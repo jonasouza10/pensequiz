@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="iconepq.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#e3f2fd" />
+  <title>PenseQuiz Concursos</title>
+ 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+  <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-100 to-blue-200 text-gray-900 flex items-center justify-center min-h-screen p-4 font-sans">
+  <div id="root"></div>
+  <div id="error" class="hidden text-red-500 text-center"></div>
+
+  <script type="text/babel">
+    // Dados do quiz por disciplina
+    const quizzes = {
+      'Informática': [
+        { question: "O que é um sistema operacional?", options: ["Um tipo de hardware", "Um software que gerencia recursos do computador", "Um cabo de rede", "Um protocolo de internet"], answer: "Um software que gerencia recursos do computador" },
+        { question: "Qual é a função principal de um firewall?", options: ["Aumentar a velocidade da internet", "Proteger a rede contra acessos não autorizados", "Armazenar dados do usuário", "Gerenciar impressoras"], answer: "Proteger a rede contra acessos não autorizados" },
+		 { question: "O que é um sistema operacional?", options: ["Um tipo de hardware", "Um cabo de rede", "Um software que gerencia recursos do computador", "Um protocolo de internet"], answer: "Um software que gerencia recursos do computador" },
+  { question: "Qual é a função principal de um antivírus?", options: ["Aumentar a velocidade do processador", "Proteger o sistema contra malware", "Gerenciar impressoras", "Criar backups automáticos"], answer: "Proteger o sistema contra malware" },
+  { question: "O que é um processador?", options: ["Um dispositivo de armazenamento", "O cérebro do computador que executa instruções", "Um tipo de monitor", "Um software de edição"], answer: "O cérebro do computador que executa instruções" },
+  { question: "Qual é o papel da memória RAM?", options: ["Armazenar dados permanentemente", "Fornecer memória temporária para o sistema", "Exibir imagens na tela", "Conectar dispositivos externos"], answer: "Fornecer memória temporária para o sistema" },
+  { question: "O que é um disco rígido?", options: ["Um componente de rede", "Um dispositivo para armazenamento de dados", "Um tipo de teclado", "Um software de segurança"], answer: "Um dispositivo para armazenamento de dados" },
+  { question: "Qual é a função de um driver?", options: ["Acelerar a internet", "Permitir que o sistema opere hardware", "Criar arquivos de texto", "Gerenciar usuários"], answer: "Permitir que o sistema opere hardware" },
+  { question: "O que é uma interface gráfica?", options: ["Um tipo de cabo", "Uma interface visual para interação com o sistema", "Um protocolo de comunicação", "Um dispositivo de entrada"], answer: "Uma interface visual para interação com o sistema" },
+  { question: "Qual é o propósito de um firewall?", options: ["Melhorar a qualidade de vídeo", "Proteger a rede contra acessos não autorizados", "Aumentar a memória RAM", "Gerenciar impressoras"], answer: "Proteger a rede contra acessos não autorizados" },
+  { question: "O que é um navegador?", options: ["Um dispositivo de armazenamento", "Um software para acessar a internet", "Um tipo de processador", "Um cabo de rede"], answer: "Um software para acessar a internet" },
+  { question: "Qual é a função de um sistema de arquivos?", options: ["Exibir gráficos em 3D", "Organizar e gerenciar dados no armazenamento", "Aumentar a velocidade da CPU", "Conectar dispositivos USB"], answer: "Organizar e gerenciar dados no armazenamento" },
+  { question: "O que é um servidor?", options: ["Um tipo de monitor", "Um computador que fornece serviços a outros", "Um software de edição de vídeo", "Um dispositivo de entrada"], answer: "Um computador que fornece serviços a outros" },
+  { question: "Qual é o papel de um roteador?", options: ["Armazenar dados permanentemente", "Direcionar tráfego de rede entre dispositivos", "Exibir imagens na tela", "Gerenciar softwares"], answer: "Direcionar tráfego de rede entre dispositivos" },
+  { question: "O que é um sistema em nuvem?", options: ["Um tipo de hardware", "Armazenamento e computação baseados na internet", "Um protocolo de segurança", "Um dispositivo de saída"], answer: "Armazenamento e computação baseados na internet" },
+  { question: "Qual é a função de um compilador?", options: ["Traduzir código fonte em linguagem de máquina", "Gerenciar impressoras", "Aumentar a memória RAM", "Criar interfaces gráficas"], answer: "Traduzir código fonte em linguagem de máquina" },
+  { question: "O que é um banco de dados?", options: ["Um software de edição", "Uma coleção organizada de dados", "Um tipo de processador", "Um cabo de rede"], answer: "Uma coleção organizada de dados" },
+  { question: "Qual é o propósito de um sistema de backup?", options: ["Aumentar a velocidade da internet", "Proteger dados contra perda", "Exibir gráficos em alta resolução", "Gerenciar usuários"], answer: "Proteger dados contra perda" },
+  { question: "O que é um protocolo de rede?", options: ["Um dispositivo de armazenamento", "Um conjunto de regras para comunicação de dados", "Um tipo de monitor", "Um software de segurança"], answer: "Um conjunto de regras para comunicação de dados" },
+  { question: "Qual é a função de uma placa de vídeo?", options: ["Armazenar dados permanentemente", "Renderizar gráficos e imagens", "Gerenciar a memória RAM", "Conectar dispositivos externos"], answer: "Renderizar gráficos e imagens" },
+  { question: "O que é um sistema embarcado?", options: ["Um software de escritório", "Um computador dedicado a uma tarefa específica", "Um tipo de roteador", "Um dispositivo de entrada"], answer: "Um computador dedicado a uma tarefa específica" },
+  { question: "Qual é o papel de um sistema operacional em tempo real?", options: ["Gerenciar impressoras", "Processar tarefas com tempos de resposta precisos", "Aumentar a memória", "Exibir interfaces gráficas"], answer: "Processar tarefas com tempos de resposta precisos" },
+  { question: "O que é uma linguagem de programação?", options: ["Um dispositivo de saída", "Um conjunto de instruções para criar software", "Um tipo de cabo", "Um protocolo de rede"], answer: "Um conjunto de instruções para criar software" },
+  { question: "Qual é a função de um switch?", options: ["Armazenar dados", "Conectar dispositivos em uma rede local", "Renderizar gráficos", "Gerenciar usuários"], answer: "Conectar dispositivos em uma rede local" },
+  { question: "O que é um sistema distribuído?", options: ["Um software de edição", "Um conjunto de computadores trabalhando juntos", "Um tipo de monitor", "Um dispositivo de entrada"], answer: "Um conjunto de computadores trabalhando juntos" },
+  { question: "Qual é o propósito de um sistema de criptografia?", options: ["Aumentar a velocidade da CPU", "Proteger informações por meio de codificação", "Gerenciar impressoras", "Exibir imagens"], answer: "Proteger informações por meio de codificação" },
+  { question: "O que é uma API?", options: ["Um dispositivo de armazenamento", "Uma interface para comunicação entre softwares", "Um tipo de processador", "Um cabo de rede"], answer: "Uma interface para comunicação entre softwares" },
+  { question: "Qual é a função de um sistema de virtualização?", options: ["Renderizar gráficos", "Criar várias máquinas virtuais em um hardware", "Aumentar a memória RAM", "Gerenciar usuários"], answer: "Criar várias máquinas virtuais em um hardware" },
+  { question: "O que é um sistema de arquivos distribuído?", options: ["Um software de segurança", "Um sistema para armazenar dados em múltiplos locais", "Um tipo de monitor", "Um dispositivo de saída"], answer: "Um sistema para armazenar dados em múltiplos locais" },
+  { question: "Qual é o papel de um gerenciador de tarefas?", options: ["Exibir interfaces gráficas", "Monitorar e gerenciar processos do sistema", "Aumentar a velocidade da internet", "Conectar dispositivos"], answer: "Monitorar e gerenciar processos do sistema" },
+  { question: "O que é um sistema de autenticação?", options: ["Um tipo de cabo", "Um método para verificar a identidade de usuários", "Um software de edição", "Um dispositivo de entrada"], answer: "Um método para verificar a identidade de usuários" },
+  { question: "Qual é a função de um sistema de monitoramento?", options: ["Armazenar dados permanentemente", "Acompanhar o desempenho de um sistema", "Renderizar gráficos", "Gerenciar impressoras"], answer: "Acompanhar o desempenho de um sistema" },
+  { question: "O que é um sistema operacional de código aberto?", options: ["Um software proprietário", "Um sistema cujo código pode ser modificado", "Um tipo de hardware", "Um protocolo de rede"], answer: "Um sistema cujo código pode ser modificado" },
+  { question: "Qual é o propósito de um sistema de cache?", options: ["Aumentar a memória RAM", "Armazenar dados temporariamente para acesso rápido", "Gerenciar usuários", "Exibir imagens"], answer: "Armazenar dados temporariamente para acesso rápido" },
+  { question: "O que é um sistema de gerenciamento de banco de dados?", options: ["Um dispositivo de saída", "Um software para gerenciar bancos de dados", "Um tipo de processador", "Um cabo de rede"], answer: "Um software para gerenciar bancos de dados" },
+  { question: "Qual é a função de um sistema de recuperação?", options: ["Renderizar gráficos", "Restaurar o sistema após falhas", "Aumentar a velocidade da CPU", "Conectar dispositivos"], answer: "Restaurar o sistema após falhas" },
+  { question: "O que é um sistema de rede local?", options: ["Um software de edição", "Uma rede que conecta dispositivos em uma área limitada", "Um tipo de monitor", "Um dispositivo de entrada"], answer: "Uma rede que conecta dispositivos em uma área limitada" },
+  { question: "Qual é o papel de um sistema de atualização?", options: ["Exibir interfaces gráficas", "Manter o software atualizado com correções", "Aumentar a memória", "Gerenciar impressoras"], answer: "Manter o software atualizado com correções" },
+  { question: "O que é um sistema de controle de versão?", options: ["Um dispositivo de armazenamento", "Um software para gerenciar mudanças em códigos", "Um tipo de roteador", "Um protocolo de segurança"], answer: "Um software para gerenciar mudanças em códigos" },
+  { question: "Qual é a função de um sistema de logs?", options: ["Renderizar gráficos", "Registrar eventos e atividades do sistema", "Aumentar a velocidade da internet", "Gerenciar usuários"], answer: "Registrar eventos e atividades do sistema" },
+  { question: "O que é um sistema de automação?", options: ["Um software de escritório", "Um sistema para realizar tarefas automaticamente", "Um tipo de monitor", "Um dispositivo de saída"], answer: "Um sistema para realizar tarefas automaticamente" },
+  { question: "Qual é o propósito de um sistema de compressão?", options: ["Aumentar a memória RAM", "Reduzir o tamanho de arquivos", "Gerenciar impressoras", "Exibir imagens"], answer: "Reduzir o tamanho de arquivos" },
+  { question: "O que é um sistema de virtualização de rede?", options: ["Um software de segurança", "Uma tecnologia para criar redes virtuais", "Um tipo de processador", "Um cabo de rede"], answer: "Uma tecnologia para criar redes virtuais" },
+  { question: "Qual é a função de um sistema de autenticação de dois fatores?", options: ["Renderizar gráficos", "Adicionar uma camada extra de segurança ao login", "Aumentar a velocidade da CPU", "Conectar dispositivos"], answer: "Adicionar uma camada extra de segurança ao login" },
+  { question: "O que é um sistema de gerenciamento de energia?", options: ["Um dispositivo de saída", "Um software para controlar o consumo de energia", "Um tipo de monitor", "Um protocolo de rede"], answer: "Um software para controlar o consumo de energia" },
+  { question: "Qual é o papel de um sistema de detecção de intrusão?", options: ["Exibir interfaces gráficas", "Identificar tentativas de invasão", "Aumentar a memória", "Gerenciar impressoras"], answer: "Identificar tentativas de invasão" },
+  { question: "O que é um sistema de clustering?", options: ["Um software de edição", "Um grupo de computadores trabalhando como um único sistema", "Um tipo de hardware", "Um dispositivo de entrada"], answer: "Um grupo de computadores trabalhando como um único sistema" },
+  { question: "Qual é a função de um sistema de escalabilidade?", options: ["Armazenar dados permanentemente", "Permitir que um sistema lide com mais carga", "Renderizar gráficos", "Gerenciar usuários"], answer: "Permitir que um sistema lide com mais carga" },
+  { question: "O que é um sistema de gestão de projetos?", options: ["Um dispositivo de armazenamento", "Um software para planejar e rastrear projetos", "Um tipo de processador", "Um cabo de rede"], answer: "Um software para planejar e rastrear projetos" },
+  { question: "Qual é o propósito de um sistema de criptografia assimétrica?", options: ["Aumentar a velocidade da internet", "Usar chaves públicas e privadas para segurança", "Gerenciar impressoras", "Exibir imagens"], answer: "Usar chaves públicas e privadas para segurança" },
+  { question: "O que é um sistema de inteligência artificial?", options: ["Um tipo de monitor", "Um sistema que simula inteligência humana", "Um dispositivo de entrada", "Um protocolo de rede"], answer: "Um sistema que simula inteligência humana" },
+  { question: "Qual é a função de um sistema de backup incremental?", options: ["Renderizar gráficos", "Salvar apenas mudanças desde o último backup", "Aumentar a memória RAM", "Conectar dispositivos"], answer: "Salvar apenas mudanças desde o último backup" },
+  
+  
+   { question: "O que é um sistema de arquivos FAT32?", options: ["Um tipo de processador", "Um formato para organizar dados em discos", "Um software de edição", "Um protocolo de rede"], answer: "Um formato para organizar dados em discos" },
+  { question: "Qual é a função de um sistema de balanceamento de carga?", options: ["Distribuir o tráfego entre servidores", "Aumentar a memória RAM", "Gerenciar impressoras", "Exibir imagens"], answer: "Distribuir o tráfego entre servidores" },
+  { question: "O que é um sistema operacional móvel?", options: ["Um software para dispositivos portáteis", "Um tipo de monitor", "Um cabo de rede", "Um dispositivo de entrada"], answer: "Um software para dispositivos portáteis" },
+  { question: "Qual é o propósito de um sistema de controle de acesso?", options: ["Renderizar gráficos", "Restringir o acesso a recursos", "Aumentar a velocidade da CPU", "Conectar dispositivos"], answer: "Restringir o acesso a recursos" },
+  { question: "O que é um sistema de realidade aumentada?", options: ["Um software que sobrepõe informações digitais ao mundo real", "Um tipo de processador", "Um dispositivo de armazenamento", "Um protocolo de segurança"], answer: "Um software que sobrepõe informações digitais ao mundo real" },
+  { question: "Qual é a função de um sistema de impressão em rede?", options: ["Gerenciar usuários", "Permitir impressão a partir de vários dispositivos", "Aumentar a memória", "Exibir interfaces gráficas"], answer: "Permitir impressão a partir de vários dispositivos" },
+  { question: "O que é um sistema de aprendizado de máquina?", options: ["Um tipo de cabo", "Um sistema que aprende com dados", "Um software de segurança", "Um dispositivo de saída"], answer: "Um sistema que aprende com dados" },
+  { question: "Qual é o papel de um sistema de autenticação biométrica?", options: ["Usar características físicas para verificar identidade", "Renderizar gráficos", "Aumentar a velocidade da internet", "Gerenciar impressoras"], answer: "Usar características físicas para verificar identidade" },
+  { question: "O que é um sistema de blockchain?", options: ["Um dispositivo de entrada", "Uma tecnologia de registro distribuído e seguro", "Um tipo de monitor", "Um software de edição"], answer: "Uma tecnologia de registro distribuído e seguro" },
+  { question: "Qual é a função de um sistema de compactação de dados?", options: ["Aumentar a memória RAM", "Reduzir o espaço ocupado por arquivos", "Gerenciar usuários", "Exibir imagens"], answer: "Reduzir o espaço ocupado por arquivos" },
+  { question: "O que é um sistema de realidade virtual?", options: ["Um software que cria ambientes simulados imersivos", "Um tipo de processador", "Um cabo de rede", "Um dispositivo de armazenamento"], answer: "Um software que cria ambientes simulados imersivos" },
+  { question: "Qual é o propósito de um sistema de autenticação única (SSO)?", options: ["Permitir login único para múltiplos sistemas", "Renderizar gráficos", "Aumentar a velocidade da CPU", "Conectar dispositivos"], answer: "Permitir login único para múltiplos sistemas" },
+  { question: "O que é um sistema de computação quântica?", options: ["Um tipo de monitor", "Uma tecnologia que usa princípios quânticos para processar dados", "Um software de segurança", "Um dispositivo de entrada"], answer: "Uma tecnologia que usa princípios quânticos para processar dados" },
+  { question: "Qual é a função de um sistema de DNS?", options: ["Traduzir nomes de domínio em endereços IP", "Gerenciar impressoras", "Aumentar a memória", "Exibir interfaces gráficas"], answer: "Traduzir nomes de domínio em endereços IP" },
+  { question: "O que é um sistema de automação residencial?", options: ["Um dispositivo de saída", "Um sistema para controlar dispositivos domésticos", "Um tipo de processador", "Um protocolo de rede"], answer: "Um sistema para controlar dispositivos domésticos" },
+  { question: "Qual é o papel de um sistema de recuperação de desastres?", options: ["Renderizar gráficos", "Garantir continuidade após falhas críticas", "Aumentar a velocidade da internet", "Gerenciar usuários"], answer: "Garantir continuidade após falhas críticas" },
+  { question: "O que é um sistema de interface de voz?", options: ["Um tipo de cabo", "Uma tecnologia que permite interação por comandos de voz", "Um software de edição", "Um dispositivo de armazenamento"], answer: "Uma tecnologia que permite interação por comandos de voz" },
+  { question: "Qual é a função de um sistema de gerenciamento de conteúdo?", options: ["Aumentar a memória RAM", "Organizar e publicar conteúdo digital", "Gerenciar impressoras", "Exibir imagens"], answer: "Organizar e publicar conteúdo digital" },
+  { question: "O que é um sistema de IoT (Internet das Coisas)?", options: ["Um software de segurança", "Uma rede de dispositivos conectados que trocam dados", "Um tipo de monitor", "Um dispositivo de entrada"], answer: "Uma rede de dispositivos conectados que trocam dados" },
+  { question: "Qual é o propósito de um sistema de versionamento de software?", options: ["Acompanhar e gerenciar mudanças no código", "Renderizar gráficos", "Aumentar a velocidade da CPU", "Conectar dispositivos"], answer: "Acompanhar e gerenciar mudanças no código" },
+  { question: "O que é um sistema de pagamento digital?", options: ["Um dispositivo de armazenamento", "Uma plataforma para transações eletrônicas", "Um tipo de processador", "Um cabo de rede"], answer: "Uma plataforma para transações eletrônicas" },
+  { question: "Qual é a função de um sistema de videoconferência?", options: ["Gerenciar usuários", "Permitir reuniões virtuais com vídeo e áudio", "Aumentar a memória", "Exibir interfaces gráficas"], answer: "Permitir reuniões virtuais com vídeo e áudio" },
+  { question: "O que é um sistema de autenticação por token?", options: ["Um tipo de monitor", "Um método que usa dispositivos para autenticação", "Um software de edição", "Um dispositivo de saída"], answer: "Um método que usa dispositivos para autenticação" },
+  { question: "Qual é o papel de um sistema de análise de dados?", options: ["Processar e interpretar grandes volumes de dados", "Renderizar gráficos", "Aumentar a velocidade da internet", "Gerenciar impressoras"], answer: "Processar e interpretar grandes volumes de dados" },
+  { question: "O que é um sistema de criptografia simétrica?", options: ["Um dispositivo de entrada", "Um método que usa uma única chave para criptografia", "Um tipo de processador", "Um protocolo de rede"], answer: "Um método que usa uma única chave para criptografia" },
+  { question: "Qual é a função de um sistema de chatbots?", options: ["Aumentar a memória RAM", "Automatizar interações com usuários", "Gerenciar usuários", "Exibir imagens"], answer: "Automatizar interações com usuários" },
+  { question: "O que é um sistema de automação industrial?", options: ["Um software que controla processos industriais", "Um tipo de monitor", "Um cabo de rede", "Um dispositivo de armazenamento"], answer: "Um software que controla processos industriais" },
+  { question: "Qual é o propósito de um sistema de proteção contra DDoS?", options: ["Proteger contra ataques de negação de serviço", "Renderizar gráficos", "Aumentar a velocidade da CPU", "Conectar dispositivos"], answer: "Proteger contra ataques de negação de serviço" },
+  { question: "O que é um sistema de reconhecimento facial?", options: ["Um dispositivo de saída", "Uma tecnologia que identifica pessoas por traços faciais", "Um tipo de processador", "Um protocolo de rede"], answer: "Uma tecnologia que identifica pessoas por traços faciais" },
+  { question: "Qual é a função de um sistema de streaming?", options: ["Gerenciar impressoras", "Transmitir mídia em tempo real", "Aumentar a memória", "Exibir interfaces gráficas"], answer: "Transmitir mídia em tempo real" },
+  { question: "O que é um sistema de automação de marketing?", options: ["Um tipo de cabo", "Um software para gerenciar campanhas de marketing", "Um software de segurança", "Um dispositivo de entrada"], answer: "Um software para gerenciar campanhas de marketing" },
+  { question: "Qual é o papel de um sistema de monitoramento de rede?", options: ["Acompanhar o desempenho e segurança da rede", "Renderizar gráficos", "Aumentar a velocidade da internet", "Gerenciar usuários"], answer: "Acompanhar o desempenho e segurança da rede" },
+  { question: "O que é um sistema de comércio eletrônico?", options: ["Um dispositivo de armazenamento", "Uma plataforma para vendas online", "Um tipo de monitor", "Um software de edição"], answer: "Uma plataforma para vendas online" },
+  { question: "Qual é a função de um sistema de gestão de clientes (CRM)?", options: ["Aumentar a memória RAM", "Gerenciar relacionamentos com clientes", "Gerenciar impressoras", "Exibir imagens"], answer: "Gerenciar relacionamentos com clientes" },
+  { question: "O que é um sistema de autenticação multifator?", options: ["Um software que exige várias formas de verificação", "Um tipo de processador", "Um cabo de rede", "Um dispositivo de armazenamento"], answer: "Um software que exige várias formas de verificação" },
+  { question: "Qual é o propósito de um sistema de computação de borda?", options: ["Processar dados mais perto da fonte", "Renderizar gráficos", "Aumentar a velocidade da CPU", "Conectar dispositivos"], answer: "Processar dados mais perto da fonte" },
+  { question: "O que é um sistema de rastreamento de erros?", options: ["Um dispositivo de saída", "Um software para identificar e gerenciar falhas", "Um tipo de monitor", "Um protocolo de rede"], answer: "Um software para identificar e gerenciar falhas" },
+  { question: "Qual é a função de um sistema de telemetria?", options: ["Coletar e transmitir dados remotamente", "Gerenciar impressoras", "Aumentar a memória", "Exibir interfaces gráficas"], answer: "Coletar e transmitir dados remotamente" },
+  { question: "O que é um sistema de autenticação baseada em risco?", options: ["Um tipo de cabo", "Um método que ajusta a segurança com base no risco", "Um software de segurança", "Um dispositivo de entrada"], answer: "Um método que ajusta a segurança com base no risco" },
+  { question: "Qual é o papel de um sistema de aprendizado profundo?", options: ["Usar redes neurais para resolver problemas complexos", "Renderizar gráficos", "Aumentar a velocidade da internet", "Gerenciar usuários"], answer: "Usar redes neurais para resolver problemas complexos" },
+  { question: "O que é um sistema de automação de testes?", options: ["Um dispositivo de armazenamento", "Um software para executar testes automaticamente", "Um tipo de monitor", "Um software de edição"], answer: "Um software para executar testes automaticamente" },
+  { question: "Qual é a função de um sistema de integração contínua?", options: ["Aumentar a memória RAM", "Automatizar a integração de código", "Gerenciar impressoras", "Exibir imagens"], answer: "Automatizar a integração de código" },
+  { question: "O que é um sistema de gerenciamento de identidade?", options: ["Um software que controla acesso e permissões de usuários", "Um tipo de processador", "Um cabo de rede", "Um dispositivo de armazenamento"], answer: "Um software que controla acesso e permissões de usuários" },
+  { question: "Qual é o propósito de um sistema de aprendizado federado?", options: ["Treinar modelos de IA em dados descentralizados", "Renderizar gráficos", "Aumentar a velocidade da CPU", "Conectar dispositivos"], answer: "Treinar modelos de IA em dados descentralizados" },
+  { question: "O que é um sistema de automação de processos robóticos?", options: ["Um dispositivo de saída", "Um software que automatiza tarefas repetitivas", "Um tipo de monitor", "Um protocolo de rede"], answer: "Um software que automatiza tarefas repetitivas" },
+  { question: "Qual é a função de um sistema de análise preditiva?", options: ["Prever resultados com base em dados", "Gerenciar impressoras", "Aumentar a memória", "Exibir interfaces gráficas"], answer: "Prever resultados com base em dados" },
+  { question: "O que é um sistema de autenticação por certificado?", options: ["Um tipo de cabo", "Um método que usa certificados digitais", "Um software de segurança", "Um dispositivo de entrada"], answer: "Um método que usa certificados digitais" },
+  { question: "Qual é o papel de um sistema de visão computacional?", options: ["Interpretar e processar imagens ou vídeos", "Renderizar gráficos", "Aumentar a velocidade da internet", "Gerenciar usuários"], answer: "Interpretar e processar imagens ou vídeos" },
+  { question: "O que é um sistema de automação de cadeia de suprimentos?", options: ["Um dispositivo de armazenamento", "Um software para gerenciar logística", "Um tipo de monitor", "Um software de edição"], answer: "Um software para gerenciar logística" },
+  { question: "Qual é a função de um sistema de entrega contínua?", options: ["Aumentar a memória RAM", "Automatizar a entrega de software", "Gerenciar impressoras", "Exibir imagens"], answer: "Automatizar a entrega de software" }
+      ],
+      'Português': [
+        { question: "Qual é a função de um advérbio?", options: ["Substituir um substantivo", "Indicar o sujeito da frase", "Conectar duas orações", "Modificar um verbo, adjetivo ou outro advérbio"], answer: "Modificar um verbo, adjetivo ou outro advérbio" },
+  { question: "Qual é o plural de 'cidadão'?", options: ["Cidadões", "Cidadãns", "Cidadoes", "Cidadãos"], answer: "Cidadãos" },
+  { question: "Qual é o sinônimo de 'feliz'?", options: ["Triste", "Alegre", "Cansado", "Nervoso"], answer: "Alegre" },
+  { question: "O que é um artigo definido?", options: ["Uma palavra que substitui um verbo", "Um determinante como 'o', 'a', 'os', 'as'", "Um tipo de preposição", "Uma conjunção"], answer: "Um determinante como 'o', 'a', 'os', 'as'" },
+  { question: "Qual é o feminino de 'ator'?", options: ["Atriz", "Atora", "Atressa", "Atoração"], answer: "Atriz" },
+  { question: "O que é uma oração subordinada?", options: ["Uma frase independente", "Uma oração que depende de outra", "Um tipo de verbo", "Uma preposição"], answer: "Uma oração que depende de outra" },
+  { question: "Qual é o antônimo de 'alto'?", options: ["Baixo", "Largo", "Curto", "Longo"], answer: "Baixo" },
+  { question: "O que é um pronome pessoal?", options: ["Uma palavra que indica ação", "Um termo como 'eu', 'tu', 'ele'", "Um artigo definido", "Uma conjunção"], answer: "Um termo como 'eu', 'tu', 'ele'" },
+  { question: "Qual é o singular de 'crianças'?", options: ["Criança", "Crianças", "Crianço", "Crianços"], answer: "Criança" },
+  { question: "Qual é a função de uma preposição?", options: ["Modificar um verbo", "Ligar termos ou orações", "Indicar o sujeito", "Substituir um substantivo"], answer: "Ligar termos ou orações" },
+  { question: "O que é um adjetivo?", options: ["Uma palavra que indica ação", "Uma palavra que qualifica um substantivo", "Um tipo de pronome", "Uma conjunção"], answer: "Uma palavra que qualifica um substantivo" },
+  { question: "Qual é o plural de 'lápis'?", options: ["Lápis", "Lápises", "Lápisões", "Lápides"], answer: "Lápis" },
+  { question: "O que é uma conjunção coordenada?", options: ["Uma palavra que liga orações independentes", "Um tipo de preposição", "Uma oração subordinada", "Um artigo"], answer: "Uma palavra que liga orações independentes" },
+  { question: "Qual é o feminino de 'rei'?", options: ["Rainha", "Reina", "Reiha", "Reína"], answer: "Rainha" },
+  { question: "O que é um verbo transitivo?", options: ["Um verbo que não exige complemento", "Um verbo que exige complemento direto ou indireto", "Um tipo de adjetivo", "Uma preposição"], answer: "Um verbo que exige complemento direto ou indireto" },
+  { question: "Qual é o sinônimo de 'rápido'?", options: ["Lento", "Veloz", "Pesado", "Fraco"], answer: "Veloz" },
+  { question: "O que é um pronome possessivo?", options: ["Uma palavra que indica lugar", "Um termo como 'meu', 'teu', 'seu'", "Um artigo definido", "Uma conjunção"], answer: "Um termo como 'meu', 'teu', 'seu'" },
+  { question: "Qual é o plural de 'mel'?", options: ["Meles", "Méis", "Meleses", "Mel"], answer: "Mel" },
+  { question: "Qual é a função de um gerúndio?", options: ["Indicar tempo futuro", "Expressar ação em curso", "Substituir um substantivo", "Ligar orações"], answer: "Expressar ação em curso" },
+  { question: "O que é uma interjeição?", options: ["Uma palavra que qualifica", "Uma expressão de emoção como 'oh!'", "Um tipo de verbo", "Uma preposição"], answer: "Uma expressão de emoção como 'oh!'" },
+  { question: "Qual é o antônimo de 'frio'?", options: ["Quente", "Seco", "Molhado", "Escuro"], answer: "Quente" },
+  { question: "O que é um substantivo coletivo?", options: ["Uma palavra que indica ação", "Um termo que designa um grupo", "Um adjetivo", "Uma conjunção"], answer: "Um termo que designa um grupo" },
+  { question: "Qual é o singular de 'pássaros'?", options: ["Pássaro", "Pássaros", "Pássarosso", "Pássarosé"], answer: "Pássaro" },
+  { question: "Qual é a função de um artigo indefinido?", options: ["Indicar posse", "Introduzir substantivos de forma genérica", "Ligar orações", "Modificar verbos"], answer: "Introduzir substantivos de forma genérica" },
+  { question: "O que é um verbo intransitivo?", options: ["Um verbo que exige complemento", "Um verbo que não exige complemento", "Um tipo de pronome", "Uma preposição"], answer: "Um verbo que não exige complemento" },
+  { question: "Qual é o sinônimo de 'bonito'?", options: ["Feio", "Atraente", "Chato", "Triste"], answer: "Atraente" },
+  { question: "O que é uma oração principal?", options: ["Uma oração dependente", "Uma oração que tem sentido completo", "Um tipo de adjetivo", "Uma conjunção"], answer: "Uma oração que tem sentido completo" },
+  { question: "Qual é o plural de 'jovem'?", options: ["Jovens", "Jovems", "Jovemes", "Jovêns"], answer: "Jovens" },
+  { question: "Qual é a função de um particípio?", options: ["Indicar tempo passado ou estado", "Ligar termos", "Substituir substantivos", "Modificar verbos"], answer: "Indicar tempo passado ou estado" },
+  { question: "O que é um advérbio de tempo?", options: ["Uma palavra que indica lugar", "Uma palavra que indica quando algo ocorre", "Um tipo de pronome", "Uma preposição"], answer: "Uma palavra que indica quando algo ocorre" },
+  { question: "Qual é o antônimo de 'leve'?", options: ["Pesado", "Suave", "Claro", "Fraco"], answer: "Pesado" },
+  { question: "O que é um pronome relativo?", options: ["Uma palavra que substitui um substantivo", "Um termo como 'que', 'quem', 'cujo'", "Um artigo indefinido", "Uma conjunção"], answer: "Um termo como 'que', 'quem', 'cujo'" },
+  { question: "Qual é o singular de 'montanhas'?", options: ["Montanha", "Montanhas", "Montanhos", "Montanhãs"], answer: "Montanha" },
+  { question: "Qual é a função de uma conjunção subordinada?", options: ["Ligar orações independentes", "Introduzir uma oração dependente", "Modificar um verbo", "Indicar posse"], answer: "Introduzir uma oração dependente" },
+  { question: "O que é um advérbio de modo?", options: ["Uma palavra que indica lugar", "Uma palavra que indica como algo acontece", "Um tipo de pronome", "Uma preposição"], answer: "Uma palavra que indica como algo acontece" },
+  { question: "Qual é o feminino de 'professor'?", options: ["Professora", "Professoração", "Professoraia", "Professoresa"], answer: "Professora" },
+  { question: "O que é uma locução verbal?", options: ["Uma única palavra que indica ação", "Uma combinação de verbos para expressar ação", "Um tipo de adjetivo", "Uma conjunção"], answer: "Uma combinação de verbos para expressar ação" },
+  { question: "Qual é o sinônimo de 'inteligente'?", options: ["Bobos", "Sábio", "Ignorante", "Tolo"], answer: "Sábio" },
+  { question: "O que é um artigo partitivo?", options: ["Um determinante como 'algum', 'certo'", "Uma palavra que indica parte de um todo", "Um tipo de pronome", "Uma preposição"], answer: "Uma palavra que indica parte de um todo" },
+  { question: "Qual é o plural de 'sol'?", options: ["Sóis", "Soles", "Solis", "Sols"], answer: "Sóis" },
+  { question: "Qual é a função de um gerúndio composto?", options: ["Indicar ação futura", "Expressar ação em curso com outro verbo auxiliar", "Ligar orações", "Substituir substantivos"], answer: "Expressar ação em curso com outro verbo auxiliar" },
+  { question: "O que é um advérbio de intensidade?", options: ["Uma palavra que indica lugar", "Uma palavra que intensifica outro termo", "Um tipo de pronome", "Uma conjunção"], answer: "Uma palavra que intensifica outro termo" },
+  { question: "Qual é o antônimo de 'forte'?", options: ["Fraco", "Grande", "Alto", "Largo"], answer: "Fraco" },
+  { question: "O que é uma oração condicional?", options: ["Uma frase sem sujeito", "Uma oração que expressa uma condição", "Um tipo de verbo", "Uma preposição"], answer: "Uma oração que expressa uma condição" },
+  { question: "Qual é o singular de 'animais'?", options: ["Animal", "Animais", "Animalis", "Animáls"], answer: "Animal" },
+  { question: "Qual é a função de um infinitivo pessoal?", options: ["Indicar tempo futuro", "Expressar ação com sujeito implícito", "Modificar um verbo", "Ligar orações"], answer: "Expressar ação com sujeito implícito" },
+  { question: "O que é um pronome demonstrativo?", options: ["Uma palavra que indica posse", "Um termo como 'este', 'aquele', 'isso'", "Um artigo definido", "Uma conjunção"], answer: "Um termo como 'este', 'aquele', 'isso'" },
+  { question: "Qual é o plural de 'irmão'?", options: ["Irmãos", "Irmãosos", "Irmãosés", "Irmãosns"], answer: "Irmãos" },
+  { question: "Qual é a função de uma interjeição enfática?", options: ["Modificar um verbo", "Expressar emoção com intensidade", "Indicar lugar", "Substituir substantivos"], answer: "Expressar emoção com intensidade" },
+  { question: "O que é um advérbio de lugar?", options: ["Uma palavra que indica tempo", "Uma palavra que indica onde algo ocorre", "Um tipo de pronome", "Uma preposição"], answer: "Uma palavra que indica onde algo ocorre" },
+  
+  
+   { question: "Qual é o plural de 'coração'?", options: ["Corações", "Coraçãoes", "Coraçõs", "Coraçõeses"], answer: "Corações" },
+  { question: "O que é uma oração exclamativa?", options: ["Uma frase que faz pergunta", "Uma frase que expressa emoção", "Um tipo de verbo", "Uma preposição"], answer: "Uma frase que expressa emoção" },
+  { question: "Qual é o sinônimo de 'grande'?", options: ["Pequeno", "Enorme", "Curto", "Fraco"], answer: "Enorme" },
+  { question: "O que é um advérbio interrogativo?", options: ["Uma palavra que indica lugar", "Uma palavra como 'quando', 'onde'", "Um tipo de pronome", "Uma conjunção"], answer: "Uma palavra como 'quando', 'onde'" },
+  { question: "Qual é o feminino de 'cavalo'?", options: ["Cavala", "Cavalha", "Cavaloa", "Cavalona"], answer: "Cavala" },
+  { question: "O que é uma locução adjetiva?", options: ["Uma combinação de verbos", "Uma expressão que funciona como adjetivo", "Um tipo de pronome", "Uma preposição"], answer: "Uma expressão que funciona como adjetivo" },
+  { question: "Qual é o antônimo de 'cheio'?", options: ["Vazio", "Pleno", "Largo", "Alto"], answer: "Vazio" },
+  { question: "O que é um pronome indefinido?", options: ["Um termo como 'todo', 'algum'", "Uma palavra que indica ação", "Um artigo definido", "Uma conjunção"], answer: "Um termo como 'todo', 'algum'" },
+  { question: "Qual é o singular de 'flores'?", options: ["Flor", "Flores", "Floreses", "Floras"], answer: "Flor" },
+  { question: "Qual é a função de uma oração adverbial?", options: ["Modificar um substantivo", "Modificar um verbo ou oração", "Indicar posse", "Ligar termos"], answer: "Modificar um verbo ou oração" },
+  { question: "O que é um verbo auxiliar?", options: ["Um verbo que indica ação principal", "Um verbo que ajuda outro verbo", "Um tipo de adjetivo", "Uma preposição"], answer: "Um verbo que ajuda outro verbo" },
+  { question: "Qual é o plural de 'anel'?", options: ["Anéis", "Aneles", "Anelões", "Anels"], answer: "Anéis" },
+  { question: "O que é uma oração interrogativa?", options: ["Uma frase que expressa emoção", "Uma frase que faz uma pergunta", "Um tipo de verbo", "Uma conjunção"], answer: "Uma frase que faz uma pergunta" },
+  { question: "Qual é o feminino de 'leão'?", options: ["Leoa", "Leãoa", "Leona", "Leáona"], answer: "Leoa" },
+  { question: "O que é um gerúndio impessoal?", options: ["Uma forma verbal com sujeito", "Uma forma verbal sem sujeito específico", "Um tipo de adjetivo", "Uma preposição"], answer: "Uma forma verbal sem sujeito específico" },
+  { question: "Qual é o sinônimo de 'calmo'?", options: ["Agitado", "Tranquilo", "Nervoso", "Rápido"], answer: "Tranquilo" },
+  { question: "O que é uma locução prepositiva?", options: ["Uma combinação de verbos", "Uma expressão que funciona como preposição", "Um tipo de pronome", "Uma conjunção"], answer: "Uma expressão que funciona como preposição" },
+  { question: "Qual é o plural de 'pão'?", options: ["Pães", "Pões", "Pãos", "Paões"], answer: "Pães" },
+  { question: "Qual é a função de um infinitivo impessoal?", options: ["Indicar tempo futuro", "Expressar ação sem sujeito definido", "Modificar um verbo", "Ligar orações"], answer: "Expressar ação sem sujeito definido" },
+  { question: "O que é um advérbio de afirmação?", options: ["Uma palavra que indica lugar", "Uma palavra como 'sim', 'certamente'", "Um tipo de pronome", "Uma preposição"], answer: "Uma palavra como 'sim', 'certamente'" },
+  { question: "Qual é o antônimo de 'luz'?", options: ["Escuridão", "Brilho", "Clareza", "Calor"], answer: "Escuridão" },
+  { question: "O que é uma oração causal?", options: ["Uma frase que indica tempo", "Uma oração que explica uma causa", "Um tipo de verbo", "Uma conjunção"], answer: "Uma oração que explica uma causa" },
+  { question: "Qual é o singular de 'rios'?", options: ["Rio", "Rios", "Rióes", "Rioses"], answer: "Rio" },
+  { question: "Qual é a função de uma locução adverbial?", options: ["Modificar um substantivo", "Funcioner como advérbio", "Indicar posse", "Ligar termos"], answer: "Funcioner como advérbio" },
+  { question: "O que é um verbo de ligação?", options: ["Um verbo que exige complemento", "Um verbo que liga sujeito a predicativo", "Um tipo de pronome", "Uma preposição"], answer: "Um verbo que liga sujeito a predicativo" },
+  { question: "Qual é o sinônimo de 'valente'?", options: ["Covarde", "Corajoso", "Tímido", "Fraco"], answer: "Corajoso" },
+  { question: "O que é uma oração concessiva?", options: ["Uma frase que indica condição", "Uma oração que expressa contraste", "Um tipo de verbo", "Uma conjunção"], answer: "Uma oração que expressa contraste" },
+  { question: "Qual é o plural de 'herói'?", options: ["Heróis", "Heróisos", "Heróes", "Heróisns"], answer: "Heróis" },
+  { question: "Qual é a função de um particípio passado?", options: ["Indicar ação em curso", "Expressar ação concluída", "Ligar orações", "Substituir substantivos"], answer: "Expressar ação concluída" },
+  { question: "O que é um advérbio de negação?", options: ["Uma palavra que indica tempo", "Uma palavra como 'não', 'nunca'", "Um tipo de pronome", "Uma preposição"], answer: "Uma palavra como 'não', 'nunca'" },
+  { question: "Qual é o antônimo de 'fácil'?", options: ["Difícil", "Simples", "Rápido", "Leve"], answer: "Difícil" },
+  { question: "O que é uma oração temporal?", options: ["Uma frase que indica lugar", "Uma oração que indica tempo", "Um tipo de verbo", "Uma conjunção"], answer: "Uma oração que indica tempo" },
+  { question: "Qual é o singular de 'árvores'?", options: ["Árvore", "Árvores", "Árvoreses", "Árvoes"], answer: "Árvore" },
+  { question: "Qual é a função de uma oração comparativa?", options: ["Estabelecer uma comparação", "Modificar um verbo", "Indicar posse", "Ligar termos"], answer: "Estabelecer uma comparação" },
+  { question: "O que é um pronome reflexivo?", options: ["Um termo que indica posse", "Um termo como 'me', 'se', 'si'", "Um artigo indefinido", "Uma conjunção"], answer: "Um termo como 'me', 'se', 'si'" },
+  { question: "Qual é o plural de 'mamão'?", options: ["Mamões", "Mamãos", "Mamõs", "Mamõeses"], answer: "Mamões" },
+  { question: "Qual é a função de um gerúndio presente?", options: ["Indicar tempo futuro", "Expressar ação em progresso", "Ligar orações", "Substituir substantivos"], answer: "Expressar ação em progresso" },
+  { question: "O que é uma locução conjuntiva?", options: ["Uma expressão que funciona como conjunção", "Um tipo de verbo", "Uma preposição", "Um adjetivo"], answer: "Uma expressão que funciona como conjunção" },
+  { question: "Qual é o sinônimo de 'silencioso'?", options: ["Ruidoso", "Quieto", "Alto", "Forte"], answer: "Quieto" },
+  { question: "O que é uma oração final?", options: ["Uma frase que indica causa", "Uma oração que expressa finalidade", "Um tipo de verbo", "Uma preposição"], answer: "Uma oração que expressa finalidade" },
+  { question: "Qual é o singular de 'cães'?", options: ["Cão", "Cães", "Cãões", "Cãeses"], answer: "Cão" },
+  { question: "Qual é a função de um infinitivo composto?", options: ["Indicar ação futura", "Expressar ação concluída com auxiliar", "Modificar um verbo", "Ligar orações"], answer: "Expressar ação concluída com auxiliar" },
+  { question: "O que é um advérbio de dúvida?", options: ["Uma palavra que indica lugar", "Uma palavra como 'talvez', 'provavelmente'", "Um tipo de pronome", "Uma conjunção"], answer: "Uma palavra como 'talvez', 'provavelmente'" },
+  { question: "Qual é o antônimo de 'amargo'?", options: ["Doce", "Salgado", "Ácido", "Forte"], answer: "Doce" },
+  { question: "O que é uma oração consecutiva?", options: ["Uma frase que indica tempo", "Uma oração que indica resultado", "Um tipo de verbo", "Uma preposição"], answer: "Uma oração que indica resultado" },
+  { question: "Qual é o singular de 'livros'?", options: ["Livro", "Livros", "Livróes", "Livroses"], answer: "Livro" },
+  { question: "Qual é a função de uma oração condicional composta?", options: ["Estabelecer uma condição complexa", "Modificar um verbo", "Indicar posse", "Ligar termos"], answer: "Estabelecer uma condição complexa" },
+  { question: "O que é um pronome oblíquo?", options: ["Um termo que indica posse", "Um termo como 'me', 'te', 'lhe'", "Um artigo definido", "Uma conjunção"], answer: "Um termo como 'me', 'te', 'lhe'" },
+  { question: "Qual é o plural de 'tigre'?", options: ["Tigres", "Tigrões", "Tigreses", "Tigrês"], answer: "Tigres" },
+  { question: "Qual é a função de uma interjeição de saudação?", options: ["Expressar emoção intensa", "Cumprimentar ou saudar", "Indicar lugar", "Substituir substantivos"], answer: "Cumprimentar ou saudar" },
+  { question: "O que é um advérbio de quantidade?", options: ["Uma palavra que indica tempo", "Uma palavra que indica quantidade", "Um tipo de pronome", "Uma preposição"], answer: "Uma palavra que indica quantidade" }
+      ],
+      'Matemática': [
+       { question: "Qual é o valor de 2³ + 3²?", options: ["15", "25", "13", "17"], answer: "17" },
+  { question: "Qual é a raiz quadrada de 16?", options: ["2", "8", "16", "4"], answer: "4" },
+  { question: "Quanto é 5 × 6 - 4?", options: ["26", "30", "10", "22"], answer: "26" },
+  { question: "Qual é o resultado de 10 ÷ 2 + 3?", options: ["5", "13", "8", "6"], answer: "8" },
+  { question: "Qual é o valor de 4² - 3?", options: ["13", "16", "19", "10"], answer: "13" },
+  { question: "Quanto é 7 + 8 × 2?", options: ["30", "23", "15", "22"], answer: "23" },
+  { question: "Qual é a raiz cúbica de 27?", options: ["3", "9", "27", "6"], answer: "3" },
+  { question: "Quanto é 15 - 6 ÷ 2?", options: ["9", "12", "6", "10"], answer: "12" },
+  { question: "Qual é o valor de 9 × 3 - 5?", options: ["22", "27", "10", "20"], answer: "22" },
+  { question: "Quanto é 4 + 5 × 3?", options: ["19", "27", "15", "17"], answer: "19" },
+  { question: "Qual é a raiz quadrada de 25?", options: ["5", "10", "25", "3"], answer: "5" },
+  { question: "Quanto é 12 ÷ 3 + 7?", options: ["11", "9", "15", "13"], answer: "11" },
+  { question: "Qual é o valor de 6² + 2?", options: ["38", "36", "40", "30"], answer: "38" },
+  { question: "Quanto é 8 × 4 - 10?", options: ["22", "32", "15", "18"], answer: "22" },
+  { question: "Qual é o resultado de 20 ÷ 5 + 4?", options: ["8", "6", "10", "9"], answer: "8" },
+  { question: "Quanto é 3³ - 2?", options: ["25", "27", "20", "23"], answer: "25" },
+  { question: "Qual é a raiz quadrada de 49?", options: ["7", "14", "49", "5"], answer: "7" },
+  { question: "Quanto é 9 + 6 × 2?", options: ["21", "15", "27", "18"], answer: "21" },
+  { question: "Qual é o valor de 5 × 7 - 3?", options: ["32", "35", "20", "28"], answer: "32" },
+  { question: "Quanto é 16 ÷ 4 + 5?", options: ["9", "6", "11", "8"], answer: "9" },
+  { question: "Qual é o resultado de 2⁴ + 1?", options: ["17", "16", "20", "15"], answer: "17" },
+  { question: "Quanto é 10 × 3 - 8?", options: ["22", "30", "10", "18"], answer: "22" },
+  { question: "Qual é a raiz cúbica de 64?", options: ["4", "16", "64", "8"], answer: "4" },
+  { question: "Quanto é 7 × 5 + 3?", options: ["38", "35", "20", "33"], answer: "38" },
+  { question: "Qual é o valor de 11 - 4 ÷ 2?", options: ["7", "9", "5", "10"], answer: "9" },
+  { question: "Quanto é 6² - 5?", options: ["31", "36", "25", "30"], answer: "31" },
+  { question: "Qual é o resultado de 15 ÷ 3 + 6?", options: ["11", "9", "13", "7"], answer: "11" },
+  { question: "Quanto é 9 × 2 + 4?", options: ["22", "18", "15", "20"], answer: "22" },
+  { question: "Qual é a raiz quadrada de 36?", options: ["6", "12", "36", "4"], answer: "6" },
+  { question: "Quanto é 8 + 7 × 3?", options: ["29", "15", "21", "27"], answer: "29" },
+  { question: "Qual é o valor de 3⁴ - 10?", options: ["71", "81", "60", "65"], answer: "71" },
+  { question: "Quanto é 12 - 3 × 2?", options: ["6", "9", "12", "10"], answer: "6" },
+  { question: "Qual é o resultado de 20 ÷ 4 + 5?", options: ["10", "5", "15", "8"], answer: "10" },
+  { question: "Quanto é 5 × 6 + 2?", options: ["32", "30", "20", "28"], answer: "32" },
+  { question: "Qual é a raiz cúbica de 125?", options: ["5", "25", "125", "10"], answer: "5" },
+  { question: "Quanto é 14 ÷ 2 + 3?", options: ["10", "7", "11", "8"], answer: "10" },
+  { question: "Qual é o valor de 7² + 4?", options: ["53", "49", "40", "45"], answer: "53" },
+  { question: "Quanto é 9 × 5 - 7?", options: ["38", "45", "20", "30"], answer: "38" },
+  { question: "Qual é o resultado de 18 ÷ 3 + 6?", options: ["12", "6", "15", "10"], answer: "12" },
+  { question: "Quanto é 4³ + 3?", options: ["67", "64", "50", "60"], answer: "67" },
+  { question: "Qual é a raiz quadrada de 81?", options: ["9", "18", "81", "6"], answer: "9" },
+  { question: "Quanto é 6 × 7 - 5?", options: ["37", "42", "20", "30"], answer: "37" },
+  { question: "Qual é o valor de 10 + 8 × 2?", options: ["26", "18", "30", "22"], answer: "26" },
+  { question: "Quanto é 15 - 5 ÷ 1?", options: ["10", "12", "8", "15"], answer: "10" },
+  { question: "Qual é o resultado de 3² + 7?", options: ["16", "9", "20", "13"], answer: "16" },
+  { question: "Quanto é 11 × 2 + 3?", options: ["25", "22", "15", "20"], answer: "25" },
+  { question: "Qual é a raiz cúbica de 8?", options: ["2", "4", "8", "6"], answer: "2" },
+  { question: "Quanto é 9 + 4 × 3?", options: ["21", "13", "27", "15"], answer: "21" },
+  { question: "Qual é o valor de 6⁴ - 10?", options: ["1296", "1306", "1280", "1200"], answer: "1296" },
+  { question: "Quanto é 16 ÷ 2 + 4?", options: ["12", "8", "10", "14"], answer: "12" },
+  
+  { question: "Qual é o valor de 1/2 + 1/4?", options: ["1/4", "3/4", "1/2", "1"], answer: "3/4" },
+  { question: "Se 3 kg de maçãs custam 12 reais, quanto custam 5 kg?", options: ["18 reais", "20 reais", "15 reais", "24 reais"], answer: "20 reais" },
+  { question: "Quanto é 25% de 80?", options: ["15", "20", "30", "10"], answer: "20" },
+  { question: "Qual é a razão entre 15 e 5?", options: ["5:1", "1:3", "3:1", "2:1"], answer: "3:1" },
+  { question: "Se 2/3 de um número é 8, qual é o número?", options: ["12", "6", "10", "16"], answer: "12" },
+  { question: "Qual é o valor de 3/5 - 1/5?", options: ["1/5", "2/5", "4/5", "3/5"], answer: "2/5" },
+  { question: "Se 4 pessoas levam 8 horas para pintar uma casa, quanto tempo levarão 2 pessoas?", options: ["12 horas", "16 horas", "10 horas", "14 horas"], answer: "16 horas" },
+  { question: "Quanto é 40% de 150?", options: ["50", "60", "70", "40"], answer: "60" },
+  { question: "Qual é a proporção equivalente a 4:6?", options: ["2:3", "3:4", "1:2", "5:6"], answer: "2:3" },
+  { question: "Qual é a solução de 2x + 3 = 11?", options: ["3", "4", "5", "2"], answer: "4" },
+  { question: "Qual é o valor de 2/3 × 3/4?", options: ["1/2", "3/4", "1/4", "2/4"], answer: "1/2" },
+  { question: "Se 5 livros custam 100 reais, quanto custam 2 livros?", options: ["50 reais", "40 reais", "30 reais", "20 reais"], answer: "40 reais" },
+  { question: "Quanto é 15% de 200?", options: ["25", "30", "35", "20"], answer: "30" },
+  { question: "Qual é a razão entre 20 e 4?", options: ["4:1", "5:1", "3:1", "2:1"], answer: "5:1" },
+  { question: "Se 3/4 de um número é 12, qual é o número?", options: ["18", "16", "14", "20"], answer: "16" },
+  { question: "Qual é o valor de 5/6 + 1/3?", options: ["1", "1/2", "1/3", "7/6"], answer: "1" },
+  { question: "Se 6 trabalhadores terminam um projeto em 12 dias, quantos dias levarão 8 trabalhadores?", options: ["10 dias", "9 dias", "8 dias", "11 dias"], answer: "9 dias" },
+  { question: "Quanto é 60% de 50?", options: ["20", "30", "40", "25"], answer: "30" },
+  { question: "Qual é a proporção equivalente a 6:9?", options: ["3:4", "2:3", "1:2", "4:5"], answer: "2:3" },
+  { question: "Qual é a solução de 5x - 7 = 8?", options: ["2", "3", "4", "1"], answer: "3" },
+  { question: "Qual é o valor de 4/5 ÷ 2/3?", options: ["6/5", "8/15", "2/5", "3/5"], answer: "6/5" },
+  { question: "Se 2 litros de tinta cobrem 10 m², quantos litros são necessários para cobrir 25 m²?", options: ["4 litros", "5 litros", "6 litros", "3 litros"], answer: "5 litros" },
+  { question: "Quanto é 10% de 300?", options: ["20", "30", "40", "25"], answer: "30" },
+  { question: "Qual é a razão entre 12 e 3?", options: ["3:1", "4:1", "2:1", "5:1"], answer: "4:1" },
+  { question: "Se 2/5 de um número é 10, qual é o número?", options: ["20", "25", "15", "30"], answer: "25" },
+  { question: "Qual é o valor de 7/8 - 3/8?", options: ["1/2", "1/4", "3/4", "5/8"], answer: "1/2" },
+  { question: "Se 3 máquinas produzem 90 peças em 6 horas, quantas peças produzirão 5 máquinas em 6 horas?", options: ["120", "150", "180", "100"], answer: "150" },
+  { question: "Quanto é 75% de 120?", options: ["80", "90", "100", "70"], answer: "90" },
+  { question: "Qual é a proporção equivalente a 8:12?", options: ["2:3", "3:4", "1:2", "4:5"], answer: "2:3" },
+  { question: "Qual é a solução de 4x + 5 = 21?", options: ["3", "4", "5", "2"], answer: "4" },
+  { question: "Qual é o valor de 3/4 × 2/5?", options: ["3/10", "1/2", "2/5", "3/5"], answer: "3/10" },
+  { question: "Se 4 kg de arroz custam 20 reais, quanto custam 10 kg?", options: ["40 reais", "50 reais", "30 reais", "60 reais"], answer: "50 reais" },
+  { question: "Quanto é 20% de 250?", options: ["40", "50", "60", "30"], answer: "50" },
+  { question: "Qual é a razão entre 18 e 6?", options: ["2:1", "3:1", "4:1", "5:1"], answer: "3:1" },
+  { question: "Se 5/6 de um número é 20, qual é o número?", options: ["24", "20", "18", "30"], answer: "24" },
+  { question: "Qual é o valor de 2/3 + 1/6?", options: ["5/6", "1/2", "1/3", "2/6"], answer: "5/6" },
+  { question: "Se 5 pessoas levam 10 dias para concluir uma tarefa, quanto tempo levarão 2 pessoas?", options: ["20 dias", "25 dias", "15 dias", "30 dias"], answer: "25 dias" },
+  { question: "Quanto é 50% de 180?", options: ["80", "90", "100", "70"], answer: "90" },
+  { question: "Qual é a proporção equivalente a 5:10?", options: ["2:3", "1:2", "3:4", "4:5"], answer: "1:2" },
+  { question: "Qual é a solução de 3x - 4 = 14?", options: ["4", "5", "6", "3"], answer: "6" },
+  { question: "Qual é o valor de 5/7 ÷ 1/3?", options: ["15/7", "5/21", "7/15", "1/5"], answer: "15/7" },
+  { question: "Se 3 horas de trabalho custam 60 reais, quanto custam 5 horas?", options: ["80 reais", "100 reais", "90 reais", "120 reais"], answer: "100 reais" },
+  { question: "Quanto é 30% de 400?", options: ["100", "120", "140", "80"], answer: "120" },
+  { question: "Qual é a razão entre 24 e 8?", options: ["2:1", "3:1", "4:1", "5:1"], answer: "3:1" },
+  { question: "Se 4/5 de um número é 16, qual é o número?", options: ["18", "20", "22", "24"], answer: "20" },
+  { question: "Qual é o valor de 3/8 + 5/8?", options: ["7/8", "1", "1/2", "5/16"], answer: "1" },
+  { question: "Se 2 carros percorrem 400 km em 5 horas, quantos km percorrem 3 carros em 5 horas?", options: ["500 km", "600 km", "400 km", "450 km"], answer: "600 km" },
+  { question: "Quanto é 80% de 75?", options: ["50", "60", "70", "40"], answer: "60" },
+  { question: "Qual é a proporção equivalente a 10:15?", options: ["2:3", "3:4", "1:2", "4:5"], answer: "2:3" },
+  { question: "Qual é a solução de 7x + 2 = 16?", options: ["1", "2", "3", "4"], answer: "2" },
+  
+  { question: "Qual é o valor de 5² + 4²?", options: ["41", "25", "16", "41"], answer: "41" },
+  { question: "Qual é a raiz quadrada de 49?", options: ["6", "7", "8", "9"], answer: "7" },
+  { question: "Qual é o resultado de 3³ - 2³?", options: ["19", "25", "27", "8"], answer: "19" },
+  { question: "Quanto é 15% de 200?", options: ["15", "30", "25", "20"], answer: "30" },
+  { question: "Qual é o valor de 4 × (3 + 2)?", options: ["20", "14", "12", "15"], answer: "20" },
+  { question: "Qual é a solução de 2x + 5 = 15?", options: ["5", "10", "3", "7"], answer: "5" },
+  { question: "Quanto é 72 ÷ 9?", options: ["7", "8", "9", "6"], answer: "8" },
+  { question: "Qual é o valor de 7² - 5²?", options: ["24", "49", "25", "14"], answer: "24" },
+  { question: "Qual é a raiz cúbica de 27?", options: ["4", "3", "5", "2"], answer: "3" },
+  { question: "Qual é o resultado de 6 × (4 - 1)?", options: ["18", "12", "15", "24"], answer: "18" },
+  { question: "Qual é a solução de 3x - 4 = 11?", options: ["5", "3", "4", "6"], answer: "5" },
+  { question: "Quanto é 20% de 150?", options: ["25", "30", "20", "35"], answer: "30" },
+  { question: "Qual é o valor de 9² + 2²?", options: ["85", "81", "83", "79"], answer: "85" },
+  { question: "Qual é a raiz quadrada de 64?", options: ["6", "8", "7", "9"], answer: "8" },
+  { question: "Qual é o resultado de 4³ ÷ 2³?", options: ["4", "8", "2", "16"], answer: "8" },
+  { question: "Qual é a solução de 5x + 3 = 28?", options: ["4", "5", "6", "3"], answer: "5" },
+  { question: "Quanto é 48 ÷ 6?", options: ["6", "8", "7", "9"], answer: "8" },
+  { question: "Qual é o valor de 10² - 6²?", options: ["64", "36", "48", "72"], answer: "64" },
+  { question: "Qual é a raiz cúbica de 64?", options: ["4", "5", "3", "6"], answer: "4" },
+  { question: "Qual é o resultado de 8 × (2 + 3)?", options: ["40", "24", "16", "30"], answer: "40" },
+  { question: "Qual é a solução de 4x - 7 = 9?", options: ["4", "5", "3", "6"], answer: "4" },
+  { question: "Quanto é 25% de 80?", options: ["15", "20", "25", "10"], answer: "20" },
+  { question: "Qual é o valor de 6² + 8²?", options: ["100", "64", "36", "72"], answer: "100" },
+  { question: "Qual é a raiz quadrada de 81?", options: ["7", "9", "8", "10"], answer: "9" },
+  { question: "Qual é o resultado de 5³ - 3³?", options: ["98", "125", "27", "88"], answer: "98" },
+  { question: "Qual é a solução de 7x + 2 = 23?", options: ["3", "4", "2", "5"], answer: "3" },
+  { question: "Quanto é 56 ÷ 7?", options: ["7", "8", "9", "6"], answer: "8" },
+  { question: "Qual é o valor de 8² - 3²?", options: ["55", "64", "9", "49"], answer: "55" },
+  { question: "Qual é a raiz cúbica de 125?", options: ["4", "5", "6", "3"], answer: "5" },
+  { question: "Qual é o resultado de 3 × (5 + 2)?", options: ["21", "15", "12", "18"], answer: "21" },
+  { question: "Qual é a solução de 6x - 5 = 13?", options: ["2", "3", "4", "1"], answer: "3" },
+  { question: "Quanto é 40% de 50?", options: ["15", "20", "25", "10"], answer: "20" },
+  { question: "Qual é o valor de 11² + 2²?", options: ["125", "121", "123", "119"], answer: "125" },
+  { question: "Qual é a raiz quadrada de 100?", options: ["8", "10", "9", "11"], answer: "10" },
+  { question: "Qual é o resultado de 2³ × 3²?", options: ["72", "24", "48", "18"], answer: "72" },
+  { question: "Qual é a solução de 9x + 4 = 31?", options: ["2", "3", "4", "5"], answer: "3" },
+  { question: "Quanto é 63 ÷ 9?", options: ["6", "7", "8", "5"], answer: "7" },
+  { question: "Qual é o valor de 12² - 5²?", options: ["119", "144", "25", "100"], answer: "119" },
+  { question: "Qual é a raiz cúbica de 216?", options: ["5", "6", "7", "4"], answer: "6" },
+  { question: "Qual é o resultado de 7 × (3 + 4)?", options: ["49", "21", "28", "35"], answer: "49" },
+  { question: "Qual é a solução de 8x - 3 = 29?", options: ["3", "4", "5", "2"], answer: "4" },
+  { question: "Quanto é 30% de 90?", options: ["18", "27", "30", "15"], answer: "27" },
+  { question: "Qual é o valor de 4² + 9²?", options: ["97", "81", "16", "65"], answer: "97" },
+  { question: "Qual é a raiz quadrada de 144?", options: ["10", "12", "11", "13"], answer: "12" },
+  { question: "Qual é o resultado de 3³ ÷ 3?", options: ["6", "9", "3", "12"], answer: "9" },
+  { question: "Qual é a solução de 5x + 7 = 32?", options: ["4", "5", "6", "3"], answer: "5" },
+  { question: "Quanto é 45 ÷ 5?", options: ["8", "9", "7", "6"], answer: "9" },
+  { question: "Qual é o valor de 15² - 7²?", options: ["176", "225", "49", "128"], answer: "176" },
+  { question: "Qual é a raiz cúbica de 343?", options: ["6", "7", "8", "5"], answer: "7" },
+  { question: "Qual é o resultado de 2 × (6 + 5)?", options: ["22", "16", "12", "18"], answer: "22" }
+      ],
+      'Raciocínio Lógico': [
+  { question: "Se todos os pássaros voam e alguns pássaros são azuis, então:", options: ["Todos os pássaros são azuis", "Alguns pássaros são azuis", "Nenhum pássaro é azul", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 6, 9, 12?", options: ["15", "18", "14", "16"], answer: "15" },
+  { question: "Se todos os cães latem e alguns animais latem, então:", options: ["Todos os animais são cães", "Alguns animais são cães", "Nenhum animal é cão", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 4, 9, 16?", options: ["20", "25", "21", "24"], answer: "25" },
+  { question: "Se todos os livros são pesados e alguns objetos são livros, então:", options: ["Todos os objetos são pesados", "Alguns objetos são pesados", "Nenhum objeto é pesado", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 5, 10, 20, 40?", options: ["60", "80", "70", "50"], answer: "80" },
+  { question: "Se todos os carros têm rodas e alguns veículos são carros, então:", options: ["Todos os veículos têm rodas", "Alguns veículos têm rodas", "Nenhum veículo tem rodas", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 5, 10, 17?", options: ["26", "25", "24", "28"], answer: "26" },
+  { question: "Se todos os professores ensinam e algumas pessoas ensinam, então:", options: ["Todas as pessoas são professores", "Algumas pessoas são professores", "Nenhuma pessoa é professor", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 7, 14, 28, 56?", options: ["84", "70", "80", "90"], answer: "84" },
+  { question: "Se todos os rios são largos e alguns corpos d'água são rios, então:", options: ["Todos os corpos d'água são largos", "Alguns corpos d'água são largos", "Nenhum corpo d'água é largo", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 3, 6, 10?", options: ["12", "15", "13", "14"], answer: "15" },
+  { question: "Se todos os peixes nadam e alguns animais nadam, então:", options: ["Todos os animais são peixes", "Alguns animais são peixes", "Nenhum animal é peixe", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 4, 9, 16, 25?", options: ["30", "36", "32", "34"], answer: "36" },
+  { question: "Se todos os computadores processam e alguns dispositivos processam, então:", options: ["Todos os dispositivos são computadores", "Alguns dispositivos são computadores", "Nenhum dispositivo é computador", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 7, 15, 31?", options: ["47", "63", "45", "50"], answer: "63" },
+  { question: "Se todos os músicos tocam e algumas pessoas tocam, então:", options: ["Todas as pessoas são músicos", "Algumas pessoas são músicos", "Nenhuma pessoa é músico", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 6, 12, 20?", options: ["30", "28", "32", "25"], answer: "30" },
+  { question: "Se todos os lagos são profundos e alguns corpos d'água são lagos, então:", options: ["Todos os corpos d'água são profundos", "Alguns corpos d'água são profundos", "Nenhum corpo d'água é profundo", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 8, 27, 64?", options: ["100", "125", "80", "81"], answer: "125" },
+  { question: "Se todos os aviões voam e alguns veículos voam, então:", options: ["Todos os veículos são aviões", "Alguns veículos são aviões", "Nenhum veículo é avião", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 5, 11, 23, 47?", options: ["71", "95", "65", "80"], answer: "95" },
+  { question: "Se todos os médicos curam e algumas pessoas curam, então:", options: ["Todas as pessoas são médicos", "Algumas pessoas são médicos", "Nenhuma pessoa é médico", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 10, 21, 36?", options: ["55", "50", "52", "48"], answer: "55" },
+  { question: "Se todos os tigres são ferozes e alguns animais são tigres, então:", options: ["Todos os animais são ferozes", "Alguns animais são ferozes", "Nenhum animal é feroz", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 4, 13, 28, 49?", options: ["76", "80", "70", "85"], answer: "76" },
+  { question: "Se todos os barcos flutuam e alguns objetos flutuam, então:", options: ["Todos os objetos são barcos", "Alguns objetos são barcos", "Nenhum objeto é barco", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 9, 28, 65?", options: ["126", "100", "110", "120"], answer: "126" },
+  { question: "Se todos os professores escrevem e algumas pessoas escrevem, então:", options: ["Todas as pessoas são professores", "Algumas pessoas são professores", "Nenhuma pessoa é professor", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 5, 14, 30?", options: ["55", "50", "48", "52"], answer: "55" },
+  { question: "Se todos os leões rugem e alguns felinos rugem, então:", options: ["Todos os felinos são leões", "Alguns felinos são leões", "Nenhum felino é leão", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 6, 15, 28, 45?", options: ["66", "70", "60", "72"], answer: "66" },
+  { question: "Se todos os relógios marcam hora e alguns dispositivos marcam hora, então:", options: ["Todos os dispositivos são relógios", "Alguns dispositivos são relógios", "Nenhum dispositivo é relógio", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 7, 17, 37?", options: ["67", "70", "60", "65"], answer: "67" },
+  { question: "Se todos os rios correm e alguns cursos d'água correm, então:", options: ["Todos os cursos d'água são rios", "Alguns cursos d'água são rios", "Nenhum curso d'água é rio", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 12, 27, 48?", options: ["75", "80", "70", "85"], answer: "75" },
+  { question: "Se todos os pintores desenham e algumas pessoas desenham, então:", options: ["Todas as pessoas são pintores", "Algumas pessoas são pintores", "Nenhuma pessoa é pintor", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 4, 11, 22, 39?", options: ["60", "58", "62", "55"], answer: "60" },
+  { question: "Se todos os elefantes são grandes e alguns animais são elefantes, então:", options: ["Todos os animais são grandes", "Alguns animais são grandes", "Nenhum animal é grande", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 5, 14, 29, 50?", options: ["77", "80", "75", "70"], answer: "77" },
+  { question: "Se todos os trens andam e alguns transportes andam, então:", options: ["Todos os transportes são trens", "Alguns transportes são trens", "Nenhum transporte é trem", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 6, 16, 31?", options: ["51", "50", "55", "48"], answer: "51" },
+  { question: "Se todos os cozinheiros cozinham e algumas pessoas cozinham, então:", options: ["Todas as pessoas são cozinheiros", "Algumas pessoas são cozinheiros", "Nenhuma pessoa é cozinheiro", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 8, 20, 44?", options: ["80", "70", "90", "75"], answer: "80" },
+  { question: "Se todos os desertos são secos e alguns lugares são desertos, então:", options: ["Todos os lugares são secos", "Alguns lugares são secos", "Nenhum lugar é seco", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 9, 21, 45?", options: ["81", "75", "90", "70"], answer: "81" },
+  { question: "Se todos os pianos tocam e alguns instrumentos tocam, então:", options: ["Todos os instrumentos são pianos", "Alguns instrumentos são pianos", "Nenhum instrumento é piano", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 4, 13, 31, 66?", options: ["112", "120", "100", "105"], answer: "112" },
+  { question: "Se todos os vulcões são quentes e alguns locais são vulcões, então:", options: ["Todos os locais são quentes", "Alguns locais são quentes", "Nenhum local é quente", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 5, 12, 25, 46?", options: ["75", "70", "80", "65"], answer: "75" },
+  
+  
+  { question: "Se todos os ursos são fortes e alguns animais são ursos, então:", options: ["Todos os animais são fortes", "Nenhum animal é forte", "Não é possível concluir", "Alguns animais são fortes"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 6, 12, 24, 48?", options: ["72", "96", "84", "60"], answer: "96" },
+  { question: "Se todos os relógios têm ponteiros e alguns dispositivos são relógios, então:", options: ["Alguns dispositivos têm ponteiros", "Todos os dispositivos têm ponteiros", "Nenhum dispositivo tem ponteiros", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 3, 7, 15?", options: ["31", "23", "27", "29"], answer: "31" },
+  { question: "Se todos os cavalos correm e alguns animais correm, então:", options: ["Nenhum animal é cavalo", "Não é possível concluir", "Todos os animais são cavalos", "Alguns animais são cavalos"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 5, 15, 30, 50?", options: ["75", "70", "80", "65"], answer: "75" },
+  { question: "Se todos os planetas giram e alguns corpos celestes são planetas, então:", options: ["Alguns corpos celestes giram", "Todos os corpos celestes giram", "Nenhum corpo celeste gira", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 8, 18, 32?", options: ["50", "48", "52", "46"], answer: "50" },
+  { question: "Se todos os chefs cozinham e algumas pessoas cozinham, então:", options: ["Não é possível concluir", "Algumas pessoas são chefs", "Todas as pessoas são chefs", "Nenhuma pessoa é chef"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 9, 19, 33?", options: ["51", "47", "49", "45"], answer: "51" },
+  { question: "Se todos os pinguins nadam e alguns animais nadam, então:", options: ["Alguns animais são pinguins", "Todos os animais são pinguins", "Nenhum animal é pinguim", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 4, 12, 24, 40?", options: ["60", "56", "58", "62"], answer: "60" },
+  { question: "Se todos os trens têm trilhos e alguns transportes são trens, então:", options: ["Não é possível concluir", "Alguns transportes têm trilhos", "Todos os transportes têm trilhos", "Nenhum transporte tem trilhos"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 6, 15, 28?", options: ["45", "41", "43", "47"], answer: "45" },
+  { question: "Se todos os leões caçam e alguns felinos caçam, então:", options: ["Alguns felinos são leões", "Todos os felinos são leões", "Nenhum felino é leão", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 7, 14, 28, 56?", options: ["112", "84", "96", "100"], answer: "112" },
+  { question: "Se todos os livros têm páginas e alguns objetos são livros, então:", options: ["Nenhum objeto tem páginas", "Não é possível concluir", "Alguns objetos têm páginas", "Todos os objetos têm páginas"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 10, 24, 44?", options: ["70", "68", "72", "66"], answer: "70" },
+  { question: "Se todos os aviões têm asas e alguns veículos são aviões, então:", options: ["Alguns veículos têm asas", "Todos os veículos têm asas", "Nenhum veículo tem asas", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 11, 25, 45?", options: ["71", "67", "69", "73"], answer: "71" },
+  { question: "Se todos os professores leem e algumas pessoas leem, então:", options: ["Não é possível concluir", "Algumas pessoas são professores", "Todas as pessoas são professores", "Nenhuma pessoa é professor"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 5, 13, 27, 47?", options: ["73", "71", "75", "69"], answer: "73" },
+  { question: "Se todos os elefantes têm tromba e alguns animais são elefantes, então:", options: ["Alguns animais têm tromba", "Todos os animais têm tromba", "Nenhum animal tem tromba", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 4, 10, 19?", options: ["31", "29", "27", "33"], answer: "31" },
+  { question: "Se todos os barcos têm velas e alguns objetos são barcos, então:", options: ["Não é possível concluir", "Alguns objetos têm velas", "Todos os objetos têm velas", "Nenhum objeto tem velas"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 6, 18, 36, 60?", options: ["90", "96", "84", "88"], answer: "90" },
+  { question: "Se todos os médicos ajudam e algumas pessoas ajudam, então:", options: ["Algumas pessoas são médicos", "Todas as pessoas são médicos", "Nenhuma pessoa é médico", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 7, 16, 29?", options: ["46", "44", "48", "42"], answer: "46" },
+  { question: "Se todos os vulcões têm lava e alguns montes são vulcões, então:", options: ["Nenhum monte tem lava", "Não é possível concluir", "Alguns montes têm lava", "Todos os montes têm lava"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 12, 30, 60?", options: ["102", "96", "90", "108"], answer: "102" },
+  { question: "Se todos os pianos têm teclas e alguns instrumentos são pianos, então:", options: ["Alguns instrumentos têm teclas", "Todos os instrumentos têm teclas", "Nenhum instrumento tem teclas", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 4, 11, 22, 37?", options: ["56", "54", "58", "52"], answer: "56" },
+  { question: "Se todos os coelhos pulam e alguns animais pulam, então:", options: ["Não é possível concluir", "Alguns animais são coelhos", "Todos os animais são coelhos", "Nenhum animal é coelho"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 5, 13, 25?", options: ["41", "37", "39", "43"], answer: "41" },
+  { question: "Se todos os rios têm água e alguns locais são rios, então:", options: ["Alguns locais têm água", "Todos os locais têm água", "Nenhum local tem água", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 7, 15, 31, 63?", options: ["127", "120", "125", "130"], answer: "127" },
+  { question: "Se todos os pintores pintam e algumas pessoas pintam, então:", options: ["Nenhuma pessoa é pintor", "Não é possível concluir", "Algumas pessoas são pintores", "Todas as pessoas são pintores"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 9, 22, 41?", options: ["66", "64", "68", "62"], answer: "66" },
+  { question: "Se todos os carros têm motor e alguns veículos são carros, então:", options: ["Alguns veículos têm motor", "Todos os veículos têm motor", "Nenhum veículo tem motor", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 10, 23, 42?", options: ["67", "65", "69", "63"], answer: "67" },
+  { question: "Se todos os professores falam e algumas pessoas falam, então:", options: ["Não é possível concluir", "Algumas pessoas são professores", "Todas as pessoas são professores", "Nenhuma pessoa é professor"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 5, 14, 29, 50?", options: ["77", "75", "79", "73"], answer: "77" },
+  { question: "Se todos os lagos têm peixes e alguns corpos d'água são lagos, então:", options: ["Alguns corpos d'água têm peixes", "Todos os corpos d'água têm peixes", "Nenhum corpo d'água tem peixes", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 1, 6, 16, 31?", options: ["51", "49", "53", "47"], answer: "51" },
+  { question: "Se todos os aviões têm pilotos e alguns veículos são aviões, então:", options: ["Não é possível concluir", "Alguns veículos têm pilotos", "Todos os veículos têm pilotos", "Nenhum veículo tem pilotos"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 4, 13, 28, 49?", options: ["76", "74", "78", "72"], answer: "76" },
+  { question: "Se todos os chefs usam chapéu e algumas pessoas usam chapéu, então:", options: ["Algumas pessoas são chefs", "Todas as pessoas são chefs", "Nenhuma pessoa é chef", "Não é possível concluir"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 2, 8, 20, 38?", options: ["62", "60", "64", "58"], answer: "62" },
+  { question: "Se todos os vulcões têm crateras e alguns montes são vulcões, então:", options: ["Nenhum monte tem crateras", "Não é possível concluir", "Alguns montes têm crateras", "Todos os montes têm crateras"], answer: "Não é possível concluir" },
+  { question: "Qual número vem a seguir na sequência: 3, 12, 30, 60?", options: ["102", "100", "104", "98"], answer: "102" },
+  { question: "Se todos os pianos têm cordas e alguns instrumentos são pianos, então:", options: ["Alguns instrumentos têm cordas", "Todos os instrumentos têm cordas", "Nenhum instrumento tem cordas", "Não é possível concluir"], answer: "Não é possível concluir" }
+
+      ],
+      'Inglês': [
+        { question: "Qual é o significado de 'hope'?", options: ["Esperança", "Medo", "Ódio", "Alegria"], answer: "Esperança" },
+  { question: "Qual é o passado de 'run'?", options: ["Runs", "Running", "Ran", "Run"], answer: "Ran" },
+  { question: "Qual é o significado de 'peace'?", options: ["Guerra", "Paz", "Conflito", "Ruído"], answer: "Paz" },
+  { question: "Qual é o passado de 'write'?", options: ["Writes", "Writing", "Wrote", "Written"], answer: "Wrote" },
+  { question: "Qual é o significado de 'courage'?", options: ["Medo", "Coragem", "Fraqueza", "Tristeza"], answer: "Coragem" },
+  { question: "Qual é o passado de 'swim'?", options: ["Swims", "Swimming", "Swam", "Swum"], answer: "Swam" },
+  { question: "Qual é o significado de 'justice'?", options: ["Injustiça", "Justiça", "Crime", "Punição"], answer: "Justiça" },
+  { question: "Qual é o passado de 'sing'?", options: ["Sings", "Singing", "Sang", "Sung"], answer: "Sang" },
+  { question: "Qual é o significado de 'trust'?", options: ["Dúvida", "Confiança", "Traição", "Medo"], answer: "Confiança" },
+  { question: "Qual é o passado de 'drink'?", options: ["Drinks", "Drinking", "Drank", "Drunk"], answer: "Drank" },
+  { question: "Qual é o significado de 'wisdom'?", options: ["Ignorância", "Sabedoria", "Loucura", "Orgulho"], answer: "Sabedoria" },
+  { question: "Qual é o passado de 'drive'?", options: ["Drives", "Driving", "Drove", "Driven"], answer: "Drove" },
+  { question: "Qual é o significado de 'loyalty'?", options: ["Traição", "Lealdade", "Inveja", "Ódio"], answer: "Lealdade" },
+  { question: "Qual é o passado de 'fly'?", options: ["Flies", "Flying", "Flew", "Flown"], answer: "Flew" },
+  { question: "Qual é o significado de 'honor'?", options: ["Desonra", "Honra", "Vergonha", "Medo"], answer: "Honra" },
+  { question: "Qual é o passado de 'eat'?", options: ["Eats", "Eating", "Ate", "Eaten"], answer: "Ate" },
+  { question: "Qual é o significado de 'faith'?", options: ["Dúvida", "Fé", "Desespero", "Raiva"], answer: "Fé" },
+  { question: "Qual é o passado de 'take'?", options: ["Takes", "Taking", "Took", "Taken"], answer: "Took" },
+  { question: "Qual é o significado de 'kindness'?", options: ["Crueldade", "Bondade", "Inveja", "Orgulho"], answer: "Bondade" },
+  { question: "Qual é o passado de 'ride'?", options: ["Rides", "Riding", "Rode", "Ridden"], answer: "Rode" },
+  { question: "Qual é o significado de 'strength'?", options: ["Fraqueza", "Força", "Medo", "Tristeza"], answer: "Força" },
+  { question: "Qual é o passado de 'fall'?", options: ["Falls", "Falling", "Fell", "Fallen"], answer: "Fell" },
+  { question: "Qual é o significado de 'truth'?", options: ["Mentira", "Verdade", "Ilusão", "Engano"], answer: "Verdade" },
+  { question: "Qual é o passado de 'give'?", options: ["Gives", "Giving", "Gave", "Given"], answer: "Gave" },
+  { question: "Qual é o significado de 'patience'?", options: ["Impaciência", "Paciência", "Raiva", "Ansiedade"], answer: "Paciência" },
+  { question: "Qual é o passado de 'see'?", options: ["Sees", "Seeing", "Saw", "Seen"], answer: "Saw" },
+  { question: "Qual é o significado de 'respect'?", options: ["Desrespeito", "Respeito", "Inveja", "Medo"], answer: "Respeito" },
+  { question: "Qual é o passado de 'break'?", options: ["Breaks", "Breaking", "Broke", "Broken"], answer: "Broke" },
+  { question: "Qual é o significado de 'happiness'?", options: ["Tristeza", "Felicidade", "Raiva", "Desespero"], answer: "Felicidade" },
+  { question: "Qual é o passado de 'speak'?", options: ["Speaks", "Speaking", "Spoke", "Spoken"], answer: "Spoke" },
+  { question: "Qual é o significado de 'certainty'?", options: ["Dúvida", "Certeza", "Medo", "Incerteza"], answer: "Certeza" },
+  { question: "Qual é o passado de 'throw'?", options: ["Throws", "Throwing", "Threw", "Thrown"], answer: "Threw" },
+  { question: "Qual é o significado de 'humility'?", options: ["Orgulho", "Humildade", "Inveja", "Raiva"], answer: "Humildade" },
+  { question: "Qual é o passado de 'rise'?", options: ["Rises", "Rising", "Rose", "Risen"], answer: "Rose" },
+  { question: "Qual é o significado de 'equality'?", options: ["Desigualdade", "Igualdade", "Injustiça", "Conflito"], answer: "Igualdade" },
+  { question: "Qual é o passado de 'choose'?", options: ["Chooses", "Choosing", "Chose", "Chosen"], answer: "Chose" },
+  { question: "Qual é o significado de 'generosity'?", options: ["Avareza", "Generosidade", "Inveja", "Orgulho"], answer: "Generosidade" },
+  { question: "Qual é o passado de 'grow'?", options: ["Grows", "Growing", "Grew", "Grown"], answer: "Grew" },
+  { question: "Qual é o significado de 'compassion'?", options: ["Indiferença", "Compaixão", "Raiva", "Medo"], answer: "Compaixão" },
+  { question: "Qual é o passado de 'freeze'?", options: ["Freezes", "Freezing", "Froze", "Frozen"], answer: "Froze" },
+  { question: "Qual é o significado de 'integrity'?", options: ["Corrupção", "Integridade", "Desonestidade", "Inveja"], answer: "Integridade" },
+  { question: "Qual é o passado de 'steal'?", options: ["Steals", "Stealing", "Stole", "Stolen"], answer: "Stole" },
+  { question: "Qual é o significado de 'perseverance'?", options: ["Desistência", "Perseverança", "Fraqueza", "Medo"], answer: "Perseverança" },
+  { question: "Qual é o passado de 'tear'?", options: ["Tears", "Tearing", "Tore", "Torn"], answer: "Tore" },
+  { question: "Qual é o significado de 'gratitude'?", options: ["Ingratidão", "Gratidão", "Raiva", "Desdém"], answer: "Gratidão" },
+  { question: "Qual é o passado de 'wear'?", options: ["Wears", "Wearing", "Wore", "Worn"], answer: "Wore" },
+  { question: "Qual é o significado de 'tolerance'?", options: ["Intolerância", "Tolerância", "Inveja", "Ódio"], answer: "Tolerância" },
+  { question: "Qual é o passado de 'draw'?", options: ["Draws", "Drawing", "Drew", "Drawn"], answer: "Drew" },
+  { question: "Qual é o significado de 'enthusiasm'?", options: ["Apatia", "Entusiasmo", "Tristeza", "Desânimo"], answer: "Entusiasmo" },
+  { question: "Qual é o passado de 'forget'?", options: ["Forgets", "Forgetting", "Forgot", "Forgotten"], answer: "Forgot" },
+  { question: "Qual é o significado de 'harmony'?", options: ["Conflito", "Harmonia", "Desordem", "Raiva"], answer: "Harmonia" },
+  
+  { question: "Qual é o significado de 'bravery'?", options: ["Covardia", "Coragem", "Medo", "Fraqueza"], answer: "Coragem" },
+  { question: "Qual é o passado de 'buy'?", options: ["Buys", "Buying", "Bought", "Buyed"], answer: "Bought" },
+  { question: "Qual é o significado de 'unity'?", options: ["Divisão", "Unidade", "Conflito", "Isolamento"], answer: "Unidade" },
+  { question: "Qual é o passado de 'catch'?", options: ["Catches", "Catching", "Caught", "Catched"], answer: "Caught" },
+  { question: "Qual é o significado de 'forgiveness'?", options: ["Ressentimento", "Perdão", "Raiva", "Inveja"], answer: "Perdão" },
+  { question: "Qual é o passado de 'teach'?", options: ["Teaches", "Teaching", "Taught", "Teached"], answer: "Taught" },
+  { question: "Qual é o significado de 'serenity'?", options: ["Agitação", "Serenidade", "Tensão", "Medo"], answer: "Serenidade" },
+  { question: "Qual é o passado de 'think'?", options: ["Thinks", "Thinking", "Thought", "Thinked"], answer: "Thought" },
+  { question: "Qual é o significado de 'devotion'?", options: ["Indiferença", "Devoção", "Deslealdade", "Ódio"], answer: "Devoção" },
+  { question: "Qual é o passado de 'sell'?", options: ["Sells", "Selling", "Sold", "Selled"], answer: "Sold" },
+  { question: "Qual é o significado de 'clarity'?", options: ["Confusão", "Clareza", "Névoa", "Incerteza"], answer: "Clareza" },
+  { question: "Qual é o passado de 'build'?", options: ["Builds", "Building", "Built", "Builded"], answer: "Built" },
+  { question: "Qual é o significado de 'empathy'?", options: ["Indiferença", "Empatia", "Inveja", "Raiva"], answer: "Empatia" },
+  { question: "Qual é o passado de 'send'?", options: ["Sends", "Sending", "Sent", "Sended"], answer: "Sent" },
+  { question: "Qual é o significado de 'pride'?", options: ["Humildade", "Orgulho", "Vergonha", "Medo"], answer: "Orgulho" },
+  { question: "Qual é o passado de 'sleep'?", options: ["Sleeps", "Sleeping", "Slept", "Sleept"], answer: "Slept" },
+  { question: "Qual é o significado de 'justice'?", options: ["Injustiça", "Justiça", "Crime", "Punição"], answer: "Justiça" },
+  { question: "Qual é o passado de 'bring'?", options: ["Brings", "Bringing", "Brought", "Bringed"], answer: "Brought" },
+  { question: "Qual é o significado de 'gratitude'?", options: ["Ingratidão", "Gratidão", "Raiva", "Desdém"], answer: "Gratidão" },
+  { question: "Qual é o passado de 'stand'?", options: ["Stands", "Standing", "Stood", "Standed"], answer: "Stood" },
+  { question: "Qual é o significado de 'resilience'?", options: ["Fragilidade", "Resiliência", "Medo", "Desânimo"], answer: "Resiliência" },
+  { question: "Qual é o passado de 'win'?", options: ["Wins", "Winning", "Won", "Winned"], answer: "Won" },
+  { question: "Qual é o significado de 'harmony'?", options: ["Conflito", "Harmonia", "Desordem", "Raiva"], answer: "Harmonia" },
+  { question: "Qual é o passado de 'lend'?", options: ["Lends", "Lending", "Lent", "Lended"], answer: "Lent" },
+  { question: "Qual é o significado de 'inspiration'?", options: ["Desânimo", "Inspiração", "Tédio", "Medo"], answer: "Inspiração" },
+  { question: "Qual é o passado de 'sit'?", options: ["Sits", "Sitting", "Sat", "Sitted"], answer: "Sat" },
+  { question: "Qual é o significado de 'tolerance'?", options: ["Intolerância", "Tolerância", "Inveja", "Ódio"], answer: "Tolerância" },
+  { question: "Qual é o passado de 'hold'?", options: ["Holds", "Holding", "Held", "Holded"], answer: "Held" },
+  { question: "Qual é o significado de 'enthusiasm'?", options: ["Apatia", "Entusiasmo", "Tristeza", "Desânimo"], answer: "Entusiasmo" },
+  { question: "Qual é o passado de 'meet'?", options: ["Meets", "Meeting", "Met", "Meetied"], answer: "Met" },
+  { question: "Qual é o significado de 'loyalty'?", options: ["Traição", "Lealdade", "Inveja", "Ódio"], answer: "Lealdade" },
+  { question: "Qual é o passado de 'light'?", options: ["Lights", "Lighting", "Lit", "Lighted"], answer: "Lit" },
+  { question: "Qual é o significado de 'patience'?", options: ["Impaciência", "Paciência", "Raiva", "Ansiedade"], answer: "Paciência" },
+  { question: "Qual é o passado de 'keep'?", options: ["Keeps", "Keeping", "Kept", "Keeped"], answer: "Kept" },
+  { question: "Qual é o significado de 'freedom'?", options: ["Prisão", "Liberdade", "Escravidão", "Medo"], answer: "Liberdade" },
+  { question: "Qual é o passado de 'leave'?", options: ["Leaves", "Leaving", "Left", "Leaved"], answer: "Left" },
+  { question: "Qual é o significado de 'kindness'?", options: ["Crueldade", "Bondade", "Inveja", "Orgulho"], answer: "Bondade" },
+  { question: "Qual é o passado de 'begin'?", options: ["Begins", "Beginning", "Began", "Begun"], answer: "Began" },
+  { question: "Qual é o significado de 'compassion'?", options: ["Indiferença", "Compaixão", "Raiva", "Medo"], answer: "Compaixão" },
+  { question: "Qual é o passado de 'fight'?", options: ["Fights", "Fighting", "Fought", "Fighted"], answer: "Fought" },
+  { question: "Qual é o significado de 'wisdom'?", options: ["Ignorância", "Sabedoria", "Loucura", "Orgulho"], answer: "Sabedoria" },
+  { question: "Qual é o passado de 'lead'?", options: ["Leads", "Leading", "Led", "Leaded"], answer: "Led" },
+  { question: "Qual é o significado de 'honor'?", options: ["Desonra", "Honra", "Vergonha", "Medo"], answer: "Honra" },
+  { question: "Qual é o passado de 'hear'?", options: ["Hears", "Hearing", "Heard", "Heared"], answer: "Heard" },
+  { question: "Qual é o significado de 'faith'?", options: ["Dúvida", "Fé", "Desespero", "Raiva"], answer: "Fé" },
+  { question: "Qual é o passado de 'show'?", options: ["Shows", "Showing", "Showed", "Shown"], answer: "Showed" },
+  { question: "Qual é o significado de 'respect'?", options: ["Desrespeito", "Respeito", "Inveja", "Medo"], answer: "Respeito" },
+  { question: "Qual é o passado de 'blow'?", options: ["Blows", "Blowing", "Blew", "Blown"], answer: "Blew" },
+  { question: "Qual é o significado de 'strength'?", options: ["Fraqueza", "Força", "Medo", "Tristeza"], answer: "Força" },
+  { question: "Qual é o passado de 'lose'?", options: ["Loses", "Losing", "Lost", "Losied"], answer: "Lost" }
+      ],
+      'Direito Constitucional': [
+        { question: "Qual é o princípio que garante a divisão dos poderes no Brasil?", options: ["Princípio da Legalidade", "Princípio da Igualdade", "Princípio da Moralidade", "Princípio da Separação dos Poderes"], answer: "Princípio da Separação dos Poderes" },
+  { question: "Qual artigo da Constituição define os direitos fundamentais?", options: ["Artigo 1º", "Artigo 10º", "Artigo 5º", "Artigo 15º"], answer: "Artigo 5º" },
+  { question: "Quem é responsável pelo Poder Executivo no Brasil?", options: ["Congresso Nacional", "Presidente da República", "Supremo Tribunal Federal", "Ministério Público"], answer: "Presidente da República" },
+  { question: "Qual é a função principal do Poder Legislativo?", options: ["Aplicar as leis", "Fiscalizar o Executivo", "Julgar casos", "Criar e aprovar leis"], answer: "Criar e aprovar leis" },
+  { question: "Quem compõe o Poder Judiciário no Brasil?", options: ["Senadores e deputados", "Juízes e tribunais", "Presidente e governadores", "Ministério Público"], answer: "Juízes e tribunais" },
+  { question: "Qual princípio assegura que todos são iguais perante a lei?", options: ["Princípio da Separação dos Poderes", "Princípio da Igualdade", "Princípio da Moralidade", "Princípio da Publicidade"], answer: "Princípio da Igualdade" },
+  { question: "Qual artigo da Constituição trata da organização dos poderes?", options: ["Artigo 2º", "Artigo 5º", "Artigo 10º", "Artigo 1º"], answer: "Artigo 2º" },
+  { question: "Quem pode propor uma emenda à Constituição?", options: ["Cidadãos comuns", "Congresso Nacional", "Ministério Público", "Governadores"], answer: "Congresso Nacional" },
+  { question: "Qual é o princípio que exige transparência na administração pública?", options: ["Princípio da Moralidade", "Princípio da Publicidade", "Princípio da Legalidade", "Princípio da Igualdade"], answer: "Princípio da Publicidade" },
+  { question: "Qual é a duração do mandato do Presidente da República?", options: ["6 anos", "4 anos", "5 anos", "3 anos"], answer: "4 anos" },
+  { question: "Qual órgão é responsável por julgar a constitucionalidade das leis?", options: ["Congresso Nacional", "Supremo Tribunal Federal", "Tribunal de Contas", "Ministério Público"], answer: "Supremo Tribunal Federal" },
+  { question: "Qual princípio determina que a administração pública deve agir conforme a lei?", options: ["Princípio da Publicidade", "Princípio da Legalidade", "Princípio da Igualdade", "Princípio da Moralidade"], answer: "Princípio da Legalidade" },
+  { question: "Qual artigo define o Brasil como uma República Federativa?", options: ["Artigo 5º", "Artigo 1º", "Artigo 10º", "Artigo 2º"], answer: "Artigo 1º" },
+  { question: "Quem é o chefe do Poder Legislativo no Brasil?", options: ["Presidente da República", "Presidente do Senado", "Ministro do STF", "Procurador-Geral"], answer: "Presidente do Senado" },
+  { question: "Qual princípio garante que os atos públicos devem ser éticos?", options: ["Princípio da Legalidade", "Princípio da Moralidade", "Princípio da Publicidade", "Princípio da Igualdade"], answer: "Princípio da Moralidade" },
+  { question: "Qual é a função do Ministério Público na Constituição?", options: ["Criar leis", "Defender a ordem jurídica", "Executar leis", "Julgar casos"], answer: "Defender a ordem jurídica" },
+  { question: "Qual artigo trata dos direitos políticos dos cidadãos?", options: ["Artigo 14º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 14º" },
+  { question: "Quem pode ser eleito Presidente da República no Brasil?", options: ["Cidadão com mais de 18 anos", "Cidadão com mais de 35 anos", "Cidadão com mais de 30 anos", "Cidadão com mais de 25 anos"], answer: "Cidadão com mais de 35 anos" },
+  { question: "Qual é a função principal do Supremo Tribunal Federal?", options: ["Criar leis", "Fiscalizar o Executivo", "Proteger a Constituição", "Executar políticas públicas"], answer: "Proteger a Constituição" },
+  { question: "Qual princípio assegura a eficiência na administração pública?", options: ["Princípio da Eficiência", "Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Eficiência" },
+  { question: "Qual artigo define a cidadania no Brasil?", options: ["Artigo 12º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 12º" },
+  { question: "Quem compõe o Congresso Nacional?", options: ["Senadores e deputados", "Juízes e tribunais", "Presidente e ministros", "Governadores e prefeitos"], answer: "Senadores e deputados" },
+  { question: "Qual é a duração do mandato de um senador no Brasil?", options: ["4 anos", "8 anos", "6 anos", "5 anos"], answer: "8 anos" },
+  { question: "Qual artigo trata da educação como direito fundamental?", options: ["Artigo 5º", "Artigo 205º", "Artigo 10º", "Artigo 1º"], answer: "Artigo 205º" },
+  { question: "Quem nomeia os ministros do Supremo Tribunal Federal?", options: ["Congresso Nacional", "Presidente da República", "Ministério Público", "Governadores"], answer: "Presidente da República" },
+  { question: "Qual princípio garante que ninguém será privado de direitos sem processo legal?", options: ["Princípio da Legalidade", "Princípio do Devido Processo Legal", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio do Devido Processo Legal" },
+  { question: "Qual artigo define a saúde como direito de todos?", options: ["Artigo 196º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 196º" },
+  { question: "Quem pode declarar estado de emergência no Brasil?", options: ["Congresso Nacional", "Presidente da República", "Supremo Tribunal Federal", "Ministério Público"], answer: "Presidente da República" },
+  { question: "Qual é a função do Tribunal de Contas da União?", options: ["Julgar casos criminais", "Fiscalizar as contas públicas", "Criar leis", "Proteger a Constituição"], answer: "Fiscalizar as contas públicas" },
+  { question: "Qual artigo trata dos direitos sociais, como trabalho e moradia?", options: ["Artigo 5º", "Artigo 6º", "Artigo 10º", "Artigo 1º"], answer: "Artigo 6º" },
+  { question: "Quem pode iniciar uma Ação Direta de Inconstitucionalidade?", options: ["Cidadãos comuns", "Supremo Tribunal Federal", "Presidente da República", "Congresso Nacional"], answer: "Presidente da República" },
+  { question: "Qual princípio garante a independência entre os poderes?", options: ["Princípio da Igualdade", "Princípio da Separação dos Poderes", "Princípio da Legalidade", "Princípio da Moralidade"], answer: "Princípio da Separação dos Poderes" },
+  { question: "Qual artigo define a soberania popular no Brasil?", options: ["Artigo 1º", "Artigo 5º", "Artigo 14º", "Artigo 10º"], answer: "Artigo 14º" },
+  { question: "Quem é responsável por sancionar ou vetar leis no Brasil?", options: ["Congresso Nacional", "Presidente da República", "Supremo Tribunal Federal", "Ministério Público"], answer: "Presidente da República" },
+  { question: "Qual é a duração do mandato de um deputado federal?", options: ["8 anos", "4 anos", "6 anos", "5 anos"], answer: "4 anos" },
+  { question: "Qual artigo trata da proteção ao meio ambiente?", options: ["Artigo 5º", "Artigo 225º", "Artigo 10º", "Artigo 1º"], answer: "Artigo 225º" },
+  { question: "Quem pode propor leis orçamentárias no Brasil?", options: ["Congresso Nacional", "Presidente da República", "Supremo Tribunal Federal", "Cidadãos comuns"], answer: "Presidente da República" },
+  { question: "Qual princípio garante que os cidadãos têm acesso à justiça?", options: ["Princípio da Inafastabilidade da Jurisdição", "Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Inafastabilidade da Jurisdição" },
+  { question: "Qual artigo define a cultura como direito fundamental?", options: ["Artigo 215º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 215º" },
+  { question: "Quem fiscaliza o cumprimento da Constituição no Brasil?", options: ["Congresso Nacional", "Supremo Tribunal Federal", "Presidente da República", "Tribunal de Contas"], answer: "Supremo Tribunal Federal" },
+  { question: "Qual princípio assegura que os atos públicos devem ser impessoais?", options: ["Princípio da Impessoalidade", "Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Impessoalidade" },
+  { question: "Qual artigo trata da segurança pública?", options: ["Artigo 5º", "Artigo 144º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 144º" },
+  { question: "Quem pode declarar guerra no Brasil?", options: ["Congresso Nacional", "Presidente da República", "Supremo Tribunal Federal", "Ministério Público"], answer: "Congresso Nacional" },
+  { question: "Qual é a função do Conselho Nacional de Justiça?", options: ["Criar leis", "Fiscalizar o Poder Judiciário", "Executar políticas públicas", "Julgar casos criminais"], answer: "Fiscalizar o Poder Judiciário" },
+  { question: "Qual artigo define a família como base da sociedade?", options: ["Artigo 226º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 226º" },
+  { question: "Quem aprova o orçamento da União no Brasil?", options: ["Presidente da República", "Congresso Nacional", "Supremo Tribunal Federal", "Ministério Público"], answer: "Congresso Nacional" },
+  { question: "Qual princípio garante a liberdade de expressão no Brasil?", options: ["Princípio da Legalidade", "Princípio da Liberdade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Liberdade" },
+  { question: "Qual artigo trata da proteção aos direitos das crianças?", options: ["Artigo 5º", "Artigo 227º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 227º" },
+  { question: "Quem pode editar medidas provisórias no Brasil?", options: ["Congresso Nacional", "Presidente da República", "Supremo Tribunal Federal", "Ministério Público"], answer: "Presidente da República" },
+  { question: "Qual é a função do Superior Tribunal de Justiça?", options: ["Proteger a Constituição", "Julgar infrações penais comuns", "Criar leis", "Fiscalizar o Executivo"], answer: "Julgar infrações penais comuns" },
+  { question: "Qual artigo define os símbolos nacionais do Brasil?", options: ["Artigo 13º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 13º" },
+  
+  { question: "Qual é o princípio que garante a continuidade do serviço público?", options: ["Princípio da Continuidade", "Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Continuidade" },
+  { question: "Qual artigo da Constituição trata da nacionalidade brasileira?", options: ["Artigo 5º", "Artigo 12º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 12º" },
+  { question: "Quem preside o Supremo Tribunal Federal?", options: ["Presidente da República", "Ministro mais antigo do STF", "Presidente do STF", "Procurador-Geral"], answer: "Presidente do STF" },
+  { question: "Qual é a função do Congresso Nacional em relação às leis?", options: ["Executar leis", "Julgar casos", "Criar e aprovar leis", "Fiscalizar o Judiciário"], answer: "Criar e aprovar leis" },
+  { question: "Quem pode ser candidato a governador no Brasil?", options: ["Cidadão com mais de 30 anos", "Cidadão com mais de 25 anos", "Cidadão com mais de 35 anos", "Cidadão com mais de 18 anos"], answer: "Cidadão com mais de 30 anos" },
+  { question: "Qual princípio garante a publicidade dos atos processuais?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade", "Princípio da Igualdade"], answer: "Princípio da Publicidade" },
+  { question: "Qual artigo define a organização dos estados na Constituição?", options: ["Artigo 18º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 18º" },
+  { question: "Quem pode propor uma lei complementar no Brasil?", options: ["Cidadãos comuns", "Congresso Nacional", "Ministério Público", "Governadores"], answer: "Congresso Nacional" },
+  { question: "Qual princípio assegura que a administração pública deve ser imparcial?", options: ["Princípio da Impessoalidade", "Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Impessoalidade" },
+  { question: "Qual é a duração do mandato de um prefeito no Brasil?", options: ["6 anos", "4 anos", "5 anos", "3 anos"], answer: "4 anos" },
+  { question: "Qual órgão julga crimes de responsabilidade do Presidente?", options: ["Congresso Nacional", "Supremo Tribunal Federal", "Tribunal de Contas", "Senado Federal"], answer: "Senado Federal" },
+  { question: "Qual princípio determina que os atos públicos devem ser transparentes?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Igualdade", "Princípio da Moralidade"], answer: "Princípio da Publicidade" },
+  { question: "Qual artigo define o Brasil como um Estado Democrático de Direito?", options: ["Artigo 5º", "Artigo 1º", "Artigo 10º", "Artigo 2º"], answer: "Artigo 1º" },
+  { question: "Quem preside a Câmara dos Deputados?", options: ["Presidente da República", "Presidente da Câmara", "Ministro do STF", "Procurador-Geral"], answer: "Presidente da Câmara" },
+  { question: "Qual princípio garante a igualdade de direitos entre homens e mulheres?", options: ["Princípio da Legalidade", "Princípio da Igualdade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Igualdade" },
+  { question: "Qual é a função do Conselho da República?", options: ["Criar leis", "Assessorar o Presidente", "Julgar casos", "Fiscalizar o Judiciário"], answer: "Assessorar o Presidente" },
+  { question: "Qual artigo trata do direito de voto no Brasil?", options: ["Artigo 14º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 14º" },
+  { question: "Quem pode ser eleito senador no Brasil?", options: ["Cidadão com mais de 35 anos", "Cidadão com mais de 18 anos", "Cidadão com mais de 30 anos", "Cidadão com mais de 25 anos"], answer: "Cidadão com mais de 35 anos" },
+  { question: "Qual é a função principal do Tribunal Superior Eleitoral?", options: ["Criar leis", "Organizar e fiscalizar eleições", "Proteger a Constituição", "Executar políticas públicas"], answer: "Organizar e fiscalizar eleições" },
+  { question: "Qual princípio assegura a eficiência dos serviços públicos?", options: ["Princípio da Eficiência", "Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Eficiência" },
+  { question: "Qual artigo define os direitos culturais na Constituição?", options: ["Artigo 215º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 215º" },
+  { question: "Quem compõe o Senado Federal?", options: ["Deputados", "Senadores", "Juízes", "Governadores"], answer: "Senadores" },
+  { question: "Qual é a duração do mandato de um ministro do STF?", options: ["4 anos", "Até os 75 anos", "8 anos", "6 anos"], answer: "Até os 75 anos" },
+  { question: "Qual artigo trata do direito à saúde na Constituição?", options: ["Artigo 5º", "Artigo 196º", "Artigo 10º", "Artigo 1º"], answer: "Artigo 196º" },
+  { question: "Quem nomeia os governadores dos estados?", options: ["Congresso Nacional", "Eleição direta", "Supremo Tribunal Federal", "Presidente da República"], answer: "Eleição direta" },
+  { question: "Qual princípio garante o direito de defesa em processos judiciais?", options: ["Princípio da Legalidade", "Princípio do Contraditório e Ampla Defesa", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio do Contraditório e Ampla Defesa" },
+  { question: "Qual artigo trata do direito à educação no Brasil?", options: ["Artigo 205º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 205º" },
+  { question: "Quem pode propor uma lei ordinária no Brasil?", options: ["Congresso Nacional", "Cidadãos comuns", "Ministério Público", "Governadores"], answer: "Congresso Nacional" },
+  { question: "Qual é a função do Tribunal Superior do Trabalho?", options: ["Julgar casos trabalhistas", "Fiscalizar as contas públicas", "Criar leis", "Proteger a Constituição"], answer: "Julgar casos trabalhistas" },
+  { question: "Qual artigo define os direitos sociais no Brasil?", options: ["Artigo 5º", "Artigo 6º", "Artigo 10º", "Artigo 1º"], answer: "Artigo 6º" },
+  { question: "Quem pode iniciar uma Ação de Descumprimento de Preceito Fundamental?", options: ["Cidadãos comuns", "Supremo Tribunal Federal", "Presidente da República", "Congresso Nacional"], answer: "Presidente da República" },
+  { question: "Qual princípio garante a independência dos poderes no Brasil?", options: ["Princípio da Igualdade", "Princípio da Separação dos Poderes", "Princípio da Legalidade", "Princípio da Moralidade"], answer: "Princípio da Separação dos Poderes" },
+  { question: "Qual artigo define o direito de propriedade?", options: ["Artigo 5º", "Artigo 1º", "Artigo 10º", "Artigo 170º"], answer: "Artigo 5º" },
+  { question: "Quem é responsável por executar as leis no Brasil?", options: ["Congresso Nacional", "Presidente da República", "Supremo Tribunal Federal", "Ministério Público"], answer: "Presidente da República" },
+  { question: "Qual é a duração do mandato de um vereador?", options: ["8 anos", "4 anos", "6 anos", "5 anos"], answer: "4 anos" },
+  { question: "Qual artigo trata da proteção ao meio ambiente no Brasil?", options: ["Artigo 5º", "Artigo 225º", "Artigo 10º", "Artigo 1º"], answer: "Artigo 225º" },
+  { question: "Quem aprova tratados internacionais no Brasil?", options: ["Presidente da República", "Congresso Nacional", "Supremo Tribunal Federal", "Ministério Público"], answer: "Congresso Nacional" },
+  { question: "Qual princípio garante o acesso universal à justiça?", options: ["Princípio da Inafastabilidade da Jurisdição", "Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Inafastabilidade da Jurisdição" },
+  { question: "Qual artigo define o direito à cultura no Brasil?", options: ["Artigo 215º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 215º" },
+  { question: "Quem fiscaliza a atuação do Ministério Público?", options: ["Congresso Nacional", "Conselho Nacional do Ministério Público", "Presidente da República", "Supremo Tribunal Federal"], answer: "Conselho Nacional do Ministério Público" },
+  { question: "Qual princípio assegura que os serviços públicos sejam contínuos?", options: ["Princípio da Continuidade", "Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Continuidade" },
+  { question: "Qual artigo trata da segurança pública no Brasil?", options: ["Artigo 5º", "Artigo 144º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 144º" },
+  { question: "Quem pode autorizar a criação de novos municípios?", options: ["Congresso Nacional", "Presidente da República", "Assembleia Legislativa", "Supremo Tribunal Federal"], answer: "Assembleia Legislativa" },
+  { question: "Qual é a função do Conselho Nacional de Justiça?", options: ["Criar leis", "Fiscalizar o Judiciário", "Executar políticas públicas", "Julgar casos criminais"], answer: "Fiscalizar o Judiciário" },
+  { question: "Qual artigo define a proteção à família no Brasil?", options: ["Artigo 226º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 226º" },
+  { question: "Quem aprova o plano plurianual no Brasil?", options: ["Presidente da República", "Congresso Nacional", "Supremo Tribunal Federal", "Ministério Público"], answer: "Congresso Nacional" },
+  { question: "Qual princípio garante a liberdade de imprensa no Brasil?", options: ["Princípio da Legalidade", "Princípio da Liberdade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Liberdade" },
+  { question: "Qual artigo trata dos direitos das crianças e adolescentes?", options: ["Artigo 5º", "Artigo 227º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 227º" },
+  { question: "Quem pode propor uma medida provisória no Brasil?", options: ["Congresso Nacional", "Presidente da República", "Supremo Tribunal Federal", "Ministério Público"], answer: "Presidente da República" },
+  { question: "Qual é a função do Superior Tribunal de Justiça?", options: ["Proteger a Constituição", "Julgar infrações penais comuns", "Criar leis", "Fiscalizar o Executivo"], answer: "Julgar infrações penais comuns" },
+  { question: "Qual artigo define os símbolos nacionais do Brasil?", options: ["Artigo 13º", "Artigo 5º", "Artigo 1º", "Artigo 10º"], answer: "Artigo 13º" }
+      ],
+      'Direito Administrativo': [
+      { question: "O que caracteriza um ato administrativo?", options: ["É uma decisão judicial", "É um contrato entre particulares", "É uma lei aprovada pelo Congresso", "É uma manifestação de vontade da administração pública"], answer: "É uma manifestação de vontade da administração pública" },
+  { question: "Qual é um dos princípios da administração pública?", options: ["Princípio da Exclusividade", "Princípio da Flexibilidade", "Princípio da Moralidade", "Princípio da Informalidade"], answer: "Princípio da Moralidade" },
+  { question: "O que é a presunção de legitimidade em atos administrativos?", options: ["Presume-se que são ilegais", "Presume-se que são válidos até prova em contrário", "Presume-se que são temporários", "Presume-se que são revogáveis"], answer: "Presume-se que são válidos até prova em contrário" },
+  { question: "Qual princípio exige que os atos administrativos sejam transparentes?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Eficiência", "Princípio da Impessoalidade"], answer: "Princípio da Publicidade" },
+  { question: "O que é um ato vinculado?", options: ["Ato que permite liberdade de decisão", "Ato que segue estritamente a lei", "Ato que pode ser revogado a qualquer momento", "Ato que não precisa de motivação"], answer: "Ato que segue estritamente a lei" },
+  { question: "Qual princípio garante que a administração atue conforme a lei?", options: ["Princípio da Publicidade", "Princípio da Legalidade", "Princípio da Moralidade", "Princípio da Eficiência"], answer: "Princípio da Legalidade" },
+  { question: "O que é um ato discricionário?", options: ["Ato que a administração realiza com liberdade de escolha", "Ato que segue um procedimento fixo", "Ato que não pode ser revogado", "Ato que não precisa de motivação"], answer: "Ato que a administração realiza com liberdade de escolha" },
+  { question: "Qual é um elemento essencial de um ato administrativo?", options: ["Flexibilidade", "Competência", "Informalidade", "Exclusividade"], answer: "Competência" },
+  { question: "O que caracteriza a autoexecutoriedade de um ato administrativo?", options: ["A administração o executa sem intervenção judicial", "A administração precisa de autorização judicial", "O ato é automaticamente revogado", "O ato é temporário"], answer: "A administração o executa sem intervenção judicial" },
+  { question: "Qual princípio exige que os atos públicos sejam imparciais?", options: ["Princípio da Legalidade", "Princípio da Impessoalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Impessoalidade" },
+  { question: "O que é a revogação de um ato administrativo?", options: ["Anulação por ilegalidade", "Cancelamento por conveniência e oportunidade", "Alteração por decisão judicial", "Suspensão temporária"], answer: "Cancelamento por conveniência e oportunidade" },
+  { question: "Qual princípio assegura a eficiência na administração pública?", options: ["Princípio da Publicidade", "Princípio da Eficiência", "Princípio da Legalidade", "Princípio da Moralidade"], answer: "Princípio da Eficiência" },
+  { question: "O que é a anulação de um ato administrativo?", options: ["Cancelamento por motivos de conveniência", "Cancelamento por ilegalidade", "Alteração por decisão judicial", "Suspensão temporária"], answer: "Cancelamento por ilegalidade" },
+  { question: "Qual é uma característica da administração pública?", options: ["Finalidade pública", "Lucro financeiro", "Independência total", "Flexibilidade absoluta"], answer: "Finalidade pública" },
+  { question: "O que é a motivação em um ato administrativo?", options: ["A escolha livre do administrador", "A justificativa para a realização do ato", "A revogação do ato", "A suspensão do ato"], answer: "A justificativa para a realização do ato" },
+  { question: "Qual princípio garante a continuidade do serviço público?", options: ["Princípio da Legalidade", "Princípio da Continuidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Continuidade" },
+  { question: "O que é um ato administrativo unilateral?", options: ["Ato que exige acordo entre partes", "Ato imposto pela administração", "Ato que precisa de aprovação judicial", "Ato temporário"], answer: "Ato imposto pela administração" },
+  { question: "Qual é um exemplo de ato administrativo?", options: ["Contrato de trabalho", "Nomeação de um servidor", "Lei aprovada pelo Congresso", "Decisão judicial"], answer: "Nomeação de um servidor" },
+  { question: "O que é a finalidade de um ato administrativo?", options: ["Atender ao interesse público", "Atender a interesses privados", "Gerar lucro", "Flexibilizar normas"], answer: "Atender ao interesse público" },
+  { question: "Qual princípio exige que os atos sejam éticos?", options: ["Princípio da Legalidade", "Princípio da Moralidade", "Princípio da Publicidade", "Princípio da Eficiência"], answer: "Princípio da Moralidade" },
+  { question: "O que é um ato administrativo composto?", options: ["Ato que depende de outro ato para ter validade", "Ato que é realizado de forma independente", "Ato que não precisa de motivação", "Ato temporário"], answer: "Ato que depende de outro ato para ter validade" },
+  { question: "Quem pode praticar atos administrativos?", options: ["Cidadãos comuns", "Agentes públicos competentes", "Empresas privadas", "Juízes"], answer: "Agentes públicos competentes" },
+  { question: "O que é a forma de um ato administrativo?", options: ["O motivo do ato", "A maneira como o ato é expresso", "A revogação do ato", "A suspensão do ato"], answer: "A maneira como o ato é expresso" },
+  { question: "Qual é uma característica da tipicidade dos atos administrativos?", options: ["Seguir um modelo previsto em lei", "Ser flexível e informal", "Não precisar de motivação", "Ser temporário"], answer: "Seguir um modelo previsto em lei" },
+  { question: "O que é um ato administrativo discricionário?", options: ["Ato que segue estritamente a lei", "Ato que permite escolha pela administração", "Ato que não pode ser revogado", "Ato que não precisa de motivação"], answer: "Ato que permite escolha pela administração" },
+  { question: "Qual princípio garante que os serviços públicos sejam ininterruptos?", options: ["Princípio da Publicidade", "Princípio da Continuidade", "Princípio da Legalidade", "Princípio da Moralidade"], answer: "Princípio da Continuidade" },
+  { question: "O que é um ato administrativo declaratório?", options: ["Ato que cria direitos ou deveres", "Ato que reconhece uma situação preexistente", "Ato que revoga outro ato", "Ato temporário"], answer: "Ato que reconhece uma situação preexistente" },
+  { question: "Qual é uma função da administração pública?", options: ["Gerar lucro", "Prestar serviços públicos", "Criar leis", "Julgar casos"], answer: "Prestar serviços públicos" },
+  { question: "O que é a competência em um ato administrativo?", options: ["A capacidade de escolha", "A atribuição legal para praticar o ato", "A revogação do ato", "A suspensão do ato"], answer: "A atribuição legal para praticar o ato" },
+  { question: "Qual princípio garante a igualdade no atendimento pela administração?", options: ["Princípio da Legalidade", "Princípio da Impessoalidade", "Princípio da Publicidade", "Princípio da Moralidade"], answer: "Princípio da Impessoalidade" },
+  { question: "O que é um ato administrativo constitutivo?", options: ["Ato que reconhece uma situação", "Ato que cria, modifica ou extingue direitos", "Ato que não precisa de motivação", "Ato temporário"], answer: "Ato que cria, modifica ou extingue direitos" },
+  { question: "Quem pode anular um ato administrativo?", options: ["Cidadãos comuns", "Administração pública ou Judiciário", "Empresas privadas", "Congresso Nacional"], answer: "Administração pública ou Judiciário" },
+  { question: "O que é a vinculação de um ato administrativo?", options: ["A liberdade de decisão", "A obrigatoriedade de seguir a lei", "A revogação do ato", "A suspensão do ato"], answer: "A obrigatoriedade de seguir a lei" },
+  { question: "Qual é um exemplo de ato discricionário?", options: ["Nomeação de um cargo de confiança", "Pagamento de um tributo", "Aprovação de uma lei", "Decisão judicial"], answer: "Nomeação de um cargo de confiança" },
+  { question: "O que é a autoexecutoriedade em atos administrativos?", options: ["A administração executa sem intervenção judicial", "A administração precisa de autorização judicial", "O ato é automaticamente revogado", "O ato é temporário"], answer: "A administração executa sem intervenção judicial" },
+  { question: "Qual princípio exige que os atos públicos sejam eficientes?", options: ["Princípio da Publicidade", "Princípio da Eficiência", "Princípio da Legalidade", "Princípio da Moralidade"], answer: "Princípio da Eficiência" },
+  { question: "O que é um ato administrativo expresso?", options: ["Ato que não precisa de motivação", "Ato manifestado de forma clara", "Ato que depende de outro ato", "Ato temporário"], answer: "Ato manifestado de forma clara" },
+  { question: "Qual é uma característica da administração pública?", options: ["Lucro financeiro", "Finalidade pública", "Independência total", "Flexibilidade absoluta"], answer: "Finalidade pública" },
+  { question: "O que é a revogação de um ato administrativo?", options: ["Cancelamento por ilegalidade", "Cancelamento por conveniência", "Alteração por decisão judicial", "Suspensão temporária"], answer: "Cancelamento por conveniência" },
+  { question: "Qual princípio garante a transparência na administração pública?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade", "Princípio da Eficiência"], answer: "Princípio da Publicidade" },
+  { question: "O que é um ato administrativo bilateral?", options: ["Ato imposto pela administração", "Ato que exige acordo entre partes", "Ato que não precisa de motivação", "Ato temporário"], answer: "Ato que exige acordo entre partes" },
+  { question: "Qual é um exemplo de ato vinculado?", options: ["Nomeação de um cargo de confiança", "Concessão de licença obrigatória", "Aprovação de uma lei", "Decisão judicial"], answer: "Concessão de licença obrigatória" },
+  { question: "O que é a finalidade pública na administração?", options: ["Atender a interesses privados", "Atender ao interesse coletivo", "Gerar lucro", "Flexibilizar normas"], answer: "Atender ao interesse coletivo" },
+  { question: "Qual princípio exige que os atos sejam éticos e morais?", options: ["Princípio da Legalidade", "Princípio da Moralidade", "Princípio da Publicidade", "Princípio da Eficiência"], answer: "Princípio da Moralidade" },
+  { question: "O que é um ato administrativo tácito?", options: ["Ato manifestado de forma clara", "Ato presumido pelo silêncio da administração", "Ato que depende de outro ato", "Ato temporário"], answer: "Ato presumido pelo silêncio da administração" },
+  { question: "Quem pode praticar atos administrativos vinculados?", options: ["Cidadãos comuns", "Agentes públicos competentes", "Empresas privadas", "Juízes"], answer: "Agentes públicos competentes" },
+  { question: "O que é a forma legal de um ato administrativo?", options: ["O motivo do ato", "A maneira prevista em lei para o ato", "A revogação do ato", "A suspensão do ato"], answer: "A maneira prevista em lei para o ato" },
+  { question: "Qual é uma característica da presunção de legitimidade?", options: ["O ato é considerado ilegal", "O ato é considerado válido até prova em contrário", "O ato é temporário", "O ato é revogável"], answer: "O ato é considerado válido até prova em contrário" },
+  { question: "O que é um ato administrativo complexo?", options: ["Ato que depende da manifestação de mais de um órgão", "Ato realizado por um único órgão", "Ato que não precisa de motivação", "Ato temporário"], answer: "Ato que depende da manifestação de mais de um órgão" },
+  { question: "Qual princípio garante a continuidade dos serviços públicos?", options: ["Princípio da Publicidade", "Princípio da Continuidade", "Princípio da Legalidade", "Princípio da Moralidade"], answer: "Princípio da Continuidade" },
+  
+   { question: "O que é um ato administrativo vinculado?", options: ["Ato com liberdade de escolha", "Ato que segue estritamente a lei", "Ato que não precisa de motivação", "Ato temporário"], answer: "Ato que segue estritamente a lei" },
+  { question: "Qual princípio exige que a administração pública seja imparcial?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Impessoalidade", "Princípio da Moralidade"], answer: "Princípio da Impessoalidade" },
+  { question: "O que é a autoexecutoriedade de um ato administrativo?", options: ["A administração precisa de autorização judicial", "A administração executa sem intervenção judicial", "O ato é automaticamente revogado", "O ato é temporário"], answer: "A administração executa sem intervenção judicial" },
+  { question: "Qual é um exemplo de ato administrativo discricionário?", options: ["Concessão de licença obrigatória", "Nomeação de cargo de confiança", "Pagamento de um tributo", "Decisão judicial"], answer: "Nomeação de cargo de confiança" },
+  { question: "O que é a presunção de legitimidade de um ato administrativo?", options: ["O ato é considerado ilegal", "O ato é temporário", "O ato é considerado válido até prova em contrário", "O ato é revogável"], answer: "O ato é considerado válido até prova em contrário" },
+  { question: "Qual princípio garante a transparência dos atos administrativos?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade", "Princípio da Eficiência"], answer: "Princípio da Publicidade" },
+  { question: "O que é a revogação de um ato administrativo?", options: ["Cancelamento por ilegalidade", "Suspensão temporária", "Cancelamento por conveniência e oportunidade", "Alteração judicial"], answer: "Cancelamento por conveniência e oportunidade" },
+  { question: "Qual é um elemento essencial de um ato administrativo?", options: ["Flexibilidade", "Informalidade", "Competência", "Exclusividade"], answer: "Competência" },
+  { question: "O que é um ato administrativo declaratório?", options: ["Ato que cria direitos ou deveres", "Ato que reconhece uma situação preexistente", "Ato que revoga outro ato", "Ato temporário"], answer: "Ato que reconhece uma situação preexistente" },
+  { question: "Qual princípio exige que os atos públicos sejam éticos?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade", "Princípio da Eficiência"], answer: "Princípio da Moralidade" },
+  { question: "O que é a anulação de um ato administrativo?", options: ["Cancelamento por conveniência", "Cancelamento por ilegalidade", "Suspensão temporária", "Alteração judicial"], answer: "Cancelamento por ilegalidade" },
+  { question: "Qual princípio assegura a eficiência na administração pública?", options: ["Princípio da Publicidade", "Princípio da Legalidade", "Princípio da Eficiência", "Princípio da Moralidade"], answer: "Princípio da Eficiência" },
+  { question: "O que é um ato administrativo unilateral?", options: ["Ato que exige acordo entre partes", "Ato que não precisa de motivação", "Ato imposto pela administração", "Ato temporário"], answer: "Ato imposto pela administração" },
+  { question: "Qual é uma característica da administração pública?", options: ["Lucro financeiro", "Finalidade pública", "Independência total", "Flexibilidade absoluta"], answer: "Finalidade pública" },
+  { question: "O que é a motivação de um ato administrativo?", options: ["A escolha livre do administrador", "A revogação do ato", "A justificativa para a realização do ato", "A suspensão do ato"], answer: "A justificativa para a realização do ato" },
+  { question: "Qual princípio garante a continuidade do serviço público?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Continuidade", "Princípio da Moralidade"], answer: "Princípio da Continuidade" },
+  { question: "O que é um ato administrativo composto?", options: ["Ato que depende de outro ato", "Ato realizado de forma independente", "Ato que não precisa de motivação", "Ato temporário"], answer: "Ato que depende de outro ato" },
+  { question: "Quem pode praticar atos administrativos?", options: ["Cidadãos comuns", "Empresas privadas", "Agentes públicos competentes", "Juízes"], answer: "Agentes públicos competentes" },
+  { question: "O que é a forma de um ato administrativo?", options: ["O motivo do ato", "A suspensão do ato", "A maneira como o ato é expresso", "A revogação do ato"], answer: "A maneira como o ato é expresso" },
+  { question: "Qual é uma característica da tipicidade dos atos administrativos?", options: ["Ser flexível e informal", "Seguir um modelo previsto em lei", "Não precisar de motivação", "Ser temporário"], answer: "Seguir um modelo previsto em lei" },
+  { question: "O que é um ato administrativo expresso?", options: ["Ato que não precisa de motivação", "Ato manifestado de forma clara", "Ato que depende de outro ato", "Ato temporário"], answer: "Ato manifestado de forma clara" },
+  { question: "Qual princípio garante a igualdade no atendimento pela administração?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Impessoalidade", "Princípio da Moralidade"], answer: "Princípio da Impessoalidade" },
+  { question: "O que é um ato administrativo constitutivo?", options: ["Ato que reconhece uma situação", "Ato que não precisa de motivação", "Ato que cria, modifica ou extingue direitos", "Ato temporário"], answer: "Ato que cria, modifica ou extingue direitos" },
+  { question: "Quem pode anular um ato administrativo?", options: ["Cidadãos comuns", "Administração pública ou Judiciário", "Empresas privadas", "Congresso Nacional"], answer: "Administração pública ou Judiciário" },
+  { question: "O que é a vinculação de um ato administrativo?", options: ["A liberdade de decisão", "A suspensão do ato", "A obrigatoriedade de seguir a lei", "A revogação do ato"], answer: "A obrigatoriedade de seguir a lei" },
+  { question: "Qual é um exemplo de ato vinculado?", options: ["Nomeação de um cargo de confiança", "Aprovação de uma lei", "Concessão de licença obrigatória", "Decisão judicial"], answer: "Concessão de licença obrigatória" },
+  { question: "O que é a finalidade pública na administração?", options: ["Atender a interesses privados", "Gerar lucro", "Atender ao interesse coletivo", "Flexibilizar normas"], answer: "Atender ao interesse coletivo" },
+  { question: "Qual princípio exige que os atos sejam eficientes?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Eficiência", "Princípio da Moralidade"], answer: "Princípio da Eficiência" },
+  { question: "O que é um ato administrativo tácito?", options: ["Ato manifestado de forma clara", "Ato que depende de outro ato", "Ato presumido pelo silêncio da administração", "Ato temporário"], answer: "Ato presumido pelo silêncio da administração" },
+  { question: "Quem pode praticar atos administrativos vinculados?", options: ["Cidadãos comuns", "Empresas privadas", "Agentes públicos competentes", "Juízes"], answer: "Agentes públicos competentes" },
+  { question: "O que é a forma legal de um ato administrativo?", options: ["O motivo do ato", "A revogação do ato", "A maneira prevista em lei para o ato", "A suspensão do ato"], answer: "A maneira prevista em lei para o ato" },
+  { question: "Qual é uma característica da presunção de legitimidade?", options: ["O ato é considerado ilegal", "O ato é temporário", "O ato é considerado válido até prova em contrário", "O ato é revogável"], answer: "O ato é considerado válido até prova em contrário" },
+  { question: "O que é um ato administrativo complexo?", options: ["Ato realizado por um único órgão", "Ato que depende da manifestação de mais de um órgão", "Ato que não precisa de motivação", "Ato temporário"], answer: "Ato que depende da manifestação de mais de um órgão" },
+  { question: "Qual princípio garante a continuidade dos serviços públicos?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Continuidade", "Princípio da Moralidade"], answer: "Princípio da Continuidade" },
+  { question: "O que é um ato administrativo bilateral?", options: ["Ato imposto pela administração", "Ato que não precisa de motivação", "Ato que exige acordo entre partes", "Ato temporário"], answer: "Ato que exige acordo entre partes" },
+  { question: "Qual é uma função da administração pública?", options: ["Gerar lucro", "Prestar serviços públicos", "Criar leis", "Julgar casos"], answer: "Prestar serviços públicos" },
+  { question: "O que é a competência em um ato administrativo?", options: ["A capacidade de escolha", "A suspensão do ato", "A atribuição legal para praticar o ato", "A revogação do ato"], answer: "A atribuição legal para praticar o ato" },
+  { question: "Qual princípio garante a transparência na administração pública?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade", "Princípio da Eficiência"], answer: "Princípio da Publicidade" },
+  { question: "O que é um ato administrativo expresso?", options: ["Ato que não precisa de motivação", "Ato que depende de outro ato", "Ato manifestado de forma clara", "Ato temporário"], answer: "Ato manifestado de forma clara" },
+  { question: "Qual é uma característica da administração pública?", options: ["Lucro financeiro", "Independência total", "Finalidade pública", "Flexibilidade absoluta"], answer: "Finalidade pública" },
+  { question: "O que é a revogação de um ato administrativo?", options: ["Cancelamento por ilegalidade", "Suspensão temporária", "Cancelamento por conveniência", "Alteração judicial"], answer: "Cancelamento por conveniência" },
+  { question: "Qual princípio exige que os atos sejam éticos e morais?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Moralidade", "Princípio da Eficiência"], answer: "Princípio da Moralidade" },
+  { question: "O que é um ato administrativo unilateral?", options: ["Ato que exige acordo entre partes", "Ato imposto pela administração", "Ato que não precisa de motivação", "Ato temporário"], answer: "Ato imposto pela administração" },
+  { question: "Qual é um exemplo de ato administrativo?", options: ["Contrato de trabalho", "Aprovação de uma lei", "Nomeação de um servidor", "Decisão judicial"], answer: "Nomeação de um servidor" },
+  { question: "O que é a finalidade de um ato administrativo?", options: ["Atender a interesses privados", "Atender ao interesse público", "Gerar lucro", "Flexibilizar normas"], answer: "Atender ao interesse público" },
+  { question: "Qual princípio exige que os atos públicos sejam imparciais?", options: ["Princípio da Legalidade", "Princípio da Publicidade", "Princípio da Impessoalidade", "Princípio da Moralidade"], answer: "Princípio da Impessoalidade" },
+  { question: "O que é um ato administrativo composto?", options: ["Ato realizado de forma independente", "Ato que depende de outro ato para ter validade", "Ato que não precisa de motivação", "Ato temporário"], answer: "Ato que depende de outro ato para ter validade" },
+  { question: "Quem pode praticar atos administrativos?", options: ["Cidadãos comuns", "Empresas privadas", "Agentes públicos competentes", "Juízes"], answer: "Agentes públicos competentes" },
+  { question: "O que é a forma de um ato administrativo?", options: ["O motivo do ato", "A suspensão do ato", "A maneira como o ato é expresso", "A revogação do ato"], answer: "A maneira como o ato é expresso" },
+  { question: "Qual é uma característica da tipicidade dos atos administrativos?", options: ["Ser flexível e informal", "Não precisar de motivação", "Seguir um modelo previsto em lei", "Ser temporário"], answer: "Seguir um modelo previsto em lei" }
+  
+      ],
+    };
+
+    // Temas visuais por disciplina
+    const themes = {
+      'Informática': '#E6F3FF',
+      'Português': '#E6FFE6',
+      'Matemática': '#FFFFE6',
+      'Raciocínio Lógico': '#FFF3E6',
+      'Inglês': '#F3E6FF',
+      'Direito Constitucional': '#FFE6F3',
+      'Direito Administrativo': '#F0F0F0',
+    };
+
+    const shuffleArray = (array) => [...array].sort(() => Math.random() - 0.5);
+
+    // Componente do Quiz
+    const QuizApp = ({ onBack }) => {
+      const [discipline, setDiscipline] = React.useState(null);
+      const [currentIndex, setCurrentIndex] = React.useState(() => parseInt(localStorage.getItem('quizIndex')) || 0);
+      const [correctAnswers, setCorrectAnswers] = React.useState(() => parseInt(localStorage.getItem('quizCorrect')) || 0);
+      const [shuffledQuiz, setShuffledQuiz] = React.useState(() => {
+        const saved = localStorage.getItem('shuffledQuiz');
+        if (saved) return JSON.parse(saved);
+        return [];
+      });
+      const [gameState, setGameState] = React.useState('select');
+      const [answers, setAnswers] = React.useState(() => {
+        const saved = localStorage.getItem('quizAnswers');
+        return saved ? JSON.parse(saved) : [];
+      });
+      const [error, setError] = React.useState(null);
+      const [feedback, setFeedback] = React.useState(null);
+
+      React.useEffect(() => {
+        try {
+          localStorage.setItem('quizIndex', currentIndex);
+          localStorage.setItem('quizCorrect', correctAnswers);
+          localStorage.setItem('shuffledQuiz', JSON.stringify(shuffledQuiz));
+          localStorage.setItem('quizAnswers', JSON.stringify(answers));
+        } catch (err) {
+          setError('Erro ao salvar progresso: ' + err.message);
+        }
+      }, [currentIndex, correctAnswers, shuffledQuiz, answers]);
+
+      const startQuiz = (selectedDiscipline) => {
+        try {
+          const newQuiz = shuffleArray(quizzes[selectedDiscipline]).map(q => ({
+            ...q,
+            options: shuffleArray(q.options)
+          }));
+          setDiscipline(selectedDiscipline);
+          setShuffledQuiz(newQuiz);
+          setCurrentIndex(0);
+          setCorrectAnswers(0);
+          setAnswers([]);
+          setGameState('playing');
+          setFeedback(null);
+          localStorage.removeItem('quizIndex');
+          localStorage.removeItem('quizCorrect');
+          localStorage.removeItem('shuffledQuiz');
+          localStorage.removeItem('quizAnswers');
+        } catch (err) {
+          setError('Erro ao iniciar quiz: ' + err.message);
+        }
+      };
+
+      const handleAnswer = (option) => {
+        try {
+          const currentQuestion = shuffledQuiz[currentIndex];
+          const isCorrect = option === currentQuestion.answer;
+          const newAnswer = {
+            question: currentQuestion.question,
+            selected: option,
+            correct: currentQuestion.answer,
+            isCorrect
+          };
+          setAnswers([...answers, newAnswer]);
+
+          setFeedback({
+            selectedOption: option,
+            correctOption: currentQuestion.answer,
+            isCorrect
+          });
+
+          if (isCorrect) {
+            setCorrectAnswers(correctAnswers + 1);
+            setTimeout(() => {
+              if (currentIndex + 1 >= shuffledQuiz.length) {
+                setGameState('gameOver');
+              } else {
+                setCurrentIndex(currentIndex + 1);
+                setFeedback(null);
+              }
+            }, 1000);
+          } else {
+            setTimeout(() => {
+              setGameState('gameOver');
+            }, 1000);
+          }
+        } catch (err) {
+          setError('Erro ao processar resposta: ' + err.message);
+        }
+      };
+
+      const resetGame = () => {
+        try {
+          setDiscipline(null);
+          setCurrentIndex(0);
+          setCorrectAnswers(0);
+          setShuffledQuiz([]);
+          setGameState('select');
+          setAnswers([]);
+          setFeedback(null);
+          localStorage.removeItem('quizIndex');
+          localStorage.removeItem('quizCorrect');
+          localStorage.removeItem('shuffledQuiz');
+          localStorage.removeItem('quizAnswers');
+        } catch (err) {
+          setError('Erro ao reiniciar jogo: ' + err.message);
+        }
+      };
+
+      const enterReviewMode = () => {
+        setGameState('review');
+      };
+
+      if (error) {
+        return (
+          <div className="max-w-2xl w-full bg-white p-6 rounded-lg shadow-lg text-center">
+            <h1 className="text-3xl font-bold mb-4 text-blue-900">Erro</h1>
+            <p className="text-red-500">{error}</p>
+            <button
+              onClick={resetGame}
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition duration-300"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        );
+      }
+
+      if (gameState === 'select') {
+        return (
+          <div className="max-w-2xl w-full bg-white p-6 rounded-lg shadow-lg text-center">
+            <img src="logopq.png" alt="PenseQuiz Logo" className="mx-auto" style={{ maxWidth: '200px', maxHeight: '50px' }} />
+            <p className="text-blue-600 mb-4">Teste seus conhecimentos para concursos públicos!</p>
+            <div className="flex flex-wrap justify-center gap-4">
+              {Object.keys(quizzes).map((discipline) => (
+                <button
+                  key={discipline}
+                  onClick={() => startQuiz(discipline)}
+                  className="flex-1 min-w-[150px] bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg shadow-md transition duration-300"
+                >
+                  {discipline}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={onBack}
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition duration-300"
+            >
+              Voltar ao Menu
+            </button>
+			
+            <p className="text-blue-600 mt-4">Estude com dedicação e conquiste seus objetivos!</p>
+          </div>
+        );
+      }
+
+      if (gameState === 'review') {
+        return (
+          <div className="max-w-2xl w-full p-6 rounded-lg shadow-lg" style={{ backgroundColor: themes[discipline] }}>
+            <h1 className="text-3xl font-bold mb-4 text-blue-900">Revisão das Respostas</h1>
+            {answers.map((ans, idx) => (
+              <div key={idx} className="mb-4 p-4 bg-gray-100 rounded">
+                <p className="text-lg text-blue-900">{ans.question}</p>
+                <p className={ans.isCorrect ? 'text-green-600' : 'text-red-600'}>
+                  Sua resposta: {ans.selected}
+                </p>
+                <p className="text-green-600">Resposta correta: {ans.correct}</p>
+              </div>
+            ))}
+            <button
+              onClick={resetGame}
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition duration-300"
+            >
+              Voltar ao Início
+            </button>
+			
+          </div>
+        );
+      }
+
+      if (gameState === 'gameOver') {
+        return (
+          <div className="max-w-2xl w-full p-6 rounded-lg shadow-lg text-center" style={{ backgroundColor: themes[discipline] }}>
+            <h1 className="text-3xl font-bold mb-4 text-blue-900">Fim do Quiz!</h1>
+            <p className="text-xl mb-4">
+              Você acertou {correctAnswers} de {shuffledQuiz.length} questões em {discipline}!
+            </p>
+            <div className="flex space-x-4">
+              <button
+                onClick={resetGame}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition duration-300"
+              >
+                Voltar ao Início
+              </button>
+              <button
+                onClick={enterReviewMode}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded transition duration-300"
+              >
+                Revisar Respostas
+              </button>
+            </div>
+            <button
+              onClick={onBack}
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition duration-300"
+            >
+              Voltar ao Menu
+            </button>
+            <p className="text-blue-600 mt-4">Estude com dedicação e conquiste seus objetivos!</p>
+			<button
+               onClick={() => window.location.href = 'index.html'}
+               className="fixed bottom-4 right-4 bg-yellow-500 hover:bg-yellow-600 text-blue-900 py-1 px-2 rounded text-sm"
+            >
+               PenseQuiz
+            </button>
+          </div>
+        );
+      }
+
+      const currentQuestion = shuffledQuiz[currentIndex];
+      const progress = ((currentIndex + 1) / shuffledQuiz.length) * 100;
+
+      return (
+        <div className="max-w-2xl w-full p-6 rounded-lg shadow-lg" style={{ backgroundColor: themes[discipline] }}>
+          <h1 className="text-3xl font-bold mb-4 text-center text-blue-900">PenseQuiz Concursos</h1>
+          <div className="mb-4">
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              Pergunta {currentIndex + 1} de {shuffledQuiz.length}
+            </p>
+          </div>
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-lg text-blue-900">Acertos: {correctAnswers}</p>
+          </div>
+          <p className="text-xl mb-6 text-blue-900 animate-fade-in">{currentQuestion.question}</p>
+          <div className="space-y-3">
+            {currentQuestion.options.map((option) => (
+              <button
+                key={option}
+                onClick={() => handleAnswer(option)}
+                className={`w-full py-3 rounded transition duration-300 option ${
+                  feedback && feedback.isCorrect && option === feedback.correctOption
+                    ? 'correct'
+                    : feedback && !feedback.isCorrect && option === feedback.selectedOption
+                    ? 'wrong'
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                } disabled:bg-gray-400 disabled:cursor-not-allowed`}
+                disabled={feedback}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setGameState('gameOver')}
+            className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded transition duration-300"
+          >
+            Finalizar Quiz
+          </button>
+          <p className="text-blue-600 mt-4">Estude com dedicação e conquiste seus objetivos!</p>
+        </div>
+      );
+    };
+
+    // Componente Principal
+    const App = () => {
+      const [currentSection, setCurrentSection] = React.useState('menu');
+
+      const renderSection = () => {
+        switch (currentSection) {
+          case 'quiz':
+            return <QuizApp onBack={() => setCurrentSection('menu')} />;
+          default:
+            return (
+              <div className="max-w-2xl w-full bg-white p-6 rounded-lg shadow-lg text-center">
+                <h1 className="text-3xl font-bold mb-4 text-blue-900">PenseQuiz Concursos</h1>
+                <p className="text-blue-600 mb-4">Teste seus conhecimentos para concursos públicos!</p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <button
+                    onClick={() => setCurrentSection('quiz')}
+                    className="flex-1 min-w-[150px] bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg shadow-md transition duration-300"
+                  >
+                    Iniciar Quiz
+                  </button>
+                </div>
+                <p className="text-blue-600 mt-4">Estude com dedicação e conquiste seus objetivos!</p>
+              </div>
+            );
+        }
+      };
+
+      return <div>{renderSection()}</div>;
+    };
+
+    try {
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    } catch (err) {
+      document.getElementById('error').classList.remove('hidden');
+      document.getElementById('error').innerText = 'Erro ao carregar o aplicativo: ' + err.message;
+    }
+  </script>
+  <style>
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fade-in 0.5s ease-out;
+    }
+    .option {
+      display: block;
+      margin: 10px auto;
+      padding: 12px 25px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      width: 80%;
+      max-width:aminsa300px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    }
+    .option:hover {
+      background-color: #1565c0;
+    }
+    .correct {
+      background-color: #4CAF50 !important;
+    }
+    .wrong {
+      background-color: #f44336 !important;
+    }
+  </style>
+</body>
+</html>

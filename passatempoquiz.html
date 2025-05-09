@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="iconepq.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e1e2f">
+    <title>PenseQuiz - Passatempo</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+    <div id="root"></div>
+    <div id="error" class="hidden text-red-500 text-center"></div>
+
+    <script type="text/babel">
+        const questions = [
+             { clue: "Capital do Brasil", answer: "Brasília", options: ["Brasília", "Rio de Janeiro", "São Paulo", "Salvador"], hint: "Cidade planejada onde fica o Congresso Nacional." },
+            { clue: "Ator brasileiro famoso por 'Tropa de Elite'", answer: "Wagner Moura", options: ["Wagner Moura", "Selton Mello", "Rodrigo Santoro", "Lázaro Ramos"], hint: "Interpretou o Capitão Nascimento." },
+            { clue: "Escritor de 'Dom Casmurro'", answer: "Machado de Assis", options: ["Machado de Assis", "José de Alencar", "Graciliano Ramos", "João Cabral"], hint: "Maior escritor brasileiro do século XIX." },
+            { clue: "Presidente do Brasil em 2003-2010", answer: "Lula", options: ["Lula", "FHC", "Dilma", "Collor"], hint: "Seu nome é Luiz Inácio." },
+            { clue: "Cidade conhecida como 'Terra da Garoa'", answer: "São Paulo", options: ["São Paulo", "Curitiba", "Porto Alegre", "Belo Horizonte"], hint: "Maior cidade do Brasil em população." },
+            { clue: "Novela de 2001 com Jade e Lucas", answer: "O Clone", options: ["O Clone", "Caminho das Índias", "Avenida Brasil", "Senhora do Destino"], hint: "Envolve cultura árabe e clonagem." },
+            { clue: "Evento de 1822 na história do Brasil", answer: "Independência", options: ["Independência", "Proclamação da República", "Abolição da Escravatura", "Revolução de 1930"], hint: "Aconteceu às margens do rio Ipiranga." },
+            { clue: "Personalidade pública, apresentador do 'Domingão'", answer: "Faustão", options: ["Faustão", "Silvio Santos", "Luciano Huck", "Gugu"], hint: "Seu nome é Fausto Silva." },
+            { clue: "Capital do Amazonas", answer: "Manaus", options: ["Manaus", "Belém", "Porto Velho", "Boa Vista"], hint: "Fica às margens do Rio Negro." },
+            { clue: "Escritor de 'O Alquimista'", answer: "Paulo Coelho", options: ["Paulo Coelho", "Jorge Amado", "Clarice Lispector", "Érico Veríssimo"], hint: "Seu livro é um best-seller mundial." },
+            { clue: "Cidade famosa pelo Carnaval", answer: "Rio de Janeiro", options: ["Rio de Janeiro", "Salvador", "Recife", "Olinda"], hint: "Lar do Sambódromo." },
+            { clue: "Atriz de 'Avenida Brasil'", answer: "Débora Falabella", options: ["Débora Falabella", "Fernanda Montenegro", "Glória Pires", "Taís Araújo"], hint: "Interpretou Nina na novela." },
+            { clue: "Autor de 'Gabriela, Cravo e Canela'", answer: "Jorge Amado", options: ["Jorge Amado", "Machado de Assis", "Guimarães Rosa", "Monteiro Lobato"], hint: "Escritor baiano conhecido por retratar o Nordeste." },
+            { clue: "Primeira mulher presidente do Brasil", answer: "Dilma Rousseff", options: ["Dilma Rousseff", "Marina Silva", "Roseana Sarney", "Heloísa Helena"], hint: "Governou de 2011 a 2016." },
+            { clue: "Capital do Ceará", answer: "Fortaleza", options: ["Fortaleza", "Natal", "João Pessoa", "Maceió"], hint: "Famosa pela praia de Iracema." },
+            { clue: "Novela de 1988 com Tieta", answer: "Tieta", options: ["Tieta", "Roque Santeiro", "Vale Tudo", "Senhora do Destino"], hint: "Baseada em obra de Jorge Amado." },
+            { clue: "Ano da Proclamação da República no Brasil", answer: "1889", options: ["1889", "1822", "1964", "1930"], hint: "Aconteceu em 15 de novembro." },
+            { clue: "Apresentador do 'Fantástico'", answer: "Tadeu Schmidt", options: ["Tadeu Schmidt", "William Bonner", "Fausto Silva", "Luciano Huck"], hint: "Também apresenta o Big Brother Brasil." },
+            { clue: "Cidade chamada 'Veneza Brasileira'", answer: "Recife", options: ["Recife", "Florianópolis", "Santos", "Paraty"], hint: "Conhecida pelos rios e pontes." },
+            { clue: "Escritora de 'A Paixão Segundo G.H.'", answer: "Clarice Lispector", options: ["Clarice Lispector", "Cecília Meireles", "Rachel de Queiroz", "Lygia Fagundes Telles"], hint: "Autora ucraniana naturalizada brasileira." },
+            { clue: "Capital da Bahia", answer: "Salvador", options: ["Salvador", "Aracaju", "Maceió", "Recife"], hint: "Primeira capital do Brasil." },
+            { clue: "Ator de 'Cidade de Deus'", answer: "Seu Jorge", options: ["Seu Jorge", "Lázaro Ramos", "Wagner Moura", "Rodrigo Santoro"], hint: "Também é cantor famoso." },
+            { clue: "Presidente do Brasil em 1995-2002", answer: "Fernando Henrique Cardoso", options: ["Fernando Henrique Cardoso", "Itamar Franco", "José Sarney", "Tancredo Neves"], hint: "Conhecido como FHC." },
+            { clue: "Novela de 2012 com Carminha", answer: "Avenida Brasil", options: ["Avenida Brasil", "Salve Jorge", "Fina Estampa", "Cheias de Charme"], hint: "Grande sucesso de João Emanuel Carneiro." },
+            { clue: "Cidade onde fica o Pelourinho", answer: "Salvador", options: ["Salvador", "Olinda", "São Luís", "Ouro Preto"], hint: "Bairro histórico famoso na Bahia." },
+            { clue: "Autor de 'Grande Sertão: Veredas'", answer: "Guimarães Rosa", options: ["Guimarães Rosa", "Érico Veríssimo", "José de Alencar", "Monteiro Lobato"], hint: "Obra-prima do modernismo brasileiro." },
+            { clue: "Evento que marcou o fim da escravidão no Brasil", answer: "Abolição da Escravatura", options: ["Abolição da Escravatura", "Independência", "Proclamação da República", "Revolução Farroupilha"], hint: "Assinada pela Princesa Isabel em 1888." },
+            { clue: "Apresentadora do 'Mais Você'", answer: "Ana Maria Braga", options: ["Ana Maria Braga", "Fátima Bernard Bureau", "Xuxa Meneghel", "Angélica"], hint: "Famosa pelo Louro José." },
+            { clue: "Capital do Rio Grande do Sul", answer: "Porto Alegre", options: ["Porto Alegre", "Florianópolis", "Curitiba", "Pelotas"], hint: "Cidade às margens do Guaíba." },
+            { clue: "Atriz de 'Senhora do Destino'", answer: "Susana Vieira", options: ["Susana Vieira", "Regina Duarte", "Fernanda Montenegro", "Marília Pêra"], hint: "Interpretou Maria do Carmo na novela." },
+            { clue: "Escritor de 'Sítio do Picapau Amarelo'", answer: "Monteiro Lobato", options: ["Monteiro Lobato", "Carlos Drummond de Andrade", "Vinicius de Moraes", "Manuel Bandeira"], hint: "Criou a Emília e o Visconde de Sabugosa." },
+            { clue: "Cidade conhecida pelo Festival de Parintins", answer: "Parintins", options: ["Parintins", "Manaus", "Santarém", "Belém"], hint: "Famosa pelo duelo entre Caprichoso e Garantido." },
+            { clue: "Presidente do Brasil em 1985-1990", answer: "José Sarney", options: ["José Sarney", "Tancredo Neves", "João Figueiredo", "Ernesto Geisel"], hint: "Primeiro presidente civil após a ditadura." },
+            { clue: "Novela de 1985 com Roque", answer: "Roque Santeiro", options: ["Roque Santeiro", "Vale Tudo", "Tieta", "Selva de Pedra"], hint: "Escrita por Dias Gomes." },
+            { clue: "Capital de Pernambuco", answer: "Recife", options: ["Recife", "João Pessoa", "Natal", "Aracaju"], hint: "Conhecida como a capital do frevo." },
+            { clue: "Ator de 'O Pagador de Promessas'", answer: "Leonardo Villar", options: ["Leonardo Villar", "José Wilker", "Tarcísio Meira", "Antônio Fagundes"], hint: "Protagonizou o filme premiado em Cannes." },
+            { clue: "Escritora de 'Feliz Ano Velho'", answer: "Marcelo Rubens Paiva", options: ["Marcelo Rubens Paiva", "Ana Maria Machado", "Zélia Gattai", "Lya Luft"], hint: "Autor que relatou sua experiência após um acidente." },
+            { clue: "Evento de 1964 que marcou o início da ditadura", answer: "Golpe Militar", options: ["Golpe Militar", "Revolução de 1930", "Intentona Comunista", "Revolta da Armada"], hint: "Depôs o presidente João Goulart." },
+            { clue: "Apresentador do 'Caldeirão'", answer: "Marcos Mion", options: ["Marcos Mion", "Rodrigo Faro", "Celso Portiolli", "Luciano Huck"], hint: "Apresentou 'A Fazenda' antes da Globo." },
+            { clue: "Cidade onde fica a Praia de Copacabana", answer: "Rio de Janeiro", options: ["Rio de Janeiro", "Santos", "Florianópolis", "Fortaleza"], hint: "Bairro famoso por seu calçadão." },
+            { clue: "Capital do Mato Grosso", answer: "Cuiabá", options: ["Cuiabá", "Campo Grande", "Goiânia", "Palmas"], hint: "Porta de entrada para o Pantanal." },
+            { clue: "Novela de 1990 com Maria de Fátima", answer: "Vale Tudo", options: ["Vale Tudo", "Rainha da Sucata", "Que Rei Sou Eu?", "O Salvador da Pátria"], hint: "Escrita por Gilberto Braga." },
+            { clue: "Autor de 'Memórias Póstumas de Brás Cubas'", answer: "Machado de Assis", options: ["Machado de Assis", "Aluísio Azevedo", "Raul Pompeia", "Olavo Bilac"], hint: "Romance narrado por um defunto." },
+            { clue: "Cidade conhecida como 'Cidade Maravilhosa'", answer: "Rio de Janeiro", options: ["Rio de Janeiro", "Salvador", "Recife", "Florianópolis"], hint: "Lar do Cristo Redentor." },
+            { clue: "Atriz de 'Pantanal' (1990)", answer: "Cristiana Oliveira", options: ["Cristiana Oliveira", "Letícia Sabatella", "Cláudia Raia", "Carolina Dieckmann"], hint: "Interpretou Juma Marruá." },
+            { clue: "Presidente do Brasil em 1992-1994", answer: "Itamar Franco", options: ["Itamar Franco", "Fernando Collor", "José Sarney", "João Figueiredo"], hint: "Assumiu após o impeachment de Collor." },
+            { clue: "Capital do Paraná", answer: "Curitiba", options: ["Curitiba", "Porto Alegre", "Florianópolis", "Joinville"], hint: "Famosa pelo Jardim Botânico." },
+            { clue: "Evento que criou a Semana de Arte Moderna", answer: "1922", options: ["1922", "1917", "1930", "1945"], hint: "Marco do modernismo no Brasil." },
+            { clue: "Apresentadora do 'Encontro'", answer: "Fátima Bernardes", options: ["Fátima Bernardes", "Ana Maria Braga", "Angélica", "Xuxa Meneghel"], hint: "Ex-âncora do Jornal Nacional." },
+          	{ clue: "Cidade famosa pela Oktoberfest", answer: "Blumenau", options: ["Blumenau", "Gramado", "Joinville", "Caxias do Sul"], hint: "Evento de origem alemã em Santa Catarina." },
+        
+		
+		
+    {
+        "clue": "Capital de Santa Catarina",
+        "answer": "Florianópolis",
+        "options": ["Florianópolis", "Joinville", "Blumenau", "Chapecó"],
+        "hint": "Conhecida como a Ilha da Magia."
+    },
+    {
+        "clue": "Ator brasileiro de 'Carandiru'",
+        "answer": "Rodrigo Santoro",
+        "options": ["Rodrigo Santoro", "Wagner Moura", "Lázaro Ramos", "Selton Mello"],
+        "hint": "Também atuou em Hollywood em '300'."
+    },
+    {
+        "clue": "Escritor de 'Capitães da Areia'",
+        "answer": "Jorge Amado",
+        "options": ["Jorge Amado", "Graciliano Ramos", "João Cabral", "Machado de Assis"],
+        "hint": "Suas obras retratam a Bahia."
+    },
+    {
+        "clue": "Presidente do Brasil em 1990-1992",
+        "answer": "Fernando Collor",
+        "options": ["Fernando Collor", "Itamar Franco", "José Sarney", "Lula"],
+        "hint": "Primeiro presidente eleito diretamente após a ditadura."
+    },
+    {
+        "clue": "Cidade famosa pelo Bumba Meu Boi",
+        "answer": "São Luís",
+        "options": ["São Luís", "Recife", "Belém", "Salvador"],
+        "hint": "Capital do Maranhão."
+    },
+    {
+        "clue": "Novela de 2009 com Maya e Raj",
+        "answer": "Caminho das Índias",
+        "options": ["Caminho das Índias", "O Clone", "Avenida Brasil", "India – A Love Story"],
+        "hint": "Explora a cultura indiana."
+    },
+    {
+        "clue": "Ano da assinatura da Constituição Brasileira atual",
+        "answer": "1988",
+        "options": ["1988", "1967", "1946", "2000"],
+        "hint": "Conhecida como Constituição Cidadã."
+    },
+    {
+        "clue": "Apresentador do 'Domingo Espetacular'",
+        "answer": "Eduardo Ribeiro",
+        "options": ["Eduardo Ribeiro", "Celso Portiolli", "Rodrigo Faro", "Marcos Mion"],
+        "hint": "Jornalista da Record TV."
+    },
+    {
+        "clue": "Capital de Goiás",
+        "answer": "Goiânia",
+        "options": ["Goiânia", "Cuiabá", "Palmas", "Campo Grande"],
+        "hint": "Famosa pelo Parque Vaca Brava."
+    },
+    {
+        "clue": "Escritor de 'Vidas Secas'",
+        "answer": "Graciliano Ramos",
+        "options": ["Graciliano Ramos", "José de Alencar", "Érico Veríssimo", "Monteiro Lobato"],
+        "hint": "Retrata a seca no Nordeste."
+    },
+    {
+        "clue": "Cidade onde fica o Farol da Barra",
+        "answer": "Salvador",
+        "options": ["Salvador", "Recife", "Fortaleza", "Rio de Janeiro"],
+        "hint": "Ponto turístico famoso na Bahia."
+    },
+    {
+        "clue": "Atriz de 'Mulheres Apaixonadas'",
+        "answer": "Christiane Torloni",
+        "options": ["Christiane Torloni", "Glória Pires", "Fernanda Montenegro", "Regina Casé"],
+        "hint": "Interpretou Helena na novela."
+    },
+    {
+        "clue": "Presidente do Brasil em 1974-1979",
+        "answer": "Ernesto Geisel",
+        "options": ["Ernesto Geisel", "João Figueiredo", "Médici", "Costa e Silva"],
+        "hint": "Iniciou a abertura política na ditadura."
+    },
+    {
+        "clue": "Novela de 1995 com Maria Helena",
+        "answer": "A Próxima Vítima",
+        "options": ["A Próxima Vítima", "Explode Coração", "Quatro por Quatro", "Torre de Babel"],
+        "hint": "Trama policial de Sílvio de Abreu."
+    },
+    {
+        "clue": "Capital do Piauí",
+        "answer": "Teresina",
+        "options": ["Teresina", "Parnaíba", "Floriano", "Picos"],
+        "hint": "Única capital nordestina que não fica no litoral."
+    },
+    {
+        "clue": "Evento histórico de 1930 no Brasil",
+        "answer": "Revolução de 1930",
+        "options": ["Revolução de 1930", "Independência", "Abolição", "Golpe de 1964"],
+        "hint": "Levou Getúlio Vargas ao poder."
+    },
+    {
+        "clue": "Apresentadora do 'Jornal Hoje'",
+        "answer": "Sandra Annenberg",
+        "options": ["Sandra Annenberg", "Fátima Bernardes", "Ana Maria Braga", "Renata Vasconcellos"],
+        "hint": "Veterana do jornalismo da Globo."
+    },
+    {
+        "clue": "Cidade famosa pelo Círio de Nazaré",
+        "answer": "Belém",
+        "options": ["Belém", "Manaus", "Santarém", "Macapá"],
+        "hint": "Maior procissão religiosa do Brasil."
+    },
+    {
+        "clue": "Escritora de 'O Quinze'",
+        "answer": "Rachel de Queiroz",
+        "options": ["Rachel de Queiroz", "Cecília Meireles", "Clarice Lispector", "Lygia Fagundes Telles"],
+        "hint": "Primeira mulher na Academia Brasileira de Letras."
+    },
+    {
+        "clue": "Capital de Alagoas",
+        "answer": "Maceió",
+        "options": ["Maceió", "Aracaju", "Salvador", "Recife"],
+        "hint": "Conhecida pelas praias de Pajuçara."
+    },
+    {
+        "clue": "Ator de 'Que Rei Sou Eu?'",
+        "answer": "Edson Celulari",
+        "options": ["Edson Celulari", "Antônio Fagundes", "Tarcísio Meira", "José Wilker"],
+        "hint": "Interpretou Jean Pierre na novela."
+    },
+    {
+        "clue": "Presidente do Brasil em 1961-1964",
+        "answer": "João Goulart",
+        "options": ["João Goulart", "Juscelino Kubitschek", "Jânio Quadros", "Café Filho"],
+        "hint": "Deposto pelo golpe militar."
+    },
+    {
+        "clue": "Novela de 2005 com Stela e Totó",
+        "answer": "América",
+        "options": ["América", "Belíssima", "Páginas da Vida", "Cobras & Lagartos"],
+        "hint": "Explorou a imigração para os EUA."
+    },
+    {
+        "clue": "Cidade onde fica a Ponte Hercílio Luz",
+        "answer": "Florianópolis",
+        "options": ["Florianópolis", "Porto Alegre", "Santos", "Recife"],
+        "hint": "Cartão-postal de Santa Catarina."
+    },
+    {
+        "clue": "Escritor de 'O Cortiço'",
+        "answer": "Aluísio Azevedo",
+        "options": ["Aluísio Azevedo", "Machado de Assis", "José de Alencar", "Raul Pompeia"],
+        "hint": "Romance naturalista sobre a vida no Rio."
+    },
+    {
+        "clue": "Capital do Espírito Santo",
+        "answer": "Vitória",
+        "options": ["Vitória", "Vila Velha", "Cariacica", "Serra"],
+        "hint": "Cidade com a Ilha do Boi."
+    },
+    {
+        "clue": "Atriz de 'Laços de Família'",
+        "answer": "Carolina Dieckmann",
+        "options": ["Carolina Dieckmann", "Vera Fischer", "Cláudia Raia", "Marieta Severo"],
+        "hint": "Interpretou Camila, que enfrentou leucemia."
+    },
+    {
+        "clue": "Evento de 1888 no Brasil",
+        "answer": "Abolição da Escravatura",
+        "options": ["Abolição da Escravatura", "Independência", "Proclamação da República", "Revolução Farroupilha"],
+        "hint": "Assinada pela Princesa Isabel."
+    },
+    {
+        "clue": "Apresentador do 'Cidade Alerta'",
+        "answer": "Luiz Bacci",
+        "options": ["Luiz Bacci", "José Luiz Datena", "Marcelo Rezende", "Sikêra Jr."],
+        "hint": "Conhecido como 'Menino de Ouro'."
+    },
+    {
+        "clue": "Cidade famosa pela Festa do Peão",
+        "answer": "Barretos",
+        "options": ["Barretos", "Ribeirão Preto", "Campinas", "Piracicaba"],
+        "hint": "Maior rodeio do Brasil."
+    },
+    {
+        "clue": "Escritor de 'O Guarani'",
+        "answer": "José de Alencar",
+        "options": ["José de Alencar", "Machado de Assis", "Aluísio Azevedo", "Castro Alves"],
+        "hint": "Romance romântico sobre Peri e Ceci."
+    },
+    {
+        "clue": "Capital do Tocantins",
+        "answer": "Palmas",
+        "options": ["Palmas", "Goiânia", "Cuiabá", "Porto Nacional"],
+        "hint": "Cidade planejada mais jovem do Brasil."
+    },
+    {
+        "clue": "Novela de 2011 com Terezinha",
+        "answer": "Fina Estampa",
+        "options": ["Fina Estampa", "Insensato Coração", "Avenida Brasil", "Cordel Encantado"],
+        "hint": "Personagem de Christiane Torloni."
+    },
+    {
+        "clue": "Presidente do Brasil em 1956-1961",
+        "answer": "Juscelino Kubitschek",
+        "options": ["Juscelino Kubitschek", "Getúlio Vargas", "Jânio Quadros", "Café Filho"],
+        "hint": "Construiu Brasília."
+    },
+    {
+        "clue": "Cidade onde fica o Mercado Ver-o-Peso",
+        "answer": "Belém",
+        "options": ["Belém", "Manaus", "São Luís", "Recife"],
+        "hint": "Ponto turístico do Pará."
+    },
+    {
+        "clue": "Ator de 'Terra Nostra'",
+        "answer": "Antônio Fagundes",
+        "options": ["Antônio Fagundes", "Tarcísio Meira", "José Wilker", "Edson Celulari"],
+        "hint": "Interpretou Gumercindo na novela."
+    },
+    {
+        "clue": "Escritora de 'A Menina que Roubava Livros' (baseado no Brasil)",
+        "answer": "Ana Maria Machado",
+        "options": ["Ana Maria Machado", "Lygia Fagundes Telles", "Rachel de Queiroz", "Zélia Gattai"],
+        "hint": "Autora de livros infantis premiada."
+    },
+    {
+        "clue": "Capital de Sergipe",
+        "answer": "Aracaju",
+        "options": ["Aracaju", "Maceió", "Salvador", "Recife"],
+        "hint": "Conhecida pela Orla de Atalaia."
+    },
+    {
+        "clue": "Novela de 1989 com Dóris e Lucas",
+        "answer": "Top Model",
+        "options": ["Top Model", "Vale Tudo", "Tieta", "Que Rei Sou Eu?"],
+        "hint": "Ambientada no mundo da moda."
+    },
+    {
+        "clue": "Evento de 1932 no Brasil",
+        "answer": "Revolução Constitucionalista",
+        "options": ["Revolução Constitucionalista", "Intentona Comunista", "Revolução de 1930", "Golpe de 1964"],
+        "hint": "Liderada por São Paulo contra Vargas."
+    },
+    {
+        "clue": "Apresentadora do 'É de Casa'",
+        "answer": "Maria Cândida",
+        "options": ["Maria Cândida", "Ana Maria Braga", "Angélica", "Fátima Bernardes"],
+        "hint": "Veterana em programas matinais."
+    },
+    {
+        "clue": "Cidade famosa pelo Santuário de Bom Jesus",
+        "answer": "Pirenópolis",
+        "options": ["Pirenópolis", "Goiânia", "Trindade", "Anápolis"],
+        "hint": "Cidade histórica em Goiás."
+    },
+    {
+        "clue": "Atriz de 'O Rei do Gado'",
+        "answer": "Glória Pires",
+        "options": ["Glória Pires", "Regina Duarte", "Susana Vieira", "Fernanda Montenegro"],
+        "hint": "Interpretou Rafaela na novela."
+    },
+    {
+        "clue": "Capital do Amapá",
+        "answer": "Macapá",
+        "options": ["Macapá", "Boa Vista", "Porto Velho", "Manaus"],
+        "hint": "Cidade cortada pela Linha do Equador."
+    },
+    {
+        "clue": "Escritor de 'Cidade de Deus'",
+        "answer": "Paulo Lins",
+        "options": ["Paulo Lins", "Jorge Amado", "Graciliano Ramos", "Machado de Assis"],
+        "hint": "Sua obra inspirou o filme homônimo."
+    },
+    {
+        "clue": "Presidente do Brasil em 1979-1985",
+        "answer": "João Figueiredo",
+        "options": ["João Figueiredo", "Ernesto Geisel", "Médici", "Costa e Silva"],
+        "hint": "Último presidente da ditadura militar."
+    },
+    {
+        "clue": "Novela de 2003 com Sol e Leonard",
+        "answer": "Mulheres Apaixonadas",
+        "options": ["Mulheres Apaixonadas", "Celebridade", "Esperança", "Kubanacan"],
+        "hint": "Escrita por Manoel Carlos."
+    },
+    {
+        "clue": "Cidade onde fica o Elevador Lacerda",
+        "answer": "Salvador",
+        "options": ["Salvador", "Recife", "Olinda", "São Luís"],
+        "hint": "Conecta a Cidade Alta à Cidade Baixa."
+    },
+    {
+        "clue": "Apresentador do 'Balanço Geral'",
+        "answer": "José Luiz Datena",
+        "options": ["José Luiz Datena", "Luiz Bacci", "Marcelo Rezende", "Sikêra Jr."],
+        "hint": "Conhecido pelo bordão 'Corta pra mim!'."
+    },
+    {
+        "clue": "Capital de Roraima",
+        "answer": "Boa Vista",
+        "options": ["Boa Vista", "Macapá", "Porto Velho", "Manaus"],
+        "hint": "Cidade com traçado urbano em forma de leque."
+    },
+
+
+	
+	
+	   {
+        "clue": "Capital de Minas Gerais",
+        "answer": "Belo Horizonte",
+        "options": ["Belo Horizonte", "Ouro Preto", "Uberlândia", "Juiz de Fora"],
+        "hint": "Famosa pela Praça da Liberdade."
+    },
+    {
+        "clue": "Ator brasileiro de 'A Dog’s Will' (O Auto da Compadecida)",
+        "answer": "Selton Mello",
+        "options": ["Selton Mello", "Wagner Moura", "Rodrigo Santoro", "Lázaro Ramos"],
+        "hint": "Interpretou Chicó no filme."
+    },
+    {
+        "clue": "Escritor de 'Iracema'",
+        "answer": "José de Alencar",
+        "options": ["José de Alencar", "Machado de Assis", "Aluísio Azevedo", "Castro Alves"],
+        "hint": "Romance romântico sobre uma índia."
+    },
+    {
+        "clue": "Presidente do Brasil em 1951-1954",
+        "answer": "Getúlio Vargas",
+        "options": ["Getúlio Vargas", "Juscelino Kubitschek", "Jânio Quadros", "Café Filho"],
+        "hint": "Voltou ao poder após a Era Vargas."
+    },
+    {
+        "clue": "Cidade famosa pela Festa de São João",
+        "answer": "Campina Grande",
+        "options": ["Campina Grande", "Caruaru", "Recife", "João Pessoa"],
+        "hint": "Conhecida como o Maior São João do Mundo."
+    },
+    {
+        "clue": "Novela de 1998 com Estela e Edu",
+        "answer": "Torre de Babel",
+        "options": ["Torre de Babel", "Por Amor", "A Indomada", "O Rei do Gado"],
+        "hint": "Trama com um shopping explodido."
+    },
+    {
+        "clue": "Evento de 1968 no Brasil",
+        "answer": "AI-5",
+        "options": ["AI-5", "Golpe Militar", "Diretas Já", "Revolução de 1930"],
+        "hint": "Ato que endureceu a ditadura militar."
+    },
+    {
+        "clue": "Apresentador do 'Programa Silvio Santos'",
+        "answer": "Silvio Santos",
+        "options": ["Silvio Santos", "Fausto Silva", "Gugu Liberato", "Luciano Huck"],
+        "hint": "Dono do SBT."
+    },
+    {
+        "clue": "Capital do Rio Grande do Norte",
+        "answer": "Natal",
+        "options": ["Natal", "Mossoró", "Parnamirim", "Caicó"],
+        "hint": "Famosa pela praia de Ponta Negra."
+    },
+    {
+        "clue": "Escritor de 'Sagarana'",
+        "answer": "Guimarães Rosa",
+        "options": ["Guimarães Rosa", "Jorge Amado", "Graciliano Ramos", "Érico Veríssimo"],
+        "hint": "Coletânea de contos do sertão mineiro."
+    },
+    {
+        "clue": "Cidade onde fica o Morro do Careca",
+        "answer": "Natal",
+        "options": ["Natal", "Fortaleza", "Recife", "João Pessoa"],
+        "hint": "Ponto turístico no Rio Grande do Norte."
+    },
+    {
+        "clue": "Atriz de 'Belíssima'",
+        "answer": "Fernanda Montenegro",
+        "options": ["Fernanda Montenegro", "Glória Pires", "Susana Vieira", "Regina Duarte"],
+        "hint": "Interpretou Bia Falcão na novela."
+    },
+    {
+        "clue": "Presidente do Brasil em 1961",
+        "answer": "Jânio Quadros",
+        "options": ["Jânio Quadros", "João Goulart", "Juscelino Kubitschek", "Café Filho"],
+        "hint": "Renunciou após sete meses no cargo."
+    },
+    {
+        "clue": "Novela de 2015 com Eliza",
+        "answer": "Totalmente Demais",
+        "options": ["Totalmente Demais", "A Regra do Jogo", "I Love Paraisópolis", "Babilônia"],
+        "hint": "História de uma jovem que vira modelo."
+    },
+    {
+        "clue": "Capital do Acre",
+        "answer": "Rio Branco",
+        "options": ["Rio Branco", "Cruzeiro do Sul", "Sena Madureira", "Tarauacá"],
+        "hint": "Cidade às margens do rio Acre."
+    },
+    {
+        "clue": "Evento de 1984 no Brasil",
+        "answer": "Diretas Já",
+        "options": ["Diretas Já", "AI-5", "Golpe de 1964", "Abolição"],
+        "hint": "Movimento por eleições presidenciais diretas."
+    },
+    {
+        "clue": "Apresentadora do 'Altas Horas'",
+        "answer": "Sabrina Sato",
+        "options": ["Sabrina Sato", "Fernanda Lima", "Angélica", "Ana Maria Braga"],
+        "hint": "Ex-participante do Big Brother Brasil."
+    },
+    {
+        "clue": "Cidade famosa pelo Porto de Galinhas",
+        "answer": "Ipojuca",
+        "options": ["Ipojuca", "Recife", "Olinda", "Cabo de Santo Agostinho"],
+        "hint": "Praia famosa em Pernambuco."
+    },
+    {
+        "clue": "Escritora de 'Ciranda de Pedra'",
+        "answer": "Lygia Fagundes Telles",
+        "options": ["Lygia Fagundes Telles", "Clarice Lispector", "Rachel de Queiroz", "Cecília Meireles"],
+        "hint": "Autora premiada da Academia Brasileira de Letras."
+    },
+    {
+        "clue": "Capital da Paraíba",
+        "answer": "João Pessoa",
+        "options": ["João Pessoa", "Campina Grande", "Patos", "Sousa"],
+        "hint": "Cidade onde o sol nasce primeiro no Brasil."
+    },
+    {
+        "clue": "Ator de 'Saramandaia'",
+        "answer": "José Mayer",
+        "options": ["José Mayer", "Antônio Fagundes", "Tarcísio Meira", "Edson Celulari"],
+        "hint": "Interpretou Tibério na novela."
+    },
+    {
+        "clue": "Presidente do Brasil em 1946-1951",
+        "answer": "Eurico Gaspar Dutra",
+        "options": ["Eurico Gaspar Dutra", "Getúlio Vargas", "Café Filho", "Juscelino Kubitschek"],
+        "hint": "Primeiro presidente da redemocratização."
+    },
+    {
+        "clue": "Novela de 2007 com Bebel",
+        "answer": "Paraíso Tropical",
+        "options": ["Paraíso Tropical", "Duas Caras", "A Favorita", "Páginas da Vida"],
+        "hint": "Personagem icônica de Camila Pitanga."
+    },
+    {
+        "clue": "Cidade onde fica a Serra da Canastra",
+        "answer": "São Roque de Minas",
+        "options": ["São Roque de Minas", "Ouro Preto", "Diamantina", "Tiradentes"],
+        "hint": "Região famosa pelo queijo Canastra."
+    },
+    {
+        "clue": "Escritor de 'Olhai os Lírios do Campo'",
+        "answer": "Érico Veríssimo",
+        "options": ["Érico Veríssimo", "Guimarães Rosa", "Jorge Amado", "Graciliano Ramos"],
+        "hint": "Autor gaúcho de trilogias históricas."
+    },
+    {
+        "clue": "Capital de Rondônia",
+        "answer": "Porto Velho",
+        "options": ["Porto Velho", "Ji-Paraná", "Ariquemes", "Vilhena"],
+        "hint": "Cidade às margens do rio Madeira."
+    },
+    {
+        "clue": "Atriz de 'Por Amor'",
+        "answer": "Regina Duarte",
+        "options": ["Regina Duarte", "Fernanda Montenegro", "Glória Pires", "Susana Vieira"],
+        "hint": "Interpretou Helena na novela."
+    },
+    {
+        "clue": "Evento de 1935 no Brasil",
+        "answer": "Intentona Comunista",
+        "options": ["Intentona Comunista", "Revolução de 1930", "Revolução Constitucionalista", "Golpe de 1964"],
+        "hint": "Levante liderado por Luís Carlos Prestes."
+    },
+    {
+        "clue": "Apresentador do 'Domingo Legal'",
+        "answer": "Celso Portiolli",
+        "options": ["Celso Portiolli", "Silvio Santos", "Rodrigo Faro", "Marcos Mion"],
+        "hint": "Veterano do SBT."
+    },
+    {
+        "clue": "Cidade famosa pela Cachoeira do Itambé",
+        "answer": "Prados",
+        "options": ["Prados", "Ouro Preto", "Mariana", "São João del-Rei"],
+        "hint": "Cidade histórica em Minas Gerais."
+    },
+    {
+        "clue": "Escritor de 'Navio Negreiro'",
+        "answer": "Castro Alves",
+        "options": ["Castro Alves", "Olavo Bilac", "Machado de Assis", "José de Alencar"],
+        "hint": "Poeta abolicionista baiano."
+    },
+    {
+        "clue": "Capital do Mato Grosso do Sul",
+        "answer": "Campo Grande",
+        "options": ["Campo Grande", "Cuiabá", "Dourados", "Três Lagoas"],
+        "hint": "Conhecida como Cidade Morena."
+    },
+    {
+        "clue": "Novela de 1993 com Maria Fernanda",
+        "answer": "Renascer",
+        "options": ["Renascer", "A Viagem", "Fera Ferida", "Mulheres de Areia"],
+        "hint": "Ambientada em fazendas de cacau."
+    },
+    {
+        "clue": "Presidente do Brasil em 1954-1955",
+        "answer": "Café Filho",
+        "options": ["Café Filho", "Getúlio Vargas", "Juscelino Kubitschek", "Eurico Dutra"],
+        "hint": "Assumiu após o suicídio de Vargas."
+    },
+    {
+        "clue": "Cidade onde fica a Praia de Pipa",
+        "answer": "Tibau do Sul",
+        "options": ["Tibau do Sul", "Natal", "Mossoró", "Caicó"],
+        "hint": "Destino turístico no Rio Grande do Norte."
+    },
+    {
+        "clue": "Ator de 'Dona Flor e Seus Dois Maridos'",
+        "answer": "José Wilker",
+        "options": ["José Wilker", "Tarcísio Meira", "Antônio Fagundes", "Edson Celulari"],
+        "hint": "Interpretou Vadinho no filme."
+    },
+    {
+        "clue": "Escritora de 'As Meninas'",
+        "answer": "Lygia Fagundes Telles",
+        "options": ["Lygia Fagundes Telles", "Clarice Lispector", "Rachel de Queiroz", "Cecília Meireles"],
+        "hint": "Romance sobre jovens na ditadura."
+    },
+    {
+        "clue": "Capital do Maranhão",
+        "answer": "São Luís",
+        "options": ["São Luís", "Imperatriz", "Caxias", "Timon"],
+        "hint": "Cidade com azulejos portugueses."
+    },
+    {
+        "clue": "Novela de 2004 com Maria Clara",
+        "answer": "Senhora do Destino",
+        "options": ["Senhora do Destino", "Celebridade", "América", "Da Cor do Pecado"],
+        "hint": "História de uma mulher em busca da filha."
+    },
+    {
+        "clue": "Evento de 1894 no Brasil",
+        "answer": "Revolta da Armada",
+        "options": ["Revolta da Armada", "Abolição", "Proclamação da República", "Revolução Farroupilha"],
+        "hint": "Conflito naval no Rio de Janeiro."
+    },
+    {
+        "clue": "Apresentadora do 'Globo Repórter'",
+        "answer": "Glória Maria",
+        "options": ["Glória Maria", "Sandra Annenberg", "Fátima Bernardes", "Renata Vasconcellos"],
+        "hint": "Ícone do jornalismo brasileiro."
+    },
+    {
+        "clue": "Cidade famosa pelo Parque Nacional da Serra da Capivara",
+        "answer": "São Raimundo Nonato",
+        "options": ["São Raimundo Nonato", "Teresina", "Parnaíba", "Picos"],
+        "hint": "Sítio arqueológico no Piauí."
+    },
+    {
+        "clue": "Atriz de 'A Força do Querer'",
+        "answer": "Paolla Oliveira",
+        "options": ["Paolla Oliveira", "Isis Valverde", "Juliana Paes", "Cláudia Raia"],
+        "hint": "Interpretou Jeiza na novela."
+    },
+    {
+        "clue": "Presidente do Brasil em 1969-1974",
+        "answer": "Emílio Garrastazu Médici",
+        "options": ["Emílio Garrastazu Médici", "Ernesto Geisel", "João Figueiredo", "Costa e Silva"],
+        "hint": "Governou no auge da ditadura."
+    },
+    {
+        "clue": "Capital de Pernambuco",
+        "answer": "Recife",
+        "options": ["Recife", "Olinda", "Caruaru", "Petrolina"],
+        "hint": "Cidade do frevo e do maracatu."
+    },
+    {
+        "clue": "Escritor de 'Macunaíma'",
+        "answer": "Mário de Andrade",
+        "options": ["Mário de Andrade", "Oswald de Andrade", "Guimarães Rosa", "Jorge Amado"],
+        "hint": "Obra-prima do modernismo."
+    },
+    {
+        "clue": "Novela de 1991 com Glória e Ruth",
+        "answer": "Mulheres de Areia",
+        "options": ["Mulheres de Areia", "A Viagem", "Fera Ferida", "Renascer"],
+        "hint": "História de gêmeas idênticas."
+    },
+    {
+        "clue": "Cidade onde fica o Theatro da Paz",
+        "answer": "Belém",
+        "options": ["Belém", "Manaus", "São Luís", "Recife"],
+        "hint": "Teatro histórico no Pará."
+    },
+    {
+        "clue": "Apresentador do 'Roda a Roda'",
+        "answer": "Silvio Santos",
+        "options": ["Silvio Santos", "Celso Portiolli", "Rodrigo Faro", "Marcos Mion"],
+        "hint": "Apresenta o programa há décadas no SBT."
+    },
+    {
+        "clue": "Evento de 1835 no Brasil",
+        "answer": "Revolta dos Malês",
+        "options": ["Revolta dos Malês", "Revolução Farroupilha", "Abolição", "Revolta da Armada"],
+        "hint": "Levante de escravizados muçulmanos na Bahia."
+    },
+		
+            // Adicione aqui as 100 perguntas adicionais fornecidas anteriormente, se desejar
+        ];
+
+        const shuffleArray = (array) => [...array].sort(() => Math.random() - 0.5);
+
+        const QuizApp = () => {
+            const [currentIndex, setCurrentIndex] = React.useState(() => parseInt(localStorage.getItem('quizIndex')) || 0);
+            const [correctAnswers, setCorrectAnswers] = React.useState(() => parseInt(localStorage.getItem('quizCorrect')) || 0);
+            const [shuffledQuestions, setShuffledQuestions] = React.useState(() => {
+                const saved = localStorage.getItem('shuffledQuestions');
+                if (saved) return JSON.parse(saved);
+                return shuffleArray(questions).map(q => ({
+                    ...q,
+                    options: shuffleArray(q.options)
+                }));
+            });
+            const [gameState, setGameState] = React.useState('start');
+            const [timeLeft, setTimeLeft] = React.useState(40);
+            const [answers, setAnswers] = React.useState(() => {
+                const saved = localStorage.getItem('quizAnswers');
+                return saved ? JSON.parse(saved) : [];
+            });
+            const [error, setError] = React.useState(null);
+            const [feedback, setFeedback] = React.useState(null);
+            const [hintUsed, setHintUsed] = React.useState(false);
+            const [hintText, setHintText] = React.useState('');
+            const gameRef = React.useRef(null);
+
+            React.useEffect(() => {
+                try {
+                    localStorage.setItem('quizIndex', currentIndex);
+                    localStorage.setItem('quizCorrect', correctAnswers);
+                    localStorage.setItem('shuffledQuestions', JSON.stringify(shuffledQuestions));
+                    localStorage.setItem('quizAnswers', JSON.stringify(answers));
+                } catch (err) {
+                    setError('Erro ao salvar progresso: ' + err.message);
+                }
+            }, [currentIndex, correctAnswers, shuffledQuestions, answers]);
+
+            React.useEffect(() => {
+                if (gameState !== 'playing') return;
+                const timer = setInterval(() => {
+                    setTimeLeft((prev) => {
+                        if (prev <= 1) {
+                            clearInterval(timer);
+                            setGameState('gameOver');
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+                return () => clearInterval(timer);
+            }, [currentIndex, gameState]);
+
+            React.useEffect(() => {
+                if (gameState === 'gameOver' && gameRef.current) {
+                    gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, [gameState]);
+
+            const startQuiz = () => {
+                setGameState('playing');
+                setTimeLeft(40);
+                setHintUsed(false);
+                setHintText('');
+            };
+
+            const showHint = () => {
+                if (!hintUsed) {
+                    setHintText(shuffledQuestions[currentIndex].hint);
+                    setHintUsed(true);
+                }
+            };
+
+            const handleAnswer = (option) => {
+                try {
+                    const currentQuestion = shuffledQuestions[currentIndex];
+                    const isCorrect = option === currentQuestion.answer;
+                    const newAnswer = {
+                        question: currentQuestion.clue,
+                        selected: option,
+                        correct: currentQuestion.answer,
+                        isCorrect
+                    };
+                    setAnswers([...answers, newAnswer]);
+
+                    setFeedback({
+                        selectedOption: option,
+                        correctOption: currentQuestion.answer,
+                        isCorrect
+                    });
+
+                    if (isCorrect) {
+                        setCorrectAnswers(correctAnswers + 1);
+                        setTimeout(() => {
+                            if (currentIndex + 1 >= shuffledQuestions.length) {
+                                setGameState('gameOver');
+                            } else {
+                                setCurrentIndex(currentIndex + 1);
+                                setTimeLeft(40);
+                                setFeedback(null);
+                                setHintUsed(false);
+                                setHintText('');
+                            }
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            setGameState('gameOver');
+                        }, 1000);
+                    }
+                } catch (err) {
+                    setError('Erro ao processar resposta: ' + err.message);
+                }
+            };
+
+            const resetGame = () => {
+                try {
+                    setCurrentIndex(0);
+                    setCorrectAnswers(0);
+                    setShuffledQuestions(shuffleArray(questions).map(q => ({
+                        ...q,
+                        options: shuffleArray(q.options)
+                    })));
+                    setGameState('start');
+                    setTimeLeft(40);
+                    setAnswers([]);
+                    setFeedback(null);
+                    setHintUsed(false);
+                    setHintText('');
+                    localStorage.removeItem('quizIndex');
+                    localStorage.removeItem('quizCorrect');
+                    localStorage.removeItem('shuffledQuestions');
+                    localStorage.removeItem('quizAnswers');
+                } catch (err) {
+                    setError('Erro ao reiniciar jogo: ' + err.message);
+                }
+            };
+
+            if (error) {
+                return (
+                    <div className="max-w-2xl w-full parchment-bg p-6 rounded-lg shadow-lg text-center">
+                        <h1 className="text-3xl font-bold mb-4 text-blue-900">Erro</h1>
+                        <p className="text-red-500">{error}</p>
+                        <button
+                            onClick={resetGame}
+                            className="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-blue-900 py-2 rounded transition duration-300"
+                        >
+                            Tentar Novamente
+                        </button>
+                    </div>
+                );
+            }
+
+            if (gameState === 'start') {
+                return (
+                    <div className="max-w-2xl w-full parchment-bg p-6 rounded-lg shadow-lg text-center">
+                        <h1 className="text-3xl font-bold mb-4 text-blue-900 pulse">PenseQuiz - Passatempo</h1>
+                        <button
+                            onClick={startQuiz}
+                            className="w-full bg-yellow-500 hover:bg-yellow-600 text-blue-900 py-3 rounded transition duration-300"
+                        >
+                            Iniciar
+                        </button>
+                    </div>
+                );
+            }
+
+            if (gameState === 'gameOver') {
+                return (
+                    <div className="game-container">
+                        <div ref={gameRef} className="max-w-2xl w-full parchment-bg p-6 rounded-lg shadow-lg text-center">
+                            <h1 className="text-3xl font-bold mb-4 text-blue-900 shake">Fim do Jogo!</h1>
+                            <p className="text-xl mb-4">
+                                Você acertou {correctAnswers} de {shuffledQuestions.length} perguntas!
+                            </p>
+                            {answers.length > 0 && !answers[answers.length - 1].isCorrect && (
+                                <p className="text-red-500 mb-4">
+                                    Resposta correta: {answers[answers.length - 1].correct}
+                                </p>
+                            )}
+                            <button
+                                onClick={resetGame}
+                                className="w-full bg-yellow-500 hover:bg-yellow-600 text-blue-900 py-2 rounded transition duration-300"
+                            >
+                                Jogar Novamente
+                            </button>
+							
+							<button
+                    onClick={() => window.location.href = 'index.html'}
+                    className="fixed bottom-4 right-4 bg-yellow-500 hover:bg-yellow-600 text-blue-900 py-1 px-2 rounded text-sm"
+                  >
+                    PenseQuiz
+                  </button>
+                            <p className="text-blue-900 mt-4">Provérbios 1:7 🕊️ "O temor do Senhor é o princípio do conhecimento."</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            const currentQuestion = shuffledQuestions[currentIndex];
+            const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
+
+            return (
+                <div className="max-w-2xl w-full parchment-bg p-6 rounded-lg shadow-lg">
+                    <h1 className="text-3xl font-bold mb-4 text-center text-blue-900 fade-in">PenseQuiz - Passatempo</h1>
+                    <div className="mb-4">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                                className="bg-yellow-500 h-2.5 rounded-full progress-bar"
+                                style={{ width: `${progress}%` }}
+                            ></div>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Pergunta {currentIndex + 1} de {shuffledQuestions.length}
+                        </p>
+                    </div>
+                    <div className="flex justify-between items-center mb-4">
+                        <p className="text-lg font-semibold text-blue-900">Tempo restante: {timeLeft}s</p>
+                        <p className="text-lg text-blue-900">Acertos: {correctAnswers}</p>
+                    </div>
+                    <p className="text-xl mb-6 text-blue-900 fade-in">{currentQuestion.clue}</p>
+                    {hintText && (
+                        <p className="text-sm text-gray-500 mb-4 italic">{hintText}</p>
+                    )}
+                    <div className="space-y-3">
+                        {currentQuestion.options.map((option) => (
+                            <button
+                                key={option}
+                                onClick={() => handleAnswer(option)}
+                                className={`w-full py-3 rounded transition duration-300 option ${
+                                    feedback && feedback.isCorrect && option === feedback.correctOption
+                                        ? 'correct'
+                                        : feedback && !feedback.isCorrect && option === feedback.selectedOption
+                                        ? 'wrong'
+                                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                } disabled:bg-gray-400 disabled:cursor-not-allowed`}
+                                disabled={feedback}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        onClick={showHint}
+                        className={`mt-4 w-full py-2 rounded transition duration-300 ${
+                            hintUsed ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white'
+                        }`}
+                        disabled={hintUsed}
+                    >
+                        Dica
+                    </button>
+                </div>
+            );
+        };
+
+        try {
+            ReactDOM.render(<QuizApp />, document.getElementById('root'));
+        } catch (err) {
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('error').innerText = 'Erro ao carregar o quiz: ' + err.message;
+        }
+    </script>
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.5s ease-out;
+        }
+        .btn-correta {
+            background-color: #28a745 !important;
+        }
+        .btn-incorreta {
+            background-color: #dc3545 !important;
+        }
+        .option {
+            display: block;
+            margin: 10px auto;
+            padding: 12px 25px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 300px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .option:hover {
+            background-color: #1565c0;
+        }
+        .correct {
+            background-color: #4CAF50 !important;
+        }
+        .wrong {
+            background-color: #f44336 !important;
+        }
+        .parchment-bg {
+            background: url('https://www.transparenttextures.com/patterns/paper.png'), #f5e8c7;
+        }
+        .game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .progress-bar {
+            transition: width 0.1s linear;
+        }
+        .fade-in {
+            animation: fadeIn 1s;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+    </style>
+</body>
+</html>
