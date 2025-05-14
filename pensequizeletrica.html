@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+	 <link rel="icon" type="image/png" href="iconepq.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenseQuiz - Eletricidade</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; text-align: center; }
+        .header { background-color: #2c3e50; color: white; padding: 20px; }
+        .header h1 { margin: 0; font-size: 2em; }
+        .header h2 { margin: 10px 0; font-size: 1.5em; }
+        .topics { margin: 20px 0; }
+        .topics ul { list-style: none; padding: 0; }
+        .topics li { display: inline; margin: 0 10px; font-size: 1.1em; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .question { margin: 20px 0; padding: 15px; background: #ecf0f1; border-radius: 5px; display: none; }
+        .question.active { display: block; }
+        .question p { margin: 0 0 15px; font-weight: bold; font-size: 1.2em; }
+        .options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .option-btn { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; flex: 1 1 45%; max-width: 200px; }
+        .option-btn:hover { background: #2980b9; }
+        .option-btn.correct { background: #27ae60; }
+        .option-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .button-container { margin: 20px 0; }
+        .next-btn { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; display: none; }
+        .next-btn:hover { background: #2980b9; }
+        #result { margin-top: 20px; font-size: 1.1em; line-height: 1.5; }
+        .footer { margin-top: 20px; font-size: 0.9em; color: #777; }
+        .action-btn { padding: 10px 20px; margin: 5px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .action-btn:hover { background: #2980b9; }
+        #totalQuestions { margin: 10px 0; font-size: 1.2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PenseQuiz - Eletricidade</h1>
+        <p>Consulte o profissional da área específica</p>
+        <div class="topics">
+            <ul>
+                <li>Lei de Ohm</li>
+                <li>Circuitos Elétricos</li>
+                <li>Normas de Segurança (NBR 5410)</li>
+                <li>Eletrostática</li>
+                <li>Transformadores</li>
+            </ul>
+        </div>
+    </div>
+    <div class="container">
+        <div id="totalQuestions"></div>
+        <div id="quiz"></div>
+        <div class="button-container">
+            <button class="next-btn" id="nextBtn">Próxima Questão</button>
+        </div>
+        <div id="result"></div>
+        <div class="button-container">
+            <button class="action-btn" id="playAgainBtn" style="display: none;">Jogar Novamente</button>
+            <button class="action-btn" onclick="window.location.href='index.html'">Pensequiz</button>
+        </div>
+    </div>
+    <div class="footer">
+        <p>PenseQuiz</p>
+    </div>
+    <script>
+        const quizData = [
+            { question: "Qual é a corrente em um circuito com 60V e resistência de 12Ω?", options: ["2 A", "5 A", "7 A", "10 A"], correct: "5 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 60V / 12Ω = 5 A." },
+            { question: "Qual é a resistência equivalente de dois resistores de 15Ω em paralelo?", options: ["15 Ω", "3 Ω", "7.5 Ω", "30 Ω"], correct: "7.5 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/15 + 1/15 = 2/15, R_eq = 7.5 Ω." },
+            { question: "Qual é a potência dissipada em um resistor de 25Ω com 2A?", options: ["4 W", "125 W", "100 W", "50 W"], correct: "100 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = I² × R = 2² × 25 = 100 W." },
+            { question: "Qual é a tensão em um circuito com resistência de 4Ω e corrente de 8A?", options: ["24 V", "12 V", "32 V", "2 V"], correct: "32 V", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "V = R × I = 4Ω × 8A = 32 V." },
+            { question: "Qual é a função de um DPS em instalações elétricas?", options: ["Regular corrente", "Armazenar energia", "Proteger contra surtos", "Gerar tensão"], correct: "Proteger contra surtos", reference: "Instalações Elétricas, Cap. 5", explanation: "Dispositivos de proteção contra surtos limitam picos de tensão." },
+          
+  { question: "Qual é a resistência de um resistor com 12V e 4A, segundo a Lei de Ohm?", options: ["48 Ω", "3 Ω", "16 Ω", "8 Ω"], correct: "3 Ω", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "A Lei de Ohm é V = R × I. Assim, R = V / I = 12V / 4A = 3 Ω." },
+            { question: "Qual é a resistência equivalente de resistores de 5Ω e 3Ω em série?", options: ["8 Ω", "2 Ω", "15 Ω", "1.5 Ω"], correct: "8 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "Em um circuito série, R_eq = 5Ω + 3Ω = 8 Ω." },
+            { question: "Qual dispositivo é essencial para proteção contra choques elétricos, segundo a NBR 5410?", options: ["Capacitor", "Disjuntor diferencial residual (DR)", "Transformador", "Fusível"], correct: "Disjuntor diferencial residual (DR)", reference: "Instalações Elétricas, Cap. 5", explanation: "O DR detecta fugas de corrente e desarma o circuito." },
+            { question: "Qual princípio é usado em precipitadores eletrostáticos?", options: ["Indução eletromagnética", "Atração de cargas", "Condução térmica", "Acoplamento capacitivo"], correct: "Atração de cargas", reference: "Guia Mangá de Eletricidade, Cap. 6", explanation: "Usa a atração de cargas opostas para capturar partículas." },
+            { question: "Quantas espiras tem a bobina secundária de um transformador que reduz 220V para 110V, com 200 espiras na primária?", options: ["400 espiras", "200 espiras", "100 espiras", "50 espiras"], correct: "100 espiras", reference: "Guia Mangá de Eletricidade, Cap. 4", explanation: "V1/V2 = N1/N2, 220V/110V = 200/N, N = 100 espiras." },
+            { question: "Qual é a corrente em um circuito com 24V e resistência de 6Ω?", options: ["4 A", "2 A", "8 A", "12 A"], correct: "4 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 24V / 6Ω = 4 A." },
+            { question: "Qual é a resistência equivalente de dois resistores de 4Ω em paralelo?", options: ["8 Ω", "2 Ω", "4 Ω", "1 Ω"], correct: "2 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/4 + 1/4 = 2/4, R_eq = 2 Ω." },
+            { question: "Qual é a função principal de um fusível em um circuito?", options: ["Regular tensão", "Proteger contra sobrecarga", "Armazenar energia", "Amplificar corrente"], correct: "Proteger contra sobrecarga", reference: "Instalações Elétricas, Cap. 4", explanation: "O fusível queima para interromper o circuito em caso de sobrecarga." },
+            { question: "Qual é a carga de um elétron?", options: ["+1,6 × 10⁻¹⁹ C", "-1,6 × 10⁻¹⁹ C", "0 C", "+1 C"], correct: "-1,6 × 10⁻¹⁹ C", reference: "Guia Mangá de Eletricidade, Cap. 5", explanation: "A carga do elétron é negativa, com valor de -1,6 × 10⁻¹⁹ C." },
+            { question: "Qual é a potência dissipada em um resistor de 10Ω com 2A?", options: ["20 W", "40 W", "10 W", "4 W"], correct: "40 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = I² × R = 2² × 10 = 40 W." },
+            { question: "Qual é a tensão em um circuito com resistência de 8Ω e corrente de 3A?", options: ["24 V", "11 V", "5 V", "32 V"], correct: "24 V", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "V = R × I = 8Ω × 3A = 24 V." },
+            { question: "Qual é o objetivo do aterramento em instalações elétricas?", options: ["Aumentar a tensão", "Reduzir a corrente", "Proteger contra choques", "Economizar energia"], correct: "Proteger contra choques", reference: "Instalações Elétricas, Cap. 6", explanation: "O aterramento desvia correntes de fuga para evitar choques." },
+            { question: "Qual é a frequência da rede elétrica padrão no Brasil?", options: ["50 Hz", "60 Hz", "120 Hz", "30 Hz"], correct: "60 Hz", reference: "Instalações Elétricas, Cap. 2", explanation: "A frequência padrão no Brasil é 60 Hz." },
+            { question: "Qual é a resistência equivalente de três resistores de 6Ω em paralelo?", options: ["18 Ω", "2 Ω", "6 Ω", "9 Ω"], correct: "2 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/6 + 1/6 + 1/6 = 3/6, R_eq = 2 Ω." },
+            { question: "Qual é a unidade de capacitância?", options: ["Ohm", "Farad", "Volt", "Ampère"], correct: "Farad", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "A capacitância é medida em Farad (F)." },
+            { question: "Qual é a corrente em um circuito com 120V e resistência de 30Ω?", options: ["4 A", "2 A", "6 A", "8 A"], correct: "4 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 120V / 30Ω = 4 A." },
+            { question: "Qual é a função de um capacitor em um circuito?", options: ["Armazenar carga", "Limitar corrente", "Gerar tensão", "Dissipar energia"], correct: "Armazenar carga", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "Capacitores armazenam carga elétrica." },
+            { question: "Qual é a potência em um circuito com 12V e 3A?", options: ["36 W", "4 W", "15 W", "9 W"], correct: "36 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = V × I = 12V × 3A = 36 W." },
+            { question: "Qual é a resistência equivalente de resistores de 10Ω e 10Ω em série?", options: ["20 Ω", "5 Ω", "10 Ω", "2 Ω"], correct: "20 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "R_eq = 10Ω + 10Ω = 20 Ω." },
+            { question: "Qual é a tensão de saída de um transformador com 400 espiras na primária, 100 espiras na secundária e 240V na primária?", options: ["60 V", "120 V", "240 V", "960 V"], correct: "60 V", reference: "Guia Mangá de Eletricidade, Cap. 4", explanation: "V2/V1 = N2/N1, V2 = 240V × (100/400) = 60 V." },
+            { question: "Qual é a unidade de potência elétrica?", options: ["Watt", "Joule", "Volt", "Ampère"], correct: "Watt", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "A potência elétrica é medida em Watt (W)." },
+            { question: "Qual é a corrente em um circuito com 15Ω e 45V?", options: ["3 A", "5 A", "2 A", "6 A"], correct: "3 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 45V / 15Ω = 3 A." },
+            { question: "Qual é a função de um disjuntor em uma instalação elétrica?", options: ["Regular tensão", "Proteger contra sobrecarga", "Armazenar energia", "Aumentar corrente"], correct: "Proteger contra sobrecarga", reference: "Instalações Elétricas, Cap. 4", explanation: "O disjuntor desarma o circuito em caso de sobrecarga." },
+            { question: "Qual é a resistência equivalente de dois resistores de 8Ω em paralelo?", options: ["16 Ω", "4 Ω", "8 Ω", "2 Ω"], correct: "4 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/8 + 1/8 = 2/8, R_eq = 4 Ω." },
+            { question: "Qual é a carga de um próton?", options: ["+1,6 × 10⁻¹⁹ C", "-1,6 × 10⁻¹⁹ C", "0 C", "-1 C"], correct: "+1,6 × 10⁻¹⁹ C", reference: "Guia Mangá de Eletricidade, Cap. 5", explanation: "A carga do próton é positiva, +1,6 × 10⁻¹⁹ C." },
+            { question: "Qual é a potência dissipada em um resistor de 5Ω com 4A?", options: ["80 W", "20 W", "16 W", "40 W"], correct: "80 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = I² × R = 4² × 5 = 80 W." },
+            { question: "Qual é a tensão em um circuito com 6Ω e 5A?", options: ["30 V", "11 V", "1 V", "25 V"], correct: "30 V", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "V = R × I = 6Ω × 5A = 30 V." },
+            { question: "Qual é o objetivo do condutor neutro em uma instalação elétrica?", options: ["Proteger contra choques", "Completar o circuito", "Aumentar a tensão", "Reduzir a corrente"], correct: "Completar o circuito", reference: "Instalações Elétricas, Cap. 3", explanation: "O neutro completa o circuito, retornando a corrente à fonte." },
+            { question: "Qual é a frequência de uma onda elétrica com período de 0,02s?", options: ["50 Hz", "25 Hz", "100 Hz", "10 Hz"], correct: "50 Hz", reference: "Guia Mangá de Eletricidade, Cap. 8", explanation: "f = 1/T = 1/0,02 = 50 Hz." },
+            { question: "Qual é a resistência equivalente de três resistores de 12Ω em paralelo?", options: ["36 Ω", "4 Ω", "12 Ω", "6 Ω"], correct: "4 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/12 + 1/12 + 1/12 = 3/12, R_eq = 4 Ω." },
+            { question: "Qual é a unidade de resistência elétrica?", options: ["Ohm", "Farad", "Volt", "Watt"], correct: "Ohm", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "A resistência elétrica é medida em Ohm (Ω)." },
+            { question: "Qual é a corrente em um circuito com 100V e 25Ω?", options: ["4 A", "2 A", "5 A", "8 A"], correct: "4 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 100V / 25Ω = 4 A." },
+            { question: "Qual é a função de um indutor em um circuito?", options: ["Armazenar energia magnética", "Limitar tensão", "Dissipar energia", "Gerar corrente"], correct: "Armazenar energia magnética", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "Indutores armazenam energia em um campo magnético." },
+            { question: "Qual é a potência em um circuito com 15V e 2A?", options: ["30 W", "7.5 W", "17 W", "13 W"], correct: "30 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = V × I = 15V × 2A = 30 W." },
+            { question: "Qual é a resistência equivalente de resistores de 6Ω e 12Ω em série?", options: ["18 Ω", "4 Ω", "8 Ω", "2 Ω"], correct: "18 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "R_eq = 6Ω + 12Ω = 18 Ω." },
+            { question: "Qual é a tensão de saída de um transformador com 500 espiras na primária, 250 espiras na secundária e 200V na primária?", options: ["100 V", "400 V", "200 V", "50 V"], correct: "100 V", reference: "Guia Mangá de Eletricidade, Cap. 4", explanation: "V2/V1 = N2/N1, V2 = 200V × (250/500) = 100 V." },
+            { question: "Qual é a unidade de energia elétrica?", options: ["Watt", "Joule", "Volt", "Ampère"], correct: "Joule", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "A energia elétrica é medida em Joule (J)." },
+            { question: "Qual é a corrente em um circuito com 18Ω e 54V?", options: ["3 A", "6 A", "2 A", "9 A"], correct: "3 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 54V / 18Ω = 3 A." },
+            { question: "Qual é a função de um relé em um circuito?", options: ["Controlar circuitos", "Armazenar carga", "Gerar tensão", "Dissipar energia"], correct: "Controlar circuitos", reference: "Instalações Elétricas, Cap. 7", explanation: "Relés controlam circuitos de alta potência com sinais de baixa potência." },
+            { question: "Qual é a resistência equivalente de dois resistores de 20Ω em paralelo?", options: ["40 Ω", "10 Ω", "20 Ω", "5 Ω"], correct: "10 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/20 + 1/20 = 2/20, R_eq = 10 Ω." },
+            { question: "Qual é a força eletromotriz induzida em uma bobina com 0,5H e variação de corrente de 2A/s?", options: ["1 V", "0.5 V", "2 V", "4 V"], correct: "1 V", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "ε = L × ΔI/Δt = 0,5H × 2A/s = 1 V." },
+            { question: "Qual é a potência dissipada em um resistor de 8Ω com 3A?", options: ["72 W", "24 W", "9 W", "48 W"], correct: "72 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = I² × R = 3² × 8 = 72 W." },
+            { question: "Qual é a tensão em um circuito com 4Ω e 6A?", options: ["24 V", "10 V", "2 V", "12 V"], correct: "24 V", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "V = R × I = 4Ω × 6A = 24 V." },
+            { question: "Qual é o objetivo do condutor de proteção (terra)?", options: ["Completar o circuito", "Proteger contra choques", "Aumentar a tensão", "Reduzir a corrente"], correct: "Proteger contra choques", reference: "Instalações Elétricas, Cap. 6", explanation: "O condutor de proteção desvia correntes de fuga." },
+            { question: "Qual é a frequência de uma onda elétrica com período de 0,01s?", options: ["100 Hz", "50 Hz", "25 Hz", "10 Hz"], correct: "100 Hz", reference: "Guia Mangá de Eletricidade, Cap. 8", explanation: "f = 1/T = 1/0,01 = 100 Hz." },
+            { question: "Qual é a resistência equivalente de três resistores de 9Ω em paralelo?", options: ["27 Ω", "3 Ω", "9 Ω", "6 Ω"], correct: "3 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/9 + 1/9 + 1/9 = 3/9, R_eq = 3 Ω." },
+            { question: "Qual é a unidade de corrente elétrica?", options: ["Ohm", "Farad", "Volt", "Ampère"], correct: "Ampère", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "A corrente elétrica é medida em Ampère (A)." },
+            { question: "Qual é a corrente em um circuito com 80V e 20Ω?", options: ["4 A", "2 A", "5 A", "8 A"], correct: "4 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 80V / 20Ω = 4 A." },
+            { question: "Qual é a função de um diodo em um circuito?", options: ["Permitir corrente em uma direção", "Armazenar carga", "Gerar tensão", "Dissipar energia"], correct: "Permitir corrente em uma direção", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "Diodos permitem corrente em uma única direção." },
+            { question: "Qual é a potência em um circuito com 10V e 5A?", options: ["50 W", "2 W", "15 W", "25 W"], correct: "50 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = V × I = 10V × 5A = 50 W." },
+            { question: "Qual é a resistência equivalente de resistores de 3Ω e 6Ω em série?", options: ["9 Ω", "2 Ω", "18 Ω", "1.5 Ω"], correct: "9 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "R_eq = 3Ω + 6Ω = 9 Ω." },
+			
+			
+			 { question: "Qual é a corrente em um circuito com 60V e resistência de 12Ω?", options: ["2 A", "5 A", "7 A", "10 A"], correct: "5 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 60V / 12Ω = 5 A." },
+    { question: "Qual é a resistência equivalente de dois resistores de 15Ω em paralelo?", options: ["15 Ω", "3 Ω", "7.5 Ω", "30 Ω"], correct: "7.5 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/15 + 1/15 = 2/15, R_eq = 7.5 Ω." },
+    { question: "Qual é a potência dissipada em um resistor de 25Ω com 2A?", options: ["4 W", "125 W", "100 W", "50 W"], correct: "100 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = I² × R = 2² × 25 = 100 W." },
+    { question: "Qual é a tensão em um circuito com resistência de 4Ω e corrente de 8A?", options: ["24 V", "12 V", "32 V", "2 V"], correct: "32 V", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "V = R × I = 4Ω × 8A = 32 V." },
+    { question: "Qual é a função de um DPS em instalações elétricas?", options: ["Regular corrente", "Armazenar energia", "Proteger contra surtos", "Gerar tensão"], correct: "Proteger contra surtos", reference: "Instalações Elétricas, Cap. 5", explanation: "Dispositivos de proteção contra surtos limitam picos de tensão." },
+    { question: "Qual é a energia consumida por um aparelho de 200W ligado por 3 horas?", options: ["400 Wh", "600 Wh", "800 Wh", "200 Wh"], correct: "600 Wh", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "E = P × t = 200W × 3h = 600 Wh." },
+    { question: "Qual é a resistência equivalente de resistores de 3Ω e 9Ω em série?", options: ["6 Ω", "18 Ω", "12 Ω", "2 Ω"], correct: "12 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "R_eq = 3Ω + 9Ω = 12 Ω." },
+    { question: "Qual é a corrente em um circuito com 48V e resistência de 16Ω?", options: ["6 A", "4 A", "3 A", "2 A"], correct: "3 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 48V / 16Ω = 3 A." },
+    { question: "Qual é a função de um contato em uma instalação elétrica?", options: ["Armazenar carga", "Controlar circuitos", "Proteger contra sobrecarga", "Regular tensão"], correct: "Controlar circuitos", reference: "Instalações Elétricas, Cap. 7", explanation: "Contator é usado para ligar/desligar circuitos." },
+    { question: "Qual é a potência em um circuito com 18V e 4A?", options: ["36 W", "72 W", "14 W", "22 W"], correct: "72 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = V × I = 18V × 4A = 72 W." },
+    { question: "Qual é a resistência equivalente de três resistores de 18Ω em paralelo?", options: ["18 Ω", "9 Ω", "54 Ω", "6 Ω"], correct: "6 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/18 + 1/18 + 1/18 = 3/18, R_eq = 6 Ω." },
+    { question: "Qual é a unidade de indutância?", options: ["Ohm", "Farad", "Henry", "Watt"], correct: "Henry", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "A indutância é medida em Henry (H)." },
+    { question: "Qual é a tensão em um circuito com 10Ω e 5A?", options: ["2 V", "25 V", "50 V", "15 V"], correct: "50 V", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "V = R × I = 10Ω × 5A = 50 V." },
+    { question: "Qual é a função de um sensor de corrente em uma instalação?", options: ["Proteger contra surtos", "Gerar tensão", "Medir corrente", "Armazenar energia"], correct: "Medir corrente", reference: "Instalações Elétricas, Cap. 7", explanation: "Sensores de corrente monitoram o fluxo de corrente." },
+    { question: "Qual é a potência dissipada em um resistor de 9Ω com 3A?", options: ["9 W", "54 W", "81 W", "27 W"], correct: "81 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = I² × R = 3² × 9 = 81 W." },
+    { question: "Qual é a corrente em um circuito com 36V e resistência de 9Ω?", options: ["2 A", "6 A", "3 A", "4 A"], correct: "4 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 36V / 9Ω = 4 A." },
+    { question: "Qual é a resistência equivalente de dois resistores de 10Ω em série?", options: ["2 Ω", "10 Ω", "20 Ω", "5 Ω"], correct: "20 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "R_eq = 10Ω + 10Ω = 20 Ω." },
+    { question: "Qual é a tensão de saída de um transformador com 600 espiras na primária, 200 espiras na secundária e 180V na primária?", options: ["540 V", "60 V", "120 V", "180 V"], correct: "60 V", reference: "Guia Mangá de Eletricidade, Cap. 4", explanation: "V2/V1 = N2/N1, V2 = 180V × (200/600) = 60 V." },
+    { question: "Qual é a unidade de carga elétrica?", options: ["Watt", "Joule", "Coulomb", "Volt"], correct: "Coulomb", reference: "Guia Mangá de Eletricidade, Cap. 5", explanation: "A carga elétrica é medida em Coulomb (C)." },
+    { question: "Qual é a corrente em um circuito com 72V e 24Ω?", options: ["4 A", "6 A", "2 A", "3 A"], correct: "3 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 72V / 24Ω = 3 A." },
+    { question: "Qual é a função de um circuito RC em eletrônica?", options: ["Amplificar tensão", "Proteger contra surtos", "Filtrar sinais", "Gerar energia"], correct: "Filtrar sinais", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "Circuitos RC são usados como filtros de frequência." },
+    { question: "Qual é a potência em um circuito com 24V e 5A?", options: ["29 W", "60 W", "120 W", "19 W"], correct: "120 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = V × I = 24V × 5A = 120 W." },
+    { question: "Qual é a resistência equivalente de dois resistores de 6Ω em paralelo?", options: ["1.5 Ω", "6 Ω", "12 Ω", "3 Ω"], correct: "3 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/6 + 1/6 = 2/6, R_eq = 3 Ω." },
+    { question: "Qual é a força eletromotriz induzida em uma bobina com 0.4H e variação de corrente de 5A/s?", options: ["0.5 V", "4 V", "2 V", "1 V"], correct: "2 V", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "ε = L × ΔI/Δt = 0.4H × 5A/s = 2 V." },
+    { question: "Qual é a potência dissipada em um resistor de 16Ω com 4A?", options: ["16 W", "128 W", "256 W", "64 W"], correct: "256 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = I² × R = 4² × 16 = 256 W." },
+    { question: "Qual é a tensão em um circuito com 7Ω e 6A?", options: ["1 V", "42 V", "30 V", "13 V"], correct: "42 V", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "V = R × I = 7Ω × 6A = 42 V." },
+    { question: "Qual é a função do condutor fase em uma instalação elétrica?", options: ["Proteger contra choques", "Regular tensão", "Transportar corrente", "Completar o circuito"], correct: "Transportar corrente", reference: "Instalações Elétricas, Cap. 3", explanation: "O condutor fase leva a corrente ao circuito." },
+    { question: "Qual é a frequência de uma onda elétrica com período de 0.05s?", options: ["100 Hz", "50 Hz", "20 Hz", "10 Hz"], correct: "20 Hz", reference: "Guia Mangá de Eletricidade, Cap. 8", explanation: "f = 1/T = 1/0.05 = 20 Hz." },
+    { question: "Qual é a resistência equivalente de três resistores de 15Ω em paralelo?", options: ["15 Ω", "5 Ω", "45 Ω", "7.5 Ω"], correct: "5 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/15 + 1/15 + 1/15 = 3/15, R_eq = 5 Ω." },
+    { question: "Qual é a unidade de tensão elétrica?", options: ["Watt", "Ampère", "Volt", "Ohm"], correct: "Volt", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "A tensão elétrica é medida em Volt (V)." },
+    { question: "Qual é a corrente em um circuito com 90V e 30Ω?", options: ["4 A", "6 A", "3 A", "2 A"], correct: "3 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 90V / 30Ω = 3 A." },
+    { question: "Qual é a função de um oscilador em eletrônica?", options: ["Armazenar carga", "Proteger circuitos", "Gerar sinais periódicos", "Regular tensão"], correct: "Gerar sinais periódicos", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "Osciladores produzem ondas como senoides." },
+    { question: "Qual é a potência em um circuito com 30V e 3A?", options: ["33 W", "90 W", "60 W", "10 W"], correct: "90 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = V × I = 30V × 3A = 90 W." },
+    { question: "Qual é a resistência equivalente de resistores de 5Ω e 10Ω em série?", options: ["3 Ω", "15 Ω", "7.5 Ω", "2 Ω"], correct: "15 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "R_eq = 5Ω + 10Ω = 15 Ω." },
+    { question: "Qual é a tensão de saída de um transformador com 800 espiras na primária, 400 espiras na secundária e 240V na primária?", options: ["60 V", "240 V", "120 V", "480 V"], correct: "120 V", reference: "Guia Mangá de Eletricidade, Cap. 4", explanation: "V2/V1 = N2/N1, V2 = 240V × (400/800) = 120 V." },
+    { question: "Qual é a unidade de frequência?", options: ["Watt", "Joule", "Coulomb", "Hertz"], correct: "Hertz", reference: "Guia Mangá de Eletricidade, Cap. 8", explanation: "A frequência é medida em Hertz (Hz)." },
+    { question: "Qual é a corrente em um circuito com 150V e 50Ω?", options: ["4 A", "3 A", "5 A", "2 A"], correct: "3 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 150V / 50Ω = 3 A." },
+    { question: "Qual é a função de um amplificador em um circuito?", options: ["Proteger circuitos", "Aumentar sinal", "Gerar energia", "Armazenar carga"], correct: "Aumentar sinal", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "Amplificadores aumentam a amplitude de sinais." },
+    { question: "Qual é a potência dissipada em um resistor de 12Ω com 5A?", options: ["144 W", "25 W", "300 W", "60 W"], correct: "300 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = I² × R = 5² × 12 = 300 W." },
+    { question: "Qual é a tensão em um circuito com 8Ω e 4A?", options: ["4 V", "20 V", "32 V", "12 V"], correct: "32 V", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "V = R × I = 8Ω × 4A = 32 V." },
+    { question: "Qual é a função de um circuito RL em eletrônica?", options: ["Amplificar tensão", "Proteger contra surtos", "Filtrar sinais", "Gerar energia"], correct: "Filtrar sinais", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "Circuitos RL são usados como filtros de frequência." },
+    { question: "Qual é a energia consumida por um aparelho de 150W ligado por 4 horas?", options: ["450 Wh", "750 Wh", "600 Wh", "300 Wh"], correct: "600 Wh", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "E = P × t = 150W × 4h = 600 Wh." },
+    { question: "Qual é a resistência equivalente de dois resistores de 8Ω em paralelo?", options: ["2 Ω", "16 Ω", "8 Ω", "4 Ω"], correct: "4 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/8 + 1/8 = 2/8, R_eq = 4 Ω." },
+    { question: "Qual é a força eletromotriz induzida em uma bobina com 0.3H e variação de corrente de 6A/s?", options: ["2.4 V", "3.6 V", "1.8 V", "0.9 V"], correct: "1.8 V", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "ε = L × ΔI/Δt = 0.3H × 6A/s = 1.8 V." },
+    { question: "Qual é a potência em un circuito com 12V e 6A?", options: ["6 W", "36 W", "72 W", "18 W"], correct: "72 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = V × I = 12V × 6A = 72 W." },
+    { question: "Qual é a resistência equivalente de três resistores de 12Ω em série?", options: ["24 Ω", "12 Ω", "36 Ω", "4 Ω"], correct: "36 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "R_eq = 12Ω + 12Ω + 12Ω = 36 Ω." },
+    { question: "Qual é a tensão de saída de um transformador com 1000 espiras na primária, 500 espiras na secundária e 220V na primária?", options: ["55 V", "220 V", "110 V", "440 V"], correct: "110 V", reference: "Guia Mangá de Eletricidade, Cap. 4", explanation: "V2/V1 = N2/N1, V2 = 220V × (500/1000) = 110 V." },
+    { question: "Qual é a unidade de potência reativa?", options: ["Joule", "Watt", "VAR", "Volt"], correct: "VAR", reference: "Guia Mangá de Eletricidade, Cap. 8", explanation: "A potência reativa é medida em Volt-Ampère Reativo (VAR)." },
+    { question: "Qual é a corrente em un circuito com 200V e 40Ω?", options: ["6 A", "4 A", "5 A", "2 A"], correct: "5 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 200V / 40Ω = 5 A." },
+    { question: "Qual é a função de um circuito RLC em eletrônica?", options: ["Regular corrente", "Proteger circuitos", "Ressonância", "Gerar energia"], correct: "Ressonância", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "Circuitos RLC são usados para ressonância em frequências específicas." },
+    { question: "Qual é a potência dissipada em um resistor de 14Ω com 3A?", options: ["9 W", "84 W", "126 W", "42 W"], correct: "126 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = I² × R = 3² × 14 = 126 W." },
+    { question: "Qual é a tensão em um circuito com 9Ω e 5A?", options: ["30 V", "45 V", "14 V", "4 V"], correct: "45 V", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "V = R × I = 9Ω × 5A = 45 V." },
+    { question: "Qual é a função de um fusível térmico?", options: ["Regular tensão", "Gerar corrente", "Proteger contra superaquecimento", "Armazenar carga"], correct: "Proteger contra superaquecimento", reference: "Instalações Elétricas, Cap. 4", explanation: "Fusíveis térmicos interrompem o circuito em caso de alta temperatura." },
+    { question: "Qual é a energia consumida por um aparelho de 300W ligado por 2 horas?", options: ["150 Wh", "900 Wh", "600 Wh", "300 Wh"], correct: "600 Wh", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "E = P × t = 300W × 2h = 600 Wh." },
+    { question: "Qual é a resistência equivalente de dois resistores de 16Ω em paralelo?", options: ["4 Ω", "16 Ω", "32 Ω", "8 Ω"], correct: "8 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "1/R_eq = 1/16 + 1/16 = 2/16, R_eq = 8 Ω." },
+    { question: "Qual é a força eletromotriz induzida em uma bobina com 0.2H e variação de corrente de 10A/s?", options: ["4 V", "0.5 V", "2 V", "1 V"], correct: "2 V", reference: "Guia Mangá de Eletricidade, Cap. 7", explanation: "ε = L × ΔI/Δt = 0.2H × 10A/s = 2 V." },
+    { question: "Qual é a potência em um circuito com 15V e 8A?", options: ["60 W", "120 W", "23 W", "7 W"], correct: "120 W", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "P = V × I = 15V × 8A = 120 W." },
+    { question: "Qual é a resistência equivalente de três resistores de 20Ω em série?", options: ["30 Ω", "20 Ω", "60 Ω", "10 Ω"], correct: "60 Ω", reference: "Guia Mangá de Eletricidade, Cap. 3", explanation: "R_eq = 20Ω + 20Ω + 20Ω = 60 Ω." },
+    { question: "Qual é a tensão de saída de um transformador com 1200 espiras na primária, 300 espiras na secundária e 240V na primária?", options: ["960 V", "120 V", "60 V", "480 V"], correct: "60 V", reference: "Guia Mangá de Eletricidade, Cap. 4", explanation: "V2/V1 = N2/N1, V2 = 240V × (300/1200) = 60 V." },
+    { question: "Qual é a unidade de potência aparente?", options: ["Watt", "VA", "Joule", "VAR"], correct: "VA", reference: "Guia Mangá de Eletricidade, Cap. 8", explanation: "A potência aparente é medida em Volt-Ampère (VA)." },
+    { question: "Qual é a corrente em un circuito com 240V e 48Ω?", options: ["4 A", "6 A", "2 A", "5 A"], correct: "5 A", reference: "Guia Mangá de Eletricidade, Cap. 2", explanation: "I = V / R = 240V / 48Ω = 5 A." }
+
+		  
+        ];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function randomizeOptions(question) {
+            const options = shuffle([...question.options]);
+            const correctIndex = options.indexOf(question.correct);
+            return { ...question, options, correct: options[correctIndex] };
+        }
+
+        function updateQuestionCount() {
+            const totalQuestions = document.getElementById('totalQuestions');
+            totalQuestions.textContent = `Total de questões: ${quizData.length}`;
+        }
+
+        let shuffledQuizData = shuffle(quizData.map(randomizeOptions));
+        const quizContainer = document.getElementById('quiz');
+        let currentQuestion = 0;
+        let score = 0;
+
+        function renderQuestion() {
+            quizContainer.innerHTML = '';
+            const q = shuffledQuizData[currentQuestion];
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('question', 'active');
+            questionDiv.setAttribute('data-correct', q.correct);
+            questionDiv.setAttribute('data-explanation', q.explanation);
+            questionDiv.setAttribute('data-reference', q.reference);
+
+            const questionText = document.createElement('p');
+            questionText.textContent = q.question;
+            questionDiv.appendChild(questionText);
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.classList.add('options');
+            q.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                btn.setAttribute('data-value', option);
+                btn.textContent = option;
+                optionsDiv.appendChild(btn);
+            });
+
+            questionDiv.appendChild(optionsDiv);
+            quizContainer.appendChild(questionDiv);
+            setupQuestion();
+        }
+
+        function setupQuestion() {
+            const buttons = quizContainer.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('correct');
+                btn.addEventListener('click', handleAnswer, { once: true });
+            });
+        }
+
+        function handleAnswer(e) {
+            const selectedBtn = e.target;
+            const selectedValue = selectedBtn.getAttribute('data-value');
+            const currentQ = quizContainer.querySelector('.question');
+            const correctAnswer = currentQ.getAttribute('data-correct');
+            const explanation = currentQ.getAttribute('data-explanation');
+            const reference = currentQ.getAttribute('data-reference');
+
+            const buttons = currentQ.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedValue === correctAnswer) {
+                selectedBtn.classList.add('correct');
+                score++;
+                result.textContent = 'Correto!';
+            } else {
+                result.innerHTML = `Incorreto. A resposta correta é "${correctAnswer}".<br>${explanation}<br>(Fonte: ${reference})`;
+            }
+            nextBtn.style.display = 'inline-block';
+        }
+
+        const nextBtn = document.getElementById('nextBtn');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const result = document.getElementById('result');
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestion++;
+            if (currentQuestion < shuffledQuizData.length) {
+                renderQuestion();
+                nextBtn.style.display = 'none';
+                result.textContent = '';
+            } else {
+                result.textContent = `Quiz concluído! Você acertou ${score} de ${shuffledQuizData.length}!`;
+                nextBtn.style.display = 'none';
+                playAgainBtn.style.display = 'inline-block';
+            }
+        });
+
+        playAgainBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            score = 0;
+            shuffledQuizData = shuffle(quizData.map(randomizeOptions));
+            updateQuestionCount();
+            renderQuestion();
+            nextBtn.style.display = 'none';
+            playAgainBtn.style.display = 'none';
+            result.textContent = '';
+        });
+
+        // Initialize the question count on page load
+        updateQuestionCount();
+        renderQuestion();
+    </script>
+</body>
+</html>
