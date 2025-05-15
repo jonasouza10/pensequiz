@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+	<link rel="icon" type="image/png" href="iconepq.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007BFF">
+    <meta name="description" content="Teste seus conhecimentos em mecânica de carros com o PenseQuiz!">
+    <title>PenseQuiz - Mecânica de Carros</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: clamp(1.8rem, 5vw, 2.2rem);
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin: 0.5rem 0;
+        }
+
+        header ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        header ul li {
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        #quiz-container {
+            max-width: 90%;
+            width: 800px;
+            margin: 1.5rem auto;
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+        }
+
+        #quiz-container p#question {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        #options-container {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        #options-container button {
+            padding: 0.75rem;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        #options-container button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        #options-container button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #next-button {
+            margin: 1.5rem auto 0;
+            padding: 0.75rem 1.5rem;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: none;
+        }
+
+        #next-button:hover {
+            background-color: #218838;
+        }
+
+        #result {
+            margin-top: 1rem;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-weight: 500;
+        }
+
+        #restart-button, #home-button {
+            margin: 1rem 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: none;
+        }
+
+        #restart-button:hover, #home-button:hover {
+            background-color: #c82333;
+        }
+
+        footer {
+            background-color: #007BFF;
+            color: white;
+            padding: 0.75rem;
+            text-align: center;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: clamp(1.5rem, 4vw, 1.8rem);
+            }
+
+            header ul {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            #quiz-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            #options-container button {
+                padding: 0.5rem;
+                font-size: clamp(0.9rem, 2.5vw, 1rem);
+            }
+
+            #next-button, #restart-button, #home-button {
+                padding: 0.5rem 1rem;
+                font-size: clamp(0.9rem, 2.5vw, 1rem);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            #quiz-container {
+                max-width: 900px;
+            }
+
+            header h1 {
+                font-size: 2.5rem;
+            }
+
+            #question {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PenseQuiz - Mecânica de Carros</h1>
+        <p>Teste seus conhecimentos!</p>
+        <p>Consulte o profissional da área específica</p>
+        <p>Total de perguntas: <span id="total-questions"></span></p>
+        <ul>
+            <li>Motores de Combustão</li>
+            <li>Sistemas de Transmissão</li>
+            <li>Freios</li>
+            <li>Manutenção Preventiva</li>
+            <li>Injeção/Carburação</li>
+        </ul>
+    </header>
+
+    <div id="quiz-container">
+        <p id="question"></p>
+        <div id="options-container"></div>
+        <button id="next-button">Próxima Questão</button>
+        <div id="result"></div>
+        <button id="restart-button">Jogar Novamente</button>
+        <button id="home-button"onclick="window.location.href='index.html'">PenseQuiz</button>
+		<button onclick="window.location.href='index.html'">PenseQuiz</button>
+    </div>
+
+    <footer>
+        <p>PenseQuiz</p>
+    </footer>
+
+    <script>
+        const quizData = [
+            {"question": "Qual é a função da bomba d'água no sistema de arrefecimento?","options": ["Circular o líquido de arrefecimento","Filtrar o óleo","Regular a pressão","Ajustar a embreagem"],"correct": "Circular o líquido de arrefecimento","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "A bomba d'água circula o líquido pelo radiador e motor, dissipando calor para evitar superaquecimento."},
+            {"question": "O que pode indicar um problema no sensor de fluxo de ar (MAF)?","options": ["Aceleração irregular","Pneu desbalanceado","Bateria descarregada","Corrente frouxa"],"correct": "Aceleração irregular","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Um sensor MAF defeituoso envia dados errados à central, causando mistura inadequada e aceleração irregular."},
+            {"question": "Qual é a função da correia dentada no motor?","options": ["Filtrar o combustível","Sincronizar virabrequim e comando","Regular a suspensão","Ajustar a direção"],"correct": "Sincronizar virabrequim e comando","reference": "Guia de Manutenção Automotiva, Cap. 2","explanation": "A correia dentada mantém o sincronismo entre virabrequim e comando para o funcionamento das válvulas."},
+            {"question": "O que pode causar um pneu com desgaste no centro?","options": ["Pressão alta","Filtro de ar sujo","Vela defeituosa","Fluido de freio velho"],"correct": "Pressão alta","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Pressão alta faz o pneu contato mais no centro, acelerando o desgaste nessa área."},
+            {"question": "Qual é o intervalo recomendado para troca do fluido de freio?","options": ["Cada 6 meses","Cada 2 anos","Cada 5.000 km","Cada 10.000 km"],"correct": "Cada 2 anos","reference": "Guia de Manutenção Automotiva, Cap. 8","explanation": "Trocar o fluido a cada 2 anos evita umidade e mantém a eficiência do sistema de freios."},
+            {"question": "Qual é a função do diferencial em um carro?","options": ["Regular a pressão","Permitir velocidades diferentes nas rodas","Filtrar o óleo","Ajustar a embreagem"],"correct": "Permitir velocidades diferentes nas rodas","reference": "Fundamentos de Mecânica de Carros, Cap. 4","explanation": "O diferencial permite que as rodas girem em velocidades diferentes, essencial em curvas."},
+            {"question": "O que indica pastilhas de freio desgastadas?","options": ["Ruído agudo ao frear","Vibração do volante","Luz de bateria acesa","Falha na ignição"],"correct": "Ruído agudo ao frear","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "Pastilhas gastas causam ruídos agudos devido ao contato metálico com o disco."},
+            {"question": "Qual é a função do radiador no sistema de arrefecimento?","options": ["Dissipar calor","Aumentar a potência","Filtrar o combustível","Regular a direção"],"correct": "Dissipar calor","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "O radiador dissipa o calor do líquido de arrefecimento, evitando superaquecimento do motor."},
+            {"question": "O que pode causar uma embreagem patinando em um carro?","options": ["Pneu furado","Disco de embreagem desgastado","Filtro de ar limpo","Bateria nova"],"correct": "Disco de embreagem desgastado","reference": "Fundamentos de Mecânica de Carros, Cap. 3","explanation": "Um disco desgastado reduz a fricção, fazendo a embreagem patinar durante a aceleração."},
+            {"question": "Qual é a função da biela no motor de combustão?","options": ["Conectar pistão ao virabrequim","Filtrar o óleo","Regular a pressão","Ajustar a suspensão"],"correct": "Conectar pistão ao virabrequim","reference": "Manual de Mecânica Automotiva, Cap. 1","explanation": "A biela transmite o movimento do pistão ao virabrequim, convertendo-o em rotação."},
+            {"question": "O que indica uma bateria com baixa carga?","options": ["Partida lenta ou fraca","Pneu desgastado","Vibração do motor","Falha na carburação"],"correct": "Partida lenta ou fraca","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "Baixa carga na bateria resulta em dificuldades para acionar o motor de partida."},
+            {"question": "Qual é a função do sensor de oxigênio no sistema de injeção?","options": ["Regular a suspensão","Monitorar gases de escape","Filtrar o ar","Ajustar a embreagem"],"correct": "Monitorar gases de escape","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "O sensor de oxigênio ajusta a mistura com base na composição dos gases de escape."},
+            {"question": "O que pode causar um pneu com desgaste lateral excessivo?","options": ["Pressão baixa","Filtro de óleo sujo","Vela nova","Fluido de direção baixo"],"correct": "Pressão baixa","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Pressão baixa faz o pneu desgastar mais nas laterais devido ao contato desigual."},
+            {"question": "Qual é a função do comando de válvulas?","options": ["Filtrar o ar","Controlar abertura das válvulas","Regular a ignição","Ajustar a direção"],"correct": "Controlar abertura das válvulas","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "O comando regula o tempo de abertura e fechamento das válvulas de admissão e escape."},
+            {"question": "O que indica um sistema de arrefecimento com baixo nível de fluido?","options": ["Superaquecimento do motor","Vibração do volante","Ruído na suspensão","Falha na ignição"],"correct": "Superaquecimento do motor","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "Baixo nível de fluido reduz a capacidade de dissipar calor, causando superaquecimento."},
+            {"question": "Qual é a função do alternador no sistema elétrico?","options": ["Filtrar o combustível","Gerar energia para a bateria","Ajustar a suspensão","Regular a carburação"],"correct": "Gerar energia para a bateria","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "O alternador gera eletricidade para carregar a bateria e alimentar os sistemas elétricos."},
+            {"question": "O que pode causar um motor com marcha lenta irregular?","options": ["Vela de ignição defeituosa","Pneu desbalanceado","Bateria carregada","Fluido de freio novo"],"correct": "Vela de ignição defeituosa","reference": "Fundamentos de Mecânica de Carros, Cap. 4","explanation": "Velas defeituosas causam combustão instável, afetando a marcha lenta."},
+            {"question": "Qual é o intervalo recomendado para troca do filtro de óleo?","options": ["Cada 1.000 km","Cada 10.000 km","Cada 20.000 km","Cada 500 km"],"correct": "Cada 10.000 km","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "Trocar o filtro a cada 10.000 km, junto com o óleo, mantém a lubrificação eficiente."},
+            {"question": "Qual é a função da junta homocinética na transmissão?","options": ["Regular a pressão","Transmitir potência às rodas","Filtrar o óleo","Ajustar a direção"],"correct": "Transmitir potência às rodas","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "A junta homocinética transfere potência do diferencial às rodas, permitindo movimento angular."},
+            {"question": "O que indica um disco de freio empenado?","options": ["Vibração ao frear","Ruído na suspensão","Luz de bateria acesa","Falha na ignição"],"correct": "Vibração ao frear","reference": "Guia de Manutenção Automotiva, Cap. 8","explanation": "Um disco empenado causa vibrações perceptíveis no pedal ou volante ao frear."},
+            {"question": "Qual é a função do coletor de admissão?","options": ["Direcionar mistura ao cilindro","Filtrar o ar","Regular a pressão","Ajustar a suspensão"],"correct": "Direcionar mistura ao cilindro","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "O coletor de admissão guia a mistura ar-combustível para os cilindros."},
+            {"question": "O que pode causar perda de potência no motor?","options": ["Pneu furado","Filtro de ar entupido","Bateria nova","Fluido de direção cheio"],"correct": "Filtro de ar entupido","reference": "Manual de Mecânica Automotiva, Cap. 2","explanation": "Um filtro de ar entupido restringe o fluxo de ar, reduzindo a potência do motor."},
+            {"question": "Qual é a função do pedal de embreagem?","options": ["Acionar o sistema de freios","Desengatar a transmissão","Filtrar o combustível","Ajustar a direção"],"correct": "Desengatar a transmissão","reference": "Fundamentos de Mecânica de Carros, Cap. 3","explanation": "O pedal de embreagem desengata o motor da transmissão para trocas de marcha."},
+            {"question": "O que indica um problema na suspensão dianteira?","options": ["Ruído em buracos","Falha na ignição","Luz de bateria acesa","Vibração do motor"],"correct": "Ruído em buracos","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Componentes desgastados na suspensão dianteira causam ruídos ao passar por irregularidades."},
+            {"question": "Qual é a função do catalisador no escapamento?","options": ["Aumentar a potência","Reduzir emissões poluentes","Filtrar o ar","Regular a pressão"],"correct": "Reduzir emissões poluentes","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "O catalisador converte gases tóxicos em compostos menos nocivos."},
+            {"question": "O que pode causar um motor com fumaça preta no escapamento?","options": ["Pneu desbalanceado","Mistura de combustível rica","Filtro de óleo novo","Fluido de freio baixo"],"correct": "Mistura de combustível rica","reference": "Fundamentos de Mecânica de Carros, Cap. 3","explanation": "Excesso de combustível na mistura causa fumaça preta devido à combustão incompleta."},
+            {"question": "Qual é o intervalo para verificar a pressão dos pneus?","options": ["Semanalmente","Cada 3.000 km","Cada 10.000 km","Cada 6 meses"],"correct": "Semanalmente","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Verificar a pressão semanalmente garante segurança e durabilidade dos pneus."},
+            {"question": "Qual é a função do servo-freio?","options": ["Ampliar a força de frenagem","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Ampliar a força de frenagem","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "O servo-freio usa vácuo para aumentar a força aplicada ao pedal de freio."},
+            {"question": "O que indica um problema no sistema de injeção eletrônica?","options": ["Pneu furado","Marcha lenta instável","Vibração do volante","Fluido de direção baixo"],"correct": "Marcha lenta instável","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Falhas na injeção eletrônica afetam a mistura, causando instabilidade na marcha lenta."},
+            {"question": "Qual é a função do fluido de direção hidráulica?","options": ["Reduzir esforço na direção","Filtrar o ar","Regular a pressão","Ajustar a embreagem"],"correct": "Reduzir esforço na direção","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "O fluido transmite força no sistema hidráulico, facilitando a direção."},
+            {"question": "O que pode causar um freio com pedal esponjoso?","options": ["Ar no sistema hidráulico","Bateria descarregada","Filtro de ar limpo","Pneu desbalanceado"],"correct": "Ar no sistema hidráulico","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "Ar no sistema reduz a pressão hidráulica, tornando o pedal esponjoso."},
+            {"question": "Qual é a função do cabeçote no motor?","options": ["Alojar válvulas e câmara","Aumentar a potência","Filtrar o óleo","Regular a direção"],"correct": "Alojar válvulas e câmara","reference": "Fundamentos de Mecânica de Carros, Cap. 1","explanation": "O cabeçote contém as válvulas e a câmara de combustão, essencial para o motor."},
+            {"question": "O que indica um problema no rolamento da roda?","options": ["Ruído ao rodar","Falha na ignição","Luz de bateria acesa","Vibração do motor"],"correct": "Ruído ao rodar","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Rolamentos desgastados produzem ruídos, especialmente em alta velocidade."},
+            {"question": "Qual é a função do filtro de combustível?","options": ["Remover impurezas do combustível","Filtrar o ar","Regular a pressão","Ajustar a suspensão"],"correct": "Remover impurezas do combustível","reference": "Manual de Mecânica Automotiva, Cap. 2","explanation": "O filtro de combustível impede que sujeiras cheguem ao sistema de injeção ou carburador."},
+            {"question": "O que pode causar um motor com fumaça azul no escapamento?","options": ["Pneu desbalanceado","Queima de óleo","Filtro de ar entupido","Fluido de freio baixo"],"correct": "Queima de óleo","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "Fumaça azul indica que óleo está sendo queimado na câmara de combustão."},
+            {"question": "Qual é a função do tensor da correia de acessórios?","options": ["Filtrar o óleo","Manter a correia tensionada","Regular a ignição","Ajustar a direção"],"correct": "Manter a correia tensionada","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "O tensor mantém a correia de acessórios na tensão correta para funcionamento."},
+            {"question": "O que indica um problema no sistema de direção hidráulica?","options": ["Direção pesada","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Direção pesada","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Baixo nível de fluido ou bomba defeituosa torna a direção mais pesada."},
+            {"question": "Qual é a função do sistema ABS nos freios?","options": ["Evitar travamento das rodas","Aumentar a potência","Filtrar o fluido","Regular a suspensão"],"correct": "Evitar travamento das rodas","reference": "Fundamentos de Mecânica de Carros, Cap. 8","explanation": "O ABS modula a pressão dos freios para evitar travamento, mantendo o controle."},
+            {"question": "O que pode causar um motor com dificuldade para acelerar?","options": ["Bico injetor entupido","Pneu desbalanceado","Bateria nova","Fluido de freio cheio"],"correct": "Bico injetor entupido","reference": "Manual de Mecânica Automotiva, Cap. 6","explanation": "Bicos injetores entupidos restringem o fluxo de combustível, dificultando a aceleração."},
+            {"question": "Qual é a função da caixa de direção?","options": ["Regular a pressão","Converter movimento do volante","Filtrar o óleo","Ajustar a embreagem"],"correct": "Converter movimento do volante","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "A caixa de direção converte o giro do volante em movimento das rodas."},
+            {"question": "O que indica um problema no sensor de temperatura do motor?","options": ["Leitura errada no painel","Vibração do volante","Ruído na suspensão","Falha na ignição"],"correct": "Leitura errada no painel","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Um sensor defeituoso mostra temperaturas incorretas, afetando o controle do motor."},
+            {"question": "Qual é a função do fluido de transmissão automática?","options": ["Lubrificar e transmitir potência","Filtrar o ar","Regular a pressão","Ajustar a suspensão"],"correct": "Lubrificar e transmitir potência","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "O fluido lubrifica os componentes e transfere potência na transmissão automática."},
+            {"question": "O que pode causar vibrações no volante em alta velocidade?","options": ["Pneu desbalanceado","Filtro de óleo sujo","Vela nova","Fluido de freio velho"],"correct": "Pneu desbalanceado","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Pneus desbalanceados causam vibrações, especialmente em velocidades altas."},
+            {"question": "Qual é a função do virabrequim no motor?","options": ["Converter movimento linear em rotativo","Filtrar o combustível","Regular a ignição","Ajustar a direção"],"correct": "Converter movimento linear em rotativo","reference": "Fundamentos de Mecânica de Carros, Cap. 1","explanation": "O virabrequim transforma o movimento dos pistões em rotação para a transmissão."},
+            {"question": "O que indica um problema no catalisador entupido?","options": ["Perda de potência","Partida fraca","Pneu desgastado","Ruído na suspensão"],"correct": "Perda de potência","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "Um catalisador entupido restringe o fluxo de gases, reduzindo a potência do motor."},
+            {"question": "Qual é a função do filtro de cabine?","options": ["Filtrar o ar do habitáculo","Aumentar a potência","Regular a pressão","Filtrar o óleo"],"correct": "Filtrar o ar do habitáculo","reference": "Guia de Manutenção Automotiva, Cap. 2","explanation": "O filtro de cabine remove poeira e poluentes do ar que entra no interior do carro."},
+            {"question": "O que pode causar um motor com superaquecimento constante?","options": ["Ventilador do radiador defeituoso","Pneu desbalanceado","Bateria nova","Fluido de freio cheio"],"correct": "Ventilador do radiador defeituoso","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "Um ventilador defeituoso reduz o resfriamento, causando superaquecimento."},
+            {"question": "Qual é a função do amortecedor na suspensão?","options": ["Absorver impactos","Filtrar o óleo","Regular a ignição","Ajustar a embreagem"],"correct": "Absorver impactos","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "O amortecedor absorve impactos e controla o movimento da suspensão para maior conforto."},
+            {"question": "O que indica um problema no sistema de escapamento?","options": ["Ruído alto ou vazamento","Vibração do volante","Luz de bateria acesa","Falha na direção"],"correct": "Ruído alto ou vazamento","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "Furos ou conexões soltas no escapamento causam ruídos altos e vazamentos de gases."},
+       
+{"question": "Qual é a função do volante do motor?","options": ["Regular a pressão","Amortecer vibrações do virabrequim","Filtrar o óleo","Ajustar a suspensão"],"correct": "Amortecer vibrações do virabrequim","reference": "Manual de Mecânica Automotiva, Cap. 1","explanation": "O volante do motor reduz vibrações do virabrequim, garantindo um funcionamento suave."},
+    {"question": "O que pode indicar um sensor de detonação defeituoso?","options": ["Bateria descarregada","Ruído de batida no motor","Pneu desbalanceado","Freio esponjoso"],"correct": "Ruído de batida no motor","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Um sensor de detonação defeituoso não corrige a ignição, causando batidas no motor."},
+    {"question": "Qual é a função da mangueira de retorno no sistema de combustível?","options": ["Filtrar o ar","Retornar excesso de combustível ao tanque","Regular a direção","Ajustar a embreagem"],"correct": "Retornar excesso de combustível ao tanque","reference": "Guia de Manutenção Automotiva, Cap. 2","explanation": "A mangueira de retorno evita pressão excessiva, devolvendo combustível ao tanque."},
+    {"question": "O que pode causar um alinhamento de rodas desalinhado?","options": ["Impacto em buracos","Filtro de óleo sujo","Vela nova","Fluido de freio cheio"],"correct": "Impacto em buracos","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Impactos em buracos ou calçadas podem desalinhar as rodas, afetando a dirigibilidade."},
+    {"question": "Qual é o intervalo recomendado para troca do fluido de transmissão manual?","options": ["Cada 60.000 km","Cada 5.000 km","Cada 10.000 km","Cada 1.000 km"],"correct": "Cada 60.000 km","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "Trocar o fluido a cada 60.000 km mantém a lubrificação e funcionamento da transmissão."},
+    {"question": "Qual é a função do sincronizador na caixa de câmbio?","options": ["Regular a pressão","Equalizar rotações das engrenagens","Filtrar o óleo","Ajustar a direção"],"correct": "Equalizar rotações das engrenagens","reference": "Fundamentos de Mecânica de Carros, Cap. 4","explanation": "O sincronizador alinha as rotações para trocas de marcha suaves."},
+    {"question": "O que indica um fluido de direção hidráulica contaminado?","options": ["Ruído ao girar o volante","Vibração do motor","Luz de bateria acesa","Pneu desgastado"],"correct": "Ruído ao girar o volante","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Fluido contaminado causa ruídos na bomba hidráulica ao girar o volante."},
+    {"question": "Qual é a função do termostato no sistema de arrefecimento?","options": ["Regular a temperatura do motor","Aumentar a potência","Filtrar o combustível","Ajustar a suspensão"],"correct": "Regular a temperatura do motor","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "O termostato controla o fluxo de líquido para manter a temperatura ideal do motor."},
+    {"question": "O que pode causar uma transmissão automática com trocas bruscas?","options": ["Fluido de transmissão baixo","Pneu furado","Filtro de ar limpo","Bateria nova"],"correct": "Fluido de transmissão baixo","reference": "Fundamentos de Mecânica de Carros, Cap. 4","explanation": "Nível baixo de fluido causa trocas bruscas devido à falta de pressão hidráulica."},
+    {"question": "Qual é a função do anel de pistão de óleo?","options": ["Vedar a câmara de combustão","Controlar o excesso de óleo","Filtrar o ar","Regular a ignição"],"correct": "Controlar o excesso de óleo","reference": "Manual de Mecânica Automotiva, Cap. 1","explanation": "O anel de óleo remove excesso de lubrificante das paredes do cilindro."},
+    {"question": "O que indica um problema no relé do motor de partida?","options": ["Motor não gira ao dar partida","Pneu desgastado","Vibração do volante","Fumaça preta"],"correct": "Motor não gira ao dar partida","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "Um relé defeituoso impede a ativação do motor de partida."},
+    {"question": "Qual é a função do módulo de ignição?","options": ["Controlar a faísca das velas","Filtrar o combustível","Regular a suspensão","Ajustar a embreagem"],"correct": "Controlar a faísca das velas","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "O módulo de ignição gerencia o tempo e intensidade da faísca nas velas."},
+    {"question": "O que pode causar um carro com puxada para um lado ao dirigir?","options": ["Filtro de ar entupido","Desgaste desigual dos pneus","Bateria nova","Fluido de freio cheio"],"correct": "Desgaste desigual dos pneus","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Pneus desgastados desigualmente afetam o alinhamento, causando puxada."},
+    {"question": "Qual é a função da válvula PCV no motor?","options": ["Recircular gases do cárter","Filtrar o óleo","Regular a pressão","Ajustar a direção"],"correct": "Recircular gases do cárter","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "A válvula PCV redireciona gases do cárter para a combustão, reduzindo emissões."},
+    {"question": "O que indica um problema na bomba de combustível?","options": ["Falha na aceleração","Vibração do volante","Luz de bateria acesa","Ruído na suspensão"],"correct": "Falha na aceleração","reference": "Guia de Manutenção Automotiva, Cap. 2","explanation": "Uma bomba defeituosa reduz o fornecimento de combustível, causando falhas na aceleração."},
+    {"question": "Qual é a função da correia de acessórios?","options": ["Filtrar o ar","Acionar componentes como alternador","Regular a ignição","Ajustar a suspensão"],"correct": "Acionar componentes como alternador","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "A correia de acessórios aciona o alternador, bomba d'água e outros componentes."},
+    {"question": "O que pode causar um motor com ruído de tique-taque?","options": ["Válvulas mal ajustadas","Pneu desbalanceado","Bateria carregada","Fluido de freio novo"],"correct": "Válvulas mal ajustadas","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "Folga excessiva nas válvulas causa ruídos de tique-taque no motor."},
+    {"question": "Qual é o intervalo recomendado para troca do filtro de ar do motor?","options": ["Cada 15.000 km","Cada 1.000 km","Cada 5.000 km","Cada 30.000 km"],"correct": "Cada 15.000 km","reference": "Guia de Manutenção Automotiva, Cap. 2","explanation": "Trocar o filtro a cada 15.000 km garante entrada de ar limpo para o motor."},
+    {"question": "Qual é a função do cardan na transmissão?","options": ["Regular a pressão","Transmitir potência ao eixo traseiro","Filtrar o óleo","Ajustar a direção"],"correct": "Transmitir potência ao eixo traseiro","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "O cardan transfere potência do câmbio ao diferencial em veículos de tração traseira."},
+    {"question": "O que indica um freio traseiro com desgaste desigual?","options": ["Pinça de freio travada","Ruído na suspensão","Luz de bateria acesa","Falha na ignição"],"correct": "Pinça de freio travada","reference": "Guia de Manutenção Automotiva, Cap. 8","explanation": "Uma pinça travada aplica pressão desigual, desgastando as pastilhas irregularmente."},
+    {"question": "Qual é a função do coletor de escape?","options": ["Direcionar gases para o escapamento","Filtrar o ar","Regular a pressão","Ajustar a suspensão"],"correct": "Direcionar gases para o escapamento","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "O coletor de escape canaliza os gases dos cilindros para o sistema de escapamento."},
+    {"question": "O que pode causar um motor com consumo elevado de óleo?","options": ["Pneu furado","Anéis de pistão desgastados","Bateria nova","Fluido de direção cheio"],"correct": "Anéis de pistão desgastados","reference": "Manual de Mecânica Automotiva, Cap. 1","explanation": "Anéis desgastados permitem que óleo entre na câmara de combustão, aumentando o consumo."},
+    {"question": "Qual é a função do pedal de freio?","options": ["Ativar o sistema de freios","Desengatar a transmissão","Filtrar o combustível","Ajustar a direção"],"correct": "Ativar o sistema de freios","reference": "Fundamentos de Mecânica de Carros, Cap. 8","explanation": "O pedal de freio aciona o sistema hidráulico para desacelerar ou parar o veículo."},
+    {"question": "O que indica um problema nos buchas da suspensão?","options": ["Ruído ao passar por lombadas","Falha na ignição","Luz de bateria acesa","Vibração do motor"],"correct": "Ruído ao passar por lombadas","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Buchas desgastadas causam ruídos e folgas na suspensão em irregularidades."},
+    {"question": "Qual é a função do silenciador no escapamento?","options": ["Aumentar a potência","Reduzir o ruído dos gases","Filtrar o ar","Regular a pressão"],"correct": "Reduzir o ruído dos gases","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "O silenciador diminui o barulho dos gases de escape, melhorando o conforto."},
+    {"question": "O que pode causar um motor com fumaça branca no escapamento?","options": ["Pneu desbalanceado","Queima de líquido de arrefecimento","Filtro de óleo novo","Fluido de freio baixo"],"correct": "Queima de líquido de arrefecimento","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "Fumaça branca indica que líquido de arrefecimento está sendo queimado, geralmente por falha na junta do cabeçote."},
+    {"question": "Qual é o intervalo para verificar o nível de óleo do motor?","options": ["Mensalmente","Cada 10.000 km","Cada 20.000 km","Cada 6 meses"],"correct": "Mensalmente","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "Verificar o óleo mensalmente evita danos por baixo nível ou contaminação."},
+    {"question": "Qual é a função do cilindro mestre no sistema de freios?","options": ["Gerar pressão hidráulica","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Gerar pressão hidráulica","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "O cilindro mestre converte a força do pedal em pressão hidráulica para os freios."},
+    {"question": "O que indica um problema no corpo de borboleta?","options": ["Aceleração instável","Partida fraca","Pneu desgastado","Ruído na suspensão"],"correct": "Aceleração instável","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Um corpo de borboleta sujo ou defeituoso causa fluxo de ar irregular, afetando a aceleração."},
+    {"question": "Qual é a função do fluido de arrefecimento?","options": ["Absorver e dissipar calor","Filtrar o ar","Regular a pressão","Ajustar a embreagem"],"correct": "Absorver e dissipar calor","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "O fluido de arrefecimento absorve calor do motor e o dissipa no radiador."},
+    {"question": "O que pode causar um freio com ruído de chiado?","options": ["Pastilhas de freio gastas","Bateria descarregada","Filtro de ar limpo","Pneu desbalanceado"],"correct": "Pastilhas de freio gastas","reference": "Guia de Manutenção Automotiva, Cap. 8","explanation": "Pastilhas gastas produzem chiados devido ao contato metálico com o disco."},
+    {"question": "Qual é a função do eixo de balanceamento no motor?","options": ["Reduzir vibrações","Aumentar a potência","Filtrar o óleo","Regular a direção"],"correct": "Reduzir vibrações","reference": "Fundamentos de Mecânica de Carros, Cap. 1","explanation": "O eixo de balanceamento contrabalança forças internas, reduzindo vibrações do motor."},
+    {"question": "O que indica um problema no interruptor de luz de freio?","options": ["Luz de freio não acende","Vibração do volante","Ruído na suspensão","Falha na ignição"],"correct": "Luz de freio não acende","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "Um interruptor defeituoso impede a ativação das luzes de freio."},
+    {"question": "Qual é a função do sensor de posição do acelerador (TPS)?","options": ["Monitorar a abertura da borboleta","Filtrar o combustível","Regular a suspensão","Ajustar a embreagem"],"correct": "Monitorar a abertura da borboleta","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "O TPS informa à central a posição do acelerador, ajustando a mistura de combustível."},
+    {"question": "O que pode causar um carro com direção instável em alta velocidade?","options": ["Pneu furado","Folga na barra de direção","Bateria nova","Fluido de freio cheio"],"correct": "Folga na barra de direção","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Folga na barra causa instabilidade, especialmente em altas velocidades."},
+    {"question": "Qual é a função do radiador de óleo?","options": ["Resfriar o óleo do motor","Filtrar o ar","Regular a pressão","Ajustar a direção"],"correct": "Resfriar o óleo do motor","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "O radiador de óleo dissipa calor do lubrificante, mantendo sua eficiência."},
+    {"question": "O que indica um problema na mangueira do sistema de arrefecimento?","options": ["Vazamento de líquido","Partida fraca","Pneu desgastado","Ruído na suspensão"],"correct": "Vazamento de líquido","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "Mangueiras danificadas causam vazamentos, reduzindo o nível de líquido de arrefecimento."},
+    {"question": "Qual é a função do retentor do virabrequim?","options": ["Evitar vazamento de óleo","Aumentar a potência","Filtrar o combustível","Regular a ignição"],"correct": "Evitar vazamento de óleo","reference": "Manual de Mecânica Automotiva, Cap. 1","explanation": "O retentor impede que óleo vaze do virabrequim, mantendo a lubrificação."},
+    {"question": "O que pode causar um motor com partida difícil em dias frios?","options": ["Bateria com baixa carga","Pneu desbalanceado","Filtro de óleo novo","Fluido de freio baixo"],"correct": "Bateria com baixa carga","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "Frio reduz a capacidade da bateria, dificultando a partida."},
+    {"question": "Qual é a função do regulador de pressão de combustível?","options": ["Manter pressão constante no sistema","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Manter pressão constante no sistema","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "O regulador garante pressão adequada para o funcionamento da injeção."},
+    {"question": "O que indica um problema no amortecedor traseiro?","options": ["Instabilidade em curvas","Falha na ignição","Luz de bateria acesa","Vibração do motor"],"correct": "Instabilidade em curvas","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Amortecedores desgastados causam instabilidade, especialmente em curvas."},
+    {"question": "Qual é a função do filtro de partículas diesel (DPF)?","options": ["Reduzir emissões de fuligem","Aumentar a potência","Filtrar o óleo","Regular a direção"],"correct": "Reduzir emissões de fuligem","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "O DPF captura partículas de fuligem em motores diesel, reduzindo poluição."},
+    {"question": "O que pode causar um motor com vibração excessiva?","options": ["Suporte de motor danificado","Pneu desbalanceado","Bateria nova","Fluido de freio cheio"],"correct": "Suporte de motor danificado","reference": "Fundamentos de Mecânica de Carros, Cap. 1","explanation": "Suportes danificados não absorvem vibrações, causando trepidação."},
+    {"question": "Qual é a função do tubo de dipstick no motor?","options": ["Verificar o nível de óleo","Filtrar o ar","Regular a pressão","Ajustar a embreagem"],"correct": "Verificar o nível de óleo","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "O tubo de dipstick permite medir o nível e a condição do óleo do motor."},
+    {"question": "O que indica um problema no sistema de carga da bateria?","options": ["Luz de bateria acesa no painel","Vibração do volante","Ruído na suspensão","Falha na ignição"],"correct": "Luz de bateria acesa no painel","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "A luz indica falhas no alternador ou conexões, afetando a carga da bateria."},
+    {"question": "Qual é a função da válvula EGR?","options": ["Recircular gases de escape","Filtrar o combustível","Regular a suspensão","Ajustar a direção"],"correct": "Recircular gases de escape","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "A válvula EGR reduz emissões ao reintroduzir gases de escape na combustão."},
+    {"question": "O que pode causar um carro com baixa resposta ao acelerar?","options": ["Pneu furado","Sensor de massa de ar sujo","Bateria nova","Fluido de freio cheio"],"correct": "Sensor de massa de ar sujo","reference": "Manual de Mecânica Automotiva, Cap. 6","explanation": "Um sensor MAF sujo envia dados incorretos, reduzindo a resposta do motor."},
+    {"question": "Qual é a função do disco de embreagem?","options": ["Transmitting torque do motor ao câmbio","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Transmitting torque do motor ao câmbio","reference": "Fundamentos de Mecânica de Carros, Cap. 3","explanation": "O disco de embreagem transfere torque do motor para a transmissão."},
+    {"question": "O que indica um problema na junta esférica da suspensão?","options": ["Ruído ao girar o volante","Partida fraca","Pneu desgastado","Fumaça preta"],"correct": "Ruído ao girar o volante","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Juntas esféricas desgastadas causam ruídos e folgas na direção."},
+	
+	
+	{"question": "Qual é a função do damper no sistema de suspensão?","options": ["Reduzir vibrações do motor","Controlar o movimento da mola","Filtrar o óleo","Regular a pressão"],"correct": "Controlar o movimento da mola","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "O damper, ou amortecedor, controla o movimento da mola, garantindo estabilidade e conforto."},
+    {"question": "O que pode indicar um problema no sensor de velocidade do veículo?","options": ["Falha no velocímetro","Pneu desbalanceado","Bateria descarregada","Ruído na embreagem"],"correct": "Falha no velocímetro","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Um sensor de velocidade defeituoso causa leituras erradas no velocímetro ou falhas na transmissão."},
+    {"question": "Qual é a função do tubo de escape no sistema de exaustão?","options": ["Aumentar a potência","Conduzir gases para fora","Filtrar o combustível","Ajustar a suspensão"],"correct": "Conduzir gases para fora","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "O tubo de escape direciona os gases de combustão para fora do veículo, reduzindo ruído e poluição."},
+    {"question": "O que pode causar desgaste irregular nos discos de freio?","options": ["Pastilhas desalinhadas","Filtro de ar sujo","Vela nova","Fluido de direção baixo"],"correct": "Pastilhas desalinhadas","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "Pastilhas desalinhadas causam contato desigual, desgastando os discos de forma irregular."},
+    {"question": "Qual é o intervalo recomendado para verificar o alinhamento das rodas?","options": ["Cada 10.000 km","Cada 1.000 km","Cada 5.000 km","Cada 20.000 km"],"correct": "Cada 10.000 km","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Verificar o alinhamento a cada 10.000 km previne desgaste dos pneus e melhora a dirigibilidade."},
+    {"question": "Qual é a função da cremalheira na direção?","options": ["Converter movimento rotativo em linear","Regular a pressão","Filtrar o óleo","Ajustar a embreagem"],"correct": "Converter movimento rotativo em linear","reference": "Fundamentos de Mecânica de Carros, Cap. 7","explanation": "A cremalheira transforma o giro do volante em movimento lateral para as rodas."},
+    {"question": "O que indica um problema no sensor de pressão dos pneus (TPMS)?","options": ["Luz de advertência no painel","Vibração do motor","Ruído na suspensão","Falha na ignição"],"correct": "Luz de advertência no painel","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Um sensor TPMS defeituoso acende a luz de advertência, indicando pressão incorreta nos pneus."},
+    {"question": "Qual é a função da tampa do radiador?","options": ["Manter a pressão do sistema","Aumentar a potência","Filtrar o líquido","Regular a direção"],"correct": "Manter a pressão do sistema","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "A tampa do radiador mantém a pressão para elevar o ponto de ebulição do líquido de arrefecimento."},
+    {"question": "O que pode causar uma embreagem com pedal duro?","options": ["Cabo de embreagem desgastado","Pneu furado","Filtro de ar limpo","Bateria nova"],"correct": "Cabo de embreagem desgastado","reference": "Fundamentos de Mecânica de Carros, Cap. 3","explanation": "Um cabo desgastado ou mal ajustado aumenta a resistência, tornando o pedal duro."},
+    {"question": "Qual é a função da biela no sistema de combustão?","options": ["Conectar pistão ao virabrequim","Filtrar o óleo","Regular a pressão","Ajustar a suspensão"],"correct": "Conectar pistão ao virabrequim","reference": "Manual de Mecânica Automotiva, Cap. 1","explanation": "A biela transmite o movimento linear do pistão ao virabrequim, gerando rotação."},
+    {"question": "O que indica um alternador com saída insuficiente?","options": ["Luzes do painel fracas","Pneu desgastado","Vibração do volante","Fumaça preta"],"correct": "Luzes do painel fracas","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "Um alternador fraco não carrega a bateria adequadamente, causando luzes fracas ou falhas elétricas."},
+    {"question": "Qual é a função do sensor de posição do virabrequim?","options": ["Monitorar a rotação do virabrequim","Filtrar o combustível","Regular a suspensão","Ajustar a embreagem"],"correct": "Monitorar a rotação do virabrequim","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "O sensor informa a central sobre a posição e rotação do virabrequim para sincronizar a ignição."},
+    {"question": "O que pode causar um pneu com bolhas na lateral?","options": ["Impacto com buraco","Filtro de óleo sujo","Vela nova","Fluido de freio velho"],"correct": "Impacto com buraco","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Impactos fortes danificam a estrutura interna do pneu, formando bolhas na lateral."},
+    {"question": "Qual é a função do distribuidor no sistema de ignição?","options": ["Distribuir faísca às velas","Filtrar o ar","Regular a pressão","Ajustar a direção"],"correct": "Distribuir faísca às velas","reference": "Fundamentos de Mecânica de Carros, Cap. 4","explanation": "O distribuidor direciona a corrente elétrica às velas na ordem correta de ignição."},
+    {"question": "O que indica um sistema de arrefecimento com ar no circuito?","options": ["Superaquecimento intermitente","Vibração do volante","Ruído na suspensão","Falha na ignição"],"correct": "Superaquecimento intermitente","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "Ar no sistema reduz a eficiência do resfriamento, causando superaquecimento esporádico."},
+    {"question": "Qual é a função do motor de arranque?","options": ["Girar o virabrequim para partida","Gerar energia para a bateria","Filtrar o óleo","Regular a carburação"],"correct": "Girar o virabrequim para partida","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "O motor de arranque aciona o virabrequim para iniciar a combustão no motor."},
+    {"question": "O que pode causar um motor com falha em um cilindro?","options": ["Bobina de ignição defeituosa","Pneu desbalanceado","Bateria carregada","Fluido de freio novo"],"correct": "Bobina de ignição defeituosa","reference": "Fundamentos de Mecânica de Carros, Cap. 4","explanation": "Uma bobina defeituosa impede a faísca em um cilindro, causando falhas na combustão."},
+    {"question": "Qual é o intervalo recomendado para troca do fluido de arrefecimento?","options": ["Cada 2 anos","Cada 5.000 km","Cada 10.000 km","Cada 6 meses"],"correct": "Cada 2 anos","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "Trocar o fluido a cada 2 anos mantém suas propriedades anticorrosivas e de resfriamento."},
+    {"question": "Qual é a função do eixo de transmissão?","options": ["Transmitir potência às rodas traseiras","Regular a pressão","Filtrar o óleo","Ajustar a direção"],"correct": "Transmitir potência às rodas traseiras","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "O eixo de transmissão leva potência do diferencial às rodas em veículos de tração traseira."},
+    {"question": "O que indica um freio com pedal baixo?","options": ["Vazamento no sistema hidráulico","Ruído na suspensão","Luz de bateria acesa","Falha na ignição"],"correct": "Vazamento no sistema hidráulico","reference": "Guia de Manutenção Automotiva, Cap. 8","explanation": "Vazamentos reduzem a pressão hidráulica, fazendo o pedal de freio descer mais."},
+    {"question": "Qual é a função do injetor de combustível?","options": ["Pulverizar combustível na câmara","Filtrar o ar","Regular a pressão","Ajustar a suspensão"],"correct": "Pulverizar combustível na câmara","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "O injetor pulveriza combustível na câmara de combustão para a queima eficiente."},
+    {"question": "O que pode causar um motor com cheiro de combustível no escapamento?","options": ["Mistura rica de combustível","Pneu furado","Bateria nova","Fluido de direção cheio"],"correct": "Mistura rica de combustível","reference": "Manual de Mecânica Automotiva, Cap. 2","explanation": "Excesso de combustível na mistura causa combustão incompleta, liberando cheiro de gasolina."},
+    {"question": "Qual é a função do rolamento de embreagem?","options": ["Facilitar o acionamento da embreagem","Desengatar a transmissão","Filtrar o combustível","Ajustar a direção"],"correct": "Facilitar o acionamento da embreagem","reference": "Fundamentos de Mecânica de Carros, Cap. 3","explanation": "O rolamento reduz o atrito, permitindo o acionamento suave da embreagem."},
+    {"question": "O que indica um problema no pivô da suspensão?","options": ["Ruído ao girar as rodas","Falha na ignição","Luz de bateria acesa","Vibração do motor"],"correct": "Ruído ao girar as rodas","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Pivôs desgastados causam ruídos e folgas na suspensão durante manobras."},
+    {"question": "Qual é a função do abafador no sistema de escapamento?","options": ["Reduzir o ruído do motor","Aumentar a potência","Filtrar o ar","Regular a pressão"],"correct": "Reduzir o ruído do motor","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "O abafador minimiza o ruído dos gases de escape, melhorando o conforto acústico."},
+    {"question": "O que pode causar um motor com potência reduzida em subidas?","options": ["Filtro de combustível entupido","Pneu desbalanceado","Bateria nova","Fluido de freio baixo"],"correct": "Filtro de combustível entupido","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "Um filtro entupido restringe o fluxo de combustível, reduzindo a potência em altas demandas."},
+    {"question": "Qual é o intervalo para verificar o estado das velas de ignição?","options": ["Cada 20.000 km","Cada 5.000 km","Cada 10.000 km","Cada 1.000 km"],"correct": "Cada 20.000 km","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "Verificar as velas a cada 20.000 km garante combustão eficiente e evita falhas."},
+    {"question": "Qual é a função do booster de freio?","options": ["Amplificar a força de frenagem","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Amplificar a força de frenagem","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "O booster usa vácuo para aumentar a força aplicada ao pedal de freio."},
+    {"question": "O que indica um problema no sensor de nível de combustível?","options": ["Leitura errada no marcador","Vibração do volante","Ruído na suspensão","Falha na ignição"],"correct": "Leitura errada no marcador","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Um sensor defeituoso envia dados incorretos, causando leituras erradas no marcador."},
+    {"question": "Qual é a função do reservatório de fluido de freio?","options": ["Armazenar fluido para o sistema","Filtrar o ar","Regular a pressão","Ajustar a embreagem"],"correct": "Armazenar fluido para o sistema","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "O reservatório mantém o fluido disponível para o sistema hidráulico de freios."},
+    {"question": "O que pode causar um freio com resposta lenta?","options": ["Fluido de freio contaminado","Bateria descarregada","Filtro de ar limpo","Pneu desbalanceado"],"correct": "Fluido de freio contaminado","reference": "Guia de Manutenção Automotiva, Cap. 8","explanation": "Fluido contaminado por umidade reduz a eficiência hidráulica, atrasando a resposta."},
+    {"question": "Qual é a função do cárter no motor?","options": ["Armazenar o óleo lubrificante","Aumentar a potência","Filtrar o óleo","Regular a direção"],"correct": "Armazenar o óleo lubrificante","reference": "Fundamentos de Mecânica de Carros, Cap. 1","explanation": "O cárter armazena o óleo que lubrifica as partes móveis do motor."},
+    {"question": "O que indica um problema no rolamento da bomba d’água?","options": ["Ruído agudo no motor","Vibração do volante","Luz de bateria acesa","Falha na ignição"],"correct": "Ruído agudo no motor","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "Rolamentos desgastados na bomba d’água produzem ruídos agudos durante o funcionamento."},
+    {"question": "Qual é a função do filtro de ar da cabine?","options": ["Filtrar o ar do habitáculo","Aumentar a potência","Regular a pressão","Filtrar o óleo"],"correct": "Filtrar o ar do habitáculo","reference": "Guia de Manutenção Automotiva, Cap. 2","explanation": "O filtro de ar da cabine remove poeira e poluentes do ar que entra no interior do carro."},
+    {"question": "O que pode causar um motor com superaquecimento em trânsito lento?","options": ["Ventoinha elétrica defeituosa","Pneu desbalanceado","Bateria nova","Fluido de freio cheio"],"correct": "Ventoinha elétrica defeituosa","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "Uma ventoinha defeituosa não resfria o radiador em baixa velocidade, causando superaquecimento."},
+    {"question": "Qual é a função do braço oscilante na suspensão?","options": ["Conectar a roda ao chassi","Filtrar o óleo","Regular a ignição","Ajustar a embreagem"],"correct": "Conectar a roda ao chassi","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "O braço oscilante mantém a roda alinhada e permite movimento vertical na suspensão."},
+    {"question": "O que indica um problema no sistema de ignição por centelha?","options": ["Motor falhando em alta rotação","Vibração do volante","Luz de bateria acesa","Ruído na suspensão"],"correct": "Motor falhando em alta rotação","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "Falhas na ignição, como velas ou cabos defeituosos, causam perda de potência em altas rotações."},
+    {"question": "Qual é a função do tanque de expansão no sistema de arrefecimento?","options": ["Armazenar excesso de líquido","Filtrar o combustível","Regular a pressão","Ajustar a direção"],"correct": "Armazenar excesso de líquido","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "O tanque de expansão acomoda o líquido de arrefecimento que se expande com o calor."},
+    {"question": "O que pode causar um carro com direção puxando para um lado?","options": ["Pneu com pressão desigual","Partida fraca","Filtro de óleo novo","Fumaça preta"],"correct": "Pneu com pressão desigual","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Pressões diferentes nos pneus causam desequilíbrio, puxando o carro para um lado."},
+    {"question": "Qual é a função da junta de vedação do cárter?","options": ["Evitar vazamento de óleo","Aumentar a potência","Filtrar o combustível","Regular a ignição"],"correct": "Evitar vazamento de óleo","reference": "Fundamentos de Mecânica de Carros, Cap. 1","explanation": "A junta de vedação impede que o óleo vaze do cárter, protegendo o motor."},
+    {"question": "O que pode causar um motor com ruído de corrente frouxa?","options": ["Tensor de corrente desgastado","Pneu desbalanceado","Bateria nova","Fluido de freio baixo"],"correct": "Tensor de corrente desgastado","reference": "Manual de Mecânica Automotiva, Cap. 2","explanation": "Um tensor desgastado não mantém a corrente tensionada, causando ruídos."},
+    {"question": "Qual é a função do sensor de temperatura do ar de admissão?","options": ["Ajustar a mistura de combustível","Filtrar o óleo","Regular a suspensão","Ajustar a embreagem"],"correct": "Ajustar a mistura de combustível","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "O sensor monitora a temperatura do ar para otimizar a mistura de combustível."},
+    {"question": "O que indica um problema no tubo de direção hidráulica?","options": ["Vazamento de fluido","Falha na ignição","Luz de bateria acesa","Vibração do motor"],"correct": "Vazamento de fluido","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Tubos danificados causam vazamentos, reduzindo a pressão na direção hidráulica."},
+    {"question": "Qual é a função do sistema de controle de tração (TCS)?","options": ["Evitar derrapagem das rodas","Aumentar a potência","Filtrar o fluido","Regular a suspensão"],"correct": "Evitar derrapagem das rodas","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "O TCS reduz a potência nas rodas para evitar perda de tração em superfícies escorregadias."},
+    {"question": "O que pode causar um motor com dificuldade para manter a marcha lenta?","options": ["Válvula de controle de ar entupida","Pneu desbalanceado","Bateria nova","Fluido de freio cheio"],"correct": "Válvula de controle de ar entupida","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Uma válvula entupida restringe o fluxo de ar, desestabilizando a marcha lenta."},
+    {"question": "Qual é a função da polia do virabrequim?","options": ["Acionar a correia de acessórios","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Acionar a correia de acessórios","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "A polia do virabrequim transfere rotação para a correia, acionando acessórios como o alternador."},
+    {"question": "O que indica um problema no sistema de lubrificação?","options": ["Luz de óleo acesa no painel","Vibração do volante","Ruído na suspensão","Falha na direção"],"correct": "Luz de óleo acesa no painel","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "A luz de óleo indica baixa pressão ou nível insuficiente, sinalizando problemas de lubrificação."},
+    {"question": "Qual é a função do tubo de enchimento de óleo?","options": ["Permitir adição de óleo ao motor","Filtrar o ar","Regular a pressão","Ajustar a embreagem"],"correct": "Permitir adição de óleo ao motor","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "O tubo de enchimento facilita a reposição de óleo no cárter do motor."},
+    {"question": "O que pode causar um carro com consumo elevado de combustível?","options": ["Sensor de oxigênio defeituoso","Pneu desbalanceado","Bateria nova","Fluido de freio cheio"],"correct": "Sensor de oxigênio defeituoso","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Um sensor de oxigênio defeituoso causa mistura inadequada, aumentando o consumo."},
+    {"question": "Qual é a função da mola da suspensão?","options": ["Absorver impactos da estrada","Filtrar o óleo","Regular a ignição","Ajustar a embreagem"],"correct": "Absorver impactos da estrada","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "A mola absorve choques da estrada, mantendo o contato das rodas com o solo."},
+    {"question": "O que indica um problema no sistema de direção elétrica?","options": ["Volante pesado ou intermitente","Partida fraca","Pneu desgastado","Fumaça preta"],"correct": "Volante pesado ou intermitente","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Falhas no motor elétrico ou sensores tornam a direção pesada ou inconsistente."},
+
+
+ {"question": "Qual é a função do atuador da embreagem em veículos automatizados?","options": ["Regular a pressão","Controlar o engate da embreagem","Filtrar o óleo","Ajustar a suspensão"],"correct": "Controlar o engate da embreagem","reference": "Manual de Mecânica Automotiva, Cap. 3","explanation": "O atuador automatiza o engate e desengate da embreagem em sistemas de transmissão automatizada."},
+    {"question": "O que pode indicar um problema no sensor de rotação da roda (ABS)?","options": ["Luz do ABS acesa","Pneu desbalanceado","Bateria descarregada","Ruído na direção"],"correct": "Luz do ABS acesa","reference": "Fundamentos de Mecânica de Carros, Cap. 8","explanation": "Um sensor de rotação defeituoso aciona a luz do ABS, indicando falhas no sistema de freios."},
+    {"question": "Qual é a função da válvula de alívio no sistema de arrefecimento?","options": ["Liberar pressão excessiva","Filtrar o líquido","Regular a direção","Aumentar a potência"],"correct": "Liberar pressão excessiva","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "A válvula de alívio na tampa do radiador evita danos liberando pressão acumulada."},
+    {"question": "O que pode causar um pneu com desgaste em forma de escamas?","options": ["Suspensão desalinhada","Filtro de ar sujo","Vela nova","Fluido de freio velho"],"correct": "Suspensão desalinhada","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Desalinhamento da suspensão causa desgaste irregular, formando padrões de escamas no pneu."},
+    {"question": "Qual é o intervalo recomendado para troca do óleo da direção hidráulica?","options": ["Cada 50.000 km","Cada 5.000 km","Cada 10.000 km","Cada 1.000 km"],"correct": "Cada 50.000 km","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Trocar o óleo a cada 50.000 km mantém a eficiência do sistema de direção hidráulica."},
+    {"question": "Qual é a função do conversor de torque na transmissão automática?","options": ["Regular a pressão","Transmitir potência ao câmbio","Filtrar o óleo","Ajustar a direção"],"correct": "Transmitir potência ao câmbio","reference": "Fundamentos de Mecânica de Carros, Cap. 4","explanation": "O conversor de torque acopla o motor à transmissão, permitindo trocas suaves."},
+    {"question": "O que indica um problema no regulador de voltagem do alternador?","options": ["Bateria sobrecarregada","Vibração do motor","Ruído na suspensão","Pneu desgastado"],"correct": "Bateria sobrecarregada","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "Um regulador defeituoso causa carga excessiva, danificando a bateria."},
+    {"question": "Qual é a função do ressonador no sistema de escapamento?","options": ["Reduzir ruídos específicos","Aumentar a potência","Filtrar o combustível","Regular a suspensão"],"correct": "Reduzir ruídos específicos","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "O ressonador elimina frequências sonoras específicas, complementando o silenciador."},
+    {"question": "O que pode causar uma transmissão manual com dificuldade para engatar marchas?","options": ["Fluido de embreagem baixo","Pneu furado","Filtro de ar limpo","Bateria nova"],"correct": "Fluido de embreagem baixo","reference": "Fundamentos de Mecânica de Carros, Cap. 3","explanation": "Baixo nível de fluido hidráulico reduz a pressão, dificultando o engate das marchas."},
+    {"question": "Qual é a função do pistão no motor de combustão?","options": ["Comprimir a mistura ar-combustível","Filtrar o óleo","Regular a pressão","Ajustar a suspensão"],"correct": "Comprimir a mistura ar-combustível","reference": "Manual de Mecânica Automotiva, Cap. 1","explanation": "O pistão comprime a mistura na câmara de combustão para a ignição."},
+    {"question": "O que indica um problema no interruptor de ignição?","options": ["Motor não liga","Pneu desgastado","Vibração do volante","Fumaça preta"],"correct": "Motor não liga","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "Um interruptor defeituoso impede o acionamento do sistema de ignição."},
+    {"question": "Qual é a função do sensor de detonação no motor?","options": ["Detectar combustão irregular","Filtrar o combustível","Regular a suspensão","Ajustar a embreagem"],"correct": "Detectar combustão irregular","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "O sensor de detonação ajusta a ignição para evitar batidas prejudiciais no motor."},
+    {"question": "O que pode causar um carro com vibração ao frear em alta velocidade?","options": ["Disco de freio empenado","Filtro de óleo sujo","Vela nova","Fluido de direção baixo"],"correct": "Disco de freio empenado","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "Discos empenados causam vibrações no pedal ou volante durante a frenagem."},
+    {"question": "Qual é a função da árvore de cames no motor?","options": ["Controlar abertura das válvulas","Filtrar o ar","Regular a pressão","Ajustar a direção"],"correct": "Controlar abertura das válvulas","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "A árvore de cames sincroniza a abertura e fechamento das válvulas de admissão e escape."},
+    {"question": "O que indica um sistema de arrefecimento com vazamento interno?","options": ["Óleo com aparência leitosa","Vibração do volante","Ruído na suspensão","Falha na ignição"],"correct": "Óleo com aparência leitosa","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "Vazamentos internos misturam líquido de arrefecimento com óleo, dando aparência leitosa."},
+    {"question": "Qual é a função do solenóide de partida?","options": ["Acionar o motor de arranque","Gerar energia para a bateria","Filtrar o óleo","Regular a carburação"],"correct": "Acionar o motor de arranque","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "O solenóide conecta a bateria ao motor de arranque para iniciar o motor."},
+    {"question": "O que pode causar um motor com ruído de assobio?","options": ["Correia de acessórios frouxa","Pneu desbalanceado","Bateria carregada","Fluido de freio novo"],"correct": "Correia de acessórios frouxa","reference": "Fundamentos de Mecânica de Carros, Cap. 4","explanation": "Uma correia frouxa desliza, produzindo um som de assobio durante o funcionamento."},
+    {"question": "Qual é o intervalo recomendado para troca do filtro de combustível?","options": ["Cada 30.000 km","Cada 5.000 km","Cada 10.000 km","Cada 1.000 km"],"correct": "Cada 30.000 km","reference": "Guia de Manutenção Automotiva, Cap. 2","explanation": "Trocar o filtro a cada 30.000 km evita obstruções no sistema de combustível."},
+    {"question": "Qual é a função da homocinética na transmissão?","options": ["Transmitir potência às rodas","Regular a pressão","Filtrar o óleo","Ajustar a direção"],"correct": "Transmitir potência às rodas","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "A homocinética transfere potência às rodas, permitindo movimento angular na direção."},
+    {"question": "O que indica um freio com pedal pulsante?","options": ["Rotor de freio deformado","Ruído na suspensão","Luz de bateria acesa","Falha na ignição"],"correct": "Rotor de freio deformado","reference": "Guia de Manutenção Automotiva, Cap. 8","explanation": "Rotores deformados causam pulsação no pedal durante a frenagem."},
+    {"question": "Qual é a função do pré-filtro de combustível?","options": ["Remover impurezas maiores","Filtrar o ar","Regular a pressão","Ajustar a suspensão"],"correct": "Remover impurezas maiores","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "O pré-filtro remove partículas grandes do combustível antes do filtro principal."},
+    {"question": "O que pode causar um motor com falhas em baixa rotação?","options": ["Cabos de vela desgastados","Pneu furado","Bateria nova","Fluido de direção cheio"],"correct": "Cabos de vela desgastados","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "Cabos desgastados causam falhas na ignição, afetando o desempenho em baixa rotação."},
+    {"question": "Qual é a função do pedal do acelerador?","options": ["Controlar a entrada de ar e combustível","Desengatar a transmissão","Filtrar o combustível","Ajustar a direção"],"correct": "Controlar a entrada de ar e combustível","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "O pedal do acelerador regula a abertura da borboleta, controlando a mistura."},
+    {"question": "O que indica um problema no estabilizador da suspensão?","options": ["Inclinação excessiva em curvas","Falha na ignição","Luz de bateria acesa","Vibração do motor"],"correct": "Inclinação excessiva em curvas","reference": "Guia de Manutenção Automotiva, Cap. 7","explanation": "Um estabilizador desgastado reduz a rigidez, causando inclinação nas curvas."},
+    {"question": "Qual é a função do tubo de respiro no motor?","options": ["Ventilar gases do cárter","Aumentar a potência","Filtrar o ar","Regular a pressão"],"correct": "Ventilar gases do cárter","reference": "Manual de Mecânica Automotiva, Cap. 2","explanation": "O tubo de respiro libera gases acumulados no cárter, evitando pressão interna."},
+    {"question": "O que pode causar um motor com fumaça cinza no escapamento?","options": ["Excesso de óleo na combustão","Pneu desbalanceado","Filtro de óleo novo","Fluido de freio baixo"],"correct": "Excesso de óleo na combustão","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "Fumaça cinza indica queima de óleo, geralmente por vedações ou anéis desgastados."},
+    {"question": "Qual é o intervalo para verificar o estado das mangueiras do motor?","options": ["Cada 12 meses","Cada 5.000 km","Cada 10.000 km","Cada 6 meses"],"correct": "Cada 12 meses","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "Verificar mangueiras anualmente previne vazamentos e falhas no sistema."},
+    {"question": "Qual é a função do tambor de freio?","options": ["Fornecer superfície de frenagem","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Fornecer superfície de frenagem","reference": "Manual de Mecânica Automotiva, Cap. 8","explanation": "O tambor é a superfície onde as lonas de freio fazem contato para desacelerar o veículo."},
+    {"question": "O que indica um problema no sensor de fluxo de massa de ar (MAF)?","options": ["Marcha lenta irregular","Vibração do volante","Ruído na suspensão","Luz de bateria acesa"],"correct": "Marcha lenta irregular","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "Um sensor MAF defeituoso envia dados errados, causando instabilidade na marcha lenta."},
+    {"question": "Qual é a função do fluido de embreagem hidráulica?","options": ["Transmitir força ao sistema","Filtrar o ar","Regular a pressão","Ajustar a embreagem"],"correct": "Transmitir força ao sistema","reference": "Manual de Mecânica Automotiva, Cap. 3","explanation": "O fluido transmite a força do pedal ao sistema de embreagem para desengate."},
+    {"question": "O que pode causar um freio com ruído de rangido?","options": ["Lonas de freio gastas","Bateria descarregada","Filtro de ar limpo","Pneu desbalanceado"],"correct": "Lonas de freio gastas","reference": "Guia de Manutenção Automotiva, Cap. 8","explanation": "Lonas gastas causam rangidos devido ao contato metálico com o tambor."},
+    {"question": "Qual é a função do bloco do motor?","options": ["Alojar pistões e virabrequim","Aumentar a potência","Filtrar o óleo","Regular a direção"],"correct": "Alojar pistões e virabrequim","reference": "Fundamentos de Mecânica de Carros, Cap. 1","explanation": "O bloco do motor é a estrutura que contém os pistões, virabrequim e outros componentes."},
+    {"question": "O que indica um problema no rolamento do diferencial?","options": ["Ruído ao acelerar","Vibração do volante","Luz de bateria acesa","Falha na ignição"],"correct": "Ruído ao acelerar","reference": "Manual de Mecânica Automotiva, Cap. 4","explanation": "Rolamentos desgastados no diferencial produzem ruídos, especialmente ao acelerar."},
+    {"question": "Qual é a função do sensor de pressão de óleo?","options": ["Monitorar a pressão de lubrificação","Filtrar o combustível","Regular a suspensão","Ajustar a embreagem"],"correct": "Monitorar a pressão de lubrificação","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "O sensor alerta sobre baixa pressão de óleo, protegendo o motor."},
+    {"question": "O que pode causar um carro com direção solta?","options": ["Folga na caixa de direção","Pneu furado","Bateria nova","Fluido de freio cheio"],"correct": "Folga na caixa de direção","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Folga na caixa de direção reduz a precisão, deixando o volante solto."},
+    {"question": "Qual é a função do radiador de transmissão?","options": ["Resfriar o fluido de transmissão","Filtrar o ar","Regular a pressão","Ajustar a direção"],"correct": "Resfriar o fluido de transmissão","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "O radiador de transmissão dissipa calor do fluido, prolongando a vida útil do câmbio."},
+    {"question": "O que indica um problema na mangueira de vácuo do motor?","options": ["Marcha lenta instável","Partida fraca","Pneu desgastado","Ruído na suspensão"],"correct": "Marcha lenta instável","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "Vazamentos nas mangueiras de vácuo afetam a mistura, causando instabilidade na marcha lenta."},
+    {"question": "Qual é a função do vedador da válvula?","options": ["Evitar entrada de óleo na câmara","Aumentar a potência","Filtrar o combustível","Regular a ignição"],"correct": "Evitar entrada de óleo na câmara","reference": "Manual de Mecânica Automotiva, Cap. 2","explanation": "O vedador impede que óleo entre na câmara de combustão, reduzindo consumo e fumaça."},
+    {"question": "O que pode causar um motor com partida lenta?","options": ["Bateria com terminais soltos","Pneu desbalanceado","Filtro de óleo novo","Fluido de freio baixo"],"correct": "Bateria com terminais soltos","reference": "Guia de Manutenção Automotiva, Cap. 4","explanation": "Terminais soltos reduzem a corrente elétrica, dificultando a partida."},
+    {"question": "Qual é a função do regulador de marcha lenta?","options": ["Estabilizar rotações em repouso","Filtrar o óleo","Regular a suspensão","Ajustar a direção"],"correct": "Estabilizar rotações em repouso","reference": "Fundamentos de Mecânica de Carros, Cap. 6","explanation": "O regulador mantém a rotação constante na marcha lenta, evitando falhas."},
+    {"question": "O que indica um problema no amortecedor dianteiro?","options": ["Batidas em irregularidades","Falha na ignição","Luz de bateria acesa","Vibração do motor"],"correct": "Batidas em irregularidades","reference": "Manual de Mecânica Automotiva, Cap. 7","explanation": "Amortecedores desgastados causam batidas ao passar por buracos ou lombadas."},
+    {"question": "Qual é a função do sistema de recirculação de gases (EGR)?","options": ["Reduzir emissões de óxido de nitrogênio","Aumentar a potência","Filtrar o óleo","Regular a direção"],"correct": "Reduzir emissões de óxido de nitrogênio","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "O sistema EGR recircula gases para reduzir a formação de óxidos de nitrogênio."},
+    {"question": "O que pode causar um motor com perda de compressão?","options": ["Válvulas queimadas","Pneu desbalanceado","Bateria nova","Fluido de freio cheio"],"correct": "Válvulas queimadas","reference": "Fundamentos de Mecânica de Carros, Cap. 2","explanation": "Válvulas queimadas permitem escape de pressão, reduzindo a compressão do motor."},
+    {"question": "Qual é a função do tubo de alimentação de combustível?","options": ["Fornecer combustível ao sistema","Filtrar o ar","Regular a pressão","Ajustar a embreagem"],"correct": "Fornecer combustível ao sistema","reference": "Manual de Mecânica Automotiva, Cap. 2","explanation": "O tubo de alimentação transporta combustível do tanque ao sistema de injeção."},
+    {"question": "O que indica um problema no sistema de controle de estabilidade (ESC)?","options": ["Luz de ESC acesa no painel","Vibração do volante","Ruído na suspensão","Falha na direção"],"correct": "Luz de ESC acesa no painel","reference": "Guia de Manutenção Automotiva, Cap. 8","explanation": "A luz de ESC indica falhas nos sensores ou atuadores do sistema de estabilidade."},
+    {"question": "Qual é a função da junta de expansão no escapamento?","options": ["Absorver vibrações do motor","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Absorver vibrações do motor","reference": "Manual de Mecânica Automotiva, Cap. 5","explanation": "A junta de expansão reduz vibrações e tensões no sistema de escapamento."},
+    {"question": "O que pode causar um carro com consumo elevado de líquido de arrefecimento?","options": ["Radiador furado","Pneu desbalanceado","Bateria nova","Fluido de freio cheio"],"correct": "Radiador furado","reference": "Fundamentos de Mecânica de Carros, Cap. 5","explanation": "Furos no radiador causam vazamentos, aumentando o consumo de líquido de arrefecimento."},
+    {"question": "Qual é a função da corrente de comando?","options": ["Sincronizar virabrequim e comando","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Sincronizar virabrequim e comando","reference": "Manual de Mecânica Automotiva, Cap. 2","explanation": "A corrente de comando mantém o sincronismo entre virabrequim e comando de válvulas."},
+    {"question": "O que indica um problema no sistema de injeção de ar secundário?","options": ["Aumento de emissões poluentes","Partida fraca","Pneu desgastado","Fumaça preta"],"correct": "Aumento de emissões poluentes","reference": "Guia de Manutenção Automotiva, Cap. 5","explanation": "Falhas no sistema de injeção de ar aumentam emissões ao não queimar gases residuais."}
+
+	   ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const resultElement = document.getElementById('result');
+        const restartButton = document.getElementById('restart-button');
+        const homeButton = document.getElementById('home-button');
+        const totalQuestionsElement = document.getElementById('total-questions');
+
+        // Exibir o número total de perguntas
+        totalQuestionsElement.textContent = quizData.length;
+
+        function loadQuestion() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionElement.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.addEventListener('click', () => checkAnswer(option));
+                optionsContainer.appendChild(button);
+            });
+
+            nextButton.style.display = 'none';
+            resultElement.textContent = '';
+        }
+
+        function checkAnswer(selectedOption) {
+            const currentQuestion = quizData[currentQuestionIndex];
+            if (selectedOption === currentQuestion.correct) {
+                score++;
+                resultElement.textContent = `Correto! ${currentQuestion.explanation} (Referência: ${currentQuestion.reference})`;
+                resultElement.style.color = 'green';
+            } else {
+                resultElement.textContent = `Errado! A resposta correta é: ${currentQuestion.correct}. ${currentQuestion.explanation} (Referência: ${currentQuestion.reference})`;
+                resultElement.style.color = 'red';
+            }
+
+            nextButton.style.display = 'block';
+            optionsContainer.querySelectorAll('button').forEach(button => button.disabled = true);
+        }
+
+        function showNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                questionElement.textContent = '';
+                optionsContainer.innerHTML = '';
+                nextButton.style.display = 'none';
+                resultElement.textContent = `Quiz concluído! Sua pontuação: ${score}/${quizData.length}`;
+                restartButton.style.display = 'block';
+                homeButton.style.display = 'block';
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            restartButton.style.display = 'none';
+            homeButton.style.display = 'none';
+            loadQuestion();
+        }
+
+        nextButton.addEventListener('click', showNextQuestion);
+        restartButton.addEventListener('click', restartQuiz);
+        homeButton.addEventListener('click', () => window.location.reload());
+
+        // Registrar o Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registrado!', reg))
+                    .catch(err => console.log('Erro ao registrar Service Worker:', err));
+            });
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
