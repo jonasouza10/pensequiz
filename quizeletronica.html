@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+	 <link rel="icon" type="image/png" href="iconepq.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenseQuiz - Eletrônica</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; text-align: center; }
+        .header { background-color: #2c3e50; color: white; padding: 20px; }
+        .header h1 { margin: 0; font-size: 2em; }
+        .header h2 { margin: 10px 0; font-size: 1.5em; }
+        .topics { margin: 20px 0; }
+        .topics ul { list-style: none; padding: 0; }
+        .topics li { display: inline; margin: 0 10px; font-size: 1.1em; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .question { margin: 20px 0; padding: 15px; background: #ecf0f1; border-radius: 5px; display: none; }
+        .question.active { display: block; }
+        .question p { margin: 0 0 15px; font-weight: bold; font-size: 1.2em; }
+        .options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .option-btn { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; flex: 1 1 45%; max-width: 200px; }
+        .option-btn:hover { background: #2980b9; }
+        .option-btn.correct { background: #27ae60; }
+        .option-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .button-container { margin: 20px 0; }
+        .next-btn { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; display: none; }
+        .next-btn:hover { background: #2980b9; }
+        #result { margin-top: 20px; font-size: 1.1em; line-height: 1.5; }
+        .footer { margin-top: 20px; font-size: 0.9em; color: #777; }
+        .action-btn { padding: 10px 20px; margin: 5px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .action-btn:hover { background: #2980b9; }
+        #totalQuestions { margin: 10px 0; font-size: 1.2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PenseQuiz - Eletrônica</h1>
+        <h2>Teste seus conhecimentos!</h2>
+        <p>Consulte o profissional da área específica</p>
+        <div class="topics">
+            <ul>
+                <li>Diodos e Transistores</li>
+                <li>Circuitos Digitais</li>
+                <li>Amplificadores</li>
+                <li>Microcontroladores</li>
+                <li>Filtros</li>
+            </ul>
+        </div>
+    </div>
+    <div class="container">
+        <div id="totalQuestions"></div>
+        <div id="quiz"></div>
+        <div class="button-container">
+            <button class="next-btn" id="nextBtn">Próxima Questão</button>
+        </div>
+        <div id="result"></div>
+        <div class="button-container">
+            <button class="action-btn" id="playAgainBtn" style="display: none;">Jogar Novamente</button>
+            <button class="action-btn" onclick="window.location.href='index.html'">PenseQuiz</button>
+        </div>
+    </div>
+    <div class="footer">
+        <p>PenseQuiz</p>
+    </div>
+    <script>
+        const quizData = [
+            { question: "Qual é a tensão de polarização direta típica de um diodo de silício?", options: ["0.3 V", "0.7 V", "1.2 V", "2.0 V"], correct: "0.7 V", reference: "Microelectronic Circuits, Cap. 4", explanation: "Diodos de silício têm uma queda de tensão de ~0.7 V quando polarizados diretamente." },
+            { question: "Qual é a função de um transistor BJT em um circuito amplificador?", options: ["Regular tensão", "Armazenar carga", "Amplificar sinal", "Filtrar frequência"], correct: "Amplificar sinal", reference: "Eletrônica Básica, Cap. 5", explanation: "O BJT amplifica sinais variando a corrente de coletor com base na corrente de base." },
+            { question: "Qual é a saída de uma porta AND com entradas 1 e 0?", options: ["1", "0", "Indefinido", "Inverso"], correct: "0", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta AND só produz saída 1 se todas as entradas forem 1; 1 AND 0 = 0." },
+            { question: "Qual é a capacitância equivalente de dois capacitores de 10µF em série?", options: ["20 µF", "5 µF", "10 µF", "2.5 µF"], correct: "5 µF", reference: "Microelectronic Circuits, Cap. 6", explanation: "1/C_eq = 1/10 + 1/10 = 2/10, C_eq = 5 µF." },
+            { question: "Qual é a frequência de ressonância de um circuito LC com L=2mH e C=8µF?", options: ["1.25 kHz", "2.5 kHz", "5 kHz", "10 kHz"], correct: "1.25 kHz", reference: "Eletrônica Básica, Cap. 6", explanation: "f = 1/(2π√(LC)) = 1/(2π√(0.002 × 8×10⁻⁶)) ≈ 1.25 kHz." },
+           
+		   
+		   { question: "Qual é a função de um resistor pull-up em um circuito digital?", options: ["Limitar corrente", "Amplificar sinal", "Manter nível lógico alto", "Filtrar ruído"], correct: "Manter nível lógico alto", reference: "Eletrônica Básica, Cap. 7", explanation: "Um resistor pull-up conecta uma entrada digital a Vcc, mantendo nível lógico alto quando não há sinal." },
+    { question: "Qual é a tensão de saída de um amplificador operacional com ganho de 10 e entrada de 0.2V?", options: ["1 V", "2 V", "0.5 V", "4 V"], correct: "2 V", reference: "Microelectronic Circuits, Cap. 8", explanation: "V_out = Ganho × V_in = 10 × 0.2V = 2 V." },
+    { question: "Qual é a saída de uma porta OR com entradas 0 e 1?", options: ["0", "1", "Indefinido", "Inverso"], correct: "1", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta OR produz saída 1 se pelo menos uma entrada for 1; 0 OR 1 = 1." },
+    { question: "Qual é a capacitância equivalente de dois capacitores de 20µF em paralelo?", options: ["10 µF", "40 µF", "20 µF", "5 µF"], correct: "40 µF", reference: "Microelectronic Circuits, Cap. 6", explanation: "C_eq = C1 + C2 = 20µF + 20µF = 40 µF." },
+    { question: "Qual é a frequência de corte de um filtro passa-alta com R=1kΩ e C=0.1µF?", options: ["1.59 kHz", "3.18 kHz", "0.8 kHz", "6.36 kHz"], correct: "1.59 kHz", reference: "Eletrônica Básica, Cap. 6", explanation: "f_c = 1/(2πRC) = 1/(2π × 1000 × 0.1×10⁻⁶) ≈ 1.59 kHz." },
+    { question: "Qual é a corrente de base em um BJT com β=100 e corrente de coletor de 5mA?", options: ["0.05 mA", "0.5 mA", "5 mA", "50 mA"], correct: "0.05 mA", reference: "Microelectronic Circuits, Cap. 5", explanation: "I_B = I_C / β = 5mA / 100 = 0.05 mA." },
+    { question: "Qual é a função de um oscilador em um circuito eletrônico?", options: ["Amplificar sinal", "Gerar sinais periódicos", "Regular tensão", "Armazenar carga"], correct: "Gerar sinais periódicos", reference: "Eletrônica Básica, Cap. 6", explanation: "Osciladores produzem ondas periódicas, como senoides ou quadradas." },
+    { question: "Qual é a tensão de ruptura típica de um diodo Zener de 5.1V?", options: ["3.3 V", "5.1 V", "6.8 V", "12 V"], correct: "5.1 V", reference: "Microelectronic Circuits, Cap. 4", explanation: "A tensão de ruptura de um diodo Zener é sua tensão nominal, 5.1 V." },
+    { question: "Qual é a saída de uma porta XOR com entradas 1 e 1?", options: ["1", "0", "Indefinido", "Inverso"], correct: "0", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta XOR produz saída 0 se as entradas forem iguais; 1 XOR 1 = 0." },
+    { question: "Qual é a indutância equivalente de dois indutores de 10mH em série?", options: ["5 mH", "10 mH", "20 mH", "2.5 mH"], correct: "20 mH", reference: "Microelectronic Circuits, Cap. 6", explanation: "L_eq = L1 + L2 = 10mH + 10mH = 20 mH." },
+    { question: "Qual é a função de um MOSFET em um circuito de comutação?", options: ["Amplificar sinal", "Armazenar carga", "Atuar como chave", "Filtrar frequência"], correct: "Atuar como chave", reference: "Microelectronic Circuits, Cap. 5", explanation: "MOSFETs são usados como chaves eletrônicas em circuitos de comutação." },
+    { question: "Qual é a tensão de saída de um divisor de tensão com R1=2kΩ, R2=3kΩ e V_in=10V?", options: ["4 V", "6 V", "2 V", "8 V"], correct: "6 V", reference: "Eletrônica Básica, Cap. 2", explanation: "V_out = V_in × (R2/(R1+R2)) = 10V × (3/(2+3)) = 6 V." },
+    { question: "Qual é a função de um flip-flop tipo D em circuitos digitais?", options: ["Amplificar sinal", "Armazenar um bit", "Filtrar ruído", "Gerar clock"], correct: "Armazenar um bit", reference: "Eletrônica Básica, Cap. 7", explanation: "Flip-flops tipo D armazenam um bit de dados com base no clock." },
+    { question: "Qual é a corrente em um circuito RC com R=2kΩ, C=5µF e V=12V após 1τ?", options: ["4.32 mA", "2.21 mA", "1.59 mA", "3.67 mA"], correct: "2.21 mA", reference: "Microelectronic Circuits, Cap. 6", explanation: "I = (V/R) × e⁻¹, τ = RC = 0.01s, I = (12/2000) × 0.367 ≈ 2.21 mA." },
+    { question: "Qual é a função de um ADC em um circuito eletrônico?", options: ["Converter sinal analógico em digital", "Amplificar sinal", "Filtrar frequência", "Gerar tensão"], correct: "Converter sinal analógico em digital", reference: "Eletrônica Básica, Cap. 8", explanation: "ADCs transformam sinais analógicos em digitais para processamento." },
+    { question: "Qual é a saída de uma porta NAND com entradas 1 e 1?", options: ["0", "1", "Indefinido", "Inverso"], correct: "0", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta NAND produz a negação de AND; 1 NAND 1 = NOT(1 AND 1) = 0." },
+    { question: "Qual é a resistência equivalente de dois resistores de 4kΩ em paralelo?", options: ["8 kΩ", "2 kΩ", "4 kΩ", "1 kΩ"], correct: "2 kΩ", reference: "Microelectronic Circuits, Cap. 4", explanation: "1/R_eq = 1/4 + 1/4 = 2/4, R_eq = 2 kΩ." },
+    { question: "Qual é a função de um capacitor em um filtro passa-alta?", options: ["Bloquear altas frequências", "Permitir altas frequências", "Armazenar carga", "Regular tensão"], correct: "Permitir altas frequências", reference: "Eletrônica Básica, Cap. 6", explanation: "Capacitores em filtros passa-alta permitem altas frequências e bloqueiam baixas." },
+    { question: "Qual é a tensão de saída de um amplificador com ganho de 50 e entrada de 0.1V?", options: ["5 V", "10 V", "2 V", "1 V"], correct: "5 V", reference: "Microelectronic Circuits, Cap. 8", explanation: "V_out = Ganho × V_in = 50 × 0.1V = 5 V." },
+    { question: "Qual é a função de um cristal em um oscilador?", options: ["Amplificar sinal", "Estabilizar frequência", "Filtrar ruído", "Armazenar carga"], correct: "Estabilizar frequência", reference: "Eletrônica Básica, Cap. 6", explanation: "Cristais fornecem uma frequência precisa em osciladores." },
+    { question: "Qual é a corrente de dreno em um MOSFET com V_GS=5V, V_th=2V e k=0.5mA/V²?", options: ["4.5 mA", "2.25 mA", "1.5 mA", "3 mA"], correct: "4.5 mA", reference: "Microelectronic Circuits, Cap. 5", explanation: "I_D = k × (V_GS - V_th)² = 0.5 × (5-2)² = 4.5 mA." },
+    { question: "Qual é a saída de uma porta NOR com entradas 0 e 0?", options: ["1", "0", "Indefinido", "Inverso"], correct: "1", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta NOR produz saída 1 se todas as entradas forem 0; 0 NOR 0 = 1." },
+    { question: "Qual é a capacitância equivalente de três capacitores de 15µF em série?", options: ["45 µF", "5 µF", "15 µF", "7.5 µF"], correct: "5 µF", reference: "Microelectronic Circuits, Cap. 6", explanation: "1/C_eq = 1/15 + 1/15 + 1/15 = 3/15, C_eq = 5 µF." },
+    { question: "Qual é a função de um regulador de tensão 7805?", options: ["Amplificar sinal", "Gerar clock", "Manter 5V estável", "Filtrar ruído"], correct: "Manter 5V estável", reference: "Eletrônica Básica, Cap. 4", explanation: "O 7805 fornece uma saída constante de 5V." },
+    { question: "Qual é a frequência de ressonância de um circuito LC com L=5mH e C=4µF?", options: ["1.79 kHz", "3.58 kHz", "0.89 kHz", "7.16 kHz"], correct: "1.79 kHz", reference: "Eletrônica Básica, Cap. 6", explanation: "f = 1/(2π√(LC)) = 1/(2π√(0.005 × 4×10⁻⁶)) ≈ 1.79 kHz." },
+    { question: "Qual é a função de um SCR em circuitos de potência?", options: ["Amplificar sinal", "Controlar corrente", "Filtrar frequência", "Armazenar carga"], correct: "Controlar corrente", reference: "Microelectronic Circuits, Cap. 7", explanation: "SCRs controlam corrente em aplicações de potência." },
+    { question: "Qual é a tensão de saída de um divisor de tensão com R1=5kΩ, R2=5kΩ e V_in=20V?", options: ["5 V", "10 V", "15 V", "20 V"], correct: "10 V", reference: "Eletrônica Básica, Cap. 2", explanation: "V_out = V_in × (R2/(R1+R2)) = 20V × (5/(5+5)) = 10 V." },
+    { question: "Qual é a saída de uma porta XNOR com entradas 1 e 0?", options: ["1", "0", "Indefinido", "Inverso"], correct: "0", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta XNOR produz saída 0 se as entradas forem diferentes; 1 XNOR 0 = 0." },
+    { question: "Qual é a indutância equivalente de dois indutores de 8mH em paralelo?", options: ["16 mH", "4 mH", "8 mH", "2 mH"], correct: "4 mH", reference: "Microelectronic Circuits, Cap. 6", explanation: "1/L_eq = 1/8 + 1/8 = 2/8, L_eq = 4 mH." },
+    { question: "Qual é a função de um comparador em um circuito analógico?", options: ["Amplificar sinal", "Comparar tensões", "Filtrar frequência", "Gerar clock"], correct: "Comparar tensões", reference: "Microelectronic Circuits, Cap. 8", explanation: "Comparadores determinam qual de duas tensões é maior." },
+    { question: "Qual é a corrente em um circuito RL com R=3kΩ, L=6mH e V=9V após 1τ?", options: ["1.1 mA", "2.2 mA", "3.3 mA", "0.55 mA"], correct: "1.1 mA", reference: "Microelectronic Circuits, Cap. 6", explanation: "I = (V/R) × (1-e⁻¹), τ = L/R = 2µs, I = (9/3000) × 0.367 ≈ 1.1 mA." },
+    { question: "Qual é a função de um DAC em um circuito eletrônico?", options: ["Amplificar sinal", "Converter sinal digital em analógico", "Filtrar ruído", "Gerar clock"], correct: "Converter sinal digital em analógico", reference: "Eletrônica Básica, Cap. 8", explanation: "DACs transformam sinais digitais em analógicos." },
+    { question: "Qual é a tensão de saída de um amplificador diferencial com V1=2V, V2=1V e ganho de 10?", options: ["10 V", "5 V", "20 V", "15 V"], correct: "10 V", reference: "Microelectronic Circuits, Cap. 8", explanation: "V_out = Ganho × (V1 - V2) = 10 × (2-1) = 10 V." },
+    { question: "Qual é a função de um contador em circuitos digitais?", options: ["Contar pulsos", "Amplificar sinal", "Filtrar frequência", "Armazenar carga"], correct: "Contar pulsos", reference: "Eletrônica Básica, Cap. 7", explanation: "Contadores registram o número de pulsos de clock." },
+    { question: "Qual é a frequência de corte de um filtro passa-baixa com R=2kΩ e C=0.05µF?", options: ["1.59 kHz", "3.18 kHz", "0.8 kHz", "6.36 kHz"], correct: "1.59 kHz", reference: "Eletrônica Básica, Cap. 6", explanation: "f_c = 1/(2πRC) = 1/(2π × 2000 × 0.05×10⁻⁶) ≈ 1.59 kHz." },
+    { question: "Qual é a função de um LED em um circuito?", options: ["Emitir luz", "Amplificar sinal", "Regular tensão", "Armazenar carga"], correct: "Emitir luz", reference: "Eletrônica Básica, Cap. 4", explanation: "LEDs emitem luz quando polarizados diretamente." },
+    { question: "Qual é a corrente de coletor em um BJT com β=50 e I_B=0.1mA?", options: ["5 mA", "2.5 mA", "10 mA", "1 mA"], correct: "5 mA", reference: "Microelectronic Circuits, Cap. 5", explanation: "I_C = β × I_B = 50 × 0.1mA = 5 mA." },
+    { question: "Qual é a saída de uma porta NOT com entrada 1?", options: ["1", "0", "Indefinido", "Inverso"], correct: "0", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta NOT inverte a entrada; NOT 1 = 0." },
+    { question: "Qual é a capacitância equivalente de três capacitores de 12µF em paralelo?", options: ["36 µF", "12 µF", "4 µF", "6 µF"], correct: "36 µF", reference: "Microelectronic Circuits, Cap. 6", explanation: "C_eq = C1 + C2 + C3 = 12µF + 12µF + 12µF = 36 µF." },
+    { question: "Qual é a função de um temporizador 555 em modo astável?", options: ["Gerar pulsos periódicos", "Amplificar sinal", "Regular tensão", "Filtrar ruído"], correct: "Gerar pulsos periódicos", reference: "Eletrônica Básica, Cap. 6", explanation: "O 555 em modo astável gera uma onda quadrada contínua." },
+    { question: "Qual é a tensão de saída de um amplificador com ganho de 25 e entrada de 0.4V?", options: ["10 V", "5 V", "15 V", "20 V"], correct: "10 V", reference: "Microelectronic Circuits, Cap. 8", explanation: "V_out = Ganho × V_in = 25 × 0.4V = 10 V." },
+    { question: "Qual é a função de um multiplexador em circuitos digitais?", options: ["Selecionar uma entrada", "Amplificar sinal", "Filtrar frequência", "Armazenar carga"], correct: "Selecionar uma entrada", reference: "Eletrônica Básica, Cap. 7", explanation: "Multiplexadores escolhem uma entrada para a saída com base em sinais de controle." },
+    { question: "Qual é a frequência de ressonância de um circuito LC com L=10mH e C=2µF?", options: ["1.13 kHz", "2.25 kHz", "4.5 kHz", "0.56 kHz"], correct: "1.13 kHz", reference: "Eletrônica Básica, Cap. 6", explanation: "f = 1/(2π√(LC)) = 1/(2π√(0.01 × 2×10⁻⁶)) ≈ 1.13 kHz." },
+    { question: "Qual é a função de um diodo Schottky em circuitos?", options: ["Amplificar sinal", "Permitir alta tensão", "Comutação rápida", "Regular corrente"], correct: "Comutação rápida", reference: "Microelectronic Circuits, Cap. 4", explanation: "Diodos Schottky têm baixa queda de tensão e comutação rápida." },
+    { question: "Qual é a corrente em um circuito RC com R=5kΩ, C=2µF e V=15V após 2τ?", options: ["0.41 mA", "0.82 mA", "1.23 mA", "2.46 mA"], correct: "0.41 mA", reference: "Microelectronic Circuits, Cap. 6", explanation: "I = (V/R) × e⁻², τ = RC = 0.01s, I = (15/5000) × 0.135 ≈ 0.41 mA." },
+    { question: "Qual é a função de um microcontrolador em um sistema embarcado?", options: ["Executar programas", "Amplificar sinal", "Filtrar ruído", "Gerar tensão"], correct: "Executar programas", reference: "Eletrônica Básica, Cap. 8", explanation: "Microcontroladores executam instruções programadas." },
+    { question: "Qual é a tensão de saída de um divisor de tensão com R1=4kΩ, R2=6kΩ e V_in=25V?", options: ["15 V", "10 V", "20 V", "5 V"], correct: "15 V", reference: "Eletrônica Básica, Cap. 2", explanation: "V_out = V_in × (R2/(R1+R2)) = 25V × (6/(4+6)) = 15 V." },
+    { question: "Qual é a saída de uma porta AND com entradas 0 e 0?", options: ["1", "0", "Indefinido", "Inverso"], correct: "0", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta AND produz saída 0 se qualquer entrada for 0; 0 AND 0 = 0." },
+    { question: "Qual é a resistência equivalente de três resistores de 6kΩ em paralelo?", options: ["18 kΩ", "2 kΩ", "6 kΩ", "3 kΩ"], correct: "2 kΩ", reference: "Microelectronic Circuits, Cap. 4", explanation: "1/R_eq = 1/6 + 1/6 + 1/6 = 3/6, R_eq = 2 kΩ." },
+    { question: "Qual é a função de um filtro ativo em circuitos analógicos?", options: ["Amplificar e filtrar", "Regular tensão", "Armazenar carga", "Gerar clock"], correct: "Amplificar e filtrar", reference: "Microelectronic Circuits, Cap. 9", explanation: "Filtros ativos combinam amplificação com filtragem de frequência." },
+	
+	
+	 { question: "Qual é a função de um optoacoplador em um circuito?", options: ["Isolar sinais", "Amplificar tensão", "Filtrar ruído", "Gerar clock"], correct: "Isolar sinais", reference: "Eletrônica Básica, Cap. 4", explanation: "Optoacopladores isolam circuitos usando luz, protegendo contra diferenças de potencial." },
+    { question: "Qual é a tensão de saída de um amplificador operacional com ganho de 15 e entrada de 0.3V?", options: ["4.5 V", "1.5 V", "3 V", "6 V"], correct: "4.5 V", reference: "Microelectronic Circuits, Cap. 8", explanation: "V_out = Ganho × V_in = 15 × 0.3V = 4.5 V." },
+    { question: "Qual é a saída de uma porta OR com entradas 1 e 1?", options: ["0", "1", "Indefinido", "Inverso"], correct: "1", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta OR produz saída 1 se qualquer entrada for 1; 1 OR 1 = 1." },
+    { question: "Qual é a capacitância equivalente de três capacitores de 30µF em paralelo?", options: ["10 µF", "30 µF", "90 µF", "15 µF"], correct: "90 µF", reference: "Microelectronic Circuits, Cap. 6", explanation: "C_eq = C1 + C2 + C3 = 30µF + 30µF + 30µF = 90 µF." },
+    { question: "Qual é a frequência de corte de um filtro passa-baixa com R=500Ω e C=0.2µF?", options: ["1.59 kHz", "3.18 kHz", "0.8 kHz", "6.36 kHz"], correct: "1.59 kHz", reference: "Eletrônica Básica, Cap. 6", explanation: "f_c = 1/(2πRC) = 1/(2π × 500 × 0.2×10⁻⁶) ≈ 1.59 kHz." },
+    { question: "Qual é a corrente de emissor em um BJT com I_C=4mA e β=80?", options: ["0.05 mA", "4.05 mA", "3.95 mA", "4.5 mA"], correct: "4.05 mA", reference: "Microelectronic Circuits, Cap. 5", explanation: "I_E = I_C + I_B, I_B = I_C/β = 4/80 = 0.05mA, I_E = 4 + 0.05 = 4.05 mA." },
+    { question: "Qual é a função de um PLL em circuitos eletrônicos?", options: ["Filtrar ruído", "Gerar clock sincronizado", "Amplificar sinal", "Armazenar dados"], correct: "Gerar clock sincronizado", reference: "Eletrônica Básica, Cap. 6", explanation: "PLLs sincronizam frequências para gerar clocks estáveis." },
+    { question: "Qual é a tensão de saída de um diodo Zener de 3.3V em paralelo com uma carga?", options: ["5 V", "3.3 V", "2.7 V", "6 V"], correct: "3.3 V", reference: "Microelectronic Circuits, Cap. 4", explanation: "O diodo Zener mantém a tensão constante em 3.3 V quando polarizado." },
+    { question: "Qual é a saída de uma porta XOR com entradas 0 e 1?", options: ["0", "1", "Indefinido", "Inverso"], correct: "1", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta XOR produz saída 1 se as entradas forem diferentes; 0 XOR 1 = 1." },
+    { question: "Qual é a indutância equivalente de três indutores de 15mH em série?", options: ["45 mH", "15 mH", "5 mH", "30 mH"], correct: "45 mH", reference: "Microelectronic Circuits, Cap. 6", explanation: "L_eq = L1 + L2 + L3 = 15mH + 15mH + 15mH = 45 mH." },
+    { question: "Qual é a função de um IGBT em circuitos de potência?", options: ["Amplificar sinal", "Controlar alta corrente", "Filtrar frequência", "Armazenar carga"], correct: "Controlar alta corrente", reference: "Microelectronic Circuits, Cap. 7", explanation: "IGBTs combinam eficiência de MOSFETs e BJTs para controlar altas correntes." },
+    { question: "Qual é a tensão de saída de um divisor de tensão com R1=3kΩ, R2=7kΩ e V_in=20V?", options: ["14 V", "6 V", "8 V", "12 V"], correct: "14 V", reference: "Eletrônica Básica, Cap. 2", explanation: "V_out = V_in × (R2/(R1+R2)) = 20V × (7/(3+7)) = 14 V." },
+    { question: "Qual é a função de um shift register em circuitos digitais?", options: ["Deslocar bits", "Amplificar sinal", "Filtrar ruído", "Gerar clock"], correct: "Deslocar bits", reference: "Eletrônica Básica, Cap. 7", explanation: "Shift registers movem dados bit a bit em série ou paralelo." },
+    { question: "Qual é a corrente em um circuito RC com R=4kΩ, C=3µF e V=16V após 1τ?", options: ["1.47 mA", "2.94 mA", "0.73 mA", "4.41 mA"], correct: "1.47 mA", reference: "Microelectronic Circuits, Cap. 6", explanation: "I = (V/R) × e⁻¹, τ = RC = 0.012s, I = (16/4000) × 0.367 ≈ 1.47 mA." },
+    { question: "Qual é a função de um sensor de temperatura LM35?", options: ["Medir temperatura", "Amplificar sinal", "Filtrar frequência", "Gerar tensão"], correct: "Medir temperatura", reference: "Eletrônica Básica, Cap. 8", explanation: "O LM35 gera uma tensão proporcional à temperatura (10mV/°C)." },
+    { question: "Qual é a saída de uma porta NAND com entradas 0 e 1?", options: ["0", "1", "Indefinido", "Inverso"], correct: "1", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta NAND produz a negação de AND; 0 NAND 1 = NOT(0 AND 1) = 1." },
+    { question: "Qual é a resistência equivalente de três resistores de 12kΩ em paralelo?", options: ["36 kΩ", "4 kΩ", "12 kΩ", "6 kΩ"], correct: "4 kΩ", reference: "Microelectronic Circuits, Cap. 4", explanation: "1/R_eq = 1/12 + 1/12 + 1/12 = 3/12, R_eq = 4 kΩ." },
+    { question: "Qual é a função de um capacitor em um filtro passa-baixa?", options: ["Permitir altas frequências", "Bloquear altas frequências", "Amplificar sinal", "Regular tensão"], correct: "Bloquear altas frequências", reference: "Eletrônica Básica, Cap. 6", explanation: "Capacitores em filtros passa-baixa bloqueiam altas frequências e permitem baixas." },
+    { question: "Qual é a tensão de saída de um amplificador com ganho de 40 e entrada de 0.05V?", options: ["2 V", "1 V", "4 V", "0.5 V"], correct: "2 V", reference: "Microelectronic Circuits, Cap. 8", explanation: "V_out = Ganho × V_in = 40 × 0.05V = 2 V." },
+    { question: "Qual é a função de um varistor em um circuito?", options: ["Proteger contra surtos", "Amplificar sinal", "Filtrar ruído", "Armazenar carga"], correct: "Proteger contra surtos", reference: "Eletrônica Básica, Cap. 4", explanation: "Varistores limitam picos de tensão para proteger circuitos." },
+    { question: "Qual é a corrente de dreno em um MOSFET com V_GS=6V, V_th=3V e k=0.4mA/V²?", options: ["3.6 mA", "1.2 mA", "2.4 mA", "4.8 mA"], correct: "3.6 mA", reference: "Microelectronic Circuits, Cap. 5", explanation: "I_D = k × (V_GS - V_th)² = 0.4 × (6-3)² = 3.6 mA." },
+    { question: "Qual é a saída de uma porta NOR com entradas 1 e 0?", options: ["0", "1", "Indefinido", "Inverso"], correct: "0", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta NOR produz saída 0 se qualquer entrada for 1; 1 NOR 0 = 0." },
+    { question: "Qual é a capacitância equivalente de dois capacitores de 8µF em série?", options: ["16 µF", "4 µF", "8 µF", "2 µF"], correct: "4 µF", reference: "Microelectronic Circuits, Cap. 6", explanation: "1/C_eq = 1/8 + 1/8 = 2/8, C_eq = 4 µF." },
+    { question: "Qual é a função de um regulador de tensão LM317?", options: ["Gerar tensão ajustável", "Amplificar sinal", "Filtrar ruído", "Armazenar carga"], correct: "Gerar tensão ajustável", reference: "Eletrônica Básica, Cap. 4", explanation: "O LM317 fornece uma tensão de saída ajustável configurada por resistores." },
+    { question: "Qual é a frequência de ressonância de um circuito LC com L=8mH e C=5µF?", options: ["1.42 kHz", "2.84 kHz", "0.71 kHz", "5.68 kHz"], correct: "1.42 kHz", reference: "Eletrônica Básica, Cap. 6", explanation: "f = 1/(2π√(LC)) = 1/(2π√(0.008 × 5×10⁻⁶)) ≈ 1.42 kHz." },
+    { question: "Qual é a função de um TRIAC em circuitos de potência?", options: ["Controlar corrente AC", "Amplificar sinal", "Filtrar frequência", "Armazenar carga"], correct: "Controlar corrente AC", reference: "Microelectronic Circuits, Cap. 7", explanation: "TRIACs controlam corrente alternada em ambas as direções." },
+    { question: "Qual é a tensão de saída de um divisor de tensão com R1=6kΩ, R2=4kΩ e V_in=15V?", options: ["9 V", "6 V", "12 V", "3 V"], correct: "6 V", reference: "Eletrônica Básica, Cap. 2", explanation: "V_out = V_in × (R2/(R1+R2)) = 15V × (4/(6+4)) = 6 V." },
+    { question: "Qual é a saída de uma porta XNOR com entradas 1 e 1?", options: ["0", "1", "Indefinido", "Inverso"], correct: "1", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta XNOR produz saída 1 se as entradas forem iguais; 1 XNOR 1 = 1." },
+    { question: "Qual é a indutância equivalente de dois indutores de 12mH em paralelo?", options: ["6 mH", "12 mH", "24 mH", "3 mH"], correct: "6 mH", reference: "Microelectronic Circuits, Cap. 6", explanation: "1/L_eq = 1/12 + 1/12 = 2/12, L_eq = 6 mH." },
+    { question: "Qual é a função de um decodificador em circuitos digitais?", options: ["Converter código em saída", "Amplificar sinal", "Filtrar ruído", "Gerar clock"], correct: "Converter código em saída", reference: "Eletrônica Básica, Cap. 7", explanation: "Decodificadores convertem códigos binários em sinais de saída específicos." },
+    { question: "Qual é a corrente em um circuito RL com R=2kΩ, L=10mH e V=12V após 1τ?", options: ["2.2 mA", "1.1 mA", "3.3 mA", "0.55 mA"], correct: "2.2 mA", reference: "Microelectronic Circuits, Cap. 6", explanation: "I = (V/R) × (1-e⁻¹), τ = L/R = 5µs, I = (12/2000) × 0.367 ≈ 2.2 mA." },
+    { question: "Qual é a função de um conversor buck em eletrônica?", options: ["Reduzir tensão DC", "Aumentar tensão DC", "Converter AC em DC", "Filtrar ruído"], correct: "Reduzir tensão DC", reference: "Eletrônica Básica, Cap. 4", explanation: "Conversores buck diminuem a tensão DC de entrada." },
+    { question: "Qual é a tensão de saída de um amplificador diferencial com V1=3V, V2=2V e ganho de 8?", options: ["8 V", "16 V", "4 V", "12 V"], correct: "8 V", reference: "Microelectronic Circuits, Cap. 8", explanation: "V_out = Ganho × (V1 - V2) = 8 × (3-2) = 8 V." },
+    { question: "Qual é a função de uma memória RAM em sistemas digitais?", options: ["Armazenar dados temporariamente", "Amplificar sinal", "Filtrar frequência", "Gerar clock"], correct: "Armazenar dados temporariamente", reference: "Eletrônica Básica, Cap. 8", explanation: "RAM armazena dados voláteis durante o processamento." },
+    { question: "Qual é a frequência de corte de um filtro passa-alta com R=3kΩ e C=0.04µF?", options: ["1.33 kHz", "2.65 kHz", "0.66 kHz", "5.31 kHz"], correct: "1.33 kHz", reference: "Eletrônica Básica, Cap. 6", explanation: "f_c = 1/(2πRC) = 1/(2π × 3000 × 0.04×10⁻⁶) ≈ 1.33 kHz." },
+    { question: "Qual é a função de um fotodiodo em um circuito?", options: ["Detectar luz", "Emitir luz", "Amplificar sinal", "Regular tensão"], correct: "Detectar luz", reference: "Eletrônica Básica, Cap. 4", explanation: "Fotodiodos geram corrente proporcional à luz incidente." },
+    { question: "Qual é a corrente de coletor em um BJT com β=60 e I_B=0.2mA?", options: ["12 mA", "6 mA", "18 mA", "3 mA"], correct: "12 mA", reference: "Microelectronic Circuits, Cap. 5", explanation: "I_C = β × I_B = 60 × 0.2mA = 12 mA." },
+    { question: "Qual é a saída de uma porta NOT com entrada 0?", options: ["0", "1", "Indefinido", "Inverso"], correct: "1", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta NOT inverte a entrada; NOT 0 = 1." },
+    { question: "Qual é a capacitância equivalente de dois capacitores de 6µF em paralelo?", options: ["3 µF", "6 µF", "12 µF", "2 µF"], correct: "12 µF", reference: "Microelectronic Circuits, Cap. 6", explanation: "C_eq = C1 + C2 = 6µF + 6µF = 12 µF." },
+    { question: "Qual é a função de um temporizador 555 em modo monoestável?", options: ["Gerar pulso único", "Amplificar sinal", "Filtrar ruído", "Gerar onda contínua"], correct: "Gerar pulso único", reference: "Eletrônica Básica, Cap. 6", explanation: "O 555 em modo monoestável gera um pulso de duração definida." },
+    { question: "Qual é a tensão de saída de um amplificador com ganho de 30 e entrada de 0.2V?", options: ["3 V", "6 V", "9 V", "12 V"], correct: "6 V", reference: "Microelectronic Circuits, Cap. 8", explanation: "V_out = Ganho × V_in = 30 × 0.2V = 6 V." },
+    { question: "Qual é a função de um demultiplexador em circuitos digitais?", options: ["Distribuir sinal para saídas", "Amplificar sinal", "Filtrar frequência", "Armazenar dados"], correct: "Distribuir sinal para saídas", reference: "Eletrônica Básica, Cap. 7", explanation: "Demultiplexadores direcionam um sinal de entrada para uma saída selecionada." },
+    { question: "Qual é a frequência de ressonância de um circuito LC com L=6mH e C=3µF?", options: ["2.06 kHz", "4.12 kHz", "1.03 kHz", "8.24 kHz"], correct: "2.06 kHz", reference: "Eletrônica Básica, Cap. 6", explanation: "f = 1/(2π√(LC)) = 1/(2π√(0.006 × 3×10⁻⁶)) ≈ 2.06 kHz." },
+    { question: "Qual é a função de um diodo de roda livre em circuitos?", options: ["Proteger contra picos de tensão", "Amplificar sinal", "Filtrar ruído", "Regular corrente"], correct: "Proteger contra picos de tensão", reference: "Microelectronic Circuits, Cap. 4", explanation: "Diodos de roda livre dissipam energia de indutores, evitando picos." },
+    { question: "Qual é a corrente em um circuito RC com R=6kΩ, C=1µF e V=18V após 2τ?", options: ["0.41 mA", "0.81 mA", "1.22 mA", "2.44 mA"], correct: "0.41 mA", reference: "Microelectronic Circuits, Cap. 6", explanation: "I = (V/R) × e⁻², τ = RC = 0.006s, I = (18/6000) × 0.135 ≈ 0.41 mA." },
+    { question: "Qual é a função de um FPGA em sistemas eletrônicos?", options: ["Implementar lógica programável", "Amplificar sinal", "Filtrar ruído", "Gerar tensão"], correct: "Implementar lógica programável", reference: "Eletrônica Básica, Cap. 8", explanation: "FPGAs permitem configurar lógica digital personalizada." },
+    { question: "Qual é a tensão de saída de um divisor de tensão com R1=8kΩ, R2=2kΩ e V_in=30V?", options: ["6 V", "12 V", "18 V", "24 V"], correct: "6 V", reference: "Eletrônica Básica, Cap. 2", explanation: "V_out = V_in × (R2/(R1+R2)) = 30V × (2/(8+2)) = 6 V." },
+    { question: "Qual é a saída de uma porta AND com entradas 1 e 1?", options: ["0", "1", "Indefinido", "Inverso"], correct: "1", reference: "Eletrônica Básica, Cap. 7", explanation: "A porta AND produz saída 1 se todas as entradas forem 1; 1 AND 1 = 1." },
+    { question: "Qual é a resistência equivalente de dois resistores de 10kΩ em paralelo?", options: ["20 kΩ", "5 kΩ", "10 kΩ", "2.5 kΩ"], correct: "5 kΩ", reference: "Microelectronic Circuits, Cap. 4", explanation: "1/R_eq = 1/10 + 1/10 = 2/10, R_eq = 5 kΩ." },
+    { question: "Qual é a função de um filtro notch em circuitos analógicos?", options: ["Bloquear frequência específica", "Permitir todas frequências", "Amplificar sinal", "Regular tensão"], correct: "Bloquear frequência específica", reference: "Microelectronic Circuits, Cap. 9", explanation: "Filtros notch eliminam uma frequência específica do sinal." }
+        ];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function randomizeOptions(question) {
+            const options = shuffle([...question.options]);
+            const correctIndex = options.indexOf(question.correct);
+            return { ...question, options, correct: options[correctIndex] };
+        }
+
+        function updateQuestionCount() {
+            const totalQuestions = document.getElementById('totalQuestions');
+            totalQuestions.textContent = `Total de questões: ${quizData.length}`;
+        }
+
+        let shuffledQuizData = shuffle(quizData.map(randomizeOptions));
+        const quizContainer = document.getElementById('quiz');
+        let currentQuestion = 0;
+        let score = 0;
+
+        function renderQuestion() {
+            quizContainer.innerHTML = '';
+            const q = shuffledQuizData[currentQuestion];
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('question', 'active');
+            questionDiv.setAttribute('data-correct', q.correct);
+            questionDiv.setAttribute('data-explanation', q.explanation);
+            questionDiv.setAttribute('data-reference', q.reference);
+
+            const questionText = document.createElement('p');
+            questionText.textContent = q.question;
+            questionDiv.appendChild(questionText);
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.classList.add('options');
+            q.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                btn.setAttribute('data-value', option);
+                btn.textContent = option;
+                optionsDiv.appendChild(btn);
+            });
+
+            questionDiv.appendChild(optionsDiv);
+            quizContainer.appendChild(questionDiv);
+            setupQuestion();
+        }
+
+        function setupQuestion() {
+            const buttons = quizContainer.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('correct');
+                btn.addEventListener('click', handleAnswer, { once: true });
+            });
+        }
+
+        function handleAnswer(e) {
+            const selectedBtn = e.target;
+            const selectedValue = selectedBtn.getAttribute('data-value');
+            const currentQ = quizContainer.querySelector('.question');
+            const correctAnswer = currentQ.getAttribute('data-correct');
+            const explanation = currentQ.getAttribute('data-explanation');
+            const reference = currentQ.getAttribute('data-reference');
+
+            const buttons = currentQ.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedValue === correctAnswer) {
+                selectedBtn.classList.add('correct');
+                score++;
+                result.textContent = 'Correto!';
+            } else {
+                result.innerHTML = `Incorreto. A resposta correta é "${correctAnswer}".<br>${explanation}<br>(Fonte: ${reference})`;
+            }
+            nextBtn.style.display = 'inline-block';
+        }
+
+        const nextBtn = document.getElementById('nextBtn');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const result = document.getElementById('result');
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestion++;
+            if (currentQuestion < shuffledQuizData.length) {
+                renderQuestion();
+                nextBtn.style.display = 'none';
+                result.textContent = '';
+            } else {
+                result.textContent = `Quiz concluído! Você acertou ${score} de ${shuffledQuizData.length}!`;
+                nextBtn.style.display = 'none';
+                playAgainBtn.style.display = 'inline-block';
+            }
+        });
+
+        playAgainBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            score = 0;
+            shuffledQuizData = shuffle(quizData.map(randomizeOptions));
+            updateQuestionCount();
+            renderQuestion();
+            nextBtn.style.display = 'none';
+            playAgainBtn.style.display = 'none';
+            result.textContent = '';
+        });
+
+        // Initialize the question count on page load
+        updateQuestionCount();
+        renderQuestion();
+    </script>
+</body>
+</html>
