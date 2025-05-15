@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+	<link rel="icon" type="image/png" href="iconepq.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenseQuiz - Mecânica de Motocicletas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; text-align: center; }
+        .header { background-color: #2c3e50; color: white; padding: 20px; }
+        .header h1 { margin: 0; font-size: 2em; }
+        .header h2 { margin: 10px 0; font-size: 1.5em; }
+        .topics { margin: 20px 0; }
+        .topics ul { list-style: none; padding: 0; }
+        .topics li { display: inline; margin: 0 10px; font-size: 1.1em; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .question { margin: 20px 0; padding: 15px; background: #ecf0f1; border-radius: 5px; display: none; }
+        .question.active { display: block; }
+        .question p { margin: 0 0 15px; font-weight: bold; font-size: 1.2em; }
+        .options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .option-btn { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; flex: 1 1 45%; max-width: 200px; }
+        .option-btn:hover { background: #2980b9; }
+        .option-btn.correct { background: #27ae60; }
+        .option-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .button-container { margin: 20px 0; }
+        .next-btn { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; display: none; }
+        .next-btn:hover { background: #2980b9; }
+        #result { margin-top: 20px; font-size: 1.1em; line-height: 1.5; }
+        .footer { margin-top: 20px; font-size: 0.9em; color: #777; }
+        .action-btn { padding: 10px 20px; margin: 5px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .action-btn:hover { background: #2980b9; }
+        #totalQuestions { margin: 10px 0; font-size: 1.2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PenseQuiz - Mecânica de Motocicletas</h1>
+        <h2>Teste seus conhecimentos!</h2>
+        <p>Consulte o profissional da área específica</p>
+        <div class="topics">
+            <ul>
+                <li>Motores de Combustão</li>
+                <li>Sistemas de Transmissão</li>
+                <li>Freios</li>
+                <li>Manutenção Preventiva</li>
+                <li>Carburação</li>
+            </ul>
+        </div>
+    </div>
+    <div class="container">
+        <div id="totalQuestions"></div>
+        <div id="quiz"></div>
+        <div class="button-container">
+            <button class="next-btn" id="nextBtn">Próxima Questão</button>
+        </div>
+        <div id="result"></div>
+        <div class="button-container">
+            <button class="action-btn" id="playAgainBtn" style="display: none;">Jogar Novamente</button>
+            <button class="action-btn" onclick="window.location.href='index.html'">PenseQuiz</button>
+        </div>
+    </div>
+    <div class="footer">
+        <p>PenseQuiz</p>
+    </div>
+    <script>
+        const quizData = [
+            { question: "Qual é a função da válvula de admissão em um motor de motocicleta?", options: ["Controlar escape", "Permitir entrada de mistura", "Regular pressão", "Ajustar ignição"], correct: "Permitir entrada de mistura", reference: "Manual de Mecânica de Motocicletas, Cap. 2", explanation: "A válvula de admissão abre para permitir a entrada da mistura ar-combustível no cilindro." },
+            { question: "O que indica uma corrente de transmissão frouxa em uma motocicleta?", options: ["Ruído metálico", "Aumento de potência", "Desgaste do pneu", "Vibração do motor"], correct: "Ruído metálico", reference: "Fundamentos de Mecânica de Motos, Cap. 4", explanation: "Uma corrente frouxa provoca ruídos metálicos e pode desgastar a coroa e o pinhão." },
+            { question: "Qual é o fluido recomendado para o sistema de freio hidráulico de uma motocicleta?", options: ["Óleo de motor", "DOT 3 ou DOT 4", "Água destilada", "Lubrificante de corrente"], correct: "DOT 3 ou DOT 4", reference: "Manual de Mecânica de Motocicletas, Cap. 5", explanation: "Freios hidráulicos usam fluido DOT 3 ou DOT 4 para transmitir pressão sem corroer o sistema." },
+            { question: "Qual é a principal função do carburador em uma motocicleta?", options: ["Filtrar o ar", "Misturar ar e combustível", "Regular a ignição", "Refrigerar o motor"], correct: "Misturar ar e combustível", reference: "Fundamentos de Mecânica de Motos, Cap. 3", explanation: "O carburador mistura ar e combustível na proporção ideal para a combustão." },
+            { question: "Qual é o intervalo típico para troca de óleo em uma motocicleta 4 tempos?", options: ["Cada 500 km", "Cada 3.000 km", "Cada 10.000 km", "Cada 1 ano"], correct: "Cada 3.000 km", reference: "Manual de Mecânica de Motocicletas, Cap. 6", explanation: "A troca de óleo a cada 3.000 km mantém a lubrificação e prolonga a vida do motor." },
+           
+	{"question": "Qual é a função do bico injetor em uma motocicleta com injeção eletrônica? (Correta: Pulverizar combustível)","options": ["Regular a ignição","Pulverizar combustível","Filtrar o ar","Ajustar a suspensão"],"correct": "Pulverizar combustível","reference": "Manual de Mecânica de Motocicletas, Cap. 6","explanation": "O bico injetor pulveriza combustível no cilindro para a combustão na injeção eletrônica."},
+    {"question": "O que indica uma suspensão dianteira com óleo vazando? (Correta: Manchas no garfo)","options": ["Manhas no garfo","Ruído de corrente","Vibração do motor","Falha na ignição"],"correct": "Manhas no garfo","reference": "Guia de Manutenção de Motos, Cap. 7","explanation": "Vazamentos de óleo no garfo causam manchas visíveis e comprometem a suspensão."},
+    {"question": "Qual é a função do volante magnético em um motor de motocicleta? (Correta: Gerar eletricidade)","options": ["Filtrar o óleo","Controlar a embreagem","Gerar eletricidade","Ajustar a carburação"],"correct": "Gerar eletricidade","reference": "Fundamentos de Mecânica de Motos, Cap. 4","explanation": "O volante magnético gera eletricidade para o sistema elétrico da moto."},
+    {"question": "O que pode causar um carburador com mistura muito rica? (Correta: Excesso de combustível)","options": ["Filtro de ar limpo","Excesso de combustível","Pneu desbalanceado","Bateria descarregada"],"correct": "Excesso de combustível","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "Mistura rica ocorre quando há excesso de combustível em relação ao ar."},
+    {"question": "Qual é o intervalo típico para troca do filtro de ar? (Correta: Cada 6.000 km)","options": ["Cada 1.000 km","Cada 6.000 km","Cada 12.000 km","Cada 500 km"],"correct": "Cada 6.000 km","reference": "Guia de Manutenção de Motos, Cap. 2","explanation": "Trocar o filtro de ar a cada 6.000 km mantém a eficiência do motor."},
+    {"question": "Qual é a função da coroa na transmissão de uma motocicleta? (Correta: Transmitir potência à roda)","options": ["Regular a pressão","Transmitir potência à roda","Filtrar o óleo","Ajustar a suspensão"],"correct": "Transmitir potência à roda","reference": "Fundamentos de Mecânica de Motos, Cap. 4","explanation": "A coroa transfere a potência da corrente para a roda traseira."},
+    {"question": "O que indica pastilhas de freio gastas? (Correta: Ruído agudo ao frear)","options": ["Pedal esponjoso","Vibração do guidão","Ruído agudo ao frear","Luz de bateria acesa"],"correct": "Ruído agudo ao frear","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "Pastilhas gastas produzem um ruído agudo devido ao contato metálico."},
+    {"question": "Qual é a função do radiador em uma motocicleta? (Correta: Dissipar calor)","options": ["Aumentar a potência","Dissipar calor","Regular a ignição","Proteger a bateria"],"correct": "Dissipar calor","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "O radiador dissipa o calor do fluido de arrefecimento para evitar superaquecimento."},
+    {"question": "O que pode causar uma embreagem patinando? (Correta: Discos desgastados)","options": ["Pneu furado","Discos desgastados","Filtro de ar sujo","Corrente esticada"],"correct": "Discos desgastados","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "Discos de embreagem desgastados reduzem a fricção, causando patinação."},
+    {"question": "Qual é a função da biela em um motor de motocicleta? (Correta: Conectar pistão ao virabrequim)","options": ["Filtrar o combustível","Conectar pistão ao virabrequim","Regular a pressão","Ajustar a corrente"],"correct": "Conectar pistão ao virabrequim","reference": "Manual de Mecânica de Motocicletas, Cap. 1","explanation": "A biela transmite o movimento do pistão ao virabrequim."},
+    {"question": "O que indica uma bateria com baixa carga? (Correta: Partida fraca)","options": ["Partida fraca","Ruído de corrente","Pneu desgastado","Falha na carburação"],"correct": "Partida fraca","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Uma bateria com baixa carga resulta em partidas fracas ou inexistentes."},
+    {"question": "Qual é a função do sensor de oxigênio em uma motocicleta? (Correta: Monitorar gases de escape)","options": ["Controlar a suspensão","Regular a pressão","Monitorar gases de escape","Ajustar a embreagem"],"correct": "Monitorar gases de escape","reference": "Fundamentos de Mecânica de Motos, Cap. 6","explanation": "O sensor de oxigênio ajusta a mistura com base nos gases de escape."},
+    {"question": "O que pode causar um pneu traseiro desgastado no centro? (Correta: Pressão alta)","options": ["Pressão alta","Corrente frouxa","Filtro de óleo sujo","Vela defeituosa"],"correct": "Pressão alta","reference": "Manual de Mecânica de Motocicletas, Cap. 6","explanation": "Pressão alta faz o pneu desgastar mais no centro devido ao contato excessivo."},
+    {"question": "Qual é a função do eixo de comando de válvulas? (Correta: Controlar abertura das válvulas)","options": ["Filtrar o ar","Ajustar a corrente","Controlar abertura das válvulas","Regular a ignição"],"correct": "Controlar abertura das válvulas","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "O eixo de comando regula o tempo de abertura e fechamento das válvulas."},
+    {"question": "O que indica um sistema de arrefecimento com baixo nível de fluido? (Correta: Superaquecimento)","options": ["Vibração do guidão","Superaquecimento","Ruído de corrente","Falha na ignição"],"correct": "Superaquecimento","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "Baixo nível de fluido reduz a capacidade de dissipar calor, causando superaquecimento."},
+    {"question": "Qual é a função do regulador de voltagem em uma motocicleta? (Correta: Estabilizar a tensão elétrica)","options": ["Filtrar o combustível","Estabilizar a tensão elétrica","Ajustar a suspensão","Regular a carburação"],"correct": "Estabilizar a tensão elétrica","reference": "Manual de Manutenção de Motocicletas, Cap. 4","explanation": "O regulador mantém a tensão elétrica estável para proteger o sistema."},
+    {"question": "O que pode causar uma marcha lenta irregular? (Correta: Ajuste incorreto do carburador)","options": ["Pneu desbalanceado","Ajuste incorreto do carburador","Bateria carregada","Corrente esticada"],"correct": "Ajuste incorreto do carburador","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Ajuste incorreto do carburador afeta a mistura, causando marcha lenta irregular."},
+    {"question": "Qual é o intervalo recomendado para lubrificação da corrente? (Correta: Cada 500 km)","options": ["Cada 500 km","Cada 3.000 km","Cada 10.000 km","Cada 1.000 km"],"correct": "Cada 500 km","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Lubrificar a corrente a cada 500 km reduz o desgaste e melhora a transmissão."},
+    {"question": "Qual é a função do pinhão na transmissão de uma motocicleta? (Correta: Transferir potência à corrente)","options": ["Regular a pressão","Filtrar o óleo","Transferir potência à corrente","Ajustar a embreagem"],"correct": "Transferir potência à corrente","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "O pinhão transfere a potência do motor para a corrente de transmissão."},
+    {"question": "O que indica um disco de freio empenado? (Correta: Vibração ao frear)","options": ["Ruído de corrente","Vibração ao frear","Luz de bateria acesa","Falha na ignição"],"correct": "Vibração ao frear","reference": "Guia de Manutenção de Motos, Cap. 8","explanation": "Um disco empenado causa vibrações perceptíveis ao acionar o freio."},
+    {"question": "Qual é a função do coletor de admissão? (Correta: Direcionar mistura ao cilindro)","options": ["Filtrar o ar","Direcionar mistura ao cilindro","Regular a pressão","Ajustar a suspensão"],"correct": "Direcionar mistura ao cilindro","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "O coletor de admissão guia a mistura ar-combustível para o cilindro."},
+    {"question": "O que pode causar perda de potência em uma motocicleta? (Correta: Filtro de ar sujo)","options": ["Pneu furado","Filtro de ar sujo","Bateria nova","Corrente lubrificada"],"correct": "Filtro de ar sujo","reference": "Fundamentos de Mecânica de Motos, Cap. 2","explanation": "Um filtro de ar sujo restringe o fluxo de ar, reduzindo a potência."},
+    {"question": "Qual é a função do manete de embreagem? (Correta: Acionar a embreagem)","options": ["Regular a ignição","Filtrar o óleo","Ajustar a corrente","Acionar a embreagem"],"correct": "Acionar a embreagem","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "O manete aciona a embreagem para engatar ou desengatar a transmissão."},
+    {"question": "O que indica um problema na suspensão traseira? (Correta: Instabilidade em curvas)","options": ["Ruído de corrente","Falha na ignição","Instabilidade em curvas","Luz de bateria acesa"],"correct": "Instabilidade em curvas","reference": "Guia de Manutenção de Motos, Cap. 7","explanation": "Suspensão traseira defeituosa causa instabilidade, especialmente em curvas."},
+    {"question": "Qual é a função do escapamento em uma motocicleta? (Correta: Liberar gases e reduzir ruído)","options": ["Aumentar a potência","Filtrar o ar","Liberar gases e reduzir ruído","Regular a pressão"],"correct": "Liberar gases e reduzir ruído","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "O escapamento libera gases de combustão e reduz o ruído do motor."},
+    {"question": "O que pode causar um motor batendo? (Correta: Combustível de baixa qualidade)","options": ["Pneu desbalanceado","Combustível de baixa qualidade","Filtro de óleo novo","Corrente frouxa"],"correct": "Combustível de baixa qualidade","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "Combustível de baixa qualidade causa detonação, levando a batidas no motor."},
+    {"question": "Qual é o intervalo para verificar a pressão dos pneus? (Correta: Semanalmente)","options": ["Semanalmente","Cada 3.000 km","Cada 10.000 km","Cada 6 meses"],"correct": "Semanalmente","reference": "Guia de Manutenção de Motos, Cap. 6","explanation": "Verificar a pressão semanalmente garante segurança e durabilidade dos pneus."},
+    {"question": "Qual é a função do pedal de freio traseiro? (Correta: Acionar o freio traseiro)","options": ["Regular a ignição","Acionar o freio traseiro","Filtrar o combustível","Ajustar a embreagem"],"correct": "Acionar o freio traseiro","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "O pedal aciona o freio traseiro para desacelerar ou parar a moto."},
+    {"question": "O que indica um problema no sistema de injeção eletrônica? (Correta: Marcha lenta irregular)","options": ["Pneu furado","Vibração do guidão","Marcha lenta irregular","Corrente esticada"],"correct": "Marcha lenta irregular","reference": "Fundamentos de Mecânica de Motos, Cap. 6","explanation": "Injeção eletrônica defeituosa causa irregularidades na marcha lenta."},
+    {"question": "Qual é a função do tensor da corrente? (Correta: Ajustar a tensão da corrente)","options": ["Filtrar o óleo","Ajustar a tensão da corrente","Regular a pressão","Aumentar a potência"],"correct": "Ajustar a tensão da corrente","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "O tensor mantém a corrente na tensão correta para evitar desgaste."},
+    {"question": "O que pode causar um freio traseiro com pouca eficiência? (Correta: Lonas gastas)","options": ["Bateria descarregada","Lonas gastas","Filtro de ar limpo","Pneu desbalanceado"],"correct": "Lonas gastas","reference": "Guia de Manutenção de Motos, Cap. 8","explanation": "Lonas gastas reduzem a capacidade de frenagem no freio a tambor."},
+
+
+
+	{"question": "Qual é a função do retentor no garfo da suspensão?","options": ["Evitar vazamento de óleo","Regular a pressão","Filtrar o ar","Ajustar a corrente"],"correct": "Evitar vazamento de óleo","reference": "Guia de Manutenção de Motos, Cap. 7","explanation": "O retentor impede que o óleo do garfo vaze, mantendo a suspensão funcional."},
+    {"question": "O que pode indicar um carburador com mistura muito pobre?","options": ["Pneu desbalanceado","Falhas em alta rotação","Bateria descarregada","Corrente frouxa"],"correct": "Falhas em alta rotação","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Mistura pobre, com pouco combustível, causa falhas em altas rotações."},
+    {"question": "Qual é a função do estator em uma motocicleta?","options": ["Filtrar o combustível","Ajustar a embreagem","Gerar corrente alternada","Regular a suspensão"],"correct": "Gerar corrente alternada","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "O estator gera corrente alternada para o sistema elétrico da moto."},
+    {"question": "O que indica um pneu com desgaste lateral excessivo?","options": ["Pressão baixa","Filtro de ar sujo","Vela defeituosa","Corrente esticada"],"correct": "Pressão baixa","reference": "Guia de Manutenção de Motos, Cap. 6","explanation": "Pressão baixa faz o pneu desgastar mais nas laterais devido ao contato desigual."},
+    {"question": "Qual é o intervalo recomendado para troca do fluido de freio?","options": ["Cada 6 meses","Cada 2 anos","Cada 5.000 km","Cada 10.000 km"],"correct": "Cada 2 anos","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "O fluido de freio deve ser trocado a cada 2 anos para evitar corrosão e manter a eficiência."},
+    {"question": "Qual é a função do rolamento da roda?","options": ["Regular a pressão","Filtrar o óleo","Reduzir atrito na rotação","Ajustar a embreagem"],"correct": "Reduzir atrito na rotação","reference": "Fundamentos de Mecânica de Motos, Cap. 6","explanation": "O rolamento permite que a roda gire com menos atrito, melhorando a eficiência."},
+    {"question": "O que indica um problema no cabo de embreagem?","options": ["Ruído de corrente","Embreagem pesada","Vibração do guidão","Falha na ignição"],"correct": "Embreagem pesada","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "Um cabo de embreagem desgastado ou mal ajustado torna a embreagem pesada."},
+    {"question": "Qual é a função do filtro de combustível?","options": ["Aumentar a potência","Remover impurezas do combustível","Regular a ignição","Proteger a bateria"],"correct": "Remover impurezas do combustível","reference": "Guia de Manutenção de Motos, Cap. 2","explanation": "O filtro de combustível impede que sujeiras cheguem ao motor, protegendo o sistema."},
+    {"question": "O que pode causar um motor com fumaça branca no escapamento?","options": ["Pneu furado","Óleo no cilindro","Filtro de ar limpo","Corrente lubrificada"],"correct": "Óleo no cilindro","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "Óleo queimando no cilindro produz fumaça branca, indicando desgaste interno."},
+    {"question": "Qual é a função do balanceiro em um motor de motocicleta?","options": ["Filtrar o óleo","Acionar as válvulas","Regular a pressão","Ajustar a corrente"],"correct": "Acionar as válvulas","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "O balanceiro transmite o movimento do comando para abrir e fechar as válvulas."},
+    {"question": "O que indica uma corrente mal lubrificada?","options": ["Desgaste acelerado","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Desgaste acelerado","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Falta de lubrificação aumenta o atrito, desgastando a corrente rapidamente."},
+    {"question": "Qual é a função do módulo de ignição?","options": ["Regular a suspensão","Controlar a faísca","Filtrar o ar","Ajustar a embreagem"],"correct": "Controlar a faísca","reference": "Fundamentos de Mecânica de Motos, Cap. 4","explanation": "O módulo de ignição gerencia o tempo da faísca para a combustão."},
+    {"question": "O que pode causar uma roda desalinhada?","options": ["Impacto em buracos","Filtro de óleo sujo","Vela nova","Corrente frouxa"],"correct": "Impacto em buracos","reference": "Manual de Mecânica de Motocicletas, Cap. 6","explanation": "Impactos em buracos podem desalinhar a roda, afetando a estabilidade."},
+    {"question": "Qual é a função do cilindro no motor?","options": ["Filtrar o ar","Alojar o pistão","Regular a ignição","Ajustar a suspensão"],"correct": "Alojar o pistão","reference": "Manual de Mecânica de Motocicletas, Cap. 1","explanation": "O cilindro é a câmara onde o pistão se move para a combustão."},
+    {"question": "O que indica um sistema elétrico com fusível queimado?","options": ["Vibração do guidão","Falha em componentes elétricos","Ruído de corrente","Superaquecimento"],"correct": "Falha em componentes elétricos","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Um fusível queimado interrompe a corrente, causando falhas elétricas."},
+    {"question": "Qual é a função do tubo de respiro do motor?","options": ["Filtrar o combustível","Liberar gases do cárter","Ajustar a embreagem","Regular a carburação"],"correct": "Liberar gases do cárter","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "O tubo de respiro alivia a pressão de gases acumulados no cárter."},
+    {"question": "O que pode causar um guidão desalinhado?","options": ["Pneu desbalanceado","Colisão ou queda","Filtro de ar sujo","Bateria nova"],"correct": "Colisão ou queda","reference": "Manual de Mecânica de Motocicletas, Cap. 7","explanation": "Colisões ou quedas podem desalinhar o guidão, afetando a dirigibilidade."},
+    {"question": "Qual é o intervalo para verificar o alinhamento da roda?","options": ["Cada 1.000 km","Cada 3.000 km","Cada 10.000 km","Cada 500 km"],"correct": "Cada 3.000 km","reference": "Guia de Manutenção de Motos, Cap. 6","explanation": "Verificar o alinhamento a cada 3.000 km garante estabilidade e segurança."},
+    {"question": "Qual é a função do disco de embreagem?","options": ["Regular a pressão","Transmitir potência","Filtrar o óleo","Ajustar a corrente"],"correct": "Transmitir potência","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "Os discos de embreagem transmitem a potência do motor para a transmissão."},
+    {"question": "O que indica um freio com ar no sistema hidráulico?","options": ["Ruído de corrente","Pedal esponjoso","Luz de bateria acesa","Falha na ignição"],"correct": "Pedal esponjoso","reference": "Guia de Manutenção de Motos, Cap. 8","explanation": "Ar no sistema hidráulico torna o pedal esponjoso, reduzindo a eficiência."},
+    {"question": "Qual é a função do acelerador em uma motocicleta?","options": ["Filtrar o ar","Controlar a entrada de mistura","Regular a pressão","Ajustar a suspensão"],"correct": "Controlar a entrada de mistura","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "O acelerador regula a quantidade de mistura ar-combustível enviada ao motor."},
+    {"question": "O que pode causar fumaça preta no escapamento?","options": ["Pneu furado","Mistura muito rica","Bateria descarregada","Corrente lubrificada"],"correct": "Mistura muito rica","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "Mistura rica com excesso de combustível produz fumaça preta."},
+    {"question": "Qual é a função do amortecedor traseiro?","options": ["Regular a ignição","Absorver impactos","Filtrar o combustível","Ajustar a embreagem"],"correct": "Absorver impactos","reference": "Guia de Manutenção de Motos, Cap. 7","explanation": "O amortecedor traseiro absorve impactos para maior conforto e estabilidade."},
+    {"question": "O que indica um problema no rolamento da roda?","options": ["Falha na ignição","Ruído ao girar","Vibração do guidão","Corrente esticada"],"correct": "Ruído ao girar","reference": "Manual de Mecânica de Motocicletas, Cap. 6","explanation": "Rolamentos desgastados produzem ruídos ao girar a roda."},
+    {"question": "Qual é a função do tanque de combustível?","options": ["Aumentar a potência","Armazenar combustível","Regular a pressão","Filtrar o ar"],"correct": "Armazenar combustível","reference": "Fundamentos de Mecânica de Motos, Cap. 2","explanation": "O tanque armazena o combustível necessário para o funcionamento do motor."},
+    {"question": "O que pode causar um motor com baixa compressão?","options": ["Pneu desbalanceado","Anéis de pistão desgastados","Filtro de óleo novo","Corrente frouxa"],"correct": "Anéis de pistão desgastados","reference": "Manual de Mecânica de Motocicletas, Cap. 1","explanation": "Anéis desgastados reduzem a compressão, afetando a potência."},
+    {"question": "Qual é o intervalo para verificar a folga da corrente?","options": ["Cada 500 km","Cada 3.000 km","Cada 10.000 km","Cada 1.000 km"],"correct": "Cada 500 km","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Verificar a folga a cada 500 km evita desgaste e mantém a transmissão eficiente."},
+    {"question": "Qual é a função do manete de freio dianteiro?","options": ["Regular a ignição","Acionar o freio dianteiro","Filtrar o óleo","Ajustar a corrente"],"correct": "Acionar o freio dianteiro","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "O manete aciona o freio dianteiro para desacelerar ou parar a moto."},
+    {"question": "O que indica um problema no sensor de temperatura?","options": ["Pneu furado","Leitura incorreta no painel","Vibração do guidão","Corrente esticada"],"correct": "Leitura incorreta no painel","reference": "Fundamentos de Mecânica de Motos, Cap. 6","explanation": "Um sensor de temperatura defeituoso mostra leituras erradas no painel."},
+    {"question": "Qual é a função da junta de vedação do motor?","options": ["Regular a pressão","Evitar vazamentos","Filtrar o ar","Ajustar a embreagem"],"correct": "Evitar vazamentos","reference": "Manual de Mecânica de Motocicletas, Cap. 1","explanation": "A junta de vedação impede vazamentos de óleo ou gases no motor."},
+    {"question": "O que pode causar um freio dianteiro com pouca eficiência?","options": ["Bateria descarregada","Pastilhas desgastadas","Filtro de ar limpo","Pneu desbalanceado"],"correct": "Pastilhas desgastadas","reference": "Guia de Manutenção de Motos, Cap. 8","explanation": "Pastilhas desgastadas reduzem a capacidade de frenagem no freio a disco."},
+    {"question": "Qual é a função do sistema de lubrificação?","options": ["Aumentar a potência","Reduzir atrito nas peças","Regular a ignição","Filtrar o ar"],"correct": "Reduzir atrito nas peças","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "O sistema de lubrificação usa óleo para reduzir o atrito e o desgaste das peças."},
+    {"question": "O que indica um problema no cabo do acelerador?","options": ["Falha na ignição","Aceleração irregular","Ruído de corrente","Luz de bateria acesa"],"correct": "Aceleração irregular","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "Um cabo do acelerador desgastado causa aceleração irregular ou travada."},
+    {"question": "Qual é a função do radiador de óleo?","options": ["Filtrar o combustível","Resfriar o óleo do motor","Ajustar a suspensão","Regular a carburação"],"correct": "Resfriar o óleo do motor","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "O radiador de óleo dissipa o calor do óleo, mantendo a lubrificação eficiente."},
+    {"question": "O que pode causar um motor com fumaça azul?","options": ["Pneu desbalanceado","Queima de óleo","Filtro de ar sujo","Corrente frouxa"],"correct": "Queima de óleo","reference": "Manual de Mecânica de Motocicletas, Cap. 5","explanation": "Fumaça azul indica que óleo está sendo queimado no cilindro."},
+    {"question": "Qual é a função do regulador de marcha lenta?","options": ["Filtrar o ar","Ajustar rotação mínima","Regular a pressão","Ajustar a suspensão"],"correct": "Ajustar rotação mínima","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "O regulador de marcha lenta ajusta a rotação mínima do motor em repouso."},
+    {"question": "O que indica um problema no tensor de corrente?","options": ["Vibração do guidão","Corrente frouxa ou esticada","Falha na ignição","Luz de bateria acesa"],"correct": "Corrente frouxa ou esticada","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Um tensor defeituoso causa tensão incorreta na corrente."},
+    {"question": "Qual é a função do carburador de aceleração?","options": ["Regular a ignição","Fornecer mistura em aceleração","Filtrar o óleo","Ajustar a corrente"],"correct": "Fornecer mistura em aceleração","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "O carburador de aceleração fornece mistura extra durante acelerações rápidas."},
+    {"question": "O que pode causar um pneu com desgaste irregular?","options": ["Bateria descarregada","Suspensão desalinhada","Filtro de ar limpo","Vela nova"],"correct": "Suspensão desalinhada","reference": "Guia de Manutenção de Motos, Cap. 6","explanation": "Suspensão desalinhada causa desgaste desigual nos pneus."},
+    {"question": "Qual é a função do sistema de ignição?","options": ["Filtrar o combustível","Iniciar a combustão","Ajustar a embreagem","Regular a suspensão"],"correct": "Iniciar a combustão","reference": "Fundamentos de Mecânica de Motos, Cap. 4","explanation": "O sistema de ignição gera a faísca para iniciar a combustão no motor."},
+    {"question": "O que indica um problema no alternador?","options": ["Pneu furado","Bateria não carrega","Vibração do guidão","Corrente esticada"],"correct": "Bateria não carrega","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "Um alternador defeituoso não gera energia suficiente para carregar a bateria."},
+		   
+	
+
+	{"question": "Qual é a função da bomba de óleo em um motor de motocicleta?","options": ["Filtrar o combustível","Circular o óleo lubrificante","Regular a ignição","Ajustar a suspensão"],"correct": "Circular o óleo lubrificante","reference": "Manual de Mecânica de Motocicletas, Cap. 5","explanation": "A bomba de óleo circula o lubrificante para reduzir o atrito nas partes móveis do motor."},
+    {"question": "O que pode indicar um problema na bomba de combustível?","options": ["Falhas na aceleração","Pneu desbalanceado","Corrente frouxa","Bateria descarregada"],"correct": "Falhas na aceleração","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Uma bomba de combustível defeituosa causa falhas na entrega de combustível, afetando a aceleração."},
+    {"question": "Qual é a função do relé de partida em uma motocicleta?","options": ["Controlar a suspensão","Proteger o motor de partida","Filtrar o ar","Ajustar a embreagem"],"correct": "Proteger o motor de partida","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "O relé de partida controla a corrente para o motor de partida, protegendo o sistema elétrico."},
+    {"question": "O que pode causar um carburador transbordando?","options": ["Vela nova","Boia defeituosa","Pneu furado","Filtro de óleo limpo"],"correct": "Boia defeituosa","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "Uma boia defeituosa não regula o nível de combustível, causando transbordo no carburador."},
+    {"question": "Qual é o intervalo recomendado para troca das velas de ignição?","options": ["Cada 3.000 km","Cada 12.000 km","Cada 1.000 km","Cada 20.000 km"],"correct": "Cada 12.000 km","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Trocas a cada 12.000 km garantem ignição eficiente e bom desempenho do motor."},
+    {"question": "Qual é a função da alavanca de câmbio?","options": ["Regular a pressão","Trocar as marchas","Filtrar o óleo","Ajustar a corrente"],"correct": "Trocar as marchas","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "A alavanca de câmbio permite selecionar as marchas para ajustar a transmissão."},
+    {"question": "O que indica um freio a tambor mal ajustado?","options": ["Ruído ao frear","Vibração do guidão","Luz de bateria acesa","Falha na ignição"],"correct": "Ruído ao frear","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "Um freio a tambor mal ajustado causa ruídos devido ao contato irregular das lonas."},
+    {"question": "Qual é a função do sensor de posição do acelerador?","options": ["Monitorar a abertura do acelerador","Aumentar a potência","Filtrar o combustível","Regular a suspensão"],"correct": "Monitorar a abertura do acelerador","reference": "Fundamentos de Mecânica de Motos, Cap. 6","explanation": "O sensor informa à central eletrônica a posição do acelerador para ajustar a mistura."},
+    {"question": "O que pode causar uma suspensão dianteira muito rígida?","options": ["Óleo viscoso demais","Pneu desbalanceado","Corrente esticada","Filtro de ar sujo"],"correct": "Óleo viscoso demais","reference": "Guia de Manutenção de Motos, Cap. 7","explanation": "Óleo muito viscoso no garfo torna a suspensão rígida, reduzindo o conforto."},
+    {"question": "Qual é a função do cabeçote no motor?","options": ["Alojar válvulas e câmara de combustão","Filtrar o óleo","Regular a pressão","Ajustar a corrente"],"correct": "Alojar válvulas e câmara de combustão","reference": "Manual de Mecânica de Motocicletas, Cap. 1","explanation": "O cabeçote contém as válvulas e a câmara onde ocorre a combustão."},
+    {"question": "O que indica uma bateria sobrecarregada?","options": ["Vazamento de eletrólito","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Vazamento de eletrólito","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Sobrecarga causa superaquecimento da bateria, levando a vazamentos de eletrólito."},
+    {"question": "Qual é a função do cabo de vela?","options": ["Regular a suspensão","Conduzir alta voltagem à vela","Filtrar o ar","Ajustar a embreagem"],"correct": "Conduzir alta voltagem à vela","reference": "Fundamentos de Mecânica de Motos, Cap. 4","explanation": "O cabo de vela leva a corrente de alta voltagem da bobina à vela de ignição."},
+    {"question": "O que pode causar uma corrente com elos travados?","options": ["Falta de lubrificação","Filtro de óleo sujo","Vela nova","Pneu desbalanceado"],"correct": "Falta de lubrificação","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "Falta de lubrificação causa travamento dos elos, comprometendo a transmissão."},
+    {"question": "Qual é a função do sistema de exaustão?","options": ["Filtrar o ar","Liberar gases e reduzir ruído","Regular a ignição","Ajustar a suspensão"],"correct": "Liberar gases e reduzir ruído","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "O sistema de exaustão libera gases de combustão e reduz o ruído do motor."},
+    {"question": "O que indica um problema no regulador de voltagem?","options": ["Luzes piscando","Superaquecimento","Ruído de corrente","Falha na ignição"],"correct": "Luzes piscando","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Um regulador de voltagem defeituoso causa flutuações na tensão, fazendo luzes piscarem."},
+    {"question": "Qual é a função do gicleur principal no carburador?","options": ["Controlar a mistura em alta rotação","Filtrar o combustível","Regular a pressão","Ajustar a corrente"],"correct": "Controlar a mistura em alta rotação","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "O gicleur principal regula o fluxo de combustível em altas rotações."},
+    {"question": "O que pode causar um motor com alto consumo de combustível?","options": ["Pneu furado","Ajuste incorreto do carburador","Bateria nova","Corrente lubrificada"],"correct": "Ajuste incorreto do carburador","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Um carburador mal ajustado pode fornecer mistura rica, aumentando o consumo."},
+    {"question": "Qual é o intervalo para verificar o nível de fluido de arrefecimento?","options": ["Cada 500 km","Cada 2.000 km","Cada 10.000 km","Cada 6 meses"],"correct": "Cada 2.000 km","reference": "Guia de Manutenção de Motos, Cap. 5","explanation": "Verificar o fluido a cada 2.000 km evita superaquecimento do motor."},
+    {"question": "Qual é a função do eixo traseiro?","options": ["Regular a pressão","Suportar a roda traseira","Filtrar o óleo","Ajustar a embreagem"],"correct": "Suportar a roda traseira","reference": "Manual de Mecânica de Motocicletas, Cap. 6","explanation": "O eixo traseiro fixa e suporta a roda traseira, transmitindo potência."},
+    {"question": "O que indica um disco de freio com desgaste excessivo?","options": ["Vibração ao frear","Ruído de corrente","Luz de bateria acesa","Falha na ignição"],"correct": "Vibração ao frear","reference": "Guia de Manutenção de Motos, Cap. 8","explanation": "Discos desgastados causam vibrações ao frear devido à superfície irregular."},
+    {"question": "Qual é a função da válvula de retenção no sistema de freio?","options": ["Filtrar o fluido","Manter a pressão no sistema","Regular a ignição","Ajustar a suspensão"],"correct": "Manter a pressão no sistema","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "A válvula de retenção mantém a pressão hidráulica para uma frenagem eficiente."},
+    {"question": "O que pode causar uma embreagem com ruído ao engatar?","options": ["Pneu desbalanceado","Molas de embreagem fracas","Filtro de ar limpo","Corrente frouxa"],"correct": "Molas de embreagem fracas","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Molas fracas causam folga, produzindo ruídos ao engatar a embreagem."},
+    {"question": "Qual é a função do suporte do motor?","options": ["Filtrar o óleo","Fixar o motor ao chassi","Regular a pressão","Ajustar a corrente"],"correct": "Fixar o motor ao chassi","reference": "Manual de Mecânica de Motocicletas, Cap. 1","explanation": "O suporte fixa o motor ao chassi, garantindo estabilidade e alinhamento."},
+    {"question": "O que indica um problema no sensor de velocidade?","options": ["Velocímetro impreciso","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Velocímetro impreciso","reference": "Guia de Manutenção de Motos, Cap. 6","explanation": "Um sensor de velocidade defeituoso causa leituras erradas no velocímetro."},
+    {"question": "Qual é a função do tubo de alimentação do carburador?","options": ["Liberar gases","Conduzir combustível ao carburador","Regular a ignição","Ajustar a suspensão"],"correct": "Conduzir combustível ao carburador","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "O tubo de alimentação leva combustível do tanque ao carburador."},
+    {"question": "O que pode causar um motor com superaquecimento em baixa velocidade?","options": ["Ventilador do radiador defeituoso","Pneu furado","Bateria nova","Corrente lubrificada"],"correct": "Ventilador do radiador defeituoso","reference": "Manual de Mecânica de Motocicletas, Cap. 5","explanation": "Um ventilador defeituoso reduz o resfriamento em baixa velocidade, causando superaquecimento."},
+    {"question": "Qual é o intervalo para verificar a tensão da corrente?","options": ["Cada 500 km","Cada 3.000 km","Cada 10.000 km","Cada 1.000 km"],"correct": "Cada 500 km","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Verificar a tensão a cada 500 km evita desgaste e mantém a transmissão eficiente."},
+    {"question": "Qual é a função do pedal de partida em motos com partida a pedal?","options": ["Regular a ignição","Acionar o motor","Filtrar o óleo","Ajustar a corrente"],"correct": "Acionar o motor","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "O pedal de partida gira o motor para iniciar a combustão."},
+    {"question": "O que indica um problema no sistema de carga elétrica?","options": ["Bateria descarregando rápido","Pneu desbalanceado","Vibração do guidão","Corrente esticada"],"correct": "Bateria descarregando rápido","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Um sistema de carga defeituoso não recarrega a bateria, causando descarga rápida."},
+    {"question": "Qual é a função da mangueira de retorno de combustível?","options": ["Filtrar o ar","Retornar excesso de combustível ao tanque","Regular a pressão","Ajustar a suspensão"],"correct": "Retornar excesso de combustível ao tanque","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "A mangueira de retorno leva o combustível excedente de volta ao tanque."},
+    {"question": "O que pode causar um freio traseiro travando?","options": ["Pino da pinça preso","Filtro de ar limpo","Bateria descarregada","Pneu desbalanceado"],"correct": "Pino da pinça preso","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "Um pino da pinça preso impede que o freio libere, causando travamento."},
+    {"question": "Qual é a função do anel de vedação do pistão?","options": ["Aumentar a potência","Vedar a câmara de combustão","Regular a ignição","Filtrar o óleo"],"correct": "Vedar a câmara de combustão","reference": "Fundamentos de Mecânica de Motos, Cap. 1","explanation": "O anel de vedação garante a compressão ao selar a câmara de combustão."},
+    {"question": "O que indica um problema na corrente de comando?","options": ["Ruído no motor","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Ruído no motor","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "Uma corrente de comando frouxa ou desgastada causa ruídos no motor."},
+    {"question": "Qual é a função do bujão de drenagem do cárter?","options": ["Regular a suspensão","Permitir a troca de óleo","Filtrar o ar","Ajustar a embreagem"],"correct": "Permitir a troca de óleo","reference": "Guia de Manutenção de Motos, Cap. 5","explanation": "O bujão de drenagem permite escoar o óleo usado durante a troca."},
+    {"question": "O que pode causar uma suspensão traseira muito macia?","options": ["Mola desgastada","Pneu furado","Bateria nova","Corrente lubrificada"],"correct": "Mola desgastada","reference": "Manual de Mecânica de Motocicletas, Cap. 7","explanation": "Uma mola desgastada reduz a resistência, tornando a suspensão muito macia."},
+    {"question": "Qual é a função do sensor de detonação?","options": ["Detectar vibrações anormais","Filtrar o combustível","Regular a pressão","Ajustar a corrente"],"correct": "Detectar vibrações anormais","reference": "Fundamentos de Mecânica de Motos, Cap. 6","explanation": "O sensor de detonação detecta vibrações para evitar danos por combustão irregular."},
+    {"question": "O que indica um problema no cabo de freio a tambor?","options": ["Freio frouxo","Superaquecimento","Ruído de corrente","Falha na ignição"],"correct": "Freio frouxo","reference": "Guia de Manutenção de Motos, Cap. 8","explanation": "Um cabo de freio desgastado ou mal ajustado resulta em frenagem frouxa."},
+    {"question": "Qual é a função do reservatório de fluido de freio?","options": ["Armazenar fluido hidráulico","Aumentar a potência","Filtrar o óleo","Regular a ignição"],"correct": "Armazenar fluido hidráulico","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "O reservatório armazena o fluido para o sistema de freio hidráulico."},
+    {"question": "O que pode causar um motor com dificuldade para manter a marcha lenta?","options": ["Pneu desbalanceado","Parafuso de mistura mal ajustado","Filtro de ar limpo","Corrente frouxa"],"correct": "Parafuso de mistura mal ajustado","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Um parafuso de mistura mal ajustado afeta a marcha lenta do motor."},
+    {"question": "Qual é a função do eixo de balancim?","options": ["Filtrar o óleo","Controlar movimento das válvulas","Regular a pressão","Ajustar a corrente"],"correct": "Controlar movimento das válvulas","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "O eixo de balancim aciona as válvulas para abertura e fechamento."},
+    {"question": "O que indica um problema na bobina de ignição?","options": ["Faíscas fracas na vela","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Faíscas fracas na vela","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Uma bobina defeituosa produz faíscas fracas, afetando a ignição."},
+    {"question": "Qual é a função do garfo dianteiro?","options": ["Absorver impactos e guiar a roda","Filtrar o ar","Regular a ignição","Ajustar a embreagem"],"correct": "Absorver impactos e guiar a roda","reference": "Fundamentos de Mecânica de Motos, Cap. 7","explanation": "O garfo dianteiro absorve impactos e mantém a roda dianteira alinhada."},
+    {"question": "O que pode causar um pneu com rachaduras na lateral?","options": ["Ressecamento por idade","Filtro de óleo sujo","Vela nova","Corrente frouxa"],"correct": "Ressecamento por idade","reference": "Manual de Mecânica de Motocicletas, Cap. 6","explanation": "Pneus antigos ressecam, causando rachaduras que comprometem a segurança."},
+    {"question": "Qual é a função do sistema de ventilação do cárter?","options": ["Regular a suspensão","Reduzir pressão interna","Filtrar o combustível","Ajustar a embreagem"],"correct": "Reduzir pressão interna","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "O sistema de ventilação alivia a pressão de gases no cárter, evitando danos."},
+    {"question": "O que indica um problema no ajuste da folga das válvulas?","options": ["Ruído de tique-taque no motor","Vibração do guidão","Luz de bateria acesa","Falha na ignição"],"correct": "Ruído de tique-taque no motor","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "Folga incorreta das válvulas causa ruídos característicos no motor."},
+    {"question": "Qual é a função do filtro de tela no cárter?","options": ["Filtrar impurezas do óleo","Aumentar a potência","Regular a pressão","Filtrar o ar"],"correct": "Filtrar impurezas do óleo","reference": "Guia de Manutenção de Motos, Cap. 5","explanation": "O filtro de tela remove partículas maiores do óleo, protegendo o motor."},
+    {"question": "O que pode causar uma embreagem deslizando em alta rotação?","options": ["Pneu desbalanceado","Óleo de embreagem inadequado","Filtro de ar limpo","Corrente frouxa"],"correct": "Óleo de embreagem inadequado","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Óleo inadequado reduz a fricção dos discos, causando deslizamento."},
+    {"question": "Qual é a função do sensor de nível de combustível?","options": ["Indicar quantidade de combustível","Filtrar o óleo","Regular a ignição","Ajustar a suspensão"],"correct": "Indicar quantidade de combustível","reference": "Manual de Mecânica de Motocicletas, Cap. 6","explanation": "O sensor informa o nível de combustível ao painel da motocicleta."},
+    {"question": "O que indica um problema no sistema de arrefecimento a ar?","options": ["Superaquecimento em trânsito","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Superaquecimento em trânsito","reference": "Guia de Manutenção de Motos, Cap. 5","explanation": "Falta de fluxo de ar em trânsito causa superaquecimento em motores arrefecidos a ar."},	
+	
+	 {"question": "Qual é a função da mola de retorno no pedal de freio?","options": ["Regular a pressão","Trazer o pedal à posição inicial","Filtrar o fluido","Ajustar a corrente"],"correct": "Trazer o pedal à posição inicial","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "A mola de retorno puxa o pedal de freio de volta à posição inicial após ser acionado."},
+    {"question": "O que pode indicar um carburador com gicleur de baixa entupido?","options": ["Marcha lenta instável","Pneu desbalanceado","Bateria descarregada","Corrente frouxa"],"correct": "Marcha lenta instável","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Um gicleur de baixa entupido restringe o fluxo de combustível, causando instabilidade na marcha lenta."},
+    {"question": "Qual é a função do capacitor no sistema de ignição?","options": ["Armazenar carga elétrica","Filtrar o combustível","Regular a suspensão","Ajustar a embreagem"],"correct": "Armazenar carga elétrica","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "O capacitor armazena carga para gerar a faísca na vela em sistemas de ignição."},
+   
+    {"question": "Qual é o intervalo recomendado para inspeção das lonas de freio a tambor?","options": ["Cada 2.000 km","Cada 8.000 km","Cada 15.000 km","Cada 500 km"],"correct": "Cada 8.000 km","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "Inspeções a cada 8.000 km garantem que as lonas estejam em boas condições para frenagem."},
+    {"question": "Qual é a função do pino de pistão em um motor?","options": ["Conectar pistão à biela","Filtrar o óleo","Regular a pressão","Ajustar a corrente"],"correct": "Conectar pistão à biela","reference": "Fundamentos de Mecânica de Motos, Cap. 1","explanation": "O pino de pistão fixa o pistão à biela, permitindo o movimento no cilindro."},
+    {"question": "O que indica um problema no interruptor de ignição?","options": ["Motor não liga","Vibração do guidão","Ruído de corrente","Superaquecimento"],"correct": "Motor não liga","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Um interruptor de ignição defeituoso impede a ativação do sistema elétrico, evitando a partida."},
+    {"question": "Qual é a função do difusor no carburador?","options": ["Aumentar a velocidade do ar","Filtrar o combustível","Regular a ignição","Ajustar a suspensão"],"correct": "Aumentar a velocidade do ar","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "O difusor acelera o fluxo de ar no carburador, facilitando a mistura com o combustível."},
+    {"question": "O que pode causar uma embreagem com engate impreciso?","options": ["Cabo mal ajustado","Pneu desbalanceado","Filtro de ar limpo","Bateria nova"],"correct": "Cabo mal ajustado","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Um cabo de embreagem mal ajustado causa engates imprecisos ou dificuldades nas trocas de marcha."},
+    {"question": "Qual é a função do selo de óleo no virabrequim?","options": ["Regular a pressão","Evitar vazamento de óleo","Filtrar o ar","Ajustar a corrente"],"correct": "Evitar vazamento de óleo","reference": "Manual de Mecânica de Motocicletas, Cap. 1","explanation": "O selo de óleo impede que o lubrificante vaze do virabrequim, mantendo a lubrificação."},
+    {"question": "O que indica um problema no rolamento do garfo dianteiro?","options": ["Ruído ao girar o guidão","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Ruído ao girar o guidão","reference": "Guia de Manutenção de Motos, Cap. 7","explanation": "Rolamentos desgastados no garfo produzem ruídos ao girar o guidão, afetando a direção."},
+    {"question": "Qual é a função do tubo de overflow do carburador?","options": ["Liberar excesso de combustível","Filtrar o ar","Regular a pressão","Ajustar a embreagem"],"correct": "Liberar excesso de combustível","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "O tubo de overflow drena o excesso de combustível para evitar transbordo no carburador."},
+    {"question": "O que pode causar um motor com vibração excessiva em marcha lenta?","options": ["Suporte do motor solto","Pneu furado","Bateria descarregada","Corrente lubrificada"],"correct": "Suporte do motor solto","reference": "Manual de Mecânica de Motocicletas, Cap. 1","explanation": "Um suporte solto causa vibrações anormais, especialmente em marcha lenta."},
+    {"question": "Qual é a função do anel de compressão no pistão?","options": ["Aumentar a potência","Vedar a câmara de combustão","Filtrar o óleo","Regular a ignição"],"correct": "Vedar a câmara de combustão","reference": "Fundamentos de Mecânica de Motos, Cap. 1","explanation": "O anel de compressão sela a câmara, garantindo pressão para a combustão."},
+    {"question": "O que indica um problema no sistema de partida elétrica?","options": ["Motor de partida não gira","Vibração do guidão","Ruído de corrente","Superaquecimento"],"correct": "Motor de partida não gira","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Um problema no sistema elétrico impede que o motor de partida funcione."},
+    {"question": "Qual é a função da agulha do carburador?","options": ["Regular o fluxo de combustível","Filtrar o ar","Ajustar a suspensão","Controlar a ignição"],"correct": "Regular o fluxo de combustível","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "A agulha controla a quantidade de combustível que entra no carburador."},
+    {"question": "O que pode causar um freio dianteiro com ruído ao acionar?","options": ["Pastilhas contaminadas","Pneu desbalanceado","Filtro de ar limpo","Bateria nova"],"correct": "Pastilhas contaminadas","reference": "Fundamentos de Mecânica de Motos, Cap. 8","explanation": "Pastilhas contaminadas por óleo ou sujeira produzem ruídos durante a frenagem."},
+    {"question": "Qual é a função do calço de válvula?","options": ["Ajustar a folga das válvulas","Filtrar o óleo","Regular a pressão","Ajustar a corrente"],"correct": "Ajustar a folga das válvulas","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "O calço regula a folga entre a válvula e o comando para operação precisa."},
+    {"question": "O que indica um problema no sensor de posição do virabrequim?","options": ["Falha na ignição","Partida fraca","Pneu desgastado","Ruído de corrente"],"correct": "Falha na ignição","reference": "Guia de Manutenção de Motos, Cap. 6","explanation": "Um sensor defeituoso interrompe o sinal de ignição, causando falhas no motor."},
+    {"question": "Qual é a função do tubo de ventilação do tanque?","options": ["Liberar vapores de combustível","Filtrar o ar","Regular a pressão","Ajustar a embreagem"],"correct": "Liberar vapores de combustível","reference": "Fundamentos de Mecânica de Motos, Cap. 2","explanation": "O tubo de ventilação alivia a pressão de vapores no tanque, evitando bloqueios."},
+    {"question": "O que pode causar uma corrente de transmissão com desgaste desigual?","options": ["Alinhamento incorreto da roda","Pneu furado","Bateria descarregada","Filtro de ar limpo"],"correct": "Alinhamento incorreto da roda","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "Alinhamento incorreto causa tensão desigual, desgastando a corrente de forma irregular."},
+    {"question": "Qual é a função do retentor da haste de válvula?","options": ["Evitar entrada de óleo na câmara","Aumentar a potência","Filtrar o combustível","Regular a ignição"],"correct": "Evitar entrada de óleo na câmara","reference": "Fundamentos de Mecânica de Motos, Cap. 2","explanation": "O retentor impede que óleo entre na câmara de combustão, evitando queima."},
+    {"question": "O que indica um problema no cabo de velocidade?","options": ["Velocímetro não funciona","Vibração do guidão","Ruído de corrente","Superaquecimento"],"correct": "Velocímetro não funciona","reference": "Guia de Manutenção de Motos, Cap. 6","explanation": "Um cabo de velocidade danificado impede o funcionamento correto do velocímetro."},
+    {"question": "Qual é a função do circuito de lubrificação no motor?","options": ["Reduzir atrito e calor","Filtrar o ar","Regular a pressão","Ajustar a suspensão"],"correct": "Reduzir atrito e calor","reference": "Manual de Mecânica de Motocicletas, Cap. 5","explanation": "O circuito distribui óleo para reduzir atrito e dissipar calor nas peças móveis."},
+    {"question": "O que pode causar um motor com falhas em baixa rotação?","options": ["Vela com folga incorreta","Pneu desbalanceado","Bateria nova","Corrente lubrificada"],"correct": "Vela com folga incorreta","reference": "Fundamentos de Mecânica de Motos, Cap. 4","explanation": "Uma vela com folga inadequada causa faíscas instáveis, afetando baixa rotação."},
+    {"question": "Qual é a função do bujão magnético no cárter?","options": ["Atrair partículas metálicas","Filtrar o óleo","Regular a ignição","Ajustar a corrente"],"correct": "Atrair partículas metálicas","reference": "Guia de Manutenção de Motos, Cap. 5","explanation": "O bujão magnético captura partículas metálicas no óleo, protegendo o motor."},
+    {"question": "O que indica um problema no tensor automático da corrente de comando?","options": ["Ruído de chocalho no motor","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Ruído de chocalho no motor","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "Um tensor defeituoso deixa a corrente frouxa, causando ruídos de chocalho."},
+    {"question": "Qual é a função do circuito de arrefecimento a líquido?","options": ["Dissipar calor do motor","Filtrar o combustível","Regular a pressão","Ajustar a embreagem"],"correct": "Dissipar calor do motor","reference": "Fundamentos de Mecânica de Motos, Cap. 5","explanation": "O circuito de arrefecimento usa líquido para absorver e dissipar o calor do motor."},
+    {"question": "O que pode causar uma suspensão dianteira com retorno lento?","options": ["Óleo degradado no garfo","Pneu desbalanceado","Bateria descarregada","Filtro de ar limpo"],"correct": "Óleo degradado no garfo","reference": "Guia de Manutenção de Motos, Cap. 7","explanation": "Óleo degradado perde viscosidade, retardando o retorno da suspensão."},
+    {"question": "Qual é a função do sensor de pressão de óleo?","options": ["Monitorar a pressão do óleo","Filtrar o ar","Regular a ignição","Ajustar a suspensão"],"correct": "Monitorar a pressão do óleo","reference": "Manual de Mecânica de Motocicletas, Cap. 5","explanation": "O sensor alerta sobre baixa pressão de óleo, evitando danos ao motor."},	   
+	
+
+
+ {"question": "Qual é a função da válvula de escape no motor?","options": ["Liberar gases queimados","Filtrar o óleo","Regular a pressão","Ajustar a corrente"],"correct": "Liberar gases queimados","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "A válvula de escape permite que os gases da combustão saiam do cilindro."},
+    {"question": "O que pode indicar um carburador com parafuso de ar mal ajustado?","options": ["Aceleração irregular","Pneu desbalanceado","Bateria descarregada","Corrente frouxa"],"correct": "Aceleração irregular","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "Um parafuso de ar mal ajustado altera a mistura, causando aceleração instável."},
+    {"question": "Qual é a função do fusível principal no sistema elétrico?","options": ["Proteger contra sobrecarga","Filtrar o combustível","Regular a suspensão","Ajustar a embreagem"],"correct": "Proteger contra sobrecarga","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "O fusível principal desarma em caso de sobrecarga, protegendo o sistema elétrico."},
+    {"question": "O que pode causar um pneu com bolhas na lateral?","options": ["Impacto forte","Filtro de ar sujo","Vela nova","Corrente esticada"],"correct": "Impacto forte","reference": "Manual de Mecânica de Motocicletas, Cap. 6","explanation": "Um impacto forte, como em um buraco, pode danificar a estrutura do pneu, formando bolhas."},
+    {"question": "Qual é o intervalo recomendado para verificar o desgaste da corrente?","options": ["Cada 1.000 km","Cada 5.000 km","Cada 12.000 km","Cada 500 km"],"correct": "Cada 1.000 km","reference": "Guia de Manutenção de Motos, Cap. 4","explanation": "Verificar a corrente a cada 1.000 km ajuda a identificar desgaste antes de danos maiores."},
+    {"question": "Qual é a função do anel de raspagem no pistão?","options": ["Remover excesso de óleo","Aumentar a potência","Filtrar o combustível","Regular a ignição"],"correct": "Remover excesso de óleo","reference": "Fundamentos de Mecânica de Motos, Cap. 1","explanation": "O anel de raspagem remove óleo das paredes do cilindro, evitando queima excessiva."},
+    {"question": "O que indica um problema no interruptor de freio?","options": ["Luz de freio não acende","Vibração do guidão","Ruído de corrente","Superaquecimento"],"correct": "Luz de freio não acende","reference": "Manual de Mecânica de Motocicletas, Cap. 8","explanation": "Um interruptor de freio defeituoso impede que a luz de freio seja acionada."},
+    {"question": "Qual é a função da câmara de flutuação no carburador?","options": ["Armazenar combustível temporariamente","Filtrar o ar","Regular a pressão","Ajustar a suspensão"],"correct": "Armazenar combustível temporariamente","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "A câmara de flutuação mantém um nível constante de combustível no carburador."},
+    {"question": "O que pode causar uma embreagem com resistência ao desengatar?","options": ["Disco de embreagem colado","Pneu desbalanceado","Filtro de ar limpo","Bateria nova"],"correct": "Disco de embreagem colado","reference": "Manual de Mecânica de Motocicletas, Cap. 3","explanation": "Discos colados por óleo ou desgaste dificultam o desengate da embreagem."},
+    {"question": "Qual é a função do coxim de borracha no motor?","options": ["Absorver vibrações","Filtrar o óleo","Regular a pressão","Ajustar a corrente"],"correct": "Absorver vibrações","reference": "Guia de Manutenção de Motos, Cap. 1","explanation": "O coxim de borracha reduz vibrações do motor, aumentando o conforto e durabilidade."},
+    {"question": "O que indica um problema no rolamento da roda traseira?","options": ["Instabilidade em alta velocidade","Partida fraca","Pneu desgastado","Falha na carburação"],"correct": "Instabilidade em alta velocidade","reference": "Manual de Mecânica de Motocicletas, Cap. 6","explanation": "Rolamentos desgastados causam instabilidade, especialmente em altas velocidades."},
+    {"question": "Qual é a função da mangueira de vácuo no carburador?","options": ["Controlar a abertura da borboleta","Filtrar o combustível","Regular a ignição","Ajustar a embreagem"],"correct": "Controlar a abertura da borboleta","reference": "Fundamentos de Mecânica de Motos, Cap. 3","explanation": "A mangueira de vácuo ajuda a regular a borboleta para uma mistura adequada."},
+    {"question": "O que pode causar um motor com barulho de batida em alta rotação?","options": ["Combustível de baixa octanagem","Pneu furado","Bateria descarregada","Corrente lubrificada"],"correct": "Combustível de baixa octanagem","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "Baixa octanagem causa detonação, produzindo batidas em alta rotação."},
+    {"question": "Qual é a função do retentor do eixo traseiro?","options": ["Evitar vazamento de óleo","Aumentar a potência","Filtrar o ar","Regular a ignição"],"correct": "Evitar vazamento de óleo","reference": "Guia de Manutenção de Motos, Cap. 6","explanation": "O retentor impede que o óleo da transmissão vaze pelo eixo traseiro."},
+    {"question": "O que indica um problema no circuito de iluminação?","options": ["Faróis fracos ou piscando","Vibração do guidão","Ruído de corrente","Superaquecimento"],"correct": "Faróis fracos ou piscando","reference": "Manual de Mecânica de Motocicletas, Cap. 4","explanation": "Problemas no circuito, como conexões soltas, causam faróis fracos ou instáveis."},
+    {"question": "Qual é a função do registro de combustível?","options": ["Controlar o fluxo de combustível","Filtrar o óleo","Regular a pressão","Ajustar a suspensão"],"correct": "Controlar o fluxo de combustível","reference": "Fundamentos de Mecânica de Motos, Cap. 2","explanation": "O registro liga ou desliga o fluxo de combustível do tanque para o motor."},
+    {"question": "O que pode causar um freio traseiro com resposta lenta?","options": ["Fluido de freio velho","Pneu desbalanceado","Filtro de ar limpo","Bateria nova"],"correct": "Fluido de freio velho","reference": "Guia de Manutenção de Motos, Cap. 8","explanation": "Fluido velho absorve umidade, reduzindo a eficiência hidráulica do freio."},
+    {"question": "Qual é a função da biela de comando no motor?","options": ["Regular a pressão","Transmitir movimento às válvulas","Filtrar o óleo","Ajustar a corrente"],"correct": "Transmitir movimento às válvulas","reference": "Manual de Mecânica de Motocicletas, Cap. 2","explanation": "A biela de comando transfere o movimento do comando para abrir as válvulas."},
+    {"question": "O que indica um problema no sensor de oxigênio?","options": ["Consumo elevado de combustível","Partida fraca","Pneu desgastado","Ruído de corrente"],"correct": "Consumo elevado de combustível","reference": "Fundamentos de Mecânica de Motos, Cap. 6","explanation": "Um sensor de oxigênio defeituoso causa mistura inadequada, aumentando o consumo."},
+    {"question": "Qual é a função do sistema de balanceamento no motor?","options": ["Reduzir vibrações internas","Filtrar o combustível","Regular a ignição","Ajustar a embreagem"],"correct": "Reduzir vibrações internas","reference": "Manual de Mecânica de Motocicletas, Cap. 1","explanation": "O sistema de balanceamento minimiza vibrações do motor, melhorando a suavidade."},
+	
+	{
+        "question": "Qual é a função do pistão em um motor de motocicleta?",
+        "options": ["Regular a ignição", "Comprimir a mistura ar-combustível", "Filtrar o óleo", "Ajustar a corrente"],
+        "correct": "Comprimir a mistura ar-combustível",
+        "reference": "Manual de Mecânica de Motocicletas, Cap. 1",
+        "explanation": "O pistão comprime a mistura ar-combustível no cilindro, preparando-a para a combustão."
+    },
+    {
+        "question": "O que pode indicar uma corrente de transmissão esticada demais?",
+        "options": ["Ruído metálico", "Desgaste rápido da coroa", "Aumento de potência", "Vibração do motor"],
+        "correct": "Desgaste rápido da coroa",
+        "reference": "Fundamentos de Mecânica de Motos, Cap. 4",
+        "explanation": "Uma corrente esticada demais causa desgaste acelerado da coroa e do pinhão devido à tensão excessiva."
+    },
+    {
+        "question": "Qual é a função do fluido de arrefecimento em uma motocicleta com radiador?",
+        "options": ["Lubrificar o motor", "Filtrar o ar", "Dissipar o calor", "Ajustar a pressão"],
+        "correct": "Dissipar o calor",
+        "reference": "Manual de Mecânica de Motocicletas, Cap. 5",
+        "explanation": "O fluido de arrefecimento absorve e dissipa o calor do motor, mantendo a temperatura ideal."
+    },
+    {
+        "question": "O que pode causar falhas na carburação de uma motocicleta?",
+        "options": ["Vela de ignição nova", "Gicleur entupido", "Pneu desbalanceado", "Bateria carregada"],
+        "correct": "Gicleur entupido",
+        "reference": "Fundamentos de Mecânica de Motos, Cap. 3",
+        "explanation": "Um gicleur entupido impede o fluxo correto de combustível, causando falhas na carburação."
+    },
+    {
+        "question": "Qual é o intervalo recomendado para verificar a folga das válvulas em uma motocicleta?",
+        "options": ["Cada 1.000 km", "Cada 6.000 km", "Cada 12.000 km", "Cada 500 km"],
+        "correct": "Cada 12.000 km",
+        "reference": "Manual de Mecânica de Motocicletas, Cap. 6",
+        "explanation": "A verificação da folga das válvulas a cada 12.000 km garante o funcionamento eficiente do motor."
+    },
+    {
+        "question": "Qual é a função da embreagem em uma motocicleta?",
+        "options": ["Conectar/desconectar motor e transmissão", "Regular a pressão do óleo", "Filtrar o ar", "Ajustar a suspensão"],
+        "correct": "Conectar/desconectar motor e transmissão",
+        "reference": "Fundamentos de Mecânica de Motos, Cap. 3",
+        "explanation": "A embreagem permite engatar ou desengatar a potência do motor para a roda traseira."
+    },
+    {
+        "question": "O que indica um problema no sistema de freios a tambor?",
+        "options": ["Pedal esponjoso", "Ruído de rangido ao frear", "Vibração do guidão", "Luz de bateria acesa"],
+        "correct": "Ruído de rangido ao frear",
+        "reference": "Guia de Manutenção de Motos, Cap. 8",
+        "explanation": "Rangidos ao frear indicam desgaste das lonas ou sujeira no tambor."
+    },
+    {
+        "question": "Qual é a função do filtro de ar em uma motocicleta?",
+        "options": ["Aumentar a potência", "Filtrar impurezas do ar", "Regular a temperatura", "Proteger a bateria"],
+        "correct": "Filtrar impurezas do ar",
+        "reference": "Manual de Manutenção de Motocicletas, Cap. 2",
+        "explanation": "O filtro de ar impede que sujeira e detritos entrem no motor, garantindo combustão limpa."
+    },
+    {
+        "question": "O que pode causar vibrações excessivas em uma motocicleta?",
+        "options": ["Pneu desbalanceado", "Filtro de ar limpo", "Bateria carregada", "Óleo novo"],
+        "correct": "Pneu desbalanceado",
+        "reference": "Fundamentos de Mecânica de Motos, Cap. 7",
+        "explanation": "Pneus desbalanceados geram vibrações, afetando o conforto e a segurança."
+    },
+    {
+        "question": "Qual é a função do virabrequim em um motor de motocicleta?",
+        "options": ["Filtrar o óleo", "Converter movimento linear em rotativo", "Controlar a ignição", "Ajustar a corrente"],
+        "correct": "Converter movimento linear em rotativo",
+        "reference": "Manual de Mecânica de Motocicletas, Cap. 1",
+        "explanation": "O virabrequim transforma o movimento linear do pistão em rotativo para a transmissão."
+    },
+    {
+        "question": "Qual é a principal causa de superaquecimento em um motor de motocicleta?",
+        "options": ["Nível baixo de óleo", "Pneu desalinhado", "Corrente solta", "Bateria descarregada"],
+        "correct": "Nível baixo de óleo",
+        "reference": "Fundamentos de Mecânica de Motos, Cap. 5",
+        "explanation": "O óleo lubrifica e dissipa calor; níveis baixos podem levar ao superaquecimento."
+    },
+    {
+        "question": "Qual é a função da vela de ignição em um motor de motocicleta?",
+        "options": ["Filtrar o combustível", "Gerar a faísca para combustão", "Regular a pressão", "Ajustar a embreagem"],
+        "correct": "Gerar a faísca para combustão",
+        "reference": "Manual de Mecânica de Motocicletas, Cap. 4",
+        "explanation": "A vela de ignição produz a faísca que inicia a combustão da mistura ar-combustível."
+    },
+    {
+        "question": "O que indica um pneu com pressão muito baixa?",
+        "options": ["Desgaste irregular", "Ruído de corrente", "Vibração do motor", "Falha na ignição"],
+        "correct": "Desgaste irregular",
+        "reference": "Guia de Manutenção de Motos, Cap. 6",
+        "explanation": "Pressão baixa causa desgaste desigual nos pneus e compromete a estabilidade."
+    },
+    {
+        "question": "Qual é a função da corrente de comando em um motor de motocicleta?",
+        "options": ["Controlar a suspensão", "Sincronizar válvulas", "Regular a pressão do óleo", "Ajustar a embreagem"],
+        "correct": "Sincronizar válvulas",
+        "reference": "Manual de Mecânica de Motocicletas, Cap. 2",
+        "explanation": "A corrente de comando sincroniza as válvulas com o virabrequim para o tempo correto."
+    },
+    {
+        "question": "O que pode indicar um filtro de óleo entupido?",
+        "options": ["Aumento da pressão", "Redução da lubrificação", "Pneu desgastado", "Falha na ignição"],
+        "correct": "Redução da lubrificação",
+        "reference": "Fundamentos de Mecânica de Motos, Cap. 5",
+        "explanation": "Um filtro de óleo entupido impede a circulação adequada, reduzindo a lubrificação."
+    },
+    {
+        "question": "Qual é a função do alternador em uma motocicleta?",
+        "options": ["Filtrar o combustível", "Gerar energia elétrica", "Controlar a suspensão", "Regular a temperatura"],
+        "correct": "Gerar energia elétrica",
+        "reference": "Manual de Manutenção de Motocicletas, Cap. 4",
+        "explanation": "O alternador converte energia mecânica em elétrica para carregar a bateria."
+    },
+    {
+        "question": "O que pode causar desgaste prematuro das pastilhas de freio?",
+        "options": ["Uso excessivo em descidas", "Pneu desbalanceado", "Corrente frouxa", "Filtro de ar sujo"],
+        "correct": "Uso excessivo em descidas",
+        "reference": "Guia de Manutenção de Motos, Cap. 8",
+        "explanation": "Frenagens constantes em descidas aumentam o desgaste das pastilhas."
+    },
+    {
+        "question": "Qual é a função do cárter em um motor de motocicleta?",
+        "options": ["Armazenar óleo lubrificante", "Controlar a ignição", "Filtrar o ar", "Regular a corrente"],
+        "correct": "Armazenar óleo lubrificante",
+        "reference": "Manual de Mecânica de Motocicletas, Cap. 1",
+        "explanation": "O cárter armazena o óleo que lubrifica as partes móveis do motor."
+    },
+    {
+        "question": "O que pode causar falhas na ignição de uma motocicleta?",
+        "options": ["Vela de ignição defeituosa", "Pneu furado", "Corrente esticada", "Filtro de ar novo"],
+        "correct": "Vela de ignição defeituosa",
+        "reference": "Manual de Mecânica de Motocicletas, Cap. 4",
+        "explanation": "A vela defeituosa não gera faísca adequada, causando falhas na ignição."
+    },
+        ];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function randomizeOptions(question) {
+            const options = shuffle([...question.options]);
+            const correctIndex = options.indexOf(question.correct);
+            return { ...question, options, correct: options[correctIndex] };
+        }
+
+        function updateQuestionCount() {
+            const totalQuestions = document.getElementById('totalQuestions');
+            totalQuestions.textContent = `Total de questões: ${quizData.length}`;
+        }
+
+        let shuffledQuizData = shuffle(quizData.map(randomizeOptions));
+        const quizContainer = document.getElementById('quiz');
+        let currentQuestion = 0;
+        let score = 0;
+
+        function renderQuestion() {
+            quizContainer.innerHTML = '';
+            const q = shuffledQuizData[currentQuestion];
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('question', 'active');
+            questionDiv.setAttribute('data-correct', q.correct);
+            questionDiv.setAttribute('data-explanation', q.explanation);
+            questionDiv.setAttribute('data-reference', q.reference);
+
+            const questionText = document.createElement('p');
+            questionText.textContent = q.question;
+            questionDiv.appendChild(questionText);
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.classList.add('options');
+            q.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                btn.setAttribute('data-value', option);
+                btn.textContent = option;
+                optionsDiv.appendChild(btn);
+            });
+
+            questionDiv.appendChild(optionsDiv);
+            quizContainer.appendChild(questionDiv);
+            setupQuestion();
+        }
+
+        function setupQuestion() {
+            const buttons = quizContainer.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('correct');
+                btn.addEventListener('click', handleAnswer, { once: true });
+            });
+        }
+
+        function handleAnswer(e) {
+            const selectedBtn = e.target;
+            const selectedValue = selectedBtn.getAttribute('data-value');
+            const currentQ = quizContainer.querySelector('.question');
+            const correctAnswer = currentQ.getAttribute('data-correct');
+            const explanation = currentQ.getAttribute('data-explanation');
+            const reference = currentQ.getAttribute('data-reference');
+
+            const buttons = currentQ.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedValue === correctAnswer) {
+                selectedBtn.classList.add('correct');
+                score++;
+                result.textContent = 'Correto!';
+            } else {
+                result.innerHTML = `Incorreto. A resposta correta é "${correctAnswer}".<br>${explanation}<br>(Fonte: ${reference})`;
+            }
+            nextBtn.style.display = 'inline-block';
+        }
+
+        const nextBtn = document.getElementById('nextBtn');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const result = document.getElementById('result');
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestion++;
+            if (currentQuestion < shuffledQuizData.length) {
+                renderQuestion();
+                nextBtn.style.display = 'none';
+                result.textContent = '';
+            } else {
+                result.textContent = `Quiz concluído! Você acertou ${score} de ${shuffledQuizData.length}!`;
+                nextBtn.style.display = 'none';
+                playAgainBtn.style.display = 'inline-block';
+            }
+        });
+
+        playAgainBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            score = 0;
+            shuffledQuizData = shuffle(quizData.map(randomizeOptions));
+            updateQuestionCount();
+            renderQuestion();
+            nextBtn.style.display = 'none';
+            playAgainBtn.style.display = 'none';
+            result.textContent = '';
+        });
+
+        // Initialize the question count on page load
+        updateQuestionCount();
+        renderQuestion();
+    </script>
+</body>
+</html>
