@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Sofonias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sofonias Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Sofonias</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionSofonias('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionSofonias('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionSofonias('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionSofonias('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionSofonias('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionSofonias('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionSofonias('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionSofonias('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionSofonias('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Sofonias</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Sofonias, uma profecia que anuncia o "Dia do Senhor" – um dia de juízo universal sobre Judá e as nações, mas também de restauração e alegria para um remanescente fiel. Descubra a severidade da ira divina contra o pecado e a promessa de um futuro de salvação e regozijo. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Sofonias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Sofonias é um dos doze profetas menores do Antigo Testamento. Sofonias, cujo nome significa "o Senhor esconde" ou "o Senhor protege", profetizou em Judá durante o reinado do rei Josias (640-609 a.C.), provavelmente no início de seu reinado, antes das reformas religiosas (cerca de 622 a.C.). Ele era bisneto do rei Ezequias, o que lhe conferia uma posição de destaque na sociedade de Judá.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A mensagem de Sofonias é dominada pelo tema do "Dia do Senhor", que ele descreve como um dia de juízo iminente e devastador sobre Judá por sua idolatria, corrupção e injustiça. Ele também estende essa profecia de juízo a outras nações vizinhas que oprimiram o povo de Deus ou se entregaram à impiedade. A linguagem de Sofonias é forte e gráfica, pintando um quadro sombrio da destruição que viria.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">No entanto, o livro não é apenas uma mensagem de condenação. Após a proclamação do juízo, Sofonias também anuncia a esperança de restauração para um remanescente fiel. O livro culmina com promessas de alegria, regozijo e a presença de Deus no meio do Seu povo, que seria purificado e restaurado. A mensagem final é de consolo e a certeza de que Deus reunirá Seu povo e os fará louvados em todas as nações.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Dia do Senhor sobre Judá.</strong> Proclamação do juízo universal, com foco na destruição de Judá e Jerusalém por sua idolatria e impiedade.</li>
+                <li><strong>Capítulo 2: O Dia do Senhor sobre as Nações.</strong> Extensão do juízo a nações vizinhas (Filístia, Moabe, Amom, Etiópia e Assíria), com um chamado ao arrependimento.</li>
+                <li><strong>Capítulo 3: O Juízo sobre Jerusalém e a Promessa de Restauração.</strong> Condenação dos líderes corruptos de Jerusalém, seguida por promessas de purificação, restauração e alegria para um remanescente fiel.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Sofonias é um livro que ressalta a santidade de Deus e Sua intolerância ao pecado, mas também Sua fidelidade em restaurar e regozijar-se com aqueles que se voltam para Ele com humildade e fé.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Sofonias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Sofonias anuncia o Dia do Senhor como juízo e restauração.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Dia do Senhor: Juízo sobre Judá (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Introdução e Escopo do Juízo (Versículos 1-3):</strong>
+                    <ul>
+                        <li>Genealogia do profeta Sofonias.</li>
+                        <li>Deus varrerá tudo da face da terra.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Juízo sobre Judá e Jerusalém (Versículos 4-13):</strong>
+                    <ul>
+                        <li>Contra a idolatria e os que se desviam do Senhor.</li>
+                        <li>Contra os príncipes, os filhos do rei e os que se enchem de violência.</li>
+                        <li>Jerusalém será vasculhada e seus habitantes punidos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Natureza do Dia do Senhor (Versículos 14-18):</strong>
+                    <ul>
+                        <li>Um dia de ira, angústia, trevas e desolação.</li>
+                        <li>Ninguém escapará da ira do Senhor.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Dia do Senhor: Juízo sobre as Nações (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Chamado ao Arrependimento (Versículos 1-3):</strong>
+                    <ul>
+                        <li>Convocação para buscar o Senhor antes do juízo.</li>
+                        <li>Buscar justiça, humildade e talvez ser escondido.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Juízo sobre as Nações Vizinhos (Versículos 4-15):</strong>
+                    <ul>
+                        <li>Filístia: Gaza, Ascalom, Asdode, Ecrom serão destruídas.</li>
+                        <li>Moabe e Amom: Se tornarão como Sodoma e Gomorra.</li>
+                        <li>Etiópia: Seus habitantes serão mortos pela espada.</li>
+                        <li>Assíria: Nínive será desolada.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Dia do Senhor: Juízo e Restauração de Jerusalém (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Condenação de Jerusalém (Versículos 1-7):</strong>
+                    <ul>
+                        <li>Ai da cidade opressora e rebelde.</li>
+                        <li>Seus líderes, juízes, profetas e sacerdotes são corruptos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Juízo Final e a Purificação (Versículos 8-13):</strong>
+                    <ul>
+                        <li>Deus reunirá as nações para derramar Sua ira.</li>
+                        <li>Um remanescente purificado falará uma linguagem pura.</li>
+                        <li>Os humildes e fiéis serão protegidos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Restauração e a Alegria Futura (Versículos 14-20):</strong>
+                    <ul>
+                        <li>Cântico de alegria para Sião.</li>
+                        <li>O Senhor está no meio do Seu povo, salvando e regozijando-se.</li>
+                        <li>Deus removerá o juízo e os inimigos.</li>
+                        <li>O remanescente será louvado e famoso em todas as nações.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Sofonias enfatiza a santidade e a justiça de Deus, que não tolerará o pecado, seja em Seu próprio povo ou nas nações pagãs. O "Dia do Senhor" é um tema central, ilustrando a seriedade do juízo divino. No entanto, o livro também oferece uma poderosa mensagem de esperança e restauração. Ele revela que, mesmo após a disciplina, Deus é fiel em purificar e restaurar um remanescente, trazendo-o de volta para um relacionamento de alegria e paz. A soberania de Deus sobre todas as nações e Sua capacidade de transformar o lamento em louvor são temas proeminentes, encorajando a humildade, o arrependimento e a confiança na misericórdia divina.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridSofonias">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Sofonias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Sofonias, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Dia do Senhor sobre Judá</strong>
+                    <ul>
+                        <li>1.1-3: O Título e a Proclamação do Juízo Universal.</li>
+                        <li>1.4-6: Juízo sobre a Idolatria em Judá.</li>
+                        <li>1.7-13: Juízo sobre os Líderes e Habitantes de Jerusalém.</li>
+                        <li>1.14-18: A Grandeza e a Severidade do Dia do Senhor.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: O Dia do Senhor sobre as Nações</strong>
+                    <ul>
+                        <li>2.1-3: Chamado ao Arrependimento e Busca por Refúgio.</li>
+                        <li>2.4-7: Juízo sobre a Filístia.</li>
+                        <li>2.8-11: Juízo sobre Moabe e Amom.</li>
+                        <li>2.12-15: Juízo sobre a Etiópia e a Assíria (Nínive).</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: O Juízo e a Restauração de Jerusalém</strong>
+                    <ul>
+                        <li>3.1-7: Condenação da Cidade Rebelde e Opressora.</li>
+                        <li>3.8-13: A Purificação e a Reunião do Remanescente.</li>
+                        <li>3.14-20: A Alegria da Restauração e a Presença do Senhor.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Sofonias</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>O Dia do Senhor:</strong> Um tema central de juízo e, posteriormente, de restauração.</li>
+                <li><strong>Juízo Divino:</strong> A ira de Deus contra o pecado e a idolatria, tanto em Judá quanto nas nações.</li>
+                <li><strong>Arrependimento:</strong> O chamado para buscar o Senhor antes que o juízo venha.</li>
+                <li><strong>Restauração do Remanescente:</strong> A promessa de que um grupo fiel será purificado e salvo.</li>
+                <li><strong>Santidade de Deus:</strong> A natureza de Deus que não tolera a iniquidade.</li>
+                <li><strong>Soberania Universal:</strong> O controle de Deus sobre todas as nações e eventos.</li>
+                <li><strong>Alegria e Louvor:</strong> O regozijo futuro do povo restaurado na presença de Deus.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Sofonias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersSofonias">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Sofonias</h2>
+            <div id="quizContainerSofonias" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionSofonias"></p>
+                <div id="quizOptionsSofonias" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackSofonias" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionSofonias()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressSofonias"></span></p>
+                <p>Pontuação: <span id="quizScoreSofonias">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Sofonias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Sofonias.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="sofoniasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalSofonias()">&times;</span>
+                <h3 id="modalCharacterNameSofonias" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionSofonias" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Sofonias",
+            "short_name": "Sofonias",
+            "description": "Explore o livro de Sofonias de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=SF",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=SF",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'sofonias-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionSofonias(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsSofonias();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksSofonias();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsSofonias(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexSofonias = 0; // Reinicia o quiz
+                scoreSofonias = 0;
+                wrongAnswersSofonias = 0;
+                document.getElementById('quizScoreSofonias').textContent = `Acertos: ${scoreSofonias}, Erros: ${wrongAnswersSofonias}`;
+                displayQuestionSofonias();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderSofoniasChart();
+            }
+        }
+
+        // Dados dos personagens para Sofonias
+        const characterDetailsSofonias = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano e Justo Juiz, que anuncia o Dia do Senhor como um dia de juízo universal e de restauração para um remanescente fiel."
+            },
+            "Sofonias": {
+                name: "Sofonias",
+                description: "O profeta cujo nome significa 'o Senhor esconde' ou 'o Senhor protege', que proclama a mensagem de juízo e esperança de Deus."
+            },
+            "Povo de Judá/Jerusalém": {
+                name: "Povo de Judá/Jerusalém",
+                description: "A nação e a cidade que são o foco principal do juízo de Deus devido à sua idolatria, corrupção e impiedade."
+            },
+            "Nações Vizinhas": {
+                name: "Nações Vizinhas",
+                description: "Os povos ao redor de Judá (Filístia, Moabe, Amom, Etiópia, Assíria) que também seriam alvo do juízo de Deus."
+            },
+            "O Remanescente": {
+                name: "O Remanescente",
+                description: "Um grupo purificado e humilde do povo de Deus que seria restaurado e desfrutaria da Sua presença e alegria."
+            },
+            "Rei Josias": {
+                name: "Rei Josias",
+                description: "O rei de Judá durante o reinado de quem Sofonias profetizou, conhecido por suas reformas religiosas."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalSofonias(characterName) {
+            const details = characterDetailsSofonias[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameSofonias').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionSofonias').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalSofonias() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsSofonias() {
+            const grid = document.getElementById('characterGridSofonias');
+            grid.innerHTML = '';
+            for (const key in characterDetailsSofonias) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalSofonias(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksSofonias() {
+            const chaptersDiv = document.getElementById('chaptersSofonias');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 3; i++) { // Sofonias tem 3 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/sf/${i}`; // Link para a Bíblia Online, Sofonias
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Sofonias (25 perguntas únicas)
+        const uniqueQuizQuestionsSofonias = [
+            { question: "Qual o significado do nome do profeta Sofonias?", options: ["O Senhor é forte", "O Senhor esconde/protege", "O Senhor salva", "O Senhor julga"], answer: "O Senhor esconde/protege", reference: "Introdução ao Livro de Sofonias" },
+            { question: "Durante o reinado de qual rei de Judá Sofonias profetizou?", options: ["Acaz", "Ezequias", "Josias", "Manassés"], answer: "Josias", reference: "Introdução ao Livro de Sofonias" },
+            { question: "Qual é o tema principal do livro de Sofonias?", options: ["A construção do templo", "O Dia do Senhor", "A aliança com as nações", "A sabedoria de Salomão"], answer: "O Dia do Senhor", reference: "Introdução ao Livro de Sofonias" },
+            { question: "O que Deus promete fazer com tudo da face da terra em Sofonias 1:2-3?", options: ["Abençoar", "Restaurar", "Varrer", "Proteger"], answer: "Varrer", reference: "Sofonias 1:2-3" },
+            { question: "Qual é um dos pecados de Judá que Sofonias condena no capítulo 1?", options: ["Falta de oração", "Idolatria e desvio do Senhor", "Desobediência à lei", "Orgulho"], answer: "Idolatria e desvio do Senhor", reference: "Sofonias 1:4-6" },
+            { question: "Como é descrito o Dia do Senhor em Sofonias 1:15?", options: ["Um dia de festa", "Um dia de alegria", "Um dia de ira, angústia e trevas", "Um dia de paz"], answer: "Um dia de ira, angústia e trevas", reference: "Sofonias 1:15" },
+            { question: "Qual é o chamado de Sofonias 2:3 para o povo?", options: ["Construir muros", "Buscar o Senhor, justiça e humildade", "Fugir para outras terras", "Fazer sacrifícios"], answer: "Buscar o Senhor, justiça e humildade", reference: "Sofonias 2:3" },
+            { question: "Quais nações vizinhas são mencionadas como alvo do juízo de Deus no capítulo 2?", options: ["Egito e Babilônia", "Filístia, Moabe, Amom, Etiópia e Assíria", "Síria e Fenícia", "Edon e Amaleque"], answer: "Filístia, Moabe, Amom, Etiópia e Assíria", reference: "Sofonias 2:4-15" },
+            { question: "O que acontecerá com Nínive, a capital da Assíria, segundo Sofonias 2:13?", options: ["Será reconstruída", "Será desolada", "Será habitada por um novo povo", "Será um centro comercial"], answer: "Será desolada", reference: "Sofonias 2:13" },
+            { question: "Qual é a condenação principal de Jerusalém no início do capítulo 3?", options: ["Por ser pequena", "Por ser opressora e rebelde", "Por ser pobre", "Por ser muito religiosa"], answer: "Por ser opressora e rebelde", reference: "Sofonias 3:1" },
+            { question: "O que Deus promete fazer com um remanescente purificado em Sofonias 3:9?", options: ["Que eles se esconderão", "Que eles falarão uma linguagem pura", "Que eles serão esquecidos", "Que eles serão dispersos"], answer: "Que eles falarão uma linguagem pura", reference: "Sofonias 3:9" },
+            { question: "Quem será o motivo de louvor e fama para o remanescente, segundo Sofonias 3:20?", options: ["Seus reis", "Seus exércitos", "Deus no meio deles", "Seus templos"], answer: "Deus no meio deles", reference: "Sofonias 3:20" },
+            { question: "Quantos capítulos tem o livro de Sofonias?", options: ["2", "3", "4", "5"], answer: "3", reference: "Esboços do Livro de Sofonias" },
+            { question: "Qual é a genealogia de Sofonias mencionada no início do livro?", options: ["Filho de Cusi", "Filho de Josias", "Filho de Guedalias", "Filho de Ezequias"], answer: "Filho de Cusi (e bisneto de Ezequias)", reference: "Sofonias 1:1" },
+            { question: "O que a profecia de Sofonias equilibra?", options: ["Amor e ódio", "Juízo e esperança", "Guerra e paz", "Riqueza e pobreza"], answer: "Juízo e esperança", reference: "Introdução ao Livro de Sofonias" },
+            { question: "Qual a condição do povo de Deus que será restaurado, segundo Sofonias 3:12?", options: ["Poderosos e ricos", "Orgulhosos e arrogantes", "Humildes e fiéis", "Numerosos e fortes"], answer: "Humildes e fiéis", reference: "Sofonias 3:12" },
+            { question: "O que Deus fará com os inimigos de Seu povo no futuro, conforme Sofonias 3:15?", options: ["Farão aliança com eles", "Removerá o juízo e os inimigos", "Os ignorará", "Os abençoará"], answer: "Removerá o juízo e os inimigos", reference: "Sofonias 3:15" },
+            { question: "Qual a emoção expressa no final do livro de Sofonias em relação à restauração?", options: ["Tristeza", "Medo", "Alegria e regozijo", "Indiferença"], answer: "Alegria e regozijo", reference: "Sofonias 3:14, 17" },
+            { question: "Qual o propósito do juízo de Deus sobre as nações em Sofonias?", options: ["Exterminá-las completamente", "Ensinar-lhes uma lição", "Purificar a terra e estabelecer Seu reino", "Apenas punir"], answer: "Purificar a terra e estabelecer Seu reino", reference: "Significado Teológico" },
+            { question: "O que é um 'remanescente' no contexto de Sofonias?", options: ["Os que fugiram da guerra", "Os que permaneceram fiéis a Deus", "Os que foram exilados", "Os que se tornaram ricos"], answer: "Os que permaneceram fiéis a Deus", reference: "Panoramas do Livro de Sofonias" },
+            { question: "Em Sofonias 3:17, o que o Senhor fará no meio de Seu povo?", options: ["Ele os abandonará", "Ele os salvará e se regozijará com eles", "Ele os repreenderá", "Ele os testará"], answer: "Ele os salvará e se regozijará com eles", reference: "Sofonias 3:17" },
+            { question: "Qual a principal lição teológica do livro de Sofonias?", options: ["A importância da riqueza", "A santidade de Deus e Sua justiça/misericórdia", "A necessidade de sacrifícios diários", "O poder dos exércitos"], answer: "A santidade de Deus e Sua justiça/misericórdia", reference: "Significado Teológico" },
+            { question: "O que os sacerdotes de Jerusalém faziam, segundo Sofonias 3:4?", options: ["Ensinavam a lei corretamente", "Profanavam o santuário e faziam violência à lei", "Ofereciam sacrifícios perfeitos", "Oravam constantemente"], answer: "Profanavam o santuário e faziam violência à lei", reference: "Sofonias 3:4" },
+            { question: "Qual a cidade que é um símbolo de crueldade e opressão, mencionada como alvo do juízo em Sofonias 2:13?", options: ["Babilônia", "Tebas", "Nínive", "Jerusalém"], answer: "Nínive", reference: "Sofonias 2:13" },
+            { question: "O que o Livro de Sofonias encoraja os crentes a fazerem?", options: ["Apenas temer o juízo", "Buscar o Senhor com humildade e fé", "Fugir para outras terras", "Lutar contra os inimigos"], answer: "Buscar o Senhor com humildade e fé", reference: "Significado Teológico" }
+        ];
+
+        let quizQuestionsSofonias = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsSofonias() {
+            quizQuestionsSofonias = []; // Limpa as perguntas anteriores
+            while (quizQuestionsSofonias.length < 200) {
+                quizQuestionsSofonias.push(...uniqueQuizQuestionsSofonias);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsSofonias.length > 200) {
+                quizQuestionsSofonias = quizQuestionsSofonias.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsSofonias); // Embaralha o array completo
+        }
+
+        let currentQuizIndexSofonias = 0;
+        let scoreSofonias = 0;
+        let wrongAnswersSofonias = 0;
+
+        function displayQuestionSofonias() {
+            const questionElement = document.getElementById('quizQuestionSofonias');
+            const optionsElement = document.getElementById('quizOptionsSofonias');
+            const feedbackElement = document.getElementById('quizFeedbackSofonias');
+            const nextButton = document.querySelector('#quizContainerSofonias .quiz-next');
+            const progressElement = document.getElementById('quizProgressSofonias');
+
+            if (currentQuizIndexSofonias < quizQuestionsSofonias.length) {
+                const questionData = quizQuestionsSofonias[currentQuizIndexSofonias];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerSofonias(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexSofonias + 1}/${quizQuestionsSofonias.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreSofonias}, Erros: ${wrongAnswersSofonias}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerSofonias(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsSofonias button');
+            const feedbackElement = document.getElementById('quizFeedbackSofonias');
+            const nextButton = document.querySelector('#quizContainerSofonias .quiz-next');
+            const scoreElement = document.getElementById('quizScoreSofonias');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreSofonias++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersSofonias++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreSofonias}, Erros: ${wrongAnswersSofonias}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionSofonias() {
+            currentQuizIndexSofonias++;
+            displayQuestionSofonias();
+        }
+
+        // Gráfico de Temas para Sofonias
+        let sofoniasChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderSofoniasChart() {
+            const ctx = document.getElementById('sofoniasChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (sofoniasChartInstance) {
+                sofoniasChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['O Dia do Senhor', 'Juízo Divino', 'Arrependimento', 'Restauração do Remanescente', 'Santidade de Deus', 'Soberania Universal', 'Alegria e Louvor'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [7, 6, 4, 5, 5, 4, 5], // Valores fictícios para Sofonias
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para O Dia do Senhor
+                        'rgba(54, 162, 235, 0.7)', // Azul para Juízo Divino
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Arrependimento
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para Restauração do Remanescente
+                        'rgba(153, 102, 255, 0.7)', // Roxo para Santidade de Deus
+                        'rgba(255, 159, 64, 0.7)', // Laranja para Soberania Universal
+                        'rgba(201, 203, 207, 0.7)' // Cinza para Alegria e Louvor
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            sofoniasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Sofonias',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionSofonias('inicio');
+        });
+    </script>
+</body>
+</html>

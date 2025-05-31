@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Tiago</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tiago Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Tiago</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionTiago('inicioTiago')">Início</button>
+            <button class="nav-button" onclick="showSectionTiago('introducaoTiago')">Introdução</button>
+            <button class="nav-button" onclick="showSectionTiago('panoramasTiago')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionTiago('personagensTiago')">Personagens</button>
+            <button class="nav-button" onclick="showSectionTiago('esbocosTiago')">Esboços</button>
+            <button class="nav-button" onclick="showSectionTiago('temasTiago')">Temas</button>
+            <button class="nav-button" onclick="showSectionTiago('capitulosTiago')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionTiago('quizTiago')">Quiz</button>
+            <button class="nav-button" onclick="showSectionTiago('graficoTiago')">Gráfico</button>
+        </div>
+
+        <div id="inicioTiago" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Tiago</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Epístola de Tiago, um livro prático e direto que enfatiza a fé genuína demonstrada por meio de obras. Descubra as exortações de Tiago sobre a perseverança nas provações, a busca pela sabedoria, o controle da língua, o perigo do favoritismo, a relação entre fé e obras, a paciência e a oração eficaz. Entenda como a fé viva se manifesta no dia a dia do crente. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducaoTiago" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Tiago</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Epístola de Tiago é um dos livros mais práticos e desafiadores do Novo Testamento. Embora a autoria seja debatida, a visão mais aceita é que foi escrita por Tiago, o irmão de Jesus e líder da igreja em Jerusalém. A carta é considerada uma das epístolas gerais ou universais, pois não é endereçada a uma igreja específica, mas "às doze tribos que andam dispersas" (Tiago 1:1), ou seja, aos cristãos judeus espalhados pela diáspora.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A data de sua escrita é incerta, mas muitos estudiosos a consideram um dos primeiros livros do Novo Testamento, possivelmente antes do Concílio de Jerusalém (Atos 15), por volta de 45-50 d.C. Isso explicaria a ausência de referências a questões como a circuncisão e a inclusão dos gentios, que se tornaram proeminentes mais tarde.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O propósito principal de Tiago é exortar os crentes a viverem uma fé autêntica e prática, que se manifesta em boas obras. Ele contrasta a fé morta (apenas intelectual) com a fé viva (que produz frutos). A carta aborda uma variedade de temas éticos e morais, incluindo a paciência nas provações, a importância da sabedoria, o controle da língua, o perigo do favoritismo, a responsabilidade social, a oração e a restauração de irmãos desviados. Tiago é frequentemente comparado ao livro de Provérbios do Antigo Testamento devido à sua natureza sapiencial e aos seus ensinamentos práticos.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Fé nas Provações e a Busca por Sabedoria.</strong> A alegria nas provações, a fonte da tentação, a Palavra de Deus e a prática da fé.</li>
+                <li><strong>Capítulo 2: O Perigo do Favoritismo e a Relação entre Fé e Obras.</strong> A condenação do favoritismo aos ricos e a explicação de que a fé sem obras é morta.</li>
+                <li><strong>Capítulo 3: O Poder e o Perigo da Língua; a Sabedoria Celestial.</strong> A dificuldade de controlar a língua e a distinção entre a sabedoria terrena e a celestial.</li>
+                <li><strong>Capítulo 4: Conflitos, Humildade e Arrependimento.</strong> A origem dos conflitos, a necessidade de se humilhar diante de Deus e a advertência contra a arrogância.</li>
+                <li><strong>Capítulo 5: Advertências aos Ricos, Paciência e Oração.</strong> A condenação dos ricos opressores, a exortação à paciência na espera do Senhor e o poder da oração.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Tiago é um chamado vibrante para que a fé cristã seja vivida de forma coerente e prática, produzindo uma vida transformada que glorifica a Deus.</p>
+        </div>
+
+        <div id="panoramasTiago" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Tiago</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Tiago é uma epístola prática que enfatiza a fé demonstrada por meio de obras e uma vida cristã autêntica.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Fé Genuína nas Provações e Sabedoria (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação (Capítulo 1:1):</strong>
+                    <ul>
+                        <li>Tiago, servo de Deus e do Senhor Jesus Cristo, às doze tribos que andam dispersas.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Alegria nas Provações (Capítulo 1:2-4):</strong>
+                    <ul>
+                        <li>Considerar pura alegria passar por diversas provações, pois a prova da fé produz paciência.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Busca por Sabedoria (Capítulo 1:5-8):</strong>
+                    <ul>
+                        <li>Se alguém tem falta de sabedoria, peça-a a Deus, que a todos dá liberalmente.</li>
+                        <li>Pedir com fé, nada duvidando.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Ricos e Pobres (Capítulo 1:9-11):</strong>
+                    <ul>
+                        <li>O irmão de condição humilde se glorie na sua exaltação, e o rico, na sua humilhação.</li>
+                    </ul>
+                </li>
+                <li><strong>E. A Fonte da Tentação (Capítulo 1:12-18):</strong>
+                    <ul>
+                        <li>Ninguém diga, ao ser tentado: De Deus sou tentado; porque Deus não pode ser tentado pelo mal, e a ninguém tenta.</li>
+                        <li>Cada um é tentado, quando atraído e engodado pela sua própria concupiscência.</li>
+                        <li>Toda boa dádiva e todo dom perfeito vêm do alto.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Ouvir, Falar e Praticar a Palavra (Capítulo 1:19-27):</strong>
+                    <ul>
+                        <li>Pronto para ouvir, tardio para falar, tardio para se irar.</li>
+                        <li>Sede cumpridores da palavra, e não somente ouvintes.</li>
+                        <li>A religião pura e imaculada é visitar os órfãos e as viúvas nas suas tribulações e guardar-se da corrupção do mundo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Fé e Obras; o Perigo do Favoritismo (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Advertência Contra o Favoritismo (Capítulo 2:1-13):</strong>
+                    <ul>
+                        <li>Não ter a fé em nosso Senhor Jesus Cristo com acepção de pessoas.</li>
+                        <li>Exemplo do homem rico e do pobre na assembleia.</li>
+                        <li>A lei real: 'Amarás o teu próximo como a ti mesmo'.</li>
+                        <li>A misericórdia triunfa sobre o juízo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Fé Sem Obras é Morta (Capítulo 2:14-26):</strong>
+                    <ul>
+                        <li>De que aproveita, irmãos, alguém dizer que tem fé, e não tiver obras?</li>
+                        <li>A fé sem obras é morta.</li>
+                        <li>Exemplos de Abraão e Raabe: a fé foi aperfeiçoada pelas obras.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Poder da Língua e a Sabedoria (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Controle da Língua (Capítulo 3:1-12):</strong>
+                    <ul>
+                        <li>A língua é um pequeno membro, mas se gaba de grandes coisas.</li>
+                        <li>Pode ser como o freio na boca do cavalo, o leme do navio, ou o fogo que incendeia a floresta.</li>
+                        <li>É um mal que não se pode refrear, cheia de veneno mortal.</li>
+                        <li>De uma mesma boca procede bênção e maldição.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Duas Tipos de Sabedoria (Capítulo 3:13-18):</strong>
+                    <ul>
+                        <li>Sabedoria terrena, animal e diabólica: inveja e contenda.</li>
+                        <li>Sabedoria que vem do alto: pura, pacífica, moderada, tratável, cheia de misericórdia e de bons frutos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Conflitos, Humildade e Arrependimento (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Origem dos Conflitos (Capítulo 4:1-3):</strong>
+                    <ul>
+                        <li>Donde vêm as guerras e pelejas entre vós? Não vêm de vossas concupiscências?</li>
+                    </ul>
+                </li>
+                <li><strong>B. Amizade com o Mundo (Capítulo 4:4-6):</strong>
+                    <ul>
+                        <li>Amizade do mundo é inimizade contra Deus.</li>
+                        <li>Deus resiste aos soberbos, mas dá graça aos humildes.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Exortação à Humildade e Arrependimento (Capítulo 4:7-10):</strong>
+                    <ul>
+                        <li>Sujeitai-vos, pois, a Deus; resisti ao diabo, e ele fugirá de vós.</li>
+                        <li>Chegai-vos a Deus, e ele se chegará a vós.</li>
+                        <li>Humilhai-vos perante o Senhor, e ele vos exaltará.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Não Julgar os Irmãos (Capítulo 4:11-12):</strong>
+                    <ul>
+                        <li>Não faleis mal uns dos outros, irmãos.</li>
+                        <li>Um só é o legislador e juiz.</li>
+                    </ul>
+                </li>
+                <li><strong>E. A Arrogância e a Soberba da Vida (Capítulo 4:13-17):</strong>
+                    <ul>
+                        <li>Advertência contra planejar o futuro sem considerar a vontade de Deus.</li>
+                        <li>A vida é um vapor que aparece por um pouco e logo se desvanece.</li>
+                        <li>Saber fazer o bem e não o fazer é pecado.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Paciência, Oração e Restauração (Capítulo 5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Advertência aos Ricos Opressores (Capítulo 5:1-6):</strong>
+                    <ul>
+                        <li>Ai de vós, ricos! Chorai e lamentai.</li>
+                        <li>O salário dos trabalhadores retido clama.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Paciência na Espera do Senhor (Capítulo 5:7-11):</strong>
+                    <ul>
+                        <li>Sede, pois, irmãos, pacientes até à vinda do Senhor.</li>
+                        <li>Exemplo do lavrador e dos profetas.</li>
+                        <li>A paciência de Jó e o fim do Senhor.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Juramento (Capítulo 5:12):</strong>
+                    <ul>
+                        <li>Não jureis, nem pelo céu, nem pela terra.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Oração e Cura (Capítulo 5:13-18):</strong>
+                    <ul>
+                        <li>Está alguém entre vós aflito? Ore. Está alguém contente? Cante louvores.</li>
+                        <li>Está alguém entre vós doente? Chame os presbíteros da igreja, e orem sobre ele, ungindo-o com azeite.</li>
+                        <li>A oração feita por um justo pode muito em seus efeitos.</li>
+                        <li>Exemplo de Elias.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Restauração de um Irmão Desviado (Capítulo 5:19-20):</strong>
+                    <ul>
+                        <li>Se alguém de entre vós se tem desviado da verdade, e alguém o converter, saiba que aquele que converter o pecador do seu erro do caminho salvará uma alma da morte e cobrirá uma multidão de pecados.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">A Epístola de Tiago é um lembrete contundente de que a fé cristã não é meramente uma crença intelectual, mas uma força viva que se manifesta em ações e atitudes. Ela desafia os crentes a viverem de forma consistente com sua fé, demonstrando amor, sabedoria, paciência e humildade. Tiago nos chama a uma fé prática, que se importa com os necessitados, controla a língua, resiste ao mundo e busca a Deus em oração. É um convite à santidade e à responsabilidade pessoal, mostrando que uma fé genuína sempre produzirá boas obras como evidência de sua realidade.</p>
+        </div>
+
+        <div id="personagensTiago" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridTiago">
+            </div>
+        </div>
+
+        <div id="esbocosTiago" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Tiago</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Tiago, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Fé nas Provações e a Busca por Sabedoria.</li>
+                <li><strong>Capítulo 2:</strong> O Perigo do Favoritismo e a Relação entre Fé e Obras.</li>
+                <li><strong>Capítulo 3:</strong> O Poder e o Perigo da Língua; a Sabedoria Celestial.</li>
+                <li><strong>Capítulo 4:</strong> Conflitos, Humildade e Arrependimento.</li>
+                <li><strong>Capítulo 5:</strong> Advertências aos Ricos, Paciência e Oração.</li>
+            </ul>
+        </div>
+
+        <div id="temasTiago" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Tiago</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Fé e Obras:</strong> A fé genuína se manifesta em ações.</li>
+                <li><strong>Sabedoria Divina vs. Sabedoria Terrena:</strong> A busca pela sabedoria que vem do alto.</li>
+                <li><strong>O Controle da Língua:</strong> O poder destrutivo e construtivo das palavras.</li>
+                <li><strong>Perseverança nas Provações:</strong> A alegria e o propósito do sofrimento.</li>
+                <li><strong>Favoritismo e Justiça Social:</strong> A condenação da parcialidade e a defesa dos pobres.</li>
+                <li><strong>Oração e Cura:</strong> A eficácia da oração e a confissão de pecados.</li>
+                <li><strong>Humildade e Arrependimento:</strong> A necessidade de se submeter a Deus e resistir ao diabo.</li>
+            </ul>
+        </div>
+
+        <div id="capitulosTiago" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Tiago</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersTiago">
+            </div>
+        </div>
+
+        <div id="quizTiago" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Tiago</h2>
+            <div id="quizContainerTiago" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionTiago"></p>
+                <div id="quizOptionsTiago" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackTiago" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionTiago()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressTiago"></span></p>
+                <p>Pontuação: <span id="quizScoreTiago">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="graficoTiago" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Tiago</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Tiago.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="tiagoChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModalTiago" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalTiago()">&times;</span>
+                <h3 id="modalCharacterNameTiago" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionTiago" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data-tiago">
+        {
+            "name": "Livro Interativo de Tiago",
+            "short_name": "Tiago",
+            "description": "Explore o livro de Tiago de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=TGO",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=TGO",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script-tiago">
+        // service-worker.js for Tiago
+        const CACHE_NAME_TIAGO = 'tiago-interactive-v1';
+        const urlsToCacheTiago = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME_TIAGO)
+                    .then(cache => {
+                        console.log('Opened cache for Tiago');
+                        return cache.addAll(urlsToCacheTiago);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME_TIAGO];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker para Tiago
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script-tiago');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker para Tiago registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker para Tiago:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente para Tiago
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data-tiago').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções de Tiago
+        function showSectionTiago(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('active');
+            } else {
+                console.error(`Seção com ID '${sectionId}' não encontrada.`);
+            }
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagensTiago') {
+                generateCharacterButtonsTiago();
+            }
+            if (sectionId === 'capitulosTiago') {
+                generateChapterLinksTiago();
+            }
+            if (sectionId === 'quizTiago') {
+                shuffleQuizQuestionsTiago(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexTiago = 0; // Reinicia o quiz
+                scoreTiago = 0;
+                wrongAnswersTiago = 0;
+                document.getElementById('quizScoreTiago').textContent = `Acertos: ${scoreTiago}, Erros: ${wrongAnswersTiago}`;
+                displayQuestionTiago();
+            }
+            if (sectionId === 'graficoTiago') {
+                renderTiagoChart();
+            }
+        }
+
+        // Dados dos personagens para Tiago
+        const characterDetailsTiago = {
+            "Tiago": {
+                name: "Tiago",
+                description: "O autor da epístola, irmão de Jesus e líder da igreja em Jerusalém. Ele enfatiza a fé prática e as obras."
+            },
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "O Senhor a quem Tiago serve e a quem os crentes devem imitar em sua fé e obras."
+            },
+            "As doze tribos dispersas": {
+                name: "As doze tribos dispersas",
+                description: "A audiência da carta, referindo-se aos cristãos judeus espalhados pela diáspora."
+            },
+            "Homem rico (no favoritismo)": {
+                name: "Homem rico (no favoritismo)",
+                description: "Exemplo usado por Tiago para condenar o favoritismo na igreja, onde os ricos eram privilegiados."
+            },
+            "Homem pobre (no favoritismo)": {
+                name: "Homem pobre (no favoritismo)",
+                description: "Exemplo usado por Tiago para condenar o favoritismo, mostrando como os pobres eram desprezados."
+            },
+            "Abraão": {
+                name: "Abraão",
+                description: "Exemplo bíblico de fé e obras, cuja fé foi aperfeiçoada por suas ações (sacrifício de Isaque)."
+            },
+            "Raabe": {
+                name: "Raabe",
+                description: "Exemplo bíblico de fé e obras, que foi justificada por suas ações ao acolher os espias."
+            },
+            "Jó": {
+                name: "Jó",
+                description: "Exemplo de paciência nas provações, mencionado por Tiago para encorajar os crentes."
+            },
+            "Elias": {
+                name: "Elias",
+                description: "Profeta do Antigo Testamento, cujo exemplo de oração eficaz é citado por Tiago."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, a fonte de toda sabedoria, dom perfeito e graça."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalTiago(characterName) {
+            const details = characterDetailsTiago[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameTiago').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionTiago').textContent = details.description;
+                document.getElementById('characterModalTiago').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalTiago() {
+            document.getElementById('characterModalTiago').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsTiago() {
+            const grid = document.getElementById('characterGridTiago');
+            grid.innerHTML = '';
+            for (const key in characterDetailsTiago) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalTiago(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos (Tiago tem 5 capítulos)
+        function generateChapterLinksTiago() {
+            const chaptersDiv = document.getElementById('chaptersTiago');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 5; i++) { // Tiago tem 5 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/tg/${i}`; // Link para a Bíblia Online, Tiago
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Tiago (perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsTiago = [
+            { question: "Quem é o autor da Epístola de Tiago?", options: ["Pedro", "João", "Tiago", "Paulo"], answer: "Tiago", reference: "Capítulo 1:1" },
+            { question: "A quem a carta de Tiago é endereçada?", options: ["À igreja em Roma", "Às doze tribos que andam dispersas", "A Timóteo", "Aos gentios em Creta"], answer: "Às doze tribos que andam dispersas", reference: "Capítulo 1:1" },
+            { question: "O que Tiago diz para considerarmos ao passar por provações?", options: ["Tristeza", "Pura alegria", "Desespero", "Raiva"], answer: "Pura alegria", reference: "Capítulo 1:2" },
+            { question: "Se alguém tem falta de sabedoria, a quem deve pedir?", options: ["Ao pastor", "A um amigo", "A Deus", "A si mesmo"], answer: "A Deus", reference: "Capítulo 1:5" },
+            { question: "De onde vêm as tentações, segundo Tiago?", options: ["De Deus", "Da própria concupiscência", "Do diabo", "Do mundo"], answer: "Da própria concupiscência", reference: "Capítulo 1:13-14" },
+            { question: "O que Tiago diz sobre ser 'ouvinte' e 'cumpridor' da palavra?", options: ["Devemos ser apenas ouvintes", "Devemos ser apenas cumpridores", "Sede cumpridores da palavra, e não somente ouvintes", "Não importa se ouvimos ou cumprimos"], answer: "Sede cumpridores da palavra, e não somente ouvintes", reference: "Capítulo 1:22" },
+            { question: "Qual a 'religião pura e imaculada' mencionada por Tiago?", options: ["Ir à igreja todos os dias", "Fazer grandes sacrifícios", "Visitar os órfãos e as viúvas e guardar-se da corrupção do mundo", "Orar em público"], answer: "Visitar os órfãos e as viúvas e guardar-se da corrupção do mundo", reference: "Capítulo 1:27" },
+            { question: "O que Tiago condena no Capítulo 2 em relação aos ricos e pobres?", options: ["A generosidade", "O favoritismo/acepção de pessoas", "A humildade", "A fé"], answer: "O favoritismo/acepção de pessoas", reference: "Capítulo 2:1-4" },
+            { question: "Qual a relação entre fé e obras, segundo Tiago 2:26?", options: ["A fé é suficiente sem obras", "As obras são mais importantes que a fé", "A fé sem obras é morta", "As obras vêm antes da fé"], answer: "A fé sem obras é morta", reference: "Capítulo 2:26" },
+            { question: "Com o que Tiago compara a língua no Capítulo 3?", options: ["Uma árvore", "Um rio", "Um freio, um leme, um fogo", "Uma montanha"], answer: "Um freio, um leme, um fogo", reference: "Capítulo 3:3-6" },
+            { question: "Qual a característica da sabedoria que vem do alto?", options: ["Amarga e invejosa", "Pura, pacífica, moderada, tratável", "Cheia de contenda", "Terrena e sensual"], answer: "Pura, pacífica, moderada, tratável", reference: "Capítulo 3:17" },
+            { question: "De onde vêm as guerras e pelejas entre os crentes, segundo Tiago 4?", options: ["Do diabo", "Das concupiscências", "De Deus", "Dos falsos mestres"], answer: "Das concupiscências", reference: "Capítulo 4:1" },
+            { question: "O que Tiago diz sobre a amizade do mundo?", options: ["É benéfica", "É inimizade contra Deus", "É neutra", "É necessária"], answer: "É inimizade contra Deus", reference: "Capítulo 4:4" },
+            { question: "O que devemos fazer para que o diabo fuja de nós?", options: ["Ignorá-lo", "Sujeitar-nos a Deus e resistir ao diabo", "Lutar com ele", "Fugir dele"], answer: "Sujeitar-nos a Deus e resistir ao diabo", reference: "Capítulo 4:7" },
+            { question: "Como Tiago descreve a vida humana no Capítulo 4?", options: ["Longa e duradoura", "Um vapor que aparece por um pouco e logo se desvanece", "Cheia de certezas", "Imutável"], answer: "Um vapor que aparece por um pouco e logo se desvanece", reference: "Capítulo 4:14" },
+            { question: "O que Tiago condena aos ricos no Capítulo 5?", options: ["Sua fé", "Sua humildade", "A retenção do salário dos trabalhadores", "Sua oração"], answer: "A retenção do salário dos trabalhadores", reference: "Capítulo 5:4" },
+            { question: "Até quando os irmãos devem ser pacientes, segundo Tiago 5?", options: ["Até amanhã", "Até a vinda do Senhor", "Até o fim do ano", "Até que tudo melhore"], answer: "Até a vinda do Senhor", reference: "Capítulo 5:7" },
+            { question: "O que Tiago instrui a fazer se alguém está doente?", options: ["Ir ao médico apenas", "Chamar os presbíteros da igreja para orar e ungir com azeite", "Esperar a cura natural", "Desistir"], answer: "Chamar os presbíteros da igreja para orar e ungir com azeite", reference: "Capítulo 5:14" },
+            { question: "Qual o poder da oração feita por um justo?", options: ["Pode pouco", "Não tem efeito", "Pode muito em seus efeitos", "Apenas para si mesmo"], answer: "Pode muito em seus efeitos", reference: "Capítulo 5:16" },
+            { question: "O que acontece com aquele que converter um pecador do seu erro?", options: ["Ganhará dinheiro", "Salvará uma alma da morte e cobrirá uma multidão de pecados", "Será famoso", "Será julgado"], answer: "Salvará uma alma da morte e cobrirá uma multidão de pecados", reference: "Capítulo 5:20" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsTiago = [];
+        const numCopiesTiago = Math.ceil(200 / uniqueQuizQuestionsTiago.length);
+        for (let i = 0; i < numCopiesTiago; i++) {
+            allQuizQuestionsTiago = allQuizQuestionsTiago.concat(uniqueQuizQuestionsTiago);
+        }
+        allQuizQuestionsTiago = allQuizQuestionsTiago.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsTiago = [];
+        let currentQuizIndexTiago = 0;
+        let scoreTiago = 0;
+        let wrongAnswersTiago = 0;
+        let tiagoChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsTiago() {
+            shuffledQuizQuestionsTiago = [...allQuizQuestionsTiago]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsTiago);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressTiago() {
+            const progressElement = document.getElementById('quizProgressTiago');
+            progressElement.textContent = `${currentQuizIndexTiago + 1}/${shuffledQuizQuestionsTiago.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionTiago() {
+            if (currentQuizIndexTiago >= shuffledQuizQuestionsTiago.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionTiago').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsTiago').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreTiago}, Erros: ${wrongAnswersTiago}</p>`;
+                document.getElementById('quizFeedbackTiago').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsTiago[currentQuizIndexTiago];
+            document.getElementById('quizQuestionTiago').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsTiago');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerTiago(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackTiago').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressTiago();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerTiago(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackTiago');
+            const optionsButtons = document.querySelectorAll('#quizOptionsTiago button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreTiago++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersTiago++;
+            }
+            document.getElementById('quizScoreTiago').textContent = `Acertos: ${scoreTiago}, Erros: ${wrongAnswersTiago}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionTiago() {
+            currentQuizIndexTiago++;
+            displayQuestionTiago();
+        }
+
+        // Dados para o gráfico de temas de Tiago
+        const tiagoChartData = {
+            labels: ['Fé e Obras', 'Sabedoria', 'Controle da Língua', 'Perseverança', 'Favoritismo', 'Oração e Cura', 'Humildade'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [30, 20, 25, 15, 10, 18, 12], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const tiagoChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Tiago',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderTiagoChart() {
+            const ctx = document.getElementById('tiagoChart').getContext('2d');
+            if (tiagoChartInstance) {
+                tiagoChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            tiagoChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: tiagoChartData,
+                options: tiagoChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

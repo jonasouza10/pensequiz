@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Lamentações</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Lamentações Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Lamentações</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionLamentacoes('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionLamentacoes('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionLamentacoes('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionLamentacoes('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionLamentacoes('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionLamentacoes('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionLamentacoes('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionLamentacoes('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionLamentacoes('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Lamentações</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Lamentações, uma coleção poética de lamentos pela destruição de Jerusalém. Mergulhe na expressão de dor, arrependimento e, surpreendentemente, esperança na misericórdia de Deus em meio à tragédia. Descubra a profundidade da aflição e a fidelidade inabalável do Senhor. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Lamentações</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Lamentações é uma coleção de cinco poemas elegíacos (lamentos) que expressam a profunda tristeza e angústia do povo de Judá após a destruição de Jerusalém e do Templo pelos babilônios em 586 a.C. Tradicionalmente, a autoria é atribuída ao profeta Jeremias, que testemunhou e profetizou sobre esses eventos devastadores. A tradição judaica o chama de 'Eichah' (Como!), a primeira palavra do livro, que reflete o choque e a desolação.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os poemas de Lamentações são uma resposta à calamidade nacional, um reconhecimento do pecado que levou ao juízo divino e um clamor a Deus por misericórdia e restauração. Quatro dos cinco capítulos são poemas acrósticos, onde cada versículo (ou conjunto de versículos) começa com uma letra sucessiva do alfabeto hebraico, o que pode indicar uma tentativa de expressar a totalidade da dor e da devastação, do 'A ao Z'.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Apesar da escuridão e do desespero que permeiam grande parte do livro, o Capítulo 3 se destaca por um vislumbre de esperança e fé inabalável na fidelidade e nas misericórdias de Deus (Lamentações 3:22-23). Essa seção serve como um ponto de virada, lembrando que, mesmo na mais profunda aflição, a bondade de Deus permanece.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: A Desolação de Jerusalém.</strong> Jerusalém é personificada como uma viúva abandonada, lamentando sua solidão e sofrimento.</li>
+                <li><strong>Capítulo 2: A Ira de Deus na Destruição.</strong> Descreve a destruição total de Jerusalém como resultado direto da ira de Deus devido ao pecado do povo.</li>
+                <li><strong>Capítulo 3: O Lamento e a Esperança do Profeta.</strong> Um lamento individual que se move do desespero para a esperança, ancorada na fidelidade e nas misericórdias de Deus.</li>
+                <li><strong>Capítulo 4: O Cerco e a Queda.</strong> Contrasta a glória passada de Sião com a humilhação e o sofrimento extremos do cerco e da fome.</li>
+                <li><strong>Capítulo 5: Oração por Restauração.</strong> Uma súplica coletiva a Deus, pedindo que Ele se lembre de Seu povo e os restaure.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Lamentações é um testemunho poderoso da realidade do sofrimento humano e das consequências do pecado, mas também da inextinguível esperança e da fidelidade de Deus, mesmo nas circunstâncias mais sombrias.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Lamentações</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Lamentações é uma obra poética que expressa a dor da destruição de Jerusalém, mas também aponta para a esperança na misericórdia de Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Lamento pela Desolação de Jerusalém (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li>Jerusalém como uma viúva solitária e abandonada.</li>
+                <li>A dor da cidade e a confissão de seu pecado.</li>
+                <li>A vergonha e o sofrimento causados pelos inimigos.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Ira de Deus na Destruição (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li>Deus como o Executor do juízo, destruindo Sião.</li>
+                <li>A ausência de compaixão divina devido à transgressão.</li>
+                <li>A desolação do Templo e a humilhação dos líderes.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Lamento e a Esperança do Profeta (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li>A aflição pessoal do profeta em meio ao sofrimento.</li>
+                <li>A confissão de que a aflição vem de Deus.</li>
+                <li>O ponto de virada: a lembrança da misericórdia e fidelidade de Deus (Lamentações 3:22-23).</li>
+                <li>A paciência e a esperança no Senhor.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. O Cerco e a Queda de Jerusalém (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li>O contraste entre a glória passada e a miséria presente.</li>
+                <li>O sofrimento extremo da fome durante o cerco.</li>
+                <li>A culpa dos líderes e profetas.</li>
+                <li>A profecia de juízo para Edom e restauração para Sião.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Oração por Restauração (Capítulo 5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li>Uma súplica coletiva a Deus para que se lembre do sofrimento do povo.</li>
+                <li>A descrição das humilhações e opressões sofridas.</li>
+                <li>O clamor por restauração e renovação.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Lamentações é um testemunho da justiça de Deus em relação ao pecado, mas também de Sua misericórdia e fidelidade. Ele mostra que o sofrimento é muitas vezes uma consequência do afastamento de Deus, mas que mesmo na mais profunda dor, há espaço para a esperança e o arrependimento. O livro valida a expressão da dor e do luto, ao mesmo tempo em que direciona o coração para a soberania e a bondade inabalável do Senhor, que é fiel para restaurar Seu povo.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridLamentacoes">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Lamentações</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Lamentações, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> O lamento pela desolação e solidão de Jerusalém.</li>
+                <li><strong>Capítulo 2:</strong> A ira de Deus e a destruição completa de Jerusalém.</li>
+                <li><strong>Capítulo 3:</strong> O lamento pessoal do profeta e a descoberta da esperança na fidelidade de Deus.</li>
+                <li><strong>Capítulo 4:</strong> O contraste entre a glória passada e a miséria presente de Sião durante o cerco.</li>
+                <li><strong>Capítulo 5:</strong> Uma oração coletiva pedindo a Deus que se lembre e restaure Seu povo.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Lamentações</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Lamento e Sofrimento:</strong> A profunda expressão de dor e angústia pela destruição e exílio.</li>
+                <li><strong>Juízo Divino:</strong> A compreensão de que a calamidade é uma consequência do pecado e da ira de Deus.</li>
+                <li><strong>Pecado e Confissão:</strong> O reconhecimento da culpa do povo e a necessidade de arrependimento.</li>
+                <li><strong>Esperança na Misericórdia de Deus:</strong> A crença de que as misericórdias do Senhor são a causa de não sermos consumidos.</li>
+                <li><strong>Fidelidade de Deus:</strong> A convicção de que Deus permanece fiel, mesmo em meio ao juízo.</li>
+                <li><strong>Restauração:</strong> O clamor e a esperança de que Deus restaurará Seu povo e sua terra.</li>
+                <li><strong>Soberania de Deus:</strong> O reconhecimento de que Deus está no controle de todas as circunstâncias, inclusive da dor.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Lamentações</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersLamentacoes">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Lamentações</h2>
+            <div id="quizContainerLamentacoes" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionLamentacoes"></p>
+                <div id="quizOptionsLamentacoes" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackLamentacoes" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionLamentacoes()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressLamentacoes"></span></p>
+                <p>Pontuação: <span id="quizScoreLamentacoes">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Lamentações</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Lamentações.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="lamentacoesChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalLamentacoes()">&times;</span>
+                <h3 id="modalCharacterNameLamentacoes" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionLamentacoes" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Lamentações",
+            "short_name": "Lamentações",
+            "description": "Explore o livro de Lamentações de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=LM",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=LM",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'lamentacoes-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionLamentacoes(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsLamentacoes();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksLamentacoes();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsLamentacoes(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexLamentacoes = 0; // Reinicia o quiz
+                scoreLamentacoes = 0;
+                wrongAnswersLamentacoes = 0;
+                document.getElementById('quizScoreLamentacoes').textContent = `Acertos: ${scoreLamentacoes}, Erros: ${wrongAnswersLamentacoes}`;
+                displayQuestionLamentacoes();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderLamentacoesChart();
+            }
+        }
+
+        // Dados dos personagens para Lamentações
+        const characterDetailsLamentacoes = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Justo Juiz que executa a punição devido ao pecado, mas também o Misericordioso que oferece esperança e restauração."
+            },
+            "Jerusalém/Sião (personificada)": {
+                name: "Jerusalém/Sião (personificada)",
+                description: "A cidade e seu povo, que sofrem as consequências devastadoras do pecado e da destruição, lamentando sua desolação."
+            },
+            "O Profeta (tradicionalmente Jeremias)": {
+                name: "O Profeta (tradicionalmente Jeremias)",
+                description: "A voz que lamenta profundamente a calamidade, confessa o pecado do povo e, em meio ao desespero, clama a Deus por misericórdia e restauração."
+            },
+            "O Povo de Judá": {
+                name: "O Povo de Judá",
+                description: "Aqueles que experimentam diretamente o sofrimento do exílio, da fome e da humilhação após a destruição de Jerusalém."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalLamentacoes(characterName) {
+            const details = characterDetailsLamentacoes[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameLamentacoes').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionLamentacoes').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalLamentacoes() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsLamentacoes() {
+            const grid = document.getElementById('characterGridLamentacoes');
+            grid.innerHTML = '';
+            for (const key in characterDetailsLamentacoes) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalLamentacoes(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksLamentacoes() {
+            const chaptersDiv = document.getElementById('chaptersLamentacoes');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 5; i++) { // Lamentações tem 5 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/lm/${i}`; // Link para a Bíblia Online, Lamentações
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Lamentações (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsLamentacoes = [
+            { question: "Quem é tradicionalmente o autor do Livro de Lamentações?", options: ["Jeremias", "Isaías", "Ezequiel", "Daniel"], answer: "Jeremias", reference: "Introdução ao Livro de Lamentações" },
+            { question: "Qual evento histórico é o pano de fundo para o Livro de Lamentações?", options: ["A saída do Egito", "A construção do Templo", "A destruição de Jerusalém", "O retorno do exílio"], answer: "A destruição de Jerusalém", reference: "Introdução ao Livro de Lamentações" },
+            { question: "Quantos poemas (capítulos) compõem o Livro de Lamentações?", options: ["3", "5", "7", "10"], answer: "5", reference: "Esboços do Livro de Lamentações" },
+            { question: "Qual é a forma literária predominante nos primeiros quatro capítulos de Lamentações?", options: ["Narrativa histórica", "Profecia", "Poema acróstico", "Hino de louvor"], answer: "Poema acróstico", reference: "Introdução ao Livro de Lamentações" },
+            { question: "Em Lamentações, Jerusalém é frequentemente personificada como o quê?", options: ["Uma fortaleza inexpugnável", "Uma viúva desolada", "Uma rainha gloriosa", "Uma cidade próspera"], answer: "Uma viúva desolada", reference: "Capítulo 1" },
+            { question: "Qual capítulo de Lamentações é conhecido por expressar esperança na misericórdia de Deus?", options: ["Capítulo 1", "Capítulo 2", "Capítulo 3", "Capítulo 4"], answer: "Capítulo 3", reference: "Panoramas do Livro de Lamentações" },
+            { question: "Qual é o versículo chave em Lamentações 3 que fala da fidelidade de Deus?", options: ["Lamentações 1:1", "Lamentações 2:10", "Lamentações 3:22-23", "Lamentações 5:1"], answer: "Lamentações 3:22-23", reference: "Lamentações 3:22-23" },
+            { question: "O que o livro de Lamentações enfatiza como a causa principal do sofrimento de Judá?", options: ["Invasões estrangeiras", "O pecado do povo", "Desastres naturais", "Falta de recursos"], answer: "O pecado do povo", reference: "Significado Teológico do Livro de Lamentações" },
+            { question: "Qual nação foi usada por Deus para destruir Jerusalém?", options: ["Egito", "Assíria", "Pérsia", "Babilônia"], answer: "Babilônia", reference: "Introdução ao Livro de Lamentações" },
+            { question: "O que significa o termo 'lamentações'?", options: ["Canções de alegria", "Histórias de vitória", "Expressões de tristeza, luto ou dor", "Profecias de prosperidade"], answer: "Expressões de tristeza, luto ou dor", reference: "Introdução ao Livro de Lamentações" },
+            { question: "Em Lamentações 2, o que é descrito como tendo sido destruído pela ira de Deus?", options: ["As muralhas da cidade", "O Templo/Santuário", "Os campos de cultivo", "As casas dos habitantes"], answer: "O Templo/Santuário", reference: "Capítulo 2" },
+            { question: "O que o profeta pede a Deus no final do livro de Lamentações?", options: ["Vingança contra os inimigos", "Riquezas e prosperidade", "Restauração e renovação", "Esquecimento do passado"], answer: "Restauração e renovação", reference: "Capítulo 5" },
+            { question: "Qual é a emoção dominante expressa no livro de Lamentações?", options: ["Alegria", "Esperança", "Tristeza/Luto/Angústia", "Indiferença"], answer: "Tristeza/Luto/Angústia", reference: "Introdução ao Livro de Lamentações" },
+            { question: "Além de Jerusalém, qual outro nome é usado para se referir à cidade em Lamentações?", options: ["Samaria", "Nínive", "Sião", "Babilônia"], answer: "Sião", reference: "Capítulo 1" },
+            { question: "O que o Capítulo 4 de Lamentações contrasta?", options: ["A paz e a guerra", "A glória passada de Sião com sua humilhação presente", "A riqueza e a pobreza", "O dia e a noite"], answer: "A glória passada de Sião com sua humilhação presente", reference: "Capítulo 4" },
+            { question: "Qual é a atitude do profeta em relação ao sofrimento em Lamentações 3?", options: ["Ele se revolta contra Deus", "Ele o ignora", "Ele o experimenta, mas encontra esperança em Deus", "Ele culpa os outros"], answer: "Ele o experimenta, mas encontra esperança em Deus", reference: "Capítulo 3" },
+            { question: "O que a destruição de Jerusalém demonstrou sobre Deus?", options: ["Sua fraqueza", "Sua indiferença", "Sua justiça e fidelidade às Suas advertências", "Sua incapacidade de proteger"], answer: "Sua justiça e fidelidade às Suas advertências", reference: "Significado Teológico do Livro de Lamentações" },
+            { question: "Qual é a promessa de Deus que o profeta se apega em meio ao lamento?", options: ["Que ele será rico", "Que suas misericórdias não têm fim", "Que ele não sofrerá mais", "Que o inimigo será derrotado imediatamente"], answer: "Que suas misericórdias não têm fim", reference: "Lamentações 3:22" },
+            { question: "O que o Capítulo 5 de Lamentações é, em sua essência?", options: ["Uma canção de vitória", "Uma profecia de juízo", "Uma oração/súplica coletiva", "Um relato histórico"], answer: "Uma oração/súplica coletiva", reference: "Capítulo 5" },
+            { question: "Como o livro de Lamentações termina?", options: ["Com uma celebração", "Com um clamor a Deus por restauração e um reconhecimento de Sua soberania", "Com uma profecia de destruição", "Com um novo começo"], answer: "Com um clamor a Deus por restauração e um reconhecimento de Sua soberania", reference: "Capítulo 5" },
+            { question: "O que os primeiros versículos de Lamentações 1 descrevem?", options: ["A construção de Jerusalém", "A solidão e desolação de Jerusalém", "A prosperidade de Jerusalém", "A defesa de Jerusalém"], answer: "A solidão e desolação de Jerusalém", reference: "Capítulo 1" },
+            { question: "Quem é o 'homem que viu a aflição' em Lamentações 3?", options: ["Um rei", "Um sacerdote", "O profeta ou um representante do povo", "Um guerreiro"], answer: "O profeta ou um representante do povo", reference: "Capítulo 3" },
+            { question: "O que o livro ensina sobre a disciplina de Deus?", options: ["É para destruição total", "É para correção e não para destruição total", "É aleatória", "É injusta"], answer: "É para correção e não para destruição total", reference: "Significado Teológico do Livro de Lamentações" },
+            { question: "Qual é a principal diferença entre o livro de Jeremias e Lamentações?", options: ["Não há diferença", "Jeremias é poesia, Lamentações é história", "Jeremias é profecia e história; Lamentações é lamento poético sobre o cumprimento da profecia", "Jeremias é sobre salvação, Lamentações é sobre juízo"], answer: "Jeremias é profecia e história; Lamentações é lamento poético sobre o cumprimento da profecia", reference: "Introdução ao Livro de Lamentações" },
+            { question: "O que o livro de Lamentações nos convida a fazer em meio ao sofrimento?", options: ["Desistir da fé", "Culpar os outros", "Confessar o pecado e buscar a misericórdia de Deus", "Esconder a dor"], answer: "Confessar o pecado e buscar a misericórdia de Deus", reference: "Significado Teológico do Livro de Lamentações" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsLamentacoes = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsLamentacoes.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsLamentacoes = allQuizQuestionsLamentacoes.concat(uniqueQuizQuestionsLamentacoes);
+        }
+        allQuizQuestionsLamentacoes = allQuizQuestionsLamentacoes.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsLamentacoes = [];
+        let currentQuizIndexLamentacoes = 0;
+        let scoreLamentacoes = 0;
+        let wrongAnswersLamentacoes = 0;
+        let lamentacoesChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsLamentacoes() {
+            shuffledQuizQuestionsLamentacoes = [...allQuizQuestionsLamentacoes]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsLamentacoes);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressLamentacoes() {
+            const progressElement = document.getElementById('quizProgressLamentacoes');
+            progressElement.textContent = `${currentQuizIndexLamentacoes + 1}/${shuffledQuizQuestionsLamentacoes.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionLamentacoes() {
+            if (currentQuizIndexLamentacoes >= shuffledQuizQuestionsLamentacoes.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionLamentacoes').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsLamentacoes').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreLamentacoes}, Erros: ${wrongAnswersLamentacoes}</p>`;
+                document.getElementById('quizFeedbackLamentacoes').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsLamentacoes[currentQuizIndexLamentacoes];
+            document.getElementById('quizQuestionLamentacoes').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsLamentacoes');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerLamentacoes(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackLamentacoes').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressLamentacoes();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerLamentacoes(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackLamentacoes');
+            const optionsButtons = document.querySelectorAll('#quizOptionsLamentacoes button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreLamentacoes++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersLamentacoes++;
+            }
+            document.getElementById('quizScoreLamentacoes').textContent = `Acertos: ${scoreLamentacoes}, Erros: ${wrongAnswersLamentacoes}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionLamentacoes() {
+            currentQuizIndexLamentacoes++;
+            displayQuestionLamentacoes();
+        }
+
+        // Dados para o gráfico de temas de Lamentações
+        const lamentacoesChartData = {
+            labels: ['Lamento e Sofrimento', 'Juízo Divino', 'Pecado e Confissão', 'Esperança e Misericórdia', 'Fidelidade de Deus', 'Restauração', 'Soberania de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [30, 20, 15, 15, 10, 5, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const lamentacoesChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Lamentações',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderLamentacoesChart() {
+            const ctx = document.getElementById('lamentacoesChart').getContext('2d');
+            if (lamentacoesChartInstance) {
+                lamentacoesChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            lamentacoesChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: lamentacoesChartData,
+                options: lamentacoesChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Pedro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #0f766e; /* Teal border for Peter game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #0f766e; /* Teal for Peter game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #0d645c; /* Darker teal on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #0f766e;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #0f766e;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #0d645c;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-teal-700 mb-4">A História de Pedro 🎣</h1>
+        <p class="text-gray-700 mb-6">
+            Acompanhe a vida de Simão Pedro, o pescador que se tornou um dos mais importantes apóstolos de Jesus, marcado por sua fé, impulsividade e restauração.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Pedro!</p>
+            <p class="text-gray-700 mt-6">A história de Pedro é um testemunho de como Deus usa pessoas imperfeitas, transformando-as em líderes poderosos através da fé, arrependimento e um amor inabalável.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: A Chamada de Pedro',
+                location: 'Mar da Galileia',
+                objective: 'Entender como Jesus chamou Pedro para segui-Lo.',
+                clues: [
+                    'Pedro era um pescador, e Jesus o encontrou lançando as redes no mar.',
+                    'Após uma pesca milagrosa, Jesus disse a Pedro: "De agora em diante, serás pescador de homens."'
+                ],
+                keyVerse: 'Lucas 5:10-11',
+                enigma: 'Qual era a profissão de Pedro antes de seguir Jesus?',
+                options: ['Pescador', 'Carpinteiro', 'Agricultor'],
+                correctAnswer: 'Pescador'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: Pedro Andando sobre as Águas',
+                location: 'Mar da Galileia',
+                objective: 'Compreender a fé e a dúvida de Pedro.',
+                clues: [
+                    'Durante uma tempestade, Jesus foi até os discípulos andando sobre as águas.',
+                    'Pedro pediu para ir ao encontro de Jesus sobre as águas, mas começou a afundar ao ter medo e duvidar.'
+                ],
+                keyVerse: 'Mateus 14:28-31',
+                enigma: 'O que fez Pedro começar a afundar enquanto andava sobre as á águas?',
+                options: ['O medo e a dúvida', 'Uma onda grande', 'O cansaço'],
+                correctAnswer: 'O medo e a dúvida'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: A Confissão de Pedro',
+                location: 'Cesareia de Filipe',
+                objective: 'Entender a revelação de Pedro sobre a identidade de Jesus.',
+                clues: [
+                    'Jesus perguntou aos discípulos quem eles diziam que Ele era.',
+                    'Pedro respondeu: "Tu és o Cristo, o Filho do Deus vivo."'
+                ],
+                keyVerse: 'Mateus 16:15-16',
+                enigma: 'O que Pedro confessou sobre Jesus em Cesareia de Filipe?',
+                options: ['"Tu és o Cristo, o Filho do Deus vivo."', '"Tu és um grande profeta."', '"Tu és o rei de Israel."'],
+                correctAnswer: '"Tu és o Cristo, o Filho do Deus vivo."'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: A Transfiguração',
+                location: 'Uma alta montanha',
+                objective: 'Aprender sobre a experiência de Pedro na Transfiguração.',
+                clues: [
+                    'Jesus levou Pedro, Tiago e João a uma alta montanha, onde foi transfigurado diante deles.',
+                    'Pedro, em sua impulsividade, sugeriu construir três tendas para Jesus, Moisés e Elias.'
+                ],
+                keyVerse: 'Mateus 17:1-4',
+                enigma: 'Quantas tendas Pedro sugeriu construir na Transfiguração?',
+                options: ['Três', 'Uma', 'Duas'],
+                correctAnswer: 'Três'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: Pedro e o Imposto do Templo',
+                location: 'Cafarnaum',
+                objective: 'Compreender a obediência de Pedro e o milagre do peixe.',
+                clues: [
+                    'Os cobradores do imposto do Templo perguntaram a Pedro se Jesus pagava o imposto.',
+                    'Jesus instruiu Pedro a ir pescar e encontrar uma moeda na boca do primeiro peixe para pagar o imposto por ambos.'
+                ],
+                keyVerse: 'Mateus 17:24-27',
+                enigma: 'Onde Pedro encontrou a moeda para pagar o imposto do Templo?',
+                options: ['Na boca de um peixe', 'No fundo do mar', 'Em sua bolsa'],
+                correctAnswer: 'Na boca de um peixe'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: A Negação de Pedro',
+                location: 'Pátio do sumo sacerdote',
+                objective: 'Entender a fraqueza de Pedro e o cumprimento da profecia.',
+                clues: [
+                    'Jesus profetizou que Pedro o negaria três vezes antes que o galo cantasse duas vezes.',
+                    'Pedro negou conhecer Jesus por três vezes, no pátio do sumo sacerdote, e o galo cantou.'
+                ],
+                keyVerse: 'Marcos 14:66-72',
+                enigma: 'Quantas vezes Pedro negou conhecer Jesus?',
+                options: ['Três vezes', 'Uma vez', 'Duas vezes'],
+                correctAnswer: 'Três vezes'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: O Arrependimento de Pedro',
+                location: 'Pátio do sumo sacerdote',
+                objective: 'Aprender sobre o profundo arrependimento de Pedro.',
+                clues: [
+                    'Após a terceira negação e o canto do galo, Pedro se lembrou das palavras de Jesus e chorou amargamente.',
+                    'Seu arrependimento foi genuíno e levou à sua restauração.'
+                ],
+                keyVerse: 'Lucas 22:61-62',
+                enigma: 'O que Pedro fez depois de negar Jesus pela terceira vez e o galo cantar?',
+                options: ['Chorou amargamente', 'Fugiu da cidade', 'Escondeu-se dos outros discípulos'],
+                correctAnswer: 'Chorou amargamente'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: O Encontro com Jesus Ressuscitado',
+                location: 'Mar da Galileia',
+                objective: 'Observar a restauração de Pedro por Jesus.',
+                clues: [
+                    'Após a ressurreição, Jesus apareceu aos discípulos à beira do Mar da Galileia, enquanto pescavam.',
+                    'Jesus perguntou a Pedro três vezes se ele O amava, e Pedro confirmou seu amor, sendo instruído a "apascentar as Suas ovelhas".'
+                ],
+                keyVerse: 'João 21:15-17',
+                enigma: 'Quantas vezes Jesus perguntou a Pedro se ele O amava, à beira do mar?',
+                options: ['Três vezes', 'Uma vez', 'Duas vezes'],
+                correctAnswer: 'Três vezes'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: Pentecostes',
+                location: 'Jerusalém',
+                objective: 'Entender o papel de Pedro no início da Igreja.',
+                clues: [
+                    'No dia de Pentecostes, o Espírito Santo desceu sobre os discípulos.',
+                    'Pedro pregou um sermão poderoso, e cerca de três mil pessoas foram batizadas naquele dia.'
+                ],
+                keyVerse: 'Atos 2:1-4, 37-41',
+                enigma: 'Quantas pessoas foram batizadas após o sermão de Pedro no Pentecostes?',
+                options: ['Cerca de três mil', 'Cem', 'Quinhentas'],
+                correctAnswer: 'Cerca de três mil'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: A Cura do Coxo',
+                location: 'Porta do Templo (Formosa)',
+                objective: 'Aprender sobre o poder de Deus através de Pedro.',
+                clues: [
+                    'Pedro e João subiam ao Templo para orar e encontraram um homem coxo de nascença na porta Formosa.',
+                    'Pedro disse: "Não tenho prata nem ouro, mas o que tenho, isso te dou: Em nome de Jesus Cristo, o Nazareno, levanta-te e anda!" e o homem foi curado.'
+                ],
+                keyVerse: 'Atos 3:1-8',
+                enigma: 'O que Pedro disse ao homem coxo na porta do Templo?',
+                options: ['"Em nome de Jesus Cristo, o Nazareno, levanta-te e anda!"', '"Tenho ouro para te dar."', '"Vá e peça esmolas em outro lugar."'],
+                correctAnswer: '"Em nome de Jesus Cristo, o Nazareno, levanta-te e anda!"'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: Pedro e Cornélio',
+                location: 'Jope e Cesareia',
+                objective: 'Observar a abertura do evangelho aos gentios através de Pedro.',
+                clues: [
+                    'Pedro teve uma visão de animais impuros, e uma voz lhe disse para não chamar de impuro o que Deus purificou.',
+                    'Ele foi chamado à casa de Cornélio, um centurião gentio, e pregou o evangelho, resultando na conversão e batismo de Cornélio e sua família.'
+                ],
+                keyVerse: 'Atos 10:9-16, 44-48',
+                enigma: 'Qual foi o nome do centurião gentio que Pedro visitou e pregou o evangelho?',
+                options: ['Cornélio', 'Pilatos', 'Herodes'],
+                correctAnswer: 'Cornélio'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: Pedro na Prisão',
+                location: 'Jerusalém',
+                objective: 'Compreender a libertação milagrosa de Pedro da prisão.',
+                clues: [
+                    'Herodes Agripa prendeu Pedro com a intenção de executá-lo.',
+                    'Um anjo do Senhor apareceu na prisão, libertou Pedro de suas correntes e o guiou para fora da prisão.'
+                ],
+                keyVerse: 'Atos 12:1-11',
+                enigma: 'Quem libertou Pedro da prisão?',
+                options: ['Um anjo do Senhor', 'Os discípulos', 'Ele mesmo'],
+                correctAnswer: 'Um anjo do Senhor'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: O Concílio de Jerusalém',
+                location: 'Jerusalém',
+                objective: 'Entender a defesa de Pedro pela inclusão dos gentios.',
+                clues: [
+                    'Pedro participou do Concílio de Jerusalém, onde defendeu que os gentios convertidos não precisavam ser circuncidados para serem salvos.',
+                    'Ele testemunhou sobre a obra do Espírito Santo entre os gentios.'
+                ],
+                keyVerse: 'Atos 15:7-11',
+                enigma: 'Qual foi a principal questão debatida no Concílio de Jerusalém em que Pedro participou?',
+                options: ['A circuncisão dos gentios', 'A liderança da Igreja', 'A construção de um novo templo'],
+                correctAnswer: 'A circuncisão dos gentios'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: As Cartas de Pedro',
+                location: 'Diversas regiões',
+                objective: 'Aprender sobre as epístolas escritas por Pedro.',
+                clues: [
+                    'Pedro escreveu duas epístolas no Novo Testamento: 1 Pedro e 2 Pedro.',
+                    'Nelas, ele encoraja os cristãos a perseverar na fé em meio às perseguições e a crescer no conhecimento de Jesus Cristo.'
+                ],
+                keyVerse: '1 Pedro 1:3-7',
+                enigma: 'Quantas epístolas Pedro escreveu no Novo Testamento?',
+                options: ['Duas', 'Uma', 'Três'],
+                correctAnswer: 'Duas'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Legado de Pedro',
+                location: 'Roma (tradição)',
+                objective: 'Refletir sobre o impacto duradouro da vida e ministério de Pedro.',
+                clues: [
+                    'Pedro é considerado uma das colunas da Igreja primitiva, um líder corajoso e um pregador poderoso.',
+                    'Sua vida é um exemplo de transformação, de um pescador impulsivo a um apóstolo fiel e mártir (segundo a tradição).'
+                ],
+                keyVerse: 'Mateus 16:18',
+                enigma: 'Qual é um dos principais legados de Pedro para a Igreja?',
+                options: ['Sua liderança e pregação poderosa', 'Sua riqueza', 'Sua habilidade em construir barcos'],
+                correctAnswer: 'Sua liderança e pregação poderosa'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-teal-700 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

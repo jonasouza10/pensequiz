@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Romanos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Romanos Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Romanos</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionRomanos('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionRomanos('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionRomanos('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionRomanos('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionRomanos('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionRomanos('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionRomanos('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionRomanos('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionRomanos('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Romanos</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Epístola de Paulo aos Romanos, a mais completa exposição da doutrina cristã, focando na justiça de Deus, na justificação pela fé, na salvação universal e na vida transformada pelo Espírito. Descubra os fundamentos da fé, a relação entre a lei e a graça, o papel de Israel no plano de Deus e os princípios para uma vida cristã prática. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Romanos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Epístola de Paulo aos Romanos é considerada por muitos como a obra-prima teológica do apóstolo Paulo e um dos livros mais influentes da Bíblia. Escrita por Paulo por volta de 57-58 d.C., provavelmente de Corinto, a carta é dirigida à igreja em Roma, que era composta por judeus e gentios convertidos ao cristianismo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito de Romanos é apresentar uma exposição sistemática do evangelho de Jesus Cristo, aprofundando-se na doutrina da justificação pela fé. Paulo desejava preparar a igreja em Roma para sua visita planejada e para que ela servisse como base de apoio para sua futura missão à Espanha. Ele também aborda questões de unidade entre judeus e gentios dentro da igreja, enfatizando que ambos são igualmente pecadores e igualmente salvos pela graça de Deus mediante a fé.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Romanos é conhecido por sua profundidade teológica, abordando temas como o pecado universal da humanidade, a justiça de Deus, a justificação gratuita pela fé em Cristo, a santificação pelo Espírito Santo, a segurança da salvação, o papel de Israel no plano divino e as implicações práticas do evangelho para a vida diária. É um livro que tem moldado a teologia cristã ao longo dos séculos, influenciando grandes figuras como Agostinho, Martinho Lutero e João Calvino.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem a universalidade do pecado, a justificação pela fé, a redenção em Cristo, a santificação pela união com Cristo e pelo Espírito, a eleição e o lugar de Israel no plano de Deus, e as exortações práticas para uma vida cristã que glorifique a Deus e ame o próximo.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-3: A Necessidade Universal da Justiça de Deus.</strong> O pecado de gentios e judeus, a incapacidade da lei para justificar.</li>
+                <li><strong>Capítulos 3-5: A Justificação Pela Fé.</strong> Deus justifica o pecador pela fé em Cristo, não por obras da lei; Abraão como exemplo.</li>
+                <li><strong>Capítulos 6-8: A Santificação e a Vida no Espírito.</strong> Libertação do domínio do pecado, a luta contra a carne, a vida guiada pelo Espírito Santo.</li>
+                <li><strong>Capítulos 9-11: O Lugar de Israel no Plano de Deus.</strong> A soberania de Deus na eleição, a rejeição temporária de Israel e sua futura restauração.</li>
+                <li><strong>Capítulos 12-15: A Aplicação Prática do Evangelho.</strong> Exortações sobre a vida cristã em comunidade, dons espirituais, amor, submissão às autoridades, o forte e o fraco na fé.</li>
+                <li><strong>Capítulo 16: Saudações Pessoais e Conclusão.</strong> Recomendações, saudações a diversos irmãos e irmãs em Roma.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Romanos é uma carta fundamental que estabelece as bases da fé cristã e suas profundas implicações para a vida e a doutrina.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Romanos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Romanos expõe a doutrina da justificação pela fé e suas implicações para a vida cristã.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Introdução e A Necessidade Universal da Justiça de Deus (Capítulos 1-3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação e Propósito (1:1-17):</strong>
+                    <ul>
+                        <li>O evangelho como poder de Deus para a salvação.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Pecado dos Gentios (1:18-32):</strong>
+                    <ul>
+                        <li>A ira de Deus revelada contra a impiedade.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Pecado dos Judeus (2:1-3:8):</strong>
+                    <ul>
+                        <li>A hipocrisia e a lei.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Universalidade do Pecado (3:9-20):</strong>
+                    <ul>
+                        <li>Todos estão debaixo do pecado.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Justificação Pela Fé (Capítulos 3-5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Justiça de Deus Pela Fé (3:21-31):</strong>
+                    <ul>
+                        <li>Justificação gratuita em Cristo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Abraão Justificado Pela Fé (4:1-25):</strong>
+                    <ul>
+                        <li>Exemplo de fé antes da lei e da circuncisão.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Os Frutos da Justificação (5:1-11):</strong>
+                    <ul>
+                        <li>Paz com Deus, acesso à graça, esperança, amor de Deus derramado.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Adão e Cristo (5:12-21):</strong>
+                    <ul>
+                        <li>O pecado de um, a justiça de um.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Santificação e a Vida no Espírito (Capítulos 6-8)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Mortos para o Pecado, Vivos para Deus (6:1-23):</strong>
+                    <ul>
+                        <li>União com Cristo na morte e ressurreição.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Lei e o Pecado (7:1-25):</strong>
+                    <ul>
+                        <li>A luta interior do crente.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Vida no Espírito (8:1-39):</strong>
+                    <ul>
+                        <li>Libertação da lei do pecado e da morte, adoção, intercessão do Espírito, a soberania do amor de Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. O Lugar de Israel no Plano de Deus (Capítulos 9-11)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Soberania de Deus e Israel (9:1-33):</strong>
+                    <ul>
+                        <li>A eleição de Deus, vasos de ira e de misericórdia.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Incredulidade de Israel (10:1-21):</strong>
+                    <ul>
+                        <li>A justiça que vem da fé, a necessidade da pregação.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Restauração de Israel (11:1-36):</strong>
+                    <ul>
+                        <li>O remanescente, a oliveira, a cegueira parcial e a futura salvação.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. A Aplicação Prática do Evangelho (Capítulos 12-15)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Dedicação e Dons Espirituais (12:1-21):</strong>
+                    <ul>
+                        <li>Corpo de Cristo, amor genuíno.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Submissão às Autoridades e Amor (13:1-14):</strong>
+                    <ul>
+                        <li>Obediência ao governo, o amor como cumprimento da lei.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Forte e o Fraco na Fé (14:1-15:13):</strong>
+                    <ul>
+                        <li>Não julgar, edificar uns aos outros, agradar a Cristo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">VI. Conclusão e Saudações (Capítulo 16)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Recomendações e Saudações (16:1-16):</strong>
+                    <ul>
+                        <li>Phoebe, Priscila e Áquila, outros irmãos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Advertências e Doxologia (16:17-27):</strong>
+                    <ul>
+                        <li>Contra os que causam divisões, glória a Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">A Epístola aos Romanos é a mais sistemática e abrangente apresentação do evangelho na Bíblia. Paulo demonstra a necessidade universal da salvação devido ao pecado de toda a humanidade, tanto judeus quanto gentios. Ele então revela a solução divina: a justificação pela fé em Jesus Cristo, um dom gratuito da graça de Deus. O livro explora as implicações dessa justificação, levando à santificação pelo Espírito Santo e à liberdade do domínio do pecado. Romanos também aborda a complexa questão do lugar de Israel no plano de Deus, afirmando a fidelidade de Deus às Suas promessas, apesar da incredulidade parcial de Israel, e apontando para uma futura restauração. Finalmente, a carta oferece exortações práticas sobre como os crentes devem viver suas vidas em resposta à verdade do evangelho, com ênfase no amor, na unidade e na submissão à vontade de Deus. Romanos é um pilar da doutrina cristã que continua a transformar vidas e aprofundar a compreensão da salvação.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridRomanos">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Romanos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Romanos, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Introdução e o Pecado dos Gentios</strong>
+                    <ul>
+                        <li>1.1-7: Saudação e Propósito.</li>
+                        <li>1.8-17: O Desejo de Paulo de Visitar Roma e o Poder do Evangelho.</li>
+                        <li>1.18-32: A Ira de Deus contra a Impiedade dos Gentios.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: O Pecado dos Judeus</strong>
+                    <ul>
+                        <li>2.1-16: O Julgamento de Deus é Justo.</li>
+                        <li>2.17-29: A Hipocrisia Judaica e a Verdadeira Circuncisão.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: A Universalidade do Pecado e a Justiça de Deus</strong>
+                    <ul>
+                        <li>3.1-8: A Fidelidade de Deus.</li>
+                        <li>3.9-20: Todos Estão Debaixo do Pecado.</li>
+                        <li>3.21-31: A Justificação Pela Fé em Jesus Cristo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: Abraão Justificado Pela Fé</strong>
+                    <ul>
+                        <li>4.1-12: Abraão Justificado Pela Fé, Não Por Obras ou Circuncisão.</li>
+                        <li>4.13-25: A Promessa Pela Fé.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 5: Os Frutos da Justificação e Adão e Cristo</strong>
+                    <ul>
+                        <li>5.1-11: Paz com Deus e Certeza da Salvação.</li>
+                        <li>5.12-21: O Pecado de Adão e a Graça de Cristo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 6: Mortos para o Pecado, Vivos para Deus</strong>
+                    <ul>
+                        <li>6.1-14: União com Cristo na Morte e Ressurreição.</li>
+                        <li>6.15-23: Escravos da Justiça.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 7: A Lei e o Pecado</strong>
+                    <ul>
+                        <li>7.1-6: Libertação da Lei.</li>
+                        <li>7.7-13: O Propósito da Lei.</li>
+                        <li>7.14-25: A Luta Interior do Crente.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 8: A Vida no Espírito</strong>
+                    <ul>
+                        <li>8.1-17: Nenhuma Condenação e Vida Pelo Espírito.</li>
+                        <li>8.18-30: A Glória Futura e a Intercessão do Espírito.</li>
+                        <li>8.31-39: A Certeza do Amor de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 9: A Soberania de Deus e Israel</strong>
+                    <ul>
+                        <li>9.1-5: A Tristeza de Paulo por Israel.</li>
+                        <li>9.6-29: A Eleição de Deus.</li>
+                        <li>9.30-33: Israel e a Justiça Pela Fé.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 10: A Incredulidade de Israel</strong>
+                    <ul>
+                        <li>10.1-13: A Justiça Pela Fé.</li>
+                        <li>10.14-21: A Necessidade da Pregação.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 11: A Restauração de Israel</strong>
+                    <ul>
+                        <li>11.1-10: O Remanescente Fiel.</li>
+                        <li>11.11-24: A Oliveiras e os Ramos.</li>
+                        <li>11.25-36: A Salvação Futura de Israel.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 12: Dedicação e Dons Espirituais</strong>
+                    <ul>
+                        <li>12.1-2: Sacrifício Vivo e Transformação da Mente.</li>
+                        <li>12.3-8: Dons Espirituais no Corpo de Cristo.</li>
+                        <li>12.9-21: Exortações à Vida Cristã.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 13: Submissão às Autoridades e Amor</strong>
+                    <ul>
+                        <li>13.1-7: Submissão às Autoridades.</li>
+                        <li>13.8-10: O Amor Cumpre a Lei.</li>
+                        <li>13.11-14: Andar na Luz.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 14: O Forte e o Fraco na Fé</strong>
+                    <ul>
+                        <li>14.1-12: Não Julgar o Irmão.</li>
+                        <li>14.13-23: Não Ser Pedra de Tropeço.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 15: Agradar a Cristo e Planos de Paulo</strong>
+                    <ul>
+                        <li>15.1-13: Agradar a Cristo e a Unidade.</li>
+                        <li>15.14-33: Os Planos Missionários de Paulo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 16: Saudações Pessoais e Doxologia</strong>
+                    <ul>
+                        <li>16.1-16: Recomendações e Saudações.</li>
+                        <li>16.17-20: Advertências Finais.</li>
+                        <li>16.21-27: Saudações dos Companheiros e Doxologia.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Romanos</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Justiça de Deus:</strong> A retidão de Deus revelada no evangelho, que justifica os pecadores.</li>
+                <li><strong>Justificação Pela Fé:</strong> A doutrina central de Romanos, onde a salvação é recebida pela fé em Cristo, não por obras.</li>
+                <li><strong>Pecado e Condenação:</strong> A condição universal da humanidade sob o pecado e a ira de Deus.</li>
+                <li><strong>Graça e Salvação:</strong> A salvação como um dom gratuito de Deus, alcançado pela Sua graça.</li>
+                <li><strong>Santificação e o Espírito Santo:</strong> A vida transformada e guiada pelo Espírito Santo após a justificação.</li>
+                <li><strong>Israel e os Gentios:</strong> O papel de Israel no plano de salvação de Deus e a inclusão dos gentios.</li>
+                <li><strong>Vida Cristã Prática:</strong> Exortações sobre como viver uma vida que honre a Deus e ame o próximo.</li>
+                <li><strong>Soberania de Deus:</strong> O controle e o propósito de Deus em toda a história da salvação.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Romanos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersRomanos">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Romanos</h2>
+            <div id="quizContainerRomanos" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionRomanos"></p>
+                <div id="quizOptionsRomanos" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackRomanos" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionRomanos()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressRomanos"></span></p>
+                <p>Pontuação: <span id="quizScoreRomanos">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Romanos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Romanos.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="romanosChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalRomanos()">&times;</span>
+                <h3 id="modalCharacterNameRomanos" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionRomanos" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Romanos",
+            "short_name": "Romanos",
+            "description": "Explore o livro de Romanos de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=RM",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=RM",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'romanos-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Ensure Chart.js is cached
+            // Add other static resources you want to cache here
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Register the Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // Function to load manifest.json dynamically
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Functions for section control
+        function showSectionRomanos(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Ensure character buttons and chapter links are generated when entering respective sections
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsRomanos();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksRomanos();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsRomanos(); // Shuffle questions at the start of the quiz
+                currentQuizIndexRomanos = 0; // Reset the quiz
+                scoreRomanos = 0;
+                wrongAnswersRomanos = 0;
+                document.getElementById('quizScoreRomanos').textContent = `Acertos: ${scoreRomanos}, Erros: ${wrongAnswersRomanos}`;
+                displayQuestionRomanos();
+            }
+            if (sectionId === 'grafico') { // Call the chart function when the section is displayed
+                renderRomanosChart();
+            }
+        }
+
+        // Character data for Romans
+        const characterDetailsRomanos = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O autor da Epístola aos Romanos, apóstolo aos gentios, que sistematicamente expõe o evangelho da graça de Deus."
+            },
+            "Febe": {
+                name: "Febe",
+                description: "Uma diaconisa da igreja em Cencréia, recomendada por Paulo, que provavelmente levou a carta a Roma."
+            },
+            "Priscila e Áquila": {
+                name: "Priscila e Áquila",
+                description: "Um casal de colaboradores de Paulo, mencionados em Romanos 16, que arriscaram suas vidas por ele."
+            },
+            "Epeneto": {
+                name: "Epeneto",
+                description: "O primeiro convertido de Cristo na Ásia, saudado por Paulo em Romanos 16."
+            },
+            "Maria": {
+                name: "Maria",
+                description: "Uma mulher que trabalhou muito pelos crentes em Roma, mencionada por Paulo."
+            },
+            "Andrônico e Júnias": {
+                name: "Andrônico e Júnias",
+                description: "Parentes de Paulo e companheiros de prisão, notáveis entre os apóstolos."
+            },
+            "Ampliato": {
+                name: "Ampliato",
+                description: "Um amado em Cristo, saudado por Paulo em Romanos 16."
+            },
+            "Urbano": {
+                name: "Urbano",
+                description: "Um cooperador de Cristo, saudado por Paulo."
+            },
+            "Estáquis": {
+                name: "Estáquis",
+                description: "Um amado de Paulo."
+            },
+            "Tertius": {
+                name: "Tertius",
+                description: "O escriba que escreveu a Epístola aos Romanos sob ditado de Paulo."
+            },
+            "Gaio": {
+                name: "Gaio",
+                description: "O anfitrião de Paulo e de toda a igreja, de cuja casa Paulo provavelmente escreveu Romanos."
+            },
+            "Erasto": {
+                name: "Erasto",
+                description: "O tesoureiro da cidade de Corinto, que envia saudações."
+            },
+            "Quarto": {
+                name: "Quarto",
+                description: "Um irmão que envia saudações aos romanos."
+            }
+        };
+
+        // Function to display the character modal
+        function displayCharacterModalRomanos(characterName) {
+            const details = characterDetailsRomanos[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameRomanos').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionRomanos').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Function to close the modal
+        function closeCharacterModalRomanos() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Generate character buttons
+        function generateCharacterButtonsRomanos() {
+            const grid = document.getElementById('characterGridRomanos');
+            grid.innerHTML = '';
+            for (const key in characterDetailsRomanos) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalRomanos(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Generate chapter links
+        function generateChapterLinksRomanos() {
+            const chaptersDiv = document.getElementById('chaptersRomanos');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 16; i++) { // Romans has 16 chapters
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/rm/${i}`; // Link to Biblia Online, Romans
+                link.target = "_blank"; // Open in new tab
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Function to shuffle an array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Quiz data for Romans (25 unique questions)
+        const uniqueQuizQuestionsRomanos = [
+            { question: "Quem é o autor da Epístola aos Romanos?", options: ["Pedro", "João", "Paulo", "Tiago"], answer: "Paulo", reference: "Introdução ao Livro de Romanos" },
+            { question: "Qual o tema principal da Epístola aos Romanos?", options: ["A história da Igreja primitiva", "A justificação pela fé", "Os milagres de Jesus", "As profecias do Antigo Testamento"], answer: "A justificação pela fé", reference: "Introdução ao Livro de Romanos" },
+            { question: "Segundo Romanos 3:23, qual a condição de toda a humanidade?", options: ["Todos são justos", "Todos pecaram e destituídos estão da glória de Deus", "Todos são salvos por obras", "Todos são perfeitos"], answer: "Todos pecaram e destituídos estão da glória de Deus", reference: "Romanos 3:23" },
+            { question: "Como a justiça de Deus é revelada no evangelho, de acordo com Romanos 1:17?", options: ["Pela lei", "De fé em fé", "Por obras", "Por sacrifícios"], answer: "De fé em fé", reference: "Romanos 1:17" },
+            { question: "Quem é usado como exemplo de justificação pela fé em Romanos 4?", options: ["Moisés", "Davi", "Abraão", "Jacó"], answer: "Abraão", reference: "Romanos 4:1-25" },
+            { question: "O que significa estar 'morto para o pecado' em Romanos 6?", options: ["Não pecar mais", "Estar livre do domínio do pecado pela união com Cristo", "Ser incapaz de pecar", "Ser perfeito"], answer: "Estar livre do domínio do pecado pela união com Cristo", reference: "Romanos 6:1-14" },
+            { question: "Qual a condição daqueles que estão em Cristo Jesus, segundo Romanos 8:1?", options: ["Estão sob a lei", "Não há nenhuma condenação", "Estão condenados", "Estão em dúvida"], answer: "Não há nenhuma condenação", reference: "Romanos 8:1" },
+            { question: "Qual o papel do Espírito Santo na vida do crente, conforme Romanos 8?", options: ["Apenas para milagres", "Guiar, interceder e dar vida", "Para falar em línguas", "Para dar riqueza"], answer: "Guiar, interceder e dar vida", reference: "Romanos 8:14, 26" },
+            { question: "Em Romanos 9-11, Paulo aborda a questão de qual povo no plano de Deus?", options: ["Os egípcios", "Os gregos", "Israel", "Os romanos"], answer: "Israel", reference: "Romanos 9-11" },
+            { question: "O que Paulo exorta os crentes a fazerem com seus corpos em Romanos 12:1?", options: ["Oferecê-los como sacrifício vivo, santo e agradável a Deus", "Usá-los para o pecado", "Ignorá-los", "Cuidar apenas da alma"], answer: "Oferecê-los como sacrifício vivo, santo e agradável a Deus", reference: "Romanos 12:1" },
+            { question: "Qual o mandamento que Paulo diz que cumpre toda a lei em Romanos 13:10?", options: ["Não roubar", "Não matar", "Amar ao próximo como a si mesmo", "Honrar pai e mãe"], answer: "Amar ao próximo como a si mesmo", reference: "Romanos 13:10" },
+            { question: "Quem Paulo recomenda aos romanos no início do capítulo 16, que provavelmente levou a carta?", options: ["Priscila", "Áquila", "Febe", "Maria"], answer: "Febe", reference: "Romanos 16:1-2" },
+            { question: "Qual o propósito de Paulo ao escrever a Romanos, além de expor o evangelho?", options: ["Pedir dinheiro", "Estabelecer uma base para a missão à Espanha", "Criticar a igreja em Roma", "Apenas saudar os irmãos"], answer: "Estabelecer uma base para a missão à Espanha", reference: "Introdução ao Livro de Romanos" },
+            { question: "Segundo Romanos 5:8, como Deus demonstra seu amor por nós?", options: ["Quando éramos justos", "Quando éramos pecadores, Cristo morreu por nós", "Quando éramos ricos", "Quando tínhamos fé"], answer: "Quando éramos pecadores, Cristo morreu por nós", reference: "Romanos 5:8" },
+            { question: "O que Paulo diz que não pode nos separar do amor de Deus em Cristo Jesus, em Romanos 8:38-39?", options: ["Tribulação, angústia, perseguição, fome, nudez, perigo, espada", "Nada", "Nossos pecados", "Nossas dúvidas"], answer: "Nada", reference: "Romanos 8:38-39" },
+            { question: "Qual a atitude que o crente deve ter em relação às autoridades governamentais, segundo Romanos 13:1?", options: ["Desobedecer", "Submeter-se", "Ignorar", "Rebelar-se"], answer: "Submeter-se", reference: "Romanos 13:1" },
+            { question: "Qual a principal diferença entre a justiça da lei e a justiça da fé, conforme Romanos 10?", options: ["A justiça da lei é para judeus, a da fé para gentios", "A justiça da lei exige obras, a da fé exige crença no coração e confissão com a boca", "Não há diferença", "A justiça da lei é superior"], answer: "A justiça da lei exige obras, a da fé exige crença no coração e confissão com a boca", reference: "Romanos 10:4-10" },
+            { question: "O que Paulo diz que acontece com aqueles que são 'enxertados' na oliveira (Israel) em Romanos 11?", options: ["São melhores que os ramos naturais", "Compartilham da raiz e da seiva da oliveira", "São substituídos pelos ramos naturais", "Não têm relação com a oliveira"], answer: "Compartilham da raiz e da seiva da oliveira", reference: "Romanos 11:17-24" },
+            { question: "Em Romanos 14, Paulo aborda a questão de como os crentes devem lidar com o quê?", options: ["Diferenças de opinião sobre práticas não essenciais", "Pecados graves", "Falsos mestres", "Perseguição"], answer: "Diferenças de opinião sobre práticas não essenciais", reference: "Romanos 14:1-23" },
+            { question: "O que Paulo afirma sobre a lei em Romanos 7:7?", options: ["Que a lei é pecado", "Que a lei é santa, justa e boa", "Que a lei não tem propósito", "Que a lei foi abolida"], answer: "Que a lei é santa, justa e boa", reference: "Romanos 7:7" },
+            { question: "Qual o nome do escriba que escreveu a carta de Romanos sob ditado de Paulo?", options: ["Timóteo", "Silas", "Tertius", "Lucas"], answer: "Tertius", reference: "Romanos 16:22" },
+            { question: "O que Paulo diz que é a 'dívida' que os crentes têm uns para com os outros em Romanos 13:8?", options: ["Dinheiro", "Amor", "Serviço", "Oração"], answer: "Amor", reference: "Romanos 13:8" },
+            { question: "Qual o tema do capítulo 12 de Romanos?", options: ["A justificação pela fé", "A soberania de Deus", "Dons espirituais e vida cristã prática", "A história de Israel"], answer: "Dons espirituais e vida cristã prática", reference: "Romanos 12" },
+            { question: "O que Paulo diz que não pode nos separar do amor de Deus em Romanos 8:35?", options: ["Tribulação, angústia, perseguição, fome, nudez, perigo, ou espada"], answer: "Tribulação, angústia, perseguição, fome, nudez, perigo, ou espada", reference: "Romanos 8:35" },
+            { question: "Em Romanos 15, Paulo fala sobre a importância de agradar a quem?", options: ["A si mesmo", "Aos outros", "A Cristo", "Ao mundo"], answer: "A Cristo", reference: "Romanos 15:1-3" }
+        ];
+
+        let quizQuestionsRomanos = []; // This array will store the 200 shuffled questions
+
+        // Function to populate and shuffle quiz questions
+        function shuffleQuizQuestionsRomanos() {
+            quizQuestionsRomanos = []; // Clear previous questions
+            while (quizQuestionsRomanos.length < 200) {
+                quizQuestionsRomanos.push(...uniqueQuizQuestionsRomanos);
+            }
+            // Ensure the array has exactly 200 questions, in case duplication exceeds
+            if (quizQuestionsRomanos.length > 200) {
+                quizQuestionsRomanos = quizQuestionsRomanos.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsRomanos); // Shuffle the complete array
+        }
+
+        let currentQuizIndexRomanos = 0;
+        let scoreRomanos = 0;
+        let wrongAnswersRomanos = 0;
+
+        function displayQuestionRomanos() {
+            const questionElement = document.getElementById('quizQuestionRomanos');
+            const optionsElement = document.getElementById('quizOptionsRomanos');
+            const feedbackElement = document.getElementById('quizFeedbackRomanos');
+            const nextButton = document.querySelector('#quizContainerRomanos .quiz-next');
+            const progressElement = document.getElementById('quizProgressRomanos');
+
+            if (currentQuizIndexRomanos < quizQuestionsRomanos.length) {
+                const questionData = quizQuestionsRomanos[currentQuizIndexRomanos];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Shuffle options
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerRomanos(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexRomanos + 1}/${quizQuestionsRomanos.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreRomanos}, Erros: ${wrongAnswersRomanos}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerRomanos(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsRomanos button');
+            const feedbackElement = document.getElementById('quizFeedbackRomanos');
+            const nextButton = document.querySelector('#quizContainerRomanos .quiz-next');
+            const scoreElement = document.getElementById('quizScoreRomanos');
+
+            // Disable all option buttons to prevent multiple selections
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreRomanos++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersRomanos++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreRomanos}, Erros: ${wrongAnswersRomanos}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionRomanos() {
+            currentQuizIndexRomanos++;
+            displayQuestionRomanos();
+        }
+
+        // Chart for Romans Themes
+        let romanosChartInstance = null; // Variable to store the chart instance
+
+        function renderRomanosChart() {
+            const ctx = document.getElementById('romanosChart').getContext('2d');
+
+            // Destroy the previous chart instance if it exists
+            if (romanosChartInstance) {
+                romanosChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['A Justiça de Deus', 'Justificação Pela Fé', 'Pecado e Condenação', 'Graça e Salvação', 'Santificação e o Espírito Santo', 'Israel e os Gentios', 'Vida Cristã Prática', 'Soberania de Deus'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [9, 10, 8, 9, 8, 7, 7, 6], // Fictitious values for Romans
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Red for Justiça de Deus
+                        'rgba(54, 162, 235, 0.7)', // Blue for Justificação Pela Fé
+                        'rgba(255, 206, 86, 0.7)', // Yellow for Pecado e Condenação
+                        'rgba(75, 192, 192, 0.7)', // Teal for Graça e Salvação
+                        'rgba(153, 102, 255, 0.7)', // Purple for Santificação e o Espírito Santo
+                        'rgba(255, 159, 64, 0.7)', // Orange for Israel e os Gentios
+                        'rgba(201, 203, 207, 0.7)', // Gray for Vida Cristã Prática
+                        'rgba(100, 149, 237, 0.7)' // Light blue for Soberania de Deus
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)',
+                        'rgba(100, 149, 237, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            romanosChartInstance = new Chart(ctx, {
+                type: 'bar', // Can be 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Color of Y-axis labels
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Color of Y-axis grid lines
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Color of X-axis labels
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Color of X-axis grid lines
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Color of legend text
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Romanos',
+                            color: '#f8fafc', // Color of chart title
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the home section on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionRomanos('inicio');
+        });
+    </script>
+</body>
+</html>

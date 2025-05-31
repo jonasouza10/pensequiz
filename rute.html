@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Rute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Rute Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Rute</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionRuth('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionRuth('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionRuth('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionRuth('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionRuth('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionRuth('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionRuth('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionRuth('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionRuth('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Rute</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a bela e comovente história de Rute, uma mulher moabita que demonstrou lealdade, fé e perseverança. Descubra como a providência divina e a bondade humana se entrelaçam para trazer redenção e estabelecer a linhagem de Davi e, futuramente, de Jesus. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Rute</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Rute é um dos livros mais curtos e encantadores da Bíblia, situado cronologicamente no período dos Juízes. Ele narra a história de uma mulher moabita, Rute, que demonstra uma lealdade extraordinária à sua sogra Noemi e ao Deus de Israel, em meio à adversidade e à perda.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro de Rute é uma narrativa de amor, lealdade, providência divina e redenção. Ele destaca a importância da bondade (hebraico: *hesed*), da família e do papel do "resgatador" ou "parente remidor" (hebraico: *goel*). A história de Rute não é apenas uma bela narrativa pessoal, mas também serve a um propósito genealógico crucial, mostrando como Rute se tornou a bisavó do Rei Davi, inserindo-se na linhagem messiânica que culminaria em Jesus Cristo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Em contraste com a escuridão e a apostasia descritas no livro de Juízes, Rute oferece um vislumbre de fé e retidão individual, demonstrando que, mesmo nos tempos mais sombrios, a fidelidade a Deus e ao próximo pode florescer.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: A Partida e o Retorno.</strong> A família de Elimeleque e Noemi migra para Moabe. A morte de Elimeleque e de seus dois filhos, Malom e Quiliom. O retorno de Noemi a Belém com Rute, que se recusa a deixá-la.</li>
+                <li><strong>Capítulo 2: Rute no Campo de Boaz.</strong> Rute vai respigar no campo de Boaz, um parente de Elimeleque. A bondade de Boaz para com Rute.</li>
+                <li><strong>Capítulo 3: A Proposta de Rute a Boaz.</strong> Noemi instrui Rute a se apresentar a Boaz na eira como um pedido de redenção. Boaz reconhece a virtude de Rute e se compromete a agir como parente remidor.</li>
+                <li><strong>Capítulo 4: A Redenção e o Casamento.</strong> Boaz negocia a redenção da propriedade de Elimeleque e o casamento com Rute diante dos anciãos. O casamento de Boaz e Rute e o nascimento de Obede, avô de Davi.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Rute é uma história atemporal de amor, lealdade e da providência de Deus que opera nos detalhes da vida de pessoas comuns para cumprir Seus grandes propósitos.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Rute</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Rute é uma narrativa de lealdade, providência e redenção, situada no período dos Juízes, destacando a bondade de Deus e de Seus servos.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Perda e Retorno (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Fome em Belém e a Migração para Moabe:</strong>
+                    <ul>
+                        <li>Elimeleque, Noemi e seus filhos (Malom e Quiliom) vão para Moabe.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Tragédia em Moabe:</strong>
+                    <ul>
+                        <li>Morte de Elimeleque.</li>
+                        <li>Casamento dos filhos com moabitas (Orfa e Rute).</li>
+                        <li>Morte de Malom e Quiliom.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Retorno de Noemi e a Decisão de Rute:</strong>
+                    <ul>
+                        <li>Noemi decide voltar para Belém.</li>
+                        <li>Orfa retorna ao seu povo, mas Rute decide permanecer com Noemi.</li>
+                        <li>A declaração de lealdade de Rute: "Onde quer que fores, irei eu..." (Rute 1:16-17).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Rute Encontra Boaz (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Rute Respiga no Campo:</strong>
+                    <ul>
+                        <li>Rute vai respigar para sustentar Noemi e a si mesma.</li>
+                        <li>Ela "por acaso" chega ao campo de Boaz.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Bondade de Boaz:</strong>
+                    <ul>
+                        <li>Boaz a nota e pergunta sobre ela.</li>
+                        <li>Ele demonstra grande bondade e proteção para com Rute.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Noemi e o Parente Remidor:</strong>
+                    <ul>
+                        <li>Rute relata a Noemi a bondade de Boaz.</li>
+                        <li>Noemi reconhece Boaz como um parente próximo e um "goel" (resgatador).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Proposta de Redenção (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Plano de Noemi:</strong>
+                    <ul>
+                        <li>Noemi instrui Rute a ir à eira de Boaz à noite.</li>
+                        <li>Rute segue as instruções de Noemi.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Rute e Boaz na Eira:</strong>
+                    <ul>
+                        <li>Rute se deita aos pés de Boaz.</li>
+                        <li>Ela pede a ele que estenda sua capa sobre ela, um símbolo de proteção e casamento.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Compromisso de Boaz:</strong>
+                    <ul>
+                        <li>Boaz reconhece a virtude de Rute e se compromete a agir como parente remidor.</li>
+                        <li>Ele menciona que há um parente mais próximo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Redenção e Nova Vida (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Negociação na Porta da Cidade:</strong>
+                    <ul>
+                        <li>Boaz convoca o parente mais próximo e os anciãos.</li>
+                        <li>O parente mais próximo recusa a redenção.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Boaz Redime e Casa-se com Rute:</strong>
+                    <ul>
+                        <li>Boaz adquire a propriedade e se casa com Rute.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Nascimento de Obede e a Genealogia:</strong>
+                    <ul>
+                        <li>Rute dá à luz um filho, Obede.</li>
+                        <li>Obede é reconhecido como filho de Noemi.</li>
+                        <li>A genealogia de Davi é estabelecida, com Obede como avô de Davi.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O livro de Rute é um testemunho da providência soberana de Deus, que opera nos detalhes da vida para cumprir Seus propósitos redentores. Ele ilustra o conceito de *hesed* (amor leal, bondade inabalável), tanto na relação entre Rute e Noemi quanto na generosidade de Boaz. O papel do *goel* (parente remidor) prefigura a obra redentora de Jesus Cristo, que nos resgata e nos integra à família de Deus. A inclusão de Rute, uma moabita, na linhagem de Davi e de Jesus, demonstra a universalidade do plano de salvação de Deus, que transcende barreiras étnicas e sociais.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridRuth">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Rute</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Rute, capítulo por capítulo, destacando os eventos e o desenvolvimento da história.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Perda e Retorno (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A família de Elimeleque em Moabe, suas perdas e o retorno de Noemi com Rute a Belém.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Rute Encontra Boaz (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 2:</strong> Rute respiga no campo de Boaz e encontra favor.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Proposta de Redenção (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 3:</strong> Rute se apresenta a Boaz na eira e pede sua redenção.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Redenção e Nova Vida (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 4:</strong> Boaz negocia a redenção, casa-se com Rute e nasce Obede, avô de Davi.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Rute</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Lealdade (Hesed):</strong> A bondade inabalável de Rute para com Noemi e a demonstração de *hesed* por Boaz.</li>
+                <li><strong>Providência Divina:</strong> A mão de Deus agindo nos eventos cotidianos para cumprir Seus propósitos.</li>
+                <li><strong>Redenção:</strong> O papel do parente remidor (*goel*) e a restauração da família e da propriedade.</li>
+                <li><strong>Inclusão de Gentios:</strong> A história de Rute, uma moabita, na linhagem de Davi e de Jesus.</li>
+                <li><strong>Fidelidade em Tempos de Apostasia:</strong> Um contraste com o período dos Juízes, mostrando fé individual.</li>
+                <li><strong>Família e Herança:</strong> A importância da continuidade da linhagem e da herança em Israel.</li>
+                <li><strong>Esperança:</strong> A história culmina em esperança e na promessa de um futuro rei.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Rute</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersRuth">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Rute</h2>
+            <div id="quizContainerRuth" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionRuth"></p>
+                <div id="quizOptionsRuth" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackRuth" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionRuth()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressRuth"></span></p>
+                <p>Pontuação: <span id="quizScoreRuth">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Rute</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Rute.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="ruthChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalRuth()">&times;</span>
+                <h3 id="modalCharacterNameRuth" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionRuth" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Rute",
+            "short_name": "Rute",
+            "description": "Explore o livro de Rute de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=RT",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=RT",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'ruth-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionRuth(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsRuth();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksRuth();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsRuth(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexRuth = 0; // Reinicia o quiz
+                scoreRuth = 0;
+                wrongAnswersRuth = 0;
+                document.getElementById('quizScoreRuth').textContent = `Acertos: ${scoreRuth}, Erros: ${wrongAnswersRuth}`;
+                displayQuestionRuth();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderRuthChart();
+            }
+        }
+
+        // Dados dos personagens para Rute
+        const characterDetailsRuth = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus soberano que opera nos detalhes da vida, demonstrando providência e fidelidade para com Seu povo e aqueles que O buscam."
+            },
+            "Noemi": {
+                name: "Noemi",
+                description: "A sogra de Rute, que perdeu o marido e os dois filhos em Moabe. Retornou a Belém amargurada, mas experimentou a restauração através de Rute e Boaz."
+            },
+            "Rute": {
+                name: "Rute",
+                description: "Uma mulher moabita que demonstrou lealdade inabalável à sua sogra Noemi e ao Deus de Israel. Sua fé e virtude a levaram a se casar com Boaz e se tornar ancestral de Davi e Jesus."
+            },
+            "Boaz": {
+                name: "Boaz",
+                description: "Um homem rico e temente a Deus de Belém, parente de Elimeleque. Agiu como parente remidor (*goel*) para Rute e Noemi, casando-se com Rute."
+            },
+            "Orfa": {
+                name: "Orfa",
+                description: "A outra nora de Noemi, que inicialmente começou a retornar com ela, mas depois decidiu voltar para seu povo em Moabe."
+            },
+            "Elimeleque": {
+                name: "Elimeleque",
+                description: "Marido de Noemi e pai de Malom e Quiliom, que migrou com sua família de Belém para Moabe devido à fome e lá faleceu."
+            },
+            "Malom e Quiliom": {
+                name: "Malom e Quiliom",
+                description: "Filhos de Elimeleque e Noemi, que se casaram com Rute e Orfa em Moabe e também faleceram lá."
+            },
+            "O Parente Mais Próximo (sem nome)": {
+                name: "O Parente Mais Próximo (sem nome)",
+                description: "Um parente de Elimeleque que tinha o direito de redenção antes de Boaz, mas recusou-o para não prejudicar sua própria herança."
+            },
+            "Obede": {
+                name: "Obede",
+                description: "Filho de Boaz e Rute, neto de Noemi, e pai de Jessé, que foi o pai do Rei Davi."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalRuth(characterName) {
+            const details = characterDetailsRuth[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameRuth').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionRuth').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalRuth() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsRuth() {
+            const grid = document.getElementById('characterGridRuth');
+            grid.innerHTML = '';
+            for (const key in characterDetailsRuth) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalRuth(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksRuth() {
+            const chaptersDiv = document.getElementById('chaptersRuth');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 4; i++) { // Rute tem 4 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/rt/${i}`; // Link para a Bíblia Online, Rute
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Rute (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsRuth = [
+            { question: "De qual cidade Elimeleque e sua família migraram para Moabe devido à fome?", options: ["Jerusalém", "Belém de Judá", "Jericó", "Siquém"], answer: "Belém de Judá", reference: "Rute 1:1-2" },
+            { question: "Quantos filhos Noemi tinha quando foi para Moabe?", options: ["Um", "Dois", "Três", "Nenhum"], answer: "Dois", reference: "Rute 1:2" },
+            { question: "Quais eram os nomes dos dois filhos de Noemi que se casaram em Moabe?", options: ["Malom e Quiliom", "Josué e Calebe", "Davi e Salomão", "Abraão e Ló"], answer: "Malom e Quiliom", reference: "Rute 1:2" },
+            { question: "Qual das noras de Noemi decidiu retornar para sua terra e seu povo?", options: ["Rute", "Orfa", "Dalila", "Jael"], answer: "Orfa", reference: "Rute 1:14" },
+            { question: "Qual a famosa declaração de Rute a Noemi, demonstrando sua lealdade?", options: ["'Eu te seguirei aonde fores'", "'Teu povo será o meu povo, e o teu Deus o meu Deus'", "'Não te deixarei, pois te amo'", "'Voltarei para minha casa'"], answer: "'Teu povo será o meu povo, e o teu Deus o meu Deus'", reference: "Rute 1:16" },
+            { question: "Para qual cidade Noemi e Rute retornaram?", options: ["Jericó", "Belém", "Jerusalém", "Siquém"], answer: "Belém", reference: "Rute 1:19" },
+            { question: "O que Noemi pediu para ser chamada ao retornar a Belém, devido à sua amargura?", options: ["Bendita", "Feliz", "Mara", "Aflita"], answer: "Mara", reference: "Rute 1:20" },
+            { question: "Em que estação do ano Rute e Noemi chegaram a Belém?", options: ["No início da colheita da cevada", "No fim da colheita do trigo", "No tempo da semeadura", "No inverno"], answer: "No início da colheita da cevada", reference: "Rute 1:22" },
+            { question: "Como Rute sustentava a si mesma e a Noemi em Belém?", options: ["Vendendo artesanato", "Respigan do nos campos", "Recebendo esmolas", "Trabalhando como serva"], answer: "Respigan do nos campos", reference: "Rute 2:2-3" },
+            { question: "Em qual campo Rute 'por acaso' foi respigar?", options: ["No campo de Elimeleque", "No campo de Boaz", "No campo de um estranho", "No campo de um levita"], answer: "No campo de Boaz", reference: "Rute 2:3" },
+            { question: "Quem era Boaz em relação a Elimeleque, marido de Noemi?", options: ["Seu irmão", "Seu filho", "Um parente próximo", "Um amigo distante"], answer: "Um parente próximo", reference: "Rute 2:1" },
+            { question: "Que instrução Boaz deu aos seus ceifeiros em relação a Rute?", options: ["Para que não a tocassem", "Para que a deixassem respigar livremente e até deixassem cair espigas para ela", "Para que a ignorassem", "Para que a expulsassem do campo"], answer: "Para que a deixassem respigar livremente e até deixassem cair espigas para ela", reference: "Rute 2:15-16" },
+            { question: "O que Rute trouxe para Noemi depois de respigar o dia todo no campo de Boaz?", options: ["Água e pão", "Um manto novo", "Cevada em abundância", "Vinho e azeite"], answer: "Cevada em abundância", reference: "Rute 2:17" },
+            { question: "Qual o termo hebraico usado para descrever a bondade leal e o amor inabalável que Boaz demonstrou a Rute?", options: ["Shalom", "Hesed", "Mishpat", "Tsedeq"], answer: "Hesed", reference: "Rute 2:20" },
+            { question: "Onde Noemi instruiu Rute a se apresentar a Boaz para pedir a redenção?", options: ["Na porta da cidade", "No poço", "Na eira", "No mercado"], answer: "Na eira", reference: "Rute 3:2-4" },
+            { question: "O que Rute fez aos pés de Boaz na eira?", options: ["Chorou", "Adorou", "Descobriu-lhe os pés e deitou-se", "Caiu em sono profundo"], answer: "Descobriu-lhe os pés e deitou-se", reference: "Rute 3:7" },
+            { question: "O que Rute pediu a Boaz, simbolizando um pedido de proteção e casamento?", options: ["Um lugar para morar", "Comida para Noemi", "Que estendesse a sua capa sobre ela", "Que a levasse para sua casa"], answer: "Que estendesse a sua capa sobre ela", reference: "Rute 3:9" },
+            { question: "Como Boaz descreveu Rute diante do povo de Belém?", options: ["Como uma mulher trabalhadora", "Como uma mulher virtuosa", "Como uma mulher de fé", "Como uma mulher estrangeira"], answer: "Como uma mulher virtuosa", reference: "Rute 3:11" },
+            { question: "Onde Boaz resolveu a questão da redenção com o parente mais próximo?", options: ["No templo", "Na casa de Noemi", "Na porta da cidade", "No campo"], answer: "Na porta da cidade", reference: "Rute 4:1-2" },
+            { question: "Qual o costume em Israel para confirmar uma transação de redenção?", options: ["Trocar moedas", "Assinar um contrato", "Tirar um sapato e dá-lo ao outro", "Fazer um juramento"], answer: "Tirar um sapato e dá-lo ao outro", reference: "Rute 4:7-8" },
+            { question: "Quem foi o filho de Boaz e Rute?", options: ["Jessé", "Davi", "Obede", "Salomão"], answer: "Obede", reference: "Rute 4:17" },
+            { question: "Quem era o pai de Jessé e avô de Davi?", options: ["Boaz", "Obede", "Salmom", "Elimeleque"], answer: "Obede", reference: "Rute 4:17, 22" },
+            { question: "O que as mulheres de Belém disseram a Noemi sobre o filho de Rute?", options: ["Que ele seria um rei", "Que ele seria um restaurador da sua vida e sustento na velhice", "Que ele seria um profeta", "Que ele seria um juiz"], answer: "Que ele seria um restaurador da sua vida e sustento na velhice", reference: "Rute 4:15" },
+            { question: "A história de Rute é um contraste com qual livro bíblico que a precede, mostrando fé e lealdade em tempos difíceis?", options: ["Josué", "Juízes", "1 Samuel", "Deuteronômio"], answer: "Juízes", reference: "Contexto bíblico" },
+            { question: "Qual o significado do termo 'goel' (parente remidor) no contexto do livro de Rute?", options: ["Aquele que governa", "Aquele que resgata ou redime", "Aquele que ensina a lei", "Aquele que julga"], answer: "Aquele que resgata ou redime", reference: "Contexto bíblico" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsRuth = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsRuth.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsRuth = allQuizQuestionsRuth.concat(uniqueQuizQuestionsRuth);
+        }
+        allQuizQuestionsRuth = allQuizQuestionsRuth.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsRuth = [];
+        let currentQuizIndexRuth = 0;
+        let scoreRuth = 0;
+        let wrongAnswersRuth = 0;
+        let ruthChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsRuth() {
+            shuffledQuizQuestionsRuth = [...allQuizQuestionsRuth]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsRuth);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressRuth() {
+            const progressElement = document.getElementById('quizProgressRuth');
+            progressElement.textContent = `${currentQuizIndexRuth + 1}/${shuffledQuizQuestionsRuth.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionRuth() {
+            if (currentQuizIndexRuth >= shuffledQuizQuestionsRuth.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionRuth').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsRuth').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreRuth}, Erros: ${wrongAnswersRuth}</p>`;
+                document.getElementById('quizFeedbackRuth').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsRuth[currentQuizIndexRuth];
+            document.getElementById('quizQuestionRuth').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsRuth');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerRuth(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackRuth').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressRuth();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerRuth(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackRuth');
+            const optionsButtons = document.querySelectorAll('#quizOptionsRuth button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreRuth++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersRuth++;
+            }
+            document.getElementById('quizScoreRuth').textContent = `Acertos: ${scoreRuth}, Erros: ${wrongAnswersRuth}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionRuth() {
+            currentQuizIndexRuth++;
+            displayQuestionRuth();
+        }
+
+        // Dados para o gráfico de temas de Rute
+        const ruthChartData = {
+            labels: ['Lealdade (Hesed)', 'Providência Divina', 'Redenção', 'Inclusão de Gentios', 'Fidelidade', 'Família e Herança', 'Esperança'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 12, 10, 8], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const ruthChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Rute',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderRuthChart() {
+            const ctx = document.getElementById('ruthChart').getContext('2d');
+            if (ruthChartInstance) {
+                ruthChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            ruthChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: ruthChartData,
+                options: ruthChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Paulo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #f97316; /* Orange border for Paul game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #f97316; /* Orange for Paul game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #ea580c; /* Darker orange on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #f97316;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #f97316;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #ea580c;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-orange-700 mb-4">A História de Paulo 🗺️</h1>
+        <p class="text-gray-700 mb-6">
+            Acompanhe a extraordinária jornada de Saulo de Tarso, que se tornou o apóstolo Paulo, e seu incansável trabalho na propagação do evangelho.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Paulo!</p>
+            <p class="text-gray-700 mt-6">A vida de Paulo é um poderoso testemunho da graça transformadora de Deus e do impacto que um indivíduo pode ter ao se dedicar completamente ao evangelho, alcançando o mundo com a mensagem de Cristo.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: Saulo de Tarso',
+                location: 'Tarso, Jerusalém',
+                objective: 'Entender a vida inicial de Saulo como fariseu e perseguidor de cristãos.',
+                clues: [
+                    'Saulo era um fariseu zeloso pela Lei.',
+                    'Ele perseguia a Igreja, prendendo homens e mulheres.'
+                ],
+                keyVerse: 'Atos 8:1, 3',
+                enigma: 'Qual era o nome de Paulo antes de sua conversão?',
+                options: ['Saulo', 'Pedro', 'João'],
+                correctAnswer: 'Saulo'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: A Conversão na Estrada de Damasco',
+                location: 'Estrada para Damasco',
+                objective: 'Compreender o evento transformador da conversão de Saulo.',
+                clues: [
+                    'Uma luz do céu o cercou, e ele ouviu a voz de Jesus.',
+                    'Ele ficou cego por três dias.'
+                ],
+                keyVerse: 'Atos 9:3-6',
+                enigma: 'O que aconteceu com Saulo na estrada para Damasco?',
+                options: ['Ele ficou cego por uma luz e ouviu a voz de Jesus', 'Ele encontrou Pedro', 'Ele foi preso'],
+                correctAnswer: 'Ele ficou cego por uma luz e ouviu a voz de Jesus'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: Ananias e a Restauração',
+                location: 'Damasco',
+                objective: 'Aprender sobre a restauração da visão de Saulo e seu batismo.',
+                clues: [
+                    'Ananias, um discípulo em Damasco, foi enviado por Jesus a Saulo.',
+                    'Ao impor as mãos sobre Saulo, escamas caíram de seus olhos e ele recuperou a visão.'
+                ],
+                keyVerse: 'Atos 9:17-18',
+                enigma: 'Quem impôs as mãos sobre Saulo para que ele recuperasse a visão?',
+                options: ['Ananias', 'Pedro', 'Tiago'],
+                correctAnswer: 'Ananias'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: Primeiros Anos de Ministério',
+                location: 'Damasco, Jerusalém, Tarso',
+                objective: 'Entender os primeiros passos de Saulo como pregador.',
+                clues: [
+                    'Saulo começou a pregar imediatamente em Damasco, confundindo os judeus.',
+                    'Ele foi ajudado por Barnabé a ser aceito pelos apóstolos em Jerusalém.'
+                ],
+                keyVerse: 'Atos 9:19-28',
+                enigma: 'Quem ajudou Saulo a ser aceito pelos apóstolos em Jerusalém?',
+                options: ['Barnabé', 'Pedro', 'João'],
+                correctAnswer: 'Barnabé'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: Primeira Viagem Missionária',
+                location: 'Antioquia, Chipre, Pisídia, Icônio, Listra, Derbe',
+                objective: 'Conhecer o início das viagens missionárias de Paulo.',
+                clues: [
+                    'Paulo e Barnabé foram enviados pelo Espírito Santo de Antioquia.',
+                    'Eles pregaram o evangelho em várias cidades, enfrentando oposição e curando pessoas.'
+                ],
+                keyVerse: 'Atos 13:2-4',
+                enigma: 'Com quem Paulo fez sua primeira viagem missionária?',
+                options: ['Barnabé', 'Pedro', 'Silas'],
+                correctAnswer: 'Barnabé'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: O Concílio de Jerusalém',
+                location: 'Jerusalém',
+                objective: 'Compreender a defesa de Paulo pela inclusão dos gentios.',
+                clues: [
+                    'Surgiu uma disputa sobre se os gentios convertidos precisavam ser circuncidados.',
+                    'Pedro e Tiago apoiaram Paulo, e a decisão foi que os gentios não precisavam ser circuncidados.'
+                ],
+                keyVerse: 'Atos 15:1-11',
+                enigma: 'Qual foi a principal questão debatida no Concílio de Jerusalém?',
+                options: ['A circuncisão dos gentios', 'A liderança da Igreja', 'A construção do Templo'],
+                correctAnswer: 'A circuncisão dos gentios'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: Segunda Viagem Missionária',
+                location: 'Filipos, Tessalônica, Bereia, Atenas, Corinto',
+                objective: 'Aprender sobre a expansão do evangelho na Grécia.',
+                clues: [
+                    'Paulo viajou com Silas, e depois Timóteo e Lucas se juntaram a eles.',
+                    'Eles foram presos em Filipos, pregaram no Areópago em Atenas e fundaram igrejas em Corinto.'
+                ],
+                keyVerse: 'Atos 16:9-10',
+                enigma: 'Em qual cidade Paulo e Silas foram presos e cantaram hinos na prisão?',
+                options: ['Filipos', 'Atenas', 'Corinto'],
+                correctAnswer: 'Filipos'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: Terceira Viagem Missionária',
+                location: 'Éfeso, Macedônia, Acaia',
+                objective: 'Observar o ministério de Paulo em Éfeso e suas viagens de fortalecimento.',
+                clues: [
+                    'Paulo passou cerca de dois anos em Éfeso, onde a palavra do Senhor se espalhou grandemente.',
+                    'Ele ressuscitou Eutico em Trôade e se despediu dos presbíteros de Éfeso em Mileto.'
+                ],
+                keyVerse: 'Atos 19:8-10',
+                enigma: 'Em qual cidade Paulo passou cerca de dois anos ensinando na escola de Tirano?',
+                options: ['Éfeso', 'Corinto', 'Antioquia'],
+                correctAnswer: 'Éfeso'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: A Prisão em Jerusalém',
+                location: 'Jerusalém',
+                objective: 'Entender as prisões e julgamentos de Paulo.',
+                clues: [
+                    'Ao retornar a Jerusalém, Paulo foi alvo de um tumulto no Templo e foi preso pelos romanos.',
+                    'Houve uma conspiração judaica para matá-lo.'
+                ],
+                keyVerse: 'Atos 21:27-33',
+                enigma: 'Onde Paulo foi preso após um tumulto no Templo?',
+                options: ['Jerusalém', 'Cesareia', 'Roma'],
+                correctAnswer: 'Jerusalém'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: Julgamentos e Viagem a Roma',
+                location: 'Cesareia, no mar, Malta',
+                objective: 'Acompanhar os julgamentos de Paulo e sua viagem a Roma.',
+                clues: [
+                    'Paulo foi julgado por Félix, Festo e o Rei Agripa.',
+                    'Durante a viagem a Roma, ele sofreu um naufrágio na ilha de Malta, mas ninguém se perdeu.'
+                ],
+                keyVerse: 'Atos 27:41-44',
+                enigma: 'Em qual ilha Paulo sofreu um naufrágio a caminho de Roma?',
+                options: ['Malta', 'Chipre', 'Creta'],
+                correctAnswer: 'Malta'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: Prisão Domiciliar em Roma',
+                location: 'Roma',
+                objective: 'Aprender sobre o ministério de Paulo mesmo em prisão.',
+                clues: [
+                    'Em Roma, Paulo viveu por dois anos em prisão domiciliar, sob a guarda de um soldado.',
+                    'Ele recebia a todos que o procuravam e pregava o Reino de Deus sem impedimento.'
+                ],
+                keyVerse: 'Atos 28:30-31',
+                enigma: 'Por quanto tempo Paulo viveu em prisão domiciliar em Roma, pregando o evangelho?',
+                options: ['Dois anos', 'Um ano', 'Três anos'],
+                correctAnswer: 'Dois anos'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: As Epístolas de Paulo',
+                location: 'Diversas cidades (Roma, Corinto, Éfeso, Filipos, etc.)',
+                objective: 'Conhecer a importância das cartas de Paulo no Novo Testamento.',
+                clues: [
+                    'Paulo escreveu muitas cartas às igrejas e indivíduos, que se tornaram parte do Novo Testamento.',
+                    'Essas cartas abordam doutrinas, ética cristã e encorajamento.'
+                ],
+                keyVerse: '2 Timóteo 3:16',
+                enigma: 'Qual epístola Paulo escreveu para a igreja em uma cidade grega conhecida por seus problemas de divisão?',
+                options: ['Coríntios', 'Romanos', 'Efésios'],
+                correctAnswer: 'Coríntios'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: O Legado de Paulo',
+                location: 'Mundo Antigo',
+                objective: 'Refletir sobre a influência duradoura de Paulo no Cristianismo.',
+                clues: [
+                    'Paulo é conhecido como o "Apóstolo dos Gentios" por seu trabalho missionário entre os não-judeus.',
+                    'Sua teologia e seus escritos influenciaram profundamente o desenvolvimento do Cristianismo.'
+                ],
+                keyVerse: '2 Timóteo 4:7-8',
+                enigma: 'Paulo é conhecido principalmente como o apóstolo de qual grupo de pessoas?',
+                options: ['Gentios', 'Judeus', 'Samaritanos'],
+                correctAnswer: 'Gentios'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-orange-700 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Marcos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Marcos Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Marcos</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionMarcos('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionMarcos('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionMarcos('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionMarcos('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionMarcos('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionMarcos('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionMarcos('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionMarcos('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionMarcos('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Marcos</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Marcos, o Evangelho mais conciso e dinâmico, que apresenta Jesus como o Servo Sofredor e o Filho de Deus. Descubra a urgência do ministério de Jesus, Seus milagres poderosos, os confrontos com a oposição e o caminho para a cruz, culminando em Sua ressurreição. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Marcos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Marcos é o segundo dos quatro Evangelhos e é notável por sua brevidade, vivacidade e foco na ação de Jesus. Tradicionalmente, é atribuído a João Marcos, companheiro de Pedro e Paulo, e é considerado o mais antigo dos Evangelhos sinóticos, escrito provavelmente entre 50 e 60 d.C.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O público-alvo principal de Marcos eram os gentios (não-judeus), especialmente os romanos, que estavam interessados em poder e ação. Por isso, Marcos enfatiza os milagres e a autoridade de Jesus, apresentando-O como o poderoso Filho de Deus, mas também como o Servo Sofredor que veio para dar a Sua vida em resgate por muitos. O Evangelho é caracterizado pela palavra "imediatamente" (ou "logo"), que aparece frequentemente, transmitindo um senso de urgência e movimento rápido.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Marcos começa abruptamente com o ministério de João Batista e o batismo de Jesus, sem uma genealogia ou relato de nascimento. Ele se concentra na vida pública de Jesus, Seus ensinamentos concisos, Seus muitos milagres que demonstram Sua autoridade sobre a natureza, doenças e demônios, e os crescentes conflitos com as autoridades religiosas. Uma parte significativa do Evangelho é dedicada à Paixão de Cristo, detalhando os eventos que levaram à Sua crucificação e ressurreição.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem a identidade de Jesus como Filho de Deus e Servo, o Reino de Deus, o discipulado (com a falha e o crescimento dos discípulos), o segredo messiânico (Jesus frequentemente silenciava aqueles que o reconheciam como Messias) e o caminho para a cruz como o propósito central de Sua vinda.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-8: O Início do Ministério de Jesus na Galileia.</strong> João Batista, batismo e tentação de Jesus, chamado dos primeiros discípulos, milagres e ensinamentos, e a crescente oposição.</li>
+                <li><strong>Capítulos 9-10: O Caminho para Jerusalém.</strong> A transfiguração, ensinamentos sobre o discipulado e o serviço, e a jornada para a capital.</li>
+                <li><strong>Capítulos 11-16: A Semana da Paixão, Morte e Ressurreição.</strong> Entrada triunfal em Jerusalém, confrontos no Templo, a Última Ceia, prisão, julgamento, crucificação, sepultamento e a ressurreição de Jesus.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Marcos é um Evangelho poderoso que convida os leitores a verem Jesus como o Filho de Deus em ação e a refletirem sobre o verdadeiro significado do discipulado, que envolve seguir o Servo Sofredor até a cruz.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Marcos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Marcos apresenta Jesus como o Servo Sofredor e o Filho de Deus em ação.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Início do Ministério de Jesus na Galileia (Capítulos 1-8)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Preparação para o Ministério (1:1-13):</strong>
+                    <ul>
+                        <li>João Batista, batismo e tentação de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Chamado dos Primeiros Discípulos e Cura (1:14-45):</strong>
+                    <ul>
+                        <li>Início da pregação do Reino de Deus, cura de um endemoninhado, sogra de Pedro, leproso.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Conflitos Iniciais (2:1-3:6):</strong>
+                    <ul>
+                        <li>Cura do paralítico, chamado de Levi, jejum, o Senhor do sábado.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Escolha dos Doze e Parábolas (3:7-4:34):</strong>
+                    <ul>
+                        <li>Parábola do semeador, a candeia, a semente que cresce.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Milagres Poderosos (4:35-5:43):</strong>
+                    <ul>
+                        <li>Acalma a tempestade, endemoninhado gadareno, mulher com hemorragia, filha de Jairo.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Rejeição em Nazaré e Missão dos Doze (6:1-56):</strong>
+                    <ul>
+                        <li>Morte de João Batista, alimentação dos cinco mil, Jesus anda sobre as águas.</li>
+                    </ul>
+                </li>
+                <li><strong>G. Tradições e Cura (7:1-37):</strong>
+                    <ul>
+                        <li>O que contamina o homem, cura da filha da siro-fenícia, surdo-mudo.</li>
+                    </ul>
+                </li>
+                <li><strong>H. Alimentação dos Quatro Mil e Confissão de Pedro (8:1-30):</strong>
+                    <ul>
+                        <li>"Tu és o Cristo."</li>
+                    </ul>
+                </li>
+                <li><strong>I. Primeira Predição da Paixão e o Custo do Discipulado (8:31-38):</strong>
+                    <ul>
+                        <li>Jesus prediz Sua morte e ressurreição, tomar a cruz e seguir a Jesus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Caminho para Jerusalém (Capítulos 9-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Transfiguração (9:1-13):</strong>
+                    <ul>
+                        <li>Jesus revela Sua glória.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Cura e Segunda Predição da Paixão (9:14-32):</strong>
+                    <ul>
+                        <li>Cura do menino endemoninhado.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Ensinamentos sobre o Discipulado (9:33-50):</strong>
+                    <ul>
+                        <li>Quem é o maior, o que não é contra nós é por nós, escândalos.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Ensino sobre Divórcio e Riqueza (10:1-31):</strong>
+                    <ul>
+                        <li>Crianças, o jovem rico.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Terceira Predição da Paixão e o Serviço (10:32-52):</strong>
+                    <ul>
+                        <li>Os filhos de Zebedeu, o cego Bartimeu.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Semana da Paixão, Morte e Ressurreição (Capítulos 11-16)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Entrada Triunfal em Jerusalém (11:1-11):</strong>
+                    <ul>
+                        <li>Jesus entra como Rei.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Purificação do Templo e Conflitos (11:12-12:44):</strong>
+                    <ul>
+                        <li>A figueira seca, a autoridade de Jesus, parábola dos lavradores maus, impostos a César, a ressurreição, o grande mandamento, a oferta da viúva.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Discurso Escatológico (13:1-37):</strong>
+                    <ul>
+                        <li>Sinais do fim dos tempos, a vinda do Filho do Homem, a necessidade de vigilância.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Última Ceia e a Traição (14:1-52):</strong>
+                    <ul>
+                        <li>Conspiração, unção em Betânia, instituição da Ceia, Getsemani, prisão de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Julgamento e Negação de Pedro (14:53-15:15):</strong>
+                    <ul>
+                        <li>Diante do Sinédrio, Pedro nega a Jesus, Jesus diante de Pilatos.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Crucificação e Sepultamento (15:16-47):</strong>
+                    <ul>
+                        <li>A morte de Jesus e os eventos que a acompanharam.</li>
+                    </ul>
+                </li>
+                <li><strong>G. A Ressurreição (16:1-8):</strong>
+                    <ul>
+                        <li>As mulheres no túmulo vazio.</li>
+                    </ul>
+                </li>
+                <li><strong>H. Aparições e a Grande Comissão (16:9-20 - final mais longo):</strong>
+                    <ul>
+                        <li>Aparições de Jesus e o mandamento de pregar o Evangelho.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Evangelho de Marcos é um relato direto e poderoso da vida e ministério de Jesus Cristo. Ele enfatiza a divindade de Jesus através de Seus milagres e autoridade, mas também destaca Seu papel como o Servo Sofredor, que veio para servir e dar Sua vida. Marcos explora o tema do discipulado, mostrando as falhas e o crescimento dos discípulos, e a necessidade de seguir a Jesus mesmo que isso signifique sofrimento. O "segredo messiânico" é um elemento chave, onde Jesus frequentemente silencia aqueles que o reconhecem, talvez para evitar mal-entendidos sobre Sua missão como um Messias político. O clímax do livro é a cruz, onde a verdadeira identidade de Jesus como Filho de Deus é revelada de forma mais profunda. Marcos convida os leitores a uma fé ativa e a um discipulado comprometido, seguindo o exemplo de Jesus, o Servo Sofredor que venceu a morte.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridMarcos">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Marcos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Marcos, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Início do Evangelho</strong>
+                    <ul>
+                        <li>1.1-8: João Batista.</li>
+                        <li>1.9-13: Batismo e Tentação de Jesus.</li>
+                        <li>1.14-20: Chamado dos Primeiros Discípulos.</li>
+                        <li>1.21-45: Cura de um Endemoninhado, Sogra de Pedro e um Leproso.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: Conflitos Iniciais</strong>
+                    <ul>
+                        <li>2.1-12: Cura do Paralítico.</li>
+                        <li>2.13-17: Chamado de Levi (Mateus).</li>
+                        <li>2.18-22: Pergunta sobre o Jejum.</li>
+                        <li>2.23-28: O Senhor do Sábado.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: Escolha dos Doze e Oposição</strong>
+                    <ul>
+                        <li>3.1-6: Cura no Sábado.</li>
+                        <li>3.7-12: Multidões Seguem Jesus.</li>
+                        <li>3.13-19: Escolha dos Doze Apóstolos.</li>
+                        <li>3.20-35: Jesus e Belzebu; a Família de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: Parábolas do Reino</strong>
+                    <ul>
+                        <li>4.1-20: Parábola do Semeador.</li>
+                        <li>4.21-25: A Candeia debaixo do Alqueire.</li>
+                        <li>4.26-29: A Parábola da Semente que Cresce.</li>
+                        <li>4.30-34: A Parábola do Grão de Mostarda.</li>
+                        <li>4.35-41: Jesus Acalma a Tempestade.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 5: Milagres Poderosos</strong>
+                    <ul>
+                        <li>5.1-20: O Endemoninhado Gadareno.</li>
+                        <li>5.21-43: A Mulher com Hemorragia e a Filha de Jairo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 6: Rejeição e Missão dos Doze</strong>
+                    <ul>
+                        <li>6.1-6: Rejeição em Nazaré.</li>
+                        <li>6.7-13: Missão dos Doze.</li>
+                        <li>6.14-29: A Morte de João Batista.</li>
+                        <li>6.30-44: Alimentação dos Cinco Mil.</li>
+                        <li>6.45-56: Jesus Anda sobre as Águas.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 7: Tradições e Cura</strong>
+                    <ul>
+                        <li>7.1-23: O que Contamina o Homem.</li>
+                        <li>7.24-30: A Mulher Siro-Fenícia.</li>
+                        <li>7.31-37: Cura de um Surdo-Mudo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 8: Alimentação dos Quatro Mil e Confissão de Pedro</strong>
+                    <ul>
+                        <li>8.1-10: Alimentação dos Quatro Mil.</li>
+                        <li>8.11-21: A Fermento dos Fariseus.</li>
+                        <li>8.22-26: Cura de um Cego em Betsaida.</li>
+                        <li>8.27-30: A Confissão de Pedro.</li>
+                        <li>8.31-38: Jesus Prediz Sua Morte e o Custo do Discipulado.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 9: Transfiguração e Cura</strong>
+                    <ul>
+                        <li>9.1-13: A Transfiguração.</li>
+                        <li>9.14-29: Cura do Menino Endemoninhado.</li>
+                        <li>9.30-32: Segunda Predição da Paixão.</li>
+                        <li>9.33-50: Quem é o Maior e Avisos sobre Escândalos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 10: Ensino sobre Divórcio, Riqueza e Serviço</strong>
+                    <ul>
+                        <li>10.1-12: O Divórcio.</li>
+                        <li>10.13-16: Jesus e as Crianças.</li>
+                        <li>10.17-31: O Jovem Rico.</li>
+                        <li>10.32-34: Terceira Predição da Paixão.</li>
+                        <li>10.35-45: O Pedido de Tiago e João e o Serviço.</li>
+                        <li>10.46-52: Cura de Bartimeu.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 11: Entrada Triunfal e Purificação do Templo</strong>
+                    <ul>
+                        <li>11.1-11: Entrada Triunfal em Jerusalém.</li>
+                        <li>11.12-14: A Figueira Seca.</li>
+                        <li>11.15-19: Purificação do Templo.</li>
+                        <li>11.20-26: A Lição da Figueira Seca.</li>
+                        <li>11.27-33: A Autoridade de Jesus Questionada.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 12: Conflitos no Templo</strong>
+                    <ul>
+                        <li>12.1-12: A Parábola dos Lavradores Maus.</li>
+                        <li>12.13-17: Imposto a César.</li>
+                        <li>12.18-27: A Pergunta dos Saduceus sobre a Ressurreição.</li>
+                        <li>12.28-34: O Grande Mandamento.</li>
+                        <li>12.35-40: A Pergunta de Jesus sobre o Messias.</li>
+                        <li>12.41-44: A Oferta da Viúva Pobre.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 13: O Discurso Escatológico</strong>
+                    <ul>
+                        <li>13.1-8: Sinais da Destruição do Templo e o Princípio das Dores.</li>
+                        <li>13.9-13: Perseguições.</li>
+                        <li>13.14-23: A Abominação da Desolação.</li>
+                        <li>13.24-27: A Vinda do Filho do Homem.</li>
+                        <li>13.28-37: A Parábola da Figueira e a Necessidade de Vigilância.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 14: A Última Ceia e a Traição</strong>
+                    <ul>
+                        <li>14.1-11: Conspiração e Unção em Betânia.</li>
+                        <li>14.12-25: A Páscoa e a Instituição da Ceia do Senhor.</li>
+                        <li>14.26-31: Pedro Prediz a Negação.</li>
+                        <li>14.32-42: Jesus no Getsêmani.</li>
+                        <li>14.43-52: A Prisão de Jesus.</li>
+                        <li>14.53-72: Jesus Diante do Sinédrio e a Negação de Pedro.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 15: Julgamento e Crucificação</strong>
+                    <ul>
+                        <li>15.1-15: Jesus Diante de Pilatos.</li>
+                        <li>15.16-20: Jesus Escarnecido.</li>
+                        <li>15.21-32: A Crucificação.</li>
+                        <li>15.33-41: A Morte de Jesus.</li>
+                        <li>15.42-47: O Sepultamento de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 16: A Ressurreição</strong>
+                    <ul>
+                        <li>16.1-8: A Descoberta do Túmulo Vazio.</li>
+                        <li>16.9-20: Aparições de Jesus e a Grande Comissão (Final mais longo).</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Marcos</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Jesus como o Servo Sofredor:</strong> O foco na vida de serviço e sacrifício de Jesus.</li>
+                <li><strong>Jesus como o Filho de Deus:</strong> A divindade de Jesus demonstrada por Seus milagres e autoridade.</li>
+                <li><strong>O Reino de Deus:</strong> A proclamação e a manifestação do Reino através das ações de Jesus.</li>
+                <li><strong>Discipulado:</strong> O chamado para seguir a Jesus, com ênfase na fé, no serviço e na prontidão para o sofrimento.</li>
+                <li><strong>O Segredo Messiânico:</strong> A instrução de Jesus para que Sua identidade messiânica não fosse revelada imediatamente.</li>
+                <li><strong>A Urgência do Evangelho:</strong> O ritmo rápido da narrativa, com a palavra "imediatamente" frequentemente usada.</li>
+                <li><strong>A Paixão de Cristo:</strong> Uma parte significativa do Evangelho dedicada aos eventos que levaram à crucificação e ressurreição.</li>
+                <li><strong>Fé e Incredulidade:</strong> Contrastes entre a fé de alguns e a incredulidade das autoridades e até dos discípulos.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Marcos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersMarcos">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Marcos</h2>
+            <div id="quizContainerMarcos" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionMarcos"></p>
+                <div id="quizOptionsMarcos" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackMarcos" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionMarcos()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressMarcos"></span></p>
+                <p>Pontuação: <span id="quizScoreMarcos">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Marcos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Marcos.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="marcosChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalMarcos()">&times;</span>
+                <h3 id="modalCharacterNameMarcos" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionMarcos" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Marcos",
+            "short_name": "Marcos",
+            "description": "Explore o livro de Marcos de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=MC",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=MC",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'marcos-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionMarcos(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsMarcos();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksMarcos();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsMarcos(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexMarcos = 0; // Reinicia o quiz
+                scoreMarcos = 0;
+                wrongAnswersMarcos = 0;
+                document.getElementById('quizScoreMarcos').textContent = `Acertos: ${scoreMarcos}, Erros: ${wrongAnswersMarcos}`;
+                displayQuestionMarcos();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderMarcosChart();
+            }
+        }
+
+        // Dados dos personagens para Marcos
+        const characterDetailsMarcos = {
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "O Filho de Deus e Servo Sofredor, cujo ministério, milagres, ensinamentos e sacrifício são o foco central do Evangelho."
+            },
+            "João Marcos": {
+                name: "João Marcos",
+                description: "O autor tradicional do Evangelho, companheiro de Pedro e Paulo, que registrou a vida e os ensinamentos de Jesus."
+            },
+            "João Batista": {
+                name: "João Batista",
+                description: "O precursor de Jesus, que pregou o arrependimento e batizou Jesus no rio Jordão."
+            },
+            "Pedro": {
+                name: "Pedro",
+                description: "Um dos doze apóstolos, figura proeminente no Evangelho de Marcos, muitas vezes representando os discípulos."
+            },
+            "Tiago (filho de Zebedeu)": {
+                name: "Tiago (filho de Zebedeu)",
+                description: "Um dos doze apóstolos, parte do círculo íntimo de Jesus."
+            },
+            "João (filho de Zebedeu)": {
+                name: "João (filho de Zebedeu)",
+                description: "Um dos doze apóstolos, parte do círculo íntimo de Jesus."
+            },
+            "Os Doze Discípulos": {
+                name: "Os Doze Discípulos",
+                description: "Os seguidores mais próximos de Jesus, que são chamados, ensinados e comissionados, mas também demonstram falhas e incompreensão."
+            },
+            "Fariseus e Herodianos": {
+                name: "Fariseus e Herodianos",
+                description: "Grupos religiosos e políticos que se opunham a Jesus e conspiravam contra Ele."
+            },
+            "Pôncio Pilatos": {
+                name: "Pôncio Pilatos",
+                description: "O governador romano que condenou Jesus à crucificação."
+            },
+            "Maria Madalena": {
+                name: "Maria Madalena",
+                description: "Uma das mulheres que seguiam Jesus e foi a primeira a ver o túmulo vazio e receber a notícia da ressurreição."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalMarcos(characterName) {
+            const details = characterDetailsMarcos[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameMarcos').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionMarcos').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalMarcos() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsMarcos() {
+            const grid = document.getElementById('characterGridMarcos');
+            grid.innerHTML = '';
+            for (const key in characterDetailsMarcos) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalMarcos(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksMarcos() {
+            const chaptersDiv = document.getElementById('chaptersMarcos');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 16; i++) { // Marcos tem 16 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/mc/${i}`; // Link para a Bíblia Online, Marcos
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Marcos (25 perguntas únicas)
+        const uniqueQuizQuestionsMarcos = [
+            { question: "Qual a característica principal do Evangelho de Marcos?", options: ["Longas genealogias", "Foco em ensinamentos detalhados", "Brevidade e dinamismo", "Ênfase nas parábolas"], answer: "Brevidade e dinamismo", reference: "Introdução ao Livro de Marcos" },
+            { question: "Quem é o autor tradicional do Evangelho de Marcos?", options: ["Mateus", "Lucas", "João Marcos", "Pedro"], answer: "João Marcos", reference: "Introdução ao Livro de Marcos" },
+            { question: "Qual grupo de pessoas era o público-alvo principal de Marcos?", options: ["Judeus", "Romanos (gentios)", "Gregos", "Egípcios"], answer: "Romanos (gentios)", reference: "Introdução ao Livro de Marcos" },
+            { question: "Qual palavra aparece frequentemente em Marcos, transmitindo um senso de urgência?", options: ["Amém", "Aleluia", "Imediatamente", "Certamente"], answer: "Imediatamente", reference: "Introdução ao Livro de Marcos" },
+            { question: "Como Marcos inicia seu Evangelho?", options: ["Com a genealogia de Jesus", "Com o nascimento de Jesus", "Com o ministério de João Batista", "Com a fuga para o Egito"], answer: "Com o ministério de João Batista", reference: "Panoramas do Livro de Marcos" },
+            { question: "Qual o tema central do Evangelho de Marcos em relação à identidade de Jesus?", options: ["Jesus como Rei de Israel", "Jesus como o Sábio Mestre", "Jesus como o Servo Sofredor e Filho de Deus", "Jesus como o Profeta Final"], answer: "Jesus como o Servo Sofredor e Filho de Deus", reference: "Temas Centrais do Livro de Marcos" },
+            { question: "Quantos capítulos tem o livro de Marcos?", options: ["12", "14", "16", "18"], answer: "16", reference: "Esboços do Livro de Marcos" },
+            { question: "O que Jesus disse ser o 'segredo messiânico' em Marcos?", options: ["A necessidade de Sua morte", "A identidade de Seus discípulos", "Sua divindade não deveria ser revelada imediatamente", "A forma como Ele realizava milagres"], answer: "Sua divindade não deveria ser revelada imediatamente", reference: "Temas Centrais do Livro de Marcos" },
+            { question: "Quem foi o primeiro a ser curado por Jesus no livro de Marcos, logo após o chamado dos primeiros discípulos (Marcos 1:21-28)?", options: ["Um leproso", "Um paralítico", "Um endemoninhado", "A sogra de Pedro"], answer: "Um endemoninhado", reference: "Marcos 1:21-28" },
+            { question: "Qual a parábola que Jesus usa para descrever o crescimento da Palavra de Deus (Marcos 4:1-20)?", options: ["A Parábola do Bom Samaritano", "A Parábola do Semeador", "A Parábola do Joio", "A Parábola do Fermento"], answer: "A Parábola do Semeador", reference: "Marcos 4:1-20" },
+            { question: "Qual milagre Jesus realiza ao acalmar uma tempestade no mar (Marcos 4:35-41)?", options: ["Andar sobre as águas", "Multiplicar pães", "Acalmar o vento e o mar", "Curar um cego"], answer: "Acalmar o vento e o mar", reference: "Marcos 4:35-41" },
+            { question: "Quem foi decapitado a pedido de Herodias e sua filha (Marcos 6:14-29)?", options: ["Pedro", "Tiago", "João Batista", "Judas"], answer: "João Batista", reference: "Marcos 6:14-29" },
+            { question: "Qual a confissão de Pedro sobre Jesus em Marcos 8:29?", options: ["Tu és um profeta", "Tu és o Cristo", "Tu és um mestre", "Tu és o filho de Davi"], answer: "Tu és o Cristo", reference: "Marcos 8:29" },
+            { question: "O que Jesus prediz pela primeira vez em Marcos 8:31?", options: ["Sua ascensão ao céu", "Sua morte e ressurreição", "A fundação da Igreja", "A vinda do Espírito Santo"], answer: "Sua morte e ressurreição", reference: "Marcos 8:31" },
+            { question: "O que Jesus ensina sobre o discipulado em Marcos 8:34?", options: ["Acumular riquezas", "Negar a si mesmo, tomar a sua cruz e segui-Lo", "Buscar a glória dos homens", "Viver uma vida confortável"], answer: "Negar a si mesmo, tomar a sua cruz e segui-Lo", reference: "Marcos 8:34" },
+            { question: "Qual evento marca a revelação da glória de Jesus a Pedro, Tiago e João (Marcos 9:2-8)?", options: ["O batismo de Jesus", "A transfiguração", "A ressurreição de Lázaro", "A entrada triunfal em Jerusalém"], answer: "A transfiguração", reference: "Marcos 9:2-8" },
+            { question: "O que Jesus disse sobre o divórcio em Marcos 10:2-12?", options: ["É permitido em todas as circunstâncias", "É permitido em caso de adultério", "É contra a vontade de Deus desde o princípio", "É uma questão de escolha pessoal"], answer: "É contra a vontade de Deus desde o princípio", reference: "Marcos 10:2-12" },
+            { question: "Quem foi o cego que Jesus curou perto de Jericó (Marcos 10:46-52)?", options: ["Lázaro", "Bartimeu", "Tadeu", "Simão"], answer: "Bartimeu", reference: "Marcos 10:46-52" },
+            { question: "O que Jesus fez ao entrar no Templo em Jerusalém (Marcos 11:15-19)?", options: ["Orou por todos", "Purificou o Templo dos vendilhões", "Ensinou as multidões", "Ofereceu sacrifícios"], answer: "Purificou o Templo dos vendilhões", reference: "Marcos 11:15-19" },
+            { question: "Qual a parábola que Jesus contou para repreender os líderes religiosos que rejeitaram Sua autoridade (Marcos 12:1-12)?", options: ["A Parábola dos Talentos", "A Parábola do Filho Pródigo", "A Parábola dos Lavradores Maus", "A Parábola das Dez Virgens"], answer: "A Parábola dos Lavradores Maus", reference: "Marcos 12:1-12" },
+            { question: "Qual o mandamento que Jesus considerou o mais importante (Marcos 12:28-31)?", options: ["Amar a Deus e ao próximo", "Guardar o sábado", "Oferecer sacrifícios", "Pagar os dízimos"], answer: "Amar a Deus e ao próximo", reference: "Marcos 12:28-31" },
+            { question: "O que Jesus instituiu com Seus discípulos na noite antes de Sua crucificação (Marcos 14:22-25)?", options: ["A circuncisão", "A Páscoa judaica", "A Ceia do Senhor", "O batismo"], answer: "A Ceia do Senhor", reference: "Marcos 14:22-25" },
+            { question: "Quem negou a Jesus três vezes antes do galo cantar (Marcos 14:66-72)?", options: ["Judas", "Tiago", "João", "Pedro"], answer: "Pedro", reference: "Marcos 14:66-72" },
+            { question: "Quem foi o governador romano que condenou Jesus à crucificação (Marcos 15:15)?", options: ["Herodes", "Caifás", "Pôncio Pilatos", "César Augusto"], answer: "Pôncio Pilatos", reference: "Marcos 15:15" },
+            { question: "Qual a primeira pessoa a quem Jesus apareceu após Sua ressurreição, segundo o final mais longo de Marcos (Marcos 16:9)?", options: ["Pedro", "Maria Madalena", "João", "Tiago"], answer: "Maria Madalena", reference: "Marcos 16:9" }
+        ];
+
+        let quizQuestionsMarcos = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsMarcos() {
+            quizQuestionsMarcos = []; // Limpa as perguntas anteriores
+            while (quizQuestionsMarcos.length < 200) {
+                quizQuestionsMarcos.push(...uniqueQuizQuestionsMarcos);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsMarcos.length > 200) {
+                quizQuestionsMarcos = quizQuestionsMarcos.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsMarcos); // Embaralha o array completo
+        }
+
+        let currentQuizIndexMarcos = 0;
+        let scoreMarcos = 0;
+        let wrongAnswersMarcos = 0;
+
+        function displayQuestionMarcos() {
+            const questionElement = document.getElementById('quizQuestionMarcos');
+            const optionsElement = document.getElementById('quizOptionsMarcos');
+            const feedbackElement = document.getElementById('quizFeedbackMarcos');
+            const nextButton = document.querySelector('#quizContainerMarcos .quiz-next');
+            const progressElement = document.getElementById('quizProgressMarcos');
+
+            if (currentQuizIndexMarcos < quizQuestionsMarcos.length) {
+                const questionData = quizQuestionsMarcos[currentQuizIndexMarcos];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerMarcos(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexMarcos + 1}/${quizQuestionsMarcos.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreMarcos}, Erros: ${wrongAnswersMarcos}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerMarcos(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsMarcos button');
+            const feedbackElement = document.getElementById('quizFeedbackMarcos');
+            const nextButton = document.querySelector('#quizContainerMarcos .quiz-next');
+            const scoreElement = document.getElementById('quizScoreMarcos');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreMarcos++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersMarcos++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreMarcos}, Erros: ${wrongAnswersMarcos}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionMarcos() {
+            currentQuizIndexMarcos++;
+            displayQuestionMarcos();
+        }
+
+        // Gráfico de Temas para Marcos
+        let marcosChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderMarcosChart() {
+            const ctx = document.getElementById('marcosChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (marcosChartInstance) {
+                marcosChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['Jesus como o Servo Sofredor', 'Jesus como o Filho de Deus', 'O Reino de Deus', 'Discipulado', 'O Segredo Messiânico', 'A Urgência do Evangelho', 'A Paixão de Cristo', 'Fé e Incredulidade'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [8, 7, 6, 7, 5, 9, 8, 6], // Valores fictícios para Marcos
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para Jesus como o Servo Sofredor
+                        'rgba(54, 162, 235, 0.7)', // Azul para Jesus como o Filho de Deus
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para O Reino de Deus
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para Discipulado
+                        'rgba(153, 102, 255, 0.7)', // Roxo para O Segredo Messiânico
+                        'rgba(255, 159, 64, 0.7)', // Laranja para A Urgência do Evangelho
+                        'rgba(201, 203, 207, 0.7)', // Cinza para A Paixão de Cristo
+                        'rgba(100, 149, 237, 0.7)' // Azul claro para Fé e Incredulidade
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)',
+                        'rgba(100, 149, 237, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            marcosChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Marcos',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionMarcos('inicio');
+        });
+    </script>
+</body>
+</html>

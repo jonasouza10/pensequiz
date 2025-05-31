@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Salmos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Salmos Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Salmos</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionSalmos('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionSalmos('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionSalmos('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionSalmos('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionSalmos('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionSalmos('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionSalmos('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionSalmos('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionSalmos('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Salmos</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Salmos, a coleção de cânticos e orações que expressam toda a gama de emoções humanas diante de Deus. Mergulhe em salmos de louvor, lamentação, sabedoria, confiança e súplica. Descubra a beleza poética e a profundidade espiritual que inspiraram gerações. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Salmos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Salmos é a maior coleção de poesia e cânticos do Antigo Testamento, servindo como o hinário e o livro de orações do povo de Israel. Composto por 150 salmos, ele abrange uma vasta gama de emoções e experiências humanas, desde o mais profundo desespero e lamentação até a mais exultante alegria e louvor. Os salmos são atribuídos a diversos autores ao longo de um período de cerca de 1000 anos, com a maioria sendo de Davi, mas também incluindo salmos de Asafe, dos filhos de Corá, de Salomão, de Moisés e outros anônimos.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os Salmos não são apenas expressões de fé, mas também reflexões teológicas sobre a natureza de Deus, Sua criação, Sua lei, Sua justiça, Sua misericórdia e Sua fidelidade. Eles servem como um guia para a adoração pessoal e comunitária, ensinando como se relacionar com Deus em todas as circunstâncias da vida. A estrutura do livro é dividida em cinco livros menores, cada um terminando com uma doxologia, imitando a estrutura da Torá (os cinco livros de Moisés).</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A diversidade de gêneros nos Salmos é notável: encontramos salmos de louvor, de lamentação (individuais e coletivas), de ação de graças, de sabedoria, salmos reais (sobre o rei e o Messias), salmos de confiança, salmos de peregrinação e salmos históricos. Essa riqueza permite que os leitores encontrem eco para suas próprias experiências e emoções, e aprendam a expressá-las a Deus de forma autêntica.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os Salmos são frequentemente citados no Novo Testamento, especialmente em referência a Jesus Cristo, o Messias. Eles apontam para o sofrimento, a ressurreição e o reinado de Cristo, mostrando a continuidade do plano redentor de Deus ao longo da história.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Livro I (Salmos 1-41):</strong> Predominantemente salmos de Davi, com foco na distinção entre justos e ímpios, e na confiança em Deus em meio às dificuldades.</li>
+                <li><strong>Livro II (Salmos 42-72):</strong> Inclui salmos dos filhos de Corá e Asafe, além de Davi. Temas de exílio, busca por Deus e orações por livramento.</li>
+                <li><strong>Livro III (Salmos 73-89):</strong> Principalmente salmos de Asafe e dos filhos de Corá. Aborda a justiça de Deus diante do sofrimento dos justos e a fidelidade da aliança.</li>
+                <li><strong>Livro IV (Salmos 90-106):</strong> Salmos que refletem sobre a soberania de Deus, Sua eternidade e a história de Israel. Inclui o Salmo de Moisés (Salmo 90).</li>
+                <li><strong>Livro V (Salmos 107-150):</strong> Uma coleção variada, com muitos salmos de louvor e ação de graças, incluindo os Salmos Hallel (113-118) e os Salmos de Ascensão (120-134). Culmina com cinco salmos de louvor universal.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os Salmos são uma fonte inesgotável de inspiração, consolo e adoração, um espelho da alma humana e um testemunho da glória de Deus.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Salmos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os Salmos são uma coleção de 150 cânticos e orações, divididos em cinco livros, que expressam a relação humana com Deus em todas as suas facetas.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Livro I: Salmos 1-41 (Oração Pessoal e Confiança)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Introdução à Sabedoria (Salmo 1):</strong>
+                    <ul>
+                        <li>A felicidade do justo e o destino do ímpio.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Salmos Messiânicos e Reais (Salmo 2, 8, 16, 22, 23, 24):</strong>
+                    <ul>
+                        <li>O reinado do Messias, a glória de Deus na criação, a confiança no Pastor.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Lamentações e Súplicas Individuais (Salmos 3, 5, 6, 7, 10, 13, 14, 17, 25, 26, 28, 31, 35, 36, 38, 39, 40, 41):</strong>
+                    <ul>
+                        <li>Expressões de angústia, pedidos de livramento e confiança em Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Louvor e Ação de Graças (Salmos 9, 18, 20, 21, 29, 30, 32, 33, 34):</strong>
+                    <ul>
+                        <li>Celebração da bondade e do poder de Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Livro II: Salmos 42-72 (Exílio, Busca e Redenção)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Salmos dos Filhos de Corá (Salmos 42-49):</strong>
+                    <ul>
+                        <li>Anseio por Deus, confiança em meio ao exílio, a glória de Sião.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Salmos de Asafe (Salmo 50):</strong>
+                    <ul>
+                        <li>A verdadeira adoração e o juízo de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Súplicas e Confissões de Davi (Salmos 51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 69, 70, 71):</strong>
+                    <ul>
+                        <li>Arrependimento, pedidos de proteção contra inimigos, confiança na rocha de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Salmos Reais e Messiânicos (Salmo 45, 72):</strong>
+                    <ul>
+                        <li>O casamento real, o reinado justo do rei.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Livro III: Salmos 73-89 (Justiça, Aliança e Sofrimento)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Salmos de Asafe (Salmos 73-83):</strong>
+                    <ul>
+                        <li>O problema da prosperidade dos ímpios, a destruição do Templo, a oração por livramento nacional.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Salmos dos Filhos de Corá (Salmos 84, 85, 87, 88):</strong>
+                    <ul>
+                        <li>Anseio pela casa de Deus, oração por restauração, a cidade de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Salmo de Etã (Salmo 89):</strong>
+                    <ul>
+                        <li>A fidelidade da aliança de Deus com Davi, mas também a lamentação pela aparente quebra da aliança.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Livro IV: Salmos 90-106 (Reino de Deus e História)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Salmo de Moisés (Salmo 90):</strong>
+                    <ul>
+                        <li>A eternidade de Deus e a brevidade da vida humana.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Salmos do Reino de Deus (Salmos 93, 95, 96, 97, 98, 99):</strong>
+                    <ul>
+                        <li>O Senhor reina! Celebração da soberania e justiça de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Salmos de Louvor e Ação de Graças (Salmos 92, 100, 103, 104, 105, 106):</strong>
+                    <ul>
+                        <li>A bondade de Deus, Suas obras na criação e na história de Israel.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Livro V: Salmos 107-150 (Louvor e Redenção Final)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Salmos de Ação de Graças pela Libertação (Salmo 107):</strong>
+                    <ul>
+                        <li>Deus liberta das aflições.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Salmos Hallel (Salmos 113-118):</strong>
+                    <ul>
+                        <li>Louvor a Deus por Sua bondade e salvação, cantados nas festas.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Salmo da Lei (Salmo 119):</strong>
+                    <ul>
+                        <li>O maior salmo, uma meditação sobre a beleza e o valor da Lei de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Salmos de Ascensão (Salmos 120-134):</strong>
+                    <ul>
+                        <li>Cânticos de peregrinos a caminho de Jerusalém.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Salmos Finais de Louvor (Salmos 146-150):</strong>
+                    <ul>
+                        <li>Uma explosão de louvor universal, culminando com "Todo ser que respira louve ao Senhor!".</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Os Salmos são um reflexo da vida de fé, ensinando os crentes a expressar suas emoções a Deus de forma honesta. Eles revelam a natureza multifacetada de Deus – como Criador, Rei, Juiz, Salvador e Pastor. Os Salmos apontam para o Messias, prefigurando Sua vida, sofrimento e reinado. Eles enfatizam a importância da Lei de Deus, da adoração genuína e da confiança inabalável na Sua fidelidade, mesmo em meio às provações. São uma fonte perene de consolo, esperança e inspiração para a adoração.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridSalmos">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Salmos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Salmos, capítulo por capítulo, destacando os temas e gêneros.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Livro I (Salmos 1-41):</strong>
+                    <ul>
+                        <li>Salmo 1: O caminho do justo e do ímpio.</li>
+                        <li>Salmo 2: O reinado do Messias.</li>
+                        <li>Salmo 3-7: Lamentações e súplicas de Davi.</li>
+                        <li>Salmo 8: A glória de Deus e a dignidade do homem.</li>
+                        <li>Salmo 9-15: Louvor, súplica e sabedoria.</li>
+                        <li>Salmo 16: Confiança em Deus na vida e na morte.</li>
+                        <li>Salmo 17-21: Orações e louvor de Davi.</li>
+                        <li>Salmo 22: Sofrimento e vitória do Messias.</li>
+                        <li>Salmo 23: O Senhor é meu Pastor.</li>
+                        <li>Salmo 24: O Rei da Glória.</li>
+                        <li>Salmo 25-30: Súplicas, confiança e ação de graças.</li>
+                        <li>Salmo 31: Confiança em Deus em tempos de angústia.</li>
+                        <li>Salmo 32: A bem-aventurança do perdão.</li>
+                        <li>Salmo 33-37: Louvor, sabedoria e confiança.</li>
+                        <li>Salmo 38-41: Lamentações e súplicas.</li>
+                    </ul>
+                </li>
+                <li><strong>Livro II (Salmos 42-72):</strong>
+                    <ul>
+                        <li>Salmo 42-49: Salmos dos Filhos de Corá (anseio por Deus, glória de Sião).</li>
+                        <li>Salmo 50: Salmo de Asafe (a verdadeira adoração).</li>
+                        <li>Salmo 51: Confissão de Davi.</li>
+                        <li>Salmo 52-64: Diversas lamentações e súplicas de Davi.</li>
+                        <li>Salmo 65-68: Louvor pela bondade de Deus e Sua vitória.</li>
+                        <li>Salmo 69-71: Mais súplicas de Davi.</li>
+                        <li>Salmo 72: Salmo de Salomão (o reinado justo do rei).</li>
+                    </ul>
+                </li>
+                <li><strong>Livro III (Salmos 73-89):</strong>
+                    <ul>
+                        <li>Salmo 73-83: Salmos de Asafe (o problema da prosperidade dos ímpios, orações nacionais).</li>
+                        <li>Salmo 84-88: Salmos dos Filhos de Corá (anseio pela casa de Deus, oração por restauração).</li>
+                        <li>Salmo 89: Salmo de Etã (a fidelidade da aliança davídica e a lamentação).</li>
+                    </ul>
+                </li>
+                <li><strong>Livro IV (Salmos 90-106):</strong>
+                    <ul>
+                        <li>Salmo 90: Salmo de Moisés (a eternidade de Deus e a brevidade humana).</li>
+                        <li>Salmo 91: O refúgio no Altíssimo.</li>
+                        <li>Salmo 92-100: Salmos do Reino de Deus (o Senhor reina!).</li>
+                        <li>Salmo 101-106: Louvor pela bondade de Deus e Sua história com Israel.</li>
+                    </ul>
+                </li>
+                <li><strong>Livro V (Salmos 107-150):</strong>
+                    <ul>
+                        <li>Salmo 107-112: Louvor e ação de graças.</li>
+                        <li>Salmo 113-118: Salmos Hallel (louvor pascal).</li>
+                        <li>Salmo 119: A excelência da Lei de Deus.</li>
+                        <li>Salmo 120-134: Salmos de Ascensão (cânticos de peregrinação).</li>
+                        <li>Salmo 135-145: Louvor, súplica e ação de graças.</li>
+                        <li>Salmo 146-150: Louvor universal e final.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Salmos</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Louvor e Adoração:</strong> A expressão de exaltação a Deus por Sua grandeza, bondade e obras.</li>
+                <li><strong>Lamentação e Súplica:</strong> A honestidade na apresentação da dor, angústia e pedidos de socorro a Deus.</li>
+                <li><strong>Confiança em Deus:</strong> A certeza da fidelidade e proteção divina em todas as circunstâncias.</li>
+                <li><strong>A Lei de Deus:</strong> A beleza, sabedoria e importância dos mandamentos divinos para a vida.</li>
+                <li><strong>A Soberania e Justiça de Deus:</strong> Deus como Rei e Juiz sobre toda a criação e a história.</li>
+                <li><strong>O Messias:</strong> Prefigurações da vida, sofrimento, morte e reinado de Jesus Cristo.</li>
+                <li><strong>A Criação:</strong> A manifestação da glória e do poder de Deus através da natureza.</li>
+                <li><strong>A História de Israel:</strong> A lembrança da fidelidade de Deus para com Seu povo ao longo do tempo.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Salmos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersSalmos">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Salmos</h2>
+            <div id="quizContainerSalmos" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionSalmos"></p>
+                <div id="quizOptionsSalmos" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackSalmos" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionSalmos()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressSalmos"></span></p>
+                <p>Pontuação: <span id="quizScoreSalmos">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Salmos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Salmos.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="salmosChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalSalmos()">&times;</span>
+                <h3 id="modalCharacterNameSalmos" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionSalmos" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Salmos",
+            "short_name": "Salmos",
+            "description": "Explore o livro de Salmos de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=SL",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=SL",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'salmos-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionSalmos(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsSalmos();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksSalmos();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsSalmos(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexSalmos = 0; // Reinicia o quiz
+                scoreSalmos = 0;
+                wrongAnswersSalmos = 0;
+                document.getElementById('quizScoreSalmos').textContent = `Acertos: ${scoreSalmos}, Erros: ${wrongAnswersSalmos}`;
+                displayQuestionSalmos();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderSalmosChart();
+            }
+        }
+
+        // Dados dos personagens para Salmos
+        const characterDetailsSalmos = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O foco central de todos os Salmos, louvado como Criador, Rei, Juiz, Salvador, Pastor e refúgio em todas as circunstâncias."
+            },
+            "Davi": {
+                name: "Davi",
+                description: "O principal autor dos Salmos, conhecido como 'o doce cantor de Israel'. Seus salmos expressam uma vasta gama de emoções e experiências com Deus."
+            },
+            "Asafe": {
+                name: "Asafe",
+                description: "Um dos líderes dos levitas e músicos do Templo, que compôs vários salmos, muitos dos quais abordam a justiça de Deus e a prosperidade dos ímpios."
+            },
+            "Filhos de Corá": {
+                name: "Filhos de Corá",
+                description: "Um grupo de levitas e cantores do Templo que compuseram diversos salmos, frequentemente expressando anseio por Deus e pela Sua casa."
+            },
+            "Salomão": {
+                name: "Salomão",
+                description: "Autor de dois salmos (Salmo 72 e Salmo 127), que refletem sobre a sabedoria e a bênção de Deus."
+            },
+            "Moisés": {
+                name: "Moisés",
+                description: "Autor do Salmo 90, um salmo de sabedoria que medita sobre a eternidade de Deus e a brevidade da vida humana."
+            },
+            "Etã, o Ezraíta": {
+                name: "Etã, o Ezrahita",
+                description: "Autor do Salmo 89, que reflete sobre a fidelidade da aliança de Deus com Davi e as dificuldades enfrentadas."
+            },
+            "O Justo": {
+                name: "O Justo",
+                description: "Um tema recorrente nos Salmos, representando aquele que confia em Deus, obedece à Sua lei e é abençoado por Ele."
+            },
+            "O Ímpio": {
+                name: "O Ímpio",
+                description: "Um tema recorrente nos Salmos, representando aquele que se afasta de Deus, vive no pecado e, eventualmente, enfrenta o juízo divino."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalSalmos(characterName) {
+            const details = characterDetailsSalmos[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameSalmos').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionSalmos').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalSalmos() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsSalmos() {
+            const grid = document.getElementById('characterGridSalmos');
+            grid.innerHTML = '';
+            for (const key in characterDetailsSalmos) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalSalmos(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksSalmos() {
+            const chaptersDiv = document.getElementById('chaptersSalmos');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 150; i++) { // Salmos tem 150 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/sl/${i}`; // Link para a Bíblia Online, Salmos
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Salmo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Salmos (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsSalmos = [
+            { question: "Quantos salmos existem no Livro de Salmos?", options: ["50", "100", "150", "200"], answer: "150", reference: "Introdução ao Livro de Salmos" },
+            { question: "Qual é o principal autor dos Salmos?", options: ["Salomão", "Moisés", "Davi", "Asafe"], answer: "Davi", reference: "Introdução ao Livro de Salmos" },
+            { question: "Em quantos livros o Livro de Salmos é dividido?", options: ["Três", "Quatro", "Cinco", "Seis"], answer: "Cinco", reference: "Introdução ao Livro de Salmos" },
+            { question: "Qual salmo é conhecido como o Salmo do Pastor?", options: ["Salmo 1", "Salmo 23", "Salmo 51", "Salmo 119"], answer: "Salmo 23", reference: "Salmo 23" },
+            { question: "Qual salmo é o mais longo do Livro de Salmos?", options: ["Salmo 1", "Salmo 90", "Salmo 119", "Salmo 150"], answer: "Salmo 119", reference: "Salmo 119" },
+            { question: "Qual salmo é atribuído a Moisés?", options: ["Salmo 1", "Salmo 23", "Salmo 90", "Salmo 100"], answer: "Salmo 90", reference: "Salmo 90" },
+            { question: "Qual é o tema principal do Salmo 1?", options: ["Louvor a Deus", "A sabedoria e a lei de Deus", "Lamentação", "A vinda do Messias"], answer: "A sabedoria e a lei de Deus", reference: "Salmo 1" },
+            { question: "Os Salmos Hallel (louvor pascal) são encontrados em quais salmos?", options: ["Salmos 1-5", "Salmos 20-25", "Salmos 113-118", "Salmos 145-150"], answer: "Salmos 113-118", reference: "Panoramas do Livro de Salmos" },
+            { question: "Qual grupo de salmos é conhecido como 'Salmos de Ascensão'?", options: ["Salmos 1-10", "Salmos 50-60", "Salmos 120-134", "Salmos 140-150"], answer: "Salmos 120-134", reference: "Panoramas do Livro de Salmos" },
+            { question: "Qual emoção é frequentemente expressa nos salmos de lamentação?", options: ["Alegria", "Esperança", "Tristeza e angústia", "Gratidão"], answer: "Tristeza e angústia", reference: "Introdução ao Livro de Salmos" },
+            { question: "O que significa a palavra 'Selah' encontrada em alguns salmos?", options: ["Amém", "Pausa ou interlúdio musical", "Aleluia", "Glória"], answer: "Pausa ou interlúdio musical", reference: "Conhecimento geral sobre Salmos" },
+            { question: "Qual salmo começa com 'Bem-aventurado o homem que não anda segundo o conselho dos ímpios'?", options: ["Salmo 1", "Salmo 23", "Salmo 119", "Salmo 150"], answer: "Salmo 1", reference: "Salmo 1:1" },
+            { question: "Quem eram os 'Filhos de Corá'?", options: ["Profetas", "Reis", "Levitas e cantores do Templo", "Sacerdotes"], answer: "Levitas e cantores do Templo", reference: "Personagens Bíblicos" },
+            { question: "Qual é o último salmo do Livro de Salmos?", options: ["Salmo 100", "Salmo 149", "Salmo 150", "Salmo 119"], answer: "Salmo 150", reference: "Salmo 150" },
+            { question: "Qual tema é central nos Salmos do Reino de Deus?", options: ["A criação", "A soberania e o reinado de Deus", "A história de Israel", "A sabedoria"], answer: "A soberania e o reinado de Deus", reference: "Panoramas do Livro de Salmos" },
+            { question: "Qual salmo é uma oração de confissão e arrependimento de Davi?", options: ["Salmo 1", "Salmo 23", "Salmo 51", "Salmo 100"], answer: "Salmo 51", reference: "Salmo 51" },
+            { question: "Qual a importância dos Salmos no Novo Testamento?", options: ["Eles não são mencionados", "São citados apenas uma vez", "São frequentemente citados em referência a Jesus Cristo", "São usados para profetizar o fim dos tempos"], answer: "São frequentemente citados em referência a Jesus Cristo", reference: "Introdução ao Livro de Salmos" },
+            { question: "Qual dos seguintes não é um tipo comum de Salmo?", options: ["Salmo de Louvor", "Salmo de Lamentação", "Salmo de Guerra", "Salmo de Sabedoria"], answer: "Salmo de Guerra", reference: "Introdução ao Livro de Salmos (implícito na diversidade de gêneros)" },
+            { question: "O que a doxologia marca no final de cada um dos cinco livros dos Salmos?", options: ["O fim da Bíblia", "Uma bênção", "Uma nova seção", "Uma pausa para meditação"], answer: "Uma bênção", reference: "Introdução ao Livro de Salmos" },
+            { question: "Qual salmo fala sobre a glória de Deus na criação e a dignidade do homem?", options: ["Salmo 1", "Salmo 8", "Salmo 19", "Salmo 104"], answer: "Salmo 8", reference: "Salmo 8" },
+            { question: "Qual o tema principal do Salmo 100?", options: ["Lamentação", "Confissão", "Ação de Graças", "Súplica"], answer: "Ação de Graças", reference: "Salmo 100" },
+            { question: "Qual salmo contém a frase 'O Senhor é a minha luz e a minha salvação; a quem temerei?'", options: ["Salmo 23", "Salmo 27", "Salmo 46", "Salmo 91"], answer: "Salmo 27", reference: "Salmo 27:1" },
+            { question: "Qual salmo é uma meditação sobre a brevidade da vida humana em contraste com a eternidade de Deus?", options: ["Salmo 1", "Salmo 23", "Salmo 90", "Salmo 119"], answer: "Salmo 90", reference: "Salmo 90" },
+            { question: "Qual salmo termina com 'Todo ser que respira louve ao Senhor! Aleluia!'?", options: ["Salmo 1", "Salmo 119", "Salmo 145", "Salmo 150"], answer: "Salmo 150", reference: "Salmo 150:6" },
+            { question: "Qual o nome do levita e músico do Templo que compôs vários salmos?", options: ["Davi", "Salomão", "Asafe", "Corá"], answer: "Asafe", reference: "Personagens Bíblicos" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsSalmos = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsSalmos.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsSalmos = allQuizQuestionsSalmos.concat(uniqueQuizQuestionsSalmos);
+        }
+        allQuizQuestionsSalmos = allQuizQuestionsSalmos.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsSalmos = [];
+        let currentQuizIndexSalmos = 0;
+        let scoreSalmos = 0;
+        let wrongAnswersSalmos = 0;
+        let salmosChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsSalmos() {
+            shuffledQuizQuestionsSalmos = [...allQuizQuestionsSalmos]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsSalmos);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressSalmos() {
+            const progressElement = document.getElementById('quizProgressSalmos');
+            progressElement.textContent = `${currentQuizIndexSalmos + 1}/${shuffledQuizQuestionsSalmos.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionSalmos() {
+            if (currentQuizIndexSalmos >= shuffledQuizQuestionsSalmos.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionSalmos').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsSalmos').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreSalmos}, Erros: ${wrongAnswersSalmos}</p>`;
+                document.getElementById('quizFeedbackSalmos').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsSalmos[currentQuizIndexSalmos];
+            document.getElementById('quizQuestionSalmos').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsSalmos');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerSalmos(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackSalmos').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressSalmos();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerSalmos(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackSalmos');
+            const optionsButtons = document.querySelectorAll('#quizOptionsSalmos button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreSalmos++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersSalmos++;
+            }
+            document.getElementById('quizScoreSalmos').textContent = `Acertos: ${scoreSalmos}, Erros: ${wrongAnswersSalmos}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionSalmos() {
+            currentQuizIndexSalmos++;
+            displayQuestionSalmos();
+        }
+
+        // Dados para o gráfico de temas de Salmos
+        const salmosChartData = {
+            labels: ['Louvor e Adoração', 'Lamentação e Súplica', 'Confiança em Deus', 'A Lei de Deus', 'Soberania e Justiça de Deus', 'O Messias', 'A Criação', 'A História de Israel'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 15, 10, 10, 8, 7, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(201, 203, 207, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const salmosChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Salmos',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderSalmosChart() {
+            const ctx = document.getElementById('salmosChart').getContext('2d');
+            if (salmosChartInstance) {
+                salmosChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            salmosChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: salmosChartData,
+                options: salmosChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Samuel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6; /* Blue border for Samuel game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #2563eb; /* Blue for Samuel game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #1d4ed8; /* Darker blue on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #2563eb;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #1d4ed8;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-blue-700 mb-4">A História de Samuel ⚖️</h1>
+        <p class="text-gray-700 mb-6">
+            Acompanhe a vida de Samuel, o último juiz de Israel, profeta e o homem que ungiu os primeiros reis.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Samuel!</p>
+            <p class="text-gray-700 mt-6">A história de Samuel é um testemunho da fidelidade de Deus, da importância da obediência e da transição de Israel de uma teocracia para uma monarquia.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: O Nascimento de Samuel e a Promessa de Ana',
+                location: 'Ramá e Siló',
+                objective: 'Entender a oração de Ana e o nascimento de Samuel.',
+                clues: [
+                    'Ana era estéril e orava fervorosamente por um filho no tabernáculo em Siló.',
+                    'Ela prometeu dedicar seu filho ao Senhor por toda a sua vida.'
+                ],
+                keyVerse: '1 Samuel 1:10-11, 20',
+                enigma: 'Qual era o nome da mãe de Samuel, que orou por um filho?',
+                options: ['Ana', 'Penina', 'Débora'],
+                correctAnswer: 'Ana'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: A Dedicação de Samuel no Templo',
+                location: 'Siló',
+                objective: 'Compreender a dedicação de Samuel ao serviço do Senhor.',
+                clues: [
+                    'Após o desmame, Ana levou Samuel ao sacerdote Eli em Siló.',
+                    'Ela o dedicou ao Senhor, cumprindo sua promessa.'
+                ],
+                keyVerse: '1 Samuel 1:24-28',
+                enigma: 'A quem Ana dedicou Samuel para servir no templo?',
+                options: ['Eli', 'O rei', 'Um profeta'],
+                correctAnswer: 'Eli'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: O Chamado de Samuel',
+                location: 'Tabernáculo em Siló',
+                objective: 'Descobrir como Deus chamou Samuel pela primeira vez.',
+                clues: [
+                    'Samuel servia ao Senhor sob a supervisão de Eli.',
+                    'Deus chamou Samuel três vezes durante a noite, e Eli o instruiu a responder: "Fala, Senhor, pois o teu servo ouve".'
+                ],
+                keyVerse: '1 Samuel 3:1-10',
+                enigma: 'O que Samuel respondeu a Deus após a instrução de Eli?',
+                options: ['"Fala, Senhor, pois o teu servo ouve"', '"Estou aqui"', '"O que queres de mim?"'],
+                correctAnswer: '"Fala, Senhor, pois o teu servo ouve"'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: A Morte de Eli e Seus Filhos',
+                location: 'Siló',
+                objective: 'Aprender sobre o julgamento de Deus sobre a casa de Eli.',
+                clues: [
+                    'Os filhos de Eli, Hofni e Fineias, eram perversos e desonravam o Senhor.',
+                    'Eli morreu ao cair de sua cadeira e quebrar o pescoço, ao saber que a Arca de Deus havia sido capturada e seus filhos mortos.'
+                ],
+                keyVerse: '1 Samuel 4:17-18',
+                enigma: 'O que causou a morte de Eli?',
+                options: ['Caiu da cadeira ao saber da captura da Arca e da morte dos filhos', 'Foi morto em batalha', 'Morreu de velhice'],
+                correctAnswer: 'Caiu da cadeira ao saber da captura da Arca e da morte dos filhos'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: A Arca Capturada pelos Filisteus',
+                location: 'Ebenézer e Asdode',
+                objective: 'Observar a captura da Arca da Aliança pelos filisteus.',
+                clues: [
+                    'Israel foi derrotado pelos filisteus em Ebenézer.',
+                    'A Arca da Aliança foi levada pelos filisteus para Asdode e colocada no templo de Dagom.'
+                ],
+                keyVerse: '1 Samuel 4:10-11, 5:1-2',
+                enigma: 'Quem capturou a Arca da Aliança de Israel?',
+                options: ['Os filisteus', 'Os midianitas', 'Os amorreus'],
+                correctAnswer: 'Os filisteus'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: O Retorno da Arca',
+                location: 'Asdode, Gate, Ecrom e Bete-Semes',
+                objective: 'Entender como a Arca retornou a Israel.',
+                clues: [
+                    'A Arca trouxe pragas e tumores aos filisteus em cada cidade onde era levada.',
+                    'Eles a devolveram a Israel em uma carroça puxada por vacas que nunca haviam sido jungidas.'
+                ],
+                keyVerse: '1 Samuel 6:10-12',
+                enigma: 'Como os filisteus devolveram a Arca da Aliança a Israel?',
+                options: ['Em uma carroça puxada por vacas', 'Por mensageiros', 'Em um barco'],
+                correctAnswer: 'Em uma carroça puxada por vacas'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: Samuel Julga Israel em Mispa',
+                location: 'Mispa',
+                objective: 'Aprender sobre o papel de Samuel como juiz e líder espiritual.',
+                clues: [
+                    'Samuel convocou todo o Israel a Mispa para se arrepender de seus pecados.',
+                    'Ele intercedeu por eles e julgou o povo.'
+                ],
+                keyVerse: '1 Samuel 7:5-6',
+                enigma: 'Onde Samuel reuniu Israel para se arrepender e julgá-los?',
+                options: ['Mispa', 'Gilgal', 'Belém'],
+                correctAnswer: 'Mispa'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: A Vitória sobre os Filisteus em Ebenézer',
+                location: 'Ebenézer',
+                objective: 'Descobrir a vitória milagrosa de Israel sob a liderança de Samuel.',
+                clues: [
+                    'Enquanto Samuel oferecia um holocausto, os filisteus atacaram Israel.',
+                    'O Senhor trovejou com grande estrondo sobre os filisteus, e eles foram derrotados.'
+                ],
+                keyVerse: '1 Samuel 7:10-12',
+                enigma: 'O que o Senhor fez para ajudar Israel a vencer os filisteus em Ebenézer?',
+                options: ['Trovejou com grande estrondo', 'Enviou anjos', 'Fez a terra tremer'],
+                correctAnswer: 'Trovejou com grande estrondo'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: O Pedido de um Rei',
+                location: 'Ramá',
+                objective: 'Entender por que Israel pediu um rei.',
+                clues: [
+                    'Quando Samuel envelheceu, seus filhos não seguiram seus caminhos.',
+                    'Os anciãos de Israel pediram a Samuel um rei para julgá-los, como as outras nações.'
+                ],
+                keyVerse: '1 Samuel 8:4-7',
+                enigma: 'Por que os anciãos de Israel pediram um rei a Samuel?',
+                options: ['Porque os filhos de Samuel não seguiam seus caminhos', 'Porque queriam ser como as outras nações', 'Ambas as opções'],
+                correctAnswer: 'Ambas as opções'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: A Escolha de Saul',
+                location: 'Ramá e Gibeá',
+                objective: 'Aprender sobre a escolha de Saul como o primeiro rei de Israel.',
+                clues: [
+                    'Deus revelou a Samuel que enviaria um homem da terra de Benjamim.',
+                    'Saul, filho de Quis, foi ungido por Samuel em particular e depois escolhido por sorteio em Mispa.'
+                ],
+                keyVerse: '1 Samuel 9:15-17, 10:1, 20-24',
+                enigma: 'De qual tribo Saul, o primeiro rei de Israel, era?',
+                options: ['Benjamim', 'Judá', 'Levi'],
+                correctAnswer: 'Benjamim'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: Saul é Confirmado como Rei',
+                location: 'Gilgal',
+                objective: 'Observar a confirmação pública de Saul como rei.',
+                clues: [
+                    'Após a vitória de Saul sobre os amonitas, Samuel convocou o povo a Gilgal.',
+                    'Lá, eles renovaram o reino e confirmaram Saul como rei diante do Senhor.'
+                ],
+                keyVerse: '1 Samuel 11:14-15',
+                enigma: 'Onde Saul foi confirmado como rei publicamente?',
+                options: ['Gilgal', 'Mispa', 'Belém'],
+                correctAnswer: 'Gilgal'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: O Discurso de Despedida de Samuel',
+                location: 'Gilgal',
+                objective: 'Compreender as últimas palavras de Samuel ao povo.',
+                clues: [
+                    'Samuel fez um discurso de despedida, reafirmando sua integridade como juiz.',
+                    'Ele advertiu o povo a temer e servir ao Senhor, ou enfrentariam as consequências.'
+                ],
+                keyVerse: '1 Samuel 12:1-5, 14-15',
+                enigma: 'Qual foi o principal conselho de Samuel ao povo em seu discurso de despedida?',
+                options: ['Temer e servir ao Senhor', 'Serem fortes na guerra', 'Construir um grande templo'],
+                correctAnswer: 'Temer e servir ao Senhor'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: A Desobediência de Saul em Gilgal',
+                location: 'Gilgal',
+                objective: 'Aprender sobre a primeira grande desobediência de Saul.',
+                clues: [
+                    'Saul não esperou Samuel para oferecer o holocausto antes da batalha contra os filisteus.',
+                    'Samuel o repreendeu, dizendo que seu reino não duraria.'
+                ],
+                keyVerse: '1 Samuel 13:8-14',
+                enigma: 'Qual foi a desobediência de Saul que levou Samuel a profetizar a perda de seu reino?',
+                options: ['Oferecer o holocausto sem Samuel', 'Não destruir completamente os amalequitas', 'Consultar uma médium'],
+                correctAnswer: 'Oferecer o holocausto sem Samuel'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: Saul Rejeitado como Rei',
+                location: 'Gilgal',
+                objective: 'Entender a rejeição final de Saul por Deus.',
+                clues: [
+                    'Deus ordenou a Saul que destruísse completamente os amalequitas, mas ele poupou o rei Agague e o melhor do gado.',
+                    'Samuel declarou que o Senhor o havia rejeitado como rei.'
+                ],
+                keyVerse: '1 Samuel 15:10-23',
+                enigma: 'Por que Deus rejeitou Saul como rei?',
+                options: ['Por sua desobediência em poupar Agague e o gado', 'Por sua falta de coragem', 'Por sua idade avançada'],
+                correctAnswer: 'Por sua desobediência em poupar Agague e o gado'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: Samuel Unge Davi',
+                location: 'Belém',
+                objective: 'Observar a unção de Davi como o futuro rei de Israel.',
+                clues: [
+                    'Deus enviou Samuel a Belém, à casa de Jessé, para ungir um novo rei.',
+                    'Samuel ungiu Davi, o filho mais novo de Jessé, e o Espírito do Senhor veio poderosamente sobre Davi.'
+                ],
+                keyVerse: '1 Samuel 16:1-13',
+                enigma: 'Quem Samuel ungiu como o futuro rei de Israel?',
+                options: ['Davi', 'Eliabe', 'Abinadabe'],
+                correctAnswer: 'Davi'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-blue-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

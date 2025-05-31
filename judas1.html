@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Judas Iscariotes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #374151; /* Dark gray border for Judas game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #374151; /* Dark gray for Judas game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #1f2937; /* Even darker gray on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #374151;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #374151;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #1f2937;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">A História de Judas Iscariotes 💔</h1>
+        <p class="text-gray-700 mb-6">
+            Acompanhe a trágica história de Judas Iscariotes, o discípulo que traiu Jesus, e as consequências de suas escolhas.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Judas Iscariotes!</p>
+            <p class="text-gray-700 mt-6">A história de Judas é um lembrete sombrio das consequências da ganância e da traição, mas também da soberania de Deus que, mesmo em meio à maldade humana, cumpre Seus propósitos.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: A Escolha do Discípulo',
+                location: 'Galileia',
+                objective: 'Entender como Judas se tornou um dos doze apóstolos.',
+                clues: [
+                    'Jesus escolheu doze homens para serem Seus apóstolos.',
+                    'Judas Iscariotes, apesar de seu futuro, foi um dos escolhidos.'
+                ],
+                keyVerse: 'Lucas 6:12-16',
+                enigma: 'Quantos discípulos Jesus escolheu para serem apóstolos, incluindo Judas?',
+                options: ['Doze', 'Sete', 'Três'],
+                correctAnswer: 'Doze'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: O Tesoureiro do Grupo',
+                location: 'Durante o ministério de Jesus',
+                objective: 'Conhecer o papel de Judas e sua inclinação.',
+                clues: [
+                    'Judas era o tesoureiro do grupo de discípulos, responsável pela bolsa de dinheiro.',
+                    'Ele, no entanto, roubava o que era colocado na bolsa.'
+                ],
+                keyVerse: 'João 12:6',
+                enigma: 'Qual era a função de Judas entre os discípulos?',
+                options: ['Tesoureiro', 'Pregador', 'Curador'],
+                correctAnswer: 'Tesoureiro'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: A Unção em Betânia',
+                location: 'Betânia (casa de Lázaro)',
+                objective: 'Compreender o descontentamento de Judas com a unção.',
+                clues: [
+                    'Maria, irmã de Lázaro, ungiu os pés de Jesus com um perfume muito caro.',
+                    'Judas reclamou, dizendo que o perfume poderia ter sido vendido por trezentos denários e dado aos pobres.'
+                ],
+                keyVerse: 'João 12:3-5',
+                enigma: 'O que Maria usou para ungir os pés de Jesus?',
+                options: ['Perfume caro', 'Azeite', 'Água'],
+                correctAnswer: 'Perfume caro'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: A Profecia da Traição (Primeira Menção)',
+                location: 'Durante o ministério de Jesus',
+                objective: 'Aprender sobre a predição de Jesus sobre a traição.',
+                clues: [
+                    'Jesus sabia desde o princípio quem O trairia.',
+                    'Ele afirmou que um dos doze era um diabo.'
+                ],
+                keyVerse: 'João 6:64, 70-71',
+                enigma: 'O que Jesus sabia desde o princípio sobre um de Seus discípulos?',
+                options: ['Que O trairia', 'Que O defenderia', 'Que O curaria'],
+                correctAnswer: 'Que O trairia'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: O Pacto com os Sacerdotes',
+                location: 'Jerusalém (Templo)',
+                objective: 'Entender o acordo de Judas para entregar Jesus.',
+                clues: [
+                    'Judas foi aos principais sacerdotes e perguntou o que eles lhe dariam para entregar Jesus.',
+                    'Ele buscou uma oportunidade para entregá-Lo sem tumulto.'
+                ],
+                keyVerse: 'Mateus 26:14-16',
+                enigma: 'Com quem Judas fez um pacto para entregar Jesus?',
+                options: ['Os principais sacerdotes', 'Os fariseus', 'Os romanos'],
+                correctAnswer: 'Os principais sacerdotes'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: As Trinta Moedas de Prata',
+                location: 'Jerusalém (Templo)',
+                objective: 'Conhecer o preço da traição.',
+                clues: [
+                    'Eles concordaram em pagar a Judas trinta moedas de prata.',
+                    'Este valor era o preço de um escravo, cumprindo uma profecia.'
+                ],
+                keyVerse: 'Mateus 26:15',
+                enigma: 'Quantas moedas de prata Judas recebeu pela traição?',
+                options: ['Trinta', 'Vinte', 'Quarenta'],
+                correctAnswer: 'Trinta'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: A Preparação da Páscoa',
+                location: 'Jerusalém',
+                objective: 'Observar a participação de Judas nos preparativos finais.',
+                clues: [
+                    'Judas estava presente quando Jesus enviou Pedro e João para preparar a Páscoa.',
+                    'Ele participou dos preparativos para a Última Ceia.'
+                ],
+                keyVerse: 'Mateus 26:17-19',
+                enigma: 'Qual festa Jesus e os discípulos estavam preparando para celebrar?',
+                options: ['Páscoa', 'Pentecostes', 'Tabernáculos'],
+                correctAnswer: 'Páscoa'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: A Última Ceia (Revelação do Traidor)',
+                location: 'Cenáculo em Jerusalém',
+                objective: 'Aprender sobre o momento em que Jesus identifica o traidor.',
+                clues: [
+                    'Durante a ceia, Jesus declarou: "Um de vocês que está comendo comigo vai me trair."',
+                    'Os discípulos ficaram muito tristes e começaram a perguntar um por um: "Sou eu, Senhor?"'
+                ],
+                keyVerse: 'Marcos 14:18-21',
+                enigma: 'O que Jesus revelou durante a Última Ceia sobre um dos discípulos?',
+                options: ['Que um O trairia', 'Que um O negaria', 'Que um O abandonaria'],
+                correctAnswer: 'Que um O trairia'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: O Bocado Molhado',
+                location: 'Cenáculo em Jerusalém',
+                objective: 'Entender o sinal específico para Judas.',
+                clues: [
+                    'Jesus respondeu a João que era aquele a quem Ele daria um bocado de pão molhado.',
+                    'Após molhar o bocado, Jesus o deu a Judas Iscariotes.'
+                ],
+                keyVerse: 'João 13:26-27',
+                enigma: 'O que Jesus deu a Judas para indicar que ele era o traidor?',
+                options: ['Um bocado de pão molhado', 'Um copo de vinho', 'Uma peça de roupa'],
+                correctAnswer: 'Um bocado de pão molhado'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: Judas Sai',
+                location: 'Cenáculo em Jerusalém',
+                objective: 'Observar o momento da partida de Judas para consumar a traição.',
+                clues: [
+                    'Depois que Judas recebeu o bocado, Satanás entrou nele.',
+                    'Jesus disse a Judas: "O que você vai fazer, faça depressa." E Judas saiu imediatamente; era noite.'
+                ],
+                keyVerse: 'João 13:30',
+                enigma: 'O que aconteceu com Judas depois que ele recebeu o bocado de Jesus e ouviu Suas palavras?',
+                options: ['Satanás entrou nele e ele saiu', 'Ele se arrependeu e ficou', 'Ele ficou confuso e perguntou mais'],
+                correctAnswer: 'Satanás entrou nele e ele saiu'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: O Beijo da Traição',
+                location: 'Jardim do Getsêmani',
+                objective: 'Aprender sobre o ato final da traição.',
+                clues: [
+                    'Judas chegou ao Getsêmani com uma grande multidão, armada com espadas e varapaus, enviada pelos principais sacerdotes e anciãos.',
+                    'Ele se aproximou de Jesus e O beijou, que era o sinal combinado para identificá-Lo.'
+                ],
+                keyVerse: 'Mateus 26:47-49',
+                enigma: 'Como Judas identificou Jesus para a multidão que O prenderia?',
+                options: ['Com um beijo', 'Apontando para Ele', 'Gritando Seu nome'],
+                correctAnswer: 'Com um beijo'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: A Prisão de Jesus',
+                location: 'Jardim do Getsêmani',
+                objective: 'Compreender o papel de Judas na prisão de Jesus.',
+                clues: [
+                    'Após o beijo de Judas, os soldados e os guardas do Templo prenderam Jesus e O levaram.',
+                    'Jesus não resistiu à prisão, cumprindo as Escrituras.'
+                ],
+                keyVerse: 'Mateus 26:50',
+                enigma: 'O que aconteceu com Jesus logo após o beijo de Judas?',
+                options: ['Foi preso', 'Fugiu', 'Curou alguém'],
+                correctAnswer: 'Foi preso'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: O Remorso de Judas',
+                location: 'Jerusalém (Templo)',
+                objective: 'Entender o arrependimento e a tentativa de Judas de reverter a situação.',
+                clues: [
+                    'Quando Judas viu que Jesus fora condenado, sentiu remorso e devolveu as trinta moedas de prata aos principais sacerdotes e anciãos.',
+                    'Ele confessou: "Pequei, traindo sangue inocente."'
+                ],
+                keyVerse: 'Mateus 27:3-4',
+                enigma: 'O que Judas fez ao sentir remorso pela condenação de Jesus?',
+                options: ['Devolveu as moedas de prata', 'Fugiu para longe', 'Tentou libertar Jesus'],
+                correctAnswer: 'Devolveu as moedas de prata'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: A Morte de Judas',
+                location: 'Jerusalém',
+                objective: 'Aprender sobre o fim trágico de Judas.',
+                clues: [
+                    'Judas atirou as moedas de prata no Templo e, em seguida, foi e enforcou-se.',
+                    'Outro relato bíblico menciona que ele caiu de cabeça e seu corpo se rompeu, derramando suas entranhas.'
+                ],
+                keyVerse: 'Mateus 27:5, Atos 1:18',
+                enigma: 'O que Judas fez após devolver as moedas de prata?',
+                options: ['Foi enforcar-se', 'Fugiu para outra cidade', 'Procurou perdão'],
+                correctAnswer: 'Foi enforcar-se'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Campo de Sangue',
+                location: 'Jerusalém',
+                objective: 'Refletir sobre o destino das moedas da traição e o legado de Judas.',
+                clues: [
+                    'Os principais sacerdotes não acharam lícito colocar as trinta moedas no tesouro do Templo, pois era preço de sangue.',
+                    'Com elas, compraram o Campo do Oleiro para sepultar estrangeiros, e por isso o campo foi chamado de "Campo de Sangue" até hoje.'
+                ],
+                keyVerse: 'Mateus 27:6-8',
+                enigma: 'O que os sacerdotes compraram com as trinta moedas de prata devolvidas por Judas?',
+                options: ['O Campo do Oleiro', 'Um novo templo', 'Armas'],
+                correctAnswer: 'O Campo do Oleiro'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

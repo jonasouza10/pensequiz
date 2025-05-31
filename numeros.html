@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Números</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Números Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Números</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Números</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a jornada de Israel pelo deserto, suas murmurações, a fidelidade de Deus e a preparação para a entrada na Terra Prometida. Entenda os desafios da liderança, as consequências da desobediência e a organização do povo de Deus. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Números</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Números, o quarto livro do Pentateuco, recebe seu nome dos dois censos do povo de Israel registrados no início e no final do livro. Ele narra a jornada de Israel desde o Monte Sinai, através do deserto, até as planícies de Moabe, na fronteira da Terra Prometida. Abrange um período de aproximadamente 38 anos, marcados por peregrinação, murmurações, rebeliões e a contínua fidelidade de Deus.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Tradicionalmente atribuído a Moisés, Números é um livro de transição, conectando a legislação do Sinai com a entrada em Canaã. Ele detalha a organização do acampamento, as responsabilidades dos levitas, os desafios enfrentados no deserto, as consequências da desobediência da primeira geração e a preparação da nova geração para herdar a terra.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Números é crucial para entender a paciência de Deus com Seu povo, a importância da obediência à Sua Palavra e as lições aprendidas através da peregrinação no deserto. Ele serve como um aviso sobre os perigos da incredulidade e da murmuração, e como um testemunho da provisão e liderança divina.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-10: Organização e Preparação no Sinai.</strong> Censos, arranjo do acampamento, deveres dos levitas, leis de pureza, oferta dos príncipes, consagração dos levitas e a celebração da Páscoa.</li>
+                <li><strong>Capítulos 11-25: A Jornada e Rebelião no Deserto.</strong> Relatos de murmurações, o incidente das codornizes e a praga, a rebelião de Miriam e Arão, o envio dos espias e a desobediência em Cades-Barneia, os 40 anos de peregrinação, a rebelião de Coré, a vara de Arão que floresce, o pecado de Moisés e Arão em Meribá, as serpentes ardentes e a história de Balaão.</li>
+                <li><strong>Capítulos 26-36: Preparação para a Entrada na Terra Prometida.</strong> O segundo censo da nova geração, leis de herança para as filhas de Zelofeade, a sucessão de Josué a Moisés, leis sobre ofertas e festas, leis sobre votos, a guerra contra Midiã, a distribuição de terras e o estabelecimento das cidades de refúgio.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Números é um testemunho da fidelidade de Deus em cumprir Suas promessas, mesmo diante da persistente desobediência humana.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Números</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Números narra a jornada de Israel pelo deserto, destacando a organização do povo, suas provações e a fidelidade de Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Organização e Preparação no Sinai (Capítulos 1-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Censos e Organização do Acampamento (Capítulos 1-4):</strong>
+                    <ul>
+                        <li>Primeiro censo dos homens de guerra.</li>
+                        <li>Organização das tribos ao redor do Tabernáculo.</li>
+                        <li>Deveres e responsabilidades dos levitas.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Leis e Cerimônias no Acampamento (Capítulos 5-10):</strong>
+                    <ul>
+                        <li>Leis de pureza e restituição.</li>
+                        <li>Lei do nazireu.</li>
+                        <li>Bênção sacerdotal.</li>
+                        <li>Ofertas dos príncipes.</li>
+                        <li>Consagração dos levitas.</li>
+                        <li>Celebração da Páscoa.</li>
+                        <li>As trombetas de prata.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Jornada e Rebelião no Deserto (Capítulos 11-25)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Murmurações e Julgamentos (Capítulos 11-12):</strong>
+                    <ul>
+                        <li>Queixas do povo e o fogo do Senhor.</li>
+                        <li>O desejo de carne e as codornizes.</li>
+                        <li>Rebelião de Miriam e Arão contra Moisés.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Desobediência em Cades-Barneia (Capítulos 13-14):</strong>
+                    <ul>
+                        <li>Envio dos doze espias à Canaã.</li>
+                        <li>Relatório dos espias e a incredulidade do povo.</li>
+                        <li>Sentença de 40 anos de peregrinação no deserto.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Rebeliões e Consequências (Capítulos 15-17):</strong>
+                    <ul>
+                        <li>Leis sobre ofertas e transgressões.</li>
+                        <li>Rebelião de Coré, Datã e Abirão.</li>
+                        <li>A vara de Arão que floresce como sinal.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Provisão e Pecado (Capítulos 18-21):</strong>
+                    <ul>
+                        <li>Deveres e porções dos sacerdotes e levitas.</li>
+                        <li>A água de Meribá e o pecado de Moisés e Arão.</li>
+                        <li>A serpente de bronze.</li>
+                        <li>Vitórias sobre os reis sihon e ogue.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Balaão e a Idolatria em Peor (Capítulos 22-25):</strong>
+                    <ul>
+                        <li>Balaque e Balaão.</li>
+                        <li>A jumenta que fala.</li>
+                        <li>As bênçãos de Balaão sobre Israel.</li>
+                        <li>A idolatria e imoralidade em Baal-Peor.</li>
+                        <li>O zelo de Finéias e o fim da praga.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Preparação para a Entrada na Terra Prometida (Capítulos 26-36)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Segundo Censo e Leis de Herança (Capítulos 26-27):</strong>
+                    <ul>
+                        <li>Segundo censo da nova geração.</li>
+                        <li>As filhas de Zelofeade e a lei da herança.</li>
+                        <li>A sucessão de Josué a Moisés.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Leis de Ofertas e Votos (Capítulos 28-30):</strong>
+                    <ul>
+                        <li>Ofertas diárias, semanais e mensais.</li>
+                        <li>Ofertas das festas anuais.</li>
+                        <li>Leis sobre votos e juramentos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Guerra e Divisão da Terra (Capítulos 31-36):</strong>
+                    <ul>
+                        <li>Guerra contra Midiã.</li>
+                        <li>Divisão da terra a leste do Jordão.</li>
+                        <li>Limites da Terra Prometida.</li>
+                        <li>Cidades dos levitas e cidades de refúgio.</li>
+                        <li>Leis sobre herança de filhas que casam fora da tribo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Números é um livro de contrastes: a fidelidade inabalável de Deus versus a persistente infidelidade de Israel. Ele ilustra as consequências do pecado e da incredulidade, mas também a graça e a paciência divinas. A peregrinação no deserto é uma metáfora para a jornada da fé, com seus desafios e a necessidade de depender de Deus. O livro prepara o cenário para a conquista de Canaã, mostrando a soberania de Deus sobre a história e Seu plano para Seu povo.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridNumbers">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Números</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Números, capítulo por capítulo e por blocos temáticos, destacando os eventos e leis.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Organização e Preparação no Sinai (Capítulos 1-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-2:</strong> O primeiro censo e a organização do acampamento.</li>
+                <li><strong>Capítulos 3-4:</strong> O serviço e os deveres dos levitas.</li>
+                <li><strong>Capítulos 5-6:</strong> Leis de pureza e a lei do nazireu.</li>
+                <li><strong>Capítulos 7-8:</strong> As ofertas dos príncipes e a consagração dos levitas.</li>
+                <li><strong>Capítulos 9-10:</strong> A segunda Páscoa e a partida do Sinai.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Jornada e Rebelião no Deserto (Capítulos 11-25)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 11-12:</strong> Murmurações, codornizes e a rebelião de Miriam e Arão.</li>
+                <li><strong>Capítulos 13-14:</strong> Os espias e a incredulidade em Cades-Barneia.</li>
+                <li><strong>Capítulos 15-17:</strong> Leis diversas e a rebelião de Coré.</li>
+                <li><strong>Capítulos 18-19:</strong> Deveres de sacerdotes e levitas, e a água da purificação.</li>
+                <li><strong>Capítulos 20-21:</strong> A morte de Miriam e Arão, o pecado de Moisés em Meribá, a serpente de bronze e vitórias sobre Siom e Ogue.</li>
+                <li><strong>Capítulos 22-24:</strong> Balaque e Balaão.</li>
+                <li><strong>Capítulo 25:</strong> A idolatria em Baal-Peor e o zelo de Finéias.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Preparação para a Entrada na Terra Prometida (Capítulos 26-36)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 26:</strong> O segundo censo da nova geração.</li>
+                <li><strong>Capítulo 27:</strong> As filhas de Zelofeade e a sucessão de Josué.</li>
+                <li><strong>Capítulos 28-29:</strong> Leis sobre ofertas e festas.</li>
+                <li><strong>Capítulo 30:</strong> Leis sobre votos.</li>
+                <li><strong>Capítulo 31:</strong> A guerra contra Midiã.</li>
+                <li><strong>Capítulo 32:</strong> As tribos de Rúben e Gade se estabelecem a leste do Jordão.</li>
+                <li><strong>Capítulo 33:</strong> As estações da jornada de Israel.</li>
+                <li><strong>Capítulos 34-36:</strong> Limites da terra, cidades dos levitas, cidades de refúgio e leis sobre herança de filhas.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Números</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Fidelidade de Deus:</strong> Apesar da constante murmuração e desobediência de Israel, Deus permanece fiel às Suas promessas e provê para Seu povo.</li>
+                <li><strong>A Desobediência e suas Consequências:</strong> O livro é um registro sombrio das punições divinas resultantes da incredulidade e rebelião, culminando na morte de uma geração no deserto.</li>
+                <li><strong>Liderança e Autoridade:</strong> Os desafios à autoridade de Moisés e Arão, e a importância da liderança divinamente instituída.</li>
+                <li><strong>A Peregrinação:</strong> A jornada física através do deserto é uma metáfora para a jornada espiritual da fé, com suas provações, dependência de Deus e o objetivo da Terra Prometida.</li>
+                <li><strong>Organização e Ordem:</strong> A meticulosa organização do acampamento e do serviço levítico reflete a ordem e a santidade de Deus.</li>
+                <li><strong>Santidade e Pureza:</strong> A necessidade contínua de manter a pureza ritual e moral no acampamento para a presença de Deus.</li>
+                <li><strong>O Censo:</strong> Não apenas uma contagem, mas um meio de organizar o exército e a nação para a conquista e a herança da terra.</li>
+                <li><strong>A Terra Prometida:</strong> O destino final da jornada, a promessa de Deus que permanece apesar da falha humana.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Números</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersNumbers">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Números</h2>
+            <div id="quizContainerNumbers" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionNumbers"></p>
+                <div id="quizOptionsNumbers" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackNumbers" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionNumbers()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressNumbers"></span></p>
+                <p>Pontuação: <span id="quizScoreNumbers">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Números</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Números.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="numbersChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal()">&times;</span>
+                <h3 id="modalCharacterName" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Números",
+            "short_name": "Números",
+            "description": "Explore o livro de Números de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=NM",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=NM",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'numeros-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsNumbers();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksNumbers();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsNumbers(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexNumbers = 0; // Reinicia o quiz
+                scoreNumbers = 0;
+                wrongAnswersNumbers = 0;
+                document.getElementById('quizScoreNumbers').textContent = `Acertos: ${scoreNumbers}, Erros: ${wrongAnswersNumbers}`;
+                displayQuestionNumbers();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderNumbersChart();
+            }
+        }
+
+        // Dados dos personagens para Números
+        const characterDetailsNumbers = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus fiel que guia Israel através do deserto, provê para suas necessidades, mas também disciplina sua desobediência e rebelião."
+            },
+            "Moisés": {
+                name: "Moisés",
+                description: "O líder e mediador de Israel, que os conduz pelo deserto. Enfrenta desafios à sua autoridade e peca em Meribá, resultando na proibição de entrar na Terra Prometida."
+            },
+            "Arão": {
+                name: "Arão",
+                description: "O Sumo Sacerdote de Israel, irmão de Moisés. Compartilha da responsabilidade da liderança e também peca em Meribá, morrendo antes de entrar em Canaã."
+            },
+            "Miriam": {
+                name: "Miriam",
+                description: "Irmã de Moisés e Arão. Lidera as mulheres em adoração, mas se rebela contra Moisés e é punida com lepra temporária."
+            },
+            "Josué": {
+                name: "Josué",
+                description: "Um dos doze espias enviados a Canaã, e um dos dois que trouxeram um relatório fiel. É escolhido por Deus para suceder Moisés como líder de Israel."
+            },
+            "Calebe": {
+                name: "Calebe",
+                description: "O outro espião fiel, que, junto com Josué, encorajou Israel a confiar em Deus e entrar na Terra Prometida. Sua fé é recompensada com a promessa de herança."
+            },
+            "Coré": {
+                name: "Coré",
+                description: "Um levita que liderou uma rebelião contra a autoridade de Moisés e Arão, resultando em sua destruição e de seus seguidores pela terra que se abriu."
+            },
+            "Datã e Abirão": {
+                name: "Datã e Abirão",
+                description: "Líderes da tribo de Rúben que se juntaram a Coré em sua rebelião contra Moisés, e foram engolidos pela terra."
+            },
+            "Balaão": {
+                name: "Balaão",
+                description: "Um profeta pagão da Mesopotâmia, contratado por Balaque para amaldiçoar Israel. No entanto, Deus o força a proferir bênçãos sobre o povo de Israel."
+            },
+            "Balaque": {
+                name: "Balaque",
+                description: "Rei de Moabe que temia Israel e tentou usar Balaão para amaldiçoá-los."
+            },
+            "Finéias": {
+                name: "Finéias",
+                description: "Neto de Arão e sacerdote. Seu zelo pela santidade de Deus ao punir a idolatria e imoralidade em Baal-Peor deteve uma praga sobre Israel."
+            },
+            "A Congregação de Israel": {
+                name: "A Congregação de Israel",
+                description: "O povo de Deus em sua jornada pelo deserto, marcado por murmurações, incredulidade, mas também pela experiência da provisão divina e da disciplina."
+            },
+            "As Filhas de Zelofeade": {
+                name: "As Filhas de Zelofeade",
+                description: "Cinco irmãs que pediram a Moisés o direito de herdar a terra de seu pai falecido, estabelecendo uma nova lei de herança para as mulheres."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalNumbers(characterName) {
+            const details = characterDetailsNumbers[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName').textContent = details.name;
+                document.getElementById('modalCharacterDescription').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsNumbers() {
+            const grid = document.getElementById('characterGridNumbers');
+            grid.innerHTML = '';
+            for (const key in characterDetailsNumbers) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalNumbers(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksNumbers() {
+            const chaptersDiv = document.getElementById('chaptersNumbers');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 36; i++) { // Números tem 36 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/nm/${i}`; // Link para a Bíblia Online, Números
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Dados do quiz para Números (200 perguntas)
+        let allQuizQuestionsNumbers = [
+            { question: "Qual o propósito do primeiro censo em Números?", options: ["Contar os levitas", "Organizar o exército para a guerra", "Saber o número de mulheres", "Contar as crianças"], answer: "Organizar o exército para a guerra", reference: "Números 1:2-3" },
+            { question: "Quantas tribos de Israel foram censadas no primeiro censo?", options: ["10", "11", "12", "13"], answer: "12", reference: "Números 1:4-15 (excluindo Levi)" },
+            { question: "Qual tribo não foi contada no primeiro censo para o exército?", options: ["Judá", "Benjamim", "Levi", "Manassés"], answer: "Levi", reference: "Números 1:49" },
+            { question: "Onde os levitas deveriam acampar?", options: ["Ao leste do Tabernáculo", "Ao redor do Tabernáculo", "Ao oeste do Tabernáculo", "Ao sul do Tabernáculo"], answer: "Ao redor do Tabernáculo", reference: "Números 1:50, 53" },
+            { question: "Qual era a função principal dos coatitas?", options: ["Cuidar dos utensílios do pátio", "Transportar os utensílios do santuário (arca, mesa, candelabro, altares)", "Montar e desmontar o Tabernáculo", "Cuidar dos animais"], answer: "Transportar os utensílios do santuário (arca, mesa, candelabro, altares)", reference: "Números 3:31" },
+            { question: "Qual era a função principal dos gersonitas?", options: ["Transportar os utensílios do santuário", "Cuidar das cortinas e cobertas do Tabernáculo", "Cuidar dos animais", "Montar e desmontar o Tabernáculo"], answer: "Cuidar das cortinas e cobertas do Tabernáculo", reference: "Números 3:25-26" },
+            { question: "Qual era a função principal dos meraritas?", options: ["Transportar os utensílios do santuário", "Cuidar das tábuas, barras e colunas do Tabernáculo", "Cuidar dos animais", "Montar e desmontar o Tabernáculo"], answer: "Cuidar das tábuas, barras e colunas do Tabernáculo", reference: "Números 3:36-37" },
+            { question: "Qual a idade para o serviço dos levitas no Tabernáculo?", options: ["20 a 50 anos", "25 a 50 anos", "30 a 50 anos", "18 a 60 anos"], answer: "25 a 50 anos", reference: "Números 8:24-25" },
+            { question: "Qual a lei sobre a pessoa que se tornava nazireu?", options: ["Não podia comer carne", "Não podia beber vinho, nem cortar o cabelo, nem tocar em morto", "Devia jejuar por 40 dias", "Devia se casar imediatamente"], answer: "Não podia beber vinho, nem cortar o cabelo, nem tocar em morto", reference: "Números 6:2-7" },
+            { question: "O que o nazireu deveria fazer ao completar seu voto?", options: ["Oferecer sacrifícios e rapar a cabeça", "Fazer uma grande festa", "Viajar para uma terra distante", "Construir um altar"], answer: "Oferecer sacrifícios e rapar a cabeça", reference: "Números 6:13-18" },
+            { question: "Qual a bênção que Arão e seus filhos deveriam pronunciar sobre os filhos de Israel?", options: ["Bênção de prosperidade", "Bênção de vitória", "Bênção sacerdotal de proteção e paz", "Bênção de sabedoria"], answer: "Bênção sacerdotal de proteção e paz", reference: "Números 6:24-26" },
+            { question: "Qual a oferta que cada príncipe das tribos de Israel trouxe para a dedicação do altar?", options: ["Ouro e prata", "Animais para sacrifício, incenso e azeite", "Cereais e vinho", "Vestes sacerdotais"], answer: "Animais para sacrifício, incenso e azeite", reference: "Números 7:10-88" },
+            { question: "O que aconteceu com o fogo do Senhor quando o povo murmurou em Taberá?", options: ["Aumentou", "Consumiu a extremidade do arraial", "Apagou-se", "Transformou-se em água"], answer: "Consumiu a extremidade do arraial", reference: "Números 11:1" },
+            { question: "O que o povo desejou comer em Quibrote-Hataavá?", options: ["Pão", "Maná", "Carne", "Frutas"], answer: "Carne", reference: "Números 11:4-5" },
+            { question: "O que Deus enviou para o povo em Quibrote-Hataavá quando desejaram carne?", options: ["Serpentes", "Gafanhotos", "Codornizes", "Pombos"], answer: "Codornizes", reference: "Números 11:31" },
+            { question: "Qual a consequência da gula do povo em Quibrote-Hataavá?", options: ["Ficaram ricos", "Uma grande praga os feriu", "Ficaram doentes", "Foram abençoados"], answer: "Uma grande praga os feriu", reference: "Números 11:33" },
+            { question: "Quem murmurou contra Moisés por causa de sua mulher etíope?", options: ["Arão e Josué", "Miriam e Arão", "Calebe e Josué", "Coré e Datã"], answer: "Miriam e Arão", reference: "Números 12:1" },
+            { question: "Qual a punição de Miriam por murmurar contra Moisés?", options: ["Morte", "Exílio", "Lepra temporária", "Fome"], answer: "Lepra temporária", reference: "Números 12:10" },
+            { question: "Quantos espias Moisés enviou para explorar Canaã?", options: ["10", "12", "7", "5"], answer: "12", reference: "Números 13:2" },
+            { question: "Quais espias trouxeram um relatório positivo e encorajador?", options: ["Datã e Abirão", "Coré e On", "Josué e Calebe", "Miriam e Arão"], answer: "Josué e Calebe", reference: "Números 14:6-9" },
+            { question: "Qual a reação do povo ao relatório negativo da maioria dos espias?", options: ["Celebraram", "Choraram e murmuraram contra Moisés e Arão", "Decidiram entrar na terra", "Ofereceram sacrifícios"], answer: "Choraram e murmuraram contra Moisés e Arão", reference: "Números 14:1-4" },
+            { question: "Qual a sentença de Deus para a geração que murmurou após o relatório dos espias?", options: ["Entrariam na terra imediatamente", "Morreriam no deserto durante 40 anos", "Seriam escravizados", "Seriam perdoados sem consequências"], answer: "Morreriam no deserto durante 40 anos", reference: "Números 14:33-34" },
+            { question: "Quem foi o líder da rebelião contra Moisés e Arão em Números 16?", options: ["Nadabe", "Abiú", "Coré", "Balaão"], answer: "Coré", reference: "Números 16:1" },
+            { question: "O que aconteceu com Coré, Datã e Abirão e suas famílias?", options: ["Foram exilados", "Foram apedrejados", "A terra se abriu e os engoliu", "Foram perdoados"], answer: "A terra se abriu e os engoliu", reference: "Números 16:31-33" },
+            { question: "O que Deus fez para confirmar a autoridade de Arão como Sumo Sacerdote?", options: ["Fez sua vara florescer e produzir amêndoas", "Fez chover maná", "Fez o sol parar", "Fez o rio se abrir"], answer: "Fez sua vara florescer e produzir amêndoas", reference: "Números 17:8" },
+            { question: "Qual o pecado de Moisés e Arão em Meribá?", options: ["Murmuraram contra Deus", "Não creram em Deus e bateram na rocha em vez de falar a ela", "Ofereceram sacrifícios estranhos", "Consultaram feiticeiros"], answer: "Não creram em Deus e bateram na rocha em vez de falar a ela", reference: "Números 20:11-12" },
+            { question: "Qual a consequência do pecado de Moisés e Arão em Meribá?", options: ["Foram mortos imediatamente", "Não entrariam na Terra Prometida", "Ficaram doentes", "Foram exilados"], answer: "Não entrariam na Terra Prometida", reference: "Números 20:12" },
+            { question: "O que Deus enviou quando o povo murmurou sobre a falta de pão e água e desprezou o maná?", options: ["Fome", "Serpentes ardentes", "Pragas", "Inimigos"], answer: "Serpentes ardentes", reference: "Números 21:5-6" },
+            { question: "Como o povo foi curado das picadas das serpentes ardentes?", options: ["Comendo maná", "Bebendo água", "Olhando para a serpente de bronze levantada por Moisés", "Oferecendo sacrifícios"], answer: "Olhando para a serpente de bronze levantada por Moisés", reference: "Números 21:8-9" },
+            { question: "Quem era Balaão?", options: ["Um rei de Moabe", "Um profeta de Israel", "Um profeta pagão contratado para amaldiçoar Israel", "Um sacerdote"], answer: "Um profeta pagão contratado para amaldiçoar Israel", reference: "Números 22:5-6" },
+            { question: "Quem contratou Balaão para amaldiçoar Israel?", options: ["Faraó", "Rei Siom", "Rei Balaque", "Rei Ogue"], answer: "Rei Balaque", reference: "Números 22:4" },
+            { question: "O que a jumenta de Balaão fez no caminho?", options: ["Correu descontroladamente", "Caiu morta", "Falou com Balaão", "Se recusou a andar"], answer: "Falou com Balaão", reference: "Números 22:28" },
+            { question: "O que Balaão foi forçado a fazer por Deus em vez de amaldiçoar Israel?", options: ["Profetizar sua destruição", "Proferir bênçãos sobre Israel", "Permanecer em silêncio", "Lutar contra Israel"], answer: "Proferir bênçãos sobre Israel", reference: "Números 23:11-12, 24:9-10" },
+            { question: "O que aconteceu com Israel em Baal-Peor?", options: ["Celebraram uma festa", "Cometeram idolatria e imoralidade com as mulheres moabitas", "Lutaram uma batalha", "Fizeram um censo"], answer: "Cometeram idolatria e imoralidade com as mulheres moabitas", reference: "Números 25:1-3" },
+            { question: "Quem deteve a praga que se espalhou por Israel em Baal-Peor?", options: ["Moisés", "Arão", "Finéias", "Josué"], answer: "Finéias", reference: "Números 25:7-8" },
+            { question: "Qual o propósito do segundo censo em Números 26?", options: ["Contar a geração que morreu no deserto", "Contar a nova geração pronta para entrar em Canaã", "Saber o número de mulheres", "Organizar os levitas"], answer: "Contar a nova geração pronta para entrar em Canaã", reference: "Números 26:2-4" },
+            { question: "Qual a principal diferença entre o primeiro e o segundo censo?", options: ["O primeiro contava os homens de guerra, o segundo a nova geração", "Não há diferença", "O primeiro contava todas as pessoas, o segundo apenas os homens", "O primeiro contava os levitas, o segundo as outras tribos"], answer: "O primeiro contava os homens de guerra, o segundo a nova geração", reference: "Números 1 e 26" },
+            { question: "Quem foi o único homem, além de Josué e Calebe, do primeiro censo que entrou na Terra Prometida?", options: ["Moisés", "Arão", "Ninguém", "Eleazar"], answer: "Ninguém", reference: "Números 26:65" },
+            { question: "O que as filhas de Zelofeade pediram a Moisés?", options: ["Casar com quem quisessem", "Ter uma porção de terra como herança de seu pai", "Serem sacerdotisas", "Serem líderes de tribo"], answer: "Ter uma porção de terra como herança de seu pai", reference: "Números 27:1-4" },
+            { question: "Quem Deus escolheu para suceder Moisés como líder de Israel?", options: ["Arão", "Eleazar", "Josué", "Calebe"], answer: "Josué", reference: "Números 27:18-23" },
+            { question: "O que Josué deveria fazer para liderar o povo?", options: ["Consultar a Arca da Aliança", "Consultar a Deus por meio de Eleazar, o sacerdote", "Consultar os anciãos", "Consultar os espias"], answer: "Consultar a Deus por meio de Eleazar, o sacerdote", reference: "Números 27:21" },
+            { question: "Qual a lei sobre os votos de uma mulher casada?", options: ["Eram sempre válidos", "Podiam ser anulados pelo marido no dia em que soubesse", "Eram sempre inválidos", "Dependiam da aprovação dos anciãos"], answer: "Podiam ser anulados pelo marido no dia em que soubesse", reference: "Números 30:6-8" },
+            { question: "Contra qual povo Israel lutou uma guerra em Números 31, por causa da idolatria em Baal-Peor?", options: ["Amalequitas", "Moabitas", "Midianitas", "Amoritas"], answer: "Midianitas", reference: "Números 31:1-3" },
+            { question: "O que Israel deveria fazer com as mulheres midianitas que induziram o povo à idolatria?", options: ["Casar com elas", "Matá-las, exceto as virgens", "Exilá-las", "Perdoá-las"], answer: "Matá-las, exceto as virgens", reference: "Números 31:15-18" },
+            { question: "Quais tribos pediram para se estabelecer a leste do rio Jordão?", options: ["Judá e Benjamim", "Rúben e Gade (e meia tribo de Manassés)", "Levi e Simeão", "Dã e Naftali"], answer: "Rúben e Gade (e meia tribo de Manassés)", reference: "Números 32:1-5" },
+            { question: "Qual a condição para que as tribos de Rúben e Gade se estabelecessem a leste do Jordão?", options: ["Que construíssem cidades", "Que lutassem na frente de batalha para conquistar Canaã", "Que pagassem um imposto", "Que servissem aos levitas"], answer: "Que lutassem na frente de batalha para conquistar Canaã", reference: "Números 32:20-22" },
+            { question: "Quantas cidades de refúgio foram estabelecidas em Israel?", options: ["3", "6", "9", "12"], answer: "6", reference: "Números 35:6" },
+            { question: "Qual o propósito das cidades de refúgio?", options: ["Para os levitas morarem", "Para abrigar aqueles que matassem alguém acidentalmente", "Para os criminosos se esconderem", "Para os pobres morarem"], answer: "Para abrigar aqueles que matassem alguém acidentalmente", reference: "Números 35:11-12" },
+            { question: "O que acontecia com o homicida que fugia para uma cidade de refúgio?", options: ["Era julgado imediatamente", "Devia permanecer lá até a morte do sumo sacerdote", "Era perdoado e podia voltar para casa", "Era entregue à família da vítima"], answer: "Devia permanecer lá até a morte do sumo sacerdote", reference: "Números 35:25" },
+            { question: "Qual a lei final sobre as filhas de Zelofeade e a herança de terras?", options: ["Podiam casar com quem quisessem", "Deviam casar dentro da tribo de seu pai para que a herança não saísse da tribo", "Não podiam herdar terras", "Deviam se tornar nazireias"], answer: "Deviam casar dentro da tribo de seu pai para que a herança não saísse da tribo", reference: "Números 36:6-9" },
+            { question: "Qual o nome do pai de Josué?", options: ["Arão", "Calebe", "Num", "Finéias"], answer: "Num", reference: "Números 13:16" },
+            { question: "Qual o nome do pai de Calebe?", options: ["Num", "Jefoné", "Coré", "Zelofeade"], answer: "Jefoné", reference: "Números 13:6" },
+            { question: "Qual o nome do irmão de Moisés que morreu no Monte Hor?", options: ["Nadabe", "Abiú", "Arão", "Eleazar"], answer: "Arão", reference: "Números 20:28" },
+            { question: "Qual o nome da irmã de Moisés que morreu em Cades?", options: ["Zípora", "Miriam", "Joquebede", "Séfora"], answer: "Miriam", reference: "Números 20:1" },
+            { question: "Qual o nome do filho de Arão que se tornou Sumo Sacerdote após a morte de Arão?", options: ["Nadabe", "Abiú", "Eleazar", "Itamar"], answer: "Eleazar", reference: "Números 20:28" },
+            { question: "Qual a tribo que era responsável pelo serviço do Tabernáculo?", options: ["Judá", "Levi", "Benjamim", "Dã"], answer: "Levi", reference: "Números 1:49-50" },
+            { question: "O que os israelitas deveriam fazer com os leprosos e os que tinham fluxo?", options: ["Curá-los", "Excluí-los do arraial", "Oferecer sacrifícios por eles", "Isolá-los em casa"], answer: "Excluí-los do arraial", reference: "Números 5:2-3" },
+            { question: "Qual a lei sobre a restituição para quem pecasse contra o próximo e confessasse?", options: ["Apenas confessar", "Restituir o principal e acrescentar a quinta parte", "Oferecer um sacrifício", "Ser exilado"], answer: "Restituir o principal e acrescentar a quinta parte", reference: "Números 5:7" },
+            { question: "Qual a lei sobre a mulher suspeita de adultério?", options: ["Era apedrejada imediatamente", "Era submetida ao 'teste da água amarga'", "Era perdoada", "Era exilada"], answer: "Era submetida ao 'teste da água amarga'", reference: "Números 5:11-31" },
+            { question: "O que as trombetas de prata eram usadas para?", options: ["Tocar música", "Convocar a congregação e mover o arraial", "Celebrar vitórias", "Anunciar a chegada de Moisés"], answer: "Convocar a congregação e mover o arraial", reference: "Números 10:2-6" },
+            { question: "O que aconteceu quando o povo murmurou sobre o maná?", options: ["Deus enviou mais maná", "Deus enviou codornizes e uma praga", "Deus os deixou com fome", "Deus os abençoou"], answer: "Deus enviou codornizes e uma praga", reference: "Números 11:4-6, 31-33" },
+            { question: "Qual a razão da murmuração de Miriam e Arão contra Moisés?", options: ["Por causa de sua mulher etíope e por sua autoridade", "Por causa da comida", "Por causa da água", "Por causa da liderança"], answer: "Por causa de sua mulher etíope e por sua autoridade", reference: "Números 12:1-2" },
+            { question: "O que os espias disseram sobre os habitantes de Canaã?", options: ["Eram fracos e poucos", "Eram gigantes e as cidades fortificadas", "Eram amigáveis", "Eram poucos e fáceis de derrotar"], answer: "Eram gigantes e as cidades fortificadas", reference: "Números 13:28-33" },
+            { question: "O que o povo quis fazer com Josué e Calebe após o relatório dos espias?", options: ["Abençoá-los", "Apedrejá-los", "Nomeá-los líderes", "Segui-los"], answer: "Apedrejá-los", reference: "Números 14:10" },
+            { question: "Qual a punição para quem profanasse o sábado?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Números 15:32-36" },
+            { question: "O que os israelitas deveriam usar nas bordas de suas vestes para se lembrarem dos mandamentos do Senhor?", options: ["Ouro", "Franjas com um cordão azul", "Pedras preciosas", "Sinos"], answer: "Franjas com um cordão azul", reference: "Números 15:38-40" },
+            { question: "Quem se juntou a Coré na rebelião contra Moisés e Arão?", options: ["Nadabe e Abiú", "Datã e Abirão", "Josué e Calebe", "Miriam e Finéias"], answer: "Datã e Abirão", reference: "Números 16:1" },
+            { question: "O que aconteceu com os 250 homens que ofereceram incenso com Coré?", options: ["Foram perdoados", "Foram consumidos pelo fogo do Senhor", "Foram exilados", "Foram presos"], answer: "Foram consumidos pelo fogo do Senhor", reference: "Números 16:35" },
+            { question: "O que foi feito com os incensários dos homens que foram consumidos pelo fogo?", options: ["Foram jogados fora", "Foram batidos em lâminas para cobrir o altar", "Foram guardados como memorial", "Foram derretidos"], answer: "Foram batidos em lâminas para cobrir o altar", reference: "Números 16:38-39" },
+            { question: "Qual a responsabilidade dos sacerdotes e levitas em relação ao santuário?", options: ["Apenas adorar", "Guardar o santuário e o altar para que não houvesse ira sobre a congregação", "Cuidar dos animais", "Construir novas tendas"], answer: "Guardar o santuário e o altar para que não houvesse ira sobre a congregação", reference: "Números 18:5" },
+            { question: "Qual a porção dos sacerdotes e levitas das ofertas e dízimos?", options: ["Nada", "Uma pequena parte", "Todas as ofertas e dízimos", "Uma porção específica das ofertas e todos os dízimos de Israel"], answer: "Uma porção específica das ofertas e todos os dízimos de Israel", reference: "Números 18:8-24" },
+            { question: "O que era a 'água da purificação' (água da separação)?", options: ["Água para beber", "Água misturada com cinzas de novilha vermelha para purificação de impurezas de mortos", "Água para lavar as mãos", "Água para sacrifícios"], answer: "Água misturada com cinzas de novilha vermelha para purificação de impurezas de mortos", reference: "Números 19:9" },
+            { question: "Quem morreu em Cades, no deserto de Zim?", options: ["Moisés", "Arão", "Miriam", "Josué"], answer: "Miriam", reference: "Números 20:1" },
+            { question: "Onde Arão morreu?", options: ["Em Cades", "No Monte Sinai", "No Monte Hor", "Nas planícies de Moabe"], answer: "No Monte Hor", reference: "Números 20:28" },
+            { question: "Qual o nome do rei amorreu que Israel derrotou antes de entrar em Canaã?", options: ["Ogue", "Balaque", "Siom", "Zin"], answer: "Siom", reference: "Números 21:21-26" },
+            { question: "Qual o nome do rei de Basã que Israel derrotou?", options: ["Siom", "Ogue", "Balaque", "Zin"], answer: "Ogue", reference: "Números 21:33-35" },
+            { question: "O que Balaque ofereceu a Balaão para amaldiçoar Israel?", options: ["Ouro e prata", "Honras e riquezas", "Terra", "Mulheres"], answer: "Honras e riquezas", reference: "Números 22:17" },
+            { question: "Quantas vezes Balaão tentou amaldiçoar Israel?", options: ["Uma", "Duas", "Três", "Quatro"], answer: "Três", reference: "Números 23:1, 13, 27" },
+            { question: "Qual a profecia de Balaão sobre uma 'estrela' que viria de Jacó?", options: ["Um rei poderoso", "Um novo líder", "Um Messias", "Um profeta"], answer: "Um Messias", reference: "Números 24:17" },
+            { question: "Qual o nome do midianita que Finéias matou com uma lança?", options: ["Zimri", "Cozbi", "Balaão", "Siom"], answer: "Zimri", reference: "Números 25:14" },
+            { question: "Qual o nome da mulher midianita que Finéias matou?", options: ["Zípora", "Cozbi", "Miriam", "Raabe"], answer: "Cozbi", reference: "Números 25:15" },
+            { question: "Qual a recompensa de Finéias por seu zelo?", options: ["Riquezas", "O sacerdócio perpétuo para sua descendência", "Liderança sobre Israel", "Longa vida"], answer: "O sacerdócio perpétuo para sua descendência", reference: "Números 25:12-13" },
+            { question: "Qual a idade mínima para ser contado no segundo censo?", options: ["15 anos", "20 anos", "25 anos", "30 anos"], answer: "20 anos", reference: "Números 26:2" },
+            { question: "Quantos homens de guerra foram contados no segundo censo?", options: ["603.550", "601.730", "600.000", "605.000"], answer: "601.730", reference: "Números 26:51" },
+            { question: "Qual a lei sobre a herança de terras quando não havia filhos homens?", options: ["A terra voltava para a tribo", "As filhas podiam herdar", "A terra era vendida", "A terra era dada aos sacerdotes"], answer: "As filhas podiam herdar", reference: "Números 27:7-8" },
+            { question: "O que Moisés deveria fazer para Josué antes de sua morte?", options: ["Ungi-lo com óleo", "Impor as mãos sobre ele e dar-lhe autoridade", "Dar-lhe ouro", "Construir um altar"], answer: "Impor as mãos sobre ele e dar-lhe autoridade", reference: "Números 27:23" },
+            { question: "Qual a oferta diária que deveria ser feita ao Senhor?", options: ["Um cordeiro", "Dois cordeiros de um ano", "Um novilho", "Uma cabra"], answer: "Dois cordeiros de um ano", reference: "Números 28:3" },
+            { question: "Quantos bodes eram oferecidos como oferta pelo pecado no Dia da Expiação?", options: ["Um", "Dois", "Três", "Quatro"], answer: "Um", reference: "Números 29:11" },
+            { question: "Qual a lei sobre o voto de uma mulher solteira?", options: ["Era sempre válido", "Podia ser anulado por seu pai", "Era sempre inválido", "Dependia da aprovação dos anciãos"], answer: "Podia ser anulado por seu pai", reference: "Números 30:3-5" },
+            { question: "O que aconteceu com Balaão no final da guerra contra Midiã?", options: ["Fugiu", "Foi morto à espada", "Foi preso", "Foi perdoado"], answer: "Foi morto à espada", reference: "Números 31:8" },
+            { question: "Qual a porção do despojo de guerra que deveria ser dada ao Senhor?", options: ["Tudo", "Metade", "Um quinto", "Uma porção específica para sacerdotes e levitas"], answer: "Uma porção específica para sacerdotes e levitas", reference: "Números 31:28-47" },
+            { question: "Quais cidades foram reconstruídas pelas tribos de Rúben e Gade a leste do Jordão?", options: ["Jerusalém e Jericó", "Hesbom e Jaazer", "Siquém e Betel", "Dã e Berseba"], answer: "Hesbom e Jaazer", reference: "Números 32:34-35" },
+            { question: "Quantas estações a jornada de Israel teve do Egito às planícies de Moabe?", options: ["30", "40", "42", "50"], answer: "42", reference: "Números 33:1-49" },
+            { question: "Qual o limite norte da Terra Prometida?", options: ["O rio Nilo", "O Grande Mar (Mediterrâneo)", "O Monte Hor", "A entrada de Hamate"], answer: "A entrada de Hamate", reference: "Números 34:7-9" },
+            { question: "Qual o limite sul da Terra Prometida?", options: ["O rio do Egito", "O Grande Mar", "O Mar Salgado", "O deserto de Zim"], answer: "O rio do Egito", reference: "Números 34:5" },
+            { question: "Qual a tribo que não tinha herança de terra, mas cidades para morar?", options: ["Judá", "Levi", "Benjamim", "Dã"], answer: "Levi", reference: "Números 35:2" },
+            { question: "Quantas cidades os levitas receberam?", options: ["24", "36", "48", "60"], answer: "48", reference: "Números 35:7" },
+            { question: "Qual a lei sobre a herança de filhas que casassem fora de sua tribo?", options: ["Perderiam a herança", "Sua herança passaria para a tribo do marido", "Sua herança permaneceria na tribo de seu pai", "Sua herança seria vendida"], answer: "Sua herança permaneceria na tribo de seu pai", reference: "Números 36:7-9" },
+            { question: "Qual o nome do pai das filhas de Zelofeade?", options: ["Moisés", "Arão", "Zelofeade", "Josué"], answer: "Zelofeade", reference: "Números 27:1" },
+            { question: "Qual o nome da mãe das filhas de Zelofeade?", options: ["Não mencionado", "Zípora", "Joquebede", "Miriam"], answer: "Não mencionado", reference: "Números 27:1" },
+            { question: "Qual o nome do deserto onde Israel peregrinou por 40 anos?", options: ["Deserto do Sinai", "Deserto de Zim", "Deserto de Parã", "Deserto de Cades"], answer: "Deserto de Parã", reference: "Números 10:12" },
+            { question: "Qual a primeira estação após a saída do Sinai?", options: ["Taberá", "Quibrote-Hataavá", "Hazerote", "Cades-Barneia"], answer: "Quibrote-Hataavá", reference: "Números 11:34" },
+            { question: "Qual a punição para quem não se purificasse de tocar em um morto?", options: ["Seria impuro até a tarde", "Seria expulso do arraial", "Seria multado", "Seria preso"], answer: "Seria expulso do arraial", reference: "Números 19:13" },
+            { question: "O que os sacerdotes deveriam fazer com a cinza da novilha vermelha?", options: ["Jogar fora", "Guardar para a água da purificação", "Espalhar no altar", "Comer"], answer: "Guardar para a água da purificação", reference: "Números 19:9" },
+            { question: "Qual a idade em que os levitas se aposentavam do serviço?", options: ["50 anos", "60 anos", "70 anos", "Não se aposentavam"], answer: "50 anos", reference: "Números 8:25" },
+            { question: "Qual a punição para quem violasse o voto de nazireu?", options: ["Multa", "Oferecer sacrifícios e recomeçar o voto", "Exílio", "Prisão"], answer: "Oferecer sacrifícios e recomeçar o voto", reference: "Números 6:9-12" },
+            { question: "Qual a oferta que era feita com azeite e farinha de flor de farinha?", options: ["Holocausto", "Oferta de Manjares", "Oferta Pacífica", "Oferta pelo Pecado"], answer: "Oferta de Manjares", reference: "Números 15:4" },
+            { question: "O que os israelitas deveriam fazer com os seus primeiros frutos?", options: ["Vender", "Trazer como oferta ao Senhor", "Comer", "Dar aos pobres"], answer: "Trazer como oferta ao Senhor", reference: "Números 18:12-13" },
+            { question: "Qual a punição para quem oferecesse sacrifício a Moloque?", options: ["Exílio", "Morte por apedrejamento", "Multa", "Prisão"], answer: "Morte por apedrejamento", reference: "Levítico 20:2 (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer animais que rastejam sobre a terra?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 11:41-42 (contexto de Números)" },
+            { question: "Qual a punição para quem amaldiçoasse pai ou mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:9 (contexto de Números)" },
+            { question: "O que aconteceu com os filhos de Coré que não se juntaram à rebelião?", options: ["Foram mortos", "Foram poupados", "Foram exilados", "Foram presos"], answer: "Foram poupados", reference: "Números 26:11" },
+            { question: "Qual a lei sobre a herança de terras em caso de morte sem filhos?", options: ["Passava para o irmão", "Passava para a filha", "Passava para o parente mais próximo", "Voltava para a tribo"], answer: "Passava para a filha", reference: "Números 27:8" },
+            { question: "O que Moisés fez com a vara de Arão que floresceu?", options: ["Queimou-a", "Guardou-a diante do Testemunho", "Enterrou-a", "Deu-a a Josué"], answer: "Guardou-a diante do Testemunho", reference: "Números 17:10" },
+            { question: "Qual a idade de Arão quando morreu?", options: ["100 anos", "110 anos", "123 anos", "130 anos"], answer: "123 anos", reference: "Números 33:39" },
+            { question: "Qual a montanha onde Arão morreu?", options: ["Monte Sinai", "Monte Nebo", "Monte Hor", "Monte Carmelo"], answer: "Monte Hor", reference: "Números 33:38" },
+            { question: "Qual o nome do sucessor de Arão como Sumo Sacerdote?", options: ["Nadabe", "Abiú", "Eleazar", "Itamar"], answer: "Eleazar", reference: "Números 20:28" },
+            { question: "O que os israelitas deveriam fazer com os cananeus ao entrar na terra?", options: ["Fazer aliança com eles", "Expulsá-los e destruir seus ídolos", "Torná-los escravos", "Ignorá-los"], answer: "Expulsá-los e destruir seus ídolos", reference: "Números 33:52" },
+            { question: "Qual a punição para quem não expulsasse os cananeus da terra?", options: ["Seriam abençoados", "Seriam espinhos nos olhos e aguilhões nos lados", "Seriam exilados", "Seriam presos"], answer: "Seriam espinhos nos olhos e aguilhões nos lados", reference: "Números 33:55" },
+            { question: "Quantas cidades de refúgio estavam a leste do Jordão?", options: ["Uma", "Duas", "Três", "Quatro"], answer: "Três", reference: "Números 35:14" },
+            { question: "Quantas cidades de refúgio estavam na terra de Canaã?", options: ["Uma", "Duas", "Três", "Quatro"], answer: "Três", reference: "Números 35:14" },
+            { question: "Quem era o 'vingador do sangue'?", options: ["O sacerdote", "O parente mais próximo da vítima de homicídio", "O líder da tribo", "O juiz"], answer: "O parente mais próximo da vítima de homicídio", reference: "Números 35:19" },
+            { question: "Qual a diferença entre homicídio doloso e culposo (acidental)?", options: ["Não há diferença", "Homicídio doloso é intencional, culposo é acidental", "Homicídio doloso é acidental, culposo é intencional", "Ambos são intencionais"], answer: "Homicídio doloso é intencional, culposo é acidental", reference: "Números 35:22-24" },
+            { question: "Qual a lei sobre as filhas de Zelofeade que casaram com homens de outras tribos?", options: ["Sua herança permaneceria na tribo de seu pai", "Sua herança passaria para a tribo do marido", "Não podiam herdar", "Perderiam a herança"], answer: "Sua herança passaria para a tribo do marido", reference: "Números 36:7-9 (a lei foi alterada para que casassem dentro da tribo)" },
+            { question: "Qual o objetivo da lei sobre a herança das filhas de Zelofeade?", options: ["Aumentar a riqueza das tribos", "Manter a herança dentro da tribo e evitar a confusão de terras", "Diminuir o número de herdeiros", "Facilitar a venda de terras"], answer: "Manter a herança dentro da tribo e evitar a confusão de terras", reference: "Números 36:7" },
+            { question: "Qual a idade de Moisés quando morreu?", options: ["100 anos", "110 anos", "120 anos", "130 anos"], answer: "120 anos", reference: "Deuteronômio 34:7 (contexto de Números)" },
+            { question: "Qual o último lugar onde Israel acampou antes das planícies de Moabe?", options: ["Cades", "Monte Hor", "Abel-Sitim", "Jerico"], answer: "Abel-Sitim", reference: "Números 33:49" },
+            { question: "Qual o nome do rio que Israel atravessaria para entrar em Canaã?", options: ["Rio Nilo", "Rio Eufrates", "Rio Jordão", "Rio Quebar"], answer: "Rio Jordão", reference: "Números 34:12" },
+            { question: "O que Deus prometeu fazer com os habitantes da terra de Canaã?", options: ["Fazer aliança com eles", "Expulsá-los diante de Israel", "Torná-los escravos", "Ignorá-los"], answer: "Expulsá-los diante de Israel", reference: "Números 33:53" },
+            { question: "Qual o nome do monte onde Moisés veria a Terra Prometida antes de morrer?", options: ["Monte Sinai", "Monte Hor", "Monte Nebo", "Monte Carmelo"], answer: "Monte Nebo", reference: "Números 27:12 (e Deuteronômio 34:1)" },
+            { question: "Qual a punição para quem comesse a carne de uma oferta pelo pecado impuro?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria impuro até a tarde", reference: "Levítico 7:20 (contexto de Números)" },
+            { question: "O que os sacerdotes deveriam fazer com o que sobrasse da oferta de manjares?", options: ["Queimar", "Comer no Lugar Santo", "Vender", "Dar aos pobres"], answer: "Comer no Lugar Santo", reference: "Levítico 6:16 (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer animais que rastejam sobre a terra?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 11:41-42 (contexto de Números)" },
+            { question: "O que tornava uma casa impura por lepra?", options: ["Sujeira", "Mofo", "Manchas esverdeadas ou avermelhadas", "Umidade"], answer: "Manchas esverdeadas ou avermelhadas", reference: "Levítico 14:34-37 (contexto de Números)" },
+            { question: "O que deveria ser feito com uma casa impura por lepra que não pudesse ser purificada?", options: ["Reformada", "Queimada", "Demolida e seus materiais levados para fora da cidade", "Vendida"], answer: "Demolida e seus materiais levados para fora da cidade", reference: "Levítico 14:45 (contexto de Números)" },
+            { question: "Qual a proibição em relação a fazer incisões na carne por causa de um morto?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:28 (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer com o sangue?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:26 (contexto de Números)" },
+            { question: "Qual a proibição em relação a virar-se para os que têm espíritos familiares ou para os feiticeiros?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:31 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com o idoso?", options: ["Ignorá-lo", "Respeitá-lo e levantar-se diante dele", "Zombar dele", "Explorá-lo"], answer: "Respeitá-lo e levantar-se diante dele", reference: "Levítico 19:32 (contexto de Números)" },
+            { question: "Qual a punição para quem praticasse incesto?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:11-14 (contexto de Números)" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a tia?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:19 (contexto de Números)" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a sogra e a filha dela?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:14 (contexto de Números)" },
+            { question: "O que os sacerdotes não podiam beber antes de entrar na Tenda da Congregação?", options: ["Água", "Vinho ou bebida forte", "Leite", "Suco de fruta"], answer: "Vinho ou bebida forte", reference: "Levítico 10:9 (contexto de Números)" },
+            { question: "Qual a punição para o sacerdote que oferecesse pão de Deus com defeito físico?", options: ["Seria expulso", "Seria morto", "Não seria aceito, mas não haveria punição de morte", "Seria multado"], answer: "Não seria aceito, mas não haveria punição de morte", reference: "Levítico 21:23 (contexto de Números)" },
+            { question: "O que os sacerdotes deveriam fazer com a carne dos sacrifícios que tocasse em algo imundo?", options: ["Comer", "Queimar", "Lavar", "Enterrar"], answer: "Queimar", reference: "Levítico 7:19 (contexto de Números)" },
+            { question: "Qual a festa que era um dia de descanso solene, santa convocação, onde não se fazia nenhum trabalho servil?", options: ["Páscoa", "Pentecostes", "Qualquer festa de Jeová", "Dia da Expiação"], answer: "Qualquer festa de Jeová", reference: "Levítico 23:7, 8, 21, 25, 30, 36 (contexto de Números)" },
+            { question: "Qual a oferta que era feita com dois pães levedados, como oferta movida?", options: ["Oferta de Manjares", "Oferta Pacífica", "Oferta das Primícias", "Oferta de Semanas (Pentecostes)"], answer: "Oferta de Semanas (Pentecostes)", reference: "Levítico 23:17 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com o que sobrassem da colheita no Ano Sabático?", options: ["Vender", "Deixar para o pobre e para o animal do campo", "Queimar", "Guardar"], answer: "Deixar para o pobre e para o animal do campo", reference: "Levítico 25:6-7 (contexto de Números)" },
+            { question: "Qual a proibição em relação a semear o campo ou podar a vinha no Ano do Jubileu?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 25:11 (contexto de Números)" },
+            { question: "O que Deus prometeu enviar se o povo andasse nos Seus estatutos?", options: ["Fome", "Paz na terra", "Guerra", "Doenças"], answer: "Paz na terra", reference: "Levítico 26:6 (contexto de Números)" },
+            { question: "O que Deus prometeu fazer com os inimigos de Israel se o povo obedecesse?", options: ["Fortalecê-los", "Persegui-los e fazê-los cair à espada", "Fazer aliança com eles", "Ignorá-los"], answer: "Persegui-los e fazê-los cair à espada", reference: "Levítico 26:7-8 (contexto de Números)" },
+            { question: "O que Deus prometeu fazer com Sua habitação se o povo obedecesse?", options: ["Afastá-la", "Estabelecê-la no meio deles", "Destruí-la", "Escondê-la"], answer: "Estabelecê-la no meio deles", reference: "Levítico 26:11 (contexto de Números)" },
+            { question: "Qual a punição para quem não obedecesse aos mandamentos de Deus e desprezasse Seus estatutos?", options: ["Bênçãos", "Terror, doença e fome", "Paz", "Prosperidade"], answer: "Terror, doença e fome", reference: "Levítico 26:16 (contexto de Números)" },
+            { question: "O que Deus prometeu fazer com a força do poder do povo se desobedecessem?", options: ["Aumentá-la", "Quebrá-la", "Ignorá-la", "Fortalecê-la"], answer: "Quebrá-la", reference: "Levítico 26:19 (contexto de Números)" },
+            { question: "O que Deus prometeu fazer com as chuvas e a terra se o povo desobedecesse?", options: ["Daria chuva a seu tempo e a terra daria sua produção", "Faria o céu como ferro e a terra como bronze", "Aumentaria a produção", "Faria a terra fértil"], answer: "Faria o céu como ferro e a terra como bronze", reference: "Levítico 26:19 (contexto de Números)" },
+            { question: "O que Deus prometeu enviar se o povo continuasse a andar em contrariedade a Ele?", options: ["Paz", "Sete vezes mais pragas", "Bênçãos", "Prosperidade"], answer: "Sete vezes mais pragas", reference: "Levítico 26:21, 24, 28 (contexto de Números)" },
+            { question: "O que aconteceria com as cidades fortificadas de Israel se o povo desobedecesse?", options: ["Seriam fortalecidas", "Seriam destruídas", "Seriam habitadas por estrangeiros", "Seriam abandonadas"], answer: "Seriam destruídas", reference: "Levítico 26:31 (contexto de Números)" },
+            { question: "O que Deus prometeu fazer com os santuários de Israel se o povo desobedecesse?", options: ["Abençoá-los", "Profaná-los", "Protegê-los", "Aumentá-los"], answer: "Profaná-los", reference: "Levítico 26:31 (contexto de Números)" },
+            { question: "O que aconteceria com a terra de Israel se o povo fosse exilado?", options: ["Ficaria deserta e desfrutaria de seus sábados", "Seria cultivada por estrangeiros", "Seria destruída", "Seria vendida"], answer: "Ficaria deserta e desfrutaria de seus sábados", reference: "Levítico 26:34-35 (contexto de Números)" },
+            { question: "Qual a condição para que Deus se lembrasse de Sua aliança com Israel no exílio?", options: ["Que eles construíssem um templo", "Que se humilhassem e confessassem seus pecados", "Que oferecessem sacrifícios", "Que voltassem ao Egito"], answer: "Que se humilhassem e confessassem seus pecados", reference: "Levítico 26:40-42 (contexto de Números)" },
+            { question: "Qual a lei sobre os votos de pessoas que não eram aptas para o serviço do Tabernáculo?", options: ["Eram aceitos", "Não eram aceitos", "Podiam ser resgatados por um valor menor", "Eram ignorados"], answer: "Não eram aceitos", reference: "Levítico 27:9-10 (contexto de Números)" },
+            { question: "Qual a lei sobre a dedicação de campos ao Senhor?", options: ["Eram vendidos", "Eram considerados santos e podiam ser resgatados", "Eram queimados", "Eram dados aos sacerdotes"], answer: "Eram considerados santos e podiam ser resgatados", reference: "Levítico 27:16-19 (contexto de Números)" },
+            { question: "O que acontecia com um campo dedicado ao Senhor que não fosse resgatado antes do Jubileu?", options: ["Voltava ao seu dono", "Tornava-se propriedade do sacerdote para sempre", "Era vendido a outro", "Era destruído"], answer: "Tornava-se propriedade do sacerdote para sempre", reference: "Levítico 27:21 (contexto de Números)" },
+            { question: "Qual a lei sobre o primogênito de animais puros?", options: ["Podia ser vendido", "Era do Senhor e não podia ser resgatado", "Era sacrificado", "Era dado aos levitas"], answer: "Era do Senhor e não podia ser resgatado", reference: "Levítico 27:26 (contexto de Números)" },
+            { question: "Qual a lei sobre o primogênito de animais impuros?", options: ["Era do Senhor e não podia ser resgatado", "Podia ser resgatado ou vendido", "Era sacrificado", "Era dado aos levitas"], answer: "Podia ser resgatado ou vendido", reference: "Levítico 27:27 (contexto de Números)" },
+            { question: "O que era o 'anatema' (coisa dedicada ao Senhor para destruição)?", options: ["Algo que podia ser resgatado", "Algo que não podia ser vendido nem resgatado, e deveria ser morto", "Uma oferta voluntária", "Um dízimo"], answer: "Algo que não podia ser vendido nem resgatado, e deveria ser morto", reference: "Levítico 27:28-29 (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer a gordura de um animal sacrificado?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 7:23-25 (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer o sangue de qualquer animal?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 7:26-27 (contexto de Números)" },
+            { question: "O que os sacerdotes deveriam fazer com a porção da oferta pacífica que lhes pertencia?", options: ["Queimar", "Comer no Lugar Santo", "Vender", "Dar aos pobres"], answer: "Comer no Lugar Santo", reference: "Levítico 7:31-34 (contexto de Números)" },
+            { question: "Qual o propósito da oferta pela culpa?", options: ["Expiação por pecados de ignorância", "Expiação por transgressões que exigiam restituição e reparação", "Agradecimento", "Dedicação total"], answer: "Expiação por transgressões que exigiam restituição e reparação", reference: "Levítico 5:15-16 (contexto de Números)" },
+            { question: "Que animal era usado para a oferta pelo pecado de toda a congregação de Israel?", options: ["Um cordeiro", "Um bode", "Um novilho", "Uma cabra"], answer: "Um novilho", reference: "Levítico 4:13-14 (contexto de Números)" },
+            { question: "O que o sumo sacerdote deveria fazer com o sangue do novilho da oferta pelo pecado de toda a congregação?", options: ["Derramar no altar", "Aspergir sete vezes diante do véu do santuário", "Comer", "Queimar"], answer: "Aspergir sete vezes diante do véu do santuário", reference: "Levítico 4:17 (contexto de Números)" },
+            { question: "Qual a punição para quem comesse a carne da oferta pelo pecado que não fosse queimada no altar?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria impuro até a tarde", reference: "Levítico 6:30 (contexto de Números)" },
+            { question: "O que os sacerdotes deveriam fazer com as vestes que tocassem na carne da oferta pelo pecado?", options: ["Queimar", "Lavar em lugar santo", "Vender", "Guardar"], answer: "Lavar em lugar santo", reference: "Levítico 6:27 (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer o que morria por si ou era despedaçado por feras?", options: ["É permitido", "É proibido, sob pena de impureza", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de impureza", reference: "Levítico 17:15-16 (contexto de Números)" },
+            { question: "O que Deus disse que faria com a terra se o povo desobedecesse e não a cultivasse no Ano Sabático?", options: ["A abençoaria", "A faria deserta e desfrutaria de seus sábados", "A faria fértil", "A daria a outro povo"], answer: "A faria deserta e desfrutaria de seus sábados", reference: "Levítico 26:34-35 (contexto de Números)" },
+            { question: "Qual o propósito do Ano do Jubileu?", options: ["Para que os ricos ficassem mais ricos", "Para restaurar a igualdade e a justiça social, e a terra voltasse às famílias", "Para celebrar a colheita", "Para descansar da agricultura"], answer: "Para restaurar a igualdade e a justiça social, e a terra voltasse às famílias", reference: "Levítico 25:10 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com as bordas de seus campos na colheita?", options: ["Colher tudo", "Não colher completamente as bordas, deixando para o pobre e estrangeiro", "Vender as bordas", "Queimar as bordas"], answer: "Não colher completamente as bordas, deixando para o pobre e estrangeiro", reference: "Levítico 23:22 (contexto de Números)" },
+            { question: "Qual a proibição em relação a oferecer sacrifícios a demônios?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 17:7 (contexto de Números)" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a filha do pai ou da mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:17 (contexto de Números)" },
+            { question: "O que os sacerdotes deveriam fazer com o dinheiro do resgate de votos?", options: ["Guardar para si", "Usar para o serviço do Tabernáculo", "Dar aos pobres", "Vender"], answer: "Usar para o serviço do Tabernáculo", reference: "Levítico 27:2-8 (implícito, para o tesouro do santuário) (contexto de Números)" },
+            { question: "Qual a lei sobre a primícia da colheita?", options: ["Era para ser vendida", "Era para ser trazida ao sacerdote como oferta movida", "Era para ser comida imediatamente", "Era para ser guardada"], answer: "Era para ser trazida ao sacerdote como oferta movida", reference: "Levítico 23:10-11 (contexto de Números)" },
+            { question: "Qual a punição para quem não se purificasse de uma impureza?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria expulso do povo", reference: "Levítico 7:20-21 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com o incenso sagrado?", options: ["Queimar no altar de incenso", "Cheirar", "Vender", "Dar aos pobres"], answer: "Queimar no altar de incenso", reference: "Levítico 16:12 (contexto de Números)" },
+            { question: "Qual a proibição em relação a consultar os mortos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:31 (contexto de Números)" },
+            { question: "Qual a proibição em relação a semear dois tipos de sementes no mesmo campo?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:19 (contexto de Números)" },
+            { question: "Qual a lei sobre o tratamento do estrangeiro que morasse entre eles?", options: ["Oprimir", "Amar como a si mesmo", "Ignorar", "Expulsar"], answer: "Amar como a si mesmo", reference: "Levítico 19:34 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16 (contexto de Números)" },
+            { question: "Qual a punição para quem não se afligisse no Dia da Expiação?", options: ["Seria expulso do povo", "Seria multado", "Seria preso", "Seria doente"], answer: "Seria expulso do povo", reference: "Levítico 23:29 (contexto de Números)" },
+            { question: "Qual a lei sobre o ano de descanso da terra?", options: ["Deveria ser cultivada intensamente", "Deveria descansar, sem semeadura ou poda", "Deveria ser vendida", "Deveria ser irrigada"], answer: "Deveria descansar, sem semeadura ou poda", reference: "Levítico 25:4 (contexto de Números)" },
+            { question: "O que acontecia com as dívidas no Ano do Jubileu?", options: ["Eram perdoadas", "Eram dobradas", "Eram mantidas", "Eram vendidas"], answer: "Eram perdoadas", reference: "Levítico 25:35-38 (implícito na libertação e restituição) (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer sangue de aves ou animais?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 17:13-14 (contexto de Números)" },
+            { question: "O que os sacerdotes deveriam fazer com a oferta pelo pecado que não fosse comida no Lugar Santo?", options: ["Queimar", "Vender", "Dar aos pobres", "Guardar"], answer: "Queimar", reference: "Levítico 6:30 (contexto de Números)" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a filha do pai ou da mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:17 (contexto de Números)" },
+            { question: "Qual a proibição em relação a fazer votos de animais impuros?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 27:11-12 (contexto de Números)" },
+            { question: "Qual a lei sobre a dedicação de casas ao Senhor?", options: ["Eram vendidas", "Eram consideradas santas e podiam ser resgatadas", "Eram queimadas", "Eram dadas aos sacerdotes"], answer: "Eram consideradas santas e podiam ser resgatadas", reference: "Levítico 27:14-15 (contexto de Números)" },
+            { question: "O que aconteceria com uma casa dedicada ao Senhor que não fosse resgatada?", options: ["Voltava ao seu dono", "Tornava-se propriedade do sacerdote para sempre", "Era vendida a outro", "Era destruída"], answer: "Tornava-se propriedade do sacerdote para sempre", reference: "Levítico 27:15 (contexto de Números)" },
+            { question: "Qual a lei sobre a dedicação de um campo herdado ao Senhor?", options: ["Era vendido", "Voltava ao seu dono original no Jubileu", "Tornava-se propriedade do sacerdote para sempre", "Era queimado"], answer: "Voltava ao seu dono original no Jubileu", reference: "Levítico 27:24 (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer o que tem vida no sangue?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 17:14 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com o que sobrasse da oferta de manjares?", options: ["Queimar", "Comer no Lugar Santo", "Vender", "Dar aos pobres"], answer: "Comer no Lugar Santo", reference: "Levítico 6:16 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a esposa do pai?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:8 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a filha do filho ou da filha?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:10 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a irmã do pai ou da mãe?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:12-13 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a tia (irmã da mãe ou irmã do pai)?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:12-13 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a esposa do irmão?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:16 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a filha da esposa?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:17 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a nora?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:15 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a cunhada (esposa do irmão)?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:16 (contexto de Números)" },
+            { question: "Qual a proibição em relação a oferecer seus filhos a Moloque?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for por necessidade"], answer: "É uma abominação", reference: "Levítico 18:21 (contexto de Números)" },
+            { question: "Qual a punição para quem comesse carne de um animal que morreu naturalmente ou foi despedaçado?", options: ["Seria impuro até a tarde", "Seria morto", "Seria exilado", "Seria multado"], answer: "Seria impuro até a tarde", reference: "Levítico 17:15 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16 (contexto de Números)" },
+            { question: "Qual a punição para quem não se purificasse de uma impureza?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria expulso do povo", reference: "Levítico 7:20-21 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com o incenso sagrado?", options: ["Queimar no altar de incenso", "Cheirar", "Vender", "Dar aos pobres"], answer: "Queimar no altar de incenso", reference: "Levítico 16:12 (contexto de Números)" },
+            { question: "Qual a proibição em relação a consultar os mortos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:31 (contexto de Números)" },
+            { question: "Qual a proibição em relação a semear dois tipos de sementes no mesmo campo?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:19 (contexto de Números)" },
+            { question: "Qual a lei sobre o tratamento do estrangeiro que morasse entre eles?", options: ["Oprimir", "Amar como a si mesmo", "Ignorar", "Expulsar"], answer: "Amar como a si mesmo", reference: "Levítico 19:34 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16 (contexto de Números)" },
+            { question: "Qual a punição para quem não se afligisse no Dia da Expiação?", options: ["Seria expulso do povo", "Seria multado", "Seria preso", "Seria doente"], answer: "Seria expulso do povo", reference: "Levítico 23:29 (contexto de Números)" },
+            { question: "Qual a lei sobre o ano de descanso da terra?", options: ["Deveria ser cultivada intensamente", "Deveria descansar, sem semeadura ou poda", "Deveria ser vendida", "Deveria ser irrigada"], answer: "Deveria descansar, sem semeadura ou poda", reference: "Levítico 25:4 (contexto de Números)" },
+            { question: "O que acontecia com as dívidas no Ano do Jubileu?", options: ["Eram perdoadas", "Eram dobradas", "Eram mantidas", "Eram vendidas"], answer: "Eram perdoadas", reference: "Levítico 25:35-38 (implícito na libertação e restituição) (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer sangue de aves ou animais?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 17:13-14 (contexto de Números)" },
+            { question: "O que os sacerdotes deveriam fazer com a oferta pelo pecado que não fosse comida no Lugar Santo?", options: ["Queimar", "Vender", "Dar aos pobres", "Guardar"], answer: "Queimar", reference: "Levítico 6:30 (contexto de Números)" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a filha do pai ou da mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:17 (contexto de Números)" },
+            { question: "Qual a proibição em relação a fazer votos de animais impuros?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 27:11-12 (contexto de Números)" },
+            { question: "Qual a lei sobre a dedicação de casas ao Senhor?", options: ["Eram vendidas", "Eram consideradas santas e podiam ser resgatadas", "Eram queimadas", "Eram dadas aos sacerdotes"], answer: "Eram consideradas santas e podiam ser resgatadas", reference: "Levítico 27:14-15 (contexto de Números)" },
+            { question: "O que aconteceria com uma casa dedicada ao Senhor que não fosse resgatada?", options: ["Voltava ao seu dono", "Tornava-se propriedade do sacerdote para sempre", "Era vendida a outro", "Era destruída"], answer: "Tornava-se propriedade do sacerdote para sempre", reference: "Levítico 27:15 (contexto de Números)" },
+            { question: "Qual a lei sobre a dedicação de um campo herdado ao Senhor?", options: ["Era vendido", "Voltava ao seu dono original no Jubileu", "Tornava-se propriedade do sacerdote para sempre", "Era queimado"], answer: "Voltava ao seu dono original no Jubileu", reference: "Levítico 27:24 (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer o que tem vida no sangue?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 17:14 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com o que sobrasse da oferta de manjares?", options: ["Queimar", "Comer no Lugar Santo", "Vender", "Dar aos pobres"], answer: "Comer no Lugar Santo", reference: "Levítico 6:16 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a esposa do pai?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:8 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a filha do filho ou da filha?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:10 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a irmã do pai ou da mãe?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:12-13 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a tia (irmã da mãe ou irmã do pai)?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:12-13 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a esposa do irmão?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:16 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a filha da esposa?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:17 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a nora?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:15 (contexto de Números)" },
+            { question: "Qual a proibição em relação a deitar-se com a cunhada (esposa do irmão)?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:16 (contexto de Números)" },
+            { question: "Qual a proibição em relação a oferecer seus filhos a Moloque?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for por necessidade"], answer: "É uma abominação", reference: "Levítico 18:21 (contexto de Números)" },
+            { question: "Qual a punição para quem comesse carne de um animal que morreu naturalmente ou foi despedaçado?", options: ["Seria impuro até a tarde", "Seria morto", "Seria exilado", "Seria multado"], answer: "Seria impuro até a tarde", reference: "Levítico 17:15 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16 (contexto de Números)" },
+            { question: "Qual a punição para quem não se purificasse de uma impureza?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria expulso do povo", reference: "Levítico 7:20-21 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com o incenso sagrado?", options: ["Queimar no altar de incenso", "Cheirar", "Vender", "Dar aos pobres"], answer: "Queimar no altar de incenso", reference: "Levítico 16:12 (contexto de Números)" },
+            { question: "Qual a proibição em relação a consultar os mortos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:31 (contexto de Números)" },
+            { question: "Qual a proibição em relação a semear dois tipos de sementes no mesmo campo?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:19 (contexto de Números)" },
+            { question: "Qual a lei sobre o tratamento do estrangeiro que morasse entre eles?", options: ["Oprimir", "Amar como a si mesmo", "Ignorar", "Expulsar"], answer: "Amar como a si mesmo", reference: "Levítico 19:34 (contexto de Números)" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16 (contexto de Números)" },
+            { question: "Qual a punição para quem não se afligisse no Dia da Expiação?", options: ["Seria expulso do povo", "Seria multado", "Seria preso", "Seria doente"], answer: "Seria expulso do povo", reference: "Levítico 23:29 (contexto de Números)" },
+            { question: "Qual a lei sobre o ano de descanso da terra?", options: ["Deveria ser cultivada intensamente", "Deveria descansar, sem semeadura ou poda", "Deveria ser vendida", "Deveria ser irrigada"], answer: "Deveria descansar, sem semeadura ou poda", reference: "Levítico 25:4 (contexto de Números)" },
+            { question: "O que acontecia com as dívidas no Ano do Jubileu?", options: ["Eram perdoadas", "Eram dobradas", "Eram mantidas", "Eram vendidas"], answer: "Eram perdoadas", reference: "Levítico 25:35-38 (implícito na libertação e restituição) (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer sangue de aves ou animais?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 17:13-14 (contexto de Números)" },
+            { question: "O que os sacerdotes deveriam fazer com a oferta pelo pecado que não fosse comida no Lugar Santo?", options: ["Queimar", "Vender", "Dar aos pobres", "Guardar"], answer: "Queimar", reference: "Levítico 6:30 (contexto de Números)" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a filha do pai ou da mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:17 (contexto de Números)" },
+            { question: "Qual a proibição em relação a fazer votos de animais impuros?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 27:11-12 (contexto de Números)" },
+            { question: "Qual a lei sobre a dedicação de casas ao Senhor?", options: ["Eram vendidas", "Eram consideradas santas e podiam ser resgatadas", "Eram queimadas", "Eram dadas aos sacerdotes"], answer: "Eram consideradas santas e podiam ser resgatadas", reference: "Levítico 27:14-15 (contexto de Números)" },
+            { question: "O que aconteceria com uma casa dedicada ao Senhor que não fosse resgatada?", options: ["Voltava ao seu dono", "Tornava-se propriedade do sacerdote para sempre", "Era vendida a outro", "Era destruída"], answer: "Tornava-se propriedade do sacerdote para sempre", reference: "Levítico 27:15 (contexto de Números)" },
+            { question: "Qual a lei sobre a dedicação de um campo herdado ao Senhor?", options: ["Era vendido", "Voltava ao seu dono original no Jubileu", "Tornava-se propriedade do sacerdote para sempre", "Era queimado"], answer: "Voltava ao seu dono original no Jubileu", reference: "Levítico 27:24 (contexto de Números)" },
+            { question: "Qual a proibição em relação a comer o que tem vida no sangue?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 17:14 (contexto de Números)" }
+        ];
+
+
+        let shuffledQuizQuestionsNumbers = [];
+        let currentQuizIndexNumbers = 0;
+        let scoreNumbers = 0;
+        let wrongAnswersNumbers = 0;
+
+        function shuffleQuizQuestionsNumbers() {
+            shuffledQuizQuestionsNumbers = [...allQuizQuestionsNumbers];
+            for (let i = shuffledQuizQuestionsNumbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledQuizQuestionsNumbers[i], shuffledQuizQuestionsNumbers[j]] = [shuffledQuizQuestionsNumbers[j], shuffledQuizQuestionsNumbers[i]];
+            }
+        }
+
+        function displayQuestionNumbers() {
+            const questionElement = document.getElementById('quizQuestionNumbers');
+            const optionsDiv = document.getElementById('quizOptionsNumbers');
+            const feedbackElement = document.getElementById('quizFeedbackNumbers');
+            const nextButton = document.querySelector('#quizContainerNumbers .quiz-next');
+            const progressElement = document.getElementById('quizProgressNumbers');
+
+            if (currentQuizIndexNumbers < shuffledQuizQuestionsNumbers.length) {
+                const currentQuestion = shuffledQuizQuestionsNumbers[currentQuizIndexNumbers];
+                questionElement.textContent = currentQuestion.question;
+                optionsDiv.innerHTML = '';
+                feedbackElement.textContent = '';
+                nextButton.classList.add('hidden');
+
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerNumbers(option, currentQuestion.answer, currentQuestion.reference);
+                    optionsDiv.appendChild(button);
+                });
+
+                // Atualizar progresso
+                progressElement.textContent = `${currentQuizIndexNumbers + 1}/${shuffledQuizQuestionsNumbers.length}`;
+            } else {
+                // Quiz concluído
+                questionElement.textContent = "Quiz Concluído!";
+                optionsDiv.innerHTML = '';
+                feedbackElement.textContent = `Você acertou ${scoreNumbers} de ${shuffledQuizQuestionsNumbers.length} perguntas.`;
+                nextButton.classList.add('hidden');
+                progressElement.textContent = "Fim";
+            }
+        }
+
+        function checkAnswerNumbers(selectedOption, correctAnswer, reference) {
+            const optionsDiv = document.getElementById('quizOptionsNumbers');
+            const feedbackElement = document.getElementById('quizFeedbackNumbers');
+            const nextButton = document.querySelector('#quizContainerNumbers .quiz-next');
+            const scoreElement = document.getElementById('quizScoreNumbers');
+
+            // Desabilitar botões após a seleção
+            Array.from(optionsDiv.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto!";
+                feedbackElement.classList.remove('text-red-500');
+                feedbackElement.classList.add('text-green-500');
+                scoreNumbers++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}. (Referência: ${reference})`;
+                feedbackElement.classList.remove('text-green-500');
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersNumbers++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreNumbers}, Erros: ${wrongAnswersNumbers}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionNumbers() {
+            currentQuizIndexNumbers++;
+            displayQuestionNumbers();
+        }
+
+        // Gráfico de Temas de Números
+        let numbersChartInstance = null; // Para armazenar a instância do Chart.js
+
+        function renderNumbersChart() {
+            const ctx = document.getElementById('numbersChart').getContext('2d');
+
+            if (numbersChartInstance) {
+                numbersChartInstance.destroy(); // Destroi a instância anterior do gráfico, se existir
+            }
+
+            numbersChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Fidelidade de Deus', 'Desobediência', 'Liderança', 'Peregrinação', 'Organização', 'Santidade', 'Censo', 'Terra Prometida'],
+                    datasets: [{
+                        label: 'Frequência Temática (Estimativa)',
+                        data: [20, 25, 15, 18, 10, 7, 3, 2], // Dados de exemplo para Números
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)', // Azul
+                            'rgba(255, 99, 132, 0.7)', // Vermelho
+                            'rgba(75, 192, 192, 0.7)', // Verde-água
+                            'rgba(255, 206, 86, 0.7)', // Amarelo
+                            'rgba(153, 102, 255, 0.7)', // Roxo
+                            'rgba(255, 159, 64, 0.7)', // Laranja
+                            'rgba(201, 203, 207, 0.7)', // Cinza
+                            'rgba(100, 200, 100, 0.7)' // Verde claro
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(201, 203, 207, 1)',
+                            'rgba(100, 200, 100, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor do texto dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: '#4a5568' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor do texto dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: '#4a5568' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição Temática no Livro de Números',
+                            color: '#f8fafc' // Cor do título do gráfico
+                        }
+                    }
+                }
+            });
+        }
+
+        // Exibir a seção inicial ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('inicio');
+        });
+    </script>
+</body>
+</html>

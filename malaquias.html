@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Malaquias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Malaquias Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Malaquias</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionMalaquias('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionMalaquias('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionMalaquias('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionMalaquias('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionMalaquias('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionMalaquias('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionMalaquias('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionMalaquias('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionMalaquias('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Malaquias</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Malaquias, o último livro do Antigo Testamento, que confronta o povo de Israel com sua negligência espiritual e moral após o retorno do exílio. Descubra as acusações de Deus contra os sacerdotes e o povo, os desafios à sua fé e as promessas de um futuro dia de juízo e bênção para os fiéis. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Malaquias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Malaquias é o último dos doze profetas menores e o livro final do Antigo Testamento. O nome "Malaquias" significa "meu mensageiro" ou "mensageiro do Senhor", e o livro serve como uma ponte entre os Testamentos, apontando para a vinda de João Batista e de Jesus Cristo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Malaquias profetizou provavelmente entre 450 e 430 a.C., após a reconstrução do Templo (concluída em 516 a.C.) e durante o período de Esdras e Neemias. A euforia inicial do retorno do exílio havia diminuído, e o povo de Israel havia caído em um estado de apatia espiritual, formalismo religioso e negligência moral. Os sacerdotes estavam oferecendo sacrifícios impuros, o povo estava retendo os dízimos e ofertas, havia divórcios e casamentos mistos, e a justiça social estava sendo negligenciada.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O estilo de Malaquias é único, caracterizado por um método de "disputa" ou "diálogo", onde Deus faz uma declaração, o povo responde com uma pergunta cética, e Deus então refuta a objeção com evidências e acusações. Essa estrutura permite que o profeta aborde uma série de questões que revelam a falta de reverência e compromisso do povo com o Senhor.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A mensagem de Malaquias é de repreensão e exortação ao arrependimento, mas também contém promessas de juízo para os ímpios e de bênção para os fiéis. O livro culmina com a profecia da vinda do "mensageiro" que prepararia o caminho para o "Dia do Senhor", um dia de purificação e juízo, mas também de cura e justiça para aqueles que temem o nome do Senhor.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Amor de Deus Questionado e a Impureza dos Sacerdotes.</strong> Deus afirma Seu amor por Israel, que é duvidado, e repreende os sacerdotes por sacrifícios impuros.</li>
+                <li><strong>Capítulo 2: A Repreensão aos Sacerdotes e a Infidelidade no Casamento.</strong> Continuação da condenação aos sacerdotes e a denúncia de divórcios e casamentos mistos.</li>
+                <li><strong>Capítulo 3: A Vinda do Mensageiro e o Juízo, e a Questão dos Dízimos.</strong> Profecia sobre o precursor do Messias, o juízo purificador e a exortação à fidelidade nos dízimos.</li>
+                <li><strong>Capítulo 4: O Grande e Terrível Dia do Senhor.</strong> A promessa de juízo para os ímpios e de cura e justiça para os justos, com a vinda de Elias.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Malaquias é um livro que chama o povo de Deus à renovação de sua aliança com Ele, lembrando-os de Sua santidade, justiça e fidelidade, e apontando para a esperança do Messias.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Malaquias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Malaquias confronta Israel com sua negligência e aponta para o Dia do Senhor.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Amor de Deus Questionado e a Impureza dos Sacerdotes (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Amor de Deus por Israel (Versículos 1-5):</strong>
+                    <ul>
+                        <li>"Eu vos amei, diz o Senhor."</li>
+                        <li>A prova do amor de Deus: Jacó amado, Esaú odiado.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Desonra dos Sacerdotes (Versículos 6-14):</strong>
+                    <ul>
+                        <li>Deus questiona a honra que lhe é devida.</li>
+                        <li>Sacrifícios impuros e desprezo pelo altar.</li>
+                        <li>Oferecendo animais cegos, mancos e enfermos.</li>
+                        <li>O nome do Senhor é temível entre as nações.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Repreensão aos Sacerdotes e a Infidelidade no Casamento (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Aliança com Levi Quebrada (Versículos 1-9):</strong>
+                    <ul>
+                        <li>Deus repreende os sacerdotes por desviarem-se do caminho.</li>
+                        <li>Serão desprezados e humilhados.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Infidelidade no Casamento e a Injustiça Social (Versículos 10-16):</strong>
+                    <ul>
+                        <li>Divórcio e casamento com mulheres estrangeiras.</li>
+                        <li>Deus odeia o divórcio.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Injustiça de Deus Questionada (Versículos 17):</strong>
+                    <ul>
+                        <li>"Onde está o Deus do juízo?"</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Vinda do Mensageiro e o Juízo, e a Questão dos Dízimos (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Vinda do Mensageiro e do Senhor (Versículos 1-5):</strong>
+                    <ul>
+                        <li>"Eis que eu envio o meu mensageiro, que preparará o caminho diante de mim."</li>
+                        <li>O Senhor virá ao seu Templo como fogo de refinador.</li>
+                        <li>Juízo contra feiticeiros, adúlteros, falsos juradores e opressores.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Retenção dos Dízimos e Ofertas (Versículos 6-12):</strong>
+                    <ul>
+                        <li>"Roubais a mim nos dízimos e nas ofertas alçadas."</li>
+                        <li>Desafio para provar a Deus: "Trazei todos os dízimos à casa do tesouro."</li>
+                        <li>Promessa de abrir as janelas do céu e derramar bênçãos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Serviço a Deus Questionado (Versículos 13-18):</strong>
+                    <ul>
+                        <li>"Que nos aproveita termos guardado os seus preceitos?"</li>
+                        <li>Distinção entre o justo e o ímpio.</li>
+                        <li>O livro da memória para os que temem o Senhor.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. O Grande e Terrível Dia do Senhor (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Dia que Queima como Forno (Versículos 1-3):</strong>
+                    <ul>
+                        <li>Os soberbos e todos os que obram impiedade serão como palha.</li>
+                        <li>O Sol da Justiça nascerá com salvação nas suas asas.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Chamado para Lembrar a Lei e a Vinda de Elias (Versículos 4-6):</strong>
+                    <ul>
+                        <li>"Lembrai-vos da lei de Moisés, meu servo."</li>
+                        <li>"Eis que eu vos envio o profeta Elias, antes que venha o grande e terrível Dia do Senhor."</li>
+                        <li>Ele converterá o coração dos pais aos filhos e o coração dos filhos a seus pais.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Malaquias é uma poderosa repreensão à apatia e ao formalismo religioso, enfatizando a santidade de Deus e a importância de uma adoração sincera e de um compromisso genuíno com Ele. Ele destaca a fidelidade de Deus contrastada com a infidelidade do povo. O livro também contém profecias cruciais sobre a vinda de João Batista (o "mensageiro") e de Jesus Cristo (o "Senhor" que viria ao Templo e o "Sol da Justiça"). Malaquias encerra o cânon do Antigo Testamento com uma nota de expectativa, apontando para o futuro Dia do Senhor, quando a justiça prevalecerá e os fiéis serão recompensados, e a necessidade de um precursor para preparar o caminho para o Messias. É um chamado à renovação da aliança e à preparação para a vinda do Senhor.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridMalaquias">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Malaquias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Malaquias, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Amor de Deus Questionado e a Impureza dos Sacerdotes</strong>
+                    <ul>
+                        <li>1.1-5: O Amor de Deus por Israel.</li>
+                        <li>1.6-14: A Desonra do Nome de Deus pelos Sacerdotes.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: A Repreensão aos Sacerdotes e a Infidelidade do Povo</strong>
+                    <ul>
+                        <li>2.1-9: A Aliança com Levi Quebrada.</li>
+                        <li>2.10-16: Infidelidade no Casamento.</li>
+                        <li>2.17: A Injustiça de Deus Questionada.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: A Vinda do Mensageiro, o Juízo e os Dízimos</strong>
+                    <ul>
+                        <li>3.1-5: A Vinda do Mensageiro e do Senhor.</li>
+                        <li>3.6-12: A Retenção dos Dízimos e Ofertas.</li>
+                        <li>3.13-18: O Serviço a Deus Questionado e o Livro da Memória.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: O Grande e Terrível Dia do Senhor</strong>
+                    <ul>
+                        <li>4.1-3: O Juízo sobre os Ímpios e a Salvação dos Justos.</li>
+                        <li>4.4-6: O Chamado para Lembrar a Lei e a Vinda de Elias.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Malaquias</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Fidelidade de Deus:</strong> O amor inabalável de Deus por Israel, apesar de sua infidelidade.</li>
+                <li><strong>A Apatia e o Formalismo Religioso:</strong> A repreensão à adoração superficial e sacrifícios impuros.</li>
+                <li><strong>Dízimos e Ofertas:</strong> A importância da fidelidade financeira como um ato de adoração.</li>
+                <li><strong>Casamento e Divórcio:</strong> A santidade do casamento e a condenação do divórcio.</li>
+                <li><strong>O Dia do Senhor:</strong> O juízo vindouro para os ímpios e a salvação para os justos.</li>
+                <li><strong>O Mensageiro e o Messias:</strong> Profecias sobre João Batista e Jesus Cristo.</li>
+                <li><strong>Justiça Social:</strong> A importância de tratar o próximo com equidade.</li>
+                <li><strong>O Livro da Memória:</strong> A lembrança de Deus daqueles que o temem.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Malaquias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersMalaquias">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Malaquias</h2>
+            <div id="quizContainerMalaquias" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionMalaquias"></p>
+                <div id="quizOptionsMalaquias" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackMalaquias" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionMalaquias()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressMalaquias"></span></p>
+                <p>Pontuação: <span id="quizScoreMalaquias">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Malaquias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Malaquias.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="malaquiasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalMalaquias()">&times;</span>
+                <h3 id="modalCharacterNameMalaquias" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionMalaquias" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Malaquias",
+            "short_name": "Malaquias",
+            "description": "Explore o livro de Malaquias de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=ML",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=ML",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'malaquias-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionMalaquias(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsMalaquias();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksMalaquias();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsMalaquias(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexMalaquias = 0; // Reinicia o quiz
+                scoreMalaquias = 0;
+                wrongAnswersMalaquias = 0;
+                document.getElementById('quizScoreMalaquias').textContent = `Acertos: ${scoreMalaquias}, Erros: ${wrongAnswersMalaquias}`;
+                displayQuestionMalaquias();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderMalaquiasChart();
+            }
+        }
+
+        // Dados dos personagens para Malaquias
+        const characterDetailsMalaquias = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano que confronta Israel com sua infidelidade, revela Seus planos de juízo e bênção, e promete enviar Seu mensageiro."
+            },
+            "Malaquias": {
+                name: "Malaquias",
+                description: "O profeta cujo nome significa 'meu mensageiro', que entregou as últimas mensagens do Antigo Testamento, confrontando o povo e os sacerdotes."
+            },
+            "Sacerdotes": {
+                name: "Sacerdotes",
+                description: "Os líderes religiosos de Israel que são repreendidos por sua adoração impura, desprezo pelo nome de Deus e negligência da lei."
+            },
+            "O Povo de Israel": {
+                name: "O Povo de Israel",
+                description: "A nação de Israel, confrontada com sua apatia espiritual, retenção de dízimos, divórcios e injustiças sociais."
+            },
+            "O Mensageiro (João Batista)": {
+                name: "O Mensageiro (João Batista)",
+                description: "A figura profética que viria para preparar o caminho para o Senhor, identificado no Novo Testamento como João Batista."
+            },
+            "O Sol da Justiça (Messias)": {
+                name: "O Sol da Justiça (Messias)",
+                description: "Uma referência profética a Jesus Cristo, que traria cura e justiça para aqueles que temem o nome do Senhor."
+            },
+            "Elias": {
+                name: "Elias",
+                description: "O profeta que seria enviado antes do grande e terrível Dia do Senhor, para converter os corações."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalMalaquias(characterName) {
+            const details = characterDetailsMalaquias[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameMalaquias').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionMalaquias').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalMalaquias() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsMalaquias() {
+            const grid = document.getElementById('characterGridMalaquias');
+            grid.innerHTML = '';
+            for (const key in characterDetailsMalaquias) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalMalaquias(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksMalaquias() {
+            const chaptersDiv = document.getElementById('chaptersMalaquias');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 4; i++) { // Malaquias tem 4 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/ml/${i}`; // Link para a Bíblia Online, Malaquias
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Malaquias (25 perguntas únicas)
+        const uniqueQuizQuestionsMalaquias = [
+            { question: "Qual o significado do nome do profeta Malaquias?", options: ["Meu mensageiro", "O Senhor é rei", "O Senhor salva", "O Senhor é justo"], answer: "Meu mensageiro", reference: "Introdução ao Livro de Malaquias" },
+            { question: "Malaquias é o último livro de qual parte da Bíblia?", options: ["Novo Testamento", "Pentateuco", "Livros Históricos", "Antigo Testamento"], answer: "Antigo Testamento", reference: "Introdução ao Livro de Malaquias" },
+            { question: "Em que período Malaquias profetizou, aproximadamente?", options: ["Antes do exílio", "Durante o exílio", "Após a reconstrução do Templo", "Durante o reinado de Davi"], answer: "Após a reconstrução do Templo", reference: "Introdução ao Livro de Malaquias" },
+            { question: "Qual era a condição espiritual do povo na época de Malaquias?", options: ["Fervor espiritual", "Grande avivamento", "Apatia e formalismo religioso", "Perseguição intensa"], answer: "Apatia e formalismo religioso", reference: "Introdução ao Livro de Malaquias" },
+            { question: "Qual o estilo literário característico de Malaquias?", options: ["Narrativa histórica", "Poesia lírica", "Disputa ou diálogo", "Epístola"], answer: "Disputa ou diálogo", reference: "Introdução ao Livro de Malaquias" },
+            { question: "O que Deus disse que os sacerdotes estavam oferecendo em Seu altar (Malaquias 1:7-8)?", options: ["Ouro e prata", "Sacrifícios perfeitos", "Pão imundo e animais cegos/mancos", "Incenso aromático"], answer: "Pão imundo e animais cegos/mancos", reference: "Malaquias 1:7-8" },
+            { question: "Qual a acusação de Deus contra o povo em relação aos dízimos (Malaquias 3:8)?", options: ["Não oravam o suficiente", "Roubavam a Deus nos dízimos e ofertas", "Não construíam casas", "Não jejuavam"], answer: "Roubavam a Deus nos dízimos e ofertas", reference: "Malaquias 3:8" },
+            { question: "O que Deus prometeu fazer para aqueles que trouxessem os dízimos à casa do tesouro (Malaquias 3:10)?", options: ["Fechariam as janelas do céu", "Derramaria bênçãos sem medida", "Os faria pobres", "Os abandonaria"], answer: "Derramaria bênçãos sem medida", reference: "Malaquias 3:10" },
+            { question: "Quem é o 'mensageiro' que prepararia o caminho para o Senhor (Malaquias 3:1)?", options: ["Malaquias", "Elias", "O Messias", "João Batista (implícito no NT)"], answer: "João Batista (implícito no NT)", reference: "Panoramas do Livro de Malaquias" },
+            { question: "Como é descrito o 'Dia do Senhor' para os ímpios em Malaquias 4:1?", options: ["Um dia de festa", "Um dia de paz", "Um dia que queima como forno", "Um dia de chuva"], answer: "Um dia que queima como forno", reference: "Malaquias 4:1" },
+            { question: "Quem é o 'Sol da Justiça' que nasceria com salvação nas suas asas (Malaquias 4:2)?", options: ["O profeta Elias", "O Messias", "O rei de Israel", "Um novo líder"], answer: "O Messias", reference: "Malaquias 4:2" },
+            { question: "Qual profeta do Antigo Testamento é prometido para vir antes do grande e terrível Dia do Senhor (Malaquias 4:5)?", options: ["Jeremias", "Isaías", "Ezequiel", "Elias"], answer: "Elias", reference: "Malaquias 4:5" },
+            { question: "Quantos capítulos tem o livro de Malaquias?", options: ["2", "3", "4", "5"], answer: "4", reference: "Esboços do Livro de Malaquias" },
+            { question: "O que Deus odeia, segundo Malaquias 2:16?", options: ["O jejum", "O divórcio", "As ofertas", "A oração"], answer: "O divórcio", reference: "Malaquias 2:16" },
+            { question: "Qual a prova do amor de Deus por Israel em Malaquias 1:2-3?", options: ["A construção do Templo", "A prosperidade material", "Jacó amado e Esaú odiado", "A libertação do Egito"], answer: "Jacó amado e Esaú odiado", reference: "Malaquias 1:2-3" },
+            { question: "O que Deus prometeu abrir para derramar bênçãos em Malaquias 3:10?", options: ["As portas do Templo", "As janelas do céu", "Os tesouros da terra", "Os rios"], answer: "As janelas do céu", reference: "Malaquias 3:10" },
+            { question: "Para quem o coração dos pais e dos filhos seria convertido pela vinda de Elias (Malaquias 4:6)?", options: ["Aos sacerdotes", "Uns aos outros", "Aos reis", "Aos profetas"], answer: "Uns aos outros", reference: "Malaquias 4:6" },
+            { question: "O que o livro de Malaquias serve como uma ponte para?", options: ["Os livros históricos", "Os salmos", "O Novo Testamento", "Os livros de sabedoria"], answer: "O Novo Testamento", reference: "Introdução ao Livro de Malaquias" },
+            { question: "Qual a atitude do povo que questionava o serviço a Deus em Malaquias 3:14?", options: ["'Que nos aproveita termos guardado os seus preceitos?'", "'Servir a Deus é uma alegria'", "'Deus é justo em tudo'", "'Nós amamos a Deus'"], answer: "'Que nos aproveita termos guardado os seus preceitos?'", reference: "Malaquias 3:14" },
+            { question: "O que Deus prometeu purificar como fogo de refinador em Malaquias 3:3?", options: ["O ouro e a prata", "Os sacerdotes levitas", "As nações inimigas", "A terra"], answer: "Os sacerdotes levitas", reference: "Malaquias 3:3" },
+            { question: "Qual o tema principal da mensagem de Malaquias?", options: ["A reconstrução do Templo", "A vinda do Messias", "A santidade de Deus e a infidelidade do povo", "A história de Israel"], answer: "A santidade de Deus e a infidelidade do povo", reference: "Significado Teológico" },
+            { question: "O que é o 'Livro da Memória' mencionado em Malaquias 3:16?", options: ["Um registro dos pecados do povo", "Um livro de leis", "Um registro dos que temem ao Senhor", "Um livro de profecias"], answer: "Um registro dos que temem ao Senhor", reference: "Malaquias 3:16" },
+            { question: "Qual a acusação de Deus contra os sacerdotes em Malaquias 2:8?", options: ["Eles eram muito ricos", "Eles desviavam muitos da lei", "Eles não oravam", "Eles eram muito humildes"], answer: "Eles desviavam muitos da lei", reference: "Malaquias 2:8" },
+            { question: "O que o livro de Malaquias condena além da negligência religiosa?", options: ["A agricultura", "A construção de casas", "O divórcio e o casamento misto", "A leitura da lei"], answer: "O divórcio e o casamento misto", reference: "Introdução ao Livro de Malaquias" },
+            { question: "Malaquias encerra o Antigo Testamento com uma nota de quê?", options: ["Desespero", "Derrota", "Expectativa pela vinda do Senhor", "Final feliz"], answer: "Expectativa pela vinda do Senhor", reference: "Significado Teológico" }
+        ];
+
+        let quizQuestionsMalaquias = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsMalaquias() {
+            quizQuestionsMalaquias = []; // Limpa as perguntas anteriores
+            while (quizQuestionsMalaquias.length < 200) {
+                quizQuestionsMalaquias.push(...uniqueQuizQuestionsMalaquias);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsMalaquias.length > 200) {
+                quizQuestionsMalaquias = quizQuestionsMalaquias.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsMalaquias); // Embaralha o array completo
+        }
+
+        let currentQuizIndexMalaquias = 0;
+        let scoreMalaquias = 0;
+        let wrongAnswersMalaquias = 0;
+
+        function displayQuestionMalaquias() {
+            const questionElement = document.getElementById('quizQuestionMalaquias');
+            const optionsElement = document.getElementById('quizOptionsMalaquias');
+            const feedbackElement = document.getElementById('quizFeedbackMalaquias');
+            const nextButton = document.querySelector('#quizContainerMalaquias .quiz-next');
+            const progressElement = document.getElementById('quizProgressMalaquias');
+
+            if (currentQuizIndexMalaquias < quizQuestionsMalaquias.length) {
+                const questionData = quizQuestionsMalaquias[currentQuizIndexMalaquias];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerMalaquias(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexMalaquias + 1}/${quizQuestionsMalaquias.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreMalaquias}, Erros: ${wrongAnswersMalaquias}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerMalaquias(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsMalaquias button');
+            const feedbackElement = document.getElementById('quizFeedbackMalaquias');
+            const nextButton = document.querySelector('#quizContainerMalaquias .quiz-next');
+            const scoreElement = document.getElementById('quizScoreMalaquias');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreMalaquias++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersMalaquias++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreMalaquias}, Erros: ${wrongAnswersMalaquias}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionMalaquias() {
+            currentQuizIndexMalaquias++;
+            displayQuestionMalaquias();
+        }
+
+        // Gráfico de Temas para Malaquias
+        let malaquiasChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderMalaquiasChart() {
+            const ctx = document.getElementById('malaquiasChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (malaquiasChartInstance) {
+                malaquiasChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['A Fidelidade de Deus', 'Apatia e Formalismo Religioso', 'Dízimos e Ofertas', 'Casamento e Divórcio', 'O Dia do Senhor', 'O Mensageiro e o Messias', 'Justiça Social', 'O Livro da Memória'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [6, 8, 7, 5, 7, 7, 4, 3], // Valores fictícios para Malaquias
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para A Fidelidade de Deus
+                        'rgba(54, 162, 235, 0.7)', // Azul para Apatia e Formalismo Religioso
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Dízimos e Ofertas
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para Casamento e Divórcio
+                        'rgba(153, 102, 255, 0.7)', // Roxo para O Dia do Senhor
+                        'rgba(255, 159, 64, 0.7)', // Laranja para O Mensageiro e o Messias
+                        'rgba(201, 203, 207, 0.7)', // Cinza para Justiça Social
+                        'rgba(100, 149, 237, 0.7)' // Azul claro para O Livro da Memória
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)',
+                        'rgba(100, 149, 237, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            malaquiasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Malaquias',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionMalaquias('inicio');
+        });
+    </script>
+</body>
+</html>

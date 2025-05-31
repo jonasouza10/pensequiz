@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Neemias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #16a34a; /* Green border for Nehemiah game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #16a34a; /* Green for Nehemiah game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #15803d; /* Darker green on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #16a34a;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #16a34a;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #15803d;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-green-700 mb-4">A História de Neemias 🧱</h1>
+        <p class="text-gray-700 mb-6">
+            Explore a inspiradora história de Neemias, o líder que reconstruiu os muros de Jerusalém com fé e determinação.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Neemias!</p>
+            <p class="text-gray-700 mt-6">A história de Neemias é um poderoso exemplo de liderança, oração, perseverança e dedicação à obra de Deus, mesmo diante de grande oposição.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: Notícias de Jerusalém',
+                location: 'Susã (Persia)',
+                objective: 'Entender a situação de Jerusalém que afligiu Neemias.',
+                clues: [
+                    'Neemias era copeiro do rei Artaxerxes.',
+                    'Hanani, um de seus irmãos, veio de Judá e trouxe notícias sobre a situação de Jerusalém: os muros estavam derrubados e os portões queimados.'
+                ],
+                keyVerse: 'Neemias 1:2-3',
+                enigma: 'Qual era a função de Neemias no palácio do rei Artaxerxes?',
+                options: ['Copeiro', 'Vizir', 'Comandante'],
+                correctAnswer: 'Copeiro'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: A Oração de Neemias',
+                location: 'Susã',
+                objective: 'Aprender sobre a oração de Neemias por seu povo e sua cidade.',
+                clues: [
+                    'Ao ouvir as notícias, Neemias chorou, lamentou, jejuou e orou diante do Deus dos céus.',
+                    'Ele confessou os pecados de Israel e pediu a Deus que o ajudasse a encontrar favor diante do rei.'
+                ],
+                keyVerse: 'Neemias 1:4-6',
+                enigma: 'O que Neemias fez ao ouvir as notícias de Jerusalém?',
+                options: ['Chorou, lamentou, jejuou e orou', 'Foi imediatamente ao rei', 'Juntou um exército'],
+                correctAnswer: 'Chorou, lamentou, jejuou e orou'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: O Pedido ao Rei Artaxerxes',
+                location: 'Susã (Palácio Real)',
+                objective: 'Descobrir como Neemias obteve permissão para ir a Jerusalém.',
+                clues: [
+                    'Após meses de oração, Neemias estava triste diante do rei, que percebeu sua aflição.',
+                    'Neemias pediu ao rei permissão para ir a Judá para reconstruir a cidade e os muros, e o rei concedeu.'
+                ],
+                keyVerse: 'Neemias 2:4-6',
+                enigma: 'Qual rei concedeu a Neemias permissão para ir a Jerusalém?',
+                options: ['Artaxerxes', 'Ciro', 'Dario'],
+                correctAnswer: 'Artaxerxes'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: Chegada a Jerusalém e Inspeção',
+                location: 'Jerusalém',
+                objective: 'Entender os primeiros passos de Neemias em Jerusalém.',
+                clues: [
+                    'Neemias chegou a Jerusalém e, após três dias, saiu à noite para inspecionar os muros quebrados.',
+                    'Ele não contou a ninguém o que Deus havia colocado em seu coração para fazer por Jerusalém.'
+                ],
+                keyVerse: 'Neemias 2:11-12',
+                enigma: 'O que Neemias fez secretamente ao chegar a Jerusalém?',
+                options: ['Inspecionou os muros da cidade', 'Reuniu um exército', 'Começou a construir um palácio'],
+                correctAnswer: 'Inspecionou os muros da cidade'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: O Início da Reconstrução',
+                location: 'Jerusalém (Muros)',
+                objective: 'Aprender como o povo se uniu para reconstruir.',
+                clues: [
+                    'Neemias apresentou a situação aos líderes e ao povo, exortando-os a reconstruir os muros.',
+                    'O povo respondeu com entusiasmo: "Levantemo-nos, e edifiquemos!" e começaram a trabalhar.'
+                ],
+                keyVerse: 'Neemias 2:17-18',
+                enigma: 'Qual foi a resposta do povo ao chamado de Neemias para reconstruir?',
+                options: ['"Levantemo-nos, e edifiquemos!"', '"Não podemos fazer isso!"', '"Precisamos de mais dinheiro!"'],
+                correctAnswer: '"Levantemo-nos, e edifiquemos!"'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: Oposição de Sambalate e Tobias',
+                location: 'Jerusalém e Samaria',
+                objective: 'Entender a resistência enfrentada pelos construtores.',
+                clues: [
+                    'Sambalate, Tobias e Gesém zombaram e desprezaram os judeus, questionando sua capacidade de reconstruir.',
+                    'Eles tentaram desanimar o povo e conspiraram para lutar contra Jerusalém.'
+                ],
+                keyVerse: 'Neemias 4:1-3',
+                enigma: 'Quem foram os principais opositores de Neemias na reconstrução?',
+                options: ['Sambalate, Tobias e Gesém', 'O rei Artaxerxes', 'Os sacerdotes de Jerusalém'],
+                correctAnswer: 'Sambalate, Tobias e Gesém'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: Armados e Trabalhando',
+                location: 'Jerusalém (Muros)',
+                objective: 'Observar a estratégia de Neemias contra a oposição.',
+                clues: [
+                    'Diante das ameaças, Neemias armou o povo e os fez trabalhar com uma mão na obra e a outra segurando uma arma.',
+                    'Ele também organizou vigias e trombetas para alertar sobre ataques.'
+                ],
+                keyVerse: 'Neemias 4:17-18',
+                enigma: 'Como o povo de Jerusalém trabalhou na reconstrução dos muros?',
+                options: ['Com uma mão na obra e outra na arma', 'Apenas trabalhando durante o dia', 'Apenas trabalhando à noite'],
+                correctAnswer: 'Com uma mão na obra e outra na arma'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: Problemas Internos (Usura)',
+                location: 'Jerusalém',
+                objective: 'Aprender sobre a injustiça social que Neemias enfrentou.',
+                clues: [
+                    'O povo clamou a Neemias sobre a opressão e a usura, onde alguns judeus estavam explorando outros.',
+                    'Neemias repreendeu os nobres e os oficiais, exigindo que restituíssem o que haviam tomado com juros.'
+                ],
+                keyVerse: 'Neemias 5:1-7',
+                enigma: 'Qual problema interno Neemias abordou em Jerusalém?',
+                options: ['Usura e opressão', 'Falta de trabalhadores', 'Ataques de animais selvagens'],
+                correctAnswer: 'Usura e opressão'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: Conclusão do Muro',
+                location: 'Jerusalém (Muros)',
+                objective: 'Entender a conclusão da reconstrução dos muros.',
+                clues: [
+                    'Os muros de Jerusalém foram concluídos em cinquenta e dois dias.',
+                    'Os inimigos ficaram desanimados e reconheceram que a obra havia sido feita com a ajuda de Deus.'
+                ],
+                keyVerse: 'Neemias 6:15-16',
+                enigma: 'Em quantos dias os muros de Jerusalém foram reconstruídos?',
+                options: ['Cinquenta e dois dias', 'Setenta dias', 'Cem dias'],
+                correctAnswer: 'Cinquenta e dois dias'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: A Dedicação do Muro',
+                location: 'Jerusalém',
+                objective: 'Aprender sobre a celebração da dedicação dos muros.',
+                clues: [
+                    'Após a conclusão, houve uma grande dedicação dos muros com cânticos, instrumentos e sacrifícios.',
+                    'Duas grandes companhias de ação de graças caminharam sobre o muro, uma em cada direção, lideradas por Neemias e Esdras.'
+                ],
+                keyVerse: 'Neemias 12:27-31',
+                enigma: 'Quantas companhias de ação de graças caminharam sobre o muro durante a dedicação?',
+                options: ['Duas', 'Uma', 'Três'],
+                correctAnswer: 'Duas'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: A Leitura da Lei',
+                location: 'Praça diante da Porta das Águas',
+                objective: 'Observar a renovação espiritual do povo através da Palavra.',
+                clues: [
+                    'Esdras, o escriba, leu o Livro da Lei de Moisés para o povo, que estava reunido como um só homem.',
+                    'O povo ouviu atentamente, chorou ao entender a Lei e foi instruído a celebrar com alegria.'
+                ],
+                keyVerse: 'Neemias 8:1-3, 9',
+                enigma: 'Quem leu o Livro da Lei para o povo na praça?',
+                options: ['Esdras, o escriba', 'Neemias, o governador', 'Um levita'],
+                correctAnswer: 'Esdras, o escriba'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: A Renovação da Aliança',
+                location: 'Jerusalém',
+                objective: 'Compreender o compromisso do povo com Deus.',
+                clues: [
+                    'Após a leitura da Lei, o povo jejuou, confessou seus pecados e fez uma solene aliança com Deus.',
+                    'Eles se comprometeram a andar na Lei de Deus, a não dar suas filhas em casamento a estrangeiros e a observar o sábado.'
+                ],
+                keyVerse: 'Neemias 9:38; 10:29-31',
+                enigma: 'O que o povo fez após a leitura da Lei e a confissão de pecados?',
+                options: ['Fez uma solene aliança com Deus', 'Construiu um novo templo', 'Elegeram um novo rei'],
+                correctAnswer: 'Fez uma solene aliança com Deus'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: As Reformas de Neemias (Templo)',
+                location: 'Jerusalém (Templo)',
+                objective: 'Aprender sobre as reformas de Neemias após seu retorno.',
+                clues: [
+                    'Após um tempo na Babilônia, Neemias retornou a Jerusalém e encontrou abusos no Templo.',
+                    'Ele expulsou Tobias do aposento no Templo que lhe havia sido concedido e restaurou as ofertas e o serviço levítico.'
+                ],
+                keyVerse: 'Neemias 13:4-9',
+                enigma: 'Quem Neemias expulsou de um aposento no Templo?',
+                options: ['Tobias', 'Sambalate', 'Gesém'],
+                correctAnswer: 'Tobias'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: As Reformas de Neemias (Sábado)',
+                location: 'Jerusalém',
+                objective: 'Observar a restauração da observância do sábado.',
+                clues: [
+                    'Neemias viu que o sábado estava sendo profanado com comércio e trabalho.',
+                    'Ele ordenou que os portões de Jerusalém fossem fechados antes do sábado e proibiu o comércio naquele dia.'
+                ],
+                keyVerse: 'Neemias 13:15-18',
+                enigma: 'O que Neemias fez para restaurar a santidade do sábado?',
+                options: ['Ordenou o fechamento dos portões da cidade', 'Construiu um novo mercado', 'Aumentou os impostos'],
+                correctAnswer: 'Ordenou o fechamento dos portões da cidade'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Legado de Neemias',
+                location: 'Jerusalém',
+                objective: 'Refletir sobre o impacto duradouro da liderança de Neemias.',
+                clues: [
+                    'Neemias é lembrado por sua liderança corajosa, sua fé inabalável e sua dedicação à reconstrução física e espiritual de Jerusalém.',
+                    'Sua vida é um testemunho de como Deus pode usar um indivíduo para realizar grandes obras.'
+                ],
+                keyVerse: 'Neemias 6:16',
+                enigma: 'Qual foi um dos principais legados de Neemias?',
+                options: ['Reconstrução dos muros de Jerusalém', 'Conquista de novas terras', 'Criação de um novo exército'],
+                correctAnswer: 'Reconstrução dos muros de Jerusalém'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-green-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

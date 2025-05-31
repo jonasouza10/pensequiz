@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Lucas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Lucas Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Lucas</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionLucas('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionLucas('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionLucas('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionLucas('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionLucas('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionLucas('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionLucas('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionLucas('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionLucas('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Lucas</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Lucas, o Evangelho que apresenta Jesus como o Salvador universal, cheio de compaixão pelos marginalizados e oprimidos. Descubra a narrativa detalhada do nascimento de Jesus, Seus ensinamentos sobre o Reino de Deus, parábolas únicas, milagres e o foco na oração e no Espírito Santo, culminando em Sua paixão, morte e ressurreição. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Lucas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Lucas é o terceiro dos quatro Evangelhos e é o mais longo dos livros do Novo Testamento. Escrito por Lucas, um médico gentio e companheiro do apóstolo Paulo, este Evangelho foi provavelmente redigido entre 60 e 80 d.C. Lucas é também o autor do livro de Atos dos Apóstolos, que serve como uma continuação de seu Evangelho.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Lucas escreveu seu Evangelho para um público mais amplo, especialmente para Teófilo (Lucas 1:3), que provavelmente era um oficial romano de alto escalão. Seu propósito era fornecer um relato "ordenado" e preciso da vida e dos ensinamentos de Jesus, com uma ênfase particular na universalidade da salvação de Cristo, Sua compaixão pelos marginalizados (pobres, mulheres, samaritanos, pecadores) e o papel central do Espírito Santo e da oração em Seu ministério.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Evangelho de Lucas é conhecido por sua riqueza de detalhes históricos e por incluir narrativas e parábolas que não são encontradas nos outros Evangelhos, como as histórias do nascimento de João Batista e Jesus, as parábolas do Bom Samaritano, do Filho Pródigo, do Rico e Lázaro, e a visita de Jesus à casa de Zaqueu. Lucas apresenta Jesus como o Filho do Homem, que se identifica com a humanidade em sua totalidade, e como o Salvador que veio buscar e salvar o que se havia perdido.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem a salvação universal, a compaixão de Jesus, a importância da oração, o poder do Espírito Santo, a alegria no Reino de Deus, a justiça social e a preocupação com os pobres e excluídos. Lucas é um Evangelho que nos convida a ver Jesus como o Messias que veio para toda a humanidade, oferecendo perdão, cura e restauração.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-2: Introdução e Narrativas do Nascimento.</strong> O nascimento de João Batista e Jesus, o Magnificat, o Benedictus, o Nunc Dimittis, a infância de Jesus.</li>
+                <li><strong>Capítulos 3-4: Preparação para o Ministério.</strong> Ministério de João Batista, batismo e genealogia de Jesus, tentação de Jesus.</li>
+                <li><strong>Capítulos 5-9: Ministério na Galileia.</strong> Chamado dos discípulos, milagres, ensinamentos, e a crescente oposição.</li>
+                <li><strong>Capítulos 9-19: A Grande Jornada para Jerusalém.</strong> Uma seção única de Lucas, focando em ensinamentos e parábolas durante a viagem de Jesus para Jerusalém.</li>
+                <li><strong>Capítulos 19-23: Ministério em Jerusalém e Paixão.</strong> Entrada triunfal, ensinamentos no Templo, a Última Ceia, prisão, julgamento e crucificação de Jesus.</li>
+                <li><strong>Capítulos 24: Ressurreição e Ascensão.</strong> O túmulo vazio, aparições de Jesus (incluindo o caminho de Emaús) e Sua ascensão.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Lucas é um Evangelho rico e detalhado que nos apresenta um retrato multifacetado de Jesus, o Salvador compassivo e universal, que veio para todos.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Lucas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Lucas apresenta Jesus como o Salvador universal, cheio de compaixão e poder.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Introdução e Narrativas do Nascimento (Capítulos 1-2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Dedicatória a Teófilo (1:1-4):</strong>
+                    <ul>
+                        <li>Propósito e método do Evangelho.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Anúncio do Nascimento de João Batista (1:5-25):</strong>
+                    <ul>
+                        <li>A Zacarias e Isabel.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Anúncio do Nascimento de Jesus (1:26-38):</strong>
+                    <ul>
+                        <li>A Maria pelo anjo Gabriel.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Visita de Maria a Isabel (1:39-56):</strong>
+                    <ul>
+                        <li>O Magnificat de Maria.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Nascimento de João Batista (1:57-80):</strong>
+                    <ul>
+                        <li>O Benedictus de Zacarias.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Nascimento de Jesus (2:1-20):</strong>
+                    <ul>
+                        <li>Censo, Belém, anjos e pastores.</li>
+                    </ul>
+                </li>
+                <li><strong>G. Apresentação no Templo (2:21-40):</strong>
+                    <ul>
+                        <li>Simeão (Nunc Dimittis) e Ana.</li>
+                    </ul>
+                </li>
+                <li><strong>H. Jesus no Templo aos Doze Anos (2:41-52):</strong>
+                    <ul>
+                        <li>Crescimento e sabedoria de Jesus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Preparação para o Ministério (Capítulos 3-4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Ministério de João Batista (3:1-20):</strong>
+                    <ul>
+                        <li>Pregação do arrependimento.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Batismo de Jesus (3:21-22):</strong>
+                    <ul>
+                        <li>Aprovação divina.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Genealogia de Jesus (3:23-38):</strong>
+                    <ul>
+                        <li>Até Adão, enfatizando a humanidade universal.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Tentação de Jesus (4:1-13):</strong>
+                    <ul>
+                        <li>Vitória sobre Satanás.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Início do Ministério na Galileia (4:14-30):</strong>
+                    <ul>
+                        <li>Rejeição em Nazaré.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Cura e Pregação (4:31-44):</strong>
+                    <ul>
+                        <li>Cura de um endemoninhado, sogra de Pedro.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Ministério na Galileia (Capítulos 5-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Chamado dos Discípulos e Milagres (5:1-6:11):</strong>
+                    <ul>
+                        <li>Pesca maravilhosa, cura do leproso, paralítico, chamado de Levi, o Senhor do sábado.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Escolha dos Doze e Sermão da Planície (6:12-49):</strong>
+                    <ul>
+                        <li>Bem-aventuranças e ais, amar os inimigos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Cura e Perdão (7:1-50):</strong>
+                    <ul>
+                        <li>Servo do centurião, filho da viúva de Naim, mulher pecadora perdoada.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Parábolas e Milagres (8:1-56):</strong>
+                    <ul>
+                        <li>O semeador, a candeia, Jesus acalma a tempestade, endemoninhado gadareno, filha de Jairo e mulher com hemorragia.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Missão dos Doze e Confissão de Pedro (9:1-27):</strong>
+                    <ul>
+                        <li>Alimentação dos cinco mil, "Tu és o Cristo de Deus."</li>
+                    </ul>
+                </li>
+                <li><strong>F. Transfiguração e o Custo do Discipulado (9:28-62):</strong>
+                    <ul>
+                        <li>Cura do menino endemoninhado, prediz a paixão, o custo de seguir a Jesus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. A Grande Jornada para Jerusalém (Capítulos 9-19)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Início da Jornada e Missão dos Setenta (9:51-10:24):</strong>
+                    <ul>
+                        <li>Samaritanos rejeitam Jesus, envio dos setenta e dois.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Parábola do Bom Samaritano (10:25-37):</strong>
+                    <ul>
+                        <li>Quem é o próximo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Maria e Marta, e Ensino sobre Oração (10:38-11:13):</strong>
+                    <ul>
+                        <li>A melhor parte, a oração do Pai Nosso.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Avisos e Parábolas (11:14-12:59):</strong>
+                    <ul>
+                        <li>Jesus e Belzebu, a parábola do rico insensato, não se preocupar com a vida, o tesouro no céu.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Arrependimento e Parábolas (13:1-14:35):</strong>
+                    <ul>
+                        <li>A figueira estéril, cura no sábado, a porta estreita, a parábola da grande ceia, o custo do discipulado.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Parábolas da Ovelha Perdida, Dracma Perdida e Filho Pródigo (15:1-32):</strong>
+                    <ul>
+                        <li>A alegria no céu por um pecador que se arrepende.</li>
+                    </ul>
+                </li>
+                <li><strong>G. Parábolas do Mordomo Infiel e do Rico e Lázaro (16:1-31):</strong>
+                    <ul>
+                        <li>Uso da riqueza, o abismo entre ricos e pobres.</li>
+                    </ul>
+                </li>
+                <li><strong>H. Ensino sobre Fé, Serviço e Zaqueu (17:1-19:27):</strong>
+                    <ul>
+                        <li>Os dez leprosos, a vinda do Reino, a parábola do juiz iníquo, do fariseu e do publicano, o jovem rico, Zaqueu.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Ministério em Jerusalém e Paixão (Capítulos 19-23)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Entrada Triunfal em Jerusalém (19:28-44):</strong>
+                    <ul>
+                        <li>Choro de Jesus sobre Jerusalém.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Purificação do Templo e Conflitos (19:45-21:4):</strong>
+                    <ul>
+                        <li>A autoridade de Jesus, impostos a César, a ressurreição, a oferta da viúva pobre.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Discurso Escatológico (21:5-38):</strong>
+                    <ul>
+                        <li>Sinais do fim dos tempos, a vinda do Filho do Homem, a necessidade de vigilância.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Última Ceia e a Traição (22:1-53):</strong>
+                    <ul>
+                        <li>Instituição da Ceia, Getsemani, prisão de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Julgamento e Negação de Pedro (22:54-23:25):</strong>
+                    <ul>
+                        <li>Diante do Sinédrio, Pedro nega a Jesus, Jesus diante de Pilatos e Herodes.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Crucificação e Morte (23:26-56):</strong>
+                    <ul>
+                        <li>O ladrão arrependido, a morte de Jesus e o sepultamento.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">VI. Ressurreição e Ascensão (Capítulo 24)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Túmulo Vazio (24:1-12):</strong>
+                    <ul>
+                        <li>As mulheres e os anjos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. No Caminho de Emaús (24:13-35):</strong>
+                    <ul>
+                        <li>Jesus aparece a dois discípulos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Aparição aos Discípulos em Jerusalém (24:36-49):</strong>
+                    <ul>
+                        <li>Come pão e peixe, abre o entendimento das Escrituras.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Ascensão (24:50-53):</strong>
+                    <ul>
+                        <li>Jesus é levado ao céu.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Evangelho de Lucas é um relato abrangente e compassivo da vida e ministério de Jesus Cristo. Ele destaca a universalidade do Evangelho, mostrando que a salvação de Jesus é para todos, incluindo os marginalizados e excluídos da sociedade. Lucas enfatiza a humanidade de Jesus, Sua compaixão por aqueles que sofrem, e Seu papel como o Salvador que veio para buscar e salvar o perdido. A oração e o poder do Espírito Santo são temas recorrentes, mostrando como Jesus dependia do Pai e operava pelo Espírito. O Evangelho também ressalta a alegria que acompanha a vinda do Reino de Deus e a importância da justiça social. Lucas nos convida a um discipulado que se preocupa com os necessitados e que celebra a inclusão de todos no plano de salvação de Deus.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridLucas">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Lucas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Lucas, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Anúncios do Nascimento de João e Jesus</strong>
+                    <ul>
+                        <li>1.1-4: Dedicatória a Teófilo.</li>
+                        <li>1.5-25: Anúncio do Nascimento de João Batista.</li>
+                        <li>1.26-38: Anúncio do Nascimento de Jesus.</li>
+                        <li>1.39-56: Visita de Maria a Isabel (Magnificat).</li>
+                        <li>1.57-80: Nascimento de João Batista (Benedictus).</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: Nascimento e Infância de Jesus</strong>
+                    <ul>
+                        <li>2.1-20: Nascimento de Jesus.</li>
+                        <li>2.21-40: Apresentação no Templo (Simeão e Ana).</li>
+                        <li>2.41-52: Jesus no Templo aos Doze Anos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: Ministério de João Batista e Batismo de Jesus</strong>
+                    <ul>
+                        <li>3.1-20: A Pregação de João Batista.</li>
+                        <li>3.21-22: O Batismo de Jesus.</li>
+                        <li>3.23-38: A Genealogia de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: Tentação de Jesus e Início do Ministério</strong>
+                    <ul>
+                        <li>4.1-13: A Tentação no Deserto.</li>
+                        <li>4.14-30: Início do Ministério na Galileia e Rejeição em Nazaré.</li>
+                        <li>4.31-44: Cura e Pregação em Cafarnaum.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 5: Chamado de Discípulos e Cura</strong>
+                    <ul>
+                        <li>5.1-11: A Pesca Maravilhosa e o Chamado de Pedro.</li>
+                        <li>5.12-16: Cura de um Leproso.</li>
+                        <li>5.17-26: Cura do Paralítico.</li>
+                        <li>5.27-32: Chamado de Levi (Mateus).</li>
+                        <li>5.33-39: Pergunta sobre o Jejum.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 6: O Senhor do Sábado e o Sermão da Planície</strong>
+                    <ul>
+                        <li>6.1-11: O Senhor do Sábado.</li>
+                        <li>6.12-16: Escolha dos Doze Apóstolos.</li>
+                        <li>6.17-49: O Sermão da Planície (Bem-aventuranças e Ais).</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 7: Cura e Perdão</strong>
+                    <ul>
+                        <li>7.1-10: Cura do Servo do Centurião.</li>
+                        <li>7.11-17: A Ressurreição do Filho da Viúva de Naim.</li>
+                        <li>7.18-35: A Pergunta de João Batista.</li>
+                        <li>7.36-50: A Mulher Pecadora Perdoada.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 8: Parábolas e Milagres</strong>
+                    <ul>
+                        <li>8.1-3: Mulheres que Serviam a Jesus.</li>
+                        <li>8.4-15: Parábola do Semeador.</li>
+                        <li>8.16-18: A Parábola da Candeia.</li>
+                        <li>8.19-21: A Verdadeira Família de Jesus.</li>
+                        <li>8.22-25: Jesus Acalma a Tempestade.</li>
+                        <li>8.26-39: O Endemoninhado Gadareno.</li>
+                        <li>8.40-56: A Filha de Jairo e a Mulher com Hemorragia.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 9: Missão dos Doze e Transfiguração</strong>
+                    <ul>
+                        <li>9.1-6: Missão dos Doze.</li>
+                        <li>9.7-9: Herodes e Jesus.</li>
+                        <li>9.10-17: Alimentação dos Cinco Mil.</li>
+                        <li>9.18-27: A Confissão de Pedro e a Primeira Predição da Paixão.</li>
+                        <li>9.28-36: A Transfiguração.</li>
+                        <li>9.37-43: Cura do Menino Endemoninhado.</li>
+                        <li>9.44-50: Segunda Predição da Paixão e Quem é o Maior.</li>
+                        <li>9.51-62: O Custo do Discipulado.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 10: Missão dos Setenta e Parábola do Bom Samaritano</strong>
+                    <ul>
+                        <li>10.1-24: Missão dos Setenta e Dois.</li>
+                        <li>10.25-37: Parábola do Bom Samaritano.</li>
+                        <li>10.38-42: Maria e Marta.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 11: Ensino sobre Oração e Avisos</strong>
+                    <ul>
+                        <li>11.1-13: A Oração do Pai Nosso e a Persistência na Oração.</li>
+                        <li>11.14-28: Jesus e Belzebu.</li>
+                        <li>11.29-36: O Sinal de Jonas.</li>
+                        <li>11.37-54: Ais contra os Fariseus e Doutores da Lei.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 12: Avisos e Parábolas</strong>
+                    <ul>
+                        <li>12.1-12: Avisos contra a Hipocrisia e a Blasfêmia contra o Espírito Santo.</li>
+                        <li>12.13-21: Parábola do Rico Insensato.</li>
+                        <li>12.22-34: Não Se Preocupar com a Vida.</li>
+                        <li>12.35-48: A Necessidade de Vigilância.</li>
+                        <li>12.49-59: Divisão e Discernimento dos Tempos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 13: Arrependimento e Cura</strong>
+                    <ul>
+                        <li>13.1-9: Arrependimento e a Parábola da Figueira Estéril.</li>
+                        <li>13.10-17: Cura de uma Mulher Encurvada no Sábado.</li>
+                        <li>13.18-21: Parábolas do Grão de Mostarda e do Fermento.</li>
+                        <li>13.22-30: A Porta Estreita.</li>
+                        <li>13.31-35: Jesus e Herodes; Jesus Chora sobre Jerusalém.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 14: Humildade e a Grande Ceia</strong>
+                    <ul>
+                        <li>14.1-6: Cura no Sábado.</li>
+                        <li>14.7-14: Humildade e Convidar os Pobres.</li>
+                        <li>14.15-24: Parábola da Grande Ceia.</li>
+                        <li>14.25-35: O Custo do Discipulado.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 15: Parábolas da Restauração</strong>
+                    <ul>
+                        <li>15.1-10: Parábola da Ovelha Perdida e da Dracma Perdida.</li>
+                        <li>15.11-32: Parábola do Filho Pródigo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 16: Riqueza e Juízo</strong>
+                    <ul>
+                        <li>16.1-13: Parábola do Mordomo Infiel.</li>
+                        <li>16.14-18: Fariseus e a Lei.</li>
+                        <li>16.19-31: Parábola do Rico e Lázaro.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 17: Fé, Serviço e a Vinda do Reino</strong>
+                    <ul>
+                        <li>17.1-10: Escândalos, Perdão e Serviço.</li>
+                        <li>17.11-19: Cura dos Dez Leprosos.</li>
+                        <li>17.20-37: A Vinda do Reino de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 18: Oração e Humildade</strong>
+                    <ul>
+                        <li>18.1-8: Parábola do Juiz Iníquo.</li>
+                        <li>18.9-14: Parábola do Fariseu e do Publicano.</li>
+                        <li>18.15-17: Jesus e as Crianças.</li>
+                        <li>18.18-30: O Jovem Rico.</li>
+                        <li>18.31-34: Quarta Predição da Paixão.</li>
+                        <li>18.35-43: Cura de um Cego em Jericó.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 19: Zaqueu e a Entrada Triunfal</strong>
+                    <ul>
+                        <li>19.1-10: Zaqueu, o Publicano.</li>
+                        <li>19.11-27: Parábola das Minas.</li>
+                        <li>19.28-44: Entrada Triunfal em Jerusalém e Choro de Jesus sobre a Cidade.</li>
+                        <li>19.45-48: Purificação do Templo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 20: Conflitos no Templo</strong>
+                    <ul>
+                        <li>20.1-8: A Autoridade de Jesus Questionada.</li>
+                        <li>20.9-19: Parábola dos Lavradores Maus.</li>
+                        <li>20.20-26: Imposto a César.</li>
+                        <li>20.27-40: A Pergunta dos Saduceus sobre a Ressurreição.</li>
+                        <li>20.41-47: Jesus e o Messias; Cuidado com os Escribas.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 21: O Discurso Escatológico</strong>
+                    <ul>
+                        <li>21.1-4: A Oferta da Viúva Pobre.</li>
+                        <li>21.5-38: Sinais do Fim dos Tempos e a Vinda do Filho do Homem.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 22: A Última Ceia e a Traição</strong>
+                    <ul>
+                        <li>22.1-6: Conspiração contra Jesus.</li>
+                        <li>22.7-23: A Páscoa e a Instituição da Ceia do Senhor.</li>
+                        <li>22.24-38: A Discussão sobre a Grandeza e os Avisos a Pedro.</li>
+                        <li>22.39-53: Jesus no Getsêmani e a Prisão.</li>
+                        <li>22.54-62: Pedro Nega a Jesus.</li>
+                        <li>22.63-71: Jesus Escarnecido e Diante do Sinédrio.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 23: Julgamento e Crucificação</strong>
+                    <ul>
+                        <li>23.1-25: Jesus Diante de Pilatos e Herodes.</li>
+                        <li>23.26-43: A Crucificação e o Ladrão Arrependido.</li>
+                        <li>23.44-49: A Morte de Jesus.</li>
+                        <li>23.50-56: O Sepultamento de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 24: A Ressurreição e Ascensão</strong>
+                    <ul>
+                        <li>24.1-12: O Túmulo Vazio.</li>
+                        <li>24.13-35: No Caminho de Emaús.</li>
+                        <li>24.36-49: Aparição aos Discípulos em Jerusalém.</li>
+                        <li>24.50-53: A Ascensão de Jesus.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Lucas</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Universalidade do Evangelho:</strong> Salvação para gentios, marginalizados e excluídos.</li>
+                <li><strong>Compaixão de Jesus:</strong> Preocupação com os pobres, doentes, mulheres e pecadores.</li>
+                <li><strong>Oração:</strong> Jesus como exemplo de vida de oração e ensinamentos sobre a oração.</li>
+                <li><strong>O Espírito Santo:</strong> O papel do Espírito no nascimento, ministério e vida de Jesus e Seus seguidores.</li>
+                <li><strong>Alegria e Louvor:</strong> Respostas de alegria e louvor à vinda do Reino de Deus.</li>
+                <li><strong>Justiça Social:</strong> Ênfase na responsabilidade para com os necessitados e a reversão de valores.</li>
+                <li><strong>O Filho do Homem:</strong> A humanidade de Jesus e Sua identificação com a raça humana.</li>
+                <li><strong>Perdão e Graça:</strong> A oferta de perdão aos pecadores e a graça de Deus.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Lucas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersLucas">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Lucas</h2>
+            <div id="quizContainerLucas" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionLucas"></p>
+                <div id="quizOptionsLucas" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackLucas" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionLucas()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressLucas"></span></p>
+                <p>Pontuação: <span id="quizScoreLucas">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Lucas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Lucas.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="lucasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalLucas()">&times;</span>
+                <h3 id="modalCharacterNameLucas" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionLucas" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Lucas",
+            "short_name": "Lucas",
+            "description": "Explore o livro de Lucas de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=LC",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=LC",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'lucas-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionLucas(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsLucas();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksLucas();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsLucas(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexLucas = 0; // Reinicia o quiz
+                scoreLucas = 0;
+                wrongAnswersLucas = 0;
+                document.getElementById('quizScoreLucas').textContent = `Acertos: ${scoreLucas}, Erros: ${wrongAnswersLucas}`;
+                displayQuestionLucas();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderLucasChart();
+            }
+        }
+
+        // Dados dos personagens para Lucas
+        const characterDetailsLucas = {
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "O Salvador universal, o Filho do Homem, que demonstra compaixão pelos marginalizados e oprimidos, e cujo ministério é central no Evangelho."
+            },
+            "Lucas": {
+                name: "Lucas",
+                description: "O autor do Evangelho e do livro de Atos, um médico gentio e companheiro de Paulo, que escreveu um relato detalhado e ordenado da vida de Jesus."
+            },
+            "Teófilo": {
+                name: "Teófilo",
+                description: "O destinatário do Evangelho de Lucas e do livro de Atos, provavelmente um oficial romano de alto escalão."
+            },
+            "João Batista": {
+                name: "João Batista",
+                description: "O precursor de Jesus, cujo nascimento e ministério são detalhados no início do Evangelho."
+            },
+            "Maria": {
+                name: "Maria",
+                description: "A mãe de Jesus, cujo cântico (Magnificat) e a visita a Isabel são registrados unicamente em Lucas."
+            },
+            "Zacarias": {
+                name: "Zacarias",
+                description: "O pai de João Batista, um sacerdote que teve seu cântico (Benedictus) registrado em Lucas."
+            },
+            "Isabel": {
+                name: "Isabel",
+                description: "A mãe de João Batista e parente de Maria."
+            },
+            "Simeão": {
+                name: "Simeão",
+                description: "Um homem justo e piedoso que reconheceu Jesus como o Messias no Templo e proferiu o Nunc Dimittis."
+            },
+            "Ana": {
+                name: "Ana",
+                description: "Uma profetisa idosa que também reconheceu Jesus no Templo."
+            },
+            "Os Doze Apóstolos": {
+                name: "Os Doze Apóstolos",
+                description: "Os seguidores mais próximos de Jesus, que são chamados e comissionados para continuar Sua obra."
+            },
+            "Zaqueu": {
+                name: "Zaqueu",
+                description: "Um publicano rico que se arrependeu e encontrou salvação através de Jesus."
+            },
+            "O Bom Samaritano": {
+                name: "O Bom Samaritano",
+                description: "Personagem de uma das parábolas únicas de Lucas, que exemplifica o amor ao próximo."
+            },
+            "O Filho Pródigo": {
+                name: "O Filho Pródigo",
+                description: "Personagem central de uma parábola única de Lucas, que ilustra o arrependimento e o perdão de Deus."
+            },
+            "Lázaro (da parábola)": {
+                name: "Lázaro (da parábola)",
+                description: "Personagem da parábola do Rico e Lázaro, que destaca a justiça social e o destino eterno."
+            },
+            "Os Discípulos no Caminho de Emaús": {
+                name: "Os Discípulos no Caminho de Emaús",
+                description: "Dois discípulos que encontraram Jesus ressuscitado no caminho para Emaús, uma narrativa única de Lucas."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalLucas(characterName) {
+            const details = characterDetailsLucas[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameLucas').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionLucas').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalLucas() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsLucas() {
+            const grid = document.getElementById('characterGridLucas');
+            grid.innerHTML = '';
+            for (const key in characterDetailsLucas) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalLucas(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksLucas() {
+            const chaptersDiv = document.getElementById('chaptersLucas');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 24; i++) { // Lucas tem 24 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/lc/${i}`; // Link para a Bíblia Online, Lucas
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Lucas (25 perguntas únicas)
+        const uniqueQuizQuestionsLucas = [
+            { question: "Quem é o autor do Evangelho de Lucas?", options: ["Mateus", "Marcos", "Lucas", "João"], answer: "Lucas", reference: "Introdução ao Livro de Lucas" },
+            { question: "Para quem Lucas dedicou seu Evangelho?", options: ["Pedro", "Paulo", "Teófilo", "Maria"], answer: "Teófilo", reference: "Lucas 1:3" },
+            { question: "Qual a profissão do autor do Evangelho de Lucas?", options: ["Pescador", "Cobrador de impostos", "Médico", "Carregador de barris"], answer: "Médico", reference: "Introdução ao Livro de Lucas" },
+            { question: "Qual o cântico de Maria registrado em Lucas 1:46-55?", options: ["Nunc Dimittis", "Magnificat", "Benedictus", "Glória in Excelsis Deo"], answer: "Magnificat", reference: "Lucas 1:46-55" },
+            { question: "Qual a parábola única de Lucas que ensina sobre o amor ao próximo, mesmo para inimigos?", options: ["O Semeador", "O Filho Pródigo", "O Bom Samaritano", "O Rico e Lázaro"], answer: "O Bom Samaritano", reference: "Lucas 10:25-37" },
+            { question: "Quantos capítulos tem o livro de Lucas?", options: ["20", "24", "26", "28"], answer: "24", reference: "Esboços do Livro de Lucas" },
+            { question: "Qual o tema principal do Evangelho de Lucas?", options: ["A realeza de Jesus", "O ministério de Pedro", "A salvação universal e a compaixão de Jesus", "A urgência do Evangelho"], answer: "A salvação universal e a compaixão de Jesus", reference: "Temas Centrais do Livro de Lucas" },
+            { question: "Qual a parábola única de Lucas que descreve o arrependimento e o perdão de Deus?", options: ["As Dez Virgens", "O Joio", "O Filho Pródigo", "Os Talentos"], answer: "O Filho Pródigo", reference: "Lucas 15:11-32" },
+            { question: "Quem foi o pai de João Batista, que teve seu cântico (Benedictus) registrado em Lucas?", options: ["José", "Simeão", "Zacarias", "Levi"], answer: "Zacarias", reference: "Lucas 1:57-80" },
+            { question: "O que Jesus fez no caminho para Emaús, uma narrativa única de Lucas?", options: ["Curou um cego", "Multiplicou pães", "Explicou as Escrituras e foi reconhecido ao partir o pão", "Acalmou uma tempestade"], answer: "Explicou as Escrituras e foi reconhecido ao partir o pão", reference: "Lucas 24:13-35" },
+            { question: "Qual a parábola de Lucas que contrasta a vida de um rico e um pobre, destacando a justiça social?", options: ["O Mordomo Infiel", "O Rico e Lázaro", "A Grande Ceia", "As Minas"], answer: "O Rico e Lázaro", reference: "Lucas 16:19-31" },
+            { question: "Qual a genealogia de Jesus em Lucas traça Sua linhagem até quem?", options: ["Abraão", "Davi", "Adão", "Noé"], answer: "Adão", reference: "Lucas 3:23-38" },
+            { question: "Qual o evento que marca o fim do Evangelho de Lucas?", options: ["A Grande Comissão", "A Ascensão de Jesus", "A vinda do Espírito Santo", "A segunda vinda de Jesus"], answer: "A Ascensão de Jesus", reference: "Lucas 24:50-53" },
+            { question: "Quem foi o publicano rico que se arrependeu e encontrou salvação em Lucas 19:1-10?", options: ["Mateus", "Levi", "Zaqueu", "Simão"], answer: "Zaqueu", reference: "Lucas 19:1-10" },
+            { question: "Qual o foco principal de Lucas em relação aos milagres de Jesus?", options: ["A demonstração de poder", "A compaixão de Jesus pelos sofredores", "A punição dos pecadores", "A confirmação de Sua realeza"], answer: "A compaixão de Jesus pelos sofredores", reference: "Introdução ao Livro de Lucas" },
+            { question: "Qual o papel do Espírito Santo no Evangelho de Lucas?", options: ["Ausente", "Secundário", "Central no nascimento e ministério de Jesus", "Apenas para os apóstolos"], answer: "Central no nascimento e ministério de Jesus", reference: "Temas Centrais do Livro de Lucas" },
+            { question: "Qual o cântico de Simeão ao ver Jesus no Templo (Lucas 2:29-32)?", options: ["Magnificat", "Benedictus", "Nunc Dimittis", "Glória in Excelsis Deo"], answer: "Nunc Dimittis", reference: "Lucas 2:29-32" },
+            { question: "O que Jesus ensina sobre a oração em Lucas 11:1-13?", options: ["Orar em público", "A Oração do Pai Nosso e a persistência na oração", "Orar apenas em momentos de crise", "Não é necessário orar"], answer: "A Oração do Pai Nosso e a persistência na oração", reference: "Lucas 11:1-13" },
+            { question: "Qual a parábola de Lucas que destaca a importância da humildade e da oração sincera (Lucas 18:9-14)?", options: ["O Semeador", "O Fariseu e o Publicano", "O Rico Insensato", "O Bom Samaritano"], answer: "O Fariseu e o Publicano", reference: "Lucas 18:9-14" },
+            { question: "Qual a história única de Lucas sobre Jesus curando dez leprosos (Lucas 17:11-19)?", options: ["Todos voltaram para agradecer", "Apenas um samaritano voltou para agradecer", "Nenhum voltou para agradecer", "Jesus curou apenas um"], answer: "Apenas um samaritano voltou para agradecer", reference: "Lucas 17:11-19" },
+            { question: "O que Jesus fez ao chorar sobre Jerusalém em Lucas 19:41-44?", options: ["Profetizou sua destruição", "Curou os doentes", "Ensinou no Templo", "Expulsou os vendilhões"], answer: "Profetizou sua destruição", reference: "Lucas 19:41-44" },
+            { question: "Qual o tema da parábola das Minas em Lucas 19:11-27?", options: ["A importância de investir dinheiro", "A responsabilidade no uso dos dons e talentos", "A história de um rei", "A vinda do Reino de Deus"], answer: "A responsabilidade no uso dos dons e talentos", reference: "Lucas 19:11-27" },
+            { question: "Quem foi o anjo que anunciou o nascimento de João Batista e Jesus?", options: ["Miguel", "Rafael", "Gabriel", "Uriel"], answer: "Gabriel", reference: "Lucas 1:11, 1:26" },
+            { question: "Qual o principal foco de Lucas ao apresentar Jesus como o 'Filho do Homem'?", options: ["Sua divindade", "Sua realeza", "Sua humanidade e identificação com a raça humana", "Sua autoridade"], answer: "Sua humanidade e identificação com a raça humana", reference: "Temas Centrais do Livro de Lucas" },
+            { question: "O que Lucas enfatiza sobre a salvação de Jesus?", options: ["Que é apenas para judeus", "Que é apenas para os ricos", "Que é universal, para todos", "Que é apenas para os justos"], answer: "Que é universal, para todos", reference: "Introdução ao Livro de Lucas" }
+        ];
+
+        let quizQuestionsLucas = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsLucas() {
+            quizQuestionsLucas = []; // Limpa as perguntas anteriores
+            while (quizQuestionsLucas.length < 200) {
+                quizQuestionsLucas.push(...uniqueQuizQuestionsLucas);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsLucas.length > 200) {
+                quizQuestionsLucas = quizQuestionsLucas.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsLucas); // Embaralha o array completo
+        }
+
+        let currentQuizIndexLucas = 0;
+        let scoreLucas = 0;
+        let wrongAnswersLucas = 0;
+
+        function displayQuestionLucas() {
+            const questionElement = document.getElementById('quizQuestionLucas');
+            const optionsElement = document.getElementById('quizOptionsLucas');
+            const feedbackElement = document.getElementById('quizFeedbackLucas');
+            const nextButton = document.querySelector('#quizContainerLucas .quiz-next');
+            const progressElement = document.getElementById('quizProgressLucas');
+
+            if (currentQuizIndexLucas < quizQuestionsLucas.length) {
+                const questionData = quizQuestionsLucas[currentQuizIndexLucas];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerLucas(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexLucas + 1}/${quizQuestionsLucas.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreLucas}, Erros: ${wrongAnswersLucas}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerLucas(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsLucas button');
+            const feedbackElement = document.getElementById('quizFeedbackLucas');
+            const nextButton = document.querySelector('#quizContainerLucas .quiz-next');
+            const scoreElement = document.getElementById('quizScoreLucas');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreLucas++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersLucas++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreLucas}, Erros: ${wrongAnswersLucas}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionLucas() {
+            currentQuizIndexLucas++;
+            displayQuestionLucas();
+        }
+
+        // Gráfico de Temas para Lucas
+        let lucasChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderLucasChart() {
+            const ctx = document.getElementById('lucasChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (lucasChartInstance) {
+                lucasChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['A Universalidade do Evangelho', 'Compaixão de Jesus', 'Oração', 'O Espírito Santo', 'Alegria e Louvor', 'Justiça Social', 'O Filho do Homem', 'Perdão e Graça'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [9, 8, 7, 7, 6, 6, 8, 7], // Valores fictícios para Lucas
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para Universalidade
+                        'rgba(54, 162, 235, 0.7)', // Azul para Compaixão
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Oração
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para Espírito Santo
+                        'rgba(153, 102, 255, 0.7)', // Roxo para Alegria e Louvor
+                        'rgba(255, 159, 64, 0.7)', // Laranja para Justiça Social
+                        'rgba(201, 203, 207, 0.7)', // Cinza para O Filho do Homem
+                        'rgba(100, 149, 237, 0.7)' // Azul claro para Perdão e Graça
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)',
+                        'rgba(100, 149, 237, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            lucasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Lucas',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionLucas('inicio');
+        });
+    </script>
+</body>
+</html>

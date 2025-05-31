@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Tito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tito Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Tito</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionTito('inicioTito')">Início</button>
+            <button class="nav-button" onclick="showSectionTito('introducaoTito')">Introdução</button>
+            <button class="nav-button" onclick="showSectionTito('panoramasTito')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionTito('personagensTito')">Personagens</button>
+            <button class="nav-button" onclick="showSectionTito('esbocosTito')">Esboços</button>
+            <button class="nav-button" onclick="showSectionTito('temasTito')">Temas</button>
+            <button class="nav-button" onclick="showSectionTito('capitulosTito')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionTito('quizTito')">Quiz</button>
+            <button class="nav-button" onclick="showSectionTito('graficoTito')">Gráfico</button>
+        </div>
+
+        <div id="inicioTito" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Tito</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Epístola de Paulo a Tito, uma das 'Epístolas Pastorais' que oferece diretrizes essenciais sobre a ordem da igreja, a sã doutrina e a conduta cristã. Descubra as instruções de Paulo a Tito para organizar as igrejas em Creta, nomear presbíteros e combater as falsas doutrinas. Entenda a importância das boas obras como fruto da fé e a graça salvadora de Deus. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducaoTito" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Tito</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Epístola a Tito é uma das três 'Epístolas Pastorais' (junto com 1 e 2 Timóteo), escritas por Paulo para instruir seus colaboradores sobre a organização e o cuidado das igrejas. Esta carta foi escrita provavelmente entre a primeira e a segunda prisão de Paulo em Roma, por volta de 64 d.C., após sua libertação. O destinatário é Tito, um gentio convertido e um dos mais confiáveis colaboradores de Paulo, a quem o apóstolo havia deixado em Creta para organizar as igrejas locais.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito desta carta é fornecer a Tito orientações práticas sobre a nomeação de presbíteros (anciãos) e bispos, as qualificações necessárias para esses líderes, e a importância de promover a sã doutrina e a boa conduta entre os crentes. Paulo também instrui Tito sobre como lidar com os falsos mestres e judeus rebeldes que estavam perturbando as igrejas em Creta, uma ilha conhecida por seus habitantes com má reputação.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Tito é uma carta de grande relevância para a liderança da igreja e para a vida cristã em geral. Ela enfatiza a inseparabilidade entre a fé e as obras, mostrando que a graça de Deus que nos salva também nos capacita a viver uma vida de retidão e boas obras. A carta destaca a importância da sã doutrina como base para a piedade e a necessidade de que os crentes vivam de forma exemplar em todas as esferas da vida, sendo um testemunho eficaz do evangelho para o mundo.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Saudação e Qualificações para Presbíteros.</strong> Paulo saúda Tito, explica o propósito de tê-lo deixado em Creta e lista as qualificações para a nomeação de presbíteros. Também aborda os falsos mestres.</li>
+                <li><strong>Capítulo 2: Ensinos para Diferentes Grupos.</strong> Instruções sobre a sã doutrina para homens e mulheres mais velhos, jovens, e escravos, e a motivação para a vida piedosa baseada na graça de Deus.</li>
+                <li><strong>Capítulo 3: Boas Obras, Autoridades e Advertências Finais.</strong> Exortações para submissão às autoridades, boas obras, e evitar contendas. Instruções sobre como lidar com pessoas divisivas e saudações finais.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Tito é um guia prático para a vida e a liderança cristã, enfatizando a importância da sã doutrina e das boas obras como evidência da fé.</p>
+        </div>
+
+        <div id="panoramasTito" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Tito</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Tito é uma epístola pastoral que fornece diretrizes para a organização da igreja e a conduta cristã.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Saudação e Qualificações para Presbíteros (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação (Capítulo 1:1-4):</strong>
+                    <ul>
+                        <li>Paulo, servo de Deus e apóstolo de Jesus Cristo, a Tito, verdadeiro filho na fé.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Propósito da Missão de Tito em Creta (Capítulo 1:5):</strong>
+                    <ul>
+                        <li>Ordenar o que faltava e constituir presbíteros em cada cidade.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Qualificações para Presbíteros/Bispos (Capítulo 1:6-9):</strong>
+                    <ul>
+                        <li>Irrepreensível, marido de uma só mulher, filhos fiéis, não acusados de dissolução.</li>
+                        <li>Não soberbo, nem iracundo, nem dado ao vinho, nem espancador, nem cobiçoso de torpe ganância.</li>
+                        <li>Hospitaleiro, amigo do bem, sóbrio, justo, santo, temperante.</li>
+                        <li>Retendo firme a fiel palavra, para que possa exortar na sã doutrina e convencer os contradizentes.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Advertência Contra Falsos Mestres (Capítulo 1:10-16):</strong>
+                    <ul>
+                        <li>Muitos desordenados, faladores vãos e enganadores, especialmente os da circuncisão.</li>
+                        <li>É preciso tapar-lhes a boca, pois subvertem casas inteiras.</li>
+                        <li>Os cretenses são sempre mentirosos, bestas ruins, ventres preguiçosos.</li>
+                        <li>Repreendê-los severamente para que sejam sãos na fé.</li>
+                        <li>Para os puros, tudo é puro; para os impuros, nada é puro.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Ensinos para Diferentes Grupos (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Doutrina Sã (Capítulo 2:1):</strong>
+                    <ul>
+                        <li>Tu, porém, fala o que convém à sã doutrina.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Instruções para Homens Idosos (Capítulo 2:2):</strong>
+                    <ul>
+                        <li>Sóbrios, graves, prudentes, sãos na fé, no amor e na paciência.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Instruções para Mulheres Idosas (Capítulo 2:3-5):</strong>
+                    <ul>
+                        <li>Reverentes no seu porte, não caluniadoras, não dadas a muito vinho.</li>
+                        <li>Mestras no bem, para que ensinem as jovens a amar seus maridos e filhos, a serem prudentes, castas, boas donas de casa, sujeitas a seus maridos.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Instruções para Jovens (Capítulo 2:6-8):</strong>
+                    <ul>
+                        <li>Exortar os jovens a serem sóbrios.</li>
+                        <li>Ser exemplo de boas obras, na doutrina, mostrando integridade, gravidade, linguagem sã e irrepreensível.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Instruções para Escravos (Capítulo 2:9-10):</strong>
+                    <ul>
+                        <li>Que sejam sujeitos a seus senhores, em tudo agradáveis, não contradizendo.</li>
+                        <li>Não defraudando, antes mostrando toda a boa lealdade.</li>
+                    </ul>
+                </li>
+                <li><strong>F. A Graça de Deus e a Vida Piedosa (Capítulo 2:11-15):</strong>
+                    <ul>
+                        <li>A graça de Deus se manifestou, trazendo salvação a todos os homens.</li>
+                        <li>Ensinando-nos a renunciar à impiedade e às concupiscências mundanas.</li>
+                        <li>Viver sóbria, justa e piamente neste presente século.</li>
+                        <li>Aguardando a bem-aventurada esperança e o aparecimento da glória do grande Deus e nosso Senhor Jesus Cristo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Boas Obras e Advertências Finais (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Deveres Cívicos e Boas Obras (Capítulo 3:1-2):</strong>
+                    <ul>
+                        <li>Sujeitar-se aos principados e potestades, a obedecer, a estar preparado para toda boa obra.</li>
+                        <li>Não difamar ninguém, não ser contencioso, mas brando, mostrando toda a mansidão para com todos os homens.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Base da Salvação (Capítulo 3:3-7):</strong>
+                    <ul>
+                        <li>Éramos insensatos, desobedientes, enganados, servindo a várias concupiscências.</li>
+                        <li>Mas quando a benignidade e o amor de Deus nosso Salvador para com os homens se manifestou, Ele nos salvou.</li>
+                        <li>Não pelas obras de justiça que houvéssemos feito, mas segundo a sua misericórdia.</li>
+                        <li>Pela lavagem da regeneração e da renovação do Espírito Santo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Importância das Boas Obras (Capítulo 3:8):</strong>
+                    <ul>
+                        <li>Que os que creem em Deus procurem aplicar-se às boas obras.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Evitar Contendas e Lidar com Divisivos (Capítulo 3:9-11):</strong>
+                    <ul>
+                        <li>Evitar questões loucas, genealogias e contendas da lei, porque são inúteis e vãs.</li>
+                        <li>Ao homem herege, depois da primeira e segunda admoestação, evita-o.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Instruções Pessoais e Saudações Finais (Capítulo 3:12-15):</strong>
+                    <ul>
+                        <li>Quando eu te enviar Ártemas ou Tíquico, procura vir ter comigo a Nicópolis.</li>
+                        <li>Ajuda com diligência a Zenas, doutor da lei, e a Apolo.</li>
+                        <li>Que os nossos aprendam também a aplicar-se às boas obras.</li>
+                        <li>Saudações de todos os que estão comigo. A graça seja com todos vós.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">A Epístola a Tito é fundamental para entender a organização e a vida prática da igreja. Ela sublinha a importância da sã doutrina como fundamento para a vida cristã autêntica e as boas obras como sua manifestação natural. A carta demonstra que a salvação pela graça não anula a necessidade de uma vida transformada, mas a capacita. É um manual para a liderança pastoral e para cada crente que busca viver de forma coerente com o evangelho, sendo luz em um mundo que precisa de exemplos de piedade e retidão.</p>
+        </div>
+
+        <div id="personagensTito" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridTito">
+            </div>
+        </div>
+
+        <div id="esbocosTito" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Tito</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Tito, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Qualificações para Presbíteros e Combate aos Falsos Mestres.</li>
+                <li><strong>Capítulo 2:</strong> Ensinos para Diferentes Grupos e a Graça Salvadora.</li>
+                <li><strong>Capítulo 3:</strong> Boas Obras, Autoridades e Advertências Finais.</li>
+            </ul>
+        </div>
+
+        <div id="temasTito" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Tito</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Sã Doutrina:</strong> A importância de ensinar e reter a verdade bíblica.</li>
+                <li><strong>Ordem e Liderança na Igreja:</strong> Qualificações para presbíteros e a organização da comunidade.</li>
+                <li><strong>Boas Obras e Conduta Cristã:</strong> A vida transformada como evidência da fé e testemunho.</li>
+                <li><strong>Combate às Falsas Doutrinas:</strong> A necessidade de refutar ensinos enganosos.</li>
+                <li><strong>A Graça de Deus:</strong> A base da salvação e da vida piedosa.</li>
+                <li><strong>Deveres Cívicos:</strong> A submissão às autoridades e o bom comportamento na sociedade.</li>
+            </ul>
+        </div>
+
+        <div id="capitulosTito" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Tito</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersTito">
+            </div>
+        </div>
+
+        <div id="quizTito" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Tito</h2>
+            <div id="quizContainerTito" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionTito"></p>
+                <div id="quizOptionsTito" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackTito" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionTito()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressTito"></span></p>
+                <p>Pontuação: <span id="quizScoreTito">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="graficoTito" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Tito</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Tito.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="titoChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModalTito" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalTito()">&times;</span>
+                <h3 id="modalCharacterNameTito" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionTito" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data-tito">
+        {
+            "name": "Livro Interativo de Tito",
+            "short_name": "Tito",
+            "description": "Explore o livro de Tito de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=TTO",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=TTO",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script-tito">
+        // service-worker.js for Tito
+        const CACHE_NAME_TITO = 'tito-interactive-v1';
+        const urlsToCacheTito = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME_TITO)
+                    .then(cache => {
+                        console.log('Opened cache for Tito');
+                        return cache.addAll(urlsToCacheTito);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME_TITO];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker para Tito
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script-tito');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker para Tito registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker para Tito:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente para Tito
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data-tito').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções de Tito
+        function showSectionTito(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('active');
+            } else {
+                console.error(`Seção com ID '${sectionId}' não encontrada.`);
+            }
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagensTito') {
+                generateCharacterButtonsTito();
+            }
+            if (sectionId === 'capitulosTito') {
+                generateChapterLinksTito();
+            }
+            if (sectionId === 'quizTito') {
+                shuffleQuizQuestionsTito(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexTito = 0; // Reinicia o quiz
+                scoreTito = 0;
+                wrongAnswersTito = 0;
+                document.getElementById('quizScoreTito').textContent = `Acertos: ${scoreTito}, Erros: ${wrongAnswersTito}`;
+                displayQuestionTito();
+            }
+            if (sectionId === 'graficoTito') {
+                renderTitoChart();
+            }
+        }
+
+        // Dados dos personagens para Tito
+        const characterDetailsTito = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta carta, instruindo Tito sobre a organização da igreja em Creta."
+            },
+            "Tito": {
+                name: "Tito",
+                description: "Colaborador de Paulo, um gentio convertido, a quem esta carta foi endereçada. Deixado em Creta para organizar as igrejas e nomear presbíteros."
+            },
+            "Cretenses": {
+                name: "Cretenses",
+                description: "Os habitantes da ilha de Creta, descritos por um profeta deles como 'sempre mentirosos, bestas ruins, ventres preguiçosos'."
+            },
+            "Falsos Mestres": {
+                name: "Falsos Mestres",
+                description: "Indivíduos que perturbavam as igrejas em Creta com doutrinas enganosas, especialmente os da circuncisão, a quem Tito deveria silenciar."
+            },
+            "Ártemas": {
+                name: "Ártemas",
+                description: "Mencionado por Paulo como alguém que ele planeja enviar a Tito em Nicópolis."
+            },
+            "Tíquico": {
+                name: "Tíquico",
+                description: "Mencionado por Paulo como uma alternativa a Ártemas para ser enviado a Tito."
+            },
+            "Zenas": {
+                name: "Zenas",
+                description: "Um doutor da lei, a quem Paulo pede a Tito que ajude em sua viagem, junto com Apolo."
+            },
+            "Apolo": {
+                name: "Apolo",
+                description: "Um pregador eloquente, a quem Paulo pede a Tito que ajude em sua viagem, junto com Zenas."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, a fonte da graça, salvação e sã doutrina."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalTito(characterName) {
+            const details = characterDetailsTito[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameTito').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionTito').textContent = details.description;
+                document.getElementById('characterModalTito').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalTito() {
+            document.getElementById('characterModalTito').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsTito() {
+            const grid = document.getElementById('characterGridTito');
+            grid.innerHTML = '';
+            for (const key in characterDetailsTito) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalTito(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos (Tito tem 3 capítulos)
+        function generateChapterLinksTito() {
+            const chaptersDiv = document.getElementById('chaptersTito');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 3; i++) { // Tito tem 3 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/tt/${i}`; // Link para a Bíblia Online, Tito
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Tito (perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsTito = [
+            { question: "Quem é o autor da Epístola a Tito?", options: ["Pedro", "João", "Paulo", "Tiago"], answer: "Paulo", reference: "Capítulo 1:1" },
+            { question: "Onde Paulo deixou Tito para organizar as igrejas?", options: ["Em Éfeso", "Em Corinto", "Em Creta", "Em Roma"], answer: "Em Creta", reference: "Capítulo 1:5" },
+            { question: "Qual a principal tarefa de Tito em Creta?", options: ["Construir um templo", "Nomear presbíteros em cada cidade", "Arrecadar dinheiro", "Escrever novas leis"], answer: "Nomear presbíteros em cada cidade", reference: "Capítulo 1:5" },
+            { question: "Qual é uma das qualificações para um presbítero, segundo Tito 1:6?", options: ["Ser solteiro", "Ser rico", "Marido de uma só mulher", "Ter muitos bens"], answer: "Marido de uma só mulher", reference: "Capítulo 1:6" },
+            { question: "Como Paulo descreve os cretenses no Capítulo 1?", options: ["Sempre honestos", "Diligentes e trabalhadores", "Sempre mentirosos, bestas ruins, ventres preguiçosos", "Sábios e prudentes"], answer: "Sempre mentirosos, bestas ruins, ventres preguiçosos", reference: "Capítulo 1:12" },
+            { question: "O que Paulo instrui Tito a falar no Capítulo 2?", options: ["Histórias antigas", "O que convém à sã doutrina", "Opiniões pessoais", "Fofocas"], answer: "O que convém à sã doutrina", reference: "Capítulo 2:1" },
+            { question: "O que as mulheres idosas devem ensinar às jovens, segundo Tito 2:4-5?", options: ["A serem independentes", "A amar seus maridos e filhos, a serem prudentes e castas", "A buscar fama", "A viajar pelo mundo"], answer: "A amar seus maridos e filhos, a serem prudentes e castas", reference: "Capítulo 2:4-5" },
+            { question: "O que a graça de Deus nos ensina a renunciar, segundo Tito 2:11-12?", options: ["À impiedade e às concupiscências mundanas", "Ao trabalho", "À oração", "Às boas obras"], answer: "À impiedade e às concupiscências mundanas", reference: "Capítulo 2:11-12" },
+            { question: "Para que os crentes devem estar preparados, segundo Tito 3:1?", options: ["Para toda boa obra", "Para a guerra", "Para a riqueza", "Para a ociosidade"], answer: "Para toda boa obra", reference: "Capítulo 3:1" },
+            { question: "Por que fomos salvos, segundo Tito 3:5?", options: ["Pelas obras de justiça que fizemos", "Segundo a sua misericórdia, pela lavagem da regeneração", "Por nossa própria força", "Por nosso conhecimento"], answer: "Segundo a sua misericórdia, pela lavagem da regeneração", reference: "Capítulo 3:5" },
+            { question: "Com quem Tito deveria evitar contendas, segundo Tito 3:9?", options: ["Com os irmãos na fé", "Com os falsos mestres", "Com os apóstolos", "Com todos os homens"], answer: "Com os falsos mestres", reference: "Capítulo 3:9" },
+            { question: "Quem Paulo planeja enviar a Tito em Nicópolis?", options: ["Timóteo ou Lucas", "Ártemas ou Tíquico", "Marcos ou Barnabé", "Pedro ou João"], answer: "Ártemas ou Tíquico", reference: "Capítulo 3:12" },
+            { question: "Qual o tema central do Capítulo 1 de Tito?", options: ["A vida familiar", "Qualificações para Presbíteros e Combate aos Falsos Mestres", "A oração", "A história de Israel"], answer: "Qualificações para Presbíteros e Combate aos Falsos Mestres", reference: "Esboços do Livro de Tito" },
+            { question: "Qual o tema central do Capítulo 2 de Tito?", options: ["A criação do mundo", "Ensinos para Diferentes Grupos e a Graça Salvadora", "A lei de Moisés", "Profecias sobre o fim dos tempos"], answer: "Ensinos para Diferentes Grupos e a Graça Salvadora", reference: "Esboços do Livro de Tito" },
+            { question: "Qual o tema central do Capítulo 3 de Tito?", options: ["A vida de Jesus", "Boas Obras, Autoridades e Advertências Finais", "A fundação da igreja", "Milagres de Paulo"], answer: "Boas Obras, Autoridades e Advertências Finais", reference: "Esboços do Livro de Tito" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsTito = [];
+        const numCopiesTito = Math.ceil(200 / uniqueQuizQuestionsTito.length);
+        for (let i = 0; i < numCopiesTito; i++) {
+            allQuizQuestionsTito = allQuizQuestionsTito.concat(uniqueQuizQuestionsTito);
+        }
+        allQuizQuestionsTito = allQuizQuestionsTito.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsTito = [];
+        let currentQuizIndexTito = 0;
+        let scoreTito = 0;
+        let wrongAnswersTito = 0;
+        let titoChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsTito() {
+            shuffledQuizQuestionsTito = [...allQuizQuestionsTito]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsTito);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressTito() {
+            const progressElement = document.getElementById('quizProgressTito');
+            progressElement.textContent = `${currentQuizIndexTito + 1}/${shuffledQuizQuestionsTito.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionTito() {
+            if (currentQuizIndexTito >= shuffledQuizQuestionsTito.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionTito').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsTito').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreTito}, Erros: ${wrongAnswersTito}</p>`;
+                document.getElementById('quizFeedbackTito').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsTito[currentQuizIndexTito];
+            document.getElementById('quizQuestionTito').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsTito');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerTito(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackTito').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressTito();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerTito(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackTito');
+            const optionsButtons = document.querySelectorAll('#quizOptionsTito button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreTito++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersTito++;
+            }
+            document.getElementById('quizScoreTito').textContent = `Acertos: ${scoreTito}, Erros: ${wrongAnswersTito}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionTito() {
+            currentQuizIndexTito++;
+            displayQuestionTito();
+        }
+
+        // Dados para o gráfico de temas de Tito
+        const titoChartData = {
+            labels: ['Sã Doutrina', 'Ordem na Igreja', 'Boas Obras', 'Combate Falsos Mestres', 'Graça de Deus', 'Deveres Cívicos'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 22, 18, 15, 10], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const titoChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Tito',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderTitoChart() {
+            const ctx = document.getElementById('titoChart').getContext('2d');
+            if (titoChartInstance) {
+                titoChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            titoChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: titoChartData,
+                options: titoChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

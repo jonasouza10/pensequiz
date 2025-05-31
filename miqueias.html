@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Miqueias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Miqueias Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Miqueias</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionMiqueias('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionMiqueias('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionMiqueias('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionMiqueias('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionMiqueias('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionMiqueias('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionMiqueias('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionMiqueias('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionMiqueias('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Miqueias</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Miqueias, uma profecia poderosa que denuncia a injustiça social, a corrupção religiosa e a idolatria em Judá e Israel. Descubra a mensagem de juízo e esperança de Deus, a promessa do Messias nascido em Belém, e o chamado divino à justiça, misericórdia e humildade. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Miqueias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Miqueias é uma das doze profecias menores do Antigo Testamento. Escrito por Miqueias de Moresete, um contemporâneo de Isaías, Amós e Oseias, ele profetizou durante os reinados dos reis Jotão, Acaz e Ezequias de Judá (aproximadamente 740-687 a.C.). Sua mensagem é direcionada tanto a Judá (especialmente Jerusalém) quanto a Israel (especialmente Samaria), denunciando a corrupção generalizada e a iminência do juízo divino.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Miqueias é conhecido por sua forte condenação da injustiça social, da opressão dos pobres pelos ricos e poderosos, da corrupção dos líderes religiosos e políticos, e da idolatria. Ele proclama que Deus trará juízo sobre ambas as nações por suas transgressões, resultando na destruição de Samaria e na invasão de Judá.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">No entanto, o livro de Miqueias não é apenas uma mensagem de condenação. Ele também contém promessas gloriosas de restauração e esperança. Uma das profecias mais notáveis é a do nascimento do Messias em Belém (Miqueias 5:2), que seria o governante de Israel e traria paz. O livro culmina com uma das passagens mais famosas da Bíblia (Miqueias 6:8), que resume o que Deus realmente exige de Seu povo: "Ele te declarou, ó homem, o que é bom; e que é o que o Senhor pede de ti, senão que pratiques a justiça, e ames a misericórdia, e andes humildemente com o teu Deus?"</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-3: Profecias de Juízo.</strong> Denúncia da idolatria e injustiça em Samaria e Jerusalém, com a proclamação da destruição iminente.</li>
+                <li><strong>Capítulos 4-5: Profecias de Restauração e o Messias.</strong> Promessas de restauração de Sião, a vinda do Messias de Belém e um futuro de paz.</li>
+                <li><strong>Capítulos 6-7: O Processo de Deus contra Israel e a Oração de Confiança.</strong> Deus apresenta Sua queixa contra o povo, o chamado à verdadeira religião e a oração final de Miqueias por misericórdia e restauração.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Miqueias é um livro que equilibra a severidade do juízo divino com a profundidade da misericórdia e as promessas de um futuro glorioso, oferecendo uma visão abrangente da justiça e do amor de Deus.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Miqueias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Miqueias apresenta uma mensagem de juízo e esperança, com foco na justiça social e na vinda do Messias.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Juízo Sobre Samaria e Judá (Capítulos 1-3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Vinda do Senhor em Juízo (Capítulo 1):</strong>
+                    <ul>
+                        <li>Deus desce para julgar a idolatria e a corrupção.</li>
+                        <li>Samaria será reduzida a ruínas.</li>
+                        <li>Judá também sofrerá as consequências.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Denúncias Contra a Injustiça Social (Capítulo 2):</strong>
+                    <ul>
+                        <li>Condenação dos que oprimem os pobres e cobiçam terras.</li>
+                        <li>A profecia de que o povo será levado cativo.</li>
+                        <li>Promessa de um remanescente restaurado.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Condenação dos Líderes Corruptos (Capítulo 3):</strong>
+                    <ul>
+                        <li>Crítica aos governantes, sacerdotes e profetas que exploram o povo.</li>
+                        <li>Jerusalém e o templo serão destruídos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Restauração e o Reino Messiânico (Capítulos 4-5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Exaltação de Sião e a Paz Futura (Capítulo 4):</strong>
+                    <ul>
+                        <li>O monte do Senhor será exaltado.</li>
+                        <li>As nações afluirão para aprender os caminhos de Deus.</li>
+                        <li>Tempo de paz universal: "forjarão as suas espadas em enxadões".</li>
+                        <li>Restauração do remanescente.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Governante de Belém (Capítulo 5):</strong>
+                    <ul>
+                        <li>Profecia do nascimento do Messias em Belém Efrata.</li>
+                        <li>Ele será o Pastor de Israel e a sua paz.</li>
+                        <li>A derrota dos inimigos e a purificação de Israel.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Demanda de Deus e a Oração Final (Capítulos 6-7)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Processo de Deus Contra Israel (Capítulo 6:1-8):</strong>
+                    <ul>
+                        <li>Deus lembra Israel de Suas obras passadas.</li>
+                        <li>A famosa pergunta: "Com que me apresentarei ao Senhor?"</li>
+                        <li>A resposta de Deus: "praticar a justiça, amar a misericórdia e andar humildemente com o teu Deus."</li>
+                    </ul>
+                </li>
+                <li><strong>B. Mais Denúncias e Lamento (Capítulo 6:9-7:6):</strong>
+                    <ul>
+                        <li>Condenação da desonestidade e da violência.</li>
+                        <li>Lamento do profeta pela corrupção generalizada.</li>
+                        <li>A falta de confiança entre as pessoas.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Oração de Confiança e Esperança (Capítulo 7:7-20):</strong>
+                    <ul>
+                        <li>Miqueias expressa sua esperança em Deus.</li>
+                        <li>Deus perdoa a iniquidade e Se deleita na misericórdia.</li>
+                        <li>Promessa de restauração e fidelidade à aliança.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Miqueias é um poderoso lembrete da justiça e da santidade de Deus, que não tolera a iniquidade, especialmente a opressão dos vulneráveis. Ele enfatiza a importância da religião prática, que se manifesta em ações de justiça e misericórdia, e não apenas em rituais. A profecia messiânica de Belém é um ponto alto, apontando para a vinda do Salvador. Miqueias oferece um equilíbrio entre a severidade do juízo e a certeza da misericórdia e restauração divinas para aqueles que se voltam para Deus com um coração humilde e obediente.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridMiqueias">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Miqueias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Miqueias, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Juízo sobre Samaria e Judá</strong>
+                    <ul>
+                        <li>1.1-7: A Vinda do Senhor para Julgar Samaria.</li>
+                        <li>1.8-16: O Lamento de Miqueias e o Juízo sobre Judá.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: Denúncias contra a Injustiça Social</strong>
+                    <ul>
+                        <li>2.1-5: Condenação dos Opressores.</li>
+                        <li>2.6-11: Falsos Profetas e a Corrupção.</li>
+                        <li>2.12-13: Promessa de Restauração para o Remanescente.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: Condenação dos Líderes Corruptos</strong>
+                    <ul>
+                        <li>3.1-4: Governantes Injustos.</li>
+                        <li>3.5-8: Profetas e Sacerdotes Corruptos.</li>
+                        <li>3.9-12: A Destruição de Jerusalém.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: A Exaltação de Sião e a Paz Futura</strong>
+                    <ul>
+                        <li>4.1-5: O Monte do Senhor Exaltado e a Paz Universal.</li>
+                        <li>4.6-8: A Restauração do Remanescente.</li>
+                        <li>4.9-13: A Angústia e a Libertação de Sião.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 5: O Governante de Belém</strong>
+                    <ul>
+                        <li>5.1: O Cerco de Jerusalém.</li>
+                        <li>5.2-6: O Nascimento do Messias em Belém e Sua Grandeza.</li>
+                        <li>5.7-9: O Remanescente de Jacó entre as Nações.</li>
+                        <li>5.10-15: A Purificação e o Juízo Final.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 6: O Processo de Deus contra Israel</strong>
+                    <ul>
+                        <li>6.1-5: A Queixa de Deus contra Seu Povo.</li>
+                        <li>6.6-8: O Que Deus Requer: Justiça, Misericórdia e Humildade.</li>
+                        <li>6.9-16: Mais Denúncias e Juízo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 7: O Lamento do Profeta e a Oração de Confiança</strong>
+                    <ul>
+                        <li>7.1-6: A Corrupção Generalizada e o Lamento.</li>
+                        <li>7.7-10: A Esperança em Deus.</li>
+                        <li>7.11-13: A Restauração de Jerusalém.</li>
+                        <li>7.14-20: Oração por Misericórdia e Fidelidade de Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Miqueias</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Justiça Social:</strong> Condenação da opressão e da exploração dos pobres.</li>
+                <li><strong>Corrupção:</strong> Denúncia de líderes religiosos e políticos corruptos.</li>
+                <li><strong>Idolatria:</strong> A adoração de outros deuses e a infidelidade a Deus.</li>
+                <li><strong>Juízo Divino:</strong> A certeza do castigo de Deus sobre o pecado.</li>
+                <li><strong>Restauração e Esperança:</strong> Promessas de um futuro de paz e renovação para Israel.</li>
+                <li><strong>Profecia Messiânica:</strong> O anúncio do nascimento do Messias em Belém.</li>
+                <li><strong>O Que Deus Requer:</strong> O chamado à justiça, misericórdia e humildade.</li>
+                <li><strong>Fidelidade de Deus:</strong> A certeza de que Deus cumprirá Suas promessas e perdoará Seu povo.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Miqueias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersMiqueias">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Miqueias</h2>
+            <div id="quizContainerMiqueias" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionMiqueias"></p>
+                <div id="quizOptionsMiqueias" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackMiqueias" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionMiqueias()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressMiqueias"></span></p>
+                <p>Pontuação: <span id="quizScoreMiqueias">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Miqueias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Miqueias.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="miqueiasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalMiqueias()">&times;</span>
+                <h3 id="modalCharacterNameMiqueias" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionMiqueias" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Miqueias",
+            "short_name": "Miqueias",
+            "description": "Explore o livro de Miqueias de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=MQ",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=MQ",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'miqueias-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionMiqueias(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsMiqueias();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksMiqueias();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsMiqueias(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexMiqueias = 0; // Reinicia o quiz
+                scoreMiqueias = 0;
+                wrongAnswersMiqueias = 0;
+                document.getElementById('quizScoreMiqueias').textContent = `Acertos: ${scoreMiqueias}, Erros: ${wrongAnswersMiqueias}`;
+                displayQuestionMiqueias();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderMiqueiasChart();
+            }
+        }
+
+        // Dados dos personagens para Miqueias
+        const characterDetailsMiqueias = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano e Justo Juiz, que denuncia a iniquidade e promete restauração e um Messias."
+            },
+            "Miqueias": {
+                name: "Miqueias",
+                description: "O profeta de Moresete, que entregou as mensagens de juízo e esperança de Deus a Judá e Israel."
+            },
+            "Povo de Judá/Israel": {
+                name: "Povo de Judá/Israel",
+                description: "As nações para as quais Miqueias profetizou, denunciadas por sua injustiça, corrupção e idolatria."
+            },
+            "Líderes Corruptos": {
+                name: "Líderes Corruptos",
+                description: "Governantes, sacerdotes e profetas que oprimiam o povo e distorciam a justiça, sendo severamente condenados por Miqueias."
+            },
+            "O Remanescente": {
+                name: "O Remanescente",
+                description: "Aqueles que permaneceriam fiéis a Deus e seriam restaurados após o juízo, um tema de esperança no livro."
+            },
+            "O Messias": {
+                name: "O Messias",
+                description: "O futuro governante de Israel, cuja vinda de Belém é profetizada por Miqueias, trazendo paz e pastoreio."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalMiqueias(characterName) {
+            const details = characterDetailsMiqueias[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameMiqueias').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionMiqueias').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalMiqueias() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsMiqueias() {
+            const grid = document.getElementById('characterGridMiqueias');
+            grid.innerHTML = '';
+            for (const key in characterDetailsMiqueias) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalMiqueias(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksMiqueias() {
+            const chaptersDiv = document.getElementById('chaptersMiqueias');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 7; i++) { // Miqueias tem 7 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/mq/${i}`; // Link para a Bíblia Online, Miqueias
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Miqueias (25 perguntas únicas)
+        const uniqueQuizQuestionsMiqueias = [
+            { question: "Qual o nome do profeta que escreveu o livro de Miqueias?", options: ["Jonas", "Isaías", "Miqueias", "Amós"], answer: "Miqueias", reference: "Miqueias 1:1" },
+            { question: "Durante o reinado de quais reis de Judá Miqueias profetizou?", options: ["Davi e Salomão", "Jotão, Acaz e Ezequias", "Josias e Jeoaquim", "Manassés e Amom"], answer: "Jotão, Acaz e Ezequias", reference: "Miqueias 1:1" },
+            { question: "Qual cidade será reduzida a ruínas no juízo de Deus, conforme Miqueias 1?", options: ["Jerusalém", "Belém", "Samaria", "Nínive"], answer: "Samaria", reference: "Miqueias 1:6" },
+            { question: "Miqueias denunciava principalmente qual tipo de pecado?", options: ["Idolatria e injustiça social", "Falta de ofertas", "Desobediência militar", "Orgulho pessoal"], answer: "Idolatria e injustiça social", reference: "Miqueias 2:1-2, 3:1-3" },
+            { question: "O que Miqueias 3 condena severamente?", options: ["O povo em geral", "Os falsos profetas e sacerdotes", "Os comerciantes", "Os agricultores"], answer: "Os falsos profetas e sacerdotes", reference: "Miqueias 3:5-8" },
+            { question: "Qual cidade é profetizada como o local de nascimento do Messias?", options: ["Jerusalém", "Nazaré", "Belém Efrata", "Samaria"], answer: "Belém Efrata", reference: "Miqueias 5:2" },
+            { question: "O que o Messias fará por Israel, conforme Miqueias 5?", options: ["Será um rei guerreiro", "Será um governante e pastor", "Construirá um templo", "Estabelecerá uma nova lei"], answer: "Será um governante e pastor", reference: "Miqueias 5:4" },
+            { question: "Qual é a famosa passagem que resume o que Deus pede do homem?", options: ["Amar a Deus e ao próximo", "Praticar a justiça, amar a misericórdia e andar humildemente com Deus", "Oferecer sacrifícios e holocaustos", "Construir grandes templos"], answer: "Praticar a justiça, amar a misericórdia e andar humildemente com Deus", reference: "Miqueias 6:8" },
+            { question: "Miqueias compara o juízo de Deus a quê, no capítulo 1?", options: ["Uma tempestade", "Um incêndio", "Um terremoto", "Um leão rugindo"], answer: "Um terremoto", reference: "Miqueias 1:3-4" },
+            { question: "No futuro, o que as nações farão com suas espadas e lanças?", options: ["As afiarão para a guerra", "As guardarão em museus", "As forjarão em enxadões e podadeiras", "As venderão para outras nações"], answer: "As forjarão em enxadões e podadeiras", reference: "Miqueias 4:3" },
+            { question: "Quantos capítulos tem o livro de Miqueias?", options: ["5", "6", "7", "8"], answer: "7", reference: "Esboços do Livro de Miqueias" },
+            { question: "Qual é o principal tema do livro de Miqueias?", options: ["A história de Israel", "A vida dos profetas", "Juízo e esperança", "A criação do mundo"], answer: "Juízo e esperança", reference: "Temas Centrais do Livro de Miqueias" },
+            { question: "Miqueias lamenta a corrupção generalizada em qual capítulo?", options: ["Capítulo 1", "Capítulo 3", "Capítulo 5", "Capítulo 7"], answer: "Capítulo 7", reference: "Miqueias 7:1-6" },
+            { question: "O que Deus se deleita em fazer, conforme Miqueias 7:18?", options: ["Julgar as nações", "Perdoar a iniquidade", "Destruir os inimigos", "Receber sacrifícios"], answer: "Perdoar a iniquidade", reference: "Miqueias 7:18" },
+            { question: "Qual a atitude que Miqueias 6:8 descreve como 'andar humildemente'?", options: ["Ser submisso aos reis", "Reconhecer a soberania de Deus e depender Dele", "Viver na pobreza", "Não ter ambições"], answer: "Reconhecer a soberania de Deus e depender Dele", reference: "Miqueias 6:8 (Interpretação)" },
+            { question: "A quem Miqueias 4:1-5 se refere como 'o monte do Senhor'?", options: ["Monte Sinai", "Monte Carmelo", "Monte Sião (Jerusalém)", "Monte das Oliveiras"], answer: "Monte Sião (Jerusalém)", reference: "Miqueias 4:1" },
+            { question: "Qual a promessa de Deus para o remanescente de Jacó em Miqueias 5:7?", options: ["Serão destruídos", "Serão como orvalho e chuvas entre as nações", "Serão escravizados", "Serão esquecidos"], answer: "Serão como orvalho e chuvas entre as nações", reference: "Miqueias 5:7" },
+            { question: "Miqueias profetiza contra quais duas cidades/capitais?", options: ["Roma e Atenas", "Tiro e Sidom", "Samaria e Jerusalém", "Babilônia e Nínive"], answer: "Samaria e Jerusalém", reference: "Miqueias 1:1, 5" },
+            { question: "O que os falsos profetas faziam, segundo Miqueias 3:5?", options: ["Curavam os doentes", "Proclamavam paz quando havia comida", "Falavam a verdade ao povo", "Conduziam o povo à justiça"], answer: "Proclamavam paz quando havia comida", reference: "Miqueias 3:5" },
+            { question: "Qual a principal característica do Messias em Miqueias 5:4?", options: ["Será um grande guerreiro", "Será grande até os confins da terra", "Fará milagres", "Construirá um novo templo"], answer: "Será grande até os confins da terra", reference: "Miqueias 5:4" },
+            { question: "Miqueias 7:7 expressa que o profeta espera em quem?", options: ["Nos reis", "Nos exércitos", "No Senhor", "Nos sacerdotes"], answer: "No Senhor", reference: "Miqueias 7:7" },
+            { question: "O que Miqueias 2:1-2 denunciava em relação à propriedade?", options: ["A compra de terras", "A herança de terras", "A cobiça e o roubo de terras e casas", "A venda de terras"], answer: "A cobiça e o roubo de terras e casas", reference: "Miqueias 2:1-2" },
+            { question: "Qual é a atitude de Deus em relação à iniquidade em Miqueias 7:18?", options: ["Ele a ignora", "Ele a pune severamente", "Ele perdoa a iniquidade", "Ele a esquece"], answer: "Ele perdoa a iniquidade", reference: "Miqueias 7:18" },
+            { question: "O que acontecerá com as fortalezas das cidades, conforme Miqueias 5:11?", options: ["Serão reforçadas", "Serão destruídas", "Serão usadas para defesa", "Serão transformadas em templos"], answer: "Serão destruídas", reference: "Miqueias 5:11" },
+            { question: "Miqueias é conhecido por sua ênfase em qual aspecto da fé?", options: ["Rituais e sacrifícios", "Justiça e ética", "Profecias futuras", "A vida no deserto"], answer: "Justiça e ética", reference: "Miqueias 6:8" }
+        ];
+
+        let quizQuestionsMiqueias = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsMiqueias() {
+            quizQuestionsMiqueias = []; // Limpa as perguntas anteriores
+            while (quizQuestionsMiqueias.length < 200) {
+                quizQuestionsMiqueias.push(...uniqueQuizQuestionsMiqueias);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsMiqueias.length > 200) {
+                quizQuestionsMiqueias = quizQuestionsMiqueias.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsMiqueias); // Embaralha o array completo
+        }
+
+        let currentQuizIndexMiqueias = 0;
+        let scoreMiqueias = 0;
+        let wrongAnswersMiqueias = 0;
+
+        function displayQuestionMiqueias() {
+            const questionElement = document.getElementById('quizQuestionMiqueias');
+            const optionsElement = document.getElementById('quizOptionsMiqueias');
+            const feedbackElement = document.getElementById('quizFeedbackMiqueias');
+            const nextButton = document.querySelector('#quizContainerMiqueias .quiz-next');
+            const progressElement = document.getElementById('quizProgressMiqueias');
+
+            if (currentQuizIndexMiqueias < quizQuestionsMiqueias.length) {
+                const questionData = quizQuestionsMiqueias[currentQuizIndexMiqueias];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerMiqueias(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexMiqueias + 1}/${quizQuestionsMiqueias.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreMiqueias}, Erros: ${wrongAnswersMiqueias}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerMiqueias(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsMiqueias button');
+            const feedbackElement = document.getElementById('quizFeedbackMiqueias');
+            const nextButton = document.querySelector('#quizContainerMiqueias .quiz-next');
+            const scoreElement = document.getElementById('quizScoreMiqueias');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreMiqueias++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersMiqueias++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreMiqueias}, Erros: ${wrongAnswersMiqueias}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionMiqueias() {
+            currentQuizIndexMiqueias++;
+            displayQuestionMiqueias();
+        }
+
+        // Gráfico de Temas para Miqueias
+        let miqueiasChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderMiqueiasChart() {
+            const ctx = document.getElementById('miqueiasChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (miqueiasChartInstance) {
+                miqueiasChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['Justiça Social', 'Corrupção', 'Idolatria', 'Juízo Divino', 'Restauração/Esperança', 'Profecia Messiânica', 'O Que Deus Requer'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [7, 6, 4, 5, 6, 3, 5], // Valores fictícios para Miqueias
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para Justiça Social
+                        'rgba(54, 162, 235, 0.7)', // Azul para Corrupção
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Idolatria
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para Juízo Divino
+                        'rgba(153, 102, 255, 0.7)', // Roxo para Restauração/Esperança
+                        'rgba(255, 159, 64, 0.7)', // Laranja para Profecia Messiânica
+                        'rgba(201, 203, 207, 0.7)' // Cinza para O Que Deus Requer
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            miqueiasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Miqueias',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionMiqueias('inicio');
+        });
+    </script>
+</body>
+</html>

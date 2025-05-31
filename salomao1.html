@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Salomão</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #f59e0b; /* Amber border for Solomon game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #f59e0b; /* Amber for Solomon game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #d97706; /* Darker amber on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #f59e0b;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #f59e0b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #d97706;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-amber-700 mb-4">A História de Salomão 👑</h1>
+        <p class="text-gray-700 mb-6">
+            Explore a vida de Salomão, o rei mais sábio e rico de Israel, e as lições de sua glória e suas falhas.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Salomão!</p>
+            <p class="text-gray-700 mt-6">A história de Salomão é um lembrete de que a verdadeira sabedoria e a prosperidade vêm de Deus, e que a obediência contínua é essencial para manter as bênçãos divinas.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: A Sucessão ao Trono de Davi',
+                location: 'Jerusalém',
+                objective: 'Entender como Salomão se tornou rei após Davi.',
+                clues: [
+                    'Davi, em sua velhice, designou Salomão como seu sucessor.',
+                    'Adonias tentou usurpar o trono, mas foi impedido por Natã e Bate-Seba.'
+                ],
+                keyVerse: '1 Reis 1:28-30, 39',
+                enigma: 'Quem ungiu Salomão como rei por ordem de Davi?',
+                options: ['Zadoque, o sacerdote', 'Natã, o profeta', 'Benaia, filho de Joiada'],
+                correctAnswer: 'Zadoque, o sacerdote'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: O Pedido de Sabedoria',
+                location: 'Gibeão',
+                objective: 'Aprender sobre o famoso pedido de Salomão a Deus.',
+                clues: [
+                    'Deus apareceu a Salomão em um sonho em Gibeão e lhe ofereceu o que quisesse.',
+                    'Salomão pediu um coração sábio e discernimento para governar o povo de Deus.'
+                ],
+                keyVerse: '1 Reis 3:5-9',
+                enigma: 'O que Salomão pediu a Deus em Gibeão?',
+                options: ['Sabedoria e discernimento', 'Riqueza e glória', 'Longa vida e vitória sobre inimigos'],
+                correctAnswer: 'Sabedoria e discernimento'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: O Julgamento Sábio',
+                location: 'Jerusalém',
+                objective: 'Observar a sabedoria de Salomão em um caso difícil.',
+                clues: [
+                    'Duas prostitutas vieram a Salomão, cada uma alegando ser a mãe de um bebê vivo.',
+                    'Salomão propôs dividir o bebê ao meio para descobrir a verdadeira mãe.'
+                ],
+                keyVerse: '1 Reis 3:16-28',
+                enigma: 'Qual foi a solução de Salomão para o problema das duas mulheres e o bebê?',
+                options: ['Dividir o bebê ao meio', 'Dar o bebê à primeira mulher', 'Dar o bebê à segunda mulher'],
+                correctAnswer: 'Dividir o bebê ao meio'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: A Construção do Templo (Início)',
+                location: 'Jerusalém',
+                objective: 'Entender o início da construção do Templo do Senhor.',
+                clues: [
+                    'Salomão começou a construir o Templo do Senhor, uma tarefa que seu pai Davi desejava fazer.',
+                    'Ele usou madeira de cedro do Líbano e pedras lavradas.'
+                ],
+                keyVerse: '1 Reis 6:1-2',
+                enigma: 'Qual era o principal objetivo da construção do Templo por Salomão?',
+                options: ['Ser uma casa para o nome do Senhor', 'Ser um palácio real', 'Ser uma fortaleza militar'],
+                correctAnswer: 'Ser uma casa para o nome do Senhor'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: A Dedicação do Templo',
+                location: 'Jerusalém',
+                objective: 'Aprender sobre a dedicação do Templo e a glória de Deus.',
+                clues: [
+                    'Após sete anos de construção, o Templo foi concluído.',
+                    'Durante a dedicação, a glória do Senhor encheu o Templo, impedindo os sacerdotes de ministrar.'
+                ],
+                keyVerse: '1 Reis 8:10-11',
+                enigma: 'O que encheu o Templo durante sua dedicação?',
+                options: ['A glória do Senhor', 'Fumaça de incenso', 'Uma nuvem escura'],
+                correctAnswer: 'A glória do Senhor'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: A Riqueza e Glória de Salomão',
+                location: 'Jerusalém',
+                objective: 'Entender a vasta riqueza e glória de Salomão.',
+                clues: [
+                    'Salomão recebia 666 talentos de ouro por ano.',
+                    'Seus carros e cavalos, seus utensílios de ouro e prata, e sua sabedoria eram incomparáveis.'
+                ],
+                keyVerse: '1 Reis 10:14, 23-25',
+                enigma: 'Quantos talentos de ouro Salomão recebia por ano?',
+                options: ['666', '1000', '500'],
+                correctAnswer: '666'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: A Visita da Rainha de Sabá',
+                location: 'Jerusalém',
+                objective: 'Observar a admiração da Rainha de Sabá pela sabedoria de Salomão.',
+                clues: [
+                    'A Rainha de Sabá ouviu falar da fama de Salomão e veio para testá-lo com perguntas difíceis.',
+                    'Ela ficou impressionada com sua sabedoria, riqueza e a organização de seu reino.'
+                ],
+                keyVerse: '1 Reis 10:1-7',
+                enigma: 'De qual reino a rainha veio para visitar Salomão?',
+                options: ['Sabá', 'Egito', 'Babilônia'],
+                correctAnswer: 'Sabá'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: As Muitas Esposas e a Idolatria',
+                location: 'Jerusalém',
+                objective: 'Aprender sobre a queda de Salomão na idolatria.',
+                clues: [
+                    'Salomão amou muitas mulheres estrangeiras que não eram de Israel.',
+                    'Suas esposas desviaram seu coração para outros deuses, e ele construiu altares para eles.'
+                ],
+                keyVerse: '1 Reis 11:1-8',
+                enigma: 'O que as muitas esposas estrangeiras de Salomão fizeram com seu coração?',
+                options: ['Desviaram-no para outros deuses', 'Ensinaram-lhe sabedoria', 'Ajudaram-no a governar'],
+                correctAnswer: 'Desviaram-no para outros deuses'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: O Juízo de Deus sobre Salomão',
+                location: 'Jerusalém',
+                objective: 'Entender a consequência da desobediência de Salomão.',
+                clues: [
+                    'O Senhor ficou irado com Salomão porque seu coração se desviou.',
+                    'Deus declarou que rasgaria o reino de suas mãos, mas deixaria uma tribo por causa de Davi.'
+                ],
+                keyVerse: '1 Reis 11:9-13',
+                enigma: 'Qual foi o juízo de Deus sobre Salomão por sua idolatria?',
+                options: ['O reino seria rasgado de suas mãos', 'Ele perderia sua riqueza', 'Ele morreria jovem'],
+                correctAnswer: 'O reino seria rasgado de suas mãos'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: O Surgimento de Adversários',
+                location: 'Edon, Damasco e Israel',
+                objective: 'Aprender sobre os adversários que Deus levantou contra Salomão.',
+                clues: [
+                    'Deus levantou Hadade, o edomita, como adversário de Salomão.',
+                    'Rezon, de Damasco, também se tornou um adversário, e Jeroboão se rebelou em Israel.'
+                ],
+                keyVerse: '1 Reis 11:14, 23, 26',
+                enigma: 'Quem foi um dos principais adversários que Deus levantou contra Salomão?',
+                options: ['Hadade, o edomita', 'Golias, o filisteu', 'Naamã, o sírio'],
+                correctAnswer: 'Hadade, o edomita'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: A Profecia a Jeroboão',
+                location: 'Jerusalém',
+                objective: 'Observar a profecia sobre a divisão do reino.',
+                clues: [
+                    'O profeta Aías encontrou Jeroboão e rasgou sua capa em doze pedaços.',
+                    'Ele disse a Jeroboão que Deus lhe daria dez tribos de Israel.'
+                ],
+                keyVerse: '1 Reis 11:29-31',
+                enigma: 'Quantas tribos o profeta Aías disse que Jeroboão governaria?',
+                options: ['Dez', 'Duas', 'Doze'],
+                correctAnswer: 'Dez'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: Os Escritos de Salomão',
+                location: 'Jerusalém',
+                objective: 'Compreender a contribuição literária de Salomão.',
+                clues: [
+                    'Salomão escreveu três mil provérbios e mil e cinco cânticos.',
+                    'Ele falou sobre árvores, animais, aves, répteis e peixes.'
+                ],
+                keyVerse: '1 Reis 4:32-33',
+                enigma: 'Quantos provérbios Salomão escreveu?',
+                options: ['Três mil', 'Mil', 'Sete mil'],
+                correctAnswer: 'Três mil'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: O Fim do Reinado de Salomão',
+                location: 'Jerusalém',
+                objective: 'Aprender sobre o declínio do reinado de Salomão.',
+                clues: [
+                    'Apesar de sua sabedoria e riqueza, Salomão se desviou de Deus em sua velhice.',
+                    'Seu coração não foi inteiramente fiel ao Senhor, ao contrário de seu pai Davi.'
+                ],
+                keyVerse: '1 Reis 11:4-6',
+                enigma: 'Qual foi a principal falha de Salomão em sua velhice?',
+                options: ['Seu coração se desviou de Deus', 'Ele perdeu todas as suas riquezas', 'Ele perdeu todas as suas batalhas'],
+                correctAnswer: 'Seu coração se desviou de Deus'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: A Morte de Salomão',
+                location: 'Jerusalém',
+                objective: 'Observar o fim do reinado de Salomão.',
+                clues: [
+                    'Salomão reinou sobre todo o Israel por quarenta anos.',
+                    'Ele morreu e foi sepultado na Cidade de Davi.'
+                ],
+                keyVerse: '1 Reis 11:42-43',
+                enigma: 'Por quantos anos Salomão reinou sobre Israel?',
+                options: ['Quarenta anos', 'Vinte anos', 'Trinta anos'],
+                correctAnswer: 'Quarenta anos'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Legado de Salomão',
+                location: 'Israel',
+                objective: 'Refletir sobre o impacto duradouro do reinado de Salomão.',
+                clues: [
+                    'Salomão é lembrado por sua sabedoria, riqueza e a construção do Templo.',
+                    'No entanto, suas falhas levaram à divisão do reino após sua morte.'
+                ],
+                keyVerse: '1 Reis 12:15-16',
+                enigma: 'O que aconteceu com o reino de Israel após a morte de Salomão?',
+                options: ['Foi dividido em dois', 'Permaneceu unido', 'Foi conquistado por outra nação'],
+                correctAnswer: 'Foi dividido em dois'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

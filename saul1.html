@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Saul</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #a855f7; /* Purple border for Saul game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #9333ea; /* Purple for Saul game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #7e22ce; /* Darker purple on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #9333ea;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #9333ea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #7e22ce;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-purple-700 mb-4">A História de Saul 👑</h1>
+        <p class="text-gray-700 mb-6">
+            Explore a ascensão e queda de Saul, o primeiro rei de Israel, e as lições de obediência e humildade.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Saul!</p>
+            <p class="text-gray-700 mt-6">A história de Saul é um lembrete poderoso de que a obediência a Deus é mais importante do que sacrifícios e que a humildade precede a honra.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: A Busca pelas Jumentas e o Encontro com Samuel',
+                location: 'Ramá',
+                objective: 'Entender como Saul veio a conhecer Samuel.',
+                clues: [
+                    'Saul estava procurando as jumentas perdidas de seu pai.',
+                    'Seu servo sugeriu consultar um homem de Deus para obter ajuda.'
+                ],
+                keyVerse: '1 Samuel 9:3-6',
+                enigma: 'O que Saul estava procurando quando encontrou Samuel?',
+                options: ['Jumentas', 'Ovelhas', 'Camelos'],
+                correctAnswer: 'Jumentas'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: Saul é Ungido Rei',
+                location: 'Ramá',
+                objective: 'Aprender sobre a unção privada de Saul por Samuel.',
+                clues: [
+                    'Samuel pegou um frasco de azeite e o derramou sobre a cabeça de Saul.',
+                    'Ele disse a Saul que Deus o havia escolhido para ser governante.'
+                ],
+                keyVerse: '1 Samuel 10:1',
+                enigma: 'O que Samuel usou para ungir Saul?',
+                options: ['Azeite', 'Água', 'Vinho'],
+                correctAnswer: 'Azeite'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: Saul é Escolhido Publicamente',
+                location: 'Mispa',
+                objective: 'Observar a apresentação pública de Saul como rei.',
+                clues: [
+                    'Samuel convocou o povo a Mispa.',
+                    'Saul foi escolhido por sorteio, mas foi encontrado escondido entre a bagagem.'
+                ],
+                keyVerse: '1 Samuel 10:20-24',
+                enigma: 'Onde Saul foi encontrado escondido quando foi escolhido publicamente como rei?',
+                options: ['Entre a bagagem', 'Em sua tenda', 'Na cidade'],
+                correctAnswer: 'Entre a bagagem'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: A Vitória sobre os Amonitas',
+                location: 'Jabes-Gileade e Bezeque',
+                objective: 'Entender a primeira grande vitória militar de Saul.',
+                clues: [
+                    'Naás, o amonita, ameaçou Jabes-Gileade.',
+                    'Saul, cheio do Espírito de Deus, reuniu Israel e derrotou os amonitas.'
+                ],
+                keyVerse: '1 Samuel 11:1-11',
+                enigma: 'Que povo Saul derrotou em sua primeira grande vitória?',
+                options: ['Amonitas', 'Filisteus', 'Midianitas'],
+                correctAnswer: 'Amonitas'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: Saul Confirmado como Rei em Gilgal',
+                location: 'Gilgal',
+                objective: 'Aprender sobre a confirmação pública do reinado de Saul.',
+                clues: [
+                    'Após a vitória, Samuel convocou todo o Israel a Gilgal.',
+                    'Lá, eles renovaram o reino e fizeram Saul rei diante do Senhor.'
+                ],
+                keyVerse: '1 Samuel 11:14-15',
+                enigma: 'Onde Saul foi publicamente confirmado como rei após a vitória sobre os amonitas?',
+                options: ['Gilgal', 'Mispa', 'Belém'],
+                correctAnswer: 'Gilgal'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: A Primeira Desobediência de Saul (Sacrifício)',
+                location: 'Gilgal',
+                objective: 'Entender o primeiro grande ato de desobediência de Saul.',
+                clues: [
+                    'Saul esperou sete dias por Samuel, mas Samuel não chegou.',
+                    'Saul ofereceu o holocausto ele mesmo, em vez de esperar por Samuel.'
+                ],
+                keyVerse: '1 Samuel 13:8-14',
+                enigma: 'Qual foi o primeiro ato de desobediência de Saul que levou à repreensão de Samuel?',
+                options: ['Oferecer um holocausto ele mesmo', 'Não destruir os amalequitas', 'Consultar uma médium'],
+                correctAnswer: 'Oferecer um holocausto ele mesmo'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: A Vitória de Jônatas e o Juramento Impensado de Saul',
+                location: 'Micmás',
+                objective: 'Observar a bravura de Jônatas e o juramento impensado de Saul.',
+                clues: [
+                    'Jônatas atacou um posto filisteu, iniciando uma batalha.',
+                    'Saul fez um juramento impensado de que ninguém deveria comer até a noite, causando angústia.'
+                ],
+                keyVerse: '1 Samuel 14:1-45',
+                enigma: 'Quem era o filho de Saul que atacou o posto filisteu?',
+                options: ['Jônatas', 'Is-Bosete', 'Malquisua'],
+                correctAnswer: 'Jônatas'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: A Segunda Desobediência de Saul (Amalequitas)',
+                location: 'Amaleque',
+                objective: 'Aprender sobre o segundo grande ato de desobediência de Saul e a rejeição de Deus.',
+                clues: [
+                    'Deus ordenou a Saul que destruísse completamente os amalequitas, incluindo todo o seu gado.',
+                    'Saul poupou o rei Agague e o melhor das ovelhas e dos bois.'
+                ],
+                keyVerse: '1 Samuel 15:1-9',
+                enigma: 'O que Saul não conseguiu fazer completamente ao lutar contra os amalequitas?',
+                options: ['Destruir o rei Agague e o melhor do gado', 'Derrotá-los', 'Reunir todos os despojos'],
+                correctAnswer: 'Destruir o rei Agague e o melhor do gado'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: Samuel Rejeita Saul',
+                location: 'Gilgal',
+                objective: 'Entender a declaração de Samuel sobre a rejeição de Saul por Deus.',
+                clues: [
+                    'Samuel confrontou Saul sobre sua desobediência.',
+                    'Samuel declarou que Deus havia rejeitado Saul como rei por causa de sua rebelião.'
+                ],
+                keyVerse: '1 Samuel 15:22-23',
+                enigma: 'O que Samuel disse a Saul que era melhor do que o sacrifício?',
+                options: ['Obediência', 'Ofertas', 'Oração'],
+                correctAnswer: 'Obediência'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: O Espírito Maligno Atormenta Saul',
+                location: 'Gibeá',
+                objective: 'Aprender sobre o espírito maligno que atormentou Saul depois que o Espírito de Deus o deixou.',
+                clues: [
+                    'Depois que o Espírito do Senhor se retirou de Saul, um espírito maligno do Senhor o atormentava.',
+                    'Davi foi trazido para tocar a harpa para acalmá-lo.'
+                ],
+                keyVerse: '1 Samuel 16:14-16',
+                enigma: 'O que atormentou Saul depois que o Espírito do Senhor se retirou dele?',
+                options: ['Um espírito maligno', 'Doença', 'Solidão'],
+                correctAnswer: 'Um espírito maligno'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: O Ciúme de Saul por Davi',
+                location: 'Gibeá',
+                objective: 'Observar o crescente ciúme de Saul por Davi.',
+                clues: [
+                    'Depois que Davi matou Golias, as mulheres cantaram: "Saul feriu os seus milhares, e Davi os seus dez milhares".',
+                    'Saul ficou muito ciumento e procurou matar Davi.'
+                ],
+                keyVerse: '1 Samuel 18:6-9',
+                enigma: 'O que causou o ciúme de Saul por Davi?',
+                options: ['A canção das mulheres elogiando mais a Davi', 'A força de Davi', 'A popularidade de Davi'],
+                correctAnswer: 'A canção das mulheres elogiando mais a Davi'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: Saul Tenta Matar Davi',
+                location: 'Gibeá',
+                objective: 'Testemunhar as tentativas de Saul de matar Davi.',
+                clues: [
+                    'Saul atirou uma lança em Davi enquanto ele tocava a harpa.',
+                    'Davi escapou das tentativas de Saul de tirar sua vida várias vezes.'
+                ],
+                keyVerse: '1 Samuel 18:10-11',
+                enigma: 'O que Saul atirou em Davi enquanto ele tocava a harpa?',
+                options: ['Uma lança', 'Uma pedra', 'Uma espada'],
+                correctAnswer: 'Uma lança'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: Davi Poupa a Vida de Saul (Caverna de En-Gedi)',
+                location: 'Caverna de En-Gedi',
+                objective: 'Entender o ato de misericórdia de Davi para com Saul.',
+                clues: [
+                    'Saul entrou em uma caverna para se aliviar, sem saber que Davi e seus homens estavam lá dentro.',
+                    'Davi cortou um pedaço da orla do manto de Saul, mas não o feriu.'
+                ],
+                keyVerse: '1 Samuel 24:1-7',
+                enigma: 'O que Davi cortou do manto de Saul na caverna?',
+                options: ['Um pedaço da orla', 'Uma manga', 'Um pedaço de pano'],
+                correctAnswer: 'Um pedaço da orla'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: Davi Poupa a Vida de Saul (Colina de Haquilá)',
+                location: 'Colina de Haquilá',
+                objective: 'Observar o segundo ato de misericórdia de Davi para com Saul.',
+                clues: [
+                    'Davi e Abisai entraram no acampamento de Saul à noite enquanto Saul dormia.',
+                    'Davi pegou a lança e o jarro de água de Saul, mas não o feriu.'
+                ],
+                keyVerse: '1 Samuel 26:7-12',
+                enigma: 'Quais dois itens Davi pegou ao lado da cabeça de Saul enquanto ele dormia?',
+                options: ['Lança e jarro de água', 'Espada e escudo', 'Arco e flechas'],
+                correctAnswer: 'Lança e jarro de água'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: A Morte de Saul',
+                location: 'Monte Gilboa',
+                objective: 'Aprender sobre o trágico fim do reinado de Saul.',
+                clues: [
+                    'Os filisteus lutaram contra Israel no Monte Gilboa.',
+                    'Saul foi gravemente ferido e caiu sobre sua própria espada, em vez de ser capturado.'
+                ],
+                keyVerse: '1 Samuel 31:3-6',
+                enigma: 'Onde Saul morreu em batalha?',
+                options: ['Monte Gilboa', 'Vale de Elá', 'Micmás'],
+                correctAnswer: 'Monte Gilboa'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-purple-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

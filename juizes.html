@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Juízes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Juízes Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Juízes</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionJudges('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionJudges('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionJudges('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionJudges('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionJudges('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionJudges('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionJudges('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionJudges('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionJudges('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Juízes</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o fascinante e complexo período dos Juízes de Israel, uma era marcada por ciclos de desobediência, opressão, arrependimento e libertação. Conheça os líderes que Deus levantou para salvar Seu povo e as lições profundas sobre a fidelidade divina e as consequências da apostasia. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Juízes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Juízes é o sétimo livro da Bíblia e continua a narrativa após a morte de Josué, cobrindo o período entre a conquista parcial da Terra Prometida e o surgimento da monarquia em Israel. Este livro é um registro sombrio da desobediência do povo de Israel e das consequências de sua infidelidade a Deus.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O tema central do livro de Juízes é o ciclo repetitivo de apostasia, opressão por nações inimigas, clamor do povo a Deus, libertação por um "juiz" levantado por Deus, e um período de paz temporária, seguido por nova apostasia. Este ciclo ilustra a paciência de Deus, mas também a persistente rebelião de Israel e a necessidade de uma liderança justa e fiel.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro destaca que "naqueles dias não havia rei em Israel; cada um fazia o que parecia reto aos seus olhos" (Juízes 17:6; 21:25), o que serve como um pano de fundo para a necessidade de um rei piedoso que pudesse guiar o povo na obediência a Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-3:6: Prólogo e o Ciclo de Pecado.</strong> Descreve a falha de Israel em expulsar completamente os cananeus e a consequente apostasia, que leva ao ciclo de desobediência e opressão.</li>
+                <li><strong>Capítulos 3:7-16:31: As Histórias dos Juízes.</strong> Apresenta os principais juízes (Otniel, Eúde, Débora, Gideão, Jefté, Sansão) e alguns menores, detalhando suas libertações e as condições de Israel sob sua liderança.</li>
+                <li><strong>Capítulos 17-21: Epílogo e Exemplos de Anarquia.</strong> Duas histórias sombrias que ilustram a depravação moral e religiosa de Israel na ausência de uma liderança central e fiel, culminando na guerra civil contra Benjamim.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Juízes é um livro crucial para entender a história de Israel e a necessidade de um relacionamento contínuo com Deus, bem como a importância da liderança divinamente instituída.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Juízes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Juízes narra o período de declínio espiritual e moral de Israel após Josué, caracterizado por um ciclo de apostasia, opressão e libertação.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Introdução e o Ciclo de Pecado (Capítulos 1-3:6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Fracasso na Conquista Completa (Capítulo 1):</strong>
+                    <ul>
+                        <li>As tribos de Israel não expulsam completamente os cananeus.</li>
+                        <li>Consequências da desobediência.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Anjo do Senhor em Boquim (Capítulo 2):</strong>
+                    <ul>
+                        <li>Repreensão divina e a lamentação do povo.</li>
+                        <li>Introdução do ciclo de apostasia, opressão, clamor e libertação.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Propósito das Nações Remanescentes (Capítulo 3:1-6):</strong>
+                    <ul>
+                        <li>Deus deixa nações para testar Israel e ensinar-lhes a guerra.</li>
+                        <li>Israel se casa com cananeus e adora seus deuses.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. As Histórias dos Juízes (Capítulos 3:7-16:31)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Otniel (Capítulo 3:7-11):</strong> Primeiro juiz, liberta Israel da Mesopotâmia.</li>
+                <li><strong>B. Eúde (Capítulo 3:12-30):</strong> Liberta Israel de Moabe, matando o rei Eglom.</li>
+                <li><strong>C. Sangar (Capítulo 3:31):</strong> Mata seiscentos filisteus com uma aguilhada de bois.</li>
+                <li><strong>D. Débora e Baraque (Capítulos 4-5):</strong> Derrotam Sísera e o exército de Jabim, rei de Canaã. Cântico de Débora.</li>
+                <li><strong>E. Gideão (Capítulos 6-8):</strong> Liberta Israel de Midiã com 300 homens. Sua falha com o éfode.</li>
+                <li><strong>F. Abimeleque (Capítulo 9):</strong> Filho de Gideão, usurpa o poder e é morto por uma mulher.</li>
+                <li><strong>G. Tola e Jair (Capítulo 10:1-5):</strong> Juízes menores.</li>
+                <li><strong>H. Jefté (Capítulos 10:6-12:7):</strong> Liberta Israel de Amom, faz um voto precipitado.</li>
+                <li><strong>I. Ibsã, Elom, Abdom (Capítulo 12:8-15):</strong> Juízes menores.</li>
+                <li><strong>J. Sansão (Capítulos 13-16):</strong> Juiz com força sobrenatural, luta contra os filisteus, suas fraquezas e sua morte.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Epílogo: Anarquia em Israel (Capítulos 17-21)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Idolatria de Mica e a Migração de Dã (Capítulos 17-18):</strong>
+                    <ul>
+                        <li>Mica cria um santuário privado com ídolos.</li>
+                        <li>A tribo de Dã rouba os ídolos e o levita de Mica.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Crime de Gibeá e a Guerra Civil (Capítulos 19-21):</strong>
+                    <ul>
+                        <li>A concubina levita e o estupro em Gibeá.</li>
+                        <li>A guerra de Israel contra a tribo de Benjamim.</li>
+                        <li>A busca por esposas para os benjamitas restantes.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O livro de Juízes é um testemunho da paciência e fidelidade de Deus, que repetidamente resgata Seu povo, mesmo em sua constante infidelidade. Ele revela a necessidade de uma liderança justa e a importância da obediência à aliança com Deus. A frase "naqueles dias não havia rei em Israel; cada um fazia o que parecia reto aos seus olhos" (17:6; 21:25) serve como um lamento e uma justificação para a futura instituição da monarquia, mostrando que a anarquia moral e religiosa é o resultado da ausência de uma autoridade divinamente instituída e da obediência a Deus.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridJudges">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Juízes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Juízes, capítulo por capítulo e por blocos temáticos, destacando os eventos e as histórias dos juízes.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Introdução e o Ciclo de Pecado (Capítulos 1-3:6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Conquistas parciais e falhas das tribos.</li>
+                <li><strong>Capítulo 2:</strong> O anjo do Senhor em Boquim e o ciclo de apostasia.</li>
+                <li><strong>Capítulo 3:1-6:</strong> Nações remanescentes e a desobediência de Israel.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. As Histórias dos Juízes (Capítulos 3:7-16:31)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 3:7-11:</strong> Otniel liberta Israel dos mesopotâmios.</li>
+                <li><strong>Capítulo 3:12-30:</strong> Eúde liberta Israel dos moabitas.</li>
+                <li><strong>Capítulo 3:31:</strong> Sangar e os filisteus.</li>
+                <li><strong>Capítulo 4:</strong> Débora e Baraque derrotam Sísera.</li>
+                <li><strong>Capítulo 5:</strong> Cântico de Débora e Baraque.</li>
+                <li><strong>Capítulo 6:</strong> Gideão é chamado e destrói o altar de Baal.</li>
+                <li><strong>Capítulo 7:</strong> A vitória de Gideão sobre Midiã com 300 homens.</li>
+                <li><strong>Capítulo 8:</strong> Perseguição dos midianitas e a falha de Gideão.</li>
+                <li><strong>Capítulo 9:</strong> Abimeleque e a parábola do espinheiro.</li>
+                <li><strong>Capítulo 10:1-5:</strong> Tola e Jair.</li>
+                <li><strong>Capítulo 10:6-12:7:</strong> Jefté e seu voto.</li>
+                <li><strong>Capítulo 12:8-15:</strong> Ibsã, Elom e Abdom.</li>
+                <li><strong>Capítulo 13:</strong> Nascimento de Sansão anunciado.</li>
+                <li><strong>Capítulo 14:</strong> Sansão e a mulher filisteia em Timna.</li>
+                <li><strong>Capítulo 15:</strong> Sansão e a queixada de jumento.</li>
+                <li><strong>Capítulo 16:</strong> Sansão, Dalila e sua morte em Gaza.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Epílogo: Anarquia em Israel (Capítulos 17-21)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 17:</strong> A idolatria de Mica.</li>
+                <li><strong>Capítulo 18:</strong> A migração da tribo de Dã e o roubo dos ídolos de Mica.</li>
+                <li><strong>Capítulo 19:</strong> O crime da concubina levita em Gibeá.</li>
+                <li><strong>Capítulo 20:</strong> A guerra civil contra a tribo de Benjamim.</li>
+                <li><strong>Capítulo 21:</strong> A busca por esposas para os benjamitas restantes.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Juízes</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>O Ciclo de Pecado e Libertação:</strong> O padrão recorrente de apostasia, opressão, clamor a Deus, e libertação por um juiz.</li>
+                <li><strong>Apostasia e Idolatria:</strong> A constante inclinação de Israel para adorar deuses estrangeiros e suas consequências.</li>
+                <li><strong>A Soberania e Fidelidade de Deus:</strong> Mesmo na infidelidade de Israel, Deus permanece fiel à Sua aliança e levanta libertadores.</li>
+                <li><strong>Liderança Falha e a Necessidade de um Rei:</strong> A ausência de uma liderança central e piedosa leva à anarquia e depravação moral.</li>
+                <li><strong>As Consequências da Desobediência:</strong> O sofrimento e a opressão que resultam da quebra da aliança com Deus.</li>
+                <li><strong>A Graça de Deus:</strong> A misericórdia de Deus em responder ao clamor de Seu povo e prover salvação.</li>
+                <li><strong>A Condição Moral e Espiritual de Israel:</strong> Um retrato sombrio da decadência da nação.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Juízes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersJudges">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Juízes</h2>
+            <div id="quizContainerJudges" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionJudges"></p>
+                <div id="quizOptionsJudges" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackJudges" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionJudges()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressJudges"></span></p>
+                <p>Pontuação: <span id="quizScoreJudges">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Juízes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Juízes.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="judgesChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalJudges()">&times;</span>
+                <h3 id="modalCharacterNameJudges" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionJudges" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Juízes",
+            "short_name": "Juízes",
+            "description": "Explore o livro de Juízes de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=JZ",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=JZ",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'judges-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionJudges(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsJudges();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksJudges();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsJudges(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexJudges = 0; // Reinicia o quiz
+                scoreJudges = 0;
+                wrongAnswersJudges = 0;
+                document.getElementById('quizScoreJudges').textContent = `Acertos: ${scoreJudges}, Erros: ${wrongAnswersJudges}`;
+                displayQuestionJudges();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderJudgesChart();
+            }
+        }
+
+        // Dados dos personagens para Juízes
+        const characterDetailsJudges = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus fiel que, apesar da infidelidade de Israel, levanta libertadores e demonstra Sua paciência e misericórdia."
+            },
+            "Otniel": {
+                name: "Otniel",
+                description: "O primeiro juiz de Israel, que libertou o povo da opressão de Cusã-Risataim, rei da Mesopotâmia."
+            },
+            "Eúde": {
+                name: "Eúde",
+                description: "Um juiz canhoto da tribo de Benjamim, que libertou Israel da opressão de Eglom, rei de Moabe, com astúcia."
+            },
+            "Débora": {
+                name: "Débora",
+                description: "Uma profetisa e juíza de Israel, a única mulher a exercer essa função. Ela convocou Baraque para a batalha contra Sísera e cantou um cântico de vitória."
+            },
+            "Baraque": {
+                name: "Baraque",
+                description: "Comandante militar de Israel que, encorajado por Débora, liderou o exército contra Sísera e os cananeus."
+            },
+            "Sísera": {
+                name: "Sísera",
+                description: "Comandante do exército de Jabim, rei de Canaã, conhecido por seus novecentos carros de ferro. Foi derrotado por Débora e Baraque e morto por Jael."
+            },
+            "Jael": {
+                name: "Jael",
+                description: "Mulher quenita que matou Sísera com uma estaca de tenda enquanto ele dormia em sua tenda, cumprindo a profecia de Débora."
+            },
+            "Gideão": {
+                name: "Gideão",
+                description: "Um dos mais proeminentes juízes, que libertou Israel da opressão dos midianitas com apenas 300 homens, mas teve falhas posteriores."
+            },
+            "Abimeleque": {
+                name: "Abimeleque",
+                description: "Filho de Gideão, que se autoproclamou rei de Siquém e matou setenta de seus irmãos, governando por três anos antes de ser morto por uma mulher."
+            },
+            "Jefté": {
+                name: "Jefté",
+                description: "Um juiz de Gileade, conhecido por seu voto precipitado a Deus para vencer os amonitas, que resultou no sacrifício de sua única filha."
+            },
+            "Sansão": {
+                name: "Sansão",
+                description: "Um juiz nazireu com força sobrenatural, que lutou contra os filisteus. Sua história é marcada por sua paixão por mulheres e sua fraqueza diante de Dalila."
+            },
+            "Dalila": {
+                name: "Dalila",
+                description: "Uma mulher filisteia que seduziu Sansão para descobrir o segredo de sua força e o entregou aos filisteus."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalJudges(characterName) {
+            const details = characterDetailsJudges[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameJudges').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionJudges').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalJudges() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsJudges() {
+            const grid = document.getElementById('characterGridJudges');
+            grid.innerHTML = '';
+            for (const key in characterDetailsJudges) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalJudges(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksJudges() {
+            const chaptersDiv = document.getElementById('chaptersJudges');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 21; i++) { // Juízes tem 21 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/jz/${i}`; // Link para a Bíblia Online, Juízes
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Juízes (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsJudges = [
+            { question: "Quem foi o primeiro juiz de Israel mencionado no livro?", options: ["Eúde", "Otniel", "Débora", "Gideão"], answer: "Otniel", reference: "Juízes 3:9-11" },
+            { question: "Qual juiz libertou Israel de Eglom, rei de Moabe, usando uma espada de dois gumes?", options: ["Sansão", "Jefté", "Eúde", "Sangar"], answer: "Eúde", reference: "Juízes 3:15-23" },
+            { question: "Qual juíza profetisa convocou Baraque para a batalha contra Sísera?", options: ["Jael", "Dalila", "Débora", "Miriã"], answer: "Débora", reference: "Juízes 4:4-6" },
+            { question: "Quem era o comandante do exército de Jabim, rei de Canaã, derrotado por Débora e Baraque?", options: ["Eglom", "Sísera", "Cusã-Risataim", "Zeba"], answer: "Sísera", reference: "Juízes 4:2" },
+            { question: "Quem matou Sísera com uma estaca de tenda?", options: ["Débora", "Jael", "Baraque", "Uma mulher de Tebes"], answer: "Jael", reference: "Juízes 4:21" },
+            { question: "Qual juiz foi encontrado malhando trigo no lagar para se esconder dos midianitas?", options: ["Sansão", "Gideão", "Jefté", "Tola"], answer: "Gideão", reference: "Juízes 6:11" },
+            { question: "Quantos homens Gideão usou para derrotar o exército midianita?", options: ["10.000", "3.000", "300", "22.000"], answer: "300", reference: "Juízes 7:7" },
+            { question: "Qual o sinal que Gideão pediu a Deus envolvendo um velo de lã?", options: ["Velo molhado, chão seco; velo seco, chão molhado", "Velo seco, chão seco; velo molhado, chão molhado", "Velo molhado, chão molhado", "Velo seco, chão seco"], answer: "Velo molhado, chão seco; velo seco, chão molhado", reference: "Juízes 6:36-40" },
+            { question: "Quem foi o filho de Gideão que tentou se fazer rei e matou seus irmãos?", options: ["Jotão", "Zeba", "Abimeleque", "Salmuna"], answer: "Abimeleque", reference: "Juízes 9:1-6" },
+            { question: "Qual a parábola contada por Jotão sobre as árvores que queriam ungir um rei?", options: ["A parábola do semeador", "A parábola da figueira", "A parábola do espinheiro", "A parábola da videira"], answer: "A parábola do espinheiro", reference: "Juízes 9:7-15" },
+            { question: "Qual juiz fez um voto precipitado de sacrificar a primeira coisa que saísse de sua casa ao seu encontro?", options: ["Gideão", "Sansão", "Jefté", "Otniel"], answer: "Jefté", reference: "Juízes 11:30-31" },
+            { question: "De qual tribo era Sansão?", options: ["Judá", "Benjamim", "Dã", "Efraim"], answer: "Dã", reference: "Juízes 13:2" },
+            { question: "Qual o segredo da força de Sansão?", options: ["Sua dieta", "Seu cabelo", "Sua armadura", "Seu treinamento militar"], answer: "Seu cabelo, como parte de seu voto nazireu", reference: "Juízes 16:17" },
+            { question: "Quem foi a mulher que Sansão amou e que o traiu, entregando-o aos filisteus?", options: ["Raabe", "Jael", "Dalila", "Mica"], answer: "Dalila", reference: "Juízes 16:4-5" },
+            { question: "Com que arma Sansão matou mil filisteus?", options: ["Uma espada", "Um arco e flechas", "Uma queixada de jumento", "Uma funda"], answer: "Queixada de jumento", reference: "Juízes 15:15" },
+            { question: "Onde Sansão derrubou as colunas do templo de Dagom, matando a si mesmo e a muitos filisteus?", options: ["Ascalão", "Gaza", "Timna", "Ecróm"], answer: "Gaza", reference: "Juízes 16:29-30" },
+            { question: "Qual o nome do sacerdote que teve seus ídolos roubados pela tribo de Dã?", options: ["Eleazar", "Finéias", "Mica", "Jônatas"], answer: "Mica", reference: "Juízes 17:1-5" },
+            { question: "Qual a tribo que migrou para o norte e estabeleceu uma nova cidade chamada Dã?", options: ["Benjamim", "Judá", "Dã", "Manassés"], answer: "Dã", reference: "Juízes 18:29" },
+            { question: "Qual a história que descreve a depravação moral de Israel no final do livro de Juízes, envolvendo uma concubina levita?", options: ["A idolatria de Mica", "A guerra civil contra Benjamim", "A concubina levita em Gibeá", "A história de Sansão"], answer: "A concubina levita em Gibeá", reference: "Juízes 19:1-30" },
+            { question: "Qual tribo de Israel quase foi exterminada devido à guerra civil no final do livro?", options: ["Efraim", "Judá", "Benjamim", "Simeão"], answer: "Benjamim", reference: "Juízes 20:46-48" },
+            { question: "O que se tornou um provérbio em Israel devido à falta de liderança e à anarquia no período dos Juízes?", options: ["'Deus proverá'", "'Cada um por si'", "'Naqueles dias não havia rei em Israel; cada um fazia o que parecia reto aos seus olhos.'", "'A lei é para todos'"], answer: "'Naqueles dias não havia rei em Israel; cada um fazia o que parecia reto aos seus olhos.'", reference: "Juízes 17:6; 21:25" },
+            { question: "Quem foi o juiz que julgou Israel por 23 anos e foi sepultado em Same?", options: ["Jair", "Ibsã", "Tola", "Abdom"], answer: "Tola", reference: "Juízes 10:1-2" },
+            { question: "Quem foi o juiz que julgou Israel por 22 anos e teve trinta filhos que cavalgavam em trinta jumentos?", options: ["Tola", "Ibsã", "Jair", "Elom"], answer: "Jair", reference: "Juízes 10:3-5" },
+            { question: "Qual juiz libertou Israel dos filisteus e dos amonitas, e teve trinta filhos e trinta filhas?", options: ["Elom", "Ibsã", "Abdom", "Jefté"], answer: "Ibsã", reference: "Juízes 12:8-10" },
+            { question: "Qual juiz tinha quarenta filhos e trinta netos que cavalgavam em setenta jumentos?", options: ["Elom", "Abdom", "Ibsã", "Tola"], answer: "Abdom", reference: "Juízes 12:13-15" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsJudges = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsJudges.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsJudges = allQuizQuestionsJudges.concat(uniqueQuizQuestionsJudges);
+        }
+        allQuizQuestionsJudges = allQuizQuestionsJudges.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsJudges = [];
+        let currentQuizIndexJudges = 0;
+        let scoreJudges = 0;
+        let wrongAnswersJudges = 0;
+        let judgesChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsJudges() {
+            shuffledQuizQuestionsJudges = [...allQuizQuestionsJudges]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsJudges);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressJudges() {
+            const progressElement = document.getElementById('quizProgressJudges');
+            progressElement.textContent = `${currentQuizIndexJudges + 1}/${shuffledQuizQuestionsJudges.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionJudges() {
+            if (currentQuizIndexJudges >= shuffledQuizQuestionsJudges.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionJudges').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsJudges').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreJudges}, Erros: ${wrongAnswersJudges}</p>`;
+                document.getElementById('quizFeedbackJudges').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsJudges[currentQuizIndexJudges];
+            document.getElementById('quizQuestionJudges').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsJudges');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerJudges(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackJudges').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressJudges();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerJudges(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackJudges');
+            const optionsButtons = document.querySelectorAll('#quizOptionsJudges button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreJudges++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersJudges++;
+            }
+            document.getElementById('quizScoreJudges').textContent = `Acertos: ${scoreJudges}, Erros: ${wrongAnswersJudges}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionJudges() {
+            currentQuizIndexJudges++;
+            displayQuestionJudges();
+        }
+
+        // Dados para o gráfico de temas de Juízes
+        const judgesChartData = {
+            labels: ['Ciclo de Pecado', 'Apostasia', 'Libertação Divina', 'Liderança Falha', 'Juízo de Deus', 'Necessidade de um Rei', 'Graça de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 12, 10, 8], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const judgesChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Juízes',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderJudgesChart() {
+            const ctx = document.getElementById('judgesChart').getContext('2d');
+            if (judgesChartInstance) {
+                judgesChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            judgesChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: judgesChartData,
+                options: judgesChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

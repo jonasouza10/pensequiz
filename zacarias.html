@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Zacarias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Zacarias Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Zacarias</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionZacarias('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionZacarias('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionZacarias('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionZacarias('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionZacarias('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionZacarias('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionZacarias('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionZacarias('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionZacarias('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Zacarias</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Zacarias, uma profecia rica em visões messiânicas e escatológicas, que encorajou o povo judeu a reconstruir o Templo após o exílio babilônico. Descubra as oito visões noturnas, as mensagens de encorajamento e as detalhadas profecias sobre a vinda do Messias e o futuro de Jerusalém. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Zacarias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Zacarias é um dos doze profetas menores do Antigo Testamento e, juntamente com Ageu e Malaquias, é um dos profetas pós-exílicos. O nome "Zacarias" significa "o Senhor se lembrou", o que reflete a mensagem central do livro: Deus se lembrou de Seu povo e de Suas promessas, mesmo após o exílio.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Zacarias começou a profetizar em 520 a.C., no mesmo ano que Ageu, e continuou por um período mais longo. Ele ministrou aos judeus que haviam retornado do cativeiro babilônico, que estavam desanimados e enfrentavam dificuldades na reconstrução do Templo de Jerusalém. Sua mensagem era de encorajamento, exortando o povo a retomar a obra e a se arrepender, com a promessa da presença e da bênção de Deus.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro de Zacarias é conhecido por sua natureza apocalíptica e simbólica, especialmente na primeira parte, que contém oito visões noturnas. Essas visões oferecem esperança e encorajamento, garantindo que Deus estava no controle e que Seus planos para Jerusalém e para o Messias seriam cumpridos. A segunda parte do livro contém profecias mais diretas, muitas delas messiânicas, detalhando a vinda do Messias, Sua rejeição, Seu sofrimento e Seu reinado final.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Zacarias é um dos livros do Antigo Testamento mais citados no Novo Testamento, especialmente em relação aos eventos da vida de Jesus Cristo, como Sua entrada triunfal em Jerusalém, a traição por trinta moedas de prata, e Sua crucificação. O livro termina com uma visão gloriosa do reino messiânico e da restauração final de Jerusalém.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-8: As Oito Visões Noturnas e Mensagens de Encorajamento.</strong> Foco na reconstrução do Templo e na restauração de Jerusalém, com simbolismo e exortações ao arrependimento.</li>
+                <li><strong>Capítulos 9-14: Profecias Messiânicas e Escatológicas.</strong> Detalhes sobre a primeira e segunda vinda do Messias, o juízo sobre as nações e a glória futura de Jerusalém.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Zacarias é um livro que inspira esperança e fé na soberania de Deus e em Seus planos redentores, que culminam na vinda e no reinado do Messias.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Zacarias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Zacarias apresenta visões e profecias sobre a restauração de Jerusalém e a vinda do Messias.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Chamado ao Arrependimento e Oito Visões Noturnas (Capítulos 1-6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Chamado ao Arrependimento (Capítulo 1:1-6):</strong>
+                    <ul>
+                        <li>Exortação para o povo não ser como seus pais.</li>
+                        <li>"Convertei-vos a mim, diz o Senhor dos Exércitos."</li>
+                    </ul>
+                </li>
+                <li><strong>B. As Oito Visões Noturnas (Capítulo 1:7-6:15):</strong>
+                    <ul>
+                        <li><strong>1. O Cavaleiro entre as Mirtas (1:7-17):</strong> Deus se lembra de Jerusalém e a restaurará.</li>
+                        <li><strong>2. Os Quatro Chifres e os Quatro Ferreiros (1:18-21):</strong> Destruição dos poderes que dispersaram Judá.</li>
+                        <li><strong>3. O Homem com o Cordel de Medir (2:1-13):</strong> Jerusalém será habitada e Deus será sua glória.</li>
+                        <li><strong>4. Josué, o Sumo Sacerdote, e Satanás (3:1-10):</strong> Purificação e justificação de Josué, promessa do Renovo.</li>
+                        <li><strong>5. O Candelabro de Ouro e as Duas Oliveiras (4:1-14):</strong> Pelo Espírito, não por força nem poder; Zorobabel concluirá a obra.</li>
+                        <li><strong>6. O Rolo Voador (5:1-4):</strong> Juízo contra o roubo e o falso juramento.</li>
+                        <li><strong>7. A Mulher no Efa (5:5-11):</strong> A remoção da iniquidade da terra.</li>
+                        <li><strong>8. Os Quatro Carros (6:1-8):</strong> O juízo de Deus sobre a terra.</li>
+                        <li><strong>A Coroação de Josué (6:9-15):</strong> Josué é coroado como símbolo do Renovo (Messias).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Mensagens sobre Jejum e Restauração (Capítulos 7-8)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Questão do Jejum (Capítulo 7:1-7):</strong>
+                    <ul>
+                        <li>Deus questiona a motivação dos jejuns passados.</li>
+                        <li>Chamado à justiça e misericórdia.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Promessas de Restauração e Bênção (Capítulo 7:8-8:23):</strong>
+                    <ul>
+                        <li>Deus deseja que o povo pratique a justiça.</li>
+                        <li>Os jejuns se tornarão dias de alegria e festa.</li>
+                        <li>Muitos povos e nações buscarão o Senhor em Jerusalém.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Profecias Messiânicas e Escatológicas (Capítulos 9-14)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Vinda do Rei Justo e Salvador (Capítulo 9:9-10):</strong>
+                    <ul>
+                        <li>"Eis que o teu Rei vem a ti, justo e Salvador, humilde, e montado sobre um jumento."</li>
+                        <li>Seu domínio se estenderá até os confins da terra.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Pastor Ferido e a Dispersão (Capítulo 13:7):</strong>
+                    <ul>
+                        <li>"Fere o pastor, e as ovelhas se dispersarão." (Profecia sobre a morte de Jesus).</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Dia do Senhor e o Reino Messiânico (Capítulo 14):</strong>
+                    <ul>
+                        <li>Ataque a Jerusalém e a intervenção divina.</li>
+                        <li>O Senhor será Rei sobre toda a terra.</li>
+                        <li>Jerusalém será santa e habitada em segurança.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Zacarias é fundamental para a compreensão das profecias messiânicas e escatológicas no Antigo Testamento. Ele revela a fidelidade de Deus em cumprir Suas promessas, mesmo quando o povo falha. Os temas de arrependimento, restauração e a soberania divina são proeminentes. O livro aponta claramente para a primeira e segunda vinda do Messias, descrevendo detalhes de Sua humilhação e glória. Ele inspira esperança na restauração final de Israel e no estabelecimento do reino universal de Deus, onde a santidade e a paz prevalecerão.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridZacarias">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Zacarias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Zacarias, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Chamado ao Arrependimento e Primeira Visão</strong>
+                    <ul>
+                        <li>1.1-6: Chamado ao Arrependimento.</li>
+                        <li>1.7-17: Primeira Visão: O Cavaleiro entre as Mirtas.</li>
+                        <li>1.18-21: Segunda Visão: Os Quatro Chifres e os Quatro Ferreiros.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: Terceira Visão e Promessas para Jerusalém</strong>
+                    <ul>
+                        <li>2.1-13: Terceira Visão: O Homem com o Cordel de Medir.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: Quarta Visão: Josué, o Sumo Sacerdote</strong>
+                    <ul>
+                        <li>3.1-10: Purificação de Josué e Promessa do Renovo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: Quinta Visão: O Candelabro e as Oliveiras</strong>
+                    <ul>
+                        <li>4.1-14: Pelo Espírito do Senhor.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 5: Sexta e Sétima Visões</strong>
+                    <ul>
+                        <li>5.1-4: Sexta Visão: O Rolo Voador.</li>
+                        <li>5.5-11: Sétima Visão: A Mulher no Efa.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 6: Oitava Visão e Coroação de Josué</strong>
+                    <ul>
+                        <li>6.1-8: Oitava Visão: Os Quatro Carros.</li>
+                        <li>6.9-15: A Coroação de Josué (símbolo do Messias).</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 7: A Questão do Jejum</strong>
+                    <ul>
+                        <li>7.1-7: Motivação dos Jejuns.</li>
+                        <li>7.8-14: Chamado à Justiça e Obediência.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 8: Promessas de Restauração e Bênção</strong>
+                    <ul>
+                        <li>8.1-23: Jerusalém Restaurada e Centro de Adoração.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 9: A Vinda do Rei Messiânico</strong>
+                    <ul>
+                        <li>9.1-8: Juízo sobre as Nações Vizinhas.</li>
+                        <li>9.9-10: O Rei Justo e Salvador.</li>
+                        <li>9.11-17: Restauração de Efraim e Judá.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 10: O Retorno do Rebanho Disperso</strong>
+                    <ul>
+                        <li>10.1-12: Deus Restaurará Seu Povo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 11: Os Dois Pastores e o Pastor Ferido</strong>
+                    <ul>
+                        <li>11.1-17: Profecia da Rejeição do Bom Pastor.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 12: O Cerco de Jerusalém e o Lamento</strong>
+                    <ul>
+                        <li>12.1-14: Jerusalém como Pedra Pesada; Olharão para Aquele que traspassaram.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 13: Purificação e o Pastor Ferido</strong>
+                    <ul>
+                        <li>13.1-6: Fonte de Purificação.</li>
+                        <li>13.7-9: O Pastor Ferido e a Dispersão das Ovelhas.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 14: O Dia do Senhor e o Reino Messiânico</strong>
+                    <ul>
+                        <li>14.1-21: A Batalha Final e o Reino Universal do Senhor.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Zacarias</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>O Messias:</strong> Profecias detalhadas sobre a primeira e segunda vinda de Cristo.</li>
+                <li><strong>Reconstrução e Restauração:</strong> O encorajamento para edificar o Templo e a restauração de Jerusalém.</li>
+                <li><strong>Arrependimento:</strong> O chamado para o povo se voltar para Deus.</li>
+                <li><strong>O Dia do Senhor:</strong> O tempo do juízo e da redenção final.</li>
+                <li><strong>A Presença de Deus:</strong> A promessa de que Deus habitará no meio de Seu povo.</li>
+                <li><strong>Soberania Divina:</strong> O controle de Deus sobre a história e as nações.</li>
+                <li><strong>Purificação e Santidade:</strong> A necessidade de pureza espiritual e a fonte de purificação.</li>
+                <li><strong>Glória Futura:</strong> A visão do reino universal de Deus e a exaltação de Jerusalém.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Zacarias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersZacarias">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Zacarias</h2>
+            <div id="quizContainerZacarias" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionZacarias"></p>
+                <div id="quizOptionsZacarias" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackZacarias" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionZacarias()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressZacarias"></span></p>
+                <p>Pontuação: <span id="quizScoreZacarias">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Zacarias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Zacarias.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="zacariasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalZacarias()">&times;</span>
+                <h3 id="modalCharacterNameZacarias" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionZacarias" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Zacarias",
+            "short_name": "Zacarias",
+            "description": "Explore o livro de Zacarias de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=ZC",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=ZC",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'zacarias-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionZacarias(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsZacarias();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksZacarias();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsZacarias(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexZacarias = 0; // Reinicia o quiz
+                scoreZacarias = 0;
+                wrongAnswersZacarias = 0;
+                document.getElementById('quizScoreZacarias').textContent = `Acertos: ${scoreZacarias}, Erros: ${wrongAnswersZacarias}`;
+                displayQuestionZacarias();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderZacariasChart();
+            }
+        }
+
+        // Dados dos personagens para Zacarias
+        const characterDetailsZacarias = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano que se lembra de Suas promessas, revela visões e profecias, e governa sobre a história e o futuro."
+            },
+            "Zacarias": {
+                name: "Zacarias",
+                description: "O profeta pós-exílico que recebeu e registrou visões complexas e profecias messiânicas, encorajando o povo a reconstruir o Templo."
+            },
+            "Zorobabel": {
+                name: "Zorobabel",
+                description: "O governador de Judá, líder político do retorno do exílio, que trabalhou na reconstrução do Templo e é mencionado nas visões."
+            },
+            "Josué (Sumo Sacerdote)": {
+                name: "Josué (Sumo Sacerdote)",
+                description: "O sumo sacerdote, líder espiritual do retorno do exílio, que é purificado e simboliza o Renovo (Messias)."
+            },
+            "Anjo do Senhor": {
+                name: "Anjo do Senhor",
+                description: "Um intérprete divino que aparece nas visões de Zacarias, explicando o significado das revelações."
+            },
+            "O Povo de Judá": {
+                name: "O Povo de Judá",
+                description: "Os exilados judeus que retornaram a Jerusalém, a quem as mensagens de arrependimento e encorajamento de Zacarias foram dirigidas."
+            },
+            "O Renovo (Messias)": {
+                name: "O Renovo (Messias)",
+                description: "Uma figura profética central no livro, representando o futuro Messias que construiria o Templo espiritual e reinaria."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalZacarias(characterName) {
+            const details = characterDetailsZacarias[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameZacarias').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionZacarias').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalZacarias() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsZacarias() {
+            const grid = document.getElementById('characterGridZacarias');
+            grid.innerHTML = '';
+            for (const key in characterDetailsZacarias) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalZacarias(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksZacarias() {
+            const chaptersDiv = document.getElementById('chaptersZacarias');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 14; i++) { // Zacarias tem 14 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/zc/${i}`; // Link para a Bíblia Online, Zacarias
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Zacarias (25 perguntas únicas)
+        const uniqueQuizQuestionsZacarias = [
+            { question: "Qual o significado do nome do profeta Zacarias?", options: ["O Senhor é fiel", "O Senhor se lembrou", "O Senhor salva", "O Senhor julga"], answer: "O Senhor se lembrou", reference: "Introdução ao Livro de Zacarias" },
+            { question: "Zacarias foi um profeta de qual período?", options: ["Pré-exílico", "Exílico", "Pós-exílico", "Período dos Juízes"], answer: "Pós-exílico", reference: "Introdução ao Livro de Zacarias" },
+            { question: "Qual era a principal tarefa do povo judeu na época de Zacarias?", options: ["Conquistar novas terras", "Reconstruir o Templo de Jerusalém", "Estabelecer um novo rei", "Escrever novas leis"], answer: "Reconstruir o Templo de Jerusalém", reference: "Introdução ao Livro de Zacarias" },
+            { question: "Quantas visões noturnas Zacarias recebeu na primeira parte do livro?", options: ["Cinco", "Sete", "Oito", "Dez"], answer: "Oito", reference: "Panoramas do Livro de Zacarias" },
+            { question: "Quem é o 'Renovo' mencionado em Zacarias 3:8 e 6:12?", options: ["Zorobabel", "Josué", "O Messias", "Zacarias"], answer: "O Messias", reference: "Panoramas do Livro de Zacarias" },
+            { question: "Em Zacarias 4:6, qual a famosa declaração sobre a reconstrução do Templo?", options: ["Com ouro e prata", "Com grande exército", "Não por força nem por poder, mas pelo meu Espírito", "Com sabedoria humana"], answer: "Não por força nem por poder, mas pelo meu Espírito", reference: "Zacarias 4:6" },
+            { question: "Qual a profecia sobre a entrada do Rei em Jerusalém em Zacarias 9:9?", options: ["Em um carro de guerra", "Montado em um cavalo branco", "Humilde, e montado sobre um jumento", "Em um trono de ouro"], answer: "Humilde, e montado sobre um jumento", reference: "Zacarias 9:9" },
+            { question: "O que o povo fará, segundo Zacarias 12:10, em relação àquele que foi traspassado?", options: ["Esquecê-lo", "Rir dele", "Olharão para ele e lamentarão", "Celebrarão sua morte"], answer: "Olharão para ele e lamentarão", reference: "Zacarias 12:10" },
+            { question: "Quantos capítulos tem o livro de Zacarias?", options: ["8", "10", "12", "14"], answer: "14", reference: "Esboços do Livro de Zacarias" },
+            { question: "Qual a primeira visão noturna de Zacarias?", options: ["O Candelabro de Ouro", "O Homem com o Cordel de Medir", "O Cavaleiro entre as Mirtas", "Os Quatro Carros"], answer: "O Cavaleiro entre as Mirtas", reference: "Panoramas do Livro de Zacarias" },
+            { question: "O que a visão do rolo voador (Zacarias 5:1-4) representa?", options: ["A bênção de Deus", "O juízo contra o roubo e o falso juramento", "A glória do Templo", "A restauração de Israel"], answer: "O juízo contra o roubo e o falso juramento", reference: "Panoramas do Livro de Zacarias" },
+            { question: "Quem é purificado na quarta visão de Zacarias, simbolizando a justificação?", options: ["Zorobabel", "Zacarias", "Josué, o Sumo Sacerdote", "O povo de Judá"], answer: "Josué, o Sumo Sacerdote", reference: "Panoramas do Livro de Zacarias" },
+            { question: "O que os jejuns do povo se tornarão no futuro, segundo Zacarias 8:19?", options: ["Dias de tristeza", "Dias de alegria e festa", "Dias de luto", "Dias de silêncio"], answer: "Dias de alegria e festa", reference: "Zacarias 8:19" },
+            { question: "Qual a profecia sobre o pastor ferido e a dispersão das ovelhas em Zacarias 13:7?", options: ["O pastor será protegido", "Fere o pastor, e as ovelhas se dispersarão", "O pastor reunirá as ovelhas", "O pastor será glorificado"], answer: "Fere o pastor, e as ovelhas se dispersarão", reference: "Zacarias 13:7" },
+            { question: "Qual será o resultado final do Dia do Senhor para Jerusalém em Zacarias 14?", options: ["Será destruída", "Será habitada em segurança e será santa", "Será abandonada", "Será um deserto"], answer: "Será habitada em segurança e será santa", reference: "Zacarias 14" },
+            { question: "O que o livro de Zacarias enfatiza sobre a soberania de Deus?", options: ["Que Deus não se importa com as nações", "Que Deus controla a história e as nações", "Que Deus só se importa com Israel", "Que Deus é limitado pelo poder humano"], answer: "Que Deus controla a história e as nações", reference: "Significado Teológico" },
+            { question: "Qual a principal mensagem de Zacarias para o povo desanimado na reconstrução do Templo?", options: ["Desistir da obra", "Confiar em seus próprios esforços", "Encorajamento e promessas de Deus", "Construir casas para si mesmos"], answer: "Encorajamento e promessas de Deus", reference: "Introdução ao Livro de Zacarias" },
+            { question: "O que a visão do candelabro de ouro e das duas oliveiras simboliza em Zacarias 4?", options: ["A riqueza do Templo", "A luz do mundo", "A obra de Deus realizada pelo Espírito", "A sabedoria dos sacerdotes"], answer: "A obra de Deus realizada pelo Espírito", reference: "Panoramas do Livro de Zacarias" },
+            { question: "Em Zacarias 8:23, o que acontecerá quando muitas nações buscarem o Senhor em Jerusalém?", options: ["Elas serão escravizadas", "Elas se unirão a dez homens de todas as línguas e nações", "Elas serão destruídas", "Elas se converterão a outros deuses"], answer: "Elas se unirão a dez homens de todas as línguas e nações", reference: "Zacarias 8:23" },
+            { question: "Qual a primeira exortação de Zacarias no início do livro?", options: ["Construam suas casas", "Arrependam-se e voltem para Deus", "Façam sacrifícios", "Lutem contra os inimigos"], answer: "Arrependam-se e voltem para Deus", reference: "Zacarias 1:3" },
+            { question: "O que a coroação de Josué em Zacarias 6:9-15 representa?", options: ["O início de um novo reino", "A autoridade do sumo sacerdote", "Um símbolo do Renovo (Messias)", "A união de Judá e Israel"], answer: "Um símbolo do Renovo (Messias)", reference: "Panoramas do Livro de Zacarias" },
+            { question: "Qual o tema central da segunda parte do livro de Zacarias (capítulos 9-14)?", options: ["A história dos reis de Judá", "Profecias messiânicas e escatológicas", "Leis e rituais do Templo", "A sabedoria de Deus"], answer: "Profecias messiânicas e escatológicas", reference: "Introdução ao Livro de Zacarias" },
+            { question: "O que significa o nome 'Zacarias'?", options: ["Deus é amor", "O Senhor se lembrou", "O justo viverá pela fé", "Minha rocha"], answer: "O Senhor se lembrou", reference: "Introdução ao Livro de Zacarias" },
+            { question: "Qual a visão que mostra a remoção da iniquidade da terra em Zacarias 5?", options: ["O Rolo Voador", "A Mulher no Efa", "Os Quatro Chifres", "O Cavaleiro entre as Mirtas"], answer: "A Mulher no Efa", reference: "Panoramas do Livro de Zacarias" },
+            { question: "O que o livro de Zacarias inspira nos crentes?", options: ["Medo e incerteza", "Desânimo e desesperança", "Esperança e fé na soberania de Deus", "Dúvida e ceticismo"], answer: "Esperança e fé na soberania de Deus", reference: "Significado Teológico" }
+        ];
+
+        let quizQuestionsZacarias = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsZacarias() {
+            quizQuestionsZacarias = []; // Limpa as perguntas anteriores
+            while (quizQuestionsZacarias.length < 200) {
+                quizQuestionsZacarias.push(...uniqueQuizQuestionsZacarias);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsZacarias.length > 200) {
+                quizQuestionsZacarias = quizQuestionsZacarias.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsZacarias); // Embaralha o array completo
+        }
+
+        let currentQuizIndexZacarias = 0;
+        let scoreZacarias = 0;
+        let wrongAnswersZacarias = 0;
+
+        function displayQuestionZacarias() {
+            const questionElement = document.getElementById('quizQuestionZacarias');
+            const optionsElement = document.getElementById('quizOptionsZacarias');
+            const feedbackElement = document.getElementById('quizFeedbackZacarias');
+            const nextButton = document.querySelector('#quizContainerZacarias .quiz-next');
+            const progressElement = document.getElementById('quizProgressZacarias');
+
+            if (currentQuizIndexZacarias < quizQuestionsZacarias.length) {
+                const questionData = quizQuestionsZacarias[currentQuizIndexZacarias];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerZacarias(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexZacarias + 1}/${quizQuestionsZacarias.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreZacarias}, Erros: ${wrongAnswersZacarias}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerZacarias(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsZacarias button');
+            const feedbackElement = document.getElementById('quizFeedbackZacarias');
+            const nextButton = document.querySelector('#quizContainerZacarias .quiz-next');
+            const scoreElement = document.getElementById('quizScoreZacarias');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreZacarias++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersZacarias++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreZacarias}, Erros: ${wrongAnswersZacarias}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionZacarias() {
+            currentQuizIndexZacarias++;
+            displayQuestionZacarias();
+        }
+
+        // Gráfico de Temas para Zacarias
+        let zacariasChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderZacariasChart() {
+            const ctx = document.getElementById('zacariasChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (zacariasChartInstance) {
+                zacariasChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['O Messias', 'Reconstrução e Restauração', 'Arrependimento', 'O Dia do Senhor', 'A Presença de Deus', 'Soberania Divina', 'Purificação e Santidade', 'Glória Futura'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [8, 7, 5, 6, 5, 4, 4, 6], // Valores fictícios para Zacarias
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para O Messias
+                        'rgba(54, 162, 235, 0.7)', // Azul para Reconstrução e Restauração
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Arrependimento
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para O Dia do Senhor
+                        'rgba(153, 102, 255, 0.7)', // Roxo para A Presença de Deus
+                        'rgba(255, 159, 64, 0.7)', // Laranja para Soberania Divina
+                        'rgba(201, 203, 207, 0.7)', // Cinza para Purificação e Santidade
+                        'rgba(100, 149, 237, 0.7)' // Azul claro para Glória Futura
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)',
+                        'rgba(100, 149, 237, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            zacariasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Zacarias',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionZacarias('inicio');
+        });
+    </script>
+</body>
+</html>

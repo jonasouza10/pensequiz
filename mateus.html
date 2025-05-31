@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Mateus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mateus Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Mateus</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionMateus('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionMateus('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionMateus('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionMateus('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionMateus('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionMateus('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionMateus('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionMateus('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionMateus('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Mateus</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Mateus, o primeiro Evangelho do Novo Testamento, que apresenta Jesus como o Messias prometido, o Rei de Israel e o cumprimento das profecias do Antigo Testamento. Descubra a genealogia de Jesus, o Sermão da Montanha, as parábolas do Reino dos Céus, os milagres, os ensinamentos sobre o discipulado e a Grande Comissão. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Mateus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Mateus é o primeiro dos quatro Evangelhos e serve como uma ponte crucial entre o Antigo e o Novo Testamento. Escrito por Mateus (também conhecido como Levi), um ex-cobrador de impostos que se tornou um dos doze apóstolos de Jesus, este Evangelho foi provavelmente redigido entre 60 e 70 d.C.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O público-alvo principal de Mateus eram os cristãos judeus, e seu propósito era demonstrar que Jesus de Nazaré é o Messias prometido nas Escrituras Hebraicas. Mateus faz isso de forma sistemática, citando frequentemente profecias do Antigo Testamento e mostrando como Jesus as cumpriu. Ele apresenta Jesus como o Rei de Israel, o novo Moisés, que veio para estabelecer o Reino dos Céus.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Evangelho de Mateus é conhecido por sua estrutura organizada, que intercala seções narrativas com cinco grandes discursos de Jesus: o Sermão da Montanha (caps. 5-7), o Discurso Missionário (cap. 10), o Discurso das Parábolas (cap. 13), o Discurso sobre a Comunidade (cap. 18) e o Discurso Escatológico (caps. 24-25). O livro começa com a genealogia de Jesus, traçando Sua linhagem até Abraão e Davi, e termina com a Grande Comissão, o mandamento de Jesus para Seus discípulos irem e fazerem discípulos de todas as nações.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem o Reino dos Céus, a autoridade de Jesus, o cumprimento da lei e dos profetas, o discipulado, a natureza da Igreja e o juízo final. Mateus é um livro essencial para entender a identidade de Jesus como o Messias e a natureza do Reino de Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-4: A Origem e o Início do Ministério de Jesus.</strong> Genealogia, nascimento, infância, batismo e tentação de Jesus.</li>
+                <li><strong>Capítulos 5-7: O Sermão da Montanha.</strong> Os ensinamentos fundamentais de Jesus sobre a lei, a justiça do Reino e a vida cristã.</li>
+                <li><strong>Capítulos 8-12: Milagres e Chamado aos Discípulos.</strong> Demonstrações da autoridade de Jesus e a crescente oposição.</li>
+                <li><strong>Capítulos 13-20: Parábolas do Reino e Ministério Crescente.</strong> Ensinamentos sobre o Reino dos Céus e eventos importantes na Galileia e Pereia.</li>
+                <li><strong>Capítulos 21-25: A Semana da Paixão e o Discurso Escatológico.</strong> A entrada triunfal em Jerusalém, confrontos com líderes religiosos e ensinamentos sobre o fim dos tempos.</li>
+                <li><strong>Capítulos 26-28: Paixão, Morte e Ressurreição.</strong> A prisão, julgamento, crucificação, sepultamento e ressurreição de Jesus, culminando na Grande Comissão.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Mateus é um relato poderoso que estabelece a realeza de Jesus e a fundação de Seu Reino, convidando os leitores a reconhecerem-No como o Messias e a se tornarem Seus discípulos.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Mateus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Mateus apresenta Jesus como o Messias e Rei, revelando a natureza do Reino dos Céus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Origem e a Infância do Rei (Capítulos 1-2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Genealogia de Jesus Cristo (1:1-17):</strong>
+                    <ul>
+                        <li>Desde Abraão até José, pai de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Nascimento de Jesus (1:18-25):</strong>
+                    <ul>
+                        <li>Anúncio a José, nascimento virginal.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Visita dos Magos (2:1-12):</strong>
+                    <ul>
+                        <li>Adoração ao Rei recém-nascido.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Fuga para o Egito e Retorno a Nazaré (2:13-23):</strong>
+                    <ul>
+                        <li>Cumprimento de profecias.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Início do Ministério do Rei (Capítulos 3-4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Ministério de João Batista (3:1-12):</strong>
+                    <ul>
+                        <li>Pregação do arrependimento e batismo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Batismo de Jesus (3:13-17):</strong>
+                    <ul>
+                        <li>Identificação com a humanidade e aprovação divina.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Tentação de Jesus (4:1-11):</strong>
+                    <ul>
+                        <li>Vitória sobre Satanás no deserto.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Início do Ministério na Galileia (4:12-25):</strong>
+                    <ul>
+                        <li>Chamado dos primeiros discípulos e cura de enfermos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Sermão da Montanha: A Constituição do Reino (Capítulos 5-7)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. As Bem-aventuranças (5:1-12):</strong>
+                    <ul>
+                        <li>Características dos cidadãos do Reino.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Sal da Terra e a Luz do Mundo (5:13-16):</strong>
+                    <ul>
+                        <li>A influência dos discípulos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Jesus e a Lei (5:17-48):</strong>
+                    <ul>
+                        <li>Cumprimento e aperfeiçoamento da Lei.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Piedade Genuína (6:1-18):</strong>
+                    <ul>
+                        <li>Sobre esmolas, oração e jejum.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Prioridades do Reino (6:19-34):</strong>
+                    <ul>
+                        <li>Não ajuntar tesouros na terra, buscar primeiro o Reino.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Julgar, Orar e a Regra de Ouro (7:1-12):</strong>
+                    <ul>
+                        <li>Advertências e princípios de relacionamento.</li>
+                    </ul>
+                </li>
+                <li><strong>G. Os Dois Caminhos e os Falsos Profetas (7:13-23):</strong>
+                    <ul>
+                        <li>A porta estreita e o fruto.</li>
+                    </ul>
+                </li>
+                <li><strong>H. Os Dois Fundamentos (7:24-29):</strong>
+                    <ul>
+                        <li>Ouvir e praticar as palavras de Jesus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Milagres e Chamado aos Discípulos (Capítulos 8-12)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Série de Milagres (8:1-9:34):</strong>
+                    <ul>
+                        <li>Cura de um leproso, servo do centurião, sogra de Pedro, tempestade acalmada, endemoninhados, paralítico, etc.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Chamado de Mateus e Ceia com Pecadores (9:9-17):</strong>
+                    <ul>
+                        <li>Jesus veio chamar pecadores.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Discurso Missionário (10:1-42):</strong>
+                    <ul>
+                        <li>Instruções aos doze apóstolos.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Rejeição de Jesus e o Convite ao Descanso (11:1-30):</strong>
+                    <ul>
+                        <li>Cidades impenitentes e o jugo suave.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Conflitos com os Fariseus (12:1-50):</strong>
+                    <ul>
+                        <li>O Senhor do sábado, o pecado imperdoável, o sinal de Jonas.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Parábolas do Reino e Ministério Crescente (Capítulos 13-20)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Discurso das Parábolas do Reino (13:1-58):</strong>
+                    <ul>
+                        <li>O semeador, o joio, o grão de mostarda, o fermento, o tesouro escondido, a pérola de grande valor, a rede.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Morte de João Batista e Alimentação dos Cinco Mil (14:1-36):</strong>
+                    <ul>
+                        <li>Jesus anda sobre as águas.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Tradições dos Anciãos e a Fé Cananeia (15:1-39):</strong>
+                    <ul>
+                        <li>O que contamina o homem.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Confissão de Pedro e Transfiguração (16:1-17:27):</strong>
+                    <ul>
+                        <li>Jesus é o Cristo, o Filho do Deus vivo; ensinamento sobre a Sua morte e ressurreição.</li>
+                    </ul>
+                </li>
+                <li><strong>E. O Discurso sobre a Comunidade (18:1-35):</strong>
+                    <ul>
+                        <li>Humildade, ovelha perdida, disciplina na igreja, perdão.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Ensino sobre Divórcio, Riqueza e Recompensa (19:1-20:34):</strong>
+                    <ul>
+                        <li>O jovem rico, os trabalhadores da vinha, a ambição dos filhos de Zebedeu.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">VI. A Semana da Paixão e o Discurso Escatológico (Capítulos 21-25)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Entrada Triunfal em Jerusalém (21:1-11):</strong>
+                    <ul>
+                        <li>Jesus entra como Rei.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Purificação do Templo e Conflitos (21:12-22:46):</strong>
+                    <ul>
+                        <li>A figueira seca, a autoridade de Jesus, parábola dos dois filhos, dos lavradores maus, das bodas, impostos a César, a ressurreição, o grande mandamento.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Oito Ais contra os Fariseus (23:1-39):</strong>
+                    <ul>
+                        <li>Condenação da hipocrisia religiosa.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Discurso Escatológico (24:1-25:46):</strong>
+                    <ul>
+                        <li>Sinais do fim dos tempos, a vinda do Filho do Homem, parábola das dez virgens, dos talentos, do juízo final.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">VII. Paixão, Morte e Ressurreição do Rei (Capítulos 26-28)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Última Ceia e a Traição (26:1-56):</strong>
+                    <ul>
+                        <li>Instituição da Ceia, Getsemani, prisão de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Julgamento e Negação de Pedro (26:57-27:26):</strong>
+                    <ul>
+                        <li>Diante do Sinédrio e Pilatos, a morte de Judas.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Crucificação e Sepultamento (27:27-66):</strong>
+                    <ul>
+                        <li>A morte de Jesus e os eventos que a acompanharam.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Ressurreição e a Grande Comissão (28:1-20):</strong>
+                    <ul>
+                        <li>As mulheres no túmulo vazio, o aparecimento de Jesus, o mandamento de fazer discípulos em todas as nações.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Evangelho de Mateus é fundamental para entender a identidade de Jesus como o Messias prometido no Antigo Testamento. Ele enfatiza a realeza de Jesus e o estabelecimento do Reino dos Céus, que é tanto uma realidade presente (na pessoa e nos ensinamentos de Jesus) quanto futura (em sua consumação). Mateus destaca a autoridade de Jesus como Mestre e Legislador, apresentando Seus ensinamentos como a nova e superior interpretação da Lei. O livro também ressalta a importância do discipulado, da vida em comunidade (a Igreja) e da missão de levar o Evangelho a todas as nações. A fidelidade de Deus em cumprir Suas promessas e a soberania de Jesus sobre toda a criação são temas proeminentes, culminando na vitória sobre a morte e na comissão para a expansão do Reino.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridMateus">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Mateus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Mateus, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Genealogia e Nascimento de Jesus</strong>
+                    <ul>
+                        <li>1.1-17: A Genealogia de Jesus Cristo.</li>
+                        <li>1.18-25: O Nascimento de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: Infância de Jesus e Fuga para o Egito</strong>
+                    <ul>
+                        <li>2.1-12: A Visita dos Magos.</li>
+                        <li>2.13-23: A Fuga para o Egito e Retorno a Nazaré.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: Ministério de João Batista e Batismo de Jesus</strong>
+                    <ul>
+                        <li>3.1-12: A Pregação de João Batista.</li>
+                        <li>3.13-17: O Batismo de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: Tentação de Jesus e Início do Ministério</strong>
+                    <ul>
+                        <li>4.1-11: A Tentação no Deserto.</li>
+                        <li>4.12-25: O Início do Ministério na Galileia.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 5: As Bem-aventuranças e o Caráter do Reino</strong>
+                    <ul>
+                        <li>5.1-12: As Bem-aventuranças.</li>
+                        <li>5.13-16: O Sal da Terra e a Luz do Mundo.</li>
+                        <li>5.17-48: Jesus e a Lei.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 6: Piedade Genuína e Prioridades do Reino</strong>
+                    <ul>
+                        <li>6.1-18: Sobre Esmolas, Oração e Jejum.</li>
+                        <li>6.19-34: Não Vos Inquieteis.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 7: Julgar, Orar e os Dois Fundamentos</strong>
+                    <ul>
+                        <li>7.1-12: Julgar o Próximo e a Regra de Ouro.</li>
+                        <li>7.13-29: Os Dois Caminhos e os Dois Fundamentos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 8: Milagres de Cura e Autoridade</strong>
+                    <ul>
+                        <li>8.1-17: Cura de um Leproso, Servo do Centurião, Sogra de Pedro.</li>
+                        <li>8.18-34: O Custo do Discipulado e Outros Milagres.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 9: Mais Milagres e Chamado de Mateus</strong>
+                    <ul>
+                        <li>9.1-17: Cura do Paralítico e Chamado de Mateus.</li>
+                        <li>9.18-38: Cura da Mulher com Hemorragia, Filha de Jairo, Cegos e Mudos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 10: O Discurso Missionário</strong>
+                    <ul>
+                        <li>10.1-42: Instruções aos Doze Apóstolos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 11: João Batista, Cidades Impenitentes e o Convite de Jesus</strong>
+                    <ul>
+                        <li>11.1-19: A Pergunta de João Batista.</li>
+                        <li>11.20-30: Ai das Cidades Impenitentes e o Convite ao Descanso.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 12: Conflitos com os Fariseus e o Sinal de Jonas</strong>
+                    <ul>
+                        <li>12.1-21: O Senhor do Sábado.</li>
+                        <li>12.22-50: O Pecado Imperdoável e o Sinal de Jonas.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 13: As Parábolas do Reino</strong>
+                    <ul>
+                        <li>13.1-58: O Semeador, o Joio, o Grão de Mostarda, o Fermento, o Tesouro Escondido, a Pérola, a Rede.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 14: Morte de João Batista e Alimentação dos Cinco Mil</strong>
+                    <ul>
+                        <li>14.1-12: A Morte de João Batista.</li>
+                        <li>14.13-36: Alimentação dos Cinco Mil e Jesus Anda sobre as Águas.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 15: Tradições dos Anciãos e a Fé Cananeia</strong>
+                    <ul>
+                        <li>15.1-20: O que Contamina o Homem.</li>
+                        <li>15.21-39: A Mulher Cananeia e Alimentação dos Quatro Mil.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 16: Confissão de Pedro e o Pão da Vida</strong>
+                    <ul>
+                        <li>16.1-12: A Fermento dos Fariseus e Saduceus.</li>
+                        <li>16.13-28: A Confissão de Pedro e a Primeira Predição da Paixão.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 17: A Transfiguração e a Cura do Endemoninhado</strong>
+                    <ul>
+                        <li>17.1-13: A Transfiguração.</li>
+                        <li>17.14-27: A Cura do Jovem Endemoninhado e o Imposto do Templo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 18: O Discurso sobre a Comunidade</strong>
+                    <ul>
+                        <li>18.1-14: Humildade e a Ovelha Perdida.</li>
+                        <li>18.15-35: Disciplina na Igreja e a Parábola do Credor Incompassivo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 19: Ensino sobre Divórcio e Riqueza</strong>
+                    <ul>
+                        <li>19.1-12: O Divórcio.</li>
+                        <li>19.13-30: Crianças, o Jovem Rico e a Recompensa.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 20: Os Trabalhadores da Vinha e a Ambição</strong>
+                    <ul>
+                        <li>20.1-16: A Parábola dos Trabalhadores da Vinha.</li>
+                        <li>20.17-34: A Terceira Predição da Paixão e os Dois Cegos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 21: Entrada Triunfal e Purificação do Templo</strong>
+                    <ul>
+                        <li>21.1-17: Entrada Triunfal em Jerusalém.</li>
+                        <li>21.18-32: A Figueira Seca e a Autoridade de Jesus.</li>
+                        <li>21.33-46: A Parábola dos Lavradores Maus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 22: Parábolas e Conflitos Finais</strong>
+                    <ul>
+                        <li>22.1-14: A Parábola das Bodas.</li>
+                        <li>22.15-46: Imposto a César, a Ressurreição, o Grande Mandamento, e a Pergunta de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 23: Oito Ais contra os Fariseus</strong>
+                    <ul>
+                        <li>23.1-39: Condenação da Hipocrisia Religiosa.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 24: O Discurso Escatológico: Sinais do Fim</strong>
+                    <ul>
+                        <li>24.1-35: Sinais da Destruição de Jerusalém e da Vinda do Filho do Homem.</li>
+                        <li>24.36-51: A Incerteza do Dia e a Necessidade de Vigilância.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 25: O Discurso Escatológico: Parábolas do Juízo</strong>
+                    <ul>
+                        <li>25.1-13: A Parábola das Dez Virgens.</li>
+                        <li>25.14-30: A Parábola dos Talentos.</li>
+                        <li>25.31-46: O Juízo Final: Ovelhas e Bodes.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 26: A Última Ceia e a Traição</strong>
+                    <ul>
+                        <li>26.1-35: Conspiração, Unção em Betânia, Última Ceia.</li>
+                        <li>26.36-75: Getsemani, Prisão de Jesus e Negação de Pedro.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 27: Julgamento e Crucificação</strong>
+                    <ul>
+                        <li>27.1-26: Jesus Diante de Pilatos e a Morte de Judas.</li>
+                        <li>27.27-66: A Crucificação e o Sepultamento.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 28: A Ressurreição e a Grande Comissão</strong>
+                    <ul>
+                        <li>28.1-10: A Ressurreição de Jesus.</li>
+                        <li>28.11-15: O Relato Falso dos Guardas.</li>
+                        <li>28.16-20: A Grande Comissão.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Mateus</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Jesus como o Messias:</strong> O cumprimento das profecias do Antigo Testamento em Jesus.</li>
+                <li><strong>O Reino dos Céus:</strong> A natureza e as exigências do Reino de Deus, presente e futuro.</li>
+                <li><strong>Discipulado:</strong> O chamado para seguir a Jesus e viver de acordo com Seus ensinamentos.</li>
+                <li><strong>A Lei e a Graça:</strong> A relação de Jesus com a Lei de Moisés e a justiça superior do Reino.</li>
+                <li><strong>A Igreja:</strong> A comunidade dos crentes e sua missão no mundo.</li>
+                <li><strong>Juízo:</strong> O juízo vindouro sobre os ímpios e a recompensa para os justos.</li>
+                <li><strong>Missão Global:</strong> A Grande Comissão de levar o Evangelho a todas as nações.</li>
+                <li><strong>Autoridade de Jesus:</strong> Demonstrações da autoridade de Jesus sobre a doença, o pecado, a natureza e os demônios.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Mateus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersMateus">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Mateus</h2>
+            <div id="quizContainerMateus" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionMateus"></p>
+                <div id="quizOptionsMateus" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackMateus" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionMateus()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressMateus"></span></p>
+                <p>Pontuação: <span id="quizScoreMateus">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Mateus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Mateus.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="mateusChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalMateus()">&times;</span>
+                <h3 id="modalCharacterNameMateus" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionMateus" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Mateus",
+            "short_name": "Mateus",
+            "description": "Explore o livro de Mateus de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=MT",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=MT",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'mateus-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionMateus(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsMateus();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksMateus();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsMateus(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexMateus = 0; // Reinicia o quiz
+                scoreMateus = 0;
+                wrongAnswersMateus = 0;
+                document.getElementById('quizScoreMateus').textContent = `Acertos: ${scoreMateus}, Erros: ${wrongAnswersMateus}`;
+                displayQuestionMateus();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderMateusChart();
+            }
+        }
+
+        // Dados dos personagens para Mateus
+        const characterDetailsMateus = {
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "O Messias prometido, o Rei de Israel, o Filho de Deus, cujos ensinamentos e atos de poder são o foco central do Evangelho."
+            },
+            "Mateus (Levi)": {
+                name: "Mateus (Levi)",
+                description: "O autor do Evangelho, um ex-cobrador de impostos que se tornou um dos doze apóstolos de Jesus."
+            },
+            "Maria": {
+                name: "Maria",
+                description: "A mãe de Jesus, que concebeu Jesus pelo Espírito Santo."
+            },
+            "José": {
+                name: "José",
+                description: "O pai adotivo de Jesus, descendente da linhagem de Davi."
+            },
+            "João Batista": {
+                name: "João Batista",
+                description: "O precursor de Jesus, que pregou o arrependimento e batizou Jesus no rio Jordão."
+            },
+            "Pedro": {
+                name: "Pedro",
+                description: "Um dos doze apóstolos, conhecido por sua confissão de fé em Jesus e por sua negação."
+            },
+            "Os Doze Discípulos": {
+                name: "Os Doze Discípulos",
+                description: "Os seguidores mais próximos de Jesus, comissionados a pregar o Evangelho e fazer discípulos."
+            },
+            "Fariseus e Saduceus": {
+                name: "Fariseus e Saduceus",
+                description: "Grupos religiosos judeus que frequentemente se opunham a Jesus e seus ensinamentos."
+            },
+            "Pôncio Pilatos": {
+                name: "Pôncio Pilatos",
+                description: "O governador romano da Judeia que condenou Jesus à crucificação."
+            },
+            "Judas Iscariotes": {
+                name: "Judas Iscariotes",
+                description: "Um dos doze apóstolos que traiu Jesus por trinta moedas de prata."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalMateus(characterName) {
+            const details = characterDetailsMateus[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameMateus').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionMateus').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalMateus() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsMateus() {
+            const grid = document.getElementById('characterGridMateus');
+            grid.innerHTML = '';
+            for (const key in characterDetailsMateus) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalMateus(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksMateus() {
+            const chaptersDiv = document.getElementById('chaptersMateus');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 28; i++) { // Mateus tem 28 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/mt/${i}`; // Link para a Bíblia Online, Mateus
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Mateus (25 perguntas únicas)
+        const uniqueQuizQuestionsMateus = [
+            { question: "Qual o propósito principal do Evangelho de Mateus?", options: ["Registrar a história de Israel", "Demonstrar que Jesus é o Messias prometido", "Focar na vida de Pedro", "Descrever os milagres de Jesus em detalhes"], answer: "Demonstrar que Jesus é o Messias prometido", reference: "Introdução ao Livro de Mateus" },
+            { question: "Quem é o autor tradicional do Evangelho de Mateus?", options: ["Marcos", "Lucas", "Mateus (Levi)", "João"], answer: "Mateus (Levi)", reference: "Introdução ao Livro de Mateus" },
+            { question: "A quem Mateus dirigiu seu Evangelho principalmente?", options: ["Gentios", "Romanos", "Cristãos judeus", "Gregos"], answer: "Cristãos judeus", reference: "Introdução ao Livro de Mateus" },
+            { question: "Quantos grandes discursos de Jesus são encontrados em Mateus?", options: ["Três", "Quatro", "Cinco", "Sete"], answer: "Cinco", reference: "Introdução ao Livro de Mateus" },
+            { question: "Qual o nome do famoso discurso de Jesus nos capítulos 5-7 de Mateus?", options: ["Sermão do Templo", "Sermão da Montanha", "Sermão da Planície", "Sermão da Cidade"], answer: "Sermão da Montanha", reference: "Panoramas do Livro de Mateus" },
+            { question: "Qual é o tema principal do Sermão da Montanha?", options: ["A importância dos sacrifícios", "A lei cerimonial", "Os ensinamentos fundamentais de Jesus sobre o Reino", "A história de Israel"], answer: "Os ensinamentos fundamentais de Jesus sobre o Reino", reference: "Panoramas do Livro de Mateus" },
+            { question: "Qual a primeira profecia do Antigo Testamento citada por Mateus em relação ao nascimento de Jesus (Mateus 1:23)?", options: ["Deus conosco", "O Renovo", "O Cordeiro de Deus", "O Servo Sofredor"], answer: "Deus conosco", reference: "Mateus 1:23" },
+            { question: "Qual a última instrução de Jesus aos Seus discípulos em Mateus 28:19-20?", options: ["Aguardar em Jerusalém", "Construir um templo", "Ir e fazer discípulos de todas as nações", "Viver em paz com todos"], answer: "Ir e fazer discípulos de todas as nações", reference: "Mateus 28:19-20" },
+            { question: "Quantos capítulos tem o livro de Mateus?", options: ["20", "24", "28", "30"], answer: "28", reference: "Esboços do Livro de Mateus" },
+            { question: "Quem batizou Jesus no rio Jordão?", options: ["Pedro", "João Batista", "Mateus", "Um anjo"], answer: "João Batista", reference: "Mateus 3:13-17" },
+            { question: "Qual a parábola que Jesus usou para descrever o crescimento do Reino dos Céus a partir de algo pequeno (Mateus 13)?", options: ["O Filho Pródigo", "O Bom Samaritano", "O Grão de Mostarda", "O Semeador"], answer: "O Grão de Mostarda", reference: "Mateus 13" },
+            { question: "O que Jesus disse sobre a Lei e os Profetas em Mateus 5:17?", options: ["Vim para aboli-los", "Vim para cumpri-los", "Vim para modificá-los", "Vim para ignorá-los"], answer: "Vim para cumpri-los", reference: "Mateus 5:17" },
+            { question: "Quem traiu Jesus por trinta moedas de prata?", options: ["Pedro", "Tomé", "Judas Iscariotes", "Simão"], answer: "Judas Iscariotes", reference: "Mateus 26:15" },
+            { question: "Qual o tema central do Discurso Escatológico de Jesus (Mateus 24-25)?", options: ["A fundação da Igreja", "Os sinais do fim dos tempos e a vinda do Filho do Homem", "A importância da oração", "O perdão dos pecados"], answer: "Os sinais do fim dos tempos e a vinda do Filho do Homem", reference: "Panoramas do Livro de Mateus" },
+            { question: "O que Jesus ensinou sobre a oração em Mateus 6:9-13?", options: ["Orações longas e repetitivas", "A Oração do Pai Nosso", "Orar em público", "Orar apenas no Templo"], answer: "A Oração do Pai Nosso", reference: "Mateus 6:9-13" },
+            { question: "Qual a resposta de Pedro quando Jesus perguntou 'Quem dizeis que eu sou?' (Mateus 16:16)?", options: ["Um profeta", "João Batista", "O Cristo, o Filho do Deus vivo", "Um mestre bom"], answer: "O Cristo, o Filho do Deus vivo", reference: "Mateus 16:16" },
+            { question: "O que aconteceu com Jesus após Sua morte, segundo Mateus 28?", options: ["Ele foi enterrado e permaneceu no túmulo", "Ele ressuscitou dos mortos", "Ele foi levado para o céu imediatamente", "Ele apareceu apenas para Pedro"], answer: "Ele ressuscitou dos mortos", reference: "Mateus 28" },
+            { question: "Qual o significado de 'Emanuel' em Mateus 1:23?", options: ["Deus é amor", "Deus conosco", "Deus salva", "Deus é luz"], answer: "Deus conosco", reference: "Mateus 1:23" },
+            { question: "O que Jesus ensinou sobre a preocupação com as coisas materiais em Mateus 6:25-34?", options: ["Acumular riquezas", "Buscar primeiro o Reino de Deus e Sua justiça", "Não se preocupar com nada", "Trabalhar incansavelmente"], answer: "Buscar primeiro o Reino de Deus e Sua justiça", reference: "Mateus 6:25-34" },
+            { question: "Qual o milagre que Jesus realizou ao acalmar uma tempestade no mar (Mateus 8:23-27)?", options: ["Andar sobre as águas", "Multiplicar pães", "Acalmar o vento e o mar", "Curar um cego"], answer: "Acalmar o vento e o mar", reference: "Mateus 8:23-27" },
+            { question: "O que a parábola do joio (Mateus 13:24-30) ensina sobre o Reino?", options: ["A separação final entre justos e ímpios", "A importância da agricultura", "A necessidade de plantar sementes", "A vinda imediata do Reino"], answer: "A separação final entre justos e ímpios", reference: "Mateus 13:24-30" },
+            { question: "Quem tentou Jesus no deserto por quarenta dias e quarenta noites (Mateus 4:1-11)?", options: ["Anjos", "Demônios", "Satanás", "Fariseus"], answer: "Satanás", reference: "Mateus 4:1-11" },
+            { question: "Qual a cidade para onde José e Maria fugiram com Jesus para escapar de Herodes (Mateus 2:13-15)?", options: ["Nazaré", "Belém", "Egito", "Jerusalém"], answer: "Egito", reference: "Mateus 2:13-15" },
+            { question: "O que Jesus disse ser 'a porta estreita' em Mateus 7:13-14?", options: ["O caminho para a perdição", "O caminho para a vida", "O caminho da riqueza", "O caminho da fama"], answer: "O caminho para a vida", reference: "Mateus 7:13-14" },
+            { question: "Qual a principal característica do Evangelho de Mateus em relação ao Antigo Testamento?", options: ["Ignora o Antigo Testamento", "Contradiz o Antigo Testamento", "Cita frequentemente profecias do Antigo Testamento e mostra seu cumprimento", "Apenas faz referência a histórias do Antigo Testamento"], answer: "Cita frequentemente profecias do Antigo Testamento e mostra seu cumprimento", reference: "Introdução ao Livro de Mateus" }
+        ];
+
+        let quizQuestionsMateus = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsMateus() {
+            quizQuestionsMateus = []; // Limpa as perguntas anteriores
+            while (quizQuestionsMateus.length < 200) {
+                quizQuestionsMateus.push(...uniqueQuizQuestionsMateus);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsMateus.length > 200) {
+                quizQuestionsMateus = quizQuestionsMateus.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsMateus); // Embaralha o array completo
+        }
+
+        let currentQuizIndexMateus = 0;
+        let scoreMateus = 0;
+        let wrongAnswersMateus = 0;
+
+        function displayQuestionMateus() {
+            const questionElement = document.getElementById('quizQuestionMateus');
+            const optionsElement = document.getElementById('quizOptionsMateus');
+            const feedbackElement = document.getElementById('quizFeedbackMateus');
+            const nextButton = document.querySelector('#quizContainerMateus .quiz-next');
+            const progressElement = document.getElementById('quizProgressMateus');
+
+            if (currentQuizIndexMateus < quizQuestionsMateus.length) {
+                const questionData = quizQuestionsMateus[currentQuizIndexMateus];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerMateus(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexMateus + 1}/${quizQuestionsMateus.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreMateus}, Erros: ${wrongAnswersMateus}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerMateus(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsMateus button');
+            const feedbackElement = document.getElementById('quizFeedbackMateus');
+            const nextButton = document.querySelector('#quizContainerMateus .quiz-next');
+            const scoreElement = document.getElementById('quizScoreMateus');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreMateus++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersMateus++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreMateus}, Erros: ${wrongAnswersMateus}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionMateus() {
+            currentQuizIndexMateus++;
+            displayQuestionMateus();
+        }
+
+        // Gráfico de Temas para Mateus
+        let mateusChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderMateusChart() {
+            const ctx = document.getElementById('mateusChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (mateusChartInstance) {
+                mateusChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['Jesus como o Messias', 'O Reino dos Céus', 'Discipulado', 'A Lei e a Graça', 'A Igreja', 'Juízo', 'Missão Global', 'Autoridade de Jesus'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [9, 8, 7, 6, 5, 6, 5, 7], // Valores fictícios para Mateus
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para Jesus como o Messias
+                        'rgba(54, 162, 235, 0.7)', // Azul para O Reino dos Céus
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Discipulado
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para A Lei e a Graça
+                        'rgba(153, 102, 255, 0.7)', // Roxo para A Igreja
+                        'rgba(255, 159, 64, 0.7)', // Laranja para Juízo
+                        'rgba(201, 203, 207, 0.7)', // Cinza para Missão Global
+                        'rgba(100, 149, 237, 0.7)' // Azul claro para Autoridade de Jesus
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)',
+                        'rgba(100, 149, 237, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            mateusChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Mateus',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionMateus('inicio');
+        });
+    </script>
+</body>
+</html>

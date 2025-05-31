@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Naum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Naum Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Naum</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionNaum('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionNaum('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionNaum('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionNaum('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionNaum('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionNaum('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionNaum('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionNaum('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionNaum('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Naum</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Naum, uma profecia que anuncia a destruição inevitável de Nínive, a capital do Império Assírio. Descubra a justiça e a soberania de Deus sobre as nações, a consolação para Judá e o cumprimento da retribuição divina contra a crueldade e a opressão. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Naum</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Naum é uma das doze profecias menores do Antigo Testamento, cujo nome significa "consolo" ou "aquele que consola". Apesar do significado do nome do profeta, o livro em si é uma profecia de juízo, focada inteiramente na destruição de Nínive, a capital do Império Assírio. Nínive era um símbolo de crueldade, opressão e idolatria, e havia sido o instrumento de Deus para punir Israel, mas também havia excedido sua autoridade e se voltado contra o povo de Deus.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A profecia de Naum foi provavelmente escrita entre 663 a.C. (após a queda de Tebas, mencionada em 3:8-10) e 612 a.C. (antes da queda de Nínive). Ela serve como um contraste direto com o livro de Jonas, que descreve o arrependimento de Nínive e a misericórdia de Deus. Naum, por outro lado, proclama o juízo final e irrevogável sobre a cidade, demonstrando que a paciência de Deus tem um limite e que Ele é um Deus justo que retribui o mal.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro é notável por sua linguagem poética e vívida, descrevendo a fúria de Deus e a devastação que viria sobre Nínive. Ele oferece consolo ao povo de Judá, que havia sofrido grandemente sob o domínio assírio, assegurando-lhes que Deus vingaria seus inimigos e restauraria sua dignidade.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Caráter de Deus e o Juízo Implacável.</strong> Uma teofania que revela a ira de Deus contra Seus inimigos e Sua bondade para com Seu povo.</li>
+                <li><strong>Capítulo 2: A Queda de Nínive.</strong> Descrição vívida do cerco e da destruição da cidade, com imagens de guerra e desolação.</li>
+                <li><strong>Capítulo 3: A Razão do Juízo de Nínive.</strong> Detalhes dos pecados de Nínive (crueldade, idolatria, prostituição e engano) que justificam sua destruição.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Naum é um lembrete poderoso da soberania de Deus sobre as nações e de Sua justiça implacável contra o mal, ao mesmo tempo em que oferece esperança e consolo àqueles que confiam Nele.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Naum</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Naum profetiza a destruição de Nínive, revelando a justiça e a soberania de Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Caráter de Deus e o Juízo (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Senhor é Zeloso e Vingador (Versículos 1-3):</strong>
+                    <ul>
+                        <li>O Senhor é tardio em irar-se, mas grande em poder.</li>
+                        <li>Não terá por inocente o culpado.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Poder de Deus na Natureza (Versículos 4-6):</strong>
+                    <ul>
+                        <li>Montes e colinas tremem diante Dele.</li>
+                        <li>Quem pode subsistir diante da Sua indignação?</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Bondade de Deus para Seu Povo (Versículos 7-8):</strong>
+                    <ul>
+                        <li>O Senhor é bom, uma fortaleza no dia da angústia.</li>
+                        <li>Conhece os que confiam Nele.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Destruição de Nínive e a Libertação de Judá (Versículos 9-15):</strong>
+                    <ul>
+                        <li>Nínive será completamente destruída.</li>
+                        <li>Judá será libertada do jugo assírio.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Queda de Nínive (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Preparação para o Cerco (Versículos 1-4):</strong>
+                    <ul>
+                        <li>Deus envia destruidores contra Nínive.</li>
+                        <li>Carros e cavaleiros em fúria.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Assalto e a Desolação (Versículos 5-10):</strong>
+                    <ul>
+                        <li>Portões abertos, palácio em ruínas.</li>
+                        <li>Saque, fuga e desmaio.</li>
+                        <li>"Vazia, esvaziada e assolada!"</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Fim da Cidade dos Leões (Versículos 11-13):</strong>
+                    <ul>
+                        <li>Nínive, comparada a um covil de leões, será destruída.</li>
+                        <li>O Senhor está contra ela.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Razão do Juízo e a Destruição Final (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Ai da Cidade Sanguinária (Versículos 1-3):</strong>
+                    <ul>
+                        <li>Condenação por sua crueldade, engano e violência.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Prostituição e a Feitiçaria de Nínive (Versículos 4-7):</strong>
+                    <ul>
+                        <li>Nínive é comparada a uma prostituta que engana as nações.</li>
+                        <li>Será exposta e desprezada.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Exemplo de Tebas (Versículos 8-10):</strong>
+                    <ul>
+                        <li>Lembrança da queda de Tebas (No-Amom) como um aviso.</li>
+                        <li>Nínive não escapará do mesmo destino.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Inevitabilidade da Destruição (Versículos 11-19):</strong>
+                    <ul>
+                        <li>Seus líderes e guerreiros serão fracos.</li>
+                        <li>Nenhum socorro para Nínive.</li>
+                        <li>Sua ruína será celebrada por todos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Naum é uma poderosa demonstração da justiça retributiva de Deus. Ele mostra que Deus não ignora a maldade e a opressão, e que a impunidade não dura para sempre. A profecia de Naum reafirma a soberania de Deus sobre todas as nações, mesmo os impérios mais poderosos. Embora seja um livro de juízo, ele também oferece consolo ao povo de Deus, garantindo que o Senhor é um refúgio para os que confiam Nele e que Ele vindicará Seu povo contra seus opressores. É um lembrete da fidelidade de Deus em cumprir Suas promessas, tanto de juízo quanto de salvação.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridNaum">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Naum</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Naum, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Caráter de Deus e o Juízo Implacável</strong>
+                    <ul>
+                        <li>1.1-3: O Título e a Natureza de Deus.</li>
+                        <li>1.4-6: O Poder de Deus na Natureza.</li>
+                        <li>1.7-8: A Bondade de Deus e a Destruição dos Inimigos.</li>
+                        <li>1.9-15: A Ruína de Nínive e a Libertação de Judá.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: A Queda de Nínive</strong>
+                    <ul>
+                        <li>2.1-4: A Preparação para o Cerco.</li>
+                        <li>2.5-10: O Assalto e a Desolação da Cidade.</li>
+                        <li>2.11-13: O Fim da Cidade dos Leões.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: A Razão do Juízo e a Destruição Final</strong>
+                    <ul>
+                        <li>3.1-3: Ai da Cidade Sanguinária.</li>
+                        <li>3.4-7: A Prostituição e a Exposição de Nínive.</li>
+                        <li>3.8-10: O Exemplo de Tebas.</li>
+                        <li>3.11-19: A Inevitabilidade da Destruição de Nínive.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Naum</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Justiça Divina:</strong> A retribuição de Deus contra a maldade e a opressão.</li>
+                <li><strong>Soberania de Deus:</strong> O controle absoluto de Deus sobre as nações e a história.</li>
+                <li><strong>Juízo sobre Nínive:</strong> A destruição inevitável da capital assíria.</li>
+                <li><strong>Consolo para Judá:</strong> A promessa de libertação e paz para o povo de Deus.</li>
+                <li><strong>A Ira de Deus:</strong> A manifestação da fúria divina contra o pecado.</li>
+                <li><strong>Fidelidade de Deus:</strong> O cumprimento das promessas de Deus, tanto de juízo quanto de salvação.</li>
+                <li><strong>Consequências do Pecado:</strong> A inevitabilidade da punição para a crueldade e a idolatria.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Naum</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersNaum">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Naum</h2>
+            <div id="quizContainerNaum" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionNaum"></p>
+                <div id="quizOptionsNaum" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackNaum" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionNaum()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressNaum"></span></p>
+                <p>Pontuação: <span id="quizScoreNaum">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Naum</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Naum.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="naumChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalNaum()">&times;</span>
+                <h3 id="modalCharacterNameNaum" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionNaum" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Naum",
+            "short_name": "Naum",
+            "description": "Explore o livro de Naum de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=NM",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=NM",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'naum-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionNaum(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsNaum();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksNaum();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsNaum(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexNaum = 0; // Reinicia o quiz
+                scoreNaum = 0;
+                wrongAnswersNaum = 0;
+                document.getElementById('quizScoreNaum').textContent = `Acertos: ${scoreNaum}, Erros: ${wrongAnswersNaum}`;
+                displayQuestionNaum();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderNaumChart();
+            }
+        }
+
+        // Dados dos personagens para Naum
+        const characterDetailsNaum = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano, Justo e Vingador, que proclama a destruição de Nínive e a libertação de Seu povo."
+            },
+            "Naum": {
+                name: "Naum",
+                description: "O profeta cujo nome significa 'consolo', que entrega a mensagem de juízo de Deus contra Nínive."
+            },
+            "Ninivitas": {
+                name: "Ninivitas",
+                description: "Os habitantes de Nínive, a capital assíria, alvo da profecia de juízo de Naum por sua crueldade e idolatria."
+            },
+            "Povo de Judá": {
+                name: "Povo de Judá",
+                description: "O povo de Deus que havia sofrido sob a opressão assíria e a quem a profecia de Naum oferece consolo e esperança."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalNaum(characterName) {
+            const details = characterDetailsNaum[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameNaum').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionNaum').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalNaum() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsNaum() {
+            const grid = document.getElementById('characterGridNaum');
+            grid.innerHTML = '';
+            for (const key in characterDetailsNaum) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalNaum(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksNaum() {
+            const chaptersDiv = document.getElementById('chaptersNaum');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 3; i++) { // Naum tem 3 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/na/${i}`; // Link para a Bíblia Online, Naum
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Naum (25 perguntas únicas)
+        const uniqueQuizQuestionsNaum = [
+            { question: "Qual o significado do nome do profeta Naum?", options: ["Paz", "Força", "Consolo", "Justiça"], answer: "Consolo", reference: "Introdução ao Livro de Naum" },
+            { question: "Qual cidade é o foco principal da profecia de Naum?", options: ["Jerusalém", "Samaria", "Nínive", "Babilônia"], answer: "Nínive", reference: "Introdução ao Livro de Naum" },
+            { question: "Nínive era a capital de qual império?", options: ["Babilônico", "Egípcio", "Assírio", "Persa"], answer: "Assírio", reference: "Introdução ao Livro de Naum" },
+            { question: "O que Naum 1:3 afirma sobre o Senhor, apesar de ser tardio em irar-se?", options: ["Ele perdoa tudo", "Ele é fraco", "Não terá por inocente o culpado", "Ele esquece o pecado"], answer: "Não terá por inocente o culpado", reference: "Naum 1:3" },
+            { question: "Como Naum descreve o poder de Deus na natureza?", options: ["Ele cria as flores", "Ele faz chover", "Montes e colinas tremem diante Dele", "Ele faz o sol nascer"], answer: "Montes e colinas tremem diante Dele", reference: "Naum 1:5" },
+            { question: "Para quem o Senhor é uma fortaleza no dia da angústia?", options: ["Para os inimigos", "Para os que confiam Nele", "Para os reis", "Para os sacerdotes"], answer: "Para os que confiam Nele", reference: "Naum 1:7" },
+            { question: "O que acontecerá com Nínive, conforme Naum 1:9?", options: ["Será reconstruída", "Será completamente destruída", "Será governada por Judá", "Será esquecida"], answer: "Será completamente destruída", reference: "Naum 1:9" },
+            { question: "Quantos capítulos tem o livro de Naum?", options: ["1", "2", "3", "4"], answer: "3", reference: "Esboços do Livro de Naum" },
+            { question: "No capítulo 2, como é descrita a invasão e destruição de Nínive?", options: ["Como uma festa", "Com imagens de guerra e desolação", "Como um evento pacífico", "Como uma reconstrução"], answer: "Com imagens de guerra e desolação", reference: "Naum 2:1-10" },
+            { question: "Nínive é comparada a qual animal no capítulo 2?", options: ["Um lobo", "Um leão", "Um urso", "Uma serpente"], answer: "Um leão", reference: "Naum 2:11-13" },
+            { question: "Qual é um dos pecados de Nínive que justifica seu juízo, segundo Naum 3?", options: ["Preguiça", "Crueldade e engano", "Falta de oração", "Construção de templos"], answer: "Crueldade e engano", reference: "Naum 3:1" },
+            { question: "A queda de qual cidade é mencionada em Naum 3 como um exemplo para Nínive?", options: ["Babilônia", "Tebas (No-Amom)", "Jerusalém", "Samaria"], answer: "Tebas (No-Amom)", reference: "Naum 3:8-10" },
+            { question: "O que acontecerá com a reputação de Nínive após sua queda?", options: ["Será louvada", "Será esquecida", "Sua ruína será celebrada por todos", "Será lembrada com tristeza"], answer: "Sua ruína será celebrada por todos", reference: "Naum 3:19" },
+            { question: "Qual é um dos temas centrais do livro de Naum?", options: ["O amor de Deus por todas as nações", "A justiça retributiva de Deus", "A importância dos sacrifícios", "A vida do profeta"], answer: "A justiça retributiva de Deus", reference: "Temas Centrais do Livro de Naum" },
+            { question: "O livro de Naum oferece consolo a qual povo?", options: ["Assírios", "Egípcios", "Judá", "Babilônios"], answer: "Judá", reference: "Introdução ao Livro de Naum" },
+            { question: "O que significa a frase 'Vazia, esvaziada e assolada!' em Naum 2:10?", options: ["Prosperidade", "Destruição completa", "Reconstrução", "Paz duradoura"], answer: "Destruição completa", reference: "Naum 2:10" },
+            { question: "Qual a atitude de Deus em relação aos que confiam Nele?", options: ["Ele os ignora", "Ele os protege", "Ele os pune", "Ele os esquece"], answer: "Ele os protege", reference: "Naum 1:7" },
+            { question: "Naum é um contraste direto com qual outro livro profético?", options: ["Isaías", "Jonas", "Miqueias", "Amós"], answer: "Jonas", reference: "Introdução ao Livro de Naum" },
+            { question: "O que Nínive fez com as nações, comparada a uma prostituta?", options: ["As abençoou", "As enganou com feitiçarias", "As ajudou", "As libertou"], answer: "As enganou com feitiçarias", reference: "Naum 3:4" },
+            { question: "O que os pastores de Nínive farão no dia do juízo?", options: ["Lutarão bravamente", "Fugirão", "Dormirão", "Se arrependerão"], answer: "Dormirão", reference: "Naum 3:18" },
+            { question: "O que o Livro de Naum demonstra sobre a paciência de Deus?", options: ["Que ela é infinita", "Que ela tem um limite", "Que ela não existe", "Que ela é irrelevante"], answer: "Que ela tem um limite", reference: "Introdução ao Livro de Naum" },
+            { question: "A profecia de Naum é principalmente sobre:", options: ["A salvação de Israel", "A vida do profeta", "O juízo de uma nação inimiga", "A construção do templo"], answer: "O juízo de uma nação inimiga", reference: "Introdução ao Livro de Naum" },
+            { question: "Qual é a principal mensagem de Naum para Judá?", options: ["Condenação", "Exílio", "Consolo e esperança", "Guerra"], answer: "Consolo e esperança", reference: "Significado Teológico" },
+            { question: "O que acontecerá com os carros e cavaleiros de Nínive em Naum 2?", options: ["Serão usados na guerra", "Serão queimados e destruídos", "Serão capturados", "Serão escondidos"], answer: "Serão queimados e destruídos", reference: "Naum 2:13" },
+            { question: "Qual o atributo de Deus mais enfatizado em Naum?", options: ["Amor", "Misericórdia", "Justiça e Soberania", "Paciência"], answer: "Justiça e Soberania", reference: "Significado Teológico" }
+        ];
+
+        let quizQuestionsNaum = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsNaum() {
+            quizQuestionsNaum = []; // Limpa as perguntas anteriores
+            while (quizQuestionsNaum.length < 200) {
+                quizQuestionsNaum.push(...uniqueQuizQuestionsNaum);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsNaum.length > 200) {
+                quizQuestionsNaum = quizQuestionsNaum.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsNaum); // Embaralha o array completo
+        }
+
+        let currentQuizIndexNaum = 0;
+        let scoreNaum = 0;
+        let wrongAnswersNaum = 0;
+
+        function displayQuestionNaum() {
+            const questionElement = document.getElementById('quizQuestionNaum');
+            const optionsElement = document.getElementById('quizOptionsNaum');
+            const feedbackElement = document.getElementById('quizFeedbackNaum');
+            const nextButton = document.querySelector('#quizContainerNaum .quiz-next');
+            const progressElement = document.getElementById('quizProgressNaum');
+
+            if (currentQuizIndexNaum < quizQuestionsNaum.length) {
+                const questionData = quizQuestionsNaum[currentQuizIndexNaum];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerNaum(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexNaum + 1}/${quizQuestionsNaum.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreNaum}, Erros: ${wrongAnswersNaum}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerNaum(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsNaum button');
+            const feedbackElement = document.getElementById('quizFeedbackNaum');
+            const nextButton = document.querySelector('#quizContainerNaum .quiz-next');
+            const scoreElement = document.getElementById('quizScoreNaum');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreNaum++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersNaum++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreNaum}, Erros: ${wrongAnswersNaum}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionNaum() {
+            currentQuizIndexNaum++;
+            displayQuestionNaum();
+        }
+
+        // Gráfico de Temas para Naum
+        let naumChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderNaumChart() {
+            const ctx = document.getElementById('naumChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (naumChartInstance) {
+                naumChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['Justiça Divina', 'Soberania de Deus', 'Juízo sobre Nínive', 'Consolo para Judá', 'A Ira de Deus', 'Fidelidade de Deus', 'Consequências do Pecado'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [6, 5, 7, 4, 5, 4, 6], // Valores fictícios para Naum
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para Justiça Divina
+                        'rgba(54, 162, 235, 0.7)', // Azul para Soberania de Deus
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Juízo sobre Nínive
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para Consolo para Judá
+                        'rgba(153, 102, 255, 0.7)', // Roxo para A Ira de Deus
+                        'rgba(255, 159, 64, 0.7)', // Laranja para Fidelidade de Deus
+                        'rgba(201, 203, 207, 0.7)' // Cinza para Consequências do Pecado
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            naumChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Naum',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionNaum('inicio');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Levítico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Levítico Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Levítico</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection('grafico')">Gráfico</button> </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Levítico</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore as instruções divinas sobre a santidade, os sacrifícios, o sacerdócio e as leis que regulavam a relação entre Deus e Israel. Entenda como o povo de Deus deveria viver em santidade e se aproximar de um Deus santo. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Levítico</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Levítico, o terceiro livro do Pentateuco, deriva seu nome da tribo de Levi, da qual os sacerdotes e levitas eram escolhidos para servir no Tabernáculo. O livro é uma continuação da narrativa de Êxodo, começando imediatamente após a ereção do Tabernáculo no deserto. Seu tema central é a <strong>santidade</strong> de Jeová e como um povo impuro pode se aproximar e viver em comunhão com um Deus santo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Tradicionalmente atribuído a Moisés, Levítico é primariamente um livro de leis e regulamentos divinos, focando nos rituais de sacrifício, no sacerdócio aarônico, nas leis de pureza e impureza, e nas festas anuais. Ele estabelece os meios pelos quais o pecado poderia ser expiado, a impureza ritual removida, e a santidade mantida para que a presença de Deus pudesse permanecer entre Seu povo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Levítico é crucial para entender o sistema sacrificial do Antigo Testamento, que aponta profeticamente para o sacrifício perfeito de Jesus Cristo. Ele também destaca a importância da obediência à lei de Deus e a busca por um estilo de vida que reflita Sua santidade.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-7: Leis dos Sacrifícios.</strong> Detalhes sobre as cinco ofertas principais (holocausto, oferta de manjares, oferta pacífica, oferta pelo pecado, oferta pela culpa) e seu propósito.</li>
+                <li><strong>Capítulos 8-10: Instituição do Sacerdócio.</strong> A consagração de Arão e seus filhos, o início do serviço sacerdotal e o trágico incidente de Nadabe e Abiú.</li>
+                <li><strong>Capítulos 11-15: Leis de Pureza e Impureza.</strong> Discernimento entre animais puros e impuros, leis de purificação após o parto, leis sobre lepra e impurezas corporais.</li>
+                <li><strong>Capítulo 16: O Dia da Expiação (Yom Kippur).</strong> O ritual mais solene do calendário israelita para a expiação anual dos pecados da nação.</li>
+                <li><strong>Capítulos 17-27: O Código de Santidade.</strong> Leis que regulam a vida moral e social do povo, incluindo proibições sexuais, tratamento do próximo, leis para os sacerdotes, observância das festas e promessas de bênção ou maldição.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Levítico é um convite a Israel (e por extensão, a nós) a ser santo, porque Jeová é santo (Levítico 19:2).</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Levítico</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Levítico estabelece o manual para a santidade e a adoração de Israel, detalhando os rituais e leis para viver em comunhão com Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Meios de Aproximação a Deus (Capítulos 1-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. As Leis dos Sacrifícios (Capítulos 1-7):</strong>
+                    <ul>
+                        <li>Holocausto (oferta queimada) - Expiação e dedicação total.</li>
+                        <li>Oferta de Manjares (oferta de cereal) - Dedicação e gratidão.</li>
+                        <li>Oferta Pacífica (oferta de paz) - Comunhão e ação de graças.</li>
+                        <li>Oferta pelo Pecado - Expiação por pecados não intencionais.</li>
+                        <li>Oferta pela Culpa - Expiação por transgressões específicas que exigem restituição.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Instituição do Sacerdócio (Capítulos 8-10):</strong>
+                    <ul>
+                        <li>Consagração de Arão e seus filhos.</li>
+                        <li>Início do serviço sacerdotal.</li>
+                        <li>O aviso da santidade sacerdotal (Nadabe e Abiú).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Leis de Santidade e Pureza (Capítulos 11-16)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Pureza Alimentar e Pessoal (Capítulos 11-15):</strong>
+                    <ul>
+                        <li>Animais puros e impuros.</li>
+                        <li>Leis de purificação pós-parto.</li>
+                        <li>Diagnóstico e purificação de lepra.</li>
+                        <li>Impurezas resultantes de fluidos corporais.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Dia da Expiação (Yom Kippur) (Capítulo 16):</strong>
+                    <ul>
+                        <li>O ritual anual para a expiação coletiva dos pecados de Israel.</li>
+                        <li>O papel do sumo sacerdote e os bodes expiatórios.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="2xl font-semibold text-white mb-3">III. O Código de Santidade e Viver Consagrado (Capítulos 17-27)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Santidade na Vida Diária (Capítulos 17-20):</strong>
+                    <ul>
+                        <li>Proibições contra comer sangue e sacrifícios aos demônios.</li>
+                        <li>Leis de pureza sexual e moralidade.</li>
+                        <li>Justiça social e tratamento do próximo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Santidade dos Sacerdotes e Festas (Capítulos 21-25):</strong>
+                    <ul>
+                        <li>Regras para a conduta dos sacerdotes.</li>
+                        <li>Leis sobre ofertas sagradas.</li>
+                        <li>As Festas de Jeová (Páscoa, Pães Ázimos, Primícias, Semanas/Pentecostes, Trombetas, Expiação, Tabernáculos).</li>
+                        <li>O Ano Sabático e o Ano do Jubileu.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Bênçãos e Maldições (Capítulo 26):</strong> Consequências da obediência e desobediência à aliança.</li>
+                <li><strong>D. Leis sobre Votos e Dízimos (Capítulo 27):</strong> Regulamentos para votos pessoais e a santidade dos dízimos.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Levítico é um livro fundamental que ensina sobre a santidade de Deus e a seriedade do pecado. Ele demonstra a necessidade de expiação e a provisão divina para o perdão. O sistema sacrificial e o sacerdócio prefiguram a obra redentora de Jesus Cristo, o Sumo Sacerdote perfeito e o sacrifício final que cumpre toda a lei. O livro enfatiza a importância de viver uma vida santa em resposta à santidade de Deus: "Sereis santos, porque eu, o Senhor vosso Deus, sou santo" (Lv 19:2).</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridLeviticus">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Levítico</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Levítico, capítulo por capítulo e por blocos temáticos, destacando as leis e rituais.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Os Sacrifícios e as Ofertas (Capítulos 1-7)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-5:</strong> Detalhamento das Ofertas: Holocausto, Oferta de Manjares, Oferta Pacífica, Oferta pelo Pecado, Oferta pela Culpa.</li>
+                <li><strong>Capítulos 6-7:</strong> Leis adicionais sobre as Ofertas para os Sacerdotes e o Povo.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Sacerdócio e sua Consagração (Capítulos 8-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 8:</strong> A consagração de Arão e seus filhos.</li>
+                <li><strong>Capítulo 9:</strong> O primeiro serviço sacerdotal.</li>
+                <li><strong>Capítulo 10:</strong> O pecado de Nadabe e Abiú e suas consequências.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Pureza e Impureza (Capítulos 11-15)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 11:</strong> Animais puros e impuros para consumo.</li>
+                <li><strong>Capítulo 12:</strong> Pureza após o parto.</li>
+                <li><strong>Capítulos 13-14:</strong> Leis sobre lepra (e outras doenças de pele) e rituais de purificação.</li>
+                <li><strong>Capítulo 15:</strong> Impurezas corporais e rituais de purificação.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. O Dia da Expiação (Capítulo 16)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 16:</strong> Os rituais e a importância do Yom Kippur para a expiação dos pecados de toda a nação.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. O Código de Santidade (Capítulos 17-27)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 17-20:</strong> Leis de santidade na vida diária: uso do sangue, proibições sexuais, justiça social, etc.</li>
+                <li><strong>Capítulos 21-22:</strong> Santidade dos sacerdotes e das coisas santas.</li>
+                <li><strong>Capítulo 23:</strong> As Festas de Jeová: Páscoa, Pães Ázimos, Primícias, Semanas (Pentecostes), Trombetas, Expiação (Yom Kippur), Tabernáculos.</li>
+                <li><strong>Capítulo 24:</strong> Cuidado com o candelabro e os pães da proposição; a punição da blasfêmia.</li>
+                <li><strong>Capítulo 25:</strong> O Ano Sabático e o Ano do Jubileu.</li>
+                <li><strong>Capítulo 26:</strong> Bênçãos pela obediência e maldições pela desobediência à aliança.</li>
+                <li><strong>Capítulo 27:</strong> Leis sobre votos e o dízimo.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Levítico</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Santidade de Deus:</strong> O tema central de Levítico. Deus é santo, separado de tudo o que é pecaminoso e impuro. Seu povo deve ser santo porque Ele é santo.</li>
+                <li><strong>Expiação e Perdão:</strong> O sistema de sacrifícios provê um caminho para a expiação dos pecados e a restauração da comunhão com Deus, prefigurando o sacrifício de Cristo.</li>
+                <li><strong>Pecado e Impureza:</strong> Levítico detalha a natureza do pecado e da impureza (ritual, moral, física) e como eles contaminam o povo e o santuário, exigindo purificação.</li>
+                <li><strong>Sacerdócio:</strong> A importância do sacerdócio levítico como mediadores entre Deus e o povo, responsáveis por manter a santidade e guiar o povo nos rituais.</li>
+                <li><strong>Aliança:</strong> A reafirmação da aliança de Deus com Israel, estabelecendo as condições para a bênção e maldição baseadas na obediência.</li>
+                <li><strong>Adoração e Ritual:</strong> As instruções detalhadas para os sacrifícios, festas e práticas rituais que permitiam a Israel adorar a Deus de forma aceitável.</li>
+                <li><strong>Vida Santa:</strong> Além dos rituais, Levítico enfatiza a santidade na vida diária, nas relações interpessoais, na moralidade e na justiça social.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Levítico</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersLeviticus">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Levítico</h2>
+            <div id="quizContainerLeviticus" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionLeviticus"></p>
+                <div id="quizOptionsLeviticus" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackLeviticus" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionLeviticus()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressLeviticus"></span></p>
+                <p>Pontuação: <span id="quizScoreLeviticus">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Levítico</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Levítico.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="leviticusChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal()">&times;</span>
+                <h3 id="modalCharacterName" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Levítico",
+            "short_name": "Levítico",
+            "description": "Explore o livro de Levítico de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=LV",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=LV",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'levitico-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsLeviticus();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksLeviticus();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsLeviticus(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexLeviticus = 0; // Reinicia o quiz
+                scoreLeviticus = 0;
+                wrongAnswersLeviticus = 0;
+                document.getElementById('quizScoreLeviticus').textContent = `Acertos: ${scoreLeviticus}, Erros: ${wrongAnswersLeviticus}`;
+                displayQuestionLeviticus();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderLeviticusChart();
+            }
+        }
+
+        // Dados dos personagens para Levítico
+        const characterDetailsLeviticus = {
+            "Jeová": {
+                name: "Jeová (Deus)",
+                description: "O Deus santo de Israel que dá as leis e instruções para que Seu povo possa se aproximar d'Ele e viver em santidade. Ele é o centro de toda a adoração e rituais em Levítico."
+            },
+            "Moisés": {
+                name: "Moisés",
+                description: "O mediador da aliança, através de quem Jeová revela todas as leis, estatutos e mandamentos registrados em Levítico, instruindo o povo sobre como viver em santidade."
+            },
+            "Arão": {
+                name: "Arão",
+                description: "O primeiro Sumo Sacerdote de Israel, irmão de Moisés. Ele e seus filhos são consagrados para servir no Tabernáculo, realizando os sacrifícios e rituais de purificação."
+            },
+            "Nadabe": {
+                name: "Nadabe",
+                description: "Filho de Arão. Ele e seu irmão Abiú foram mortos por Jeová por oferecerem 'fogo estranho' perante o Senhor, enfatizando a seriedade da obediência nos rituais sagrados."
+            },
+            "Abiú": {
+                name: "Abiú",
+                description: "Filho de Arão. Morreu junto com seu irmão Nadabe por desobediência ritual, servindo como um severo aviso sobre a santidade de Deus e a importância de seguir Suas instruções precisamente."
+            },
+            "Os Sacerdotes (Filhos de Arão)": {
+                name: "Os Sacerdotes (Filhos de Arão)",
+                description: "Designados por Deus para realizar os serviços no Tabernáculo, administrar os sacrifícios e ensinar as leis ao povo, mantendo a pureza e santidade ritual."
+            },
+            "A Congregação de Israel": {
+                name: "A Congregação de Israel",
+                description: "O povo para quem as leis de Levítico são dadas. São instruídos a viver em santidade e obediência, a fim de manter a aliança e a presença de Deus entre eles."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalLeviticus(characterName) {
+            const details = characterDetailsLeviticus[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName').textContent = details.name;
+                document.getElementById('modalCharacterDescription').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsLeviticus() {
+            const grid = document.getElementById('characterGridLeviticus');
+            grid.innerHTML = '';
+            for (const key in characterDetailsLeviticus) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalLeviticus(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksLeviticus() {
+            const chaptersDiv = document.getElementById('chaptersLeviticus');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 27; i++) { // Levítico tem 27 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/lv/${i}`; // Link para a Bíblia Online, Levítico
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Dados do quiz para Levítico (100 perguntas)
+        let allQuizQuestionsLeviticus = [
+            { question: "Qual é o tema central de Levítico?", options: ["Guerras e Conquistas", "Sabedoria para a Vida", "Santidade de Deus e Rituais", "Profecias sobre o futuro"], answer: "Santidade de Deus e Rituais", reference: "Introdução ao livro" },
+            { question: "Qual o primeiro tipo de oferta descrito em Levítico?", options: ["Oferta de Manjares", "Oferta Pacífica", "Holocausto", "Oferta pelo Pecado"], answer: "Holocausto", reference: "Levítico 1:3" },
+            { question: "Para que servia o Holocausto (oferta queimada)?", options: ["Agradecimento por colheitas", "Expiação e dedicação total a Deus", "Pedido de paz", "Perdão por pecados específicos"], answer: "Expiação e dedicação total a Deus", reference: "Levítico 1:4" },
+            { question: "Qual animal podia ser oferecido como Holocausto?", options: ["Porco", "Cão", "Boi, ovelha, cabra ou aves", "Cavalo"], answer: "Boi, ovelha, cabra ou aves", reference: "Levítico 1:3, 10, 14" },
+            { question: "O que era a Oferta de Manjares (oferta de cereal)?", options: ["Oferta de frutas", "Oferta de grãos, farinha e azeite", "Oferta de animais", "Oferta de vinho"], answer: "Oferta de grãos, farinha e azeite", reference: "Levítico 2:1" },
+            { question: "Que ingrediente não podia ser usado na Oferta de Manjares?", options: ["Azeite", "Sal", "Fermento ou mel", "Incenso"], answer: "Fermento ou mel", reference: "Levítico 2:11" },
+            { question: "Para que servia a Oferta Pacífica (oferta de paz)?", options: ["Para pedir perdão", "Para expressar comunhão, gratidão ou voto", "Para purificação", "Para dedicação total"], answer: "Para expressar comunhão, gratidão ou voto", reference: "Levítico 7:16" },
+            { question: "O que deveria ser feito com a gordura de todas as ofertas?", options: ["Comida pelos sacerdotes", "Queimada no altar ao Senhor", "Dada aos pobres", "Guardada para o dia seguinte"], answer: "Queimada no altar ao Senhor", reference: "Levítico 3:16-17" },
+            { question: "Para que servia a Oferta pelo Pecado?", options: ["Por pecados intencionais", "Por pecados de ignorância ou não intencionais", "Por pecados de blasfêmia", "Por pecados de roubo"], answer: "Por pecados de ignorância ou não intencionais", reference: "Levítico 4:2-3" },
+            { question: "Qual a diferença principal entre a Oferta pelo Pecado e a Oferta pela Culpa?", options: ["Não há diferença", "A Oferta pela Culpa exigia restituição além do sacrifício", "A Oferta pelo Pecado era mais cara", "A Oferta pela Culpa era para pecados de ignorância"], answer: "A Oferta pela Culpa exigia restituição além do sacrifício", reference: "Levítico 5:16, 6:4-5" },
+            { question: "Quem era o responsável por ministrar as ofertas no Tabernáculo?", options: ["Moisés", "Os levitas", "Os sacerdotes (filhos de Arão)", "Os anciãos de Israel"], answer: "Os sacerdotes (filhos de Arão)", reference: "Levítico 6:8-13" },
+            { question: "O que aconteceu com Nadabe e Abiú, filhos de Arão?", options: ["Foram abençoados", "Foram mortos por oferecerem fogo estranho", "Foram exilados", "Tornaram-se sumos sacerdotes"], answer: "Foram mortos por oferecerem fogo estranho", reference: "Levítico 10:1-2" },
+            { question: "Por que Nadabe e Abiú foram mortos?", options: ["Por roubo", "Por desobediência e oferecerem fogo estranho", "Por blasfêmia", "Por rebelião"], answer: "Por desobediência e oferecerem fogo estranho", reference: "Levítico 10:1-2" },
+            { question: "O que Moisés disse a Arão após a morte de seus filhos?", options: ["Para chorar e se lamentar", "Para se alegrar", "Para não prantear nem rasgar as vestes", "Para se vingar"], answer: "Para não prantear nem rasgar as vestes", reference: "Levítico 10:6" },
+            { question: "Qual o propósito das leis de pureza e impureza em Levítico?", options: ["Higienização do povo", "Separar Israel das outras nações e mantê-los santos para Deus", "Testar a obediência do povo", "Controlar a alimentação"], answer: "Separar Israel das outras nações e mantê-los santos para Deus", reference: "Levítico 11:44-45" },
+            { question: "Que animais eram considerados puros para o consumo?", options: ["Todos os animais", "Apenas aves", "Animais que tinham casco fendido e ruminavam", "Apenas peixes"], answer: "Animais que tinham casco fendido e ruminavam", reference: "Levítico 11:3" },
+            { question: "Qual animal aquático era considerado puro?", options: ["Enguia", "Lagosta", "Peixes com barbatanas e escamas", "Caranguejo"], answer: "Peixes com barbatanas e escamas", reference: "Levítico 11:9" },
+            { question: "O que tornava uma mulher impura após o parto?", options: ["O sexo do bebê", "O tempo de purificação após o nascimento", "A dor do parto", "A impureza do marido"], answer: "O tempo de purificação após o nascimento", reference: "Levítico 12:2-5" },
+            { question: "Qual a doença de pele que Levítico descreve detalhadamente e que exigia isolamento?", options: ["Varíola", "Sarampo", "Lepra", "Eczema"], answer: "Lepra", reference: "Levítico 13:2" },
+            { question: "O que o sacerdote deveria fazer com uma pessoa com suspeita de lepra?", options: ["Curá-la", "Isolá-la por sete dias", "Oferecer um sacrifício por ela", "Enviá-la para casa"], answer: "Isolá-la por sete dias", reference: "Levítico 13:4" },
+            { question: "Qual o dia mais solene do calendário israelita, descrito em Levítico 16?", options: ["Páscoa", "Pentecostes", "Dia da Expiação (Yom Kippur)", "Festa dos Tabernáculos"], answer: "Dia da Expiação (Yom Kippur)", reference: "Levítico 16:29-34" },
+            { question: "Quantos bodes eram usados no Dia da Expiação?", options: ["Um", "Dois", "Três", "Quatro"], answer: "Dois", reference: "Levítico 16:5" },
+            { question: "O que era feito com o segundo bode no Dia da Expiação?", options: ["Era sacrificado a Deus", "Era comido pelos sacerdotes", "Era enviado para o deserto como bode expiatório", "Era guardado para o próximo ano"], answer: "Era enviado para o deserto como bode expiatório", reference: "Levítico 16:10, 21-22" },
+            { question: "O que o sumo sacerdote deveria fazer antes de entrar no Santo dos Santos no Dia da Expiação?", options: ["Oferecer um Holocausto", "Lavar-se e vestir vestes de linho", "Jejuar por sete dias", "Tocar o altar"], answer: "Lavar-se e vestir vestes de linho", reference: "Levítico 16:4" },
+            { question: "O que o sangue representava em Levítico e qual a proibição sobre ele?", options: ["Vida; proibido comer", "Morte; proibido tocar", "Poder; proibido derramar", "Riqueza; proibido vender"], answer: "Vida; proibido comer", reference: "Levítico 17:11, 14" },
+            { question: "Qual a lei fundamental do Código de Santidade?", options: ["Não roubarás", "Amarás o teu próximo como a ti mesmo", "Sereis santos, porque eu sou santo", "Não matarás"], answer: "Sereis santos, porque eu sou santo", reference: "Levítico 19:2" },
+            { question: "Qual a punição para quem entregasse seus filhos a Moloque?", options: ["Exílio", "Morte por apedrejamento", "Multa", "Prisão"], answer: "Morte por apedrejamento", reference: "Levítico 20:2" },
+            { question: "Qual a punição para o adultério?", options: ["Multa", "Prisão", "Morte para ambos os adúlteros", "Exílio"], answer: "Morte para ambos os adúlteros", reference: "Levítico 20:10" },
+            { question: "O que os sacerdotes não podiam fazer em relação aos mortos?", options: ["Tocar em qualquer cadáver", "Participar de funerais", "Contaminar-se com mortos, exceto parentes próximos", "Chorar pelos mortos"], answer: "Contaminar-se com mortos, exceto parentes próximos", reference: "Levítico 21:1-4" },
+            { question: "Qual a idade mínima para um sacerdote começar a servir?", options: ["15 anos", "20 anos", "25 anos", "30 anos"], answer: "20 anos", reference: "Levítico 21:17-23 (não especifica idade exata, mas se refere a defeitos físicos que impediriam o serviço)" },
+            { question: "Qual a primeira festa anual mencionada em Levítico 23?", options: ["Pentecostes", "Festa dos Tabernáculos", "Páscoa", "Dia da Expiação"], answer: "Páscoa", reference: "Levítico 23:5" },
+            { question: "Quantos dias durava a Festa dos Pães Ázimos?", options: ["Um dia", "Três dias", "Sete dias", "Quatorze dias"], answer: "Sete dias", reference: "Levítico 23:6" },
+            { question: "Qual a festa que celebrava a colheita do trigo e era também chamada de Festa das Semanas?", options: ["Páscoa", "Primícias", "Pentecostes", "Tabernáculos"], answer: "Pentecostes", reference: "Levítico 23:15-16" },
+            { question: "Qual a festa que era celebrada com o toque de trombetas?", options: ["Páscoa", "Primícias", "Festa das Trombetas", "Dia da Expiação"], answer: "Festa das Trombetas", reference: "Levítico 23:24" },
+            { question: "O que os israelitas deveriam fazer no Dia da Expiação?", options: ["Comer e beber", "Afligir as suas almas (jejuar)", "Trabalhar", "Fazer festa"], answer: "Afligir as suas almas (jejuar)", reference: "Levítico 23:27" },
+            { question: "Qual a festa que os israelitas deveriam morar em tendas por sete dias?", options: ["Páscoa", "Pentecostes", "Festa dos Tabernáculos", "Festa das Primícias"], answer: "Festa dos Tabernáculos", reference: "Levítico 23:42" },
+            { question: "De quanto em quanto tempo era o Ano Sabático?", options: ["A cada ano", "A cada três anos", "A cada sete anos", "A cada dez anos"], answer: "A cada sete anos", reference: "Levítico 25:4" },
+            { question: "O que deveria acontecer com a terra no Ano Sabático?", options: ["Deveria ser cultivada intensamente", "Deveria descansar, sem semeadura ou poda", "Deveria ser vendida", "Deveria ser irrigada"], answer: "Deveria descansar, sem semeadura ou poda", reference: "Levítico 25:4" },
+            { question: "De quanto em quanto tempo era o Ano do Jubileu?", options: ["A cada 10 anos", "A cada 25 anos", "A cada 50 anos", "A cada 100 anos"], answer: "A cada 50 anos", reference: "Levítico 25:10" },
+            { question: "O que acontecia no Ano do Jubileu em relação às terras e escravos?", options: ["As terras eram vendidas e os escravos libertos", "As terras voltavam aos seus donos originais e os escravos eram libertos", "As terras eram confiscadas e os escravos vendidos", "Nada mudava"], answer: "As terras voltavam aos seus donos originais e os escravos eram libertos", reference: "Levítico 25:10, 28, 40-41" },
+            { question: "Quais as bênçãos prometidas por Deus pela obediência em Levítico 26?", options: ["Fome e guerra", "Paz, chuva, colheitas abundantes e vitória sobre inimigos", "Doenças e exílio", "Escravidão e opressão"], answer: "Paz, chuva, colheitas abundantes e vitória sobre inimigos", reference: "Levítico 26:3-12" },
+            { question: "Quais as maldições prometidas por Deus pela desobediência em Levítico 26?", options: ["Prosperidade e alegria", "Doenças, fome, guerra, exílio e destruição", "Paz e segurança", "Bênçãos e prosperidade"], answer: "Doenças, fome, guerra, exílio e destruição", reference: "Levítico 26:14-39" },
+            { question: "Qual a porcentagem do dízimo que deveria ser dado ao Senhor?", options: ["5%", "10%", "15%", "20%"], answer: "10%", reference: "Levítico 27:30" },
+            { question: "O que acontecia com os dízimos de animais?", options: ["Eram vendidos", "Eram sacrificados", "Passavam debaixo da vara, e o décimo era santo ao Senhor", "Eram dados aos pobres"], answer: "Passavam debaixo da vara, e o décimo era santo ao Senhor", reference: "Levítico 27:32" },
+            { question: "Qual o propósito do óleo da unção sagrada?", options: ["Para cozinhar", "Para ungir o Tabernáculo, seus utensílios e os sacerdotes", "Para iluminar", "Para perfumar"], answer: "Para ungir o Tabernáculo, seus utensílios e os sacerdotes", reference: "Êxodo 30:22-30 (contexto de Levítico)" },
+            { question: "O que era o 'fogo estranho' que Nadabe e Abiú ofereceram?", options: ["Fogo de uma fogueira comum", "Fogo que não havia sido aceso no altar do holocausto", "Fogo de outro deus", "Fogo frio"], answer: "Fogo que não havia sido aceso no altar do holocausto", reference: "Levítico 10:1" },
+            { question: "Qual a idade mínima para um levita servir no Tabernáculo?", options: ["15 anos", "20 anos", "25 anos", "30 anos"], answer: "30 anos", reference: "Números 4:3 (contexto de Levítico)" },
+            { question: "O que significava 'imundo' em Levítico?", options: ["Sujeira física", "Estado de impureza ritual que impedia a aproximação a Deus", "Pecado grave", "Doença contagiosa"], answer: "Estado de impureza ritual que impedia a aproximação a Deus", reference: "Levítico 11-15 (conceito geral)" },
+            { question: "Qual a punição para quem comesse sangue?", options: ["Multa", "Exílio", "Morte", "Prisão"], answer: "Morte", reference: "Levítico 17:10" },
+            { question: "O que significa a frase 'a vida da carne está no sangue'?", options: ["O sangue é essencial para a saúde", "O sangue é a essência da vida e é usado para expiação", "O sangue é perigoso", "O sangue é um símbolo de poder"], answer: "O sangue é a essência da vida e é usado para expiação", reference: "Levítico 17:11" },
+            { question: "Qual a proibição em relação a deitar-se com a sogra?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:17" },
+            { question: "Qual a proibição em relação a deitar-se com um animal?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido em certas ocasiões"], answer: "É uma abominação", reference: "Levítico 18:23" },
+            { question: "Qual a proibição em relação a deitar-se com pessoa do mesmo sexo?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido em certas ocasiões"], answer: "É uma abominação", reference: "Levítico 18:22" },
+            { question: "O que Deus disse para não se fazer em relação aos mortos?", options: ["Chorar", "Fazer incisões no corpo ou rapar a cabeça", "Enterrar", "Lembrar"], answer: "Fazer incisões no corpo ou rapar a cabeça", reference: "Levítico 19:28" },
+            { question: "Qual a proibição em relação a consultar necromantes e feiticeiros?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido em certas ocasiões"], answer: "É uma abominação", reference: "Levítico 19:31" },
+            { question: "Qual a lei sobre o tratamento do surdo e do cego?", options: ["Amaldiçoar o surdo e tropeçar o cego", "Não amaldiçoar o surdo nem pôr tropeço diante do cego", "Ignorá-los", "Zombar deles"], answer: "Não amaldiçoar o surdo nem pôr tropeço diante do cego", reference: "Levítico 19:14" },
+            { question: "O que os israelitas deveriam deixar para o pobre e para o estrangeiro na colheita?", options: ["Nada", "Apenas o que sobrava", "As espigas caídas e os cachos da vinha", "Toda a colheita"], answer: "As espigas caídas e os cachos da vinha", reference: "Levítico 19:9-10" },
+            { question: "Qual a punição para quem blasfemasse o nome do Senhor?", options: ["Multa", "Prisão", "Morte por apedrejamento", "Exílio"], answer: "Morte por apedrejamento", reference: "Levítico 24:16" },
+            { question: "Qual o princípio da justiça em caso de dano físico?", options: ["Perdoar sempre", "Olho por olho, dente por dente", "Pagar uma multa", "Prisão"], answer: "Olho por olho, dente por dente", reference: "Levítico 24:20" },
+            { question: "O que o sacerdote deveria fazer com o leproso curado?", options: ["Isolá-lo novamente", "Oferecer sacrifícios por ele e declará-lo puro", "Enviá-lo para fora do arraial", "Queimá-lo"], answer: "Oferecer sacrifícios por ele e declará-lo puro", reference: "Levítico 14:2-7" },
+            { question: "Qual o nome do bode que era enviado para o deserto no Dia da Expiação?", options: ["Bode do sacrifício", "Bode da expiação", "Bode expiatório", "Bode da oferta"], answer: "Bode expiatório", reference: "Levítico 16:10" },
+            { question: "O que o sumo sacerdote fazia com o sangue do bode sacrificado no Dia da Expiação?", options: ["Derramava no altar", "Aspergia sobre o propiciatório e diante dele", "Dava aos levitas", "Comia"], answer: "Aspergia sobre o propiciatório e diante dele", reference: "Levítico 16:14" },
+            { question: "Qual a única pessoa que podia entrar no Santo dos Santos no Dia da Expiação?", options: ["Moisés", "Arão (o sumo sacerdote)", "Qualquer sacerdote", "Qualquer levita"], answer: "Arão (o sumo sacerdote)", reference: "Levítico 16:2" },
+            { question: "Que tipo de vestes o sumo sacerdote usava ao entrar no Santo dos Santos no Dia da Expiação?", options: ["Vestes de ouro", "Vestes de linho branco", "Vestes de lã colorida", "Vestes comuns"], answer: "Vestes de linho branco", reference: "Levítico 16:4" },
+            { question: "Qual a punição para quem não se afligisse no Dia da Expiação?", options: ["Seria expulso do povo", "Seria multado", "Seria preso", "Seria doente"], answer: "Seria expulso do povo", reference: "Levítico 23:29" },
+            { question: "Qual a festa que marcava o início da colheita da cevada?", options: ["Páscoa", "Primícias", "Pentecostes", "Tabernáculos"], answer: "Primícias", reference: "Levítico 23:10-14" },
+            { question: "Qual a festa que celebrava a libertação da escravidão no Egito?", options: ["Pães Ázimos", "Pentecostes", "Tabernáculos", "Dia da Expiação"], answer: "Pães Ázimos", reference: "Levítico 23:6" },
+            { question: "O que era o 'ômer' na oferta das primícias?", options: ["Uma medida de grãos", "Um tipo de pão", "Um tipo de animal", "Um tipo de vinho"], answer: "Uma medida de grãos", reference: "Levítico 23:10" },
+            { question: "Quantos dias após o sábado da Páscoa se contavam para a Festa das Semanas (Pentecostes)?", options: ["20 dias", "30 dias", "40 dias", "50 dias"], answer: "50 dias", reference: "Levítico 23:15-16" },
+            { question: "Qual a festa que era um memorial do tempo em que Israel habitou em tendas no deserto?", options: ["Páscoa", "Pentecostes", "Festa das Trombetas", "Festa dos Tabernáculos"], answer: "Festa dos Tabernáculos", reference: "Levítico 23:43" },
+            { question: "O que o sacerdote deveria fazer com o sangue da oferta pelo pecado de um sacerdote ungido?", options: ["Derramar no altar", "Aspergir sete vezes diante do véu do santuário", "Comer", "Queimar"], answer: "Aspergir sete vezes diante do véu do santuário", reference: "Levítico 4:6" },
+            { question: "Qual a punição para quem comesse carne de um animal que morreu naturalmente ou foi despedaçado?", options: ["Seria impuro até a tarde", "Seria morto", "Seria exilado", "Seria multado"], answer: "Seria impuro até a tarde", reference: "Levítico 17:15" },
+            { question: "Qual a proibição em relação a fazer tatuagens ou marcas no corpo?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:28" },
+            { question: "Qual a proibição em relação a rapar os cantos da barba ou cortar o cabelo em redondo?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:27" },
+            { question: "O que os israelitas deveriam fazer com os frutos das árvores nos primeiros três anos?", options: ["Comer", "Vender", "Considerar impuros e não comer", "Oferecer a Deus"], answer: "Considerar impuros e não comer", reference: "Levítico 19:23" },
+            { question: "No quarto ano, o que deveria ser feito com os frutos das árvores?", options: ["Comer", "Vender", "Seriam santos para louvar ao Senhor", "Dar aos sacerdotes"], answer: "Seriam santos para louvar ao Senhor", reference: "Levítico 19:24" },
+            { question: "No quinto ano, o que deveria ser feito com os frutos das árvores?", options: ["Comer", "Vender", "Seriam santos para louvar ao Senhor", "Dar aos sacerdotes"], answer: "Comer", reference: "Levítico 19:25" },
+            { question: "Qual a punição para quem amaldiçoasse pai ou mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:9" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a nora?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:12" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a cunhada (esposa do irmão)?", options: ["Multa", "Seriam sem filhos", "Prisão", "Exílio"], answer: "Seriam sem filhos", reference: "Levítico 20:21" },
+            { question: "O que os sacerdotes não podiam casar?", options: ["Com viúvas", "Com divorciadas, prostitutas ou mulheres desonradas", "Com estrangeiras", "Com mulheres mais velhas"], answer: "Com divorciadas, prostitutas ou mulheres desonradas", reference: "Levítico 21:7" },
+            { question: "O que o sumo sacerdote não podia fazer em relação aos mortos?", options: ["Chorar", "Contaminar-se por pai ou mãe", "Participar de funerais", "Tocar em qualquer cadáver"], answer: "Contaminar-se por pai ou mãe", reference: "Levítico 21:11" },
+            { question: "Qual a condição física que impedia um descendente de Arão de se aproximar do altar para oferecer pão de Deus?", options: ["Ser muito velho", "Ter algum defeito físico", "Ser muito jovem", "Ser estrangeiro"], answer: "Ter algum defeito físico", reference: "Levítico 21:17-23" },
+            { question: "Qual a proibição em relação a comer coisas santas se estivesse impuro?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido se arrepender", "É permitido se for pouca quantidade"], answer: "É proibido, sob pena de morte", reference: "Levítico 22:3" },
+            { question: "O que deveria ser feito com o animal que tivesse defeito e fosse oferecido em sacrifício?", options: ["Seria aceito", "Seria rejeitado", "Seria comido pelos sacerdotes", "Seria vendido"], answer: "Seria rejeitado", reference: "Levítico 22:20" },
+            { question: "Qual a idade mínima para um animal ser aceito como oferta?", options: ["Um dia", "Sete dias", "Um mês", "Um ano"], answer: "Sete dias", reference: "Levítico 22:27" },
+            { question: "Qual a festa que era um memorial de um dia de descanso solene, santa convocação, com toque de trombetas?", options: ["Páscoa", "Pentecostes", "Festa das Trombetas", "Dia da Expiação"], answer: "Festa das Trombetas", reference: "Levítico 23:24" },
+            { question: "Quantos dias após o Dia da Expiação começava a Festa dos Tabernáculos?", options: ["Três dias", "Cinco dias", "Sete dias", "Dez dias"], answer: "Cinco dias", reference: "Levítico 23:34" },
+            { question: "O que era o óleo para azeite para a luz no Tabernáculo?", options: ["Óleo de cozinha", "Azeite puro de oliveiras batidas", "Óleo perfumado", "Óleo de peixe"], answer: "Azeite puro de oliveiras batidas", reference: "Levítico 24:2" },
+            { question: "Quantos pães eram colocados sobre a mesa dos pães da proposição?", options: ["Seis", "Oito", "Dez", "Doze"], answer: "Doze", reference: "Levítico 24:5" },
+            { question: "De quanto em quanto tempo os pães da proposição eram substituídos?", options: ["Diariamente", "Semanalmente (a cada sábado)", "Mensalmente", "Anualmente"], answer: "Semanalmente (a cada sábado)", reference: "Levítico 24:8" },
+            { question: "O que o homem blasfemo fez para ser punido em Levítico 24?", options: ["Amaldiçoou a Deus", "Roubou", "Matou", "Adulterou"], answer: "Amaldiçoou a Deus", reference: "Levítico 24:11" },
+            { question: "Qual a lei sobre a escravidão de um israelita que se tornasse pobre?", options: ["Deveria ser escravizado para sempre", "Deveria ser tratado como assalariado e libertado no Jubileu", "Deveria ser vendido a estrangeiros", "Deveria ser morto"], answer: "Deveria ser tratado como assalariado e libertado no Jubileu", reference: "Levítico 25:39-41" },
+            { question: "O que aconteceria se um israelita vendesse uma casa em cidade murada?", options: ["Ela voltaria para ele no Jubileu", "Ele poderia resgatá-la em até um ano", "Ela seria vendida para sempre", "Ela seria dada aos sacerdotes"], answer: "Ele poderia resgatá-la em até um ano", reference: "Levítico 25:29" },
+            { question: "O que aconteceria se um israelita vendesse uma casa em aldeia sem muro?", options: ["Ela seria vendida para sempre", "Ela voltaria para ele no Jubileu", "Ele poderia resgatá-la em até um ano", "Ela seria dada aos sacerdotes"], answer: "Ela voltaria para ele no Jubileu", reference: "Levítico 25:31" },
+            { question: "Qual a punição para quem quebrasse a aliança de Deus?", options: ["Bênçãos", "Maldições", "Paz", "Prosperidade"], answer: "Maldições", reference: "Levítico 26:14-39" },
+            { question: "O que aconteceria se o povo andasse em contrariedade a Deus?", options: ["Deus os abençoaria", "Deus os castigaria sete vezes mais", "Deus os ignoraria", "Deus faria aliança com eles"], answer: "Deus os castigaria sete vezes mais", reference: "Levítico 26:21, 24, 28" },
+            { question: "O que Deus prometeu fazer se o povo se humilhasse e confessasse seus pecados, mesmo no exílio?", options: ["Os abandonaria", "Se lembraria da aliança e os restauraria", "Os destruiria completamente", "Os esqueceria"], answer: "Se lembraria da aliança e os restauraria", reference: "Levítico 26:40-45" },
+            { question: "O que era um voto de pessoa ao Senhor?", options: ["Uma promessa de sacrifício", "Uma dedicação de uma pessoa a Deus, que podia ser resgatada por dinheiro", "Um juramento", "Uma oração"], answer: "Uma dedicação de uma pessoa a Deus, que podia ser resgatada por dinheiro", reference: "Levítico 27:2-8" },
+            { question: "Qual a regra para o dízimo da terra?", options: ["Era voluntário", "Era santo ao Senhor", "Era para ser vendido", "Era para ser dado aos pobres"], answer: "Era santo ao Senhor", reference: "Levítico 27:30" },
+            { question: "Qual a regra para o dízimo dos animais?", options: ["Era voluntário", "Era santo ao Senhor", "Era para ser vendido", "Era para ser dado aos pobres"], answer: "Era santo ao Senhor", reference: "Levítico 27:32" },
+            { question: "Qual a punição para quem mentisse sobre um depósito ou roubo?", options: ["Multa", "Restituição e um quinto a mais, e oferta pela culpa", "Prisão", "Morte"], answer: "Restituição e um quinto a mais, e oferta pela culpa", reference: "Levítico 6:2-5" },
+            { question: "O que acontecia com a pele do animal no Holocausto?", options: ["Era queimada", "Era dada ao sacerdote", "Era vendida", "Era guardada para o ofertante"], answer: "Era dada ao sacerdote", reference: "Levítico 7:8" },
+            { question: "O que os sacerdotes deveriam fazer com a oferta pelo pecado?", options: ["Queimar tudo", "Comer a carne no Lugar Santo", "Vender", "Dar aos pobres"], answer: "Comer a carne no Lugar Santo", reference: "Levítico 6:26" },
+            { question: "Que tipo de oferta era a única que não exigia imposição de mãos sobre o animal?", options: ["Holocausto", "Oferta pelo Pecado", "Oferta pela Culpa", "Oferta de Manjares"], answer: "Oferta de Manjares", reference: "Levítico 2:1" },
+            { question: "Qual a idade mínima para um homem ser contado para o recenseamento no deserto?", options: ["15 anos", "20 anos", "25 anos", "30 anos"], answer: "20 anos", reference: "Números 1:3 (contexto de Levítico)" },
+            { question: "O que significava o 'leproso' no contexto de Levítico?", options: ["Apenas uma doença de pele", "Um estado de impureza ritual que exigia isolamento e purificação", "Um pecador grave", "Uma pessoa com doença contagiosa"], answer: "Um estado de impureza ritual que exigia isolamento e purificação", reference: "Levítico 13-14" },
+            { question: "Qual a proibição em relação a comer carne com sangue?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 17:10" },
+            { question: "O que o sacerdote deveria fazer com as cinzas do Holocausto?", options: ["Espalhar no deserto", "Levar para fora do arraial para um lugar limpo", "Guardar no altar", "Jogar no rio"], answer: "Levar para fora do arraial para um lugar limpo", reference: "Levítico 6:10-11" },
+            { question: "Qual a punição para quem comesse carne de um animal impuro?", options: ["Seria impuro até a tarde", "Seria morto", "Seria preso", "Seria multado"], answer: "Seria impuro até a tarde", reference: "Levítico 11:24-25" },
+            { question: "Qual a lei sobre a vingança e o rancor?", options: ["É permitido", "Não te vingarás nem guardarás ira contra os filhos do teu povo", "É pecado leve", "É permitido em certas ocasiões"], answer: "Não te vingarás nem guardarás ira contra os filhos do teu povo", reference: "Levítico 19:18" },
+            { question: "O que os israelitas deveriam fazer com o sábado da terra?", options: ["Cultivá-lo", "Deixá-lo descansar", "Vendê-lo", "Plantá-lo com novas sementes"], answer: "Deixá-lo descansar", reference: "Levítico 25:4" },
+            { question: "Qual a promessa de Deus para o sexto ano, antes do Ano Sabático?", options: ["Fome", "Colheita tripla", "Doenças", "Guerra"], answer: "Colheita tripla", reference: "Levítico 25:21" },
+            { question: "O que acontecia com a terra que era vendida antes do Jubileu?", options: ["Permanecia com o comprador", "Voltava ao seu dono original no Jubileu", "Era dada aos sacerdotes", "Era vendida novamente"], answer: "Voltava ao seu dono original no Jubileu", reference: "Levítico 25:28" },
+            { question: "Qual o nome da festa que celebrava a libertação da escravidão?", options: ["Páscoa", "Pentecostes", "Tabernáculos", "Dia da Expiação"], answer: "Páscoa", reference: "Levítico 23:5" },
+            { question: "Qual a festa que celebrava a colheita das primícias?", options: ["Páscoa", "Primícias", "Pentecostes", "Tabernáculos"], answer: "Primícias", reference: "Levítico 23:10" },
+            { question: "Qual a festa que celebrava o quinquagésimo dia após a Páscoa?", options: ["Pães Ázimos", "Primícias", "Pentecostes (Semanas)", "Tabernáculos"], answer: "Pentecostes (Semanas)", reference: "Levítico 23:15-16" },
+            { question: "Qual a festa que era um memorial de um dia de descanso solene com toque de trombetas?", options: ["Páscoa", "Pentecostes", "Festa das Trombetas", "Dia da Expiação"], answer: "Festa das Trombetas", reference: "Levítico 23:24" },
+            { question: "Qual a festa que era um dia de jejum e aflição da alma?", options: ["Páscoa", "Pentecostes", "Festa das Trombetas", "Dia da Expiação"], answer: "Dia da Expiação", reference: "Levítico 23:27" },
+            { question: "Qual a festa que os israelitas deveriam habitar em cabanas por sete dias?", options: ["Páscoa", "Pentecostes", "Festa das Trombetas", "Festa dos Tabernáculos"], answer: "Festa dos Tabernáculos", reference: "Levítico 23:42" },
+            { question: "O que acontecia se um israelita vendesse a si mesmo como escravo a um estrangeiro?", options: ["Permanecia escravo para sempre", "Poderia ser resgatado por um parente ou por si mesmo", "Seria morto", "Seria exilado"], answer: "Poderia ser resgatado por um parente ou por si mesmo", reference: "Levítico 25:47-49" },
+            { question: "Qual a punição para quem comesse a gordura de um sacrifício?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria expulso do povo", reference: "Levítico 7:25" },
+            { question: "O que os sacerdotes deveriam fazer com a carne da oferta pacífica que não fosse comida no primeiro dia?", options: ["Guardar para o dia seguinte", "Queimar no fogo", "Dar aos pobres", "Vender"], answer: "Queimar no fogo", reference: "Levítico 7:17" },
+            { question: "Qual o nome do filho de Arão que não foi morto com Nadabe?", options: ["Eleazar", "Itamar", "Gérson", "Eliézer"], answer: "Eleazar", reference: "Levítico 10:6" },
+            { question: "Qual o nome do outro filho de Arão que não foi morto com Nadabe?", options: ["Eleazar", "Itamar", "Gérson", "Eliézer"], answer: "Itamar", reference: "Levítico 10:6" },
+            { question: "Qual a proibição em relação a misturar diferentes tipos de sementes no campo?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:19" },
+            { question: "Qual a proibição em relação a misturar diferentes tipos de gado?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:19" },
+            { question: "Qual a proibição em relação a vestir roupa de dois tipos de fios?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:19" },
+            { question: "O que os israelitas deveriam fazer com o estrangeiro que habitasse entre eles?", options: ["Oprimir", "Amar como a si mesmo", "Ignorar", "Expulsar"], answer: "Amar como a si mesmo", reference: "Levítico 19:34" },
+            { question: "Qual a punição para quem roubasse e não restituísse?", options: ["Multa", "Morte", "Restituição e um quinto a mais", "Prisão"], answer: "Restituição e um quinto a mais", reference: "Levítico 6:4-5" },
+            { question: "O que era o 'azeite puro de oliveiras batidas'?", options: ["Azeite para cozinhar", "Azeite para a luz do candelabro", "Azeite para ungir os sacerdotes", "Azeite para sacrifícios"], answer: "Azeite para a luz do candelabro", reference: "Levítico 24:2" },
+            { question: "O que os sacerdotes deveriam fazer com os pães da proposição que eram removidos no sábado?", options: ["Comer no Lugar Santo", "Queimar", "Dar aos pobres", "Vender"], answer: "Comer no Lugar Santo", reference: "Levítico 24:9" },
+            { question: "Qual o nome do pai do homem que blasfemou em Levítico 24?", options: ["Dã", "Judá", "Simeão", "Rúben"], answer: "Dã", reference: "Levítico 24:11" },
+            { question: "Qual a punição para quem ferisse o próximo?", options: ["Olho por olho, dente por dente", "Multa", "Prisão", "Exílio"], answer: "Olho por olho, dente por dente", reference: "Levítico 24:19-20" },
+            { question: "O que aconteceria se a terra não fosse cultivada no Ano Sabático?", options: ["Deus enviaria pragas", "A terra produziria por si mesma o suficiente", "O povo passaria fome", "A terra seria amaldiçoada"], answer: "A terra produziria por si mesma o suficiente", reference: "Levítico 25:20-22" },
+            { question: "O que o parente mais próximo (remidor) poderia fazer por um israelita que vendesse sua propriedade?", options: ["Nada", "Comprá-la de volta", "Dá-la de presente", "Roubar de volta"], answer: "Comprá-la de volta", reference: "Levítico 25:25" },
+            { question: "Qual a lei sobre a venda de casas em cidades sem muro?", options: ["Não podiam ser vendidas", "Eram consideradas como campo e voltavam no Jubileu", "Eram vendidas para sempre", "Eram dadas aos sacerdotes"], answer: "Eram consideradas como campo e voltavam no Jubileu", reference: "Levítico 25:31" },
+            { question: "Qual a lei sobre a venda de casas em cidades muradas?", options: ["Eram consideradas como campo e voltavam no Jubileu", "Podiam ser resgatadas em até um ano, senão seriam do comprador para sempre", "Não podiam ser vendidas", "Eram dadas aos sacerdotes"], answer: "Podiam ser resgatadas em até um ano, senão seriam do comprador para sempre", reference: "Levítico 25:29-30" },
+            { question: "Qual a proibição em relação a fazer ídolos ou imagens de escultura?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 26:1" },
+            { question: "O que Deus prometeu fazer se os israelitas andassem nos Seus estatutos e guardassem os Seus mandamentos?", options: ["Enviaria fome", "Daria chuva a seu tempo e a terra daria sua produção", "Enviaria guerra", "Os exilaria"], answer: "Daria chuva a seu tempo e a terra daria sua produção", reference: "Levítico 26:3-4" },
+            { question: "O que Deus prometeu fazer com os animais selvagens se o povo desobedecesse?", options: ["Aumentá-los", "Enviá-los contra eles", "Afastá-los", "Domesticá-los"], answer: "Enviá-los contra eles", reference: "Levítico 26:22" },
+            { question: "Qual a punição para quem fizesse um voto ao Senhor e quisesse resgatá-lo?", options: ["Não poderia resgatar", "Deveria pagar o valor estimado pelo sacerdote mais um quinto", "Seria perdoado", "Seria preso"], answer: "Deveria pagar o valor estimado pelo sacerdote mais um quinto", reference: "Levítico 27:13" },
+            { question: "Qual a lei sobre os animais consagrados ao Senhor?", options: ["Podiam ser vendidos", "Não podiam ser vendidos nem resgatados", "Podiam ser comidos", "Podiam ser trocados"], answer: "Não podiam ser vendidos nem resgatados", reference: "Levítico 27:9-10" },
+            { question: "Qual a lei sobre a casa consagrada ao Senhor?", options: ["Podia ser vendida", "Podia ser resgatada pelo valor estimado mais um quinto", "Não podia ser resgatada", "Era queimada"], answer: "Podia ser resgatada pelo valor estimado mais um quinto", reference: "Levítico 27:15" },
+            // Novas 100 perguntas
+            { question: "Qual o nome do filho de Arão que foi morto com Nadabe?", options: ["Eleazar", "Itamar", "Abiú", "Gérson"], answer: "Abiú", reference: "Levítico 10:1" },
+            { question: "Qual a punição para quem comesse a carne de uma oferta de paz impuro?", options: ["Seria expulso do povo", "Seria multado", "Seria preso", "Seria doente"], answer: "Seria expulso do povo", reference: "Levítico 7:20" },
+            { question: "O que os sacerdotes deveriam fazer com o que sobrasse da oferta de manjares?", options: ["Queimar", "Comer no Lugar Santo", "Vender", "Dar aos pobres"], answer: "Comer no Lugar Santo", reference: "Levítico 6:16" },
+            { question: "Qual a proibição em relação a comer animais que rastejam sobre a terra?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 11:41-42" },
+            { question: "O que tornava uma casa impura por lepra?", options: ["Sujeira", "Mofo", "Manchas esverdeadas ou avermelhadas", "Umidade"], answer: "Manchas esverdeadas ou avermelhadas", reference: "Levítico 14:34-37" },
+            { question: "O que deveria ser feito com uma casa impura por lepra que não pudesse ser purificada?", options: ["Reformada", "Queimada", "Demolida e seus materiais levados para fora da cidade", "Vendida"], answer: "Demolida e seus materiais levados para fora da cidade", reference: "Levítico 14:45" },
+            { question: "Qual a proibição em relação a fazer incisões na carne por causa de um morto?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:28" },
+            { question: "Qual a proibição em relação a comer com o sangue?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:26" },
+            { question: "Qual a proibição em relação a virar-se para os que têm espíritos familiares ou para os feiticeiros?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:31" },
+            { question: "O que os israelitas deveriam fazer com o idoso?", options: ["Ignorá-lo", "Respeitá-lo e levantar-se diante dele", "Zombar dele", "Explorá-lo"], answer: "Respeitá-lo e levantar-se diante dele", reference: "Levítico 19:32" },
+            { question: "Qual a punição para quem praticasse incesto?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:11-14" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a tia?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:19" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a sogra e a filha dela?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:14" },
+            { question: "O que os sacerdotes não podiam beber antes de entrar na Tenda da Congregação?", options: ["Água", "Vinho ou bebida forte", "Leite", "Suco de fruta"], answer: "Vinho ou bebida forte", reference: "Levítico 10:9" },
+            { question: "Qual a punição para o sacerdote que oferecesse pão de Deus com defeito físico?", options: ["Seria expulso", "Seria morto", "Não seria aceito, mas não haveria punição de morte", "Seria multado"], answer: "Não seria aceito, mas não haveria punição de morte", reference: "Levítico 21:23" },
+            { question: "O que os sacerdotes deveriam fazer com a carne dos sacrifícios que tocasse em algo imundo?", options: ["Comer", "Queimar", "Lavar", "Enterrar"], answer: "Queimar", reference: "Levítico 7:19" },
+            { question: "Qual a festa que era um dia de descanso solene, santa convocação, onde não se fazia nenhum trabalho servil?", options: ["Páscoa", "Pentecostes", "Qualquer festa de Jeová", "Dia da Expiação"], answer: "Qualquer festa de Jeová", reference: "Levítico 23:7, 8, 21, 25, 30, 36" },
+            { question: "Qual a oferta que era feita com dois pães levedados, como oferta movida?", options: ["Oferta de Manjares", "Oferta Pacífica", "Oferta das Primícias", "Oferta de Semanas (Pentecostes)"], answer: "Oferta de Semanas (Pentecostes)", reference: "Levítico 23:17" },
+            { question: "O que os israelitas deveriam fazer com o que sobrassem da colheita no Ano Sabático?", options: ["Vender", "Deixar para o pobre e para o animal do campo", "Queimar", "Guardar"], answer: "Deixar para o pobre e para o animal do campo", reference: "Levítico 25:6-7" },
+            { question: "Qual a proibição em relação a semear o campo ou podar a vinha no Ano do Jubileu?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 25:11" },
+            { question: "O que Deus prometeu enviar se o povo andasse nos Seus estatutos?", options: ["Fome", "Paz na terra", "Guerra", "Doenças"], answer: "Paz na terra", reference: "Levítico 26:6" },
+            { question: "O que Deus prometeu fazer com os inimigos de Israel se o povo obedecesse?", options: ["Fortalecê-los", "Persegui-los e fazê-los cair à espada", "Fazer aliança com eles", "Ignorá-los"], answer: "Persegui-los e fazê-los cair à espada", reference: "Levítico 26:7-8" },
+            { question: "O que Deus prometeu fazer com Sua habitação se o povo obedecesse?", options: ["Afastá-la", "Estabelecê-la no meio deles", "Destruí-la", "Escondê-la"], answer: "Estabelecê-la no meio deles", reference: "Levítico 26:11" },
+            { question: "Qual a punição para quem não obedecesse aos mandamentos de Deus e desprezasse Seus estatutos?", options: ["Bênçãos", "Terror, doença e fome", "Paz", "Prosperidade"], answer: "Terror, doença e fome", reference: "Levítico 26:16" },
+            { question: "O que Deus prometeu fazer com a força do poder do povo se desobedecessem?", options: ["Aumentá-la", "Quebrá-la", "Ignorá-la", "Fortalecê-la"], answer: "Quebrá-la", reference: "Levítico 26:19" },
+            { question: "O que Deus prometeu fazer com as chuvas e a terra se o povo desobedecesse?", options: ["Daria chuva a seu tempo e a terra daria sua produção", "Faria o céu como ferro e a terra como bronze", "Aumentaria a produção", "Faria a terra fértil"], answer: "Faria o céu como ferro e a terra como bronze", reference: "Levítico 26:19" },
+            { question: "O que Deus prometeu enviar se o povo continuasse a andar em contrariedade a Ele?", options: ["Paz", "Sete vezes mais pragas", "Bênçãos", "Prosperidade"], answer: "Sete vezes mais pragas", reference: "Levítico 26:21, 24, 28" },
+            { question: "O que aconteceria com as cidades fortificadas de Israel se o povo desobedecesse?", options: ["Seriam fortalecidas", "Seriam destruídas", "Seriam habitadas por estrangeiros", "Seriam abandonadas"], answer: "Seriam destruídas", reference: "Levítico 26:31" },
+            { question: "O que Deus prometeu fazer com os santuários de Israel se o povo desobedecesse?", options: ["Abençoá-los", "Profaná-los", "Protegê-los", "Aumentá-los"], answer: "Profaná-los", reference: "Levítico 26:31" },
+            { question: "O que aconteceria com a terra de Israel se o povo fosse exilado?", options: ["Ficaria deserta e desfrutaria de seus sábados", "Seria cultivada por estrangeiros", "Seria destruída", "Seria vendida"], answer: "Ficaria deserta e desfrutaria de seus sábados", reference: "Levítico 26:34-35" },
+            { question: "Qual a condição para que Deus se lembrasse de Sua aliança com Israel no exílio?", options: ["Que eles construíssem um templo", "Que se humilhassem e confessassem seus pecados", "Que oferecessem sacrifícios", "Que voltassem ao Egito"], answer: "Que se humilhassem e confessassem seus pecados", reference: "Levítico 26:40-42" },
+            { question: "Qual a lei sobre os votos de pessoas que não eram aptas para o serviço do Tabernáculo?", options: ["Eram aceitos", "Não eram aceitos", "Podiam ser resgatados por um valor menor", "Eram ignorados"], answer: "Não eram aceitos", reference: "Levítico 27:9-10" },
+            { question: "Qual a lei sobre a dedicação de campos ao Senhor?", options: ["Eram vendidos", "Eram considerados santos e podiam ser resgatados", "Eram queimados", "Eram dados aos sacerdotes"], answer: "Eram considerados santos e podiam ser resgatados", reference: "Levítico 27:16-19" },
+            { question: "O que acontecia com um campo dedicado ao Senhor que não fosse resgatado antes do Jubileu?", options: ["Voltava ao seu dono", "Tornava-se propriedade do sacerdote para sempre", "Era vendido a outro", "Era destruído"], answer: "Tornava-se propriedade do sacerdote para sempre", reference: "Levítico 27:21" },
+            { question: "Qual a lei sobre o primogênito de animais puros?", options: ["Podia ser vendido", "Era do Senhor e não podia ser resgatado", "Era sacrificado", "Era dado aos levitas"], answer: "Era do Senhor e não podia ser resgatado", reference: "Levítico 27:26" },
+            { question: "Qual a lei sobre o primogênito de animais impuros?", options: ["Era do Senhor e não podia ser resgatado", "Podia ser resgatado ou vendido", "Era sacrificado", "Era dado aos levitas"], answer: "Podia ser resgatado ou vendido", reference: "Levítico 27:27" },
+            { question: "O que era o 'anatema' (coisa dedicada ao Senhor para destruição)?", options: ["Algo que podia ser resgatado", "Algo que não podia ser vendido nem resgatado, e deveria ser morto", "Uma oferta voluntária", "Um dízimo"], answer: "Algo que não podia ser vendido nem resgatado, e deveria ser morto", reference: "Levítico 27:28-29" },
+            { question: "Qual a proibição em relação a comer a gordura de um animal sacrificado?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 7:23-25" },
+            { question: "Qual a proibição em relação a comer o sangue de qualquer animal?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 7:26-27" },
+            { question: "O que os sacerdotes deveriam fazer com a porção da oferta pacífica que lhes pertencia?", options: ["Queimar", "Comer no Lugar Santo", "Vender", "Dar aos pobres"], answer: "Comer no Lugar Santo", reference: "Levítico 7:31-34" },
+            { question: "Qual o propósito da oferta pela culpa?", options: ["Expiação por pecados de ignorância", "Expiação por transgressões que exigiam restituição e reparação", "Agradecimento", "Dedicação total"], answer: "Expiação por transgressões que exigiam restituição e reparação", reference: "Levítico 5:15-16" },
+            { question: "Que animal era usado para a oferta pelo pecado de toda a congregação de Israel?", options: ["Um cordeiro", "Um bode", "Um novilho", "Uma cabra"], answer: "Um novilho", reference: "Levítico 4:13-14" },
+            { question: "O que o sumo sacerdote deveria fazer com o sangue do novilho da oferta pelo pecado de toda a congregação?", options: ["Derramar no altar", "Aspergir sete vezes diante do véu do santuário", "Comer", "Queimar"], answer: "Aspergir sete vezes diante do véu do santuário", reference: "Levítico 4:17" },
+            { question: "Qual a punição para quem comesse a carne da oferta pelo pecado que não fosse queimada no altar?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria impuro até a tarde", reference: "Levítico 6:30" },
+            { question: "O que os sacerdotes deveriam fazer com as vestes que tocassem na carne da oferta pelo pecado?", options: ["Queimar", "Lavar em lugar santo", "Vender", "Guardar"], answer: "Lavar em lugar santo", reference: "Levítico 6:27" },
+            { question: "Qual a proibição em relação a comer o que morria por si ou era despedaçado por feras?", options: ["É permitido", "É proibido, sob pena de impureza", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de impureza", reference: "Levítico 17:15-16" },
+            { question: "O que Deus disse que faria com a terra se o povo desobedecesse e não a cultivasse no Ano Sabático?", options: ["A abençoaria", "A faria deserta e desfrutaria de seus sábados", "A faria fértil", "A daria a outro povo"], answer: "A faria deserta e desfrutaria de seus sábados", reference: "Levítico 26:34-35" },
+            { question: "Qual o propósito do Ano do Jubileu?", options: ["Para que os ricos ficassem mais ricos", "Para restaurar a igualdade e a justiça social, e a terra voltasse às famílias", "Para celebrar a colheita", "Para descansar da agricultura"], answer: "Para restaurar a igualdade e a justiça social, e a terra voltasse às famílias", reference: "Levítico 25:10" },
+            { question: "O que os israelitas deveriam fazer com as bordas de seus campos na colheita?", options: ["Colher tudo", "Não colher completamente as bordas, deixando para o pobre e estrangeiro", "Vender as bordas", "Queimar as bordas"], answer: "Não colher completamente as bordas, deixando para o pobre e estrangeiro", reference: "Levítico 23:22" },
+            { question: "Qual a proibição em relação a oferecer sacrifícios a demônios?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 17:7" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a filha do pai ou da mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:17" },
+            { question: "O que os sacerdotes deveriam fazer com o dinheiro do resgate de votos?", options: ["Guardar para si", "Usar para o serviço do Tabernáculo", "Dar aos pobres", "Vender"], answer: "Usar para o serviço do Tabernáculo", reference: "Levítico 27:2-8 (implícito, para o tesouro do santuário)" },
+            { question: "Qual a lei sobre a primícia da colheita?", options: ["Era para ser vendida", "Era para ser trazida ao sacerdote como oferta movida", "Era para ser comida imediatamente", "Era para ser guardada"], answer: "Era para ser trazida ao sacerdote como oferta movida", reference: "Levítico 23:10-11" },
+            { question: "Qual a punição para quem não se purificasse de uma impureza?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria expulso do povo", reference: "Levítico 7:20-21" },
+            { question: "O que os israelitas deveriam fazer com o incenso sagrado?", options: ["Queimar no altar de incenso", "Cheirar", "Vender", "Dar aos pobres"], answer: "Queimar no altar de incenso", reference: "Levítico 16:12" },
+            { question: "Qual a proibição em relação a consultar os mortos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:31" },
+            { question: "Qual a proibição em relação a semear dois tipos de sementes no mesmo campo?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:19" },
+            { question: "Qual a lei sobre o tratamento do estrangeiro que morasse entre eles?", options: ["Oprimir", "Amar como a si mesmo", "Ignorar", "Expulsar"], answer: "Amar como a si mesmo", reference: "Levítico 19:34" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16" },
+            { question: "Qual a punição para quem não se afligisse no Dia da Expiação?", options: ["Seria expulso do povo", "Seria multado", "Seria preso", "Seria doente"], answer: "Seria expulso do povo", reference: "Levítico 23:29" },
+            { question: "Qual a lei sobre o ano de descanso da terra?", options: ["Deveria ser cultivada intensamente", "Deveria descansar, sem semeadura ou poda", "Deveria ser vendida", "Deveria ser irrigada"], answer: "Deveria descansar, sem semeadura ou poda", reference: "Levítico 25:4" },
+            { question: "O que acontecia com as dívidas no Ano do Jubileu?", options: ["Eram perdoadas", "Eram dobradas", "Eram mantidas", "Eram vendidas"], answer: "Eram perdoadas", reference: "Levítico 25:35-38 (implícito na libertação e restituição)" },
+            { question: "Qual a proibição em relação a comer sangue de aves ou animais?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 17:13-14" },
+            { question: "O que os sacerdotes deveriam fazer com a oferta pelo pecado que não fosse comida no Lugar Santo?", options: ["Queimar", "Vender", "Dar aos pobres", "Guardar"], answer: "Queimar", reference: "Levítico 6:30" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a filha do pai ou da mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:17" },
+            { question: "Qual a proibição em relação a fazer votos de animais impuros?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 27:11-12" },
+            { question: "Qual a lei sobre a dedicação de casas ao Senhor?", options: ["Eram vendidas", "Eram consideradas santas e podiam ser resgatadas", "Eram queimadas", "Eram dadas aos sacerdotes"], answer: "Eram consideradas santas e podiam ser resgatadas", reference: "Levítico 27:14-15" },
+            { question: "O que aconteceria com uma casa dedicada ao Senhor que não fosse resgatada?", options: ["Voltava ao seu dono", "Tornava-se propriedade do sacerdote para sempre", "Era vendida a outro", "Era destruída"], answer: "Tornava-se propriedade do sacerdote para sempre", reference: "Levítico 27:15" },
+            { question: "Qual a lei sobre a dedicação de um campo herdado ao Senhor?", options: ["Era vendido", "Voltava ao seu dono original no Jubileu", "Tornava-se propriedade do sacerdote para sempre", "Era queimado"], answer: "Voltava ao seu dono original no Jubileu", reference: "Levítico 27:24" },
+            { question: "Qual a proibição em relação a comer o que tem vida no sangue?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 17:14" },
+            { question: "O que os israelitas deveriam fazer com o que sobrasse da oferta de manjares?", options: ["Queimar", "Comer no Lugar Santo", "Vender", "Dar aos pobres"], answer: "Comer no Lugar Santo", reference: "Levítico 6:16" },
+            { question: "Qual a proibição em relação a deitar-se com a esposa do pai?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:8" },
+            { question: "Qual a proibição em relação a deitar-se com a filha do filho ou da filha?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:10" },
+            { question: "Qual a proibição em relação a deitar-se com a irmã do pai ou da mãe?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:12-13" },
+            { question: "Qual a proibição em relação a deitar-se com a tia (irmã da mãe ou irmã do pai)?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:12-13" },
+            { question: "Qual a proibição em relação a deitar-se com a esposa do irmão?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:16" },
+            { question: "Qual a proibição em relação a deitar-se com a filha da esposa?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:17" },
+            { question: "Qual a proibição em relação a deitar-se com a nora?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:15" },
+            { question: "Qual a proibição em relação a deitar-se com a cunhada (esposa do irmão)?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:16" },
+            { question: "Qual a proibição em relação a oferecer seus filhos a Moloque?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for por necessidade"], answer: "É uma abominação", reference: "Levítico 18:21" },
+            { question: "Qual a proibição em relação a comer o que morria por si ou era despedaçado?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 17:15" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16" },
+            { question: "Qual a punição para quem não se purificasse de uma impureza?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria expulso do povo", reference: "Levítico 7:20-21" },
+            { question: "O que os israelitas deveriam fazer com o incenso sagrado?", options: ["Queimar no altar de incenso", "Cheirar", "Vender", "Dar aos pobres"], answer: "Queimar no altar de incenso", reference: "Levítico 16:12" },
+            { question: "Qual a proibição em relação a consultar os mortos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:31" },
+            { question: "Qual a proibição em relação a semear dois tipos de sementes no mesmo campo?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:19" },
+            { question: "Qual a lei sobre o tratamento do estrangeiro que morasse entre eles?", options: ["Oprimir", "Amar como a si mesmo", "Ignorar", "Expulsar"], answer: "Amar como a si mesmo", reference: "Levítico 19:34" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16" },
+            { question: "Qual a punição para quem não se afligisse no Dia da Expiação?", options: ["Seria expulso do povo", "Seria multado", "Seria preso", "Seria doente"], answer: "Seria expulso do povo", reference: "Levítico 23:29" },
+            { question: "Qual a lei sobre o ano de descanso da terra?", options: ["Deveria ser cultivada intensamente", "Deveria descansar, sem semeadura ou poda", "Deveria ser vendida", "Deveria ser irrigada"], answer: "Deveria descansar, sem semeadura ou poda", reference: "Levítico 25:4" },
+            { question: "O que acontecia com as dívidas no Ano do Jubileu?", options: ["Eram perdoadas", "Eram dobradas", "Eram mantidas", "Eram vendidas"], answer: "Eram perdoadas", reference: "Levítico 25:35-38 (implícito na libertação e restituição)" },
+            { question: "Qual a proibição em relação a comer sangue de aves ou animais?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 17:13-14" },
+            { question: "O que os sacerdotes deveriam fazer com a oferta pelo pecado que não fosse comida no Lugar Santo?", options: ["Queimar", "Vender", "Dar aos pobres", "Guardar"], answer: "Queimar", reference: "Levítico 6:30" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a filha do pai ou da mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:17" },
+            { question: "Qual a proibição em relação a fazer votos de animais impuros?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 27:11-12" },
+            { question: "Qual a lei sobre a dedicação de casas ao Senhor?", options: ["Eram vendidas", "Eram consideradas santas e podiam ser resgatadas", "Eram queimadas", "Eram dadas aos sacerdotes"], answer: "Eram consideradas santas e podiam ser resgatadas", reference: "Levítico 27:14-15" },
+            { question: "O que aconteceria com uma casa dedicada ao Senhor que não fosse resgatada?", options: ["Voltava ao seu dono", "Tornava-se propriedade do sacerdote para sempre", "Era vendida a outro", "Era destruída"], answer: "Tornava-se propriedade do sacerdote para sempre", reference: "Levítico 27:15" },
+            { question: "Qual a lei sobre a dedicação de um campo herdado ao Senhor?", options: ["Era vendido", "Voltava ao seu dono original no Jubileu", "Tornava-se propriedade do sacerdote para sempre", "Era queimado"], answer: "Voltava ao seu dono original no Jubileu", reference: "Levítico 27:24" },
+            { question: "Qual a proibição em relação a comer o que tem vida no sangue?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 17:14" },
+            { question: "O que os israelitas deveriam fazer com o que sobrasse da oferta de manjares?", options: ["Queimar", "Comer no Lugar Santo", "Vender", "Dar aos pobres"], answer: "Comer no Lugar Santo", reference: "Levítico 6:16" },
+            { question: "Qual a proibição em relação a deitar-se com a esposa do pai?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:8" },
+            { question: "Qual a proibição em relação a deitar-se com a filha do filho ou da filha?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:10" },
+            { question: "Qual a proibição em relação a deitar-se com a irmã do pai ou da mãe?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:12-13" },
+            { question: "Qual a proibição em relação a deitar-se com a tia (irmã da mãe ou irmã do pai)?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:12-13" },
+            { question: "Qual a proibição em relação a deitar-se com a esposa do irmão?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:16" },
+            { question: "Qual a proibição em relação a deitar-se com a filha da esposa?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:17" },
+            { question: "Qual a proibição em relação a deitar-se com a nora?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:15" },
+            { question: "Qual a proibição em relação a deitar-se com a cunhada (esposa do irmão)?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for viúva"], answer: "É uma abominação", reference: "Levítico 18:16" },
+            { question: "Qual a proibição em relação a oferecer seus filhos a Moloque?", options: ["É permitido", "É uma abominação", "É pecado leve", "É permitido se for por necessidade"], answer: "É uma abominação", reference: "Levítico 18:21" },
+            { question: "Qual a punição para quem comesse carne de um animal que morreu naturalmente ou foi despedaçado?", options: ["Seria impuro até a tarde", "Seria morto", "Seria exilado", "Seria multado"], answer: "Seria impuro até a tarde", reference: "Levítico 17:15" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16" },
+            { question: "Qual a punição para quem não se purificasse de uma impureza?", options: ["Seria impuro até a tarde", "Seria expulso do povo", "Seria multado", "Seria preso"], answer: "Seria expulso do povo", reference: "Levítico 7:20-21" },
+            { question: "O que os israelitas deveriam fazer com o incenso sagrado?", options: ["Queimar no altar de incenso", "Cheirar", "Vender", "Dar aos pobres"], answer: "Queimar no altar de incenso", reference: "Levítico 16:12" },
+            { question: "Qual a proibição em relação a consultar os mortos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:31" },
+            { question: "Qual a proibição em relação a semear dois tipos de sementes no mesmo campo?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 19:19" },
+            { question: "Qual a lei sobre o tratamento do estrangeiro que morasse entre eles?", options: ["Oprimir", "Amar como a si mesmo", "Ignorar", "Expulsar"], answer: "Amar como a si mesmo", reference: "Levítico 19:34" },
+            { question: "O que os israelitas deveriam fazer com as ofertas de paz?", options: ["Queimar tudo", "Comer a carne no mesmo dia ou no dia seguinte", "Vender", "Dar aos pobres"], answer: "Comer a carne no mesmo dia ou no dia seguinte", reference: "Levítico 7:15-16" },
+            { question: "Qual a punição para quem não se afligisse no Dia da Expiação?", options: ["Seria expulso do povo", "Seria multado", "Seria preso", "Seria doente"], answer: "Seria expulso do povo", reference: "Levítico 23:29" },
+            { question: "Qual a lei sobre o ano de descanso da terra?", options: ["Deveria ser cultivada intensamente", "Deveria descansar, sem semeadura ou poda", "Deveria ser vendida", "Deveria ser irrigada"], answer: "Deveria descansar, sem semeadura ou poda", reference: "Levítico 25:4" },
+            { question: "O que acontecia com as dívidas no Ano do Jubileu?", options: ["Eram perdoadas", "Eram dobradas", "Eram mantidas", "Eram vendidas"], answer: "Eram perdoadas", reference: "Levítico 25:35-38 (implícito na libertação e restituição)" },
+            { question: "Qual a proibição em relação a comer sangue de aves ou animais?", options: ["É permitido", "É proibido, sob pena de morte", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido, sob pena de morte", reference: "Levítico 17:13-14" },
+            { question: "O que os sacerdotes deveriam fazer com a oferta pelo pecado que não fosse comida no Lugar Santo?", options: ["Queimar", "Vender", "Dar aos pobres", "Guardar"], answer: "Queimar", reference: "Levítico 6:30" },
+            { question: "Qual a punição para quem tivesse relações sexuais com a filha do pai ou da mãe?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Levítico 20:17" },
+            { question: "Qual a proibição em relação a fazer votos de animais impuros?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 27:11-12" },
+            { question: "Qual a lei sobre a dedicação de casas ao Senhor?", options: ["Eram vendidas", "Eram consideradas santas e podiam ser resgatadas", "Eram queimadas", "Eram dadas aos sacerdotes"], answer: "Eram consideradas santas e podiam ser resgatadas", reference: "Levítico 27:14-15" },
+            { question: "O que aconteceria com uma casa dedicada ao Senhor que não fosse resgatada?", options: ["Voltava ao seu dono", "Tornava-se propriedade do sacerdote para sempre", "Era vendida a outro", "Era destruída"], answer: "Tornava-se propriedade do sacerdote para sempre", reference: "Levítico 27:15" },
+            { question: "Qual a lei sobre a dedicação de um campo herdado ao Senhor?", options: ["Era vendido", "Voltava ao seu dono original no Jubileu", "Tornava-se propriedade do sacerdote para sempre", "Era queimado"], answer: "Voltava ao seu dono original no Jubileu", reference: "Levítico 27:24" },
+            { question: "Qual a proibição em relação a comer o que tem vida no sangue?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Levítico 17:14" }
+        ];
+
+        let shuffledQuizQuestionsLeviticus = [];
+        let currentQuizIndexLeviticus = 0;
+        let scoreLeviticus = 0;
+        let wrongAnswersLeviticus = 0;
+
+        function shuffleQuizQuestionsLeviticus() {
+            shuffledQuizQuestionsLeviticus = [...allQuizQuestionsLeviticus];
+            for (let i = shuffledQuizQuestionsLeviticus.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledQuizQuestionsLeviticus[i], shuffledQuizQuestionsLeviticus[j]] = [shuffledQuizQuestionsLeviticus[j], shuffledQuizQuestionsLeviticus[i]];
+            }
+        }
+
+        function displayQuestionLeviticus() {
+            const questionElement = document.getElementById('quizQuestionLeviticus');
+            const optionsDiv = document.getElementById('quizOptionsLeviticus');
+            const feedbackElement = document.getElementById('quizFeedbackLeviticus');
+            const nextButton = document.querySelector('#quizContainerLeviticus .quiz-next');
+            const progressElement = document.getElementById('quizProgressLeviticus');
+
+            if (currentQuizIndexLeviticus < shuffledQuizQuestionsLeviticus.length) {
+                const currentQuestion = shuffledQuizQuestionsLeviticus[currentQuizIndexLeviticus];
+                questionElement.textContent = currentQuestion.question;
+                optionsDiv.innerHTML = '';
+                feedbackElement.textContent = '';
+                nextButton.classList.add('hidden');
+
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerLeviticus(option, currentQuestion.answer, currentQuestion.reference);
+                    optionsDiv.appendChild(button);
+                });
+
+                // Atualizar progresso
+                progressElement.textContent = `${currentQuizIndexLeviticus + 1}/${shuffledQuizQuestionsLeviticus.length}`;
+            } else {
+                // Quiz concluído
+                questionElement.textContent = "Quiz Concluído!";
+                optionsDiv.innerHTML = '';
+                feedbackElement.textContent = `Você acertou ${scoreLeviticus} de ${shuffledQuizQuestionsLeviticus.length} perguntas.`;
+                nextButton.classList.add('hidden');
+                progressElement.textContent = "Fim";
+            }
+        }
+
+        function checkAnswerLeviticus(selectedOption, correctAnswer, reference) {
+            const optionsDiv = document.getElementById('quizOptionsLeviticus');
+            const feedbackElement = document.getElementById('quizFeedbackLeviticus');
+            const nextButton = document.querySelector('#quizContainerLeviticus .quiz-next');
+            const scoreElement = document.getElementById('quizScoreLeviticus');
+
+            // Desabilitar botões após a seleção
+            Array.from(optionsDiv.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto!";
+                feedbackElement.classList.remove('text-red-500');
+                feedbackElement.classList.add('text-green-500');
+                scoreLeviticus++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}. (Referência: ${reference})`;
+                feedbackElement.classList.remove('text-green-500');
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersLeviticus++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreLeviticus}, Erros: ${wrongAnswersLeviticus}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionLeviticus() {
+            currentQuizIndexLeviticus++;
+            displayQuestionLeviticus();
+        }
+
+        // Gráfico de Temas de Levítico
+        let leviticusChartInstance = null; // Para armazenar a instância do Chart.js
+
+        function renderLeviticusChart() {
+            const ctx = document.getElementById('leviticusChart').getContext('2d');
+
+            if (leviticusChartInstance) {
+                leviticusChartInstance.destroy(); // Destroi a instância anterior do gráfico, se existir
+            }
+
+            leviticusChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Santidade de Deus', 'Expiação e Perdão', 'Pecado e Impureza', 'Sacerdócio', 'Aliança', 'Adoração e Ritual', 'Vida Santa'],
+                    datasets: [{
+                        label: 'Frequência Temática (Estimativa)',
+                        data: [25, 20, 15, 12, 10, 8, 10], // Dados de exemplo para Levítico
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)', // Azul
+                            'rgba(255, 206, 86, 0.7)', // Amarelo
+                            'rgba(75, 192, 192, 0.7)', // Verde-água
+                            'rgba(153, 102, 255, 0.7)', // Roxo
+                            'rgba(255, 99, 132, 0.7)', // Vermelho
+                            'rgba(255, 159, 64, 0.7)', // Laranja
+                            'rgba(201, 203, 207, 0.7)' // Cinza
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(201, 203, 207, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor do texto dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: '#4a5568' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor do texto dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: '#4a5568' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição Temática no Livro de Levítico',
+                            color: '#f8fafc' // Cor do título do gráfico
+                        }
+                    }
+                }
+            });
+        }
+
+        // Exibir a seção inicial ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('inicio');
+        });
+    </script>
+</body>
+</html>

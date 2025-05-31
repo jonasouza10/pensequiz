@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Provérbios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Provérbios Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Provérbios</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionProverbios('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionProverbios('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionProverbios('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionProverbios('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionProverbios('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionProverbios('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionProverbios('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionProverbios('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionProverbios('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Provérbios</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Provérbios, uma coleção de sabedoria prática para a vida diária. Mergulhe em ensinamentos sobre moralidade, ética, relacionamentos, trabalho, finanças e a importância do temor do Senhor. Descubra a profundidade da sabedoria divina aplicada às situações cotidianas. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Provérbios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Provérbios é uma das obras sapienciais do Antigo Testamento, uma coleção de máximas e ditos que oferecem sabedoria prática para a vida diária. Seu propósito principal, conforme declarado em Provérbios 1:2-6, é "para se conhecer a sabedoria e a instrução; para se entenderem as palavras de prudência; para se receber a instrução do entendimento, a justiça, o juízo e a equidade; para dar aos simples prudência, e aos jovens conhecimento e bom siso".</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Embora grande parte do livro seja atribuída a Salomão (Provérbios 1:1, 10:1, 25:1), ele também inclui provérbios de outros sábios, como os "ditos dos sábios" (Provérbios 22:17-24:34), as "palavras de Agur" (Provérbios 30) e as "palavras do rei Lemuel" (Provérbios 31). Isso sugere que o livro é uma compilação de sabedoria acumulada ao longo de gerações.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O tema central de Provérbios é o "temor do Senhor", que é apresentado como o princípio fundamental da sabedoria (Provérbios 1:7, 9:10). A sabedoria não é meramente conhecimento intelectual, mas a habilidade de aplicar a verdade divina à vida de forma prática e moral. O livro contrasta a sabedoria com a loucura, personificando-as como duas mulheres que convidam os homens a seguir seus caminhos.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os provérbios abordam uma vasta gama de tópicos, incluindo: a importância da diligência, os perigos da preguiça, a virtude da honestidade, os riscos da má companhia, o valor da autodisciplina, a gestão do dinheiro, a criação dos filhos, a conduta na fala e a natureza dos relacionamentos. Eles são concisos, muitas vezes usando paralelismos e contrastes para transmitir suas mensagens de forma memorável.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-9: Os Discursos de Sabedoria.</strong> Uma série de exortações e advertências, frequentemente dirigidas a um "filho", que contrastam a sabedoria com a loucura e enfatizam o temor do Senhor.</li>
+                <li><strong>Capítulos 10-24: Provérbios de Salomão e Ditos dos Sábios.</strong> A maior parte do livro, composta por provérbios curtos e concisos sobre diversos aspectos da vida.</li>
+                <li><strong>Capítulos 25-29: Mais Provérbios de Salomão (compilados por Ezequias).</strong> Uma segunda coleção de provérbios salomônicos.</li>
+                <li><strong>Capítulo 30: As Palavras de Agur.</strong> Um conjunto de ditos e observações sobre a natureza de Deus, a humildade e a sabedoria.</li>
+                <li><strong>Capítulo 31: As Palavras do Rei Lemuel e a Mulher Virtuosa.</strong> Conselhos de uma mãe a seu filho rei e a famosa descrição da mulher virtuosa.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Provérbios é um guia atemporal para viver uma vida piedosa e bem-sucedida, enraizada no temor e na sabedoria de Deus.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Provérbios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Provérbios é uma coleção de ensinamentos sapienciais que guiam o leitor na busca por uma vida de retidão e sucesso, fundamentada no temor do Senhor.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Chamada à Sabedoria (Capítulos 1-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Propósito e Tema (Capítulo 1:1-7):</strong>
+                    <ul>
+                        <li>O temor do Senhor é o princípio do conhecimento.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Advertências contra o Pecado (Capítulos 1:8-19):</strong>
+                    <ul>
+                        <li>Contra a má companhia e a violência.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Convite da Sabedoria (Capítulos 1:20-33):</strong>
+                    <ul>
+                        <li>A Sabedoria clama nas ruas, convidando à retidão.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Os Benefícios da Sabedoria (Capítulos 2-4):</strong>
+                    <ul>
+                        <li>Proteção, discernimento e vida longa.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Advertências Específicas (Capítulos 5-7):</strong>
+                    <ul>
+                        <li>Contra a imoralidade sexual, a preguiça, a mentira, a contenda.</li>
+                    </ul>
+                </li>
+                <li><strong>F. O Elogio da Sabedoria e da Loucura (Capítulos 8-9):</strong>
+                    <ul>
+                        <li>A Sabedoria personificada como uma mulher que constrói sua casa e convida à vida.</li>
+                        <li>A Loucura personificada como uma mulher sedutora que leva à morte.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Provérbios de Salomão e Ditos dos Sábios (Capítulos 10-24)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Contrastes entre Justos e Ímpios (Capítulos 10-15):</strong>
+                    <ul>
+                        <li>Diferenças de caráter, conduta e destino.</li>
+                        <li>A importância da língua, da diligência, da humildade.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Sabedoria e Loucura na Vida Diária (Capítulos 16-22:16):</strong>
+                    <ul>
+                        <li>Conselhos sobre o controle do temperamento, a amizade, a justiça, a disciplina.</li>
+                        <li>A soberania de Deus sobre os planos humanos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Ditos dos Sábios (Capítulos 22:17-24:34):</strong>
+                    <ul>
+                        <li>Conselhos sobre a temperança, a justiça, a vizinhança, o trabalho.</li>
+                        <li>Advertências contra a inveja, a embriaguez, a preguiça.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Outras Coleções de Provérbios (Capítulos 25-31)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Provérbios de Salomão Compilados por Ezequias (Capítulos 25-29):</strong>
+                    <ul>
+                        <li>Conselhos sobre a conduta na corte, a autodisciplina, a resposta aos tolos, a honestidade.</li>
+                        <li>A importância da justiça para a nação.</li>
+                    </ul>
+                </li>
+                <li><strong>B. As Palavras de Agur (Capítulo 30):</strong>
+                    <ul>
+                        <li>A humildade diante de Deus, a incompreensibilidade de Deus, a ganância, a conduta de certos tipos de pessoas.</li>
+                        <li>Os quatro 'demais' e os quatro 'pequenos, mas sábios'.</li>
+                    </ul>
+                </li>
+                <li><strong>C. As Palavras do Rei Lemuel e a Mulher Virtuosa (Capítulo 31):</strong>
+                    <ul>
+                        <li>Conselhos de uma mãe a seu filho rei sobre justiça, bebida e defesa dos oprimidos.</li>
+                        <li>A descrição da mulher virtuosa, um exemplo de sabedoria prática e diligência.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Provérbios ensina que a verdadeira sabedoria começa com o temor do Senhor. Ele não é um livro de promessas absolutas, mas de princípios gerais que, quando aplicados, levam a uma vida abençoada. Ele revela o caráter de Deus através de Seus atributos de sabedoria, justiça e ordem. Provérbios demonstra que a fé em Deus não é apenas uma crença teórica, mas uma forma prática de viver que impacta todas as áreas da existência humana, promovendo a retidão, a prosperidade e a paz.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridProverbios">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Provérbios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Provérbios, capítulo por capítulo, destacando os temas e gêneros.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Propósito dos provérbios; advertência contra o pecado; o convite da sabedoria.</li>
+                <li><strong>Capítulo 2:</strong> Os benefícios da sabedoria: proteção e discernimento.</li>
+                <li><strong>Capítulo 3:</strong> Exortações à confiança, humildade e generosidade.</li>
+                <li><strong>Capítulo 4:</strong> A sabedoria como o caminho da vida.</li>
+                <li><strong>Capítulo 5:</strong> Advertência contra a imoralidade sexual.</li>
+                <li><strong>Capítulo 6:</strong> Advertências contra a fiança, a preguiça e a contenda.</li>
+                <li><strong>Capítulo 7:</strong> O perigo da mulher adúltera.</li>
+                <li><strong>Capítulo 8:</strong> O elogio da sabedoria personificada.</li>
+                <li><strong>Capítulo 9:</strong> O banquete da sabedoria e o convite da loucura.</li>
+                <li><strong>Capítulo 10-15:</strong> Provérbios de Salomão: contrastes entre justos e ímpios.</li>
+                <li><strong>Capítulo 16-22:16:</strong> Provérbios de Salomão: sabedoria e loucura na vida diária.</li>
+                <li><strong>Capítulo 22:17-24:34:</strong> Ditos dos sábios.</li>
+                <li><strong>Capítulo 25-29:</strong> Provérbios de Salomão compilados por Ezequias.</li>
+                <li><strong>Capítulo 30:</strong> As palavras de Agur.</li>
+                <li><strong>Capítulo 31:</strong> As palavras do rei Lemuel; a mulher virtuosa.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Provérbios</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>O Temor do Senhor:</strong> O princípio fundamental e o começo de toda a sabedoria.</li>
+                <li><strong>Sabedoria vs. Loucura:</strong> O contraste constante entre a vida guiada pela verdade divina e a vida insensata.</li>
+                <li><strong>A Língua e a Fala:</strong> A importância de usar as palavras com sabedoria, evitando a fofoca, a mentira e a calúnia.</li>
+                <li><strong>Diligência vs. Preguiça:</strong> A valorização do trabalho árduo e as consequências da indolência.</li>
+                <li><strong>Relacionamentos:</strong> Conselhos sobre amizade, família, casamento e como lidar com diferentes tipos de pessoas.</li>
+                <li><strong>Justiça e Retidão:</strong> A importância de agir com integridade, honestidade e equidade.</li>
+                <li><strong>Riqueza e Pobreza:</strong> A perspectiva divina sobre o dinheiro, a generosidade e os perigos da ganância.</li>
+                <li><strong>Autodisciplina e Autocontrole:</strong> A necessidade de controlar as paixões, o temperamento e os impulsos.</li>
+                <li><strong>Criação de Filhos:</strong> A importância da disciplina, instrução e exemplo na educação dos filhos.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Provérbios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersProverbios">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Provérbios</h2>
+            <div id="quizContainerProverbios" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionProverbios"></p>
+                <div id="quizOptionsProverbios" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackProverbios" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionProverbios()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressProverbios"></span></p>
+                <p>Pontuação: <span id="quizScoreProverbios">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Provérbios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Provérbios.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="proverbiosChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalProverbios()">&times;</span>
+                <h3 id="modalCharacterNameProverbios" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionProverbios" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Provérbios",
+            "short_name": "Provérbios",
+            "description": "Explore o livro de Provérbios de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=PR",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=PR",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'proverbios-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionProverbios(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsProverbios();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksProverbios();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsProverbios(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexProverbios = 0; // Reinicia o quiz
+                scoreProverbios = 0;
+                wrongAnswersProverbios = 0;
+                document.getElementById('quizScoreProverbios').textContent = `Acertos: ${scoreProverbios}, Erros: ${wrongAnswersProverbios}`;
+                displayQuestionProverbios();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderProverbiosChart();
+            }
+        }
+
+        // Dados dos personagens para Provérbios
+        const characterDetailsProverbios = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "A fonte de toda a sabedoria e o objeto do 'temor do Senhor', que é o princípio do conhecimento."
+            },
+            "Salomão": {
+                name: "Salomão",
+                description: "O principal autor e compilador dos provérbios, conhecido por sua sabedoria concedida por Deus."
+            },
+            "A Sabedoria (personificada)": {
+                name: "A Sabedoria (personificada)",
+                description: "Representada como uma mulher que clama nas ruas, convidando os homens a seguir seus caminhos de retidão e vida."
+            },
+            "A Loucura (personificada)": {
+                name: "A Loucura (personificada)",
+                description: "Representada como uma mulher sedutora e barulhenta que convida os homens a um caminho de destruição e morte."
+            },
+            "O Filho/Jovem": {
+                name: "O Filho/Jovem",
+                description: "O destinatário principal das exortações e instruções de sabedoria, representando qualquer pessoa que busca aprender."
+            },
+            "O Justo": {
+                name: "O Justo",
+                description: "Aquele que vive de acordo com a sabedoria divina, age com retidão e é abençoado por Deus."
+            },
+            "O Ímpio/Tolo": {
+                name: "O Ímpio/Tolo",
+                description: "Aquele que rejeita a sabedoria, vive na insensatez e enfrenta as consequências negativas de suas escolhas."
+            },
+            "Agur": {
+                name: "Agur",
+                description: "Um dos autores dos provérbios, cujas palavras são encontradas no capítulo 30, com foco na humildade e na natureza de Deus."
+            },
+            "Rei Lemuel": {
+                name: "Rei Lemuel",
+                description: "O rei cujas palavras são registradas no capítulo 31, incluindo os conselhos de sua mãe e a descrição da mulher virtuosa."
+            },
+            "A Mulher Virtuosa": {
+                name: "A Mulher Virtuosa",
+                description: "Um ideal de sabedoria prática, diligência, força e bondade, descrita em Provérbios 31."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalProverbios(characterName) {
+            const details = characterDetailsProverbios[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameProverbios').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionProverbios').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalProverbios() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsProverbios() {
+            const grid = document.getElementById('characterGridProverbios');
+            grid.innerHTML = '';
+            for (const key in characterDetailsProverbios) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalProverbios(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksProverbios() {
+            const chaptersDiv = document.getElementById('chaptersProverbios');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 31; i++) { // Provérbios tem 31 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/pv/${i}`; // Link para a Bíblia Online, Provérbios
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Provérbios (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsProverbios = [
+            { question: "Qual é o princípio do conhecimento, segundo Provérbios 1:7?", options: ["A riqueza", "O temor do Senhor", "A inteligência", "A experiência"], answer: "O temor do Senhor", reference: "Provérbios 1:7" },
+            { question: "Quem é o principal autor do livro de Provérbios?", options: ["Moisés", "Davi", "Salomão", "Agur"], answer: "Salomão", reference: "Provérbios 1:1" },
+            { question: "O que a Sabedoria personificada faz em Provérbios 1 e 8?", options: ["Vende tesouros", "Clama nas ruas", "Constrói um templo", "Escreve livros"], answer: "Clama nas ruas", reference: "Provérbios 1:20, 8:1" },
+            { question: "Qual é o contraste constante no livro de Provérbios?", options: ["Dia e noite", "Rico e pobre", "Sabedoria e loucura", "Guerra e paz"], answer: "Sabedoria e loucura", reference: "Tema central" },
+            { question: "O que o preguiçoso deseja, mas não tem, segundo Provérbios 13:4?", options: ["Riqueza", "Conhecimento", "Vida", "Nada"], answer: "Nada", reference: "Provérbios 13:4" },
+            { question: "Qual é o resultado da língua mentirosa para o Senhor?", options: ["Alegria", "Abominação", "Indiferença", "Aprovação"], answer: "Abominação", reference: "Provérbios 12:22" },
+            { question: "O que acontece com a pessoa que se recusa a ouvir a instrução?", options: ["Torna-se sábia", "Cai em desgraça", "Prospera", "É elogiada"], answer: "Cai em desgraça", reference: "Provérbios 13:18" },
+            { question: "Qual é a característica da mulher virtuosa em Provérbios 31?", options: ["Preguiçosa e fofoqueira", "Diligente e trabalhadora", "Vaidosa e egoísta", "Tímida e reclusa"], answer: "Diligente e trabalhadora", reference: "Provérbios 31:10-31" },
+            { question: "Quem é melhor que o valente, segundo Provérbios 16:32?", options: ["O rico", "O que domina o seu espírito", "O sábio", "O que tem muitos amigos"], answer: "O que domina o seu espírito", reference: "Provérbios 16:32" },
+            { question: "O que é melhor do que muito ouro e prata, segundo Provérbios 22:1?", options: ["Um bom nome", "Um grande exército", "Uma casa grande", "Muitos filhos"], answer: "Um bom nome", reference: "Provérbios 22:1" },
+            { question: "Qual é o destino do que ama o prazer?", options: ["Será rico", "Será pobre", "Será famoso", "Será feliz"], answer: "Será pobre", reference: "Provérbios 21:17" },
+            { question: "O que a vara e a repreensão fazem, segundo Provérbios 29:15?", options: ["Trazem tristeza", "Dão sabedoria", "Causam rebeldia", "Afastam os filhos"], answer: "Dão sabedoria", reference: "Provérbios 29:15" },
+            { question: "Qual é a resposta branda, segundo Provérbios 15:1?", options: ["Afastar a ira", "Aumentar a contenda", "Gerar discórdia", "Fazer calar"], answer: "Afastar a ira", reference: "Provérbios 15:1" },
+            { question: "O que o homem que se apressa em enriquecer não ficará sem?", options: ["Amigos", "Fama", "Culpa", "Dificuldades"], answer: "Culpa", reference: "Provérbios 28:20" },
+            { question: "Qual é o conselho de Provérbios 3:5-6 sobre confiar em Deus?", options: ["Confie em seu próprio entendimento", "Confie em seus amigos", "Confie no Senhor de todo o seu coração", "Confie em sua riqueza"], answer: "Confie no Senhor de todo o seu coração", reference: "Provérbios 3:5-6" },
+            { question: "Quem são os autores dos provérbios, além de Salomão?", options: ["Davi e Moisés", "Agur e o rei Lemuel", "Esdras e Neemias", "Jó e seus amigos"], answer: "Agur e o rei Lemuel", reference: "Introdução ao Livro de Provérbios" },
+            { question: "O que a Sabedoria constrói para si mesma em Provérbios 9:1?", options: ["Uma torre", "Uma casa com sete colunas", "Um jardim", "Uma cidade"], answer: "Uma casa com sete colunas", reference: "Provérbios 9:1" },
+            { question: "Qual é o destino do que anda com os sábios?", options: ["Será tolo", "Será sábio", "Será rico", "Será pobre"], answer: "Será sábio", reference: "Provérbios 13:20" },
+            { question: "O que a mão diligente faz, segundo Provérbios 10:4?", options: ["Empobrece", "Enriquece", "Cansa", "Adormece"], answer: "Enriquece", reference: "Provérbios 10:4" },
+            { question: "Qual é o conselho sobre a resposta ao tolo em Provérbios 26:4-5?", options: ["Responda-lhe para que não se julgue sábio", "Não o responda para que não se julgue sábio", "Responda-lhe segundo a sua loucura", "Não o responda segundo a sua loucura"], answer: "Não o responda para que não se julgue sábio", reference: "Provérbios 26:4-5" },
+            { question: "O que é melhor do que um banquete de carne com contenda?", options: ["Um banquete de legumes com paz", "Um banquete de vinho", "Um banquete de pão", "Um banquete de frutas"], answer: "Um banquete de legumes com paz", reference: "Provérbios 15:17" },
+            { question: "Qual é o conselho sobre a bebida para os reis em Provérbios 31:4-5?", options: ["Bebam livremente", "Não bebam vinho nem bebida forte", "Bebam com moderação", "Bebam apenas em festas"], answer: "Não bebam vinho nem bebida forte", reference: "Provérbios 31:4-5" },
+            { question: "O que a mulher virtuosa faz com suas mãos?", options: ["Gasta dinheiro", "Trabalha com diligência", "Descansa o dia todo", "Fofoca"], answer: "Trabalha com diligência", reference: "Provérbios 31:13" },
+            { question: "Qual é o provérbio sobre o homem que cava uma cova?", options: ["Cai nela", "Encontra tesouros", "Construirá uma casa", "Cansará"], answer: "Cai nela", reference: "Provérbios 26:27" },
+            { question: "O que a justiça faz a uma nação?", options: ["A empobrece", "A exalta", "A divide", "A destrói"], answer: "A exalta", reference: "Provérbios 14:34" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsProverbios = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsProverbios.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsProverbios = allQuizQuestionsProverbios.concat(uniqueQuizQuestionsProverbios);
+        }
+        allQuizQuestionsProverbios = allQuizQuestionsProverbios.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsProverbios = [];
+        let currentQuizIndexProverbios = 0;
+        let scoreProverbios = 0;
+        let wrongAnswersProverbios = 0;
+        let proverbiosChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsProverbios() {
+            shuffledQuizQuestionsProverbios = [...allQuizQuestionsProverbios]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsProverbios);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressProverbios() {
+            const progressElement = document.getElementById('quizProgressProverbios');
+            progressElement.textContent = `${currentQuizIndexProverbios + 1}/${shuffledQuizQuestionsProverbios.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionProverbios() {
+            if (currentQuizIndexProverbios >= shuffledQuizQuestionsProverbios.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionProverbios').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsProverbios').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreProverbios}, Erros: ${wrongAnswersProverbios}</p>`;
+                document.getElementById('quizFeedbackProverbios').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsProverbios[currentQuizIndexProverbios];
+            document.getElementById('quizQuestionProverbios').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsProverbios');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerProverbios(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackProverbios').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressProverbios();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerProverbios(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackProverbios');
+            const optionsButtons = document.querySelectorAll('#quizOptionsProverbios button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreProverbios++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersProverbios++;
+            }
+            document.getElementById('quizScoreProverbios').textContent = `Acertos: ${scoreProverbios}, Erros: ${wrongAnswersProverbios}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionProverbios() {
+            currentQuizIndexProverbios++;
+            displayQuestionProverbios();
+        }
+
+        // Dados para o gráfico de temas de Provérbios
+        const proverbiosChartData = {
+            labels: ['O Temor do Senhor', 'Sabedoria vs. Loucura', 'A Língua e a Fala', 'Diligência vs. Preguiça', 'Relacionamentos', 'Justiça e Retidão', 'Riqueza e Pobreza', 'Autodisciplina', 'Criação de Filhos'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [20, 18, 15, 12, 10, 8, 7, 6, 4], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(201, 203, 207, 0.6)',
+                    'rgba(59, 130, 246, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(201, 203, 207, 1)',
+                    'rgba(59, 130, 246, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const proverbiosChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Provérbios',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderProverbiosChart() {
+            const ctx = document.getElementById('proverbiosChart').getContext('2d');
+            if (proverbiosChartInstance) {
+                proverbiosChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            proverbiosChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: proverbiosChartData,
+                options: proverbiosChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

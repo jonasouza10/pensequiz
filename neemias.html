@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Neemias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Neemias Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Neemias</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionNeemias('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionNeemias('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionNeemias('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionNeemias('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionNeemias('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionNeemias('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionNeemias('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionNeemias('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionNeemias('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Neemias</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a inspiradora história de Neemias, o copeiro do rei, que liderou a reconstrução dos muros de Jerusalém em meio a grande oposição. Acompanhe a restauração física e espiritual da cidade e do povo, a dedicação dos muros e as reformas sociais e religiosas implementadas. Entenda a importância da oração, liderança e perseverança. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Neemias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Neemias é um dos livros históricos do Antigo Testamento, narrando a terceira e última grande onda de retorno dos judeus do exílio babilônico para Jerusalém. Escrito em grande parte como um relato em primeira pessoa de Neemias, o livro se concentra na reconstrução dos muros de Jerusalém, um projeto vital para a segurança e a identidade da comunidade judaica, que havia retornado sob Zorobabel e Esdras. A narrativa abrange um período de aproximadamente 12 a 15 anos, a partir do 20º ano do reinado de Artaxerxes I (c. 445 a.C.).</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro de Neemias destaca a liderança piedosa e determinada de Neemias, que, apesar de ser copeiro do rei persa, sente o fardo da condição de Jerusalém e se dispõe a agir. Ele enfrenta intensa oposição externa de inimigos como Sambalate e Tobias, e desafios internos, como a exploração dos pobres e a negligência das leis religiosas. Através de oração fervorosa, planejamento estratégico e uma fé inabalável, Neemias consegue mobilizar o povo para completar a obra dos muros em apenas 52 dias.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Além da reconstrução física, Neemias também se dedica à restauração espiritual e social da comunidade, trabalhando em conjunto com Esdras. Ele implementa reformas contra a usura, os casamentos mistos e a profanação do sábado, reafirmando a importância da Lei de Deus e da adoração correta. Neemias é um exemplo de liderança serva, coragem e devoção a Deus e ao Seu povo.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Parte 1: A Reconstrução dos Muros (Capítulos 1-7).</strong> A oração de Neemias, sua ida a Jerusalém com a permissão do rei, a inspeção dos muros, a mobilização do povo para a obra, a intensa oposição e as estratégias de defesa, e a conclusão dos muros.</li>
+                <li><strong>Parte 2: A Restauração Espiritual e Social (Capítulos 8-13).</strong> A leitura da Lei por Esdras, a celebração da Festa dos Tabernáculos, a oração de confissão e a renovação da aliança, a repovoação de Jerusalém, a dedicação dos muros e as reformas finais de Neemias contra a usura, os casamentos mistos e a profanação do sábado.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Neemias é um testemunho poderoso da providência de Deus, da importância da liderança e da capacidade de um povo em restauração quando unido em fé e trabalho.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Neemias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Neemias narra a reconstrução dos muros de Jerusalém e a restauração espiritual e social do povo, liderada por Neemias e Esdras.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Reconstrução dos Muros (Capítulos 1-7)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Oração e o Chamado de Neemias (Capítulo 1):</strong>
+                    <ul>
+                        <li>Neemias ouve sobre a condição arruinada de Jerusalém e ora a Deus.</li>
+                        <li>Sua angústia e confissão dos pecados de Israel.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Neemias em Jerusalém (Capítulo 2):</strong>
+                    <ul>
+                        <li>Neemias pede permissão ao rei Artaxerxes para ir a Jerusalém.</li>
+                        <li>Sua chegada e inspeção secreta dos muros.</li>
+                        <li>Apresenta seu plano aos líderes e ao povo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Construção dos Muros e a Oposição (Capítulos 3-4):</strong>
+                    <ul>
+                        <li>Organização da obra, com cada família reconstruindo uma seção do muro.</li>
+                        <li>A oposição de Sambalate, Tobias e Gesém, que zombam e conspiram.</li>
+                        <li>Neemias ora e implementa medidas de segurança (trabalhadores com armas).</li>
+                    </ul>
+                </li>
+                <li><strong>D. Problemas Internos e Reformas (Capítulo 5):</strong>
+                    <ul>
+                        <li>A exploração dos pobres por seus próprios irmãos judeus (usura).</li>
+                        <li>Neemias repreende os nobres e os oficiais, exigindo a restituição e a abolição da usura.</li>
+                        <li>Seu próprio exemplo de liderança desinteressada.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Conspirações Contra Neemias e Conclusão da Obra (Capítulos 6-7):</strong>
+                    <ul>
+                        <li>Novas tentativas de Sambalate e Tobias de enganar e intimidar Neemias.</li>
+                        <li>Neemias se recusa a parar a obra.</li>
+                        <li>O muro é concluído em 52 dias, para o espanto dos inimigos.</li>
+                        <li>Registro dos que retornaram do exílio (repetição de Esdras 2).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Restauração Espiritual e Social (Capítulos 8-13)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Leitura da Lei e a Celebração (Capítulo 8):</strong>
+                    <ul>
+                        <li>Esdras lê a Lei para o povo reunido, que a ouve atentamente.</li>
+                        <li>A celebração da Festa dos Tabernáculos com grande alegria.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Confissão e Renovação da Aliança (Capítulo 9-10):</strong>
+                    <ul>
+                        <li>Oração de confissão dos pecados de Israel, relembrando a fidelidade de Deus.</li>
+                        <li>Os líderes e o povo fazem uma aliança solene para obedecer à Lei de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Repovoamento de Jerusalém e Dedicação dos Muros (Capítulos 11-12):</strong>
+                    <ul>
+                        <li>O povo se estabelece em Jerusalém e nas outras cidades.</li>
+                        <li>A dedicação dos muros com procissões, cânticos e grande alegria.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Reformas Finais de Neemias (Capítulo 13):</strong>
+                    <ul>
+                        <li>Neemias retorna à Pérsia e depois volta a Jerusalém, encontrando novas irregularidades.</li>
+                        <li>Expulsa Tobias do Templo, restaura as porções dos levitas, proíbe a profanação do sábado e os casamentos mistos.</li>
+                        <li>Sua oração final por lembrança e favor de Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O livro de Neemias é um testemunho da providência e fidelidade de Deus em restaurar Seu povo. Ele demonstra o poder da oração e da liderança piedosa e corajosa. A reconstrução dos muros simboliza a restauração da identidade e segurança do povo de Deus. O livro enfatiza a importância da Lei, da adoração e da pureza da comunidade como fundamentos para uma vida de fidelidade a Deus, mesmo em meio a desafios e oposição.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridNeemias">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Neemias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Neemias, capítulo por capítulo, destacando os eventos e o desenvolvimento da história.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Reconstrução dos Muros (Capítulos 1-7)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Notícias de Jerusalém; oração de Neemias.</li>
+                <li><strong>Capítulo 2:</strong> Neemias pede ao rei para ir a Jerusalém; inspeção dos muros.</li>
+                <li><strong>Capítulo 3:</strong> A reconstrução dos muros por seções.</li>
+                <li><strong>Capítulo 4:</strong> Oposição de Sambalate e Tobias; defesa e oração.</li>
+                <li><strong>Capítulo 5:</strong> Problemas sociais; Neemias combate a usura.</li>
+                <li><strong>Capítulo 6:</strong> Conspirações contra Neemias; o muro é concluído.</li>
+                <li><strong>Capítulo 7:</strong> Registro dos que retornaram do exílio.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Restauração Espiritual e Social (Capítulos 8-13)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 8:</strong> Esdras lê a Lei; celebração da Festa dos Tabernáculos.</li>
+                <li><strong>Capítulo 9:</strong> Oração de confissão e louvor.</li>
+                <li><strong>Capítulo 10:</strong> Renovação da aliança.</li>
+                <li><strong>Capítulo 11:</strong> Repovoamento de Jerusalém.</li>
+                <li><strong>Capítulo 12:</strong> Dedicação dos muros.</li>
+                <li><strong>Capítulo 13:</strong> Reformas finais de Neemias.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Neemias</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Liderança Piedosa:</strong> O exemplo de Neemias como líder que ora, planeja, age e confia em Deus.</li>
+                <li><strong>Reconstrução e Restauração:</strong> A edificação física dos muros e a renovação espiritual e social do povo.</li>
+                <li><strong>Oposição e Perseverança:</strong> Os desafios enfrentados por inimigos externos e problemas internos, e a resiliência do povo.</li>
+                <li><strong>Oração:</strong> A centralidade da oração na vida e nas ações de Neemias.</li>
+                <li><strong>A Lei de Deus:</strong> A importância da Palavra de Deus como guia para a vida e a reforma da comunidade.</li>
+                <li><strong>Fidelidade de Deus:</strong> Deus cumprindo Suas promessas de restaurar Seu povo e protegê-lo.</li>
+                <li><strong>Unidade no Trabalho:</strong> O povo trabalhando junto para alcançar um objetivo comum, apesar das dificuldades.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Neemias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersNeemias">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Neemias</h2>
+            <div id="quizContainerNeemias" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionNeemias"></p>
+                <div id="quizOptionsNeemias" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackNeemias" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionNeemias()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressNeemias"></span></p>
+                <p>Pontuação: <span id="quizScoreNeemias">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Neemias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Neemias.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="neemiasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalNeemias()">&times;</span>
+                <h3 id="modalCharacterNameNeemias" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionNeemias" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Neemias",
+            "short_name": "Neemias",
+            "description": "Explore o livro de Neemias de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=NE",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=NE",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'neemias-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionNeemias(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsNeemias();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksNeemias();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsNeemias(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexNeemias = 0; // Reinicia o quiz
+                scoreNeemias = 0;
+                wrongAnswersNeemias = 0;
+                document.getElementById('quizScoreNeemias').textContent = `Acertos: ${scoreNeemias}, Erros: ${wrongAnswersNeemias}`;
+                displayQuestionNeemias();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderNeemiasChart();
+            }
+        }
+
+        // Dados dos personagens para Neemias
+        const characterDetailsNeemias = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus soberano que ouve as orações de Neemias, provê os meios para a reconstrução e protege Seu povo contra os inimigos."
+            },
+            "Neemias": {
+                name: "Neemias",
+                description: "O personagem central do livro, copeiro do rei Artaxerxes, que se torna governador de Jerusalém e lidera a reconstrução dos muros e reformas sociais e religiosas."
+            },
+            "Artaxerxes I": {
+                name: "Artaxerxes I",
+                description: "Rei da Pérsia que concedeu a Neemias permissão para ir a Jerusalém e forneceu recursos para a reconstrução dos muros."
+            },
+            "Sambalate": {
+                name: "Sambalate",
+                description: "Governador de Samaria e um dos principais oponentes de Neemias, que tentou impedir a reconstrução dos muros por meio de zombaria, conspiração e intimidação."
+            },
+            "Tobias": {
+                name: "Tobias",
+                description: "Um oficial amonita e outro inimigo proeminente de Neemias, que se aliou a Sambalate para se opor à obra de reconstrução."
+            },
+            "Gesém, o Árabe": {
+                name: "Gesém, o Árabe",
+                description: "Um terceiro adversário de Neemias, que se juntou a Sambalate e Tobias nas tentativas de frustrar a reconstrução dos muros."
+            },
+            "Esdras": {
+                name: "Esdras",
+                description: "Sacerdote e escriba que trabalhou com Neemias na restauração espiritual do povo, lendo a Lei e liderando a renovação da aliança."
+            },
+            "Hanani": {
+                name: "Hanani",
+                description: "Irmão de Neemias (ou parente próximo) que trouxe notícias sobre a condição de Jerusalém, o que motivou a oração e a ação de Neemias."
+            },
+            "Noadias": {
+                name: "Noadias",
+                description: "Uma profetisa que tentou intimidar Neemias e fazê-lo pecar, mencionada entre os que tentaram assustá-lo."
+            },
+            "Semaias": {
+                name: "Semaias",
+                description: "Um falso profeta que tentou enganar Neemias, aconselhando-o a se esconder no Templo para salvar sua vida, o que seria um pecado."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalNeemias(characterName) {
+            const details = characterDetailsNeemias[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameNeemias').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionNeemias').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalNeemias() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsNeemias() {
+            const grid = document.getElementById('characterGridNeemias');
+            grid.innerHTML = '';
+            for (const key in characterDetailsNeemias) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalNeemias(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksNeemias() {
+            const chaptersDiv = document.getElementById('chaptersNeemias');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 13; i++) { // Neemias tem 13 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/nee/${i}`; // Link para a Bíblia Online, Neemias
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Neemias (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsNeemias = [
+            { question: "Qual era a posição de Neemias na corte do rei Artaxerxes antes de ir para Jerusalém?", options: ["General", "Copeiro", "Conselheiro", "Escriba"], answer: "Copeiro", reference: "Neemias 1:11" },
+            { question: "Qual foi a principal tarefa que Neemias liderou em Jerusalém?", options: ["Reconstrução do Templo", "Organização do sacerdócio", "Reconstrução dos muros da cidade", "Estabelecimento de um novo rei"], answer: "Reconstrução dos muros da cidade", reference: "Neemias 2:17" },
+            { question: "Quem eram os principais oponentes de Neemias na reconstrução dos muros?", options: ["Dario e Ciro", "Faraó e Haman", "Sambalate, Tobias e Gesém", "Acabe e Jezabel"], answer: "Sambalate, Tobias e Gesém", reference: "Neemias 2:10, 19" },
+            { question: "Em quantos dias os muros de Jerusalém foram concluídos?", options: ["7 dias", "40 dias", "52 dias", "90 dias"], answer: "52 dias", reference: "Neemias 6:15" },
+            { question: "Quem leu a Lei para o povo reunido na praça pública?", options: ["Neemias", "Zorobabel", "Esdras", "Jesua"], answer: "Esdras", reference: "Neemias 8:1-3" },
+            { question: "Qual festa foi celebrada com grande alegria após a leitura da Lei?", options: ["Páscoa", "Pentecostes", "Festa dos Tabernáculos", "Festa das Trombetas"], answer: "Festa dos Tabernáculos", reference: "Neemias 8:13-18" },
+            { question: "Qual foi um dos problemas internos que Neemias teve que resolver entre o povo?", options: ["Idolatria", "Casamentos mistos", "Usura e exploração dos pobres", "Rebelião contra o governo persa"], answer: "Usura e exploração dos pobres", reference: "Neemias 5:1-13" },
+            { question: "O que Neemias fez para proteger os trabalhadores da oposição?", options: ["Contratou um exército", "Construiu torres de guarda", "Fez com que trabalhassem com uma mão na obra e a outra na arma", "Pediu ajuda ao rei"], answer: "Fez com que trabalhassem com uma mão na obra e a outra na arma", reference: "Neemias 4:16-18" },
+            { question: "Qual era a reação dos inimigos quando os muros foram concluídos?", options: ["Eles se alegraram", "Eles se entristeceram e perderam a confiança", "Eles tentaram derrubar os muros", "Eles se converteram a Deus"], answer: "Eles se entristeceram e perderam a confiança", reference: "Neemias 6:16" },
+            { question: "Após a reconstrução dos muros, o que o povo fez para renovar sua aliança com Deus?", options: ["Ofereceram sacrifícios", "Fizeram uma oração de confissão e assinaram um pacto", "Construíram um novo templo", "Foram para o exílio novamente"], answer: "Fizeram uma oração de confissão e assinaram um pacto", reference: "Neemias 9:1-10:39" },
+            { question: "Quem era Hanani, que trouxe notícias a Neemias sobre Jerusalém?", options: ["Um profeta", "Um general", "Um irmão (ou parente próximo) de Neemias", "Um mensageiro do rei"], answer: "Um irmão (ou parente próximo) de Neemias", reference: "Neemias 1:2" },
+            { question: "Qual foi a primeira ação de Neemias ao ouvir sobre a condição de Jerusalém?", options: ["Ele viajou imediatamente", "Ele escreveu uma carta ao rei", "Ele chorou, lamentou, jejuou e orou", "Ele reuniu um exército"], answer: "Ele chorou, lamentou, jejuou e orou", reference: "Neemias 1:4" },
+            { question: "O que Neemias fez com Tobias, que havia se estabelecido em uma sala do Templo?", options: ["Ele o perdoou", "Ele o expulsou e jogou seus bens para fora", "Ele o fez seu conselheiro", "Ele o ignorou"], answer: "Ele o expulsou e jogou seus bens para fora", reference: "Neemias 13:4-9" },
+            { question: "Qual foi uma das reformas de Neemias para restaurar a santidade do sábado?", options: ["Proibiu o trabalho em geral", "Proibiu a compra e venda no sábado", "Ordenou que todos ficassem em casa", "Aumentou os sacrifícios no sábado"], answer: "Proibiu a compra e venda no sábado", reference: "Neemias 13:15-22" },
+            { question: "Por que Neemias se opôs aos casamentos mistos?", options: ["Por razões políticas", "Para manter a pureza racial", "Para evitar a assimilação religiosa e a idolatria", "Para aumentar a população judaica"], answer: "Para evitar a assimilação religiosa e a idolatria", reference: "Neemias 13:23-27" },
+            { question: "Qual era o título de Neemias em Jerusalém?", options: ["Rei", "Sacerdote", "Governador", "Profeta"], answer: "Governador", reference: "Neemias 5:14" },
+            { question: "O que Neemias fez com os falsos profetas que tentaram intimidá-lo?", options: ["Ele os prendeu", "Ele os executou", "Ele orou e os ignorou", "Ele os contratou como conselheiros"], answer: "Ele orou e os ignorou", reference: "Neemias 6:10-14" },
+            { question: "Qual foi a reação do povo quando Esdras leu a Lei?", options: ["Eles ficaram entediados", "Eles riram e zombaram", "Eles choraram e se arrependeram", "Eles se revoltaram"], answer: "Eles choraram e se arrependeram", reference: "Neemias 8:9" },
+            { question: "O que Neemias pediu a Deus em suas orações ao longo do livro?", options: ["Riqueza e poder", "Vingança contra seus inimigos", "Que Deus se lembrasse dele para o bem", "Que Deus destruísse Jerusalém"], answer: "Que Deus se lembrasse dele para o bem", reference: "Neemias 5:19; 13:14, 22, 31" },
+            { question: "Qual o nome do portão de Jerusalém que foi reconstruído primeiro?", options: ["Portão do Peixe", "Portão do Vale", "Portão das Ovelhas", "Portão da Fonte"], answer: "Portão das Ovelhas", reference: "Neemias 3:1" },
+            { question: "Qual o principal tema do livro de Neemias?", options: ["A história dos reis de Israel", "A sabedoria de Salomão", "A reconstrução física e espiritual de Jerusalém", "As profecias sobre o futuro"], answer: "A reconstrução física e espiritual de Jerusalém", reference: "Introdução do livro" },
+            { question: "O que Neemias fez para garantir que os levitas recebessem suas porções?", options: ["Ele as pagou do próprio bolso", "Ele repreendeu o povo e organizou a arrecadação", "Ele pediu ao rei para pagar", "Ele as roubou do Templo"], answer: "Ele repreendeu o povo e organizou a arrecadação", reference: "Neemias 13:10-14" },
+            { question: "Qual foi a duração do governo de Neemias como governador de Judá?", options: ["7 anos", "10 anos", "12 anos", "15 anos"], answer: "12 anos", reference: "Neemias 5:14" },
+            { question: "O que significa o nome Neemias?", options: ["Deus é meu rei", "Consolado por Deus", "Jeová conforta", "Jeová é minha força"], answer: "Jeová conforta", reference: "Informação contextual" },
+            { question: "Qual a importância da oração na vida de Neemias?", options: ["Era apenas um ritual", "Era a base de suas ações e decisões", "Ele orava apenas em momentos de desespero", "Ele não orava muito"], answer: "Era a base de suas ações e decisões", reference: "Vários capítulos, ex: Neemias 1, 2, 4, 6" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsNeemias = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsNeemias.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsNeemias = allQuizQuestionsNeemias.concat(uniqueQuizQuestionsNeemias);
+        }
+        allQuizQuestionsNeemias = allQuizQuestionsNeemias.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsNeemias = [];
+        let currentQuizIndexNeemias = 0;
+        let scoreNeemias = 0;
+        let wrongAnswersNeemias = 0;
+        let neemiasChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsNeemias() {
+            shuffledQuizQuestionsNeemias = [...allQuizQuestionsNeemias]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsNeemias);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressNeemias() {
+            const progressElement = document.getElementById('quizProgressNeemias');
+            progressElement.textContent = `${currentQuizIndexNeemias + 1}/${shuffledQuizQuestionsNeemias.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionNeemias() {
+            if (currentQuizIndexNeemias >= shuffledQuizQuestionsNeemias.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionNeemias').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsNeemias').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreNeemias}, Erros: ${wrongAnswersNeemias}</p>`;
+                document.getElementById('quizFeedbackNeemias').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsNeemias[currentQuizIndexNeemias];
+            document.getElementById('quizQuestionNeemias').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsNeemias');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerNeemias(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackNeemias').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressNeemias();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerNeemias(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackNeemias');
+            const optionsButtons = document.querySelectorAll('#quizOptionsNeemias button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreNeemias++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersNeemias++;
+            }
+            document.getElementById('quizScoreNeemias').textContent = `Acertos: ${scoreNeemias}, Erros: ${wrongAnswersNeemias}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionNeemias() {
+            currentQuizIndexNeemias++;
+            displayQuestionNeemias();
+        }
+
+        // Dados para o gráfico de temas de Neemias
+        const neemiasChartData = {
+            labels: ['Liderança Piedosa', 'Reconstrução', 'Oposição/Perseverança', 'Oração', 'Lei de Deus', 'Fidelidade de Deus', 'Unidade'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 15, 15, 10, 10, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const neemiasChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Neemias',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderNeemiasChart() {
+            const ctx = document.getElementById('neemiasChart').getContext('2d');
+            if (neemiasChartInstance) {
+                neemiasChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            neemiasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: neemiasChartData,
+                options: neemiasChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

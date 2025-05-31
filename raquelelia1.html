@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Raquel e Lia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #14b8a6; /* Teal border for Rachel and Leah game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #0d9488; /* Teal for Rachel and Leah game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #0f766e; /* Darker teal on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #0d9488;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #0d9488;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #0f766e;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-teal-700 mb-4">A História de Raquel e Lia 💖</h1>
+        <p class="text-gray-700 mb-6">
+            Acompanhe a história das irmãs Raquel e Lia, suas vidas, amores e a formação das doze tribos de Israel.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Raquel e Lia!</p>
+            <p class="text-gray-700 mt-6">A história de Raquel e Lia nos ensina sobre o amor, a paciência e a providência de Deus na formação de uma nação.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: Jacó Chega em Harã',
+                location: 'Harã',
+                objective: 'Descobrir o primeiro encontro de Jacó com Raquel.',
+                clues: [
+                    'Jacó fugiu de Esaú e viajou para Harã.',
+                    'Ele encontrou Raquel perto de um poço, apascentando as ovelhas de seu pai.'
+                ],
+                keyVerse: 'Gênesis 29:1-10',
+                enigma: 'Quem Jacó encontrou primeiro perto do poço em Harã?',
+                options: ['Raquel', 'Lia', 'Labão'],
+                correctAnswer: 'Raquel'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: O Amor de Jacó por Raquel',
+                location: 'Harã',
+                objective: 'Entender a profundidade do amor de Jacó por Raquel.',
+                clues: [
+                    'Raquel era formosa de porte e de semblante.',
+                    'Jacó a amou e se ofereceu para trabalhar por ela.'
+                ],
+                keyVerse: 'Gênesis 29:17-18',
+                enigma: 'Por quantos anos Jacó se ofereceu para trabalhar por Raquel inicialmente?',
+                options: ['Sete anos', 'Catorze anos', 'Vinte anos'],
+                correctAnswer: 'Sete anos'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: O Engano de Labão',
+                location: 'Harã',
+                objective: 'Aprender sobre a astúcia de Labão no casamento de Jacó.',
+                clues: [
+                    'Após os sete anos, Jacó pediu Raquel em casamento.',
+                    'Labão deu Lia, a filha mais velha, a Jacó na noite de núpcias.'
+                ],
+                keyVerse: 'Gênesis 29:21-25',
+                enigma: 'Quem Labão deu a Jacó em casamento na primeira vez, enganando-o?',
+                options: ['Lia', 'Raquel', 'Bila'],
+                correctAnswer: 'Lia'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: O Casamento com Lia',
+                location: 'Harã',
+                objective: 'Compreender as circunstâncias do primeiro casamento de Jacó.',
+                clues: [
+                    'Lia tinha olhos tenros, mas Raquel era formosa.',
+                    'Jacó só percebeu o engano pela manhã.'
+                ],
+                keyVerse: 'Gênesis 29:25-26',
+                enigma: 'Qual era a característica física mais notável de Lia, comparada a Raquel?',
+                options: ['Olhos tenros', 'Cabelos longos', 'Pele clara'],
+                correctAnswer: 'Olhos tenros'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: O Segundo Casamento por Raquel',
+                location: 'Harã',
+                objective: 'Observar a insistência de Jacó por Raquel e o acordo com Labão.',
+                clues: [
+                    'Jacó confrontou Labão sobre o engano.',
+                    'Labão concordou em dar Raquel a Jacó após a semana de Lia, por mais sete anos de trabalho.'
+                ],
+                keyVerse: 'Gênesis 29:27-30',
+                enigma: 'Por quantos anos adicionais Jacó trabalhou por Raquel?',
+                options: ['Sete anos', 'Três anos', 'Cinco anos'],
+                correctAnswer: 'Sete anos'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: Os Primeiros Filhos de Lia',
+                location: 'Harã',
+                objective: 'Conhecer os primeiros filhos que Lia teve com Jacó.',
+                clues: [
+                    'Deus viu que Lia era desprezada e abriu sua madre.',
+                    'Ela deu à luz Rúben, Simeão, Levi e Judá.'
+                ],
+                keyVerse: 'Gênesis 29:31-35',
+                enigma: 'Qual foi o primeiro filho de Lia?',
+                options: ['Rúben', 'Simeão', 'Levi'],
+                correctAnswer: 'Rúben'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: A Esterilidade de Raquel',
+                location: 'Harã',
+                objective: 'Entender a angústia de Raquel por não ter filhos.',
+                clues: [
+                    'Raquel era estéril e invejava sua irmã.',
+                    'Ela clamou a Jacó: "Dá-me filhos, senão morro!".'
+                ],
+                keyVerse: 'Gênesis 30:1',
+                enigma: 'Qual era o principal sofrimento de Raquel?',
+                options: ['Esterilidade', 'Doença', 'Solidão'],
+                correctAnswer: 'Esterilidade'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: Bila e Zilpa',
+                location: 'Harã',
+                objective: 'Aprender sobre as servas dadas a Jacó para ter filhos.',
+                clues: [
+                    'Raquel deu sua serva Bila a Jacó para ter filhos por ela.',
+                    'Lia, vendo que parara de ter filhos, deu sua serva Zilpa a Jacó.'
+                ],
+                keyVerse: 'Gênesis 30:3-4, 9-10',
+                enigma: 'Qual era o nome da serva de Raquel?',
+                options: ['Bila', 'Zilpa', 'Hagar'],
+                correctAnswer: 'Bila'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: Os Filhos das Servas',
+                location: 'Harã',
+                objective: 'Conhecer os filhos nascidos das servas Bila e Zilpa.',
+                clues: [
+                    'Bila deu à luz Dã e Naftali.',
+                    'Zilpa deu à luz Gade e Aser.'
+                ],
+                keyVerse: 'Gênesis 30:6-8, 11-13',
+                enigma: 'Qual filho nasceu de Bila e foi chamado de "justiça" por Raquel?',
+                options: ['Dã', 'Naftali', 'Gade'],
+                correctAnswer: 'Dã'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: Lia e as Mandrágoras',
+                location: 'Harã',
+                objective: 'Entender a disputa pelas mandrágoras e seus efeitos.',
+                clues: [
+                    'Rúben encontrou mandrágoras no campo e as trouxe para Lia.',
+                    'Raquel pediu as mandrágoras a Lia em troca de uma noite com Jacó.'
+                ],
+                keyVerse: 'Gênesis 30:14-16',
+                enigma: 'O que Rúben encontrou no campo que causou uma disputa entre as irmãs?',
+                options: ['Mandrágoras', 'Frutas', 'Flores'],
+                correctAnswer: 'Mandrágoras'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: Mais Filhos para Lia',
+                location: 'Harã',
+                objective: 'Aprender sobre os últimos filhos de Lia.',
+                clues: [
+                    'Deus ouviu Lia, e ela engravidou novamente.',
+                    'Ela deu à luz Issacar, Zebulom e Diná.'
+                ],
+                keyVerse: 'Gênesis 30:17-21',
+                enigma: 'Qual foi o nome do filho que Lia chamou de "recompensa" de Deus?',
+                options: ['Issacar', 'Zebulom', 'José'],
+                correctAnswer: 'Issacar'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: O Nascimento de José',
+                location: 'Harã',
+                objective: 'Testemunhar o cumprimento da promessa de Deus a Raquel.',
+                clues: [
+                    'Deus se lembrou de Raquel e abriu sua madre.',
+                    'Ela deu à luz um filho e o chamou de José, dizendo: "Acrescente-me o Senhor outro filho!".'
+                ],
+                keyVerse: 'Gênesis 30:22-24',
+                enigma: 'Qual foi o nome do primeiro filho de Raquel?',
+                options: ['José', 'Benjamim', 'Dã'],
+                correctAnswer: 'José'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: O Retorno de Jacó para Canaã',
+                location: 'Harã para Canaã',
+                objective: 'Acompanhar a decisão de Jacó de deixar Labão e retornar à sua terra.',
+                clues: [
+                    'Jacó decidiu voltar para sua terra natal com sua família e bens.',
+                    'Ele fugiu secretamente de Labão.'
+                ],
+                keyVerse: 'Gênesis 31:17-21',
+                enigma: 'De quem Jacó fugiu secretamente ao deixar Harã?',
+                options: ['Labão', 'Esaú', 'Seus irmãos'],
+                correctAnswer: 'Labão'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: O Roubo dos Ídolos do Lar',
+                location: 'Harã',
+                objective: 'Aprender sobre o ato de Raquel antes de partir de Harã.',
+                clues: [
+                    'Raquel roubou os ídolos do lar de seu pai Labão.',
+                    'Labão perseguiu Jacó para reaver seus ídolos.'
+                ],
+                keyVerse: 'Gênesis 31:19, 30-35',
+                enigma: 'O que Raquel roubou da casa de seu pai Labão?',
+                options: ['Os ídolos do lar', 'Seu dote', 'Ouro e prata'],
+                correctAnswer: 'Os ídolos do lar'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Nascimento de Benjamim e a Morte de Raquel',
+                location: 'Caminho para Efrata',
+                objective: 'Testemunhar o nascimento do último filho de Jacó e a morte de Raquel.',
+                clues: [
+                    'Raquel deu à luz seu segundo filho no caminho para Efrata.',
+                    'Ela morreu durante o parto e foi sepultada ali.'
+                ],
+                keyVerse: 'Gênesis 35:16-19',
+                enigma: 'Qual foi o nome do último filho de Jacó, nascido de Raquel?',
+                options: ['Benjamim', 'Judá', 'Levi'],
+                correctAnswer: 'Benjamim'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-teal-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

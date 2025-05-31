@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Oseias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Oseias Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Oseias</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionOseias('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionOseias('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionOseias('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionOseias('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionOseias('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionOseias('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionOseias('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionOseias('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionOseias('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Oseias</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Oseias, uma poderosa mensagem de amor, infidelidade e restauração. Através da vida do profeta e seu casamento com Gômer, Deus ilustra a relação de aliança com Israel, sua infidelidade e o amor inabalável do Senhor que busca restaurar Seu povo. Descubra a profundidade do amor divino e a necessidade de arrependimento. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Oseias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Oseias é o primeiro dos doze profetas menores do Antigo Testamento. Oseias profetizou para o Reino do Norte (Israel) durante o século VIII a.C., antes de sua queda para a Assíria (722 a.C.). Seu ministério ocorreu durante os reinados de Uzias, Jotão, Acaz e Ezequias, reis de Judá, e de Jeroboão II, rei de Israel.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A mensagem central de Oseias é ilustrada de forma dramática através de sua própria vida: Deus instrui o profeta a se casar com uma mulher adúltera, Gômer, e ter filhos com ela. Este casamento e a infidelidade de Gômer servem como uma poderosa alegoria da relação de Deus com Israel. Israel, como uma noiva infiel, prostituiu-se com outros deuses e nações, quebrando sua aliança com o Senhor. No entanto, assim como Oseias é instruído a amar e buscar Gômer novamente, Deus demonstra Seu amor persistente e redentor por Israel, prometendo restauração após o juízo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro aborda temas como a idolatria, a infidelidade espiritual, o juízo divino, o arrependimento, o amor inabalável de Deus (<em>hesed</em>), e a restauração. Apesar das duras advertências de juízo, Oseias termina com uma nota de esperança, enfatizando a fidelidade de Deus em restaurar Seu povo quando eles retornam a Ele.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-3: O Casamento de Oseias e o Símbolo da Infidelidade de Israel.</strong> Esta seção descreve o casamento de Oseias com Gômer e o nascimento de seus filhos, cujos nomes simbolizam o juízo de Deus sobre Israel. Culmina com a restauração de Gômer, simbolizando a futura restauração de Israel.</li>
+                <li><strong>Capítulos 4-14: As Acusações de Deus contra Israel e a Promessa de Restauração.</strong> Esta parte contém uma série de oráculos de juízo contra a idolatria, a imoralidade, a corrupção política e a falta de conhecimento de Deus em Israel. Intercaladas com as advertências de juízo, há exortações ao arrependimento e promessas de restauração e cura para o povo que retornar ao Senhor.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Oseias é um livro que revela a profundidade do amor e da misericórdia de Deus, mesmo diante da persistente infidelidade de Seu povo, e a certeza de Sua fidelidade em cumprir Suas promessas de redenção.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Oseias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Oseias é uma poderosa alegoria do amor fiel de Deus e da infidelidade de Israel, com mensagens de juízo e promessas de restauração.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Casamento de Oseias: Um Símbolo da Relação de Deus com Israel (Capítulos 1-3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Casamento com Gômer e os Filhos Simbólicos (Capítulo 1):</strong>
+                    <ul>
+                        <li>Oseias se casa com Gômer, uma prostituta.</li>
+                        <li>Nomes dos filhos: Jezreel (juízo), Lo-Ruama (não-compadecida), Lo-Ami (não-meu-povo).</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Infidelidade de Israel e o Amor de Deus (Capítulo 2):</strong>
+                    <ul>
+                        <li>Deus acusa Israel de idolatria e infidelidade.</li>
+                        <li>A promessa de Deus de restaurar Israel, apesar de sua infidelidade.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Redenção de Gômer: Símbolo da Restauração de Israel (Capítulo 3):</strong>
+                    <ul>
+                        <li>Oseias compra Gômer de volta, simbolizando o amor redentor de Deus.</li>
+                        <li>A promessa de Israel retornar ao Senhor.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. As Acusações e o Chamado ao Arrependimento (Capítulos 4-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Corrupção de Israel e a Falta de Conhecimento de Deus (Capítulo 4):</strong>
+                    <ul>
+                        <li>Acusações contra sacerdotes e povo.</li>
+                        <li>A destruição por falta de conhecimento.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Idolatria e a Hipocrisia Religiosa (Capítulos 5-7):</strong>
+                    <ul>
+                        <li>Juízo sobre líderes e o povo.</li>
+                        <li>A busca superficial por Deus.</li>
+                        <li>A insensatez de Israel.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Rebelião e a Colheita da Iniquidade (Capítulos 8-10):</strong>
+                    <ul>
+                        <li>Israel semeia vento e colhe tempestade.</li>
+                        <li>A dependência de alianças estrangeiras e ídolos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Amor Inabalável de Deus e a Promessa de Restauração (Capítulos 11-14)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Amor Paternal de Deus por Israel (Capítulo 11):</strong>
+                    <ul>
+                        <li>Deus lembra Seu amor por Israel desde a infância.</li>
+                        <li>Apesar da rebelião, a compaixão de Deus prevalece.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Chamado ao Arrependimento e a Fidelidade de Deus (Capítulos 12-13):</strong>
+                    <ul>
+                        <li>Exortação para retornar ao Senhor.</li>
+                        <li>A soberania de Deus sobre a vida e a morte.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Restauração Final e a Benção (Capítulo 14):</strong>
+                    <ul>
+                        <li>Oseias chama Israel ao arrependimento sincero.</li>
+                        <li>Promessas de cura, amor e prosperidade.</li>
+                        <li>A sabedoria de andar nos caminhos do Senhor.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Oseias revela a natureza da aliança entre Deus e Seu povo, destacando a infidelidade de Israel e, mais dramaticamente, o amor inabalável (<em>hesed</em>) de Deus. Ele demonstra que, apesar do juízo justo devido ao pecado, a misericórdia e a compaixão de Deus são maiores. Oseias é um chamado ao arrependimento e à restauração, mostrando que o caminho de volta para Deus é através da fidelidade e do conhecimento do Senhor, que sempre busca redimir e curar Seu povo.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridOseias">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Oseias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Oseias, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> O casamento de Oseias com Gômer e o nascimento dos filhos simbólicos.</li>
+                <li><strong>Capítulo 2:</strong> A infidelidade de Israel e o amor restaurador de Deus.</li>
+                <li><strong>Capítulo 3:</strong> Oseias redime Gômer, simbolizando a redenção de Israel.</li>
+                <li><strong>Capítulo 4:</strong> A acusação de Deus contra Israel por falta de conhecimento e pecado.</li>
+                <li><strong>Capítulo 5:</strong> Juízo sobre os sacerdotes e líderes de Israel e Judá.</li>
+                <li><strong>Capítulo 6:</strong> O chamado ao arrependimento e a superficialidade da devoção de Israel.</li>
+                <li><strong>Capítulo 7:</strong> A insensatez e a corrupção dos reis e do povo.</li>
+                <li><strong>Capítulo 8:</strong> Israel semeia vento e colhe tempestade; a idolatria e as alianças.</li>
+                <li><strong>Capítulo 9:</strong> O castigo de Israel e o exílio.</li>
+                <li><strong>Capítulo 10:</strong> A culpa de Israel e a destruição de seus altares.</li>
+                <li><strong>Capítulo 11:</strong> O amor paternal de Deus por Israel, apesar de sua rebelião.</li>
+                <li><strong>Capítulo 12:</strong> As transgressões de Israel e o chamado para retornar a Deus.</li>
+                <li><strong>Capítulo 13:</strong> A destruição de Efraim e a soberania de Deus sobre a vida e a morte.</li>
+                <li><strong>Capítulo 14:</strong> O chamado final ao arrependimento e as promessas de restauração e benção.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Oseias</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Amor Inabalável de Deus (Hesed):</strong> A fidelidade e o amor persistente de Deus, mesmo diante da infidelidade.</li>
+                <li><strong>Infidelidade de Israel:</strong> A idolatria e a quebra da aliança de Israel com Deus.</li>
+                <li><strong>Juízo Divino:</strong> As consequências do pecado e da desobediência de Israel.</li>
+                <li><strong>Arrependimento e Restauração:</strong> O chamado de Deus para que Israel retorne a Ele e a promessa de cura.</li>
+                <li><strong>Conhecimento de Deus:</strong> A importância de conhecer a Deus e Seus caminhos.</li>
+                <li><strong>Metáfora do Casamento:</strong> A relação de Deus com Israel comparada a um casamento.</li>
+                <li><strong>Soberania de Deus:</strong> O controle de Deus sobre a história e o destino de Israel.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Oseias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersOseias">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Oseias</h2>
+            <div id="quizContainerOseias" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionOseias"></p>
+                <div id="quizOptionsOseias" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackOseias" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionOseias()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressOseias"></span></p>
+                <p>Pontuação: <span id="quizScoreOseias">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Oseias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Oseias.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="oseiasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalOseias()">&times;</span>
+                <h3 id="modalCharacterNameOseias" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionOseias" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Oseias",
+            "short_name": "Oseias",
+            "description": "Explore o livro de Oseias de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=OS",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=OS",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'oseias-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionOseias(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsOseias();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksOseias();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsOseias(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexOseias = 0; // Reinicia o quiz
+                scoreOseias = 0;
+                wrongAnswersOseias = 0;
+                document.getElementById('quizScoreOseias').textContent = `Acertos: ${scoreOseias}, Erros: ${wrongAnswersOseias}`;
+                displayQuestionOseias();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderOseiasChart();
+            }
+        }
+
+        // Dados dos personagens para Oseias
+        const characterDetailsOseias = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Deus da aliança, cujo amor inabalável e fidelidade são o foco central do livro, mesmo diante da infidelidade de Israel."
+            },
+            "Oseias": {
+                name: "Oseias",
+                description: "O profeta cujo casamento com Gômer serve como uma alegoria viva da relação de Deus com Israel, demonstrando o amor, a dor e a redenção divinos."
+            },
+            "Gômer": {
+                name: "Gômer",
+                description: "A esposa adúltera de Oseias, que simboliza a infidelidade espiritual de Israel ao se prostituir com outros deuses."
+            },
+            "Jezreel": {
+                name: "Jezreel",
+                description: "O primeiro filho de Oseias e Gômer, cujo nome significa 'Deus semeia', mas também aponta para o juízo divino sobre a casa de Jeú."
+            },
+            "Lo-Ruama": {
+                name: "Lo-Ruama",
+                description: "A filha de Oseias e Gômer, cujo nome significa 'Não-Compadecida', simbolizando que Deus não mais teria compaixão de Israel por um tempo."
+            },
+            "Lo-Ami": {
+                name: "Lo-Ami",
+                description: "O segundo filho de Oseias e Gômer, cujo nome significa 'Não-Meu-Povo', indicando que Deus havia rejeitado Israel por sua infidelidade."
+            },
+            "Israel (Efraim)": {
+                name: "Israel (Efraim)",
+                description: "O Reino do Norte, o principal alvo das profecias de Oseias, frequentemente chamado de Efraim, que representa a nação infiel a Deus."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalOseias(characterName) {
+            const details = characterDetailsOseias[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameOseias').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionOseias').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalOseias() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsOseias() {
+            const grid = document.getElementById('characterGridOseias');
+            grid.innerHTML = '';
+            for (const key in characterDetailsOseias) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalOseias(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksOseias() {
+            const chaptersDiv = document.getElementById('chaptersOseias');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 14; i++) { // Oseias tem 14 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/os/${i}`; // Link para a Bíblia Online, Oseias
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Oseias (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsOseias = [
+            { question: "Qual profeta foi instruído a se casar com uma mulher adúltera?", options: ["Isaías", "Jeremias", "Ezequiel", "Oseias"], answer: "Oseias", reference: "Capítulo 1" },
+            { question: "Qual o nome da esposa de Oseias que simboliza a infidelidade de Israel?", options: ["Raquel", "Débora", "Gômer", "Rute"], answer: "Gômer", reference: "Capítulo 1" },
+            { question: "Qual Reino Oseias profetizou principalmente?", options: ["Reino do Sul (Judá)", "Reino do Norte (Israel)", "Babilônia", "Egito"], answer: "Reino do Norte (Israel)", reference: "Introdução ao Livro de Oseias" },
+            { question: "Qual o significado do nome do primeiro filho de Oseias, Jezreel?", options: ["Deus ouve", "Deus semeia", "Deus salva", "Deus ama"], answer: "Deus semeia", reference: "Capítulo 1" },
+            { question: "O que o nome Lo-Ruama significa?", options: ["Amada", "Não-Compadecida", "Minha Alegria", "Minha Paz"], answer: "Não-Compadecida", reference: "Capítulo 1" },
+            { question: "O que o nome Lo-Ami significa?", options: ["Meu Povo", "Não-Meu-Povo", "Meu Senhor", "Meu Pastor"], answer: "Não-Meu-Povo", reference: "Capítulo 1" },
+            { question: "Qual é a metáfora central usada no livro de Oseias para descrever a relação de Deus com Israel?", options: ["Um pastor e suas ovelhas", "Um rei e seus súditos", "Um casamento", "Um mestre e seus discípulos"], answer: "Um casamento", reference: "Introdução ao Livro de Oseias" },
+            { question: "Qual é o principal pecado de Israel denunciado por Oseias?", options: ["Injustiça social", "Guerra", "Idolatria e infidelidade espiritual", "Fome"], answer: "Idolatria e infidelidade espiritual", reference: "Capítulo 4" },
+            { question: "Apesar do juízo, qual é a principal característica de Deus enfatizada em Oseias?", options: ["Sua ira", "Sua justiça", "Seu amor inabalável (Hesed)", "Sua onipotência"], answer: "Seu amor inabalável (Hesed)", reference: "Temas Centrais do Livro de Oseias" },
+            { question: "Quantos capítulos tem o livro de Oseias?", options: ["10", "12", "14", "16"], answer: "14", reference: "Esboços do Livro de Oseias" },
+            { question: "O que Oseias 6:6 enfatiza que Deus deseja mais do que sacrifícios?", options: ["Riquezas", "Oração longa", "Misericórdia e conhecimento de Deus", "Grandes templos"], answer: "Misericórdia e conhecimento de Deus", reference: "Oseias 6:6" },
+            { question: "O que simboliza a ação de Oseias comprando Gômer de volta no capítulo 3?", options: ["A compra de terras", "A redenção de Israel por Deus", "A escravidão de Gômer", "A prosperidade de Oseias"], answer: "A redenção de Israel por Deus", reference: "Capítulo 3" },
+            { question: "Qual é o nome frequentemente usado para se referir ao Reino do Norte em Oseias?", options: ["Judá", "Sião", "Efraim", "Samaria"], answer: "Efraim", reference: "Panoramas do Livro de Oseias" },
+            { question: "O que acontece com Israel por falta de conhecimento de Deus em Oseias 4:6?", options: ["Eles prosperam", "Eles são destruídos", "Eles se tornam sábios", "Eles constroem um templo"], answer: "Eles são destruídos", reference: "Oseias 4:6" },
+            { question: "O que o livro de Oseias ensina sobre o arrependimento?", options: ["Que é impossível", "Que é uma formalidade", "Que é o caminho para a restauração e cura", "Que é apenas para os sacerdotes"], answer: "Que é o caminho para a restauração e cura", reference: "Temas Centrais do Livro de Oseias" },
+            { question: "Qual período histórico Oseias profetizou?", options: ["Durante o exílio babilônico", "Antes da queda de Jerusalém", "Antes da queda do Reino do Norte (Israel)", "Após o retorno do exílio"], answer: "Antes da queda do Reino do Norte (Israel)", reference: "Introdução ao Livro de Oseias" },
+            { question: "O que Oseias 11 descreve sobre o amor de Deus por Israel?", options: ["Um amor condicional", "Um amor indiferente", "Um amor paternal e compassivo", "Um amor que se esgota"], answer: "Um amor paternal e compassivo", reference: "Capítulo 11" },
+            { question: "Qual é a promessa final de Deus para Israel no capítulo 14?", options: ["Destruição final", "Exílio eterno", "Cura, amor e prosperidade", "Esquecimento"], answer: "Cura, amor e prosperidade", reference: "Capítulo 14" },
+            { question: "O que Israel semeia e colhe, segundo Oseias 8:7?", options: ["Amor e paz", "Vento e tempestade", "Justiça e retidão", "Riquezas e honra"], answer: "Vento e tempestade", reference: "Oseias 8:7" },
+            { question: "O que o livro de Oseias nos mostra sobre a soberania de Deus?", options: ["Que Deus não interfere na história", "Que Deus tem controle sobre o destino das nações e de Israel", "Que o homem decide seu próprio destino", "Que o acaso governa o mundo"], answer: "Que Deus tem controle sobre o destino das nações e de Israel", reference: "Temas Centrais do Livro de Oseias" },
+            { question: "Qual é a principal lição do casamento de Oseias para os leitores?", options: ["Que o casamento é sempre difícil", "Que Deus usa situações da vida para ensinar verdades espirituais", "Que profetas devem ter casamentos problemáticos", "Que o amor é sempre correspondido"], answer: "Que Deus usa situações da vida para ensinar verdades espirituais", reference: "Introdução ao Livro de Oseias" },
+            { question: "Oseias frequentemente compara a infidelidade de Israel a qual ato?", options: ["Roubo", "Mentira", "Prostituição", "Assassinato"], answer: "Prostituição", reference: "Capítulo 4" },
+            { question: "Qual é a exortação de Oseias no capítulo 14?", options: ["Construir mais altares", "Fazer mais sacrifícios", "Retornar ao Senhor e pedir perdão", "Buscar alianças com outras nações"], answer: "Retornar ao Senhor e pedir perdão", reference: "Capítulo 14" },
+            { question: "O que a falta de conhecimento de Deus leva Israel a fazer?", options: ["A obedecer a Deus", "A se tornar mais sábio", "A se desviar para a idolatria e a destruição", "A construir um reino forte"], answer: "A se desviar para a idolatria e a destruição", reference: "Capítulo 4" },
+            { question: "Oseias é considerado um profeta 'menor' por qual razão?", options: ["Sua importância é menor", "Seu livro é mais curto", "Ele profetizou para um reino menor", "Suas profecias são menos importantes"], answer: "Seu livro é mais curto", reference: "Introdução ao Livro de Oseias" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsOseias = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsOseias.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsOseias = allQuizQuestionsOseias.concat(uniqueQuizQuestionsOseias);
+        }
+        allQuizQuestionsOseias = allQuizQuestionsOseias.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsOseias = [];
+        let currentQuizIndexOseias = 0;
+        let scoreOseias = 0;
+        let wrongAnswersOseias = 0;
+        let oseiasChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsOseias() {
+            shuffledQuizQuestionsOseias = [...allQuizQuestionsOseias]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsOseias);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressOseias() {
+            const progressElement = document.getElementById('quizProgressOseias');
+            progressElement.textContent = `${currentQuizIndexOseias + 1}/${shuffledQuizQuestionsOseias.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionOseias() {
+            if (currentQuizIndexOseias >= shuffledQuizQuestionsOseias.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionOseias').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsOseias').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreOseias}, Erros: ${wrongAnswersOseias}</p>`;
+                document.getElementById('quizFeedbackOseias').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsOseias[currentQuizIndexOseias];
+            document.getElementById('quizQuestionOseias').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsOseias');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerOseias(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackOseias').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressOseias();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerOseias(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackOseias');
+            const optionsButtons = document.querySelectorAll('#quizOptionsOseias button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreOseias++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersOseias++;
+            }
+            document.getElementById('quizScoreOseias').textContent = `Acertos: ${scoreOseias}, Erros: ${wrongAnswersOseias}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionOseias() {
+            currentQuizIndexOseias++;
+            displayQuestionOseias();
+        }
+
+        // Dados para o gráfico de temas de Oseias
+        const oseiasChartData = {
+            labels: ['Amor Inabalável de Deus', 'Infidelidade de Israel', 'Juízo Divino', 'Arrependimento/Restauração', 'Conhecimento de Deus', 'Metáfora do Casamento', 'Soberania de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [30, 25, 15, 15, 10, 5, 10], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const oseiasChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Oseias',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderOseiasChart() {
+            const ctx = document.getElementById('oseiasChart').getContext('2d');
+            if (oseiasChartInstance) {
+                oseiasChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            oseiasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: oseiasChartData,
+                options: oseiasChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

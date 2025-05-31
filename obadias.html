@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Obadias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Obadias Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Obadias</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionObadias('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionObadias('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionObadias('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionObadias('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionObadias('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionObadias('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionObadias('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionObadias('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionObadias('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Obadias</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Obadias, a mais curta profecia do Antigo Testamento, que proclama o juízo de Deus contra Edom por sua arrogância e por sua participação na queda de Jerusalém. Descubra a justiça divina em ação e a promessa da restauração de Israel. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Obadias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Obadias é o menor livro do Antigo Testamento, contendo apenas um capítulo com 21 versículos. Ele é uma profecia concisa, mas poderosa, focada inteiramente no juízo de Deus contra a nação de Edom e na futura restauração de Israel. A data exata da profecia é debatida, mas a maioria dos estudiosos a situa após a queda de Jerusalém para os babilônios em 586 a.C., ou durante um ataque anterior à cidade, devido à descrição da participação edomita no saque da cidade.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Edom, descendente de Esaú e irmão de Jacó (Israel), era uma nação vizinha que frequentemente se opunha a Israel. A principal acusação de Obadias contra Edom é sua arrogância e, mais gravemente, sua atitude de regozijo e até mesmo de participação ativa no sofrimento de Judá durante a invasão inimiga. Em vez de ajudar seu "irmão", Edom se aproveitou da desgraça de Jerusalém, bloqueando rotas de fuga e entregando sobreviventes aos inimigos.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A mensagem central de Obadias é a lei do "olho por olho", ou retribuição divina. Edom será tratado da mesma forma que tratou Judá. Sua exaltação e segurança (devido às suas fortalezas rochosas) serão derrubadas. O livro termina com uma nota de esperança para Israel, prometendo que o reino pertencerá ao Senhor e que Sião será restaurada e possuirá as terras de Edom.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Versículos 1-9: O Juízo de Deus contra Edom.</strong> A denúncia da arrogância de Edom e a proclamação de sua queda e desolação.</li>
+                <li><strong>Versículos 10-14: Os Pecados de Edom contra Judá.</strong> Detalhes das transgressões de Edom durante a calamidade de Jerusalém.</li>
+                <li><strong>Versículos 15-21: O Dia do Senhor e a Restauração de Israel.</strong> A universalidade do juízo divino, a retribuição contra Edom e a promessa da vitória e restauração de Israel e do reino do Senhor.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Obadias é um lembrete conciso e poderoso da justiça de Deus contra aqueles que se regozijam na desgraça alheia e da fidelidade de Deus em restaurar Seu povo.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Obadias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Obadias é uma profecia singular sobre o juízo de Edom e a restauração de Israel.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Juízo Inevitável de Edom (Versículos 1-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Arrogância de Edom (Versículos 1-4):</strong>
+                    <ul>
+                        <li>Deus levanta nações contra Edom.</li>
+                        <li>A confiança de Edom em suas fortalezas rochosas e sua autoexaltação.</li>
+                        <li>"Embora te eleves como a águia, e ponhas o teu ninho entre as estrelas, dali te derrubarei, diz o Senhor."</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Desolação de Edom (Versículos 5-9):</strong>
+                    <ul>
+                        <li>A destruição será completa, pior que ladrões ou vindimadores.</li>
+                        <li>Os aliados de Edom o trairão.</li>
+                        <li>Os sábios e valentes de Edom serão destruídos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Os Pecados de Edom contra Judá (Versículos 10-14)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Violência contra o Irmão (Versículo 10):</strong>
+                    <ul>
+                        <li>"Por causa da violência feita a teu irmão Jacó, cobrir-te-á a confusão, e serás exterminado para sempre."</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Atitude de Edom na Calamidade de Judá (Versículos 11-14):</strong>
+                    <ul>
+                        <li>Ficaram parados enquanto estranhos saqueavam Jerusalém.</li>
+                        <li>Regozijaram-se sobre a desgraça de Judá.</li>
+                        <li>Entraram pelas portas da cidade e saquearam bens.</li>
+                        <li>Bloquearam as rotas de fuga e entregaram sobreviventes.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Dia do Senhor e a Restauração de Israel (Versículos 15-21)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Lei da Retribuição (Versículo 15):</strong>
+                    <ul>
+                        <li>"Porque o dia do Senhor está perto sobre todas as nações; como tu fizeste, assim se te fará; a tua retribuição te cairá sobre a tua cabeça."</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Restauração e Possessão de Israel (Versículos 16-20):</strong>
+                    <ul>
+                        <li>Israel beberá da taça do juízo, mas será restaurado.</li>
+                        <li>Sião será santa e possuirá suas possessões.</li>
+                        <li>Os descendentes de Jacó possuirão as terras de Esaú.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Reino do Senhor (Versículo 21):</strong>
+                    <ul>
+                        <li>"E subirão salvadores ao monte Sião, para julgarem a montanha de Esaú; e o reino será do Senhor."</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Obadias é uma poderosa declaração da justiça soberana de Deus. Ele demonstra que Deus não ignora a maldade e a opressão, mesmo entre nações que se consideram seguras. A profecia enfatiza o princípio da retribuição divina: as nações colherão o que semearam. Além disso, Obadias reafirma a fidelidade de Deus à Sua aliança com Israel, prometendo a restauração e a vitória final de Seu povo, culminando na soberania universal do reino do Senhor.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridObadias">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Obadias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Obadias, que possui apenas um capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Versículos 1-9:</strong> A denúncia da arrogância de Edom e a proclamação de sua queda e desolação.</li>
+                <li><strong>Versículos 10-14:</strong> Os pecados específicos de Edom contra Judá durante a calamidade de Jerusalém.</li>
+                <li><strong>Versículos 15-21:</strong> O Dia do Senhor, a lei da retribuição, e a promessa da restauração e vitória final de Israel sob o reino do Senhor.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Obadias</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Juízo Divino:</strong> A certeza do castigo de Deus contra a arrogância e a maldade.</li>
+                <li><strong>Retribuição (Lei do Talião):</strong> As nações colherão o que semearam, especialmente Edom.</li>
+                <li><strong>Arrogância e Orgulho:</strong> A condenação da autoconfiança e da exaltação de Edom.</li>
+                <li><strong>Solidariedade Fraterna:</strong> A falha de Edom em ajudar Judá, seu "irmão".</li>
+                <li><strong>O Dia do Senhor:</strong> Um dia de juízo universal, mas também de salvação para Israel.</li>
+                <li><strong>Restauração de Israel:</strong> A promessa de Deus de restaurar e abençoar Seu povo.</li>
+                <li><strong>Soberania de Deus:</strong> O controle absoluto de Deus sobre as nações e a história.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Obadias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersObadias">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Obadias</h2>
+            <div id="quizContainerObadias" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionObadias"></p>
+                <div id="quizOptionsObadias" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackObadias" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionObadias()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressObadias"></span></p>
+                <p>Pontuação: <span id="quizScoreObadias">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Obadias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Obadias.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="obadiasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalObadias()">&times;</span>
+                <h3 id="modalCharacterNameObadias" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionObadias" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Obadias",
+            "short_name": "Obadias",
+            "description": "Explore o livro de Obadias de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=OB",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=OB",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'obadias-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionObadias(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsObadias();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksObadias();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsObadias(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexObadias = 0; // Reinicia o quiz
+                scoreObadias = 0;
+                wrongAnswersObadias = 0;
+                document.getElementById('quizScoreObadias').textContent = `Acertos: ${scoreObadias}, Erros: ${wrongAnswersObadias}`;
+                displayQuestionObadias();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderObadiasChart();
+            }
+        }
+
+        // Dados dos personagens para Obadias
+        const characterDetailsObadias = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano e Justo Juiz, que proclama o juízo contra Edom e a restauração de Israel."
+            },
+            "Obadias": {
+                name: "Obadias",
+                description: "O profeta cujo nome significa 'servo do Senhor', que entrega a mensagem de Deus de juízo contra Edom."
+            },
+            "Edomitas": {
+                name: "Edomitas",
+                description: "Os descendentes de Esaú, a nação vizinha de Israel, que são o alvo principal da profecia de Obadias devido à sua arrogância e hostilidade contra Judá."
+            },
+            "Povo de Judá/Israel": {
+                name: "Povo de Judá/Israel",
+                description: "O povo de Deus que sofreu nas mãos de seus inimigos, incluindo Edom, e a quem Deus promete restauração e vitória."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalObadias(characterName) {
+            const details = characterDetailsObadias[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameObadias').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionObadias').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalObadias() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsObadias() {
+            const grid = document.getElementById('characterGridObadias');
+            grid.innerHTML = '';
+            for (const key in characterDetailsObadias) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalObadias(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksObadias() {
+            const chaptersDiv = document.getElementById('chaptersObadias');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 1; i++) { // Obadias tem apenas 1 capítulo
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/ob/${i}`; // Link para a Bíblia Online, Obadias
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Obadias (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsObadias = [
+            { question: "Qual é o livro mais curto do Antigo Testamento?", options: ["Jonas", "Naum", "Obadias", "Ageu"], answer: "Obadias", reference: "Introdução ao Livro de Obadias" },
+            { question: "Contra qual nação a profecia de Obadias é primariamente direcionada?", options: ["Moabe", "Edom", "Amom", "Filístia"], answer: "Edom", reference: "Introdução ao Livro de Obadias" },
+            { question: "Qual é o principal pecado de Edom denunciado em Obadias?", options: ["Idolatria", "Orgulho e regozijo na desgraça de Judá", "Injustiça social", "Falta de ofertas"], answer: "Orgulho e regozijo na desgraça de Judá", reference: "Versículos 10-14" },
+            { question: "O que o nome 'Obadias' significa?", options: ["Meu Deus é Senhor", "Servo do Senhor", "Deus é minha força", "Luz de Deus"], answer: "Servo do Senhor", reference: "Personagens Bíblicos" },
+            { question: "Onde Edom se sentia seguro, o que é contrastado com sua queda?", options: ["Em vales profundos", "Em cidades fortificadas", "Em fortalezas rochosas e altas montanhas", "No deserto"], answer: "Em fortalezas rochosas e altas montanhas", reference: "Versículos 3-4" },
+            { question: "Qual a relação familiar entre Edom e Israel?", options: ["Eram primos", "Eram irmãos (descendentes de Esaú e Jacó)", "Não tinham relação", "Eram inimigos de longa data"], answer: "Eram irmãos (descendentes de Esaú e Jacó)", reference: "Introdução ao Livro de Obadias" },
+            { question: "O que acontecerá com Edom 'como tu fizeste'?", options: ["Será abençoado", "Será perdoado", "Assim se te fará; a tua retribuição te cairá sobre a tua cabeça", "Será esquecido"], answer: "Assim se te fará; a tua retribuição te cairá sobre a tua cabeça", reference: "Versículo 15" },
+            { question: "Quantos capítulos tem o livro de Obadias?", options: ["1", "2", "3", "4"], answer: "1", reference: "Esboços do Livro de Obadias" },
+            { question: "Qual é a promessa final para o Monte Sião no livro de Obadias?", options: ["Será destruído", "Será habitado por Edom", "Será santo e possuirá suas possessões", "Será abandonado"], answer: "Será santo e possuirá suas possessões", reference: "Versículo 17" },
+            { question: "O que Edom fez quando estranhos saquearam Jerusalém?", options: ["Ajudou Judá", "Ficou parado e se regozijou", "Lutou contra os invasores", "Ofereceu refúgio"], answer: "Ficou parado e se regozijou", reference: "Versículo 11" },
+            { question: "O que significa a frase 'Embora te eleves como a águia, e ponhas o teu ninho entre as estrelas, dali te derrubarei'?", options: ["Deus exalta os humildes", "A arrogância de Edom será derrubada por Deus", "Edom construirá grandes cidades", "Edom será invencível"], answer: "A arrogância de Edom será derrubada por Deus", reference: "Versículo 4" },
+            { question: "Qual é a principal mensagem teológica de Obadias?", options: ["O amor incondicional de Deus", "A importância da adoração no Templo", "A justiça soberana de Deus e a retribuição", "A salvação pela fé"], answer: "A justiça soberana de Deus e a retribuição", reference: "Significado Teológico" },
+            { question: "O que Edom fez com os sobreviventes de Judá?", options: ["Ofereceu ajuda", "Deu-lhes comida", "Bloqueou suas rotas de fuga e os entregou aos inimigos", "Ignorou-os"], answer: "Bloqueou suas rotas de fuga e os entregou aos inimigos", reference: "Versículo 14" },
+            { question: "O que acontecerá com 'a montanha de Esaú' (Edom) no Dia do Senhor?", options: ["Será abençoada", "Será julgada", "Será restaurada", "Será um refúgio"], answer: "Será julgada", reference: "Versículo 21" },
+            { question: "O que o livro de Obadias promete para o futuro de Israel?", options: ["Exílio eterno", "Destruição completa", "Restauração e posse das terras de Edom", "Escravidão"], answer: "Restauração e posse das terras de Edom", reference: "Versículos 17-20" },
+            { question: "Qual é o período provável da profecia de Obadias?", options: ["Antes do exílio", "Durante o reinado de Davi", "Após a queda de Jerusalém (586 a.C.) ou um ataque anterior", "Durante o Novo Testamento"], answer: "Após a queda de Jerusalém (586 a.C.) ou um ataque anterior", reference: "Introdução ao Livro de Obadias" },
+            { question: "O que a profecia de Obadias ensina sobre a justiça de Deus?", options: ["Que Deus é indiferente ao mal", "Que Deus sempre perdoa sem consequências", "Que Deus não ignora a maldade e a opressão", "Que a justiça é relativa"], answer: "Que Deus não ignora a maldade e a opressão", reference: "Significado Teológico" },
+            { question: "No final do livro, a quem pertencerá o reino?", options: ["A Edom", "A Israel", "Ao Senhor", "Às nações"], answer: "Ao Senhor", reference: "Versículo 21" },
+            { question: "Qual evento histórico é frequentemente associado ao contexto da profecia de Obadias?", options: ["A construção do Templo", "A queda de Jerusalém", "O êxodo do Egito", "A divisão do reino"], answer: "A queda de Jerusalém", reference: "Introdução ao Livro de Obadias" },
+            { question: "O que a 'taça do juízo' (Versículo 16) representa para Israel?", options: ["Bênçãos", "Prosperidade", "Sofrimento e purificação", "Alegria"], answer: "Sofrimento e purificação", reference: "Versículo 16" },
+            { question: "Qual é a principal acusação contra Edom em relação a Judá?", options: ["Comércio injusto", "Idolatria", "Violência e regozijo na calamidade de seu irmão", "Não pagar impostos"], answer: "Violência e regozijo na calamidade de seu irmão", reference: "Versículo 10" },
+            { question: "O que a restauração de Israel incluirá, além da posse de terras?", options: ["Aumento do exército", "Abundância de riquezas", "Santidade no Monte Sião", "Paz com Edom"], answer: "Santidade no Monte Sião", reference: "Versículo 17" },
+            { question: "O que o livro de Obadias demonstra sobre a fidelidade de Deus?", options: ["Que Deus é infiel às suas promessas", "Que Deus é fiel em restaurar Seu povo", "Que Deus esquece Seu povo", "Que Deus só se importa com Edom"], answer: "Que Deus é fiel em restaurar Seu povo", reference: "Significado Teológico" },
+            { question: "Qual é a mensagem de esperança para Israel no livro de Obadias?", options: ["Que Edom será seu aliado", "Que eles não sofrerão juízo", "Que o reino será do Senhor e eles serão restaurados", "Que eles se tornarão uma grande potência mundial"], answer: "Que o reino será do Senhor e eles serão restaurados", reference: "Versículo 21" },
+            { question: "O que a destruição de Edom será, comparada a ladrões ou vindimadores?", options: ["Menos severa", "Mais severa e completa", "Igual", "Inexistente"], answer: "Mais severa e completa", reference: "Versículo 5" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsObadias = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsObadias.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsObadias = allQuizQuestionsObadias.concat(uniqueQuizQuestionsObadias);
+        }
+        allQuizQuestionsObadias = allQuizQuestionsObadias.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsObadias = [];
+        let currentQuizIndexObadias = 0;
+        let scoreObadias = 0;
+        let wrongAnswersObadias = 0;
+        let obadiasChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsObadias() {
+            shuffledQuizQuestionsObadias = [...allQuizQuestionsObadias]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsObadias);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressObadias() {
+            const progressElement = document.getElementById('quizProgressObadias');
+            progressElement.textContent = `${currentQuizIndexObadias + 1}/${shuffledQuizQuestionsObadias.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionObadias() {
+            if (currentQuizIndexObadias >= shuffledQuizQuestionsObadias.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionObadias').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsObadias').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreObadias}, Erros: ${wrongAnswersObadias}</p>`;
+                document.getElementById('quizFeedbackObadias').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsObadias[currentQuizIndexObadias];
+            document.getElementById('quizQuestionObadias').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsObadias');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerObadias(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackObadias').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressObadias();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerObadias(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackObadias');
+            const optionsButtons = document.querySelectorAll('#quizOptionsObadias button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreObadias++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersObadias++;
+            }
+            document.getElementById('quizScoreObadias').textContent = `Acertos: ${scoreObadias}, Erros: ${wrongAnswersObadias}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionObadias() {
+            currentQuizIndexObadias++;
+            displayQuestionObadias();
+        }
+
+        // Dados para o gráfico de temas de Obadias
+        const obadiasChartData = {
+            labels: ['Juízo Divino', 'Retribuição', 'Arrogância/Orgulho', 'Solidariedade Fraterna', 'O Dia do Senhor', 'Restauração de Israel', 'Soberania de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [30, 25, 20, 10, 5, 5, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const obadiasChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Obadias',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderObadiasChart() {
+            const ctx = document.getElementById('obadiasChart').getContext('2d');
+            if (obadiasChartInstance) {
+                obadiasChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            obadiasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: obadiasChartData,
+                options: obadiasChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

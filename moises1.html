@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Moisés</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6; /* Blue border for Moses game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #2563eb; /* Blue for Moses game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #1d4ed8; /* Darker blue on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #2563eb;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #1d4ed8;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-blue-700 mb-4">A História de Moisés 📖</h1>
+        <p class="text-gray-700 mb-6">
+            Embarque em uma jornada épica pela vida de Moisés, desde seu nascimento milagroso até sua liderança na libertação de Israel.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela vida de Moisés!</p>
+            <p class="text-gray-700 mt-6">A história de Moisés é um testemunho de fé, liderança e obediência a Deus.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo (50 enigmas)
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: O Bebê no Cesto',
+                location: 'Rio Nilo, Egito',
+                objective: 'Descobrir como Moisés foi salvo da morte.',
+                clues: [
+                    'Um bebê foi colocado em um cesto à beira do rio.',
+                    'Uma princesa egípcia encontrou o cesto.'
+                ],
+                keyVerse: 'Êxodo 2:10',
+                enigma: 'Qual nome a princesa deu ao bebê, e o que ele significa?',
+                options: ['Moisés', 'Ramsés', 'José'],
+                correctAnswer: 'Moisés'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: O Pastor no Deserto',
+                location: 'Midiã',
+                objective: 'Entender por que Moisés fugiu do Egito.',
+                clues: [
+                    'Moisés viu um egípcio maltratando um hebreu.',
+                    'Ele se casou com a filha de um sacerdote de Midiã.'
+                ],
+                keyVerse: 'Êxodo 2:15',
+                enigma: 'O que Moisés fez que o levou a fugir do Egito?',
+                options: ['Matou um egípcio', 'Roubou ouro', 'Desobedeceu ao faraó'],
+                correctAnswer: 'Matou um egípcio'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: A Sarça Ardente',
+                location: 'Monte Horebe',
+                objective: 'Descobrir o chamado de Deus a Moisés.',
+                clues: [
+                    'Moisés viu uma sarça que queimava, mas não se consumia.',
+                    'Uma voz do meio da sarça o chamou.'
+                ],
+                keyVerse: 'Êxodo 3:2',
+                enigma: 'Qual foi a primeira ordem que Deus deu a Moisés da sarça?',
+                options: ['Tirar as sandálias', 'Construir um altar', 'Ir ao faraó'],
+                correctAnswer: 'Tirar as sandálias'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: O Retorno ao Egito',
+                location: 'Deserto de Midiã',
+                objective: 'Entender a relutância inicial de Moisés e a ajuda de Deus.',
+                clues: [
+                    'Moisés apresentou desculpas sobre sua fala.',
+                    'Deus designou um ajudante para ele.'
+                ],
+                keyVerse: 'Êxodo 4:14',
+                enigma: 'Quem foi designado por Deus para ser a voz de Moisés?',
+                options: ['Arão', 'Josué', 'Miriam'],
+                correctAnswer: 'Arão'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: A Primeira Audiência',
+                location: 'Palácio do Faraó',
+                objective: 'Observar a primeira confrontação entre Moisés e o Faraó.',
+                clues: [
+                    'Moisés e Arão exigiram a libertação de Israel.',
+                    'O Faraó endureceu seu coração e aumentou a carga de trabalho.'
+                ],
+                keyVerse: 'Êxodo 5:2',
+                enigma: 'Qual foi a resposta inicial do Faraó à exigência de Moisés?',
+                options: ['Quem é o Senhor para que eu obedeça?', 'Eu os libertarei', 'Vocês podem ir'],
+                correctAnswer: 'Quem é o Senhor para que eu obedeça?'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: A Praga do Sangue',
+                location: 'Rio Nilo, Egito',
+                objective: 'Testemunhar a primeira demonstração do poder de Deus.',
+                clues: [
+                    'A água do Nilo se transformou em sangue.',
+                    'Os peixes morreram e o rio cheirava mal.'
+                ],
+                keyVerse: 'Êxodo 7:17',
+                enigma: 'Por quantos dias a praga do sangue durou?',
+                options: ['Sete dias', 'Três dias', 'Um mês'],
+                correctAnswer: 'Sete dias'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: A Praga das Rãs',
+                location: 'Egito',
+                objective: 'Ver a segunda praga e a tentativa do Faraó de negociar.',
+                clues: [
+                    'Rãs invadiram casas e camas.',
+                    'O Faraó pediu a Moisés para interceder.'
+                ],
+                keyVerse: 'Êxodo 8:6',
+                enigma: 'O que o Faraó prometeu fazer se as rãs fossem removidas?',
+                options: ['Deixar o povo ir', 'Dar-lhes comida', 'Construir um templo'],
+                correctAnswer: 'Deixar o povo ir'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: As Pragas dos Piolhos e Moscas',
+                location: 'Egito',
+                objective: 'Observar a distinção entre egípcios e israelitas.',
+                clues: [
+                    'O pó da terra se transformou em piolhos.',
+                    'Enxames de moscas invadiram o Egito, mas não Gósen.'
+                ],
+                keyVerse: 'Êxodo 8:22',
+                enigma: 'Qual foi a área do Egito que foi poupada da praga das moscas?',
+                options: ['Gósen', 'Tebas', 'Mênfis'],
+                correctAnswer: 'Gósen'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: A Praga da Peste',
+                location: 'Campos do Egito',
+                objective: 'Entender o impacto da praga nos animais.',
+                clues: [
+                    'Uma peste severa atingiu os rebanhos egípcios.',
+                    'Nenhum animal dos israelitas morreu.'
+                ],
+                keyVerse: 'Êxodo 9:6',
+                enigma: 'Que tipo de animais foram afetados pela praga da peste?',
+                options: ['Cavalos, jumentos, camelos, bois e ovelhas', 'Cães e gatos', 'Aves e peixes'],
+                correctAnswer: 'Cavalos, jumentos, camelos, bois e ovelhas'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: A Praga das Úlceras',
+                location: 'Egito',
+                objective: 'Testemunhar a aflição que atingiu egípcios e magos.',
+                clues: [
+                    'Moisés e Arão lançaram cinzas ao ar.',
+                    'Úlceras e tumores irromperam em pessoas e animais.'
+                ],
+                keyVerse: 'Êxodo 9:10',
+                enigma: 'O que Moisés e Arão lançaram ao ar para causar a praga das úlceras?',
+                options: ['Cinzas da fornalha', 'Pó da terra', 'Água do rio'],
+                correctAnswer: 'Cinzas da fornalha'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: A Praga da Chuva de Pedra',
+                location: 'Egito',
+                objective: 'Ver a destruição causada pela sétima praga.',
+                clues: [
+                    'Uma chuva de pedras e fogo caiu sobre o Egito.',
+                    'Destruiu plantações e árvores.'
+                ],
+                keyVerse: 'Êxodo 9:24',
+                enigma: 'Qual foi a única plantação que não foi destruída pela chuva de pedra?',
+                options: ['Trigo e centeio', 'Cevada e linho', 'Uvas e figos'],
+                correctAnswer: 'Trigo e centeio'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: A Praga dos Gafanhotos',
+                location: 'Egito',
+                objective: 'Observar a devastação final das plantações.',
+                clues: [
+                    'Gafanhotos cobriram a face da terra.',
+                    'Devoraram tudo o que restou da chuva de pedra.'
+                ],
+                keyVerse: 'Êxodo 10:15',
+                enigma: 'O que os gafanhotos devoraram que não havia sido destruído pela chuva de pedra?',
+                options: ['Toda a vegetação da terra', 'Os animais', 'As casas'],
+                correctAnswer: 'Toda a vegetação da terra'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: A Praga das Trevas',
+                location: 'Egito',
+                objective: 'Experimentar a escuridão que cobriu a terra.',
+                clues: [
+                    'Uma escuridão densa cobriu o Egito por três dias.',
+                    'Os israelitas tinham luz em suas habitações.'
+                ],
+                keyVerse: 'Êxodo 10:22',
+                enigma: 'Por quantos dias a escuridão cobriu o Egito?',
+                options: ['Três dias', 'Sete dias', 'Um dia'],
+                correctAnswer: 'Três dias'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: A Praga dos Primogênitos',
+                location: 'Egito',
+                objective: 'Entender a praga final que levou à libertação.',
+                clues: [
+                    'O anjo da morte passou pelo Egito.',
+                    'Os primogênitos egípcios morreram.'
+                ],
+                keyVerse: 'Êxodo 12:29',
+                enigma: 'O que os israelitas deveriam fazer para que o anjo da morte os poupasse?',
+                options: ['Marcar as ombreiras das portas com sangue de cordeiro', 'Acender uma fogueira', 'Esconder-se em suas casas'],
+                correctAnswer: 'Marcar as ombreiras das portas com sangue de cordeiro'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: A Páscoa',
+                location: 'Egito',
+                objective: 'Aprender sobre a instituição da Páscoa.',
+                clues: [
+                    'Uma refeição especial foi ordenada para aquela noite.',
+                    'Era um memorial da libertação.'
+                ],
+                keyVerse: 'Êxodo 12:14',
+                enigma: 'Qual era o pão que os israelitas deveriam comer na Páscoa?',
+                options: ['Pão sem fermento', 'Pão com fermento', 'Pão de cevada'],
+                correctAnswer: 'Pão sem fermento'
+            },
+            {
+                id: 'chapter16',
+                title: 'Capítulo 16: O Êxodo',
+                location: 'Ramsés, Egito',
+                objective: 'Testemunhar a saída dos israelitas do Egito.',
+                clues: [
+                    'O Faraó finalmente deixou o povo ir.',
+                    'Os israelitas saíram apressadamente.'
+                ],
+                keyVerse: 'Êxodo 12:31',
+                enigma: 'Quantos homens, aproximadamente, saíram do Egito, sem contar mulheres e crianças?',
+                options: ['Seiscentos mil', 'Cem mil', 'Um milhão'],
+                correctAnswer: 'Seiscentos mil'
+            },
+            {
+                id: 'chapter17',
+                title: 'Capítulo 17: A Coluna de Nuvem e Fogo',
+                location: 'Deserto',
+                objective: 'Entender a guia divina no deserto.',
+                clues: [
+                    'Deus os guiava de dia e de noite.',
+                    'Uma coluna os protegia do sol e iluminava à noite.'
+                ],
+                keyVerse: 'Êxodo 13:21',
+                enigma: 'O que guiava os israelitas durante o dia?',
+                options: ['Coluna de nuvem', 'Coluna de fogo', 'Uma estrela'],
+                correctAnswer: 'Coluna de nuvem'
+            },
+            {
+                id: 'chapter18',
+                title: 'Capítulo 18: A Travessia do Mar Vermelho',
+                location: 'Mar Vermelho',
+                objective: 'Investigar o milagre da libertação de Israel.',
+                clues: [
+                    'O mar se abriu, formando um caminho seco.',
+                    'Os egípcios foram engolidos pelas águas.'
+                ],
+                keyVerse: 'Êxodo 14:21',
+                enigma: 'O que Moisés usou para abrir o Mar Vermelho?',
+                options: ['Seu cajado', 'Sua mão', 'Uma espada'],
+                correctAnswer: 'Seu cajado'
+            },
+            {
+                id: 'chapter19',
+                title: 'Capítulo 19: O Cântico de Moisés e Miriam',
+                location: 'À beira do Mar Vermelho',
+                objective: 'Celebrar a vitória e a libertação.',
+                clues: [
+                    'Moisés e os israelitas cantaram um cântico de louvor.',
+                    'Miriam liderou as mulheres em dança.'
+                ],
+                keyVerse: 'Êxodo 15:1',
+                enigma: 'Qual instrumento Miriam usou para liderar as mulheres na dança?',
+                options: ['Tamborim', 'Harpa', 'Flauta'],
+                correctAnswer: 'Tamborim'
+            },
+            {
+                id: 'chapter20',
+                title: 'Capítulo 20: Águas Amargas de Mara',
+                location: 'Mara',
+                objective: 'Entender a provisão de Deus em meio à escassez.',
+                clues: [
+                    'As águas eram amargas e não podiam ser bebidas.',
+                    'Moisés clamou ao Senhor.'
+                ],
+                keyVerse: 'Êxodo 15:25',
+                enigma: 'O que Deus mandou Moisés lançar na água para torná-la doce?',
+                options: ['Um pedaço de madeira', 'Areia', 'Sal'],
+                correctAnswer: 'Um pedaço de madeira'
+            },
+            {
+                id: 'chapter21',
+                title: 'Capítulo 21: Maná e Codornizes',
+                location: 'Deserto de Sim',
+                objective: 'Aprender sobre o alimento provido por Deus.',
+                clues: [
+                    'O povo murmurou por falta de comida.',
+                    'De manhã, havia algo como orvalho no chão.'
+                ],
+                keyVerse: 'Êxodo 16:15',
+                enigma: 'O que os israelitas chamaram o pão que caía do céu?',
+                options: ['Maná', 'Cevada', 'Trigo'],
+                correctAnswer: 'Maná'
+            },
+            {
+                id: 'chapter22',
+                title: 'Capítulo 22: Água da Rocha em Refidim',
+                location: 'Refidim',
+                objective: 'Ver a provisão de água de uma fonte inesperada.',
+                clues: [
+                    'Não havia água para o povo beber.',
+                    'Moisés golpeou uma rocha.'
+                ],
+                keyVerse: 'Êxodo 17:6',
+                enigma: 'Qual foi o nome do lugar onde Moisés golpeou a rocha e saiu água?',
+                options: ['Massá e Meribá', 'Mara', 'Elim'],
+                correctAnswer: 'Massá e Meribá'
+            },
+            {
+                id: 'chapter23',
+                title: 'Capítulo 23: Batalha contra Amaleque',
+                location: 'Refidim',
+                objective: 'Compreender a importância da intercessão na batalha.',
+                clues: [
+                    'Amaleque atacou os israelitas.',
+                    'Moisés ergueu suas mãos durante a batalha.'
+                ],
+                keyVerse: 'Êxodo 17:11',
+                enigma: 'Quem ajudou Moisés a manter suas mãos erguidas durante a batalha?',
+                options: ['Arão e Hur', 'Josué e Calebe', 'Miriam e Zípora'],
+                correctAnswer: 'Arão e Hur'
+            },
+            {
+                id: 'chapter24',
+                title: 'Capítulo 24: A Visita de Jetro',
+                location: 'Deserto',
+                objective: 'Aprender sobre a sabedoria e o conselho de Jetro.',
+                clues: [
+                    'O sogro de Moisés veio visitá-lo.',
+                    'Ele aconselhou Moisés a delegar responsabilidades.'
+                ],
+                keyVerse: 'Êxodo 18:24',
+                enigma: 'O que Jetro aconselhou Moisés a fazer para aliviar sua carga de trabalho?',
+                options: ['Nomear juízes', 'Construir um templo', 'Consultar o Faraó'],
+                correctAnswer: 'Nomear juízes'
+            },
+            {
+                id: 'chapter25',
+                title: 'Capítulo 25: A Chegada ao Sinai',
+                location: 'Monte Sinai',
+                objective: 'Preparar-se para a revelação da Lei de Deus.',
+                clues: [
+                    'Os israelitas acamparam em frente ao monte.',
+                    'Deus chamou Moisés ao monte.'
+                ],
+                keyVerse: 'Êxodo 19:3',
+                enigma: 'O que Deus disse que faria no terceiro dia no Monte Sinai?',
+                options: ['Descer sobre o monte', 'Enviar maná', 'Abrir o mar'],
+                correctAnswer: 'Descer sobre o monte'
+            },
+            {
+                id: 'chapter26',
+                title: 'Capítulo 26: Os Dez Mandamentos (I)',
+                location: 'Monte Sinai',
+                objective: 'Descobrir os primeiros mandamentos de Deus.',
+                clues: [
+                    'Deus falou com Moisés em meio a trovões e relâmpagos.',
+                    'Os primeiros mandamentos tratam da relação com Deus.'
+                ],
+                keyVerse: 'Êxodo 20:3',
+                enigma: 'Qual é o primeiro mandamento dado por Deus?',
+                options: ['Não terás outros deuses diante de mim', 'Não matarás', 'Honra teu pai e tua mãe'],
+                correctAnswer: 'Não terás outros deuses diante de mim'
+            },
+            {
+                id: 'chapter27',
+                title: 'Capítulo 27: Os Dez Mandamentos (II)',
+                location: 'Monte Sinai',
+                objective: 'Continuar aprendendo sobre as leis divinas.',
+                clues: [
+                    'Os mandamentos incluem a santificação do sábado.',
+                    'Eles abordam a honra aos pais.'
+                ],
+                keyVerse: 'Êxodo 20:8',
+                enigma: 'O que o quarto mandamento instrui a fazer?',
+                options: ['Guardar o dia de sábado', 'Não furtar', 'Não cobiçar'],
+                correctAnswer: 'Guardar o dia de sábado'
+            },
+            {
+                id: 'chapter28',
+                title: 'Capítulo 28: Os Dez Mandamentos (III)',
+                location: 'Monte Sinai',
+                objective: 'Concluir o estudo dos mandamentos que regem a vida social.',
+                clues: [
+                    'Mandamentos sobre não matar e não adulterar.',
+                    'Mandamentos sobre não furtar e não dar falso testemunho.'
+                ],
+                keyVerse: 'Êxodo 20:13',
+                enigma: 'Qual mandamento proíbe tomar a vida de outro ser humano?',
+                options: ['Não matarás', 'Não adulterarás', 'Não furtarás'],
+                correctAnswer: 'Não matarás'
+            },
+            {
+                id: 'chapter29',
+                title: 'Capítulo 29: O Bezerro de Ouro',
+                location: 'Pé do Monte Sinai',
+                objective: 'Entender a rebelião do povo enquanto Moisés estava no monte.',
+                clues: [
+                    'O povo se impacientou com a demora de Moisés.',
+                    'Eles pediram a Arão para fazer um deus para eles.'
+                ],
+                keyVerse: 'Êxodo 32:4',
+                enigma: 'De que material o bezerro foi feito?',
+                options: ['Ouro', 'Prata', 'Bronze'],
+                correctAnswer: 'Ouro'
+            },
+            {
+                id: 'chapter30',
+                title: 'Capítulo 30: A Ira de Moisés',
+                location: 'Pé do Monte Sinai',
+                objective: 'Observar a reação de Moisés ao ver a idolatria.',
+                clues: [
+                    'Moisés desceu do monte com as tábuas da Lei.',
+                    'Ele quebrou as tábuas ao ver o bezerro.'
+                ],
+                keyVerse: 'Êxodo 32:19',
+                enigma: 'O que Moisés fez com as tábuas da Lei ao ver o bezerro de ouro?',
+                options: ['Quebrou-as', 'Escondeu-as', 'Enterrou-as'],
+                correctAnswer: 'Quebrou-as'
+            },
+            {
+                id: 'chapter31',
+                title: 'Capítulo 31: O Tabernáculo: O Projeto',
+                location: 'Monte Sinai',
+                objective: 'Aprender sobre os detalhes da construção do Tabernáculo.',
+                clues: [
+                    'Deus deu instruções detalhadas para uma tenda de encontro.',
+                    'Seria um lugar para Deus habitar entre o povo.'
+                ],
+                keyVerse: 'Êxodo 25:8',
+                enigma: 'Qual era o propósito principal do Tabernáculo?',
+                options: ['Para Deus habitar entre o povo', 'Para armazenar comida', 'Para reuniões políticas'],
+                correctAnswer: 'Para Deus habitar entre o povo'
+            },
+            {
+                id: 'chapter32',
+                title: 'Capítulo 32: O Tabernáculo: A Arca da Aliança',
+                location: 'Tabernáculo',
+                objective: 'Conhecer o objeto mais sagrado do Tabernáculo.',
+                clues: [
+                    'Era um baú de madeira de acácia coberto de ouro.',
+                    'Continha as tábuas da Lei, o maná e o cajado de Arão.'
+                ],
+                keyVerse: 'Êxodo 25:10',
+                enigma: 'O que ficava sobre a tampa da Arca da Aliança?',
+                options: ['Dois querubins de ouro', 'Uma pomba', 'Um cordeiro'],
+                correctAnswer: 'Dois querubins de ouro'
+            },
+            {
+                id: 'chapter33',
+                title: 'Capítulo 33: A Liderança de Moisés',
+                location: 'Deserto',
+                objective: 'Entender os desafios e a responsabilidade de Moisés.',
+                clues: [
+                    'Moisés era o mediador entre Deus e o povo.',
+                    'Ele enfrentou muitas murmurações e rebeliões.'
+                ],
+                keyVerse: 'Números 12:3',
+                enigma: 'Qual era a característica mais notável de Moisés, segundo a Bíblia?',
+                options: ['Humildade', 'Força', 'Riqueza'],
+                correctAnswer: 'Humildade'
+            },
+            {
+                id: 'chapter34',
+                title: 'Capítulo 34: A Rebelião de Corá',
+                location: 'Deserto',
+                objective: 'Aprender sobre a oposição à autoridade de Moisés e Arão.',
+                clues: [
+                    'Corá e seus seguidores se levantaram contra Moisés.',
+                    'A terra se abriu e os engoliu.'
+                ],
+                keyVerse: 'Números 16:32',
+                enigma: 'O que aconteceu com Corá e seus seguidores?',
+                options: ['A terra os engoliu', 'Foram apedrejados', 'Foram exilados'],
+                correctAnswer: 'A terra os engoliu'
+            },
+            {
+                id: 'chapter35',
+                title: 'Capítulo 35: A Água da Rocha em Meribá',
+                location: 'Deserto de Zim',
+                objective: 'Entender o erro de Moisés que o impediu de entrar em Canaã.',
+                clues: [
+                    'O povo murmurou por falta de água.',
+                    'Moisés golpeou a rocha duas vezes em vez de falar a ela.'
+                ],
+                keyVerse: 'Números 20:12',
+                enigma: 'Por que Moisés não pôde entrar na Terra Prometida?',
+                options: ['Desobedeceu a Deus ao golpear a rocha', 'Recusou-se a ir', 'Morreu de velhice'],
+                correctAnswer: 'Desobedeceu a Deus ao golpear a rocha'
+            },
+            {
+                id: 'chapter36',
+                title: 'Capítulo 36: A Serpente de Bronze',
+                location: 'Deserto',
+                objective: 'Aprender sobre o símbolo de cura e salvação.',
+                clues: [
+                    'Serpentes venenosas atacaram o povo.',
+                    'Moisés levantou algo no deserto para a cura.'
+                ],
+                keyVerse: 'Números 21:8-9',
+                enigma: 'O que Moisés fez para que o povo fosse curado das picadas das serpentes?',
+                options: ['Serpente de bronze', 'Água amarga', 'Maná do céu'],
+                correctAnswer: 'Serpente de bronze'
+            },
+            {
+                id: 'chapter37',
+                title: 'Capítulo 37: Balaque e Balaão',
+                location: 'Campos de Moabe',
+                objective: 'Entender a tentativa de amaldiçoar Israel.',
+                clues: [
+                    'Balaque, rei de Moabe, chamou um profeta para amaldiçoar Israel.',
+                    'O profeta, Balaão, só podia proferir bênçãos.'
+                ],
+                keyVerse: 'Números 23:8',
+                enigma: 'Qual animal falou com Balaão no caminho?',
+                options: ['Uma jumenta', 'Um camelo', 'Um cavalo'],
+                correctAnswer: 'Uma jumenta'
+            },
+            {
+                id: 'chapter38',
+                title: 'Capítulo 38: O Censo',
+                location: 'Planícies de Moabe',
+                objective: 'Compreender a contagem do povo antes de entrar em Canaã.',
+                clues: [
+                    'Deus ordenou um censo dos homens de guerra.',
+                    'Foi para preparar a divisão da terra.'
+                ],
+                keyVerse: 'Números 26:2',
+                enigma: 'Qual era a idade mínima para ser contado no censo?',
+                options: ['Vinte anos ou mais', 'Dezoito anos ou mais', 'Quinze anos ou mais'],
+                correctAnswer: 'Vinte anos ou mais'
+            },
+            {
+                id: 'chapter39',
+                title: 'Capítulo 39: A Nomeação de Josué',
+                location: 'Planícies de Moabe',
+                objective: 'Ver a transição de liderança para a próxima geração.',
+                clues: [
+                    'Deus instruiu Moisés a nomear seu sucessor.',
+                    'Josué era um servo fiel e cheio do Espírito.'
+                ],
+                keyVerse: 'Números 27:18',
+                enigma: 'Quem foi escolhido por Deus para suceder Moisés?',
+                options: ['Josué', 'Calebe', 'Arão'],
+                correctAnswer: 'Josué'
+            },
+            {
+                id: 'chapter40',
+                title: 'Capítulo 40: As Leis da Terra Prometida',
+                location: 'Planícies de Moabe',
+                objective: 'Aprender sobre as instruções para a vida em Canaã.',
+                clues: [
+                    'Moisés deu instruções sobre a herança da terra.',
+                    'Leis sobre cidades de refúgio e herança de filhas.'
+                ],
+                keyVerse: 'Números 35:11',
+                enigma: 'Qual era o propósito das cidades de refúgio?',
+                options: ['Proteger homicidas acidentais', 'Armazenar tesouros', 'Servir como centros comerciais'],
+                correctAnswer: 'Proteger homicidas acidentais'
+            },
+            {
+                id: 'chapter41',
+                title: 'Capítulo 41: O Discurso de Despedida (I)',
+                location: 'Planícies de Moabe',
+                objective: 'Ouvir as últimas exortações de Moisés ao povo.',
+                clues: [
+                    'Moisés relembrou a jornada do deserto.',
+                    'Ele enfatizou a importância de obedecer a Deus.'
+                ],
+                keyVerse: 'Deuteronômio 4:9',
+                enigma: 'O que Moisés advertiu o povo a não esquecer?',
+                options: ['As coisas que viram com seus próprios olhos', 'As pragas do Egito', 'Os nomes de seus inimigos'],
+                correctAnswer: 'As coisas que viram com seus próprios olhos'
+            },
+            {
+                id: 'chapter42',
+                title: 'Capítulo 42: O Discurso de Despedida (II)',
+                location: 'Planícies de Moabe',
+                objective: 'Continuar a ouvir os conselhos finais de Moisés.',
+                clues: [
+                    'Moisés reiterou os Dez Mandamentos.',
+                    'Ele falou sobre a importância de amar a Deus de todo o coração.'
+                ],
+                keyVerse: 'Deuteronômio 6:5',
+                enigma: 'Qual é o maior mandamento, segundo Moisés?',
+                options: ['Amar o Senhor teu Deus de todo o teu coração', 'Honrar pai e mãe', 'Não matar'],
+                correctAnswer: 'Amar o Senhor teu Deus de todo o teu coração'
+            },
+            {
+                id: 'chapter43',
+                title: 'Capítulo 43: A Aliança em Moabe',
+                location: 'Planícies de Moabe',
+                objective: 'Entender a renovação da aliança de Deus com Israel.',
+                clues: [
+                    'Moisés fez uma aliança com o povo além da do Sinai.',
+                    'Esta aliança incluía bênçãos e maldições.'
+                ],
+                keyVerse: 'Deuteronômio 29:1',
+                enigma: 'O que aconteceria se o povo desobedecesse à aliança?',
+                options: ['Maldições viriam sobre eles', 'Seriam abençoados', 'Seriam esquecidos'],
+                correctAnswer: 'Maldições viriam sobre eles'
+            },
+            {
+                id: 'chapter44',
+                title: 'Capítulo 44: A Canção de Moisés',
+                location: 'Planícies de Moabe',
+                objective: 'Aprender sobre a canção que Moisés ensinou a Israel.',
+                clues: [
+                    'Moisés escreveu uma canção para servir de testemunho.',
+                    'Ela falava da fidelidade de Deus e da infidelidade de Israel.'
+                ],
+                keyVerse: 'Deuteronômio 32:1',
+                enigma: 'O que a canção de Moisés deveria ensinar às futuras gerações?',
+                options: ['A justiça de Deus', 'A história do Egito', 'As canções de guerra'],
+                correctAnswer: 'A justiça de Deus'
+            },
+            {
+                id: 'chapter45',
+                title: 'Capítulo 45: A Bênção de Moisés',
+                location: 'Planícies de Moabe',
+                objective: 'Ouvir as últimas bênçãos de Moisés sobre as tribos de Israel.',
+                clues: [
+                    'Moisés abençoou cada tribo de Israel individualmente.',
+                    'Ele profetizou sobre o futuro de cada uma.'
+                ],
+                keyVerse: 'Deuteronômio 33:1',
+                enigma: 'Qual tribo Moisés abençoou dizendo: "Que o Senhor abençoe a sua força"?',
+                options: ['Levi', 'Judá', 'Benjamim'],
+                correctAnswer: 'Levi'
+            },
+            {
+                id: 'chapter46',
+                title: 'Capítulo 46: A Subida ao Monte Nebo',
+                location: 'Monte Nebo',
+                objective: 'Testemunhar a última visão de Moisés da Terra Prometida.',
+                clues: [
+                    'Deus levou Moisés ao topo de um monte.',
+                    'De lá, ele pôde ver toda a terra de Canaã.'
+                ],
+                keyVerse: 'Deuteronômio 34:1',
+                enigma: 'De qual monte Moisés viu a Terra Prometida?',
+                options: ['Monte Nebo', 'Monte Sinai', 'Monte Carmelo'],
+                correctAnswer: 'Monte Nebo'
+            },
+            {
+                id: 'chapter47',
+                title: 'Capítulo 47: A Morte de Moisés',
+                location: 'Monte Nebo',
+                objective: 'Conhecer o desfecho da vida de Moisés.',
+                clues: [
+                    'Moisés morreu com 120 anos de idade.',
+                    'Seus olhos não haviam enfraquecido, nem seu vigor diminuído.'
+                ],
+                keyVerse: 'Deuteronômio 34:7',
+                enigma: 'Qual era a idade de Moisés quando ele morreu?',
+                options: ['120 anos', '100 anos', '80 anos'],
+                correctAnswer: '120 anos'
+            },
+            {
+                id: 'chapter48',
+                title: 'Capítulo 48: O Sepultamento de Moisés',
+                location: 'Vale em Moabe',
+                objective: 'Descobrir onde Moisés foi sepultado.',
+                clues: [
+                    'Deus mesmo sepultou Moisés.',
+                    'Ninguém soube o local exato de seu túmulo.'
+                ],
+                keyVerse: 'Deuteronômio 34:6',
+                enigma: 'Quem sepultou Moisés?',
+                options: ['Deus', 'Josué', 'Arão'],
+                correctAnswer: 'Deus'
+            },
+            {
+                id: 'chapter49',
+                title: 'Capítulo 49: O Luto por Moisés',
+                location: 'Planícies de Moabe',
+                objective: 'Entender a reação de Israel à morte de seu líder.',
+                clues: [
+                    'Os israelitas lamentaram Moisés por trinta dias.',
+                    'Ninguém se levantou em Israel como Moisés.'
+                ],
+                keyVerse: 'Deuteronômio 34:8',
+                enigma: 'Por quantos dias os israelitas lamentaram a morte de Moisés?',
+                options: ['Trinta dias', 'Sete dias', 'Quarenta dias'],
+                correctAnswer: 'Trinta dias'
+            },
+            {
+                id: 'chapter50',
+                title: 'Capítulo 50: O Legado de Moisés',
+                location: 'Israel',
+                objective: 'Refletir sobre a importância de Moisés na história de Israel.',
+                clues: [
+                    'Ele foi o maior profeta que Deus levantou em Israel.',
+                    'Ele falou com Deus face a face.'
+                ],
+                keyVerse: 'Deuteronômio 34:10',
+                enigma: 'Qual foi o maior legado de Moisés para o povo de Israel?',
+                options: ['A Lei de Deus', 'A travessia do Mar Vermelho', 'As pragas do Egito'],
+                correctAnswer: 'A Lei de Deus'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-blue-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>
