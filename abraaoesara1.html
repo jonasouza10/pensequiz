@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Abraão e Sara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #f59e0b; /* Amber border for Abraham and Sarah game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #d97706; /* Darker Amber for Abraham and Sarah game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #b45309; /* Even darker amber on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #d97706;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #d97706;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #b45309;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-amber-700 mb-4">A História de Abraão e Sara ✨</h1>
+        <p class="text-gray-700 mb-6">
+            Embarque na jornada de fé de Abraão e Sara, desde o chamado de Deus até o cumprimento das promessas.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Abraão e Sara!</p>
+            <p class="text-gray-700 mt-6">A história de Abraão e Sara é um testemunho de fé, paciência e da fidelidade das promessas de Deus.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: O Chamado de Abrão',
+                location: 'Ur dos Caldeus',
+                objective: 'Descobrir o primeiro chamado de Deus a Abrão.',
+                clues: [
+                    'Deus chamou Abrão para sair de sua terra e parentela.',
+                    'Ele deveria ir para uma terra que Deus lhe mostraria.'
+                ],
+                keyVerse: 'Gênesis 12:1',
+                enigma: 'De qual cidade Deus chamou Abrão para sair?',
+                options: ['Ur dos Caldeus', 'Harã', 'Canaã'],
+                correctAnswer: 'Ur dos Caldeus'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: A Promessa da Grande Nação',
+                location: 'Harã',
+                objective: 'Entender as promessas iniciais de Deus a Abrão.',
+                clues: [
+                    'Deus prometeu fazer dele uma grande nação.',
+                    'Seu nome seria engrandecido e ele seria uma bênção.'
+                ],
+                keyVerse: 'Gênesis 12:2',
+                enigma: 'O que Deus prometeu fazer de Abrão?',
+                options: ['Uma grande nação', 'Um grande rei', 'Um grande profeta'],
+                correctAnswer: 'Uma grande nação'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: A Viagem para Canaã',
+                location: 'Canaã',
+                objective: 'Acompanhar a obediência de Abrão em sua jornada.',
+                clues: [
+                    'Abrão partiu como o Senhor lhe havia dito.',
+                    'Ele levou sua esposa Sarai e seu sobrinho Ló.'
+                ],
+                keyVerse: 'Gênesis 12:4',
+                enigma: 'Quem acompanhou Abrão em sua viagem para Canaã, além de sua esposa?',
+                options: ['Ló', 'Noé', 'Sem'],
+                correctAnswer: 'Ló'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: O Altar em Siquém',
+                location: 'Siquém',
+                objective: 'Observar o primeiro altar que Abrão construiu em Canaã.',
+                clues: [
+                    'Deus apareceu a Abrão em Siquém.',
+                    'Abrão construiu um altar ao Senhor que lhe aparecera.'
+                ],
+                keyVerse: 'Gênesis 12:7',
+                enigma: 'O que Abrão construiu em Siquém em honra a Deus?',
+                options: ['Um altar', 'Uma casa', 'Um poço'],
+                correctAnswer: 'Um altar'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: A Fome no Egito',
+                location: 'Egito',
+                objective: 'Entender a ida de Abrão ao Egito e a situação de Sarai.',
+                clues: [
+                    'Houve uma grande fome na terra de Canaã.',
+                    'Abrão pediu a Sarai para dizer que era sua irmã.'
+                ],
+                keyVerse: 'Gênesis 12:10-13',
+                enigma: 'Por que Abrão foi para o Egito?',
+                options: ['Por causa da fome', 'Para fazer comércio', 'Para visitar parentes'],
+                correctAnswer: 'Por causa da fome'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: A Separação de Ló',
+                location: 'Betel e Ai',
+                objective: 'Compreender a necessidade da separação entre Abrão e Ló.',
+                clues: [
+                    'Houve contenda entre os pastores de Abrão e Ló.',
+                    'Abrão ofereceu a Ló a escolha da terra.'
+                ],
+                keyVerse: 'Gênesis 13:8-9',
+                enigma: 'Qual terra Ló escolheu para si?',
+                options: ['A planície do Jordão', 'As montanhas', 'O deserto'],
+                correctAnswer: 'A planície do Jordão'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: A Promessa Renovada',
+                location: 'Canaã',
+                objective: 'Ver a renovação das promessas de Deus a Abrão após a separação.',
+                clues: [
+                    'Deus falou a Abrão depois que Ló se separou dele.',
+                    'Deus prometeu toda a terra que ele via.'
+                ],
+                keyVerse: 'Gênesis 13:14-15',
+                enigma: 'O que Deus prometeu a Abrão que sua descendência seria como?',
+                options: ['O pó da terra', 'As estrelas do céu', 'As areias do mar'],
+                correctAnswer: 'O pó da terra'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: A Batalha dos Reis',
+                location: 'Vale de Sidim',
+                objective: 'Aprender sobre a intervenção de Abrão para resgatar Ló.',
+                clues: [
+                    'Quatro reis do Oriente lutaram contra cinco reis de cidades da planície.',
+                    'Ló foi levado cativo.'
+                ],
+                keyVerse: 'Gênesis 14:12-16',
+                enigma: 'Quem foi levado cativo na batalha dos reis?',
+                options: ['Ló', 'Sarai', 'Abrão'],
+                correctAnswer: 'Ló'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: Melquisedeque',
+                location: 'Vale de Savé',
+                objective: 'Conhecer o sacerdote-rei que abençoou Abrão.',
+                clues: [
+                    'Melquisedeque era rei de Salém e sacerdote do Deus Altíssimo.',
+                    'Ele trouxe pão e vinho e abençoou Abrão.'
+                ],
+                keyVerse: 'Gênesis 14:18-20',
+                enigma: 'O que Abrão deu a Melquisedeque?',
+                options: ['O dízimo de tudo', 'Ouro e prata', 'Animais'],
+                correctAnswer: 'O dízimo de tudo'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: A Aliança com Abrão',
+                location: 'Canaã',
+                objective: 'Entender a formalização da aliança de Deus com Abrão.',
+                clues: [
+                    'Deus fez uma aliança com Abrão em um sonho profundo.',
+                    'Prometeu uma descendência numerosa e a posse da terra.'
+                ],
+                keyVerse: 'Gênesis 15:18',
+                enigma: 'O que Deus usou como símbolo na aliança com Abrão, que passou entre as metades dos animais?',
+                options: ['Uma tocha fumegante e uma chama de fogo', 'Uma nuvem e um raio', 'Um arco-íris'],
+                correctAnswer: 'Uma tocha fumegante e uma chama de fogo'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: Agar e Ismael',
+                location: 'Canaã',
+                objective: 'Aprender sobre a tentativa de Sarai de ajudar no cumprimento da promessa.',
+                clues: [
+                    'Sarai não podia ter filhos e deu sua serva Agar a Abrão.',
+                    'Agar deu à luz Ismael.'
+                ],
+                keyVerse: 'Gênesis 16:3-4',
+                enigma: 'Qual era o nome da serva egípcia de Sarai que teve um filho com Abrão?',
+                options: ['Agar', 'Rebeca', 'Raquel'],
+                correctAnswer: 'Agar'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: A Mudança de Nomes',
+                location: 'Canaã',
+                objective: 'Entender a mudança de nomes de Abrão e Sarai e o significado.',
+                clues: [
+                    'Deus mudou o nome de Abrão para Abraão, pai de muitas nações.',
+                    'Sarai foi mudada para Sara, princesa.'
+                ],
+                keyVerse: 'Gênesis 17:5, 15',
+                enigma: 'Qual o significado do novo nome de Abraão?',
+                options: ['Pai de muitas nações', 'Pai da fé', 'Pai da alegria'],
+                correctAnswer: 'Pai de muitas nações'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: A Visita dos Três Homens',
+                location: 'Carvalho de Manre',
+                objective: 'Observar a visita de Deus a Abraão e a promessa de um filho.',
+                clues: [
+                    'Três homens apareceram a Abraão junto aos carvalhos de Manre.',
+                    'Eles anunciaram que Sara teria um filho em um ano.'
+                ],
+                keyVerse: 'Gênesis 18:10',
+                enigma: 'Como Sara reagiu ao ouvir que teria um filho na velhice?',
+                options: ['Riu-se', 'Chorou', 'Ficou em silêncio'],
+                correctAnswer: 'Riu-se'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: Sodoma e Gomorra',
+                location: 'Vale de Sidim',
+                objective: 'Aprender sobre a intercessão de Abraão pelas cidades.',
+                clues: [
+                    'Deus revelou a Abraão que destruiria Sodoma e Gomorra.',
+                    'Abraão intercedeu por elas, tentando salvar os justos.'
+                ],
+                keyVerse: 'Gênesis 18:23-32',
+                enigma: 'Quantos justos Abraão pediu a Deus que houvesse em Sodoma para que ela não fosse destruída?',
+                options: ['Dez', 'Cinquenta', 'Vinte'],
+                correctAnswer: 'Dez'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Nascimento de Isaque',
+                location: 'Gerar',
+                objective: 'Testemunhar o cumprimento da promessa de Deus.',
+                clues: [
+                    'Sara engravidou e deu à luz um filho na velhice de Abraão.',
+                    'O nome do filho significava "riso".'
+                ],
+                keyVerse: 'Gênesis 21:1-3',
+                enigma: 'Qual foi o nome do filho de Abraão e Sara, que significa "riso"?',
+                options: ['Isaque', 'Ismael', 'Jacó'],
+                correctAnswer: 'Isaque'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

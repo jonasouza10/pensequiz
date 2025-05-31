@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 2 Reis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2 Reis Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 2 Reis</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection2Reis('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection2Reis('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection2Reis('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection2Reis('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection2Reis('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection2Reis('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection2Reis('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection2Reis('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection2Reis('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 2 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a contínua história dos reinos divididos de Israel e Judá, o ministério de Eliseu, a queda de Samaria e o exílio de Israel, e a queda de Jerusalém e o exílio de Judá. Acompanhe as últimas gerações de reis e profetas e as consequências da desobediência persistente a Deus. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 2 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Reis é o décimo primeiro livro da Bíblia e a continuação direta da narrativa de 1 Reis. Abrange um período de aproximadamente 250 anos, desde a morte de Acazias de Israel até a queda de Jerusalém e o exílio babilônico. O livro documenta a história dos reinos divididos de Israel (Norte) e Judá (Sul), com um foco particular na sucessão de reis, suas ações em relação à adoração a Deus, e o papel dos profetas, especialmente Eliseu, como mensageiros divinos.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais de 2 Reis incluem a persistência da idolatria em ambos os reinos, as consequências inevitáveis da desobediência à aliança de Deus, a fidelidade de Deus em enviar profetas para advertir Seu povo, e o cumprimento das profecias de juízo através da queda de Samaria (capital de Israel) para a Assíria e a queda de Jerusalém (capital de Judá) para a Babilônia. O livro enfatiza que a soberania de Deus se manifesta na história, e que a infidelidade leva ao cativeiro e à dispersão.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Este livro é essencial para entender o declínio e a queda dos reinos de Israel e Judá, as razões teológicas por trás desses eventos e a transição para o período do exílio. Ele destaca a importância da obediência radical a Deus e as severas consequências da apostasia.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-17: O Reino Dividido até a Queda de Israel.</strong> O ministério de Eliseu (sucessor de Elias), milagres e profecias. Os reinados dos reis de Israel e Judá, com suas avaliações morais e espirituais. A ascensão da Assíria como potência mundial e a eventual queda de Samaria e o exílio de Israel.</li>
+                <li><strong>Capítulos 18-25: O Reino de Judá até a Queda de Jerusalém.</strong> Os reinados dos últimos reis de Judá, incluindo os justos Ezequias e Josias, e os ímpios Manassés e Jeoaquim. A ascensão da Babilônia. O cerco e a destruição de Jerusalém, a destruição do Templo e o exílio de Judá. O livro termina com um vislumbre de esperança com a libertação de Joaquim da prisão.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Reis é uma narrativa sombria, mas crucial, que demonstra a justiça de Deus e a seriedade da desobediência, ao mesmo tempo em que aponta para a fidelidade contínua de Deus às Suas promessas, mesmo em meio ao juízo.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 2 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Reis narra o declínio e a queda dos reinos de Israel e Judá, o ministério de Eliseu e o cumprimento das profecias de juízo.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Reino Dividido até a Queda de Israel (Capítulos 1-17)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Transição de Elias para Eliseu (Capítulos 1-2):</strong>
+                    <ul>
+                        <li>Morte de Acazias de Israel.</li>
+                        <li>Elias é levado ao céu em um redemoinho.</li>
+                        <li>Eliseu recebe a porção dobrada do espírito de Elias.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Ministério de Eliseu (Capítulos 3-8):</strong>
+                    <ul>
+                        <li>Numerosos milagres de Eliseu: purificação da água, multiplicação de azeite, ressurreição do filho da sunamita, cura de Naamã, machado flutuante, cegueira de exércitos sírios.</li>
+                        <li>Eliseu aconselha reis e profetiza eventos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Reis de Israel e Judá (Capítulos 9-16):</strong>
+                    <ul>
+                        <li>Jeú é ungido rei de Israel e executa a casa de Acabe e Jezabel.</li>
+                        <li>Reinados de diversos reis de Israel (Jeú, Jeoacaz, Jeoás, Jeroboão II, Zacarias, Salum, Menaém, Pecaías, Peca, Oseias) e Judá (Jorão, Acazias, Atalia, Joás, Amazias, Uzias, Jotão, Acaz).</li>
+                        <li>A avaliação moral e espiritual de cada rei é dada, com a maioria dos reis de Israel sendo ímpios.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Queda de Samaria e o Exílio de Israel (Capítulo 17):</strong>
+                    <ul>
+                        <li>Oseias, o último rei de Israel, conspira contra a Assíria.</li>
+                        <li>Samaria é sitiada e capturada por Salmaneser V e Sargão II.</li>
+                        <li>Os israelitas são levados cativos para a Assíria, e povos estrangeiros são trazidos para Samaria.</li>
+                        <li>As razões para a queda de Israel: idolatria e desobediência.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Reino de Judá até a Queda de Jerusalém (Capítulos 18-25)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Reinados de Ezequias e Manassés (Capítulos 18-21):</strong>
+                    <ul>
+                        <li>Ezequias: um rei justo que promove reformas religiosas e confia em Deus contra Senaqueribe da Assíria.</li>
+                        <li>Manassés: o rei mais ímpio de Judá, que reverteu as reformas de Ezequias e encheu Jerusalém de idolatria.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Reinado de Josias (Capítulos 22-23):</strong>
+                    <ul>
+                        <li>Josias: um rei justo que encontra o Livro da Lei e promove uma grande reforma religiosa, destruindo a idolatria.</li>
+                        <li>Sua morte trágica em batalha.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Os Últimos Reis de Judá e a Ascensão da Babilônia (Capítulos 23:31-24:20):</strong>
+                    <ul>
+                        <li>Reinados de Jeoacaz, Jeoaquim e Joaquim.</li>
+                        <li>Judá se torna um vassalo da Babilônia.</li>
+                        <li>Primeiras deportações para a Babilônia.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Queda de Jerusalém e o Exílio de Judá (Capítulo 25):</strong>
+                    <ul>
+                        <li>Zedequias, o último rei de Judá, se rebela contra a Babilônia.</li>
+                        <li>Nabucodonosor sitia e destrói Jerusalém e o Templo.</li>
+                        <li>A maioria do povo é levada cativa para a Babilônia.</li>
+                        <li>Gedalias é nomeado governador, mas é assassinado.</li>
+                        <li>Libertação de Joaquim da prisão na Babilônia, um pequeno sinal de esperança.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">2 Reis é um livro de juízo e cumprimento profético. Ele demonstra a paciência de Deus em advertir Seu povo repetidamente através dos profetas, mas também Sua justiça ao cumprir as consequências da desobediência persistente. A queda de Israel e Judá serve como um lembrete vívido da importância da fidelidade à aliança de Deus e das consequências da idolatria. Apesar da escuridão do exílio, o final do livro, com a libertação de Joaquim, oferece um pequeno vislumbre da fidelidade de Deus à Sua promessa davídica, apontando para uma futura restauração e o cumprimento final da aliança através do Messias.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGrid2Reis">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 2 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 2 Reis, capítulo por capítulo, destacando os eventos e o desenvolvimento da história.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Reino Dividido até a Queda de Israel (Capítulos 1-17)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Morte de Acazias; Elias profetiza contra ele.</li>
+                <li><strong>Capítulo 2:</strong> Elias é levado ao céu; Eliseu recebe seu manto.</li>
+                <li><strong>Capítulo 3:</strong> Guerra contra Moabe; milagre da água para os exércitos.</li>
+                <li><strong>Capítulo 4:</strong> Milagres de Eliseu: azeite da viúva, filho da sunamita.</li>
+                <li><strong>Capítulo 5:</strong> Cura de Naamã, o sírio.</li>
+                <li><strong>Capítulo 6:</strong> Eliseu e o machado flutuante; exército sírio cegado.</li>
+                <li><strong>Capítulo 7:</strong> Cerco de Samaria; profecia de abundância.</li>
+                <li><strong>Capítulo 8:</strong> Eliseu e a sunamita; Hazael se torna rei da Síria.</li>
+                <li><strong>Capítulo 9:</strong> Jeú é ungido rei de Israel; Jeú mata Jorão e Acazias.</li>
+                <li><strong>Capítulo 10:</strong> Jeú extermina a casa de Acabe e os adoradores de Baal.</li>
+                <li><strong>Capítulo 11:</strong> Atalia usurpa o trono de Judá; Joás é feito rei.</li>
+                <li><strong>Capítulo 12:</strong> Joás repara o Templo.</li>
+                <li><strong>Capítulo 13:</strong> Reinados de Jeoacaz e Jeoás em Israel; morte de Eliseu.</li>
+                <li><strong>Capítulo 14:</strong> Reinados de Amazias em Judá e Jeroboão II em Israel.</li>
+                <li><strong>Capítulo 15:</strong> Reinados de Azarias (Uzias) em Judá e vários reis em Israel.</li>
+                <li><strong>Capítulo 16:</strong> Reinado de Acaz em Judá.</li>
+                <li><strong>Capítulo 17:</strong> Queda de Samaria; exílio de Israel para a Assíria.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Reino de Judá até a Queda de Jerusalém (Capítulos 18-25)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 18:</strong> Reinado de Ezequias em Judá; Senaqueribe da Assíria ameaça Jerusalém.</li>
+                <li><strong>Capítulo 19:</strong> Oração de Ezequias; Deus destrói o exército assírio.</li>
+                <li><strong>Capítulo 20:</strong> Doença de Ezequias e sua cura; visita de Merodaque-Baladã.</li>
+                <li><strong>Capítulo 21:</strong> Reinados de Manassés e Amom em Judá.</li>
+                <li><strong>Capítulo 22:</strong> Reinado de Josias; o Livro da Lei é encontrado.</li>
+                <li><strong>Capítulo 23:</strong> Reforma religiosa de Josias; sua morte.</li>
+                <li><strong>Capítulo 24:</strong> Reinados de Jeoaquim e Joaquim; primeira deportação para a Babilônia.</li>
+                <li><strong>Capítulo 25:</strong> Queda de Jerusalém; destruição do Templo; exílio para a Babilônia; libertação de Joaquim.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 2 Reis</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Consequências da Desobediência:</strong> A queda de Israel e Judá como resultado direto da persistente idolatria e infidelidade à aliança de Deus.</li>
+                <li><strong>O Papel dos Profetas:</strong> A contínua atuação dos profetas (Eliseu, Isaías, etc.) como porta-vozes de Deus, advertindo e chamando ao arrependimento.</li>
+                <li><strong>A Soberania de Deus na História:</strong> Deus usando nações estrangeiras (Assíria, Babilônia) como instrumentos de Seu juízo contra Seu próprio povo.</li>
+                <li><strong>A Importância do Templo e da Adoração Verdadeira:</strong> A centralidade do Templo e a necessidade de uma adoração pura, contrastada com a idolatria generalizada.</li>
+                <li><strong>Reis Bons e Maus:</strong> A avaliação dos reis com base em sua fidelidade a Deus e ao legado de Davi, mostrando que poucos foram fiéis.</li>
+                <li><strong>Fidelidade de Deus à Aliança Davídica:</strong> Mesmo em meio ao juízo, a promessa de Deus a Davi (uma dinastia eterna) é mantida, com um vislumbre de esperança no final.</li>
+                <li><strong>Milagres e o Poder de Deus:</strong> O ministério de Eliseu, repleto de milagres, demonstra o poder contínuo de Deus em um período de declínio espiritual.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 2 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chapters2Reis">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 2 Reis</h2>
+            <div id="quizContainer2Reis" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestion2Reis"></p>
+                <div id="quizOptions2Reis" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedback2Reis" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestion2Reis()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgress2Reis"></span></p>
+                <p>Pontuação: <span id="quizScore2Reis">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 2 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 2 Reis.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="reis2Chart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal2Reis()">&times;</span>
+                <h3 id="modalCharacterName2Reis" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription2Reis" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 2 Reis",
+            "short_name": "2 Reis",
+            "description": "Explore o livro de 2 Reis de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=2R",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=2R",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '2reis-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection2Reis(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtons2Reis();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinks2Reis();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestions2Reis(); // Embaralha as perguntas no início do quiz
+                currentQuizIndex2Reis = 0; // Reinicia o quiz
+                score2Reis = 0;
+                wrongAnswers2Reis = 0;
+                document.getElementById('quizScore2Reis').textContent = `Acertos: ${score2Reis}, Erros: ${wrongAnswers2Reis}`;
+                displayQuestion2Reis();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                render2ReisChart();
+            }
+        }
+
+        // Dados dos personagens para 2 Reis
+        const characterDetails2Reis = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus soberano que executa Seus juízos contra a idolatria e a desobediência, mas também demonstra fidelidade à Sua aliança e provê esperança em meio ao exílio."
+            },
+            "Eliseu": {
+                name: "Eliseu",
+                description: "O principal profeta de Israel após Elias, conhecido por seus numerosos milagres (cura de Naamã, ressurreição do filho da sunamita, etc.) e por seu papel em aconselhar reis e profetizar eventos."
+            },
+            "Elias": {
+                name: "Elias",
+                description: "O profeta que foi levado ao céu em um redemoinho, marcando a transição de seu ministério para Eliseu."
+            },
+            "Acazias": {
+                name: "Acazias",
+                description: "Rei de Israel, filho de Acabe e Jezabel, que continuou a idolatria de seus pais. Sua morte é narrada no início do livro."
+            },
+            "Naamã": {
+                name: "Naamã",
+                description: "Comandante do exército do rei da Síria, que foi curado de lepra por Eliseu ao se banhar sete vezes no rio Jordão."
+            },
+            "Jezabel": {
+                name: "Jezabel",
+                description: "Rainha de Israel, esposa de Acabe, que foi morta por ordem de Jeú, cumprindo a profecia de Elias."
+            },
+            "Jeú": {
+                name: "Jeú",
+                description: "Comandante do exército ungido por Eliseu para ser rei de Israel. Executou a casa de Acabe e Jezabel e exterminou a adoração a Baal em Israel."
+            },
+            "Atalia": {
+                name: "Atalia",
+                description: "Rainha-mãe de Judá, filha de Acabe e Jezabel. Tentou destruir toda a descendência real de Judá, mas Joás foi salvo e eventualmente se tornou rei."
+            },
+            "Joás (de Judá)": {
+                name: "Joás (de Judá)",
+                description: "Rei de Judá que foi salvo da matança de Atalia e reinou por 40 anos. Reparou o Templo, mas se desviou no final de seu reinado."
+            },
+            "Ezequias": {
+                name: "Ezequias",
+                description: "Um dos poucos reis justos de Judá. Promoveu reformas religiosas, removeu a idolatria e confiou em Deus contra a ameaça do rei Senaqueribe da Assíria."
+            },
+            "Senaqueribe": {
+                name: "Senaqueribe",
+                description: "Rei da Assíria que invadiu Judá e ameaçou Jerusalém durante o reinado de Ezequias. Seu exército foi milagrosamente destruído por Deus."
+            },
+            "Manassés": {
+                name: "Manassés",
+                description: "Filho de Ezequias e o rei mais ímpio de Judá. Reverteu as reformas de seu pai, introduziu a idolatria em larga escala e encheu Jerusalém de sangue inocente."
+            },
+            "Josias": {
+                name: "Josias",
+                description: "Um dos reis mais justos de Judá. Encontrou o Livro da Lei no Templo e liderou uma grande reforma religiosa, destruindo a idolatria em toda a terra."
+            },
+            "Hulda": {
+                name: "Hulda",
+                description: "Uma profetisa que confirmou a autenticidade do Livro da Lei encontrado durante o reinado de Josias e profetizou o juízo sobre Judá."
+            },
+            "Nabucodonosor": {
+                name: "Nabucodonosor",
+                description: "Rei da Babilônia que sitiou e destruiu Jerusalém e o Templo, levando a maioria do povo de Judá para o exílio."
+            },
+            "Joaquim": {
+                name: "Joaquim",
+                description: "Rei de Judá que foi levado cativo para a Babilônia. No final do livro, ele é libertado da prisão e recebe um lugar de honra, oferecendo um pequeno vislumbre de esperança."
+            },
+            "Gedalias": {
+                name: "Gedalias",
+                description: "Nomeado governador de Judá pelos babilônios após a queda de Jerusalém. Foi assassinado, levando a mais dispersão do povo."
+            },
+            "Jeroboão II": {
+                name: "Jeroboão II",
+                description: "Um dos reis de Israel que reinou por um longo período e trouxe prosperidade material, embora não tenha removido a idolatria."
+            },
+            "Salmaneser V": {
+                name: "Salmaneser V",
+                description: "Rei da Assíria que iniciou o cerco de Samaria."
+            },
+            "Sargão II": {
+                name: "Sargão II",
+                description: "Rei da Assíria que completou a captura de Samaria e deportou os israelitas."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModal2Reis(characterName) {
+            const details = characterDetails2Reis[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName2Reis').textContent = details.name;
+                document.getElementById('modalCharacterDescription2Reis').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal2Reis() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtons2Reis() {
+            const grid = document.getElementById('characterGrid2Reis');
+            grid.innerHTML = '';
+            for (const key in characterDetails2Reis) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModal2Reis(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinks2Reis() {
+            const chaptersDiv = document.getElementById('chapters2Reis');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 25; i++) { // 2 Reis tem 25 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/2rs/${i}`; // Link para a Bíblia Online, 2 Reis
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 2 Reis (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestions2Reis = [
+            { question: "Quem foi levado ao céu em um redemoinho?", options: ["Elias", "Eliseu", "Enoque", "Moisés"], answer: "Elias", reference: "2 Reis 2:11" },
+            { question: "Quem recebeu uma porção dobrada do espírito de Elias?", options: ["Josué", "Eliseu", "Geazi", "Samuel"], answer: "Eliseu", reference: "2 Reis 2:9-10" },
+            { question: "Qual profeta curou Naamã da lepra?", options: ["Elias", "Isaías", "Eliseu", "Jeremias"], answer: "Eliseu", reference: "2 Reis 5:1-14" },
+            { question: "Qual cidade foi sitiada e capturada pela Assíria, resultando no exílio de Israel?", options: ["Jerusalém", "Dã", "Betel", "Samaria"], answer: "Samaria", reference: "2 Reis 17:5-6" },
+            { question: "Qual rei de Judá promoveu uma grande reforma religiosa após encontrar o Livro da Lei?", options: ["Ezequias", "Manassés", "Josias", "Acaz"], answer: "Josias", reference: "2 Reis 22:8-23:25" },
+            { question: "Quem foi o rei mais ímpio de Judá, que reverteu as reformas de seu pai Ezequias?", options: ["Acaz", "Manassés", "Amom", "Jeoaquim"], answer: "Manassés", reference: "2 Reis 21:1-9" },
+            { question: "Qual império destruiu Jerusalém e o Templo, levando Judá para o exílio?", options: ["Assíria", "Egito", "Babilônia", "Síria"], answer: "Babilônia", reference: "2 Reis 25:8-10" },
+            { question: "Quem foi a rainha-mãe de Judá que tentou destruir toda a descendência real?", options: ["Jezabel", "Atalia", "Bate-Seba", "Hulda"], answer: "Atalia", reference: "2 Reis 11:1" },
+            { question: "Quem foi o comandante do exército sírio curado da lepra?", options: ["Ben-Hadade", "Hazael", "Naamã", "Rezin"], answer: "Naamã", reference: "2 Reis 5:1" },
+            { question: "Qual rei de Israel foi ungido por Eliseu e executou a casa de Acabe e Jezabel?", options: ["Jeorão", "Jeú", "Oseias", "Peca"], answer: "Jeú", reference: "2 Reis 9:1-10" },
+            { question: "Qual foi o milagre de Eliseu que envolveu um machado flutuante?", options: ["Multiplicação de pães", "Cura de cegos", "Fazer um machado flutuar", "Ressuscitar os mortos"], answer: "Fazer um machado flutuar", reference: "2 Reis 6:5-7" },
+            { question: "Quem foi o rei de Judá que confiou em Deus contra Senaqueribe da Assíria?", options: ["Josias", "Manassés", "Ezequias", "Acaz"], answer: "Ezequias", reference: "2 Reis 18:1-19:37" },
+            { question: "Qual profetisa confirmou a autenticidade do Livro da Lei encontrado por Josias?", options: ["Débora", "Miriã", "Hulda", "Ana"], answer: "Hulda", reference: "2 Reis 22:14-20" },
+            { question: "Quem foi o último rei de Judá antes da queda de Jerusalém?", options: ["Jeoaquim", "Joaquim", "Zedequias", "Josias"], answer: "Zedequias", reference: "2 Reis 24:18-25:7" },
+            { question: "Qual rei de Israel reinou por um longo período e trouxe prosperidade material, mas não removeu a idolatria?", options: ["Jeú", "Jeoás", "Jeroboão II", "Oseias"], answer: "Jeroboão II", reference: "2 Reis 14:23-29" },
+            { question: "Quem foi o rei da Babilônia que destruiu Jerusalém?", options: ["Tiglath-Pileser", "Salmaneser", "Nabucodonosor", "Sargão"], answer: "Nabucodonosor", reference: "2 Reis 25:1" },
+            { question: "Qual o nome do servo de Eliseu que cobiçou os presentes de Naamã e foi atingido com lepra?", options: ["Geazi", "Obadias", "Jônatas", "Aías"], answer: "Geazi", reference: "2 Reis 5:20-27" },
+            { question: "Onde o rei Acazias de Israel morreu depois de cair por uma grade?", options: ["Samaria", "Jerusalém", "Ecrón", "Jezreel"], answer: "Ecrón", reference: "2 Reis 1:2-17" },
+            { question: "Qual o nome do filho da sunamita que Eliseu ressuscitou dos mortos?", options: ["Amnon", "Obadias", "Eliezer", "Sem nome específico, apenas 'o filho'"], answer: "Sem nome específico, apenas 'o filho'", reference: "2 Reis 4:32-37" },
+            { question: "Qual foi o destino de Jezabel?", options: ["Morreu de doença", "Foi exilada", "Foi jogada de uma janela e comida por cães", "Suicídio"], answer: "Foi jogada de uma janela e comida por cães", reference: "2 Reis 9:30-37" },
+            { question: "Quantos anos tinha Josias quando começou a reinar?", options: ["8 anos", "16 anos", "20 anos", "25 anos"], answer: "8 anos", reference: "2 Reis 22:1" },
+            { question: "Qual o nome do rei de Judá que foi libertado da prisão na Babilônia no final do livro?", options: ["Zedequias", "Jeoaquim", "Joaquim", "Josias"], answer: "Joaquim", reference: "2 Reis 25:27-30" },
+            { question: "Quem foi o rei de Israel que fez bezerros de ouro em Dã e Betel?", options: ["Acabe", "Jeroboão", "Onri", "Jeú"], answer: "Jeroboão", reference: "1 Reis 12:28-29 (contexto de 2 Reis)" },
+            { question: "Qual o nome do general assírio que zombou de Deus e ameaçou Jerusalém?", options: ["Tartan", "Rabsacá", "Senaqueribe", "Tiglath-Pileser"], answer: "Rabsacá", reference: "2 Reis 18:17-35" },
+            { question: "Quantos profetas de Baal foram mortos por Jeú?", options: ["50", "100", "200", "Todos eles (número não especificado, mas muitos)"], answer: "Todos eles (número não especificado, mas muitos)", reference: "2 Reis 10:18-28" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestions2Reis = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestions2Reis.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestions2Reis = allQuizQuestions2Reis.concat(uniqueQuizQuestions2Reis);
+        }
+        allQuizQuestions2Reis = allQuizQuestions2Reis.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestions2Reis = [];
+        let currentQuizIndex2Reis = 0;
+        let score2Reis = 0;
+        let wrongAnswers2Reis = 0;
+        let reis2ChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestions2Reis() {
+            shuffledQuizQuestions2Reis = [...allQuizQuestions2Reis]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestions2Reis);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgress2Reis() {
+            const progressElement = document.getElementById('quizProgress2Reis');
+            progressElement.textContent = `${currentQuizIndex2Reis + 1}/${shuffledQuizQuestions2Reis.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestion2Reis() {
+            if (currentQuizIndex2Reis >= shuffledQuizQuestions2Reis.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestion2Reis').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptions2Reis').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${score2Reis}, Erros: ${wrongAnswers2Reis}</p>`;
+                document.getElementById('quizFeedback2Reis').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestions2Reis[currentQuizIndex2Reis];
+            document.getElementById('quizQuestion2Reis').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptions2Reis');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswer2Reis(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedback2Reis').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgress2Reis();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswer2Reis(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedback2Reis');
+            const optionsButtons = document.querySelectorAll('#quizOptions2Reis button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                score2Reis++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswers2Reis++;
+            }
+            document.getElementById('quizScore2Reis').textContent = `Acertos: ${score2Reis}, Erros: ${wrongAnswers2Reis}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestion2Reis() {
+            currentQuizIndex2Reis++;
+            displayQuestion2Reis();
+        }
+
+        // Dados para o gráfico de temas de 2 Reis
+        const reis2ChartData = {
+            labels: ['Queda de Israel', 'Queda de Judá', 'Ministério de Eliseu', 'Idolatria', 'Reis Bons/Maus', 'Profecias Cumpridas', 'Fidelidade de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 22, 18, 15, 10, 7, 3], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const reis2ChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 2 Reis',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function render2ReisChart() {
+            const ctx = document.getElementById('reis2Chart').getContext('2d');
+            if (reis2ChartInstance) {
+                reis2ChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            reis2ChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: reis2ChartData,
+                options: reis2ChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

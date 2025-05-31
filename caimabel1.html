@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Caim e Abel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #92400e; /* Brown border for Cain and Abel game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #78350f; /* Brown for Cain and Abel game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #92400e; /* Darker brown on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #78350f;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #78350f;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #92400e;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-amber-800 mb-4">A História de Caim e Abel 🌾</h1>
+        <p class="text-gray-700 mb-6">
+            Descubra a história dos primeiros irmãos, suas ofertas, a tragédia e as consequências de suas escolhas.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Caim e Abel!</p>
+            <p class="text-gray-700 mt-6">A história de Caim e Abel nos ensina sobre a natureza do pecado, o ciúme e a importância da obediência a Deus.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: O Nascimento dos Irmãos',
+                location: 'Fora do Éden',
+                objective: 'Conhecer os primeiros filhos de Adão e Eva.',
+                clues: [
+                    'Eva deu à luz dois filhos após a expulsão do Éden.',
+                    'Um se tornou lavrador e o outro, pastor de ovelhas.'
+                ],
+                keyVerse: 'Gênesis 4:1-2',
+                enigma: 'Qual era a profissão de Caim?',
+                options: ['Lavrador', 'Pastor de ovelhas', 'Construtor'],
+                correctAnswer: 'Lavrador'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: As Ofertas',
+                location: 'Fora do Éden',
+                objective: 'Entender os tipos de ofertas apresentadas a Deus.',
+                clues: [
+                    'Caim trouxe uma oferta dos frutos da terra.',
+                    'Abel trouxe das primícias e da gordura de seu rebanho.'
+                ],
+                keyVerse: 'Gênesis 4:3',
+                enigma: 'O que Caim ofereceu ao Senhor?',
+                options: ['Frutos da terra', 'Animais do rebanho', 'Ouro e prata'],
+                correctAnswer: 'Frutos da terra'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: A Aceitação de Abel',
+                location: 'Fora do Éden',
+                objective: 'Descobrir por que a oferta de Abel foi aceita.',
+                clues: [
+                    'Deus atentou para Abel e para a sua oferta.',
+                    'A oferta de Abel era das primícias e do melhor.'
+                ],
+                keyVerse: 'Gênesis 4:4',
+                enigma: 'Por que a oferta de Abel foi agradável a Deus?',
+                options: ['Porque era a melhor parte do seu rebanho', 'Porque era a maior oferta', 'Porque era a primeira oferta'],
+                correctAnswer: 'Porque era a melhor parte do seu rebanho'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: A Rejeição de Caim',
+                location: 'Fora do Éden',
+                objective: 'Observar a reação de Caim à rejeição de sua oferta.',
+                clues: [
+                    'Deus não atentou para Caim e para a sua oferta.',
+                    'Caim ficou irado e seu semblante se abateu.'
+                ],
+                keyVerse: 'Gênesis 4:5',
+                enigma: 'Como Caim reagiu à rejeição de sua oferta?',
+                options: ['Ficou irado e abatido', 'Ficou triste e chorou', 'Pediu perdão a Deus'],
+                correctAnswer: 'Ficou irado e abatido'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: A Advertência de Deus',
+                location: 'Fora do Éden',
+                objective: 'Entender o aviso divino a Caim sobre o pecado.',
+                clues: [
+                    'Deus perguntou a Caim por que ele estava irado.',
+                    'Deus o alertou que o pecado estava à porta.'
+                ],
+                keyVerse: 'Gênesis 4:6-7',
+                enigma: 'O que Deus disse a Caim que estava à porta, esperando para dominá-lo?',
+                options: ['O pecado', 'A fome', 'A tristeza'],
+                correctAnswer: 'O pecado'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: O Homicídio',
+                location: 'Campo',
+                objective: 'Testemunhar o primeiro ato de violência entre irmãos.',
+                clues: [
+                    'Caim chamou Abel para o campo.',
+                    'Lá, Caim se levantou contra seu irmão e o matou.'
+                ],
+                keyVerse: 'Gênesis 4:8',
+                enigma: 'Onde Caim matou Abel?',
+                options: ['No campo', 'Em casa', 'No jardim'],
+                correctAnswer: 'No campo'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: O Questionamento de Deus',
+                location: 'Campo',
+                objective: 'Observar a confrontação de Deus com Caim.',
+                clues: [
+                    'Deus perguntou a Caim onde estava seu irmão Abel.',
+                    'Caim respondeu com uma pergunta evasiva.'
+                ],
+                keyVerse: 'Gênesis 4:9',
+                enigma: 'Qual foi a resposta de Caim quando Deus perguntou sobre Abel?',
+                options: ['Não sei; sou eu guarda do meu irmão?', 'Ele fugiu', 'Ele está dormindo'],
+                correctAnswer: 'Não sei; sou eu guarda do meu irmão?'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: O Clamor do Sangue',
+                location: 'Terra',
+                objective: 'Entender a voz do sangue de Abel clamando a Deus.',
+                clues: [
+                    'Deus disse a Caim que a voz do sangue de seu irmão clamava da terra.',
+                    'O sangue de Abel era um testemunho contra Caim.'
+                ],
+                keyVerse: 'Gênesis 4:10',
+                enigma: 'De onde o sangue de Abel clamava a Deus?',
+                options: ['Da terra', 'Do céu', 'Da arca'],
+                correctAnswer: 'Da terra'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: A Maldição de Caim',
+                location: 'Terra',
+                objective: 'Aprender sobre a punição imposta a Caim por Deus.',
+                clues: [
+                    'Caim foi amaldiçoado pela terra.',
+                    'Ela não mais lhe daria sua força, e ele seria fugitivo e errante.'
+                ],
+                keyVerse: 'Gênesis 4:11-12',
+                enigma: 'Qual foi uma das maldições impostas a Caim?',
+                options: ['Ser fugitivo e errante na terra', 'Perder a fala', 'Ser transformado em animal'],
+                correctAnswer: 'Ser fugitivo e errante na terra'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: O Lamento de Caim',
+                location: 'Terra',
+                objective: 'Observar a reação de Caim à sua punição.',
+                clues: [
+                    'Caim disse que sua punição era maior do que podia suportar.',
+                    'Ele temia que qualquer um que o encontrasse o mataria.'
+                ],
+                keyVerse: 'Gênesis 4:13-14',
+                enigma: 'O que Caim temia após receber sua punição?',
+                options: ['Ser morto por quem o encontrasse', 'Passar fome', 'Viver sozinho'],
+                correctAnswer: 'Ser morto por quem o encontrasse'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: A Proteção de Caim',
+                location: 'Terra',
+                objective: 'Entender a provisão de Deus para a proteção de Caim.',
+                clues: [
+                    'Deus colocou um sinal em Caim.',
+                    'Para que ninguém que o encontrasse o matasse.'
+                ],
+                keyVerse: 'Gênesis 4:15',
+                enigma: 'Qual foi o propósito do sinal que Deus colocou em Caim?',
+                options: ['Para protegê-lo de ser morto', 'Para marcá-lo como assassino', 'Para que todos o evitassem'],
+                correctAnswer: 'Para protegê-lo de ser morto'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: A Terra de Node',
+                location: 'Terra de Node',
+                objective: 'Aprender sobre o novo lar de Caim após ser expulso.',
+                clues: [
+                    'Caim saiu da presença do Senhor.',
+                    'Ele habitou na terra de Node, a leste do Éden.'
+                ],
+                keyVerse: 'Gênesis 4:16',
+                enigma: 'Qual era o nome da terra para onde Caim foi viver?',
+                options: ['Node', 'Gósen', 'Canaã'],
+                correctAnswer: 'Node'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: A Descendência de Caim',
+                location: 'Terra de Node',
+                objective: 'Conhecer a linhagem de Caim e suas contribuições.',
+                clues: [
+                    'Caim teve um filho chamado Enoque.',
+                    'Sua descendência incluiu inventores e construtores de cidades.'
+                ],
+                keyVerse: 'Gênesis 4:17-24',
+                enigma: 'Quem foi o primeiro filho de Caim?',
+                options: ['Enoque', 'Lameque', 'Jubal'],
+                correctAnswer: 'Enoque'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: O Nascimento de Sete',
+                location: 'Fora do Éden',
+                objective: 'Entender a continuação da linhagem piedosa através de Adão e Eva.',
+                clues: [
+                    'Adão e Eva tiveram outro filho após a morte de Abel.',
+                    'Eva o considerou uma substituição para Abel.'
+                ],
+                keyVerse: 'Gênesis 4:25',
+                enigma: 'Qual foi o nome do filho que Adão e Eva tiveram para substituir Abel?',
+                options: ['Sete', 'Enos', 'Noé'],
+                correctAnswer: 'Sete'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Início da Invocação do Nome do Senhor',
+                location: 'Fora do Éden',
+                objective: 'Aprender sobre o reavivamento da adoração a Deus.',
+                clues: [
+                    'Sete também teve um filho.',
+                    'Naqueles dias, começou-se a invocar o nome do Senhor.'
+                ],
+                keyVerse: 'Gênesis 4:26',
+                enigma: 'O que começou a acontecer nos dias do filho de Sete?',
+                options: ['A invocar o nome do Senhor', 'A construir grandes cidades', 'A criar animais'],
+                correctAnswer: 'A invocar o nome do Senhor'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

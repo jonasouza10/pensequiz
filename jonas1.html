@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Jonas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #2563eb; /* Blue border for Jonah game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #2563eb; /* Blue for Jonah game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #1d4ed8; /* Darker blue on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #2563eb;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #1d4ed8;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-blue-700 mb-4">A História de Jonas 🐳</h1>
+        <p class="text-gray-700 mb-6">
+            Siga a jornada de Jonas, o profeta que tentou fugir da vontade de Deus, mas aprendeu sobre Sua soberania e misericórdia.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Jonas!</p>
+            <p class="text-gray-700 mt-6">A história de Jonas é um poderoso exemplo da soberania de Deus, de Sua infinita misericórdia e da importância da obediência, mesmo quando não compreendemos Seus planos.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: A Chamada de Jonas',
+                location: 'Nínive (destino), Jope (ponto de partida)',
+                objective: 'Entender a ordem de Deus a Jonas e sua desobediência.',
+                clues: [
+                    'Deus chamou Jonas para pregar em Nínive.',
+                    'Jonas fugiu para Társis.'
+                ],
+                keyVerse: 'Jonas 1:1-3',
+                enigma: 'Para onde Deus mandou Jonas pregar?',
+                options: ['Nínive', 'Társis', 'Jerusalém'],
+                correctAnswer: 'Nínive'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: A Tempestade no Mar',
+                location: 'No navio, em alto mar',
+                objective: 'Compreender as consequências da desobediência de Jonas.',
+                clues: [
+                    'Uma grande tempestade se levantou.',
+                    'Os marinheiros lançaram sortes e descobriram que Jonas era o culpado.'
+                ],
+                keyVerse: 'Jonas 1:4-7',
+                enigma: 'O que os marinheiros fizeram para descobrir quem causou a tempestade?',
+                options: ['Lançaram sortes', 'Oraram a seus deuses', 'Jogaram a carga ao mar'],
+                correctAnswer: 'Lançaram sortes'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: Jonas é Lançado ao Mar',
+                location: 'No mar',
+                objective: 'Entender a decisão de Jonas e a intervenção divina.',
+                clues: [
+                    'Jonas pediu para ser lançado ao mar para acalmar a tempestade.',
+                    'O mar se acalmou.'
+                ],
+                keyVerse: 'Jonas 1:12-15',
+                enigma: 'O que aconteceu com a tempestade depois que Jonas foi lançado ao mar?',
+                options: ['Acalmou-se', 'Intensificou-se', 'Permaneceu a mesma'],
+                correctAnswer: 'Acalmou-se'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: O Grande Peixe',
+                location: 'Dentro do grande peixe',
+                objective: 'Aprender sobre o livramento milagroso de Jonas.',
+                clues: [
+                    'Deus preparou um grande peixe para engolir Jonas.',
+                    'Jonas ficou três dias e três noites no ventre do peixe.'
+                ],
+                keyVerse: 'Jonas 1:17',
+                enigma: 'Por quantos dias Jonas ficou no ventre do grande peixe?',
+                options: ['Três dias e três noites', 'Sete dias e sete noites', 'Um dia e uma noite'],
+                correctAnswer: 'Três dias e três noites'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: A Oração de Jonas',
+                location: 'Dentro do grande peixe',
+                objective: 'Observar a oração de arrependimento e súplica de Jonas.',
+                clues: [
+                    'Jonas orou a Deus do ventre do peixe, clamando por socorro e arrependimento.'
+                ],
+                keyVerse: 'Jonas 2:1-9',
+                enigma: 'De onde Jonas orou a Deus?',
+                options: ['Do ventre do peixe', 'Do navio', 'Da praia'],
+                correctAnswer: 'Do ventre do peixe'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: Jonas Vomitado na Terra Seca',
+                location: 'Terra seca (próximo a Nínive)',
+                objective: 'Entender o segundo comando de Deus e o livramento.',
+                clues: [
+                    'Deus ordenou ao peixe que vomitasse Jonas na terra seca.'
+                ],
+                keyVerse: 'Jonas 2:10',
+                enigma: 'O que Deus ordenou ao peixe?',
+                options: ['Vomitar Jonas na terra seca', 'Levá-lo de volta a Jope', 'Deixá-lo no fundo do mar'],
+                correctAnswer: 'Vomitar Jonas na terra seca'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: Jonas Obedece a Deus',
+                location: 'Nínive',
+                objective: 'Acompanhar a obediência de Jonas e sua pregação.',
+                clues: [
+                    'Pela segunda vez, a palavra do Senhor veio a Jonas, e ele foi a Nínive.'
+                ],
+                keyVerse: 'Jonas 3:1-3',
+                enigma: 'Quantas vezes a palavra do Senhor veio a Jonas para ir a Nínive?',
+                options: ['Duas vezes', 'Uma vez', 'Três vezes'],
+                correctAnswer: 'Duas vezes'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: A Mensagem de Jonas a Nínive',
+                location: 'Nínive',
+                objective: 'Aprender sobre a mensagem de arrependimento de Jonas.',
+                clues: [
+                    'Jonas pregou que em quarenta dias Nínive seria subvertida.'
+                ],
+                keyVerse: 'Jonas 3:4',
+                enigma: 'Em quantos dias Nínive seria subvertida, segundo a pregação de Jonas?',
+                options: ['Quarenta dias', 'Sete dias', 'Cem dias'],
+                correctAnswer: 'Quarenta dias'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: O Arrependimento de Nínive',
+                location: 'Nínive',
+                objective: 'Observar a resposta do povo de Nínive à pregação de Jonas.',
+                clues: [
+                    'O povo de Nínive creu em Deus, proclamou um jejum e se vestiu de saco, do maior ao menor.'
+                ],
+                keyVerse: 'Jonas 3:5',
+                enigma: 'O que o povo de Nínive fez ao ouvir a mensagem de Jonas?',
+                options: ['Creu em Deus e se arrependeu', 'Zombou de Jonas', 'Ignorou a mensagem'],
+                correctAnswer: 'Creu em Deus e se arrependeu'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: O Arrependimento do Rei de Nínive',
+                location: 'Nínive (Palácio Real)',
+                objective: 'Entender a atitude do rei de Nínive.',
+                clues: [
+                    'O rei de Nínive também se arrependeu, desceu do trono, tirou seu manto, cobriu-se de saco e sentou-se sobre cinzas.'
+                ],
+                keyVerse: 'Jonas 3:6-9',
+                enigma: 'O que o rei de Nínive fez para mostrar seu arrependimento?',
+                options: ['Desceu do trono e se vestiu de saco', 'Mandou prender Jonas', 'Ofereceu sacrifícios'],
+                correctAnswer: 'Desceu do trono e se vestiu de saco'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: A Compaixão de Deus',
+                location: 'Nínive',
+                objective: 'Compreender a misericórdia de Deus para com Nínive.',
+                clues: [
+                    'Deus viu as obras do povo, que se converteram do seu mau caminho, e se arrependeu do mal que havia falado que lhes faria.'
+                ],
+                keyVerse: 'Jonas 3:10',
+                enigma: 'O que Deus fez ao ver o arrependimento de Nínive?',
+                options: ['Se arrependeu do mal que lhes faria', 'Destruiu a cidade', 'Enviou outro profeta'],
+                correctAnswer: 'Se arrependeu do mal que lhes faria'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: A Ira de Jonas',
+                location: 'Fora de Nínive',
+                objective: 'Entender a insatisfação de Jonas com a misericórdia de Deus.',
+                clues: [
+                    'Jonas ficou muito desgostoso e irado porque Deus não destruiu Nínive.'
+                ],
+                keyVerse: 'Jonas 4:1',
+                enigma: 'O que Jonas sentiu quando Deus não destruiu Nínive?',
+                options: ['Ira e desgosto', 'Alegria e gratidão', 'Indiferença'],
+                correctAnswer: 'Ira e desgosto'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: A Planta e o Verme',
+                location: 'Fora de Nínive',
+                objective: 'Aprender sobre a lição de Deus a Jonas através da planta.',
+                clues: [
+                    'Deus fez crescer uma planta para dar sombra a Jonas, mas depois enviou um verme para secá-la.'
+                ],
+                keyVerse: 'Jonas 4:6-7',
+                enigma: 'O que Deus usou para dar sombra a Jonas e depois secá-la?',
+                options: ['Uma planta e um verme', 'Uma rocha e o sol', 'Uma tenda e o vento'],
+                correctAnswer: 'Uma planta e um verme'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: A Lição de Deus a Jonas',
+                location: 'Fora de Nínive',
+                objective: 'Entender a repreensão de Deus a Jonas.',
+                clues: [
+                    'Deus questionou Jonas sobre sua preocupação com a planta em contraste com Sua compaixão por Nínive, que tinha mais de cento e vinte mil pessoas.'
+                ],
+                keyVerse: 'Jonas 4:10-11',
+                enigma: 'Quantas pessoas havia em Nínive, segundo Deus?',
+                options: ['Mais de cento e vinte mil', 'Dez mil', 'Quinhentas mil'],
+                correctAnswer: 'Mais de cento e vinte mil'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Legado de Jonas',
+                location: 'Nínive e Israel',
+                objective: 'Refletir sobre as lições da história de Jonas.',
+                clues: [
+                    'A história de Jonas ensina sobre a soberania de Deus, Sua misericórdia, a importância da obediência e o amor de Deus por todas as nações.'
+                ],
+                keyVerse: 'Mateus 12:40 (referência do Novo Testamento)',
+                enigma: 'Qual é uma das principais lições da história de Jonas?',
+                options: ['A misericórdia de Deus por todas as nações', 'A importância da pesca', 'A ira de Deus'],
+                correctAnswer: 'A misericórdia de Deus por todas as nações'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-blue-700 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

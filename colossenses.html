@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Colossenses</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Colossenses Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Colossenses</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionColossenses('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionColossenses('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionColossenses('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionColossenses('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionColossenses('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionColossenses('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionColossenses('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionColossenses('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionColossenses('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Colossenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Epístola de Paulo aos Colossenses, uma carta poderosa que exalta a supremacia e a suficiência de Cristo em todas as coisas. Descubra a verdade sobre a divindade de Cristo, a plenitude que temos Nele, e as exortações práticas para uma vida enraizada em Cristo, em contraste com filosofias vazias e legalismo. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Colossenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Epístola de Paulo aos Colossenses é uma das 'Epístolas da Prisão', escrita por Paulo enquanto estava aprisionado em Roma (cerca de 60-62 d.C.), juntamente com Efésios, Filipenses e Filemom. Ela foi endereçada à igreja em Colossos, uma cidade na Frígia (Ásia Menor), que Paulo nunca havia visitado pessoalmente, mas que foi evangelizada por Epafras, um de seus colaboradores.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito desta carta é combater uma heresia crescente na igreja de Colossos, que misturava elementos do gnosticismo (ênfase em 'conhecimento secreto'), legalismo judaico (observância de leis e rituais), ascetismo (privação do corpo) e adoração de anjos. Essa heresia diminuía a pessoa e a obra de Jesus Cristo. Paulo, então, exalta a supremacia e a suficiência de Cristo em todas as coisas: Ele é o Criador, o Sustentador, a Cabeça da Igreja, o Redentor e a plenitude da divindade. Em Cristo, os crentes têm tudo o que precisam para a salvação e para uma vida plena.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A carta é dividida em duas seções principais: a doutrinária (Capítulos 1-2), que apresenta a supremacia de Cristo e a plenitude que os crentes têm Nele, e a prática (Capítulos 3-4), que exorta os crentes a viverem uma nova vida em Cristo, despojando-se do velho homem e revestindo-se do novo, com implicações para a vida pessoal, familiar e social, e incluindo saudações finais. Colossenses é uma defesa vigorosa da centralidade de Cristo e um chamado para que os crentes permaneçam firmes na fé e não se desviem para filosofias vazias ou tradições humanas.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-2: A Supremacia de Cristo e a Plenitude em Cristo.</strong> Ações de graças, a pessoa e a obra de Cristo (o hino cristológico), o ministério de Paulo, advertências contra as falsas filosofias e o legalismo.</li>
+                <li><strong>Capítulos 3-4: A Nova Vida em Cristo e Exortações Práticas.</strong> Despojar-se do velho homem, revestir-se do novo, relacionamentos cristãos (família, trabalho), e saudações finais.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Colossenses é uma carta essencial para entender a centralidade de Cristo em nossa fé e vida, e para nos proteger de doutrinas que diminuem Sua glória e suficiência.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Colossenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Colossenses é uma epístola que exalta a supremacia de Cristo e a plenitude da vida Nele.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Doutrina: A Supremacia e Suficiência de Cristo (Capítulos 1-2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudações e Ações de Graças (Capítulo 1:1-8):</strong>
+                    <ul>
+                        <li>Saudação de Paulo e Timóteo.</li>
+                        <li>Ações de graças pela fé, amor e esperança dos colossenses.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Oração de Paulo pela Sabedoria e Conhecimento (Capítulo 1:9-14):</strong>
+                    <ul>
+                        <li>Para que andem dignamente do Senhor e frutifiquem.</li>
+                        <li>Libertação do poder das trevas e transporte para o Reino do Filho.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Supremacia de Cristo (Capítulo 1:15-23):</strong>
+                    <ul>
+                        <li>O hino cristológico: Cristo como imagem do Deus invisível, primogênito de toda a criação, Criador, Sustentador, Cabeça da Igreja, primogênito dentre os mortos, e em quem reside toda a plenitude.</li>
+                        <li>Reconciliação de todas as coisas por meio d'Ele.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Ministério de Paulo (Capítulo 1:24-2:3):</strong>
+                    <ul>
+                        <li>Paulo se alegra em seus sofrimentos por amor à Igreja.</li>
+                        <li>O mistério de Cristo em vós, a esperança da glória.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Advertência contra Falsas Filosofias (Capítulo 2:4-23):</strong>
+                    <ul>
+                        <li>Cuidado com filosofias e vãs subtilezas.</li>
+                        <li>A plenitude em Cristo, não em rituais, ascetismo ou adoração de anjos.</li>
+                        <li>Cristo é a cabeça de todo principado e potestade.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Prática: A Nova Vida em Cristo (Capítulos 3-4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Buscando as Coisas do Alto (Capítulo 3:1-4):</strong>
+                    <ul>
+                        <li>Se já ressuscitastes com Cristo, buscai as coisas que são de cima.</li>
+                        <li>Vossa vida está escondida com Cristo em Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Despojar-se e Revestir-se (Capítulo 3:5-17):</strong>
+                    <ul>
+                        <li>Mortificar a carne e suas paixões.</li>
+                        <li>Revestir-se do novo homem, que se renova para o conhecimento.</li>
+                        <li>O amor como vínculo da perfeição.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Relacionamentos Cristãos (Capítulo 3:18-4:1):</strong>
+                    <ul>
+                        <li>Esposas e maridos.</li>
+                        <li>Filhos e pais.</li>
+                        <li>Servos e senhores.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Exortações Finais e Saudações (Capítulo 4:2-18):</strong>
+                    <ul>
+                        <li>Perseverar na oração.</li>
+                        <li>Andar com sabedoria para com os de fora.</li>
+                        <li>Saudações a diversos colaboradores (Tíquico, Onésimo, Epafras, Lucas, Demas, etc.).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Colossenses é uma carta crucial para a cristologia, pois apresenta uma das mais elevadas declarações sobre a pessoa e a obra de Jesus Cristo. Ela combate eficazmente as heresias que buscam diminuir a suficiência de Cristo, afirmando que Ele é a plenitude da divindade e que os crentes estão completos Nele. A epístola enfatiza que a verdadeira vida cristã não se baseia em rituais, regras ou conhecimentos secretos, mas em uma união vital com Cristo, que leva a uma transformação prática da vida, buscando as coisas do alto e vivendo em amor e sabedoria.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridColossenses">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Colossenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Colossenses, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Ações de graças, oração de Paulo, e o hino cristológico sobre a supremacia de Cristo.</li>
+                <li><strong>Capítulo 2:</strong> O ministério de Paulo e a advertência contra falsas filosofias e legalismo.</li>
+                <li><strong>Capítulo 3:</strong> Exortação a buscar as coisas do alto, despojar-se do velho homem e revestir-se do novo, e relacionamentos cristãos.</li>
+                <li><strong>Capítulo 4:</strong> Exortações finais sobre oração, sabedoria e saudações a diversos colaboradores.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Colossenses</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Supremacia de Cristo:</strong> Cristo como Criador, Sustentador, Cabeça da Igreja e a plenitude da divindade.</li>
+                <li><strong>A Suficiência de Cristo:</strong> Os crentes estão completos Nele, não precisando de acréscimos.</li>
+                <li><strong>Falsas Filosofias e Heresias:</strong> Advertência contra o gnosticismo, legalismo e ascetismo.</li>
+                <li><strong>A Nova Vida em Cristo:</strong> Despojar-se do velho homem e revestir-se do novo.</li>
+                <li><strong>União com Cristo:</strong> Vida escondida com Cristo em Deus.</li>
+                <li><strong>Relacionamentos Cristãos:</strong> Princípios para a vida familiar e social.</li>
+                <li><strong>Oração e Sabedoria:</strong> A importância da comunicação com Deus e do viver sábio.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Colossenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersColossenses">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Colossenses</h2>
+            <div id="quizContainerColossenses" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionColossenses"></p>
+                <div id="quizOptionsColossenses" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackColossenses" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionColossenses()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressColossenses"></span></p>
+                <p>Pontuação: <span id="quizScoreColossenses">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Colossenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Colossenses.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="colossensesChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalColossenses()">&times;</span>
+                <h3 id="modalCharacterNameColossenses" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionColossenses" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Colossenses",
+            "short_name": "Colossenses",
+            "description": "Explore o livro de Colossenses de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=CL",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=CL",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'colossenses-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionColossenses(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsColossenses();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksColossenses();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsColossenses(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexColossenses = 0; // Reinicia o quiz
+                scoreColossenses = 0;
+                wrongAnswersColossenses = 0;
+                document.getElementById('quizScoreColossenses').textContent = `Acertos: ${scoreColossenses}, Erros: ${wrongAnswersColossenses}`;
+                displayQuestionColossenses();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderColossensesChart();
+            }
+        }
+
+        // Dados dos personagens para Colossenses
+        const characterDetailsColossenses = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta epístola da prisão, exaltando a supremacia de Cristo e combatendo as heresias em Colossos."
+            },
+            "Timóteo": {
+                name: "Timóteo",
+                description: "Colaborador de Paulo, mencionado no início da carta junto com Paulo."
+            },
+            "Epafras": {
+                name: "Epafras",
+                description: "Fiel ministro de Cristo e colaborador de Paulo, que evangelizou Colossos e levou a Paulo notícias sobre a igreja."
+            },
+            "Tíquico": {
+                name: "Tíquico",
+                description: "O fiel irmão e ministro no Senhor, portador desta epístola (e também de Efésios) e que informaria os colossenses sobre a situação de Paulo."
+            },
+            "Onésimo": {
+                name: "Onésimo",
+                description: "O fiel e amado irmão, ex-escravo de Filemom, que acompanhou Tíquico e é mencionado na carta a Filemom também."
+            },
+            "Aristaco": {
+                name: "Aristaco",
+                description: "Companheiro de prisão de Paulo, mencionado nas saudações finais."
+            },
+            "Marcos": {
+                name: "Marcos",
+                description: "Primo de Barnabé e colaborador de Paulo, que seria bem recebido pelos colossenses."
+            },
+            "Jesus, que se chama Justo": {
+                name: "Jesus, que se chama Justo",
+                description: "Um dos colaboradores judeus de Paulo, mencionado nas saudações finais."
+            },
+            "Lucas": {
+                name: "Lucas",
+                description: "O médico amado, mencionado nas saudações finais."
+            },
+            "Demas": {
+                name: "Demas",
+                description: "Mencionado nas saudações finais; mais tarde, Paulo diria que ele o abandonou, amando o presente século (2 Timóteo 4:10)."
+            },
+            "Ninfa": {
+                name: "Ninfa",
+                description: "Uma mulher em Laodiceia cuja casa era um local de reunião para a igreja."
+            },
+            "Arquipo": {
+                name: "Arquipo",
+                description: "Membro da igreja de Colossos a quem Paulo exorta a cumprir o ministério que recebeu no Senhor."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, que é a fonte de toda a criação, redenção e plenitude, e em quem os crentes estão completos."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalColossenses(characterName) {
+            const details = characterDetailsColossenses[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameColossenses').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionColossenses').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalColossenses() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsColossenses() {
+            const grid = document.getElementById('characterGridColossenses');
+            grid.innerHTML = '';
+            for (const key in characterDetailsColossenses) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalColossenses(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksColossenses() {
+            const chaptersDiv = document.getElementById('chaptersColossenses');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 4; i++) { // Colossenses tem 4 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/cl/${i}`; // Link para a Bíblia Online, Colossenses
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Colossenses (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsColossenses = [
+            { question: "Qual apóstolo escreveu a Epístola aos Colossenses?", options: ["Pedro", "João", "Paulo", "Tiago"], answer: "Paulo", reference: "Introdução ao Livro de Colossenses" },
+            { question: "Em que período Paulo escreveu Colossenses?", options: ["Durante sua primeira viagem missionária", "Durante sua prisão em Roma", "Após sua libertação", "Antes de sua conversão"], answer: "Durante sua prisão em Roma", reference: "Introdução ao Livro de Colossenses" },
+            { question: "Qual é o principal tema da Epístola aos Colossenses?", options: ["A lei de Moisés", "A supremacia e suficiência de Cristo", "A circuncisão", "A condenação do pecado"], answer: "A supremacia e suficiência de Cristo", reference: "Introdução ao Livro de Colossenses" },
+            { question: "Quem evangelizou a igreja de Colossos e levou notícias a Paulo?", options: ["Timóteo", "Tíquico", "Epafras", "Onésimo"], answer: "Epafras", reference: "Introdução ao Livro de Colossenses" },
+            { question: "O que Paulo descreve Cristo como em Colossenses 1:15?", options: ["Um profeta", "A imagem do Deus invisível", "Um anjo", "Um rei terreno"], answer: "A imagem do Deus invisível", reference: "Capítulo 1" },
+            { question: "Em quem reside toda a plenitude da divindade corporalmente, segundo Colossenses 2:9?", options: ["Em anjos", "Em homens", "Em Cristo", "Em rituais"], answer: "Em Cristo", reference: "Capítulo 2" },
+            { question: "O que os crentes devem buscar, se já ressuscitaram com Cristo, segundo Colossenses 3:1?", options: ["As coisas terrenas", "As coisas que são de cima", "A riqueza material", "A fama pessoal"], answer: "As coisas que são de cima", reference: "Capítulo 3" },
+            { question: "O que os crentes devem despojar e revestir, segundo Colossenses 3:8-10?", options: ["Roupas velhas e novas", "O velho homem e o novo homem", "Dúvidas e certezas", "Medos e coragem"], answer: "O velho homem e o novo homem", reference: "Capítulo 3" },
+            { question: "Qual é o vínculo da perfeição, segundo Colossenses 3:14?", options: ["A fé", "A esperança", "O amor", "A sabedoria"], answer: "O amor", reference: "Capítulo 3" },
+            { question: "Qual a exortação de Paulo sobre a oração em Colossenses 4:2?", options: ["Orar de vez em quando", "Perseverar na oração, velando nela com ações de graças", "Orar apenas quando há problemas", "Não orar"], answer: "Perseverar na oração, velando nela com ações de graças", reference: "Capítulo 4" },
+            { question: "Quem foi o portador da carta de Colossenses, segundo o próprio Paulo?", options: ["Timóteo", "Onésimo", "Epafras", "Tíquico"], answer: "Tíquico", reference: "Capítulo 4" },
+            { question: "Qual o nome do ex-escravo de Filemom, mencionado em Colossenses 4:9?", options: ["Epafras", "Aristaco", "Onésimo", "Lucas"], answer: "Onésimo", reference: "Capítulo 4" },
+            { question: "Contra o que Paulo adverte em Colossenses 2:8?", options: ["Contra a fé", "Contra a filosofia e vãs subtilezas", "Contra a oração", "Contra o amor"], answer: "Contra a filosofia e vãs subtilezas", reference: "Capítulo 2" },
+            { question: "Em quem os crentes estão 'completos', segundo Colossenses 2:10?", options: ["Em si mesmos", "Em rituais", "Em Cristo", "Em anjos"], answer: "Em Cristo", reference: "Capítulo 2" },
+            { question: "Qual a exortação para os maridos em Colossenses 3:19?", options: ["Amar suas esposas e não as tratar com amargura", "Dominar suas esposas", "Ignorar suas esposas", "Tratar suas esposas com dureza"], answer: "Amar suas esposas e não as tratar com amargura", reference: "Capítulo 3" },
+            { question: "Quantos capítulos tem o livro de Colossenses?", options: ["3", "4", "5", "6"], answer: "4", reference: "Esboços do Livro de Colossenses" },
+            { question: "O que Paulo deseja que os colossenses saibam em Colossenses 2:2?", options: ["Os segredos do mundo", "O mistério de Deus, a saber, Cristo", "O futuro", "A riqueza material"], answer: "O mistério de Deus, a saber, Cristo", reference: "Capítulo 2" },
+            { question: "Qual o tema do capítulo 1 de Colossenses?", options: ["A nova vida em Cristo", "A supremacia de Cristo", "Relacionamentos cristãos", "Falsas doutrinas"], answer: "A supremacia de Cristo", reference: "Esboços do Livro de Colossenses" },
+            { question: "O que Paulo exorta os colossenses a fazerem em relação à sabedoria com os de fora (Colossenses 4:5)?", options: ["Serem imprudentes", "Andarem em sabedoria, remindo o tempo", "Ignorarem os de fora", "Serem arrogantes"], answer: "Andarem em sabedoria, remindo o tempo", reference: "Capítulo 4" },
+            { question: "Qual a relação de Cristo com a criação, segundo Colossenses 1:16-17?", options: ["Ele foi criado", "Por Ele e para Ele foram criadas todas as coisas, e Nele tudo subsiste", "Ele é parte da criação", "Ele não tem relação com a criação"], answer: "Por Ele e para Ele foram criadas todas as coisas, e Nele tudo subsiste", reference: "Capítulo 1" },
+            { question: "Quem é o médico amado mencionado nas saudações finais?", options: ["Tíquico", "Onésimo", "Lucas", "Demas"], answer: "Lucas", reference: "Capítulo 4" },
+            { question: "O que Paulo exorta os servos a fazerem em Colossenses 3:23?", options: ["Servir aos homens", "Trabalhar de má vontade", "Tudo o que fizerem, façam de todo o coração, como ao Senhor", "Servir apenas a si mesmos"], answer: "Tudo o que fizerem, façam de todo o coração, como ao Senhor", reference: "Capítulo 3" },
+            { question: "Qual é o nome do membro da igreja de Laodiceia cuja casa era um local de reunião para a igreja?", options: ["Ninfa", "Euódia", "Síntique", "Lídia"], answer: "Ninfa", reference: "Capítulo 4" },
+            { question: "O que é a vida dos crentes, segundo Colossenses 3:3?", options: ["Exposta a todos", "Escondida com Cristo em Deus", "Visível ao mundo", "Cheia de problemas"], answer: "Escondida com Cristo em Deus", reference: "Capítulo 3" },
+            { question: "Qual o nome do colaborador de Paulo a quem ele exorta a cumprir o ministério que recebeu no Senhor?", options: ["Epafras", "Arquipo", "Tíquico", "Onésimo"], answer: "Arquipo", reference: "Capítulo 4" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsColossenses = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsColossenses.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsColossenses = allQuizQuestionsColossenses.concat(uniqueQuizQuestionsColossenses);
+        }
+        allQuizQuestionsColossenses = allQuizQuestionsColossenses.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsColossenses = [];
+        let currentQuizIndexColossenses = 0;
+        let scoreColossenses = 0;
+        let wrongAnswersColossenses = 0;
+        let colossensesChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsColossenses() {
+            shuffledQuizQuestionsColossenses = [...allQuizQuestionsColossenses]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsColossenses);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressColossenses() {
+            const progressElement = document.getElementById('quizProgressColossenses');
+            progressElement.textContent = `${currentQuizIndexColossenses + 1}/${shuffledQuizQuestionsColossenses.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionColossenses() {
+            if (currentQuizIndexColossenses >= shuffledQuizQuestionsColossenses.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionColossenses').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsColossenses').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreColossenses}, Erros: ${wrongAnswersColossenses}</p>`;
+                document.getElementById('quizFeedbackColossenses').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsColossenses[currentQuizIndexColossenses];
+            document.getElementById('quizQuestionColossenses').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsColossenses');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerColossenses(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackColossenses').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressColossenses();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerColossenses(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackColossenses');
+            const optionsButtons = document.querySelectorAll('#quizOptionsColossenses button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreColossenses++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersColossenses++;
+            }
+            document.getElementById('quizScoreColossenses').textContent = `Acertos: ${scoreColossenses}, Erros: ${wrongAnswersColossenses}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionColossenses() {
+            currentQuizIndexColossenses++;
+            displayQuestionColossenses();
+        }
+
+        // Dados para o gráfico de temas de Colossenses
+        const colossensesChartData = {
+            labels: ['Supremacia de Cristo', 'Suficiência de Cristo', 'Falsas Filosofias', 'Nova Vida em Cristo', 'União com Cristo', 'Relacionamentos Cristãos', 'Oração e Sabedoria'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 12, 10, 8], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const colossensesChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Colossenses',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderColossensesChart() {
+            const ctx = document.getElementById('colossensesChart').getContext('2d');
+            if (colossensesChartInstance) {
+                colossensesChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            colossensesChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: colossensesChartData,
+                options: colossensesChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 1 Crônicas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="1 Crônicas Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 1 Crônicas</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection1Cronicas('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection1Cronicas('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection1Cronicas('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection1Cronicas('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection1Cronicas('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection1Cronicas('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection1Cronicas('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection1Cronicas('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection1Cronicas('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 1 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore as genealogias de Israel, o reinado de Davi com foco na linhagem real e nos preparativos para o Templo. Entenda a importância da adoração e da fidelidade a Deus para o povo que retornou do exílio. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 1 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Crônicas é o décimo terceiro livro da Bíblia e, juntamente com 2 Crônicas, forma uma única obra na tradição hebraica. Escrito após o exílio babilônico, seu principal objetivo era encorajar os judeus que retornaram a Jerusalém, lembrando-os de sua herança espiritual, da fidelidade de Deus à Sua aliança com Davi e da centralidade da adoração no Templo. O livro revisita a história de Israel, mas com uma perspectiva teológica específica, focando na linhagem de Davi e na importância do sacerdócio e do serviço levítico.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Diferente dos livros de Samuel e Reis, que narram a história política dos reis de Israel e Judá com suas falhas e juízos, Crônicas enfatiza os aspectos positivos do reinado de Davi e a preparação para a construção do Templo por Salomão. Ignora os eventos negativos da vida de Davi, como seu pecado com Bate-Seba, e foca em sua devoção a Deus e seu papel na organização da adoração.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Este livro é crucial para entender a identidade do povo de Deus após o exílio, reafirmando sua conexão com as promessas divinas através da linhagem davídica e a importância de restaurar a adoração correta em Jerusalém. Ele serve como um lembrete da fidelidade de Deus e da esperança messiânica.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-9: Genealogias.</strong> Uma extensa lista de linhagens desde Adão, com foco especial nas tribos de Israel, particularmente a de Judá (para estabelecer a linhagem de Davi) e a de Levi (para estabelecer o sacerdócio).</li>
+                <li><strong>Capítulos 10-29: O Reinado de Davi.</strong> A morte de Saul, a ascensão de Davi ao trono, a conquista de Jerusalém, o transporte da Arca da Aliança para Jerusalém, a aliança davídica, as vitórias militares de Davi, o censo e a praga, e, principalmente, os extensos preparativos de Davi para a construção do Templo, incluindo a organização dos levitas e sacerdotes.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Crônicas é uma narrativa que inspira esperança e reafirma a soberania de Deus e a importância da adoração em meio à restauração de uma nação.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 1 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Crônicas narra a história de Israel com foco na linhagem de Davi, na adoração no Templo e na fidelidade de Deus à Sua aliança.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Genealogias (Capítulos 1-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Desde Adão até Abraão (Capítulo 1:1-27):</strong>
+                    <ul>
+                        <li>As primeiras gerações da humanidade.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Descendentes de Abraão (Capítulo 1:28-54):</strong>
+                    <ul>
+                        <li>Ismael, os filhos de Quetura e Esaú.</li>
+                    </ul>
+                </li>
+                <li><strong>C. As Tribos de Israel (Capítulos 2-8):</strong>
+                    <ul>
+                        <li>Foco na linhagem de Judá, com a genealogia de Davi (Capítulo 2-3).</li>
+                        <li>Outras tribos, incluindo Rúben, Gade, Manassés, Levi (com ênfase nos sacerdotes), Issacar, Benjamim, Naftali, Efraim e Aser.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Habitantes de Jerusalém e Genealogias de Saul (Capítulo 9):</strong>
+                    <ul>
+                        <li>Lista dos que retornaram do exílio e se estabeleceram em Jerusalém.</li>
+                        <li>Genealogia da família de Saul.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Reinado de Davi (Capítulos 10-29)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Morte de Saul e Ascensão de Davi (Capítulos 10-12):</strong>
+                    <ul>
+                        <li>A morte de Saul e seus filhos no Monte Gilboa.</li>
+                        <li>Davi é ungido rei sobre todo o Israel em Hebron.</li>
+                        <li>Os valentes que se juntaram a Davi.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Arca da Aliança em Jerusalém (Capítulos 13-16):</strong>
+                    <ul>
+                        <li>A primeira tentativa de Davi de trazer a Arca e a morte de Uzá.</li>
+                        <li>A segunda tentativa, bem-sucedida, com a Arca sendo trazida para Jerusalém com alegria e adoração.</li>
+                        <li>O cântico de Davi de louvor e gratidão.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Aliança Davídica (Capítulo 17):</strong>
+                    <ul>
+                        <li>Deus, através do profeta Natã, promete a Davi uma casa, um trono e um reino eternos.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Vitórias Militares e Administração (Capítulos 18-20):</strong>
+                    <ul>
+                        <li>Davi derrota os filisteus, moabitas, sírios, edomitas e amonitas.</li>
+                        <li>Seus oficiais e a expansão do reino.</li>
+                    </ul>
+                </li>
+                <li><strong>E. O Censo de Davi e a Praga (Capítulo 21):</strong>
+                    <ul>
+                        <li>Davi ordena um censo, pecando contra Deus.</li>
+                        <li>A praga atinge Israel, mas é detida na eira de Ornã.</li>
+                        <li>Davi constrói um altar e oferece sacrifícios.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Preparativos para o Templo (Capítulos 22-27):</strong>
+                    <ul>
+                        <li>Davi reúne materiais abundantes para a construção do Templo.</li>
+                        <li>Ele organiza os levitas em divisões para o serviço do Templo (músicos, porteiros, tesoureiros).</li>
+                        <li>Organização dos sacerdotes (descendentes de Arão).</li>
+                        <li>Oficiais do rei e chefes das tribos.</li>
+                    </ul>
+                </li>
+                <li><strong>G. Últimas Palavras de Davi e Sucessão de Salomão (Capítulos 28-29):</strong>
+                    <ul>
+                        <li>Davi instrui Salomão e os líderes sobre a construção do Templo.</li>
+                        <li>Ofertas generosas do povo para o Templo.</li>
+                        <li>A oração de Davi e suas últimas palavras.</li>
+                        <li>Salomão é ungido rei pela segunda vez.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">1 Crônicas é um livro que reafirma a fidelidade de Deus à Sua aliança com Davi, mesmo após o exílio. Ele destaca a importância da adoração centrada no Templo e o papel vital dos levitas e sacerdotes. Ao focar na linhagem de Davi e na preparação para o Templo, o cronista oferece esperança e uma base para a restauração da comunidade pós-exílio, lembrando-os de sua identidade como povo de Deus e da promessa de um Messias que viria da casa de Davi.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGrid1Cronicas">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 1 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 1 Crônicas, capítulo por capítulo, destacando os eventos e o desenvolvimento da história.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Genealogias (Capítulos 1-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Genealogias de Adão a Abraão e seus descendentes.</li>
+                <li><strong>Capítulo 2:</strong> Genealogias de Israel (Jacó) e a linhagem de Judá.</li>
+                <li><strong>Capítulo 3:</strong> Descendentes de Davi.</li>
+                <li><strong>Capítulo 4:</strong> Outras famílias de Judá e Simeão.</li>
+                <li><strong>Capítulo 5:</strong> Genealogias de Rúben, Gade e a meia tribo de Manassés.</li>
+                <li><strong>Capítulo 6:</strong> Genealogias de Levi e dos sacerdotes.</li>
+                <li><strong>Capítulo 7:</strong> Genealogias de Issacar, Benjamim, Naftali, Manassés, Efraim e Aser.</li>
+                <li><strong>Capítulo 8:</strong> Genealogias de Benjamim.</li>
+                <li><strong>Capítulo 9:</strong> Habitantes de Jerusalém e genealogias de Saul.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Reinado de Davi (Capítulos 10-29)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 10:</strong> Morte de Saul e seus filhos.</li>
+                <li><strong>Capítulo 11:</strong> Davi é ungido rei; a conquista de Jerusalém.</li>
+                <li><strong>Capítulo 12:</strong> Os valentes que se juntaram a Davi em Ziclague e Hebron.</li>
+                <li><strong>Capítulo 13:</strong> Davi tenta trazer a Arca; morte de Uzá.</li>
+                <li><strong>Capítulo 14:</strong> Casa de Davi; vitórias contra os filisteus.</li>
+                <li><strong>Capítulo 15:</strong> Davi traz a Arca para Jerusalém corretamente.</li>
+                <li><strong>Capítulo 16:</strong> Celebração e cântico de Davi.</li>
+                <li><strong>Capítulo 17:</strong> A aliança de Deus com Davi.</li>
+                <li><strong>Capítulo 18:</strong> Vitórias de Davi sobre as nações vizinhas.</li>
+                <li><strong>Capítulo 19:</strong> Davi e os amonitas e sírios.</li>
+                <li><strong>Capítulo 20:</strong> Conquista de Rabá; feitos dos valentes.</li>
+                <li><strong>Capítulo 21:</strong> Davi faz um censo e a praga.</li>
+                <li><strong>Capítulo 22:</strong> Davi prepara materiais para o Templo.</li>
+                <li><strong>Capítulo 23:</strong> Organização dos levitas.</li>
+                <li><strong>Capítulo 24:</strong> Organização dos sacerdotes.</li>
+                <li><strong>Capítulo 25:</strong> Organização dos músicos levitas.</li>
+                <li><strong>Capítulo 26:</strong> Organização dos porteiros e tesoureiros.</li>
+                <li><strong>Capítulo 27:</strong> Chefes das tribos e oficiais do rei.</li>
+                <li><strong>Capítulo 28:</strong> Davi instrui Salomão e os líderes sobre o Templo.</li>
+                <li><strong>Capítulo 29:</strong> Ofertas para o Templo; oração e últimas palavras de Davi; Salomão é feito rei.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 1 Crônicas</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Soberania de Deus:</strong> Deus está no controle da história, cumprindo Seus propósitos através de Sua aliança e de Seus escolhidos.</li>
+                <li><strong>A Aliança Davídica:</strong> A promessa incondicional de Deus de uma dinastia e reino eternos através de Davi, enfatizando a esperança messiânica.</li>
+                <li><strong>A Importância do Templo e da Adoração:</strong> A centralidade do Templo como lugar da presença de Deus e a necessidade de uma adoração organizada e correta.</li>
+                <li><strong>A Continuidade da Linhagem de Davi:</strong> A preservação da linhagem real como garantia das promessas de Deus.</li>
+                <li><strong>A Restauração Pós-Exílio:</strong> O livro serve como um lembrete da identidade e herança do povo de Deus após o retorno do cativeiro.</li>
+                <li><strong>A Fidelidade de Deus:</strong> A demonstração da fidelidade de Deus em manter Suas promessas, apesar das falhas humanas.</li>
+                <li><strong>A Unidade de Israel:</strong> Embora o foco seja em Judá, o livro busca promover um senso de unidade entre todas as tribos de Israel.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 1 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chapters1Cronicas">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 1 Crônicas</h2>
+            <div id="quizContainer1Cronicas" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestion1Cronicas"></p>
+                <div id="quizOptions1Cronicas" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedback1Cronicas" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestion1Cronicas()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgress1Cronicas"></span></p>
+                <p>Pontuação: <span id="quizScore1Cronicas">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 1 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 1 Crônicas.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="cronicasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal1Cronicas()">&times;</span>
+                <h3 id="modalCharacterName1Cronicas" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription1Cronicas" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 1 Crônicas",
+            "short_name": "1 Crônicas",
+            "description": "Explore o livro de 1 Crônicas de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=1C",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=1C",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '1cronicas-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection1Cronicas(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtons1Cronicas();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinks1Cronicas();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestions1Cronicas(); // Embaralha as perguntas no início do quiz
+                currentQuizIndex1Cronicas = 0; // Reinicia o quiz
+                score1Cronicas = 0;
+                wrongAnswers1Cronicas = 0;
+                document.getElementById('quizScore1Cronicas').textContent = `Acertos: ${score1Cronicas}, Erros: ${wrongAnswers1Cronicas}`;
+                displayQuestion1Cronicas();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                render1CronicasChart();
+            }
+        }
+
+        // Dados dos personagens para 1 Crônicas
+        const characterDetails1Cronicas = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus soberano que mantém Suas alianças, especialmente com Davi, e é o centro da adoração em Israel."
+            },
+            "Davi": {
+                name: "Davi",
+                description: "O rei de Israel, foco principal do livro. Sua ascensão, conquistas, e, principalmente, seus preparativos para a construção do Templo e a organização da adoração."
+            },
+            "Salomão": {
+                name: "Salomão",
+                description: "Filho de Davi e seu sucessor, escolhido por Deus para construir o Templo. Recebe instruções detalhadas de Davi para essa tarefa."
+            },
+            "Saul": {
+                name: "Saul",
+                description: "O primeiro rei de Israel, cuja morte é narrada no início da seção sobre Davi, marcando a transição da monarquia."
+            },
+            "Joabe": {
+                name: "Joabe",
+                description: "Comandante do exército de Davi, figura proeminente em suas campanhas militares."
+            },
+            "Natã": {
+                name: "Natã",
+                description: "Profeta de Deus que entregou a Davi a promessa da aliança davídica e o aconselhou."
+            },
+            "Uzá": {
+                name: "Uzá",
+                description: "Homem que morreu ao tocar na Arca da Aliança, demonstrando a santidade de Deus e a importância de seguir Suas instruções."
+            },
+            "Abiatar": {
+                name: "Abiatar",
+                description: "Sacerdote que serviu a Davi, mencionado nas listas de oficiais."
+            },
+            "Zadoque": {
+                name: "Zadoque",
+                description: "Sacerdote que serviu a Davi e foi fundamental na organização do sacerdócio para o Templo."
+            },
+            "Mefibosete": {
+                name: "Mefibosete",
+                description: "Filho de Jônatas, neto de Saul, a quem Davi mostrou bondade, mantendo sua promessa a Jônatas."
+            },
+            "Hirão (rei de Tiro)": {
+                name: "Hirão (rei de Tiro)",
+                description: "Rei que forneceu materiais e trabalhadores para a construção do palácio de Davi e, posteriormente, para o Templo de Salomão."
+            },
+            "Araúna (Ornã)": {
+                name: "Araúna (Ornã)",
+                description: "Jebuseu cuja eira Davi comprou para construir um altar e deter a praga, tornando-se o local do futuro Templo."
+            },
+            "Levitas": {
+                name: "Levitas",
+                description: "A tribo encarregada do serviço do Templo, incluindo a música, a guarda e a manutenção, organizados por Davi."
+            },
+            "Sacerdotes": {
+                name: "Sacerdotes",
+                description: "Descendentes de Arão, responsáveis pelos sacrifícios e rituais no Templo, também organizados por Davi."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModal1Cronicas(characterName) {
+            const details = characterDetails1Cronicas[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName1Cronicas').textContent = details.name;
+                document.getElementById('modalCharacterDescription1Cronicas').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal1Cronicas() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtons1Cronicas() {
+            const grid = document.getElementById('characterGrid1Cronicas');
+            grid.innerHTML = '';
+            for (const key in characterDetails1Cronicas) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModal1Cronicas(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinks1Cronicas() {
+            const chaptersDiv = document.getElementById('chapters1Cronicas');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 29; i++) { // 1 Crônicas tem 29 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/1cr/${i}`; // Link para a Bíblia Online, 1 Crônicas
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 1 Crônicas (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestions1Cronicas = [
+            { question: "Quem foi o primeiro homem mencionado nas genealogias de 1 Crônicas?", options: ["Adão", "Noé", "Abraão", "Jacó"], answer: "Adão", reference: "1 Crônicas 1:1" },
+            { question: "Qual rei de Israel é o foco principal da segunda parte de 1 Crônicas?", options: ["Saul", "Salomão", "Davi", "Reoboão"], answer: "Davi", reference: "1 Crônicas 10:11-29" },
+            { question: "Como Saul morreu, de acordo com 1 Crônicas?", options: ["Por doença", "Suicídio", "Em batalha contra os filisteus", "Assassinado por um de seus servos"], answer: "Em batalha contra os filisteus", reference: "1 Crônicas 10:1-7" },
+            { question: "Qual cidade Davi conquistou e fez capital de Israel?", options: ["Hebron", "Belém", "Jerusalém", "Samaria"], answer: "Jerusalém", reference: "1 Crônicas 11:4-9" },
+            { question: "Quem morreu ao tocar na Arca da Aliança quando Davi tentou trazê-la para Jerusalém pela primeira vez?", options: ["Abiatar", "Uzá", "Zadoque", "Mical"], answer: "Uzá", reference: "1 Crônicas 13:9-10" },
+            { question: "Qual foi a promessa de Deus a Davi registrada em 1 Crônicas 17?", options: ["Riqueza ilimitada", "Vitória sobre todos os inimigos", "Uma casa, um trono e um reino eternos", "Uma vida longa"], answer: "Uma casa, um trono e um reino eternos", reference: "1 Crônicas 17:11-14" },
+            { question: "Para que Davi fez extensos preparativos antes de sua morte?", options: ["A construção de um palácio", "A construção do Templo", "A organização do exército", "A expansão do reino"], answer: "A construção do Templo", reference: "1 Crônicas 22:2-5" },
+            { question: "Quem foi escolhido por Deus para construir o Templo?", options: ["Davi", "Natã", "Salomão", "Hirão"], answer: "Salomão", reference: "1 Crônicas 22:9-10" },
+            { question: "Qual foi o pecado de Davi que resultou em uma praga sobre Israel?", options: ["Adultério", "Assassinato", "Fazer um censo do povo", "Idolatria"], answer: "Fazer um censo do povo", reference: "1 Crônicas 21:1-7" },
+            { question: "Qual tribo foi encarregada do serviço do Templo, incluindo música e portaria?", options: ["Judá", "Benjamim", "Levi", "Simeão"], answer: "Levi", reference: "1 Crônicas 23:27-32" },
+            { question: "Qual o nome da eira onde Davi construiu um altar para parar a praga?", options: ["Eira de Gibeão", "Eira de Belém", "Eira de Ornã/Araúna", "Eira de Jebus"], answer: "Eira de Ornã/Araúna", reference: "1 Crônicas 21:18-28" },
+            { question: "Quem foi o filho de Davi que o sucedeu como rei?", options: ["Absalão", "Adonias", "Salomão", "Amnon"], answer: "Salomão", reference: "1 Crônicas 29:26-28" },
+            { question: "Qual o nome do rei de Tiro que ajudou Davi com materiais para o Templo?", options: ["Senaqueribe", "Nabucodonosor", "Hirão", "Ben-Hadade"], answer: "Hirão", reference: "1 Crônicas 14:1" },
+            { question: "Qual a principal diferença no foco entre os livros de Samuel/Reis e Crônicas?", options: ["Samuel/Reis focam em genealogias; Crônicas em milagres", "Samuel/Reis focam na história política dos reis; Crônicas foca na linhagem de Davi, no Templo e na adoração", "Crônicas foca apenas em Judá; Samuel/Reis em todo Israel", "Não há diferença significativa"], answer: "Samuel/Reis focam na história política dos reis; Crônicas foca na linhagem de Davi, no Templo e na adoração", reference: "Introdução do livro" },
+            { question: "Qual o propósito principal do livro de 1 Crônicas?", options: ["Narrar todas as guerras de Israel", "Encorajar os judeus pós-exílio sobre a fidelidade de Deus e a importância da adoração", "Registrar a queda de Israel", "Detalhar a vida de Saul"], answer: "Encorajar os judeus pós-exílio sobre a fidelidade de Deus e a importância da adoração", reference: "Introdução do livro" },
+            { question: "As genealogias em 1 Crônicas dão particular atenção a qual linhagem?", options: ["A linhagem de Rúben", "A linhagem de Levi", "A linhagem de Judá, especialmente a de Davi", "A linhagem de Benjamim"], answer: "A linhagem de Judá, especialmente a de Davi", reference: "1 Crônicas 2:1-15, 3:1-24" },
+            { question: "Quantos valentes Davi tinha, de acordo com a lista em 1 Crônicas 11?", options: ["Sete", "Doze", "Não há um número exato, mas menciona os 'trinta' e os 'três principais'", "Cem"], answer: "Não há um número exato, mas menciona os 'trinta' e os 'três principais'", reference: "1 Crônicas 11:10-47" },
+            { question: "Qual foi a atitude de Davi ao trazer a Arca da Aliança para Jerusalém pela segunda vez?", options: ["Com medo e hesitação", "Com alegria e sacrifícios, seguindo as instruções divinas", "Com raiva e frustração", "Com indiferença"], answer: "Com alegria e sacrifícios, seguindo as instruções divinas", reference: "1 Crônicas 15:25-16:3" },
+            { question: "O que Davi fez para organizar o serviço do Templo antes de sua morte?", options: ["Nomeou um único sacerdote", "Deixou para Salomão decidir tudo", "Organizou os sacerdotes, levitas, músicos e porteiros", "Não fez nada"], answer: "Organizou os sacerdotes, levitas, músicos e porteiros", reference: "1 Crônicas 23-26" },
+            { question: "Qual o nome do pai de Davi?", options: ["Jessé", "Saul", "Isbosete", "Urias"], answer: "Jessé", reference: "1 Crônicas 2:13" },
+            { question: "O que Davi ofereceu generosamente para a construção do Templo?", options: ["Apenas dinheiro", "Apenas madeira", "Ouro, prata, bronze, ferro, pedras preciosas", "Nada, ele esperava que Salomão fizesse tudo"], answer: "Ouro, prata, bronze, ferro, pedras preciosas", reference: "1 Crônicas 29:2-5" },
+            { question: "Quem foi o profeta que entregou a aliança de Deus a Davi?", options: ["Samuel", "Elias", "Natã", "Eliseu"], answer: "Natã", reference: "1 Crônicas 17:1-15" },
+            { question: "Qual foi a última instrução de Davi a Salomão?", options: ["Conquistar mais terras", "Construir o Templo e andar nos caminhos do Senhor", "Casar-se com muitas mulheres", "Acumular mais riqueza"], answer: "Construir o Templo e andar nos caminhos do Senhor", reference: "1 Crônicas 28:9-10" },
+            { question: "Qual era o nome da cidade que Davi conquistou dos jebuseus?", options: ["Hebron", "Gibeão", "Jerusalém", "Ziclague"], answer: "Jerusalém", reference: "1 Crônicas 11:4-5" },
+            { question: "Qual o nome do comandante do exército de Davi, frequentemente mencionado em 1 Crônicas?", options: ["Benaia", "Abisai", "Joabe", "Asael"], answer: "Joabe", reference: "1 Crônicas 11:6" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestions1Cronicas = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestions1Cronicas.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestions1Cronicas = allQuizQuestions1Cronicas.concat(uniqueQuizQuestions1Cronicas);
+        }
+        allQuizQuestions1Cronicas = allQuizQuestions1Cronicas.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestions1Cronicas = [];
+        let currentQuizIndex1Cronicas = 0;
+        let score1Cronicas = 0;
+        let wrongAnswers1Cronicas = 0;
+        let cronicasChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestions1Cronicas() {
+            shuffledQuizQuestions1Cronicas = [...allQuizQuestions1Cronicas]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestions1Cronicas);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgress1Cronicas() {
+            const progressElement = document.getElementById('quizProgress1Cronicas');
+            progressElement.textContent = `${currentQuizIndex1Cronicas + 1}/${shuffledQuizQuestions1Cronicas.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestion1Cronicas() {
+            if (currentQuizIndex1Cronicas >= shuffledQuizQuestions1Cronicas.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestion1Cronicas').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptions1Cronicas').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${score1Cronicas}, Erros: ${wrongAnswers1Cronicas}</p>`;
+                document.getElementById('quizFeedback1Cronicas').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestions1Cronicas[currentQuizIndex1Cronicas];
+            document.getElementById('quizQuestion1Cronicas').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptions1Cronicas');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswer1Cronicas(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedback1Cronicas').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgress1Cronicas();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswer1Cronicas(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedback1Cronicas');
+            const optionsButtons = document.querySelectorAll('#quizOptions1Cronicas button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                score1Cronicas++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswers1Cronicas++;
+            }
+            document.getElementById('quizScore1Cronicas').textContent = `Acertos: ${score1Cronicas}, Erros: ${wrongAnswers1Cronicas}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestion1Cronicas() {
+            currentQuizIndex1Cronicas++;
+            displayQuestion1Cronicas();
+        }
+
+        // Dados para o gráfico de temas de 1 Crônicas
+        const cronicasChartData = {
+            labels: ['Genealogias', 'Reinado de Davi', 'Templo', 'Adoração', 'Aliança Davídica', 'Levitas/Sacerdotes', 'Fidelidade de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [20, 30, 25, 15, 10, 5, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const cronicasChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 1 Crônicas',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function render1CronicasChart() {
+            const ctx = document.getElementById('cronicasChart').getContext('2d');
+            if (cronicasChartInstance) {
+                cronicasChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            cronicasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: cronicasChartData,
+                options: cronicasChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

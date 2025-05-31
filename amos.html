@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Amós</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Amós Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Amós</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionAmos('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionAmos('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionAmos('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionAmos('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionAmos('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionAmos('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionAmos('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionAmos('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionAmos('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Amós</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Amós, uma poderosa mensagem de justiça social e juízo divino contra a opressão e a hipocrisia religiosa. Amós, um pastor e cultivador de figos, é chamado por Deus para profetizar contra Israel e as nações vizinhas, denunciando suas iniquidades e clamando por retidão. Descubra a paixão de Deus pela justiça e a esperança de restauração para um remanescente fiel. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Amós</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Amós é o terceiro dos doze profetas menores do Antigo Testamento. Amós, que não era um profeta profissional, mas um pastor e cultivador de figos de Tecoa, em Judá, foi chamado por Deus para profetizar principalmente para o Reino do Norte (Israel) durante o século VIII a.C. Seu ministério ocorreu nos dias de Uzias, rei de Judá, e de Jeroboão II, rei de Israel, um período de grande prosperidade econômica, mas também de profunda injustiça social e decadência moral e religiosa.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A mensagem de Amós é um forte clamor por justiça e retidão. Ele denuncia a opressão dos pobres pelos ricos, a corrupção nos tribunais, a hipocrisia religiosa e a idolatria. Amós proclama que a prosperidade de Israel era uma ilusão, pois Deus traria juízo severo sobre a nação por sua desobediência e falta de preocupação com a justiça. Ele argumenta que os privilégios da aliança de Israel com Deus não os isentavam do juízo, mas, ao contrário, aumentavam sua responsabilidade.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro é conhecido por sua estrutura de "oráculos contra as nações", onde Amós começa denunciando os pecados das nações vizinhas antes de se voltar para os pecados de Judá e, finalmente, de Israel. Apesar das duras advertências de juízo, Amós termina com uma mensagem de esperança e restauração futura para o remanescente fiel de Israel, prometendo a reconstrução da tenda caída de Davi e a restauração da terra.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-2: Oráculos contra as Nações.</strong> Amós proclama juízo contra Damasco, Filístia, Tiro, Edom, Amom, Moabe, Judá e, finalmente, Israel, estabelecendo um padrão de transgressão e punição.</li>
+                <li><strong>Capítulos 3-6: Sermões contra Israel.</strong> Esta seção contém acusações detalhadas contra Israel por sua injustiça social, opressão, luxo, hipocrisia religiosa e recusa em se arrepender.</li>
+                <li><strong>Capítulos 7-9: Visões de Juízo e Promessas de Restauração.</strong> Amós relata cinco visões de juízo (gafanhotos, fogo, prumo, cesto de frutas de verão, o Senhor junto ao altar) e conclui com promessas de restauração do reino de Davi e bênçãos futuras para Israel.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Amós é um livro que ressoa com a paixão de Deus pela justiça e Sua preocupação com os oprimidos, servindo como um lembrete atemporal da responsabilidade social e da necessidade de um relacionamento genuíno com o Senhor.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Amós</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Amós é uma profecia contundente sobre a justiça de Deus e o juízo contra a injustiça e a hipocrisia, culminando em promessas de restauração.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Oráculos de Juízo contra as Nações e Israel (Capítulos 1-2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Juízo sobre as Nações Vizinhas (Capítulo 1):</strong>
+                    <ul>
+                        <li>Damasco (Síria), Filístia, Tiro, Edom, Amom, Moabe.</li>
+                        <li>Punição por crimes contra a humanidade e o povo de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Juízo sobre Judá e Israel (Capítulo 2):</strong>
+                    <ul>
+                        <li>Judá: por rejeitar a lei do Senhor.</li>
+                        <li>Israel: por injustiça social, opressão e imoralidade.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Sermões de Acusação contra Israel (Capítulos 3-6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Responsabilidade de Israel (Capítulo 3):</strong>
+                    <ul>
+                        <li>"Só a vós conheci de todas as famílias da terra; portanto, vos visitarei por todas as vossas iniquidades."</li>
+                        <li>Deus age com propósito e anuncia o que fará.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Injustiça Social e a Hipocrisia Religiosa (Capítulos 4-5):</strong>
+                    <ul>
+                        <li>Críticas às "vacas de Basã" (mulheres ricas e opressoras).</li>
+                        <li>Denúncia da adoração vazia e da falta de justiça.</li>
+                        <li>Chamado para "buscai-me, e vivei".</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Luxo e a Autoconfiança de Israel (Capítulo 6):</strong>
+                    <ul>
+                        <li>Ai dos que vivem no luxo e ignoram a ruína de José.</li>
+                        <li>A falsa sensação de segurança.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Visões de Juízo e Promessas de Restauração (Capítulos 7-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. As Quatro Primeiras Visões de Juízo (Capítulos 7-8):</strong>
+                    <ul>
+                        <li>Gafanhotos e Fogo (intercessão de Amós).</li>
+                        <li>O Prumo (Deus julga a retidão de Israel).</li>
+                        <li>O Cesto de Frutas de Verão (o fim chegou para Israel).</li>
+                        <li>Conflito com Amazias, o sacerdote de Betel.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Quinta Visão e a Inevitabilidade do Juízo (Capítulo 9:1-10):</strong>
+                    <ul>
+                        <li>O Senhor junto ao altar, mostrando que não há escapatória do juízo.</li>
+                        <li>A destruição dos pecadores em Israel.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Promessa de Restauração (Capítulo 9:11-15):</strong>
+                    <ul>
+                        <li>A reconstrução da tenda caída de Davi.</li>
+                        <li>A restauração da terra, abundância e segurança.</li>
+                        <li>O retorno do cativeiro e a permanência na terra.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Amós é um testemunho poderoso da justiça e retidão de Deus. Ele revela que Deus não tolera a injustiça e a opressão, especialmente quando praticadas por Seu próprio povo. A mensagem de Amós desafia a religiosidade superficial e enfatiza a necessidade de um relacionamento genuíno com Deus que se manifeste em ações de justiça e misericórdia. Apesar do juízo inevitável, o livro termina com uma nota de esperança, apontando para a fidelidade de Deus em restaurar Seu povo e cumprir Suas promessas de um reino justo e eterno.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridAmos">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Amós</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Amós, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Oráculos de juízo contra Damasco, Filístia, Tiro, Edom, Amom e Moabe.</li>
+                <li><strong>Capítulo 2:</strong> Oráculos de juízo contra Judá e Israel, com foco na injustiça social de Israel.</li>
+                <li><strong>Capítulo 3:</strong> A responsabilidade de Israel por sua aliança com Deus e a inevitabilidade do juízo.</li>
+                <li><strong>Capítulo 4:</strong> Denúncia das "vacas de Basã" e a impiedade das mulheres ricas de Samaria.</li>
+                <li><strong>Capítulo 5:</strong> Um lamento por Israel, o chamado para buscar a Deus e a denúncia da adoração vazia.</li>
+                <li><strong>Capítulo 6:</strong> Ai dos que vivem no luxo e se sentem seguros em Sião.</li>
+                <li><strong>Capítulo 7:</strong> As visões dos gafanhotos e do fogo (intercessão de Amós), e a visão do prumo; conflito com Amazias.</li>
+                <li><strong>Capítulo 8:</strong> A visão do cesto de frutas de verão, simbolizando o fim de Israel, e a denúncia da opressão.</li>
+                <li><strong>Capítulo 9:</strong> A visão do Senhor junto ao altar, a inevitabilidade do juízo e as promessas finais de restauração.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Amós</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Justiça Social:</strong> A denúncia da opressão dos pobres e a exigência de retidão.</li>
+                <li><strong>Juízo Divino:</strong> A certeza do castigo de Deus contra o pecado e a desobediência.</li>
+                <li><strong>Hipocrisia Religiosa:</strong> A condenação da adoração formal sem um coração transformado.</li>
+                <li><strong>Soberania de Deus:</strong> O controle absoluto de Deus sobre todas as nações e a história.</li>
+                <li><strong>O Dia do Senhor:</strong> Um dia de escuridão e juízo, mas também de esperança para o remanescente.</li>
+                <li><strong>Arrependimento:</strong> O chamado urgente para que o povo se volte para Deus.</li>
+                <li><strong>Restauração:</strong> As promessas de Deus de um futuro de bênçãos e a reconstrução do reino de Davi.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Amós</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersAmos">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Amós</h2>
+            <div id="quizContainerAmos" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionAmos"></p>
+                <div id="quizOptionsAmos" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackAmos" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionAmos()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressAmos"></span></p>
+                <p>Pontuação: <span id="quizScoreAmos">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Amós</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Amós.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="amosChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalAmos()">&times;</span>
+                <h3 id="modalCharacterNameAmos" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionAmos" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Amós",
+            "short_name": "Amós",
+            "description": "Explore o livro de Amós de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=AM",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=AM",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'amos-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionAmos(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsAmos();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksAmos();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsAmos(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexAmos = 0; // Reinicia o quiz
+                scoreAmos = 0;
+                wrongAnswersAmos = 0;
+                document.getElementById('quizScoreAmos').textContent = `Acertos: ${scoreAmos}, Erros: ${wrongAnswersAmos}`;
+                displayQuestionAmos();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderAmosChart();
+            }
+        }
+
+        // Dados dos personagens para Amós
+        const characterDetailsAmos = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano e Justo Juiz de todas as nações, que clama por justiça e retidão e promete restauração."
+            },
+            "Amós": {
+                name: "Amós",
+                description: "O profeta de Tecoa, um pastor e cultivador de figos, chamado por Deus para denunciar a injustiça social e a hipocrisia religiosa em Israel."
+            },
+            "Israel (Reino do Norte)": {
+                name: "Israel (Reino do Norte)",
+                description: "A principal audiência de Amós, denunciada por sua prosperidade acompanhada de opressão, idolatria e desobediência à aliança."
+            },
+            "Judá (Reino do Sul)": {
+                name: "Judá (Reino do Sul)",
+                description: "Mencionado no livro de Amós como também sujeito ao juízo de Deus por sua rejeição da lei do Senhor."
+            },
+            "Jeroboão II": {
+                name: "Jeroboão II",
+                description: "Rei de Israel durante o ministério de Amós, sob cujo reinado Israel experimentou grande prosperidade, mas também profunda injustiça social."
+            },
+            "Amazias": {
+                name: "Amazias",
+                description: "O sacerdote de Betel que se opôs a Amós e tentou silenciá-lo, representando a resistência religiosa à mensagem profética."
+            },
+            "Nações Vizinhas": {
+                name: "Nações Vizinhas",
+                description: "Diversas nações (Damasco, Filístia, Tiro, Edom, Amom, Moabe) que são denunciadas por Amós por seus crimes contra a humanidade e o povo de Deus."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalAmos(characterName) {
+            const details = characterDetailsAmos[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameAmos').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionAmos').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalAmos() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsAmos() {
+            const grid = document.getElementById('characterGridAmos');
+            grid.innerHTML = '';
+            for (const key in characterDetailsAmos) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalAmos(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksAmos() {
+            const chaptersDiv = document.getElementById('chaptersAmos');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 9; i++) { // Amós tem 9 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/am/${i}`; // Link para a Bíblia Online, Amós
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Amós (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsAmos = [
+            { question: "Qual profeta era um pastor e cultivador de figos de Tecoa?", options: ["Isaías", "Jeremias", "Amós", "Ezequiel"], answer: "Amós", reference: "Introdução ao Livro de Amós" },
+            { question: "Para qual reino Amós profetizou principalmente?", options: ["Reino do Sul (Judá)", "Reino do Norte (Israel)", "Babilônia", "Egito"], answer: "Reino do Norte (Israel)", reference: "Introdução ao Livro de Amós" },
+            { question: "Qual é um dos temas centrais do livro de Amós?", options: ["A construção do Templo", "A justiça social", "A história dos reis", "Leis dietéticas"], answer: "A justiça social", reference: "Temas Centrais do Livro de Amós" },
+            { question: "Contra quais entidades Amós começa a denunciar os pecados?", options: ["Apenas Israel", "Apenas Judá", "As nações vizinhas e depois Judá e Israel", "Apenas os sacerdotes"], answer: "As nações vizinhas e depois Judá e Israel", reference: "Capítulos 1-2" },
+            { question: "O que Amós 5:24 declara que deve 'correr como águas'?", options: ["Dinheiro", "Vinho", "A justiça e a retidão", "Lagrimas"], answer: "A justiça e a retidão", reference: "Amós 5:24" },
+            { question: "Qual rei de Israel governava durante o ministério de Amós?", options: ["Davi", "Salomão", "Jeroboão II", "Acabe"], answer: "Jeroboão II", reference: "Introdução ao Livro de Amós" },
+            { question: "O que Amós denuncia nas 'vacas de Basã' (Amós 4:1)?", options: ["A idolatria", "A opressão das mulheres ricas", "A fraqueza militar", "A falta de colheitas"], answer: "A opressão das mulheres ricas", reference: "Capítulo 4" },
+            { question: "Quantos capítulos tem o livro de Amós?", options: ["7", "8", "9", "10"], answer: "9", reference: "Esboços do Livro de Amós" },
+            { question: "Qual é a natureza da adoração que Amós condena?", options: ["Adoração sincera", "Adoração formal e hipócrita", "Adoração em Jerusalém", "Adoração no Templo"], answer: "Adoração formal e hipócrita", reference: "Capítulo 5" },
+            { question: "O que Deus promete restaurar no final do livro de Amós?", options: ["O exército de Israel", "A tenda caída de Davi", "A riqueza material", "As alianças com outras nações"], answer: "A tenda caída de Davi", reference: "Capítulo 9" },
+            { question: "Qual é a principal acusação de Deus contra Israel em Amós?", options: ["Falta de oração", "Injustiça social e opressão", "Construção de templos", "Guerras constantes"], answer: "Injustiça social e opressão", reference: "Capítulos 3-6" },
+            { question: "Amós era considerado um profeta 'profissional'?", options: ["Sim, ele frequentou escolas de profetas", "Não, ele era um pastor e cultivador de figos", "Sim, ele era um sacerdote", "Não, ele era um rei"], answer: "Não, ele era um pastor e cultivador de figos", reference: "Introdução ao Livro de Amós" },
+            { question: "Qual sacerdote se opôs a Amós em Betel?", options: ["Arão", "Melquisedeque", "Amazias", "Zadoque"], answer: "Amazias", reference: "Capítulo 7" },
+            { question: "O que a visão do 'prumo' (Amós 7:7-9) simboliza?", options: ["A construção de um muro", "A medição da retidão de Israel por Deus", "A colheita de frutas", "A destruição de gafanhotos"], answer: "A medição da retidão de Israel por Deus", reference: "Capítulo 7" },
+            { question: "Apesar do juízo, qual é a mensagem final de Amós?", options: ["Desespero", "Destruição total", "Esperança e restauração", "Exílio permanente"], answer: "Esperança e restauração", reference: "Capítulo 9" },
+            { question: "O que o livro de Amós enfatiza sobre os privilégios da aliança de Israel com Deus?", options: ["Que os isentavam do juízo", "Que aumentavam sua responsabilidade", "Que não tinham importância", "Que garantiam prosperidade eterna"], answer: "Que aumentavam sua responsabilidade", reference: "Introdução ao Livro de Amós" },
+            { question: "Qual é o significado da visão do 'cesto de frutas de verão' (Amós 8:1-3)?", options: ["Abundância de colheita", "O fim chegou para Israel", "Um novo começo", "Um período de fome"], answer: "O fim chegou para Israel", reference: "Capítulo 8" },
+            { question: "O que Amós 5:4 exorta o povo a fazer para viver?", options: ["Construir cidades", "Buscar a Deus", "Fazer sacrifícios", "Guerrear"], answer: "Buscar a Deus", reference: "Amós 5:4" },
+            { question: "Qual a profissão de Amós antes de ser chamado por Deus?", options: ["Pescador", "Carpinteiro", "Pastor e cultivador de figos", "Sacerdote"], answer: "Pastor e cultivador de figos", reference: "Introdução ao Livro de Amós" },
+            { question: "O que a prosperidade de Israel durante o tempo de Amós era, segundo o profeta?", options: ["Uma bênção de Deus", "Um sinal de obediência", "Uma ilusão que mascarava a injustiça", "Um resultado de sua própria força"], answer: "Uma ilusão que mascarava a injustiça", reference: "Introdução ao Livro de Amós" },
+            { question: "Amós profetizou durante o reinado de qual rei de Judá?", options: ["Davi", "Salomão", "Uzias", "Ezequias"], answer: "Uzias", reference: "Introdução ao Livro de Amós" },
+            { question: "O que a 'tenda caída de Davi' simboliza na profecia de restauração?", options: ["A destruição de Jerusalém", "A restauração do reino messiânico", "A queda da dinastia de Davi", "Um acampamento no deserto"], answer: "A restauração do reino messiânico", reference: "Capítulo 9" },
+            { question: "Qual é a principal característica de Deus revelada em Amós?", options: ["Sua paciência infinita", "Sua indiferença", "Sua paixão pela justiça e retidão", "Sua fraqueza"], answer: "Sua paixão pela justiça e retidão", reference: "Temas Centrais do Livro de Amós" },
+            { question: "O que Amós 8:11-12 prevê para o futuro?", options: ["Abundância de alimentos", "Fome de ouvir as palavras do Senhor", "Paz e prosperidade", "Grandes festas"], answer: "Fome de ouvir as palavras do Senhor", reference: "Amós 8:11-12" },
+            { question: "O que a visão do Senhor junto ao altar (Amós 9:1) indica?", options: ["Um novo sacrifício", "Que não há escapatória do juízo divino", "Um tempo de paz", "A construção de um novo altar"], answer: "Que não há escapatória do juízo divino", reference: "Capítulo 9" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsAmos = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsAmos.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsAmos = allQuizQuestionsAmos.concat(uniqueQuizQuestionsAmos);
+        }
+        allQuizQuestionsAmos = allQuizQuestionsAmos.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsAmos = [];
+        let currentQuizIndexAmos = 0;
+        let scoreAmos = 0;
+        let wrongAnswersAmos = 0;
+        let amosChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsAmos() {
+            shuffledQuizQuestionsAmos = [...allQuizQuestionsAmos]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsAmos);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressAmos() {
+            const progressElement = document.getElementById('quizProgressAmos');
+            progressElement.textContent = `${currentQuizIndexAmos + 1}/${shuffledQuizQuestionsAmos.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionAmos() {
+            if (currentQuizIndexAmos >= shuffledQuizQuestionsAmos.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionAmos').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsAmos').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreAmos}, Erros: ${wrongAnswersAmos}</p>`;
+                document.getElementById('quizFeedbackAmos').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsAmos[currentQuizIndexAmos];
+            document.getElementById('quizQuestionAmos').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsAmos');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerAmos(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackAmos').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressAmos();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerAmos(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackAmos');
+            const optionsButtons = document.querySelectorAll('#quizOptionsAmos button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreAmos++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersAmos++;
+            }
+            document.getElementById('quizScoreAmos').textContent = `Acertos: ${scoreAmos}, Erros: ${wrongAnswersAmos}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionAmos() {
+            currentQuizIndexAmos++;
+            displayQuestionAmos();
+        }
+
+        // Dados para o gráfico de temas de Amós
+        const amosChartData = {
+            labels: ['Justiça Social', 'Juízo Divino', 'Hipocrisia Religiosa', 'Soberania de Deus', 'O Dia do Senhor', 'Arrependimento', 'Restauração'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [35, 25, 15, 10, 5, 5, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const amosChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Amós',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderAmosChart() {
+            const ctx = document.getElementById('amosChart').getContext('2d');
+            if (amosChartInstance) {
+                amosChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            amosChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: amosChartData,
+                options: amosChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

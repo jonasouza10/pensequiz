@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Ester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #8b5cf6; /* Purple border for Esther game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #8b5cf6; /* Purple for Esther game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #7c3aed; /* Darker purple on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #8b5cf6;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #8b5cf6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #7c3aed;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-purple-700 mb-4">A História de Ester 👑</h1>
+        <p class="text-gray-700 mb-6">
+            Descubra a corajosa jornada de Ester, a rainha que arriscou sua vida para salvar seu povo.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Ester!</p>
+            <p class="text-gray-700 mt-6">A história de Ester é um testemunho da providência divina, da coragem individual e da importância de agir com fé para o bem do seu povo.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: A Escolha de Ester',
+                location: 'Susã (Persia)',
+                objective: 'Entender como Ester se tornou rainha.',
+                clues: [
+                    'Vasti é deposta como rainha.',
+                    'Ester, uma jovem judia, é levada ao palácio para se preparar para o rei.',
+                    'Ester agrada a Hegai, o guarda das mulheres, e ganha o favor do rei.'
+                ],
+                keyVerse: 'Ester 2:17',
+                enigma: 'Qual era o nome original de Ester?',
+                options: ['Hadassa', 'Miriam', 'Débora'],
+                correctAnswer: 'Hadassa'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: Mordecai e Hamã',
+                location: 'Susã',
+                objective: 'Aprender sobre a inimizade entre Mordecai e Hamã.',
+                clues: [
+                    'Mordecai, primo e tutor de Ester, trabalhava no portão do rei.',
+                    'Hamã, um oficial do rei, exigia que todos se curvassem a ele, mas Mordecai se recusava.',
+                    'Hamã fica furioso e planeja destruir não apenas Mordecai, mas todos os judeus do império.'
+                ],
+                keyVerse: 'Ester 3:5-6',
+                enigma: 'A quem Mordecai se recusou a se curvar?',
+                options: ['Hamã', 'Rei Assuero', 'Hegai'],
+                correctAnswer: 'Hamã'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: O Decreto de Extermínio',
+                location: 'Susã',
+                objective: 'Entender o plano de Hamã para aniquilar os judeus.',
+                clues: [
+                    'Hamã convence o rei Assuero a emitir um decreto para aniquilar todos os judeus do império.',
+                    'O decreto é selado com o anel do rei e enviado a todas as províncias.'
+                ],
+                keyVerse: 'Ester 3:13',
+                enigma: 'O que Hamã planejou para os judeus?',
+                options: ['Extermínio', 'Exílio', 'Escravidão'],
+                correctAnswer: 'Extermínio'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: O Jejum de Ester e dos Judeus',
+                location: 'Susã',
+                objective: 'Observar a reação de Ester e do povo judeu ao decreto.',
+                clues: [
+                    'Mordecai informa Ester sobre o decreto e a exorta a intervir.',
+                    'Ester, temendo por sua vida, pede que Mordecai e todos os judeus em Susã jejuem por ela por três dias e três noites.'
+                ],
+                keyVerse: 'Ester 4:16',
+                enigma: 'Por quantos dias Ester pediu que os judeus jejuassem?',
+                options: ['Três dias', 'Sete dias', 'Um dia'],
+                correctAnswer: 'Três dias'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: Ester Diante do Rei',
+                location: 'Palácio de Susã',
+                objective: 'Compreender a coragem de Ester ao se apresentar ao rei sem ser chamada.',
+                clues: [
+                    'Apresentar-se ao rei sem ser chamado era punível com a morte, a menos que o rei estendesse seu cetro de ouro.',
+                    'Ester, após o jejum, corajosamente entra na presença do rei, e ele estende o cetro, poupando sua vida.'
+                ],
+                keyVerse: 'Ester 5:2',
+                enigma: 'O que o rei estendeu a Ester para poupar sua vida?',
+                options: ['O cetro de ouro', 'Uma coroa', 'Uma espada'],
+                correctAnswer: 'O cetro de ouro'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: O Primeiro Banquete de Ester',
+                location: 'Palácio de Susã',
+                objective: 'Acompanhar a estratégia inicial de Ester.',
+                clues: [
+                    'Quando o rei pergunta o que ela deseja, Ester convida o rei e Hamã para um banquete.',
+                    'No banquete, ela os convida para um segundo banquete no dia seguinte, adiando seu pedido.'
+                ],
+                keyVerse: 'Ester 5:7-8',
+                enigma: 'Quem Ester convidou para seu primeiro banquete?',
+                options: ['O rei e Hamã', 'Mordecai e o rei', 'Apenas o rei'],
+                correctAnswer: 'O rei e Hamã'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: A Noite Insona do Rei',
+                location: 'Palácio de Susã',
+                objective: 'Entender como a providência divina agiu.',
+                clues: [
+                    'Naquela noite, o rei Assuero não consegue dormir e pede para que os registros das crônicas do reino sejam lidos para ele.',
+                    'Ele descobre que Mordecai, que havia salvado sua vida de uma conspiração, nunca foi recompensado.'
+                ],
+                keyVerse: 'Ester 6:1-3',
+                enigma: 'O que o rei pediu para ser lido na noite em que não conseguiu dormir?',
+                options: ['Os registros das crônicas do reino', 'Um livro de leis', 'Um poema'],
+                correctAnswer: 'Os registros das crônicas do reino'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: A Honra de Mordecai',
+                location: 'Susã',
+                objective: 'Observar a humilhação de Hamã e a exaltação de Mordecai.',
+                clues: [
+                    'O rei pergunta a Hamã como honrar alguém que o rei deseja honrar, e Hamã, pensando que era para ele, descreve uma grande honra.',
+                    'O rei ordena que Hamã honre Mordecai exatamente como ele descreveu, levando Hamã a uma humilhação pública.'
+                ],
+                keyVerse: 'Ester 6:10-11',
+                enigma: 'Quem foi forçado a honrar Mordecai publicamente?',
+                options: ['Hamã', 'O rei Assuero', 'Um dos servos do rei'],
+                correctAnswer: 'Hamã'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: O Segundo Banquete de Ester e a Revelação',
+                location: 'Palácio de Susã',
+                objective: 'Testemunhar a coragem de Ester ao revelar o plano de Hamã.',
+                clues: [
+                    'No segundo banquete, o rei novamente pergunta a Ester seu pedido.',
+                    'Ester revela que ela e seu povo seriam destruídos por um inimigo, e acusa Hamã como o autor do plano maligno.'
+                ],
+                keyVerse: 'Ester 7:3-6',
+                enigma: 'O que Ester revelou ao rei no segundo banquete?',
+                options: ['O plano de Hamã para destruir os judeus', 'Um segredo sobre seu passado', 'Um pedido de mais riquezas'],
+                correctAnswer: 'O plano de Hamã para destruir os judeus'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: A Execução de Hamã',
+                location: 'Palácio de Susã',
+                objective: 'Aprender sobre o destino de Hamã.',
+                clues: [
+                    'O rei fica furioso com Hamã e sai para o jardim do palácio.',
+                    'Ao retornar, os eunucos mencionam a forca de cinquenta côvados que Hamã havia preparado para Mordecai, e o rei ordena que Hamã seja enforcado nela.'
+                ],
+                keyVerse: 'Ester 7:9-10',
+                enigma: 'Onde Hamã foi enforcado?',
+                options: ['Na forca que ele preparou para Mordecai', 'Na praça da cidade', 'No palácio'],
+                correctAnswer: 'Na forca que ele preparou para Mordecai'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: O Decreto de Mordecai',
+                location: 'Susã',
+                objective: 'Entender como os judeus foram protegidos.',
+                clues: [
+                    'O rei dá o anel de sinete a Mordecai, que agora tem autoridade para emitir um novo decreto.',
+                    'Um novo decreto é enviado por todo o império, permitindo que os judeus se defendam e destruam seus inimigos no dia em que seriam atacados.'
+                ],
+                keyVerse: 'Ester 8:8, 11',
+                enigma: 'Quem recebeu o anel de sinete do rei após a morte de Hamã?',
+                options: ['Mordecai', 'Ester', 'Um novo vizir'],
+                correctAnswer: 'Mordecai'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: A Vitória dos Judeus',
+                location: 'Todo o Império Persa',
+                objective: 'Observar a vitória dos judeus sobre seus inimigos.',
+                clues: [
+                    'No dia marcado para o extermínio, os judeus se reúnem e se defendem contra aqueles que os odiavam.',
+                    'Eles derrotam seus inimigos em todas as províncias, e muitos outros povos se tornam judeus por medo.'
+                ],
+                keyVerse: 'Ester 9:1-5',
+                enigma: 'No dia em que seriam exterminados, o que os judeus fizeram?',
+                options: ['Defenderam-se e derrotaram seus inimigos', 'Fugiram para outras terras', 'Renderam-se'],
+                correctAnswer: 'Defenderam-se e derrotaram seus inimigos'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: A Instituição do Purim',
+                location: 'Susã e em todo o império',
+                objective: 'Compreender a origem da festa de Purim.',
+                clues: [
+                    'Mordecai e Ester escrevem cartas para todas as províncias, instituindo uma festa anual.',
+                    'A festa é chamada Purim, em referência ao "Pur" (sorte) que Hamã havia lançado para determinar o dia do extermínio.'
+                ],
+                keyVerse: 'Ester 9:20-22',
+                enigma: 'Qual festa foi instituída para comemorar a libertação dos judeus?',
+                options: ['Purim', 'Páscoa', 'Chanucá'],
+                correctAnswer: 'Purim'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: A Grandeza de Mordecai',
+                location: 'Susã',
+                objective: 'Aprender sobre a ascensão de Mordecai.',
+                clues: [
+                    'Mordecai se torna o segundo em comando do rei Assuero, sucedendo a Hamã.',
+                    'Ele era grande entre os judeus e muito estimado por seus irmãos, buscando o bem de seu povo.'
+                ],
+                keyVerse: 'Ester 10:3',
+                enigma: 'Qual era a posição de Mordecai no reino após Hamã?',
+                options: ['Segundo em comando do rei', 'Comandante do exército', 'Sacerdote'],
+                correctAnswer: 'Segundo em comando do rei'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Legado de Ester',
+                location: 'Império Persa',
+                objective: 'Refletir sobre o impacto duradouro da vida de Ester.',
+                clues: [
+                    'A história de Ester demonstra que Deus opera nos bastidores para proteger Seu povo, mesmo quando Seu nome não é explicitamente mencionado.',
+                    'Ester é um exemplo de coragem, fé, obediência e uso estratégico de sua posição para salvar uma nação.'
+                ],
+                keyVerse: 'Ester 4:14',
+                enigma: 'Qual é a principal lição da história de Ester?',
+                options: ['Coragem e providência divina', 'Riqueza e poder', 'Vingança contra inimigos'],
+                correctAnswer: 'Coragem e providência divina'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-purple-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

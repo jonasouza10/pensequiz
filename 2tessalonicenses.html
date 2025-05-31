@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 2 Tessalonicenses</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2 Tessalonicenses Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 2 Tessalonicenses</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection2Tessalonicenses('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection2Tessalonicenses('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection2Tessalonicenses('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection2Tessalonicenses('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection2Tessalonicenses('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection2Tessalonicenses('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection2Tessalonicenses('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection2Tessalonicenses('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection2Tessalonicenses('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio2Tessalonicenses" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 2 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Segunda Epístola de Paulo aos Tessalonicenses, uma carta escrita para corrigir mal-entendidos sobre a segunda vinda de Cristo, encorajar os crentes perseguidos e exortar à disciplina. Descubra a verdade sobre o Dia do Senhor, o homem da iniquidade, e a importância de permanecer firme na fé e no trabalho diligente. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao2Tessalonicenses" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 2 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Segunda Epístola de Paulo aos Tessalonicenses foi escrita pouco tempo depois da primeira carta, provavelmente também de Corinto, por volta de 51-52 d.C. Ela é endereçada à mesma igreja em Tessalônica, que continuava a enfrentar perseguição, mas também lidava com alguns mal-entendidos e problemas internos.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito desta segunda carta é triplo: primeiramente, encorajar os crentes a perseverarem em meio à perseguição, assegurando-lhes que Deus fará justiça no Seu devido tempo. Em segundo lugar, corrigir uma falsa doutrina que havia se espalhado, afirmando que o Dia do Senhor (a segunda vinda de Cristo) já havia chegado. Paulo esclarece que certos eventos, como a apostasia e a revelação do "homem da iniquidade" (o Anticristo), devem ocorrer antes do Dia do Senhor. Por fim, exortar os crentes que, por causa de um entusiasmo equivocado sobre a iminência da volta de Cristo, haviam parado de trabalhar e viviam desordenadamente, dependendo da comunidade. Paulo enfatiza a importância do trabalho diligente e da disciplina.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem a justiça divina na retribuição aos perseguidores e o consolo aos perseguidos, a cronologia dos eventos escatológicos (especialmente o Dia do Senhor e a figura do Anticristo), e a ética cristã do trabalho e da disciplina. 2 Tessalonicenses complementa a primeira carta, oferecendo clareza e encorajamento prático para uma igreja que aguardava a volta de Cristo em meio a desafios.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Ações de Graças e Consolo na Perseguição.</strong> Gratidão pela fé e amor crescentes, e a certeza da justiça de Deus no julgamento e na retribuição.</li>
+                <li><strong>Capítulo 2: O Dia do Senhor e o Homem da Iniquidade.</strong> Esclarecimentos sobre a vinda do Senhor, a apostasia, a revelação do Anticristo e o mistério da iniquidade.</li>
+                <li><strong>Capítulo 3: Exortações ao Trabalho, Disciplina e Oração.</strong> Pedidos de oração, advertências contra os desordeiros e ociosos, e saudações finais.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Tessalonicenses é uma carta essencial para entender a perspectiva bíblica sobre os últimos tempos e a importância de uma vida cristã equilibrada, marcada pela fé, perseverança e responsabilidade.</p>
+        </div>
+
+        <div id="panoramas2Tessalonicenses" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 2 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Tessalonicenses é uma epístola que aborda a perseverança na fé, a escatologia e a ética do trabalho.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Ações de Graças e Consolo na Perseguição (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação (Capítulo 1:1-2):</strong>
+                    <ul>
+                        <li>Paulo, Silvano e Timóteo à igreja dos tessalonicenses.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Ações de Graças e Louvor pela Fé e Perseverança (Capítulo 1:3-4):</strong>
+                    <ul>
+                        <li>A fé e o amor dos tessalonicenses crescem abundantemente.</li>
+                        <li>Sua paciência e fé em todas as perseguições e aflições.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Justiça de Deus no Juízo Futuro (Capítulo 1:5-10):</strong>
+                    <ul>
+                        <li>Deus é justo em retribuir aflição aos que os afligem.</li>
+                        <li>Descanso para os afligidos na revelação do Senhor Jesus do céu.</li>
+                        <li>Ele virá para ser glorificado em Seus santos.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Oração por Digna Conduta (Capítulo 1:11-12):</strong>
+                    <ul>
+                        <li>Para que Deus os considere dignos de Seu chamado.</li>
+                        <li>Para que o nome de Jesus seja glorificado neles.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Dia do Senhor e o Homem da Iniquidade (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Esclarecimentos sobre o Dia do Senhor (Capítulo 2:1-2):</strong>
+                    <ul>
+                        <li>Não se deixem abalar facilmente, como se o Dia do Senhor já tivesse chegado.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Apostasia e a Revelação do Homem da Iniquidade (Capítulo 2:3-12):</strong>
+                    <ul>
+                        <li>Antes virá a apostasia e será revelado o homem do pecado (o Anticristo).</li>
+                        <li>Ele se oporá e se levantará contra tudo que se chama Deus.</li>
+                        <li>O mistério da iniquidade já opera, mas há um "detentor" que o impede.</li>
+                        <li>Deus enviará a operação do erro para aqueles que não creram na verdade.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Eleição e a Santificação dos Crentes (Capítulo 2:13-17):</strong>
+                    <ul>
+                        <li>Deus os escolheu desde o princípio para a salvação, em santificação do Espírito e fé na verdade.</li>
+                        <li>Exortação a permanecerem firmes e reterem as tradições ensinadas.</li>
+                        <li>Oração para que Deus os console e os confirme em toda boa palavra e obra.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Exortações Finais e Saudações (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Pedido de Oração (Capítulo 3:1-5):</strong>
+                    <ul>
+                        <li>Para que a palavra do Senhor se propague e seja glorificada.</li>
+                        <li>Para que sejam livres de homens perversos e maus.</li>
+                        <li>A fidelidade do Senhor que os confirmará e guardará do mal.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Advertência contra os Desordeiros e Ociosos (Capítulo 3:6-15):</strong>
+                    <ul>
+                        <li>Apartar-se de todo irmão que anda desordenadamente e não segundo a tradição recebida.</li>
+                        <li>Paulo e seus colaboradores trabalharam para não serem pesados a ninguém.</li>
+                        <li>Quem não quer trabalhar, também não coma.</li>
+                        <li>Admoestar os desordeiros a trabalhar tranquilamente e comer do seu próprio pão.</li>
+                        <li>Não se cansem de fazer o bem.</li>
+                        <li>Se alguém não obedecer, notá-lo e não se misturar com ele, mas admoestá-lo como irmão.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Oração e Saudações Finais (Capítulo 3:16-18):</strong>
+                    <ul>
+                        <li>O Senhor da paz vos dê sempre paz de toda maneira.</li>
+                        <li>A saudação de Paulo de sua própria mão como sinal de autenticidade.</li>
+                        <li>A graça de nosso Senhor Jesus Cristo seja com todos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">2 Tessalonicenses é crucial para a escatologia, pois fornece detalhes importantes sobre a vinda do Dia do Senhor, a apostasia e a revelação do Anticristo, corrigindo mal-entendidos que causavam ansiedade e ociosidade na igreja. A carta também reforça a justiça de Deus em retribuir a perseguição e consolar os fiéis. Além disso, enfatiza a importância da responsabilidade individual, do trabalho diligente e da disciplina na comunidade cristã, garantindo que a esperança na volta de Cristo não leve à irresponsabilidade, mas à perseverança e ao serviço.</p>
+        </div>
+
+        <div id="personagens2Tessalonicenses" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGrid2Tessalonicenses">
+            </div>
+        </div>
+
+        <div id="esbocos2Tessalonicenses" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 2 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 2 Tessalonicenses, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Ações de graças e consolo na perseguição.</li>
+                <li><strong>Capítulo 2:</strong> O Dia do Senhor e o homem da iniquidade.</li>
+                <li><strong>Capítulo 3:</strong> Exortações ao trabalho, disciplina e oração.</li>
+            </ul>
+        </div>
+
+        <div id="temas2Tessalonicenses" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 2 Tessalonicenses</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Segunda Vinda de Cristo (Escatologia):</strong> Esclarecimentos sobre o Dia do Senhor e sua cronologia.</li>
+                <li><strong>O Homem da Iniquidade (Anticristo):</strong> Sua revelação e o mistério da iniquidade.</li>
+                <li><strong>Perseverança em Meio à Perseguição:</strong> Encorajamento e a justiça divina.</li>
+                <li><strong>Trabalho Diligente e Disciplina:</strong> Advertência contra a ociosidade e a desordem.</li>
+                <li><strong>Fidelidade de Deus:</strong> A certeza de que Deus guardará e confirmará os crentes.</li>
+                <li><strong>Oração:</strong> Pedidos de oração e sua importância para o ministério.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos2Tessalonicenses" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 2 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chapters2Tessalonicenses">
+            </div>
+        </div>
+
+        <div id="quiz2Tessalonicenses" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 2 Tessalonicenses</h2>
+            <div id="quizContainer2Tessalonicenses" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestion2Tessalonicenses"></p>
+                <div id="quizOptions2Tessalonicenses" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedback2Tessalonicenses" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestion2Tessalonicenses()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgress2Tessalonicenses"></span></p>
+                <p>Pontuação: <span id="quizScore2Tessalonicenses">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico2Tessalonicenses" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 2 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 2 Tessalonicenses.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="2tessalonicensesChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal2Tessalonicenses()">&times;</span>
+                <h3 id="modalCharacterName2Tessalonicenses" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription2Tessalonicenses" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 2 Tessalonicenses",
+            "short_name": "2 Tessalonicenses",
+            "description": "Explore o livro de 2 Tessalonicenses de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=2TS",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=2TS",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '2tessalonicenses-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection2Tessalonicenses(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtons2Tessalonicenses();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinks2Tessalonicenses();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestions2Tessalonicenses(); // Embaralha as perguntas no início do quiz
+                currentQuizIndex2Tessalonicenses = 0; // Reinicia o quiz
+                score2Tessalonicenses = 0;
+                wrongAnswers2Tessalonicenses = 0;
+                document.getElementById('quizScore2Tessalonicenses').textContent = `Acertos: ${score2Tessalonicenses}, Erros: ${wrongAnswers2Tessalonicenses}`;
+                displayQuestion2Tessalonicenses();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                render2TessalonicensesChart();
+            }
+        }
+
+        // Dados dos personagens para 2 Tessalonicenses
+        const characterDetails2Tessalonicenses = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta epístola, corrigindo mal-entendidos sobre a volta de Cristo e exortando à perseverança e ao trabalho."
+            },
+            "Silvano (Silas)": {
+                name: "Silvano (Silas)",
+                description: "Colaborador de Paulo e co-autor da carta, que o acompanhou em sua segunda viagem missionária."
+            },
+            "Timóteo": {
+                name: "Timóteo",
+                description: "Colaborador de Paulo e co-autor da carta, que estava com Paulo ao escrever aos tessalonicenses."
+            },
+            "Igreja em Tessalônica": {
+                name: "Igreja em Tessalônica",
+                description: "A comunidade de crentes em Tessalônica, que enfrentava perseguição e mal-entendidos sobre a escatologia."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, que é a fonte de toda justiça, consolo e fidelidade, e que opera nos eventos escatológicos."
+            },
+            "O Homem da Iniquidade (Anticristo)": {
+                name: "O Homem da Iniquidade (Anticristo)",
+                description: "Uma figura profética que se levantará antes do Dia do Senhor, descrita por Paulo como aquele que se opõe a Deus e se exalta sobre tudo que é divino."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModal2Tessalonicenses(characterName) {
+            const details = characterDetails2Tessalonicenses[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName2Tessalonicenses').textContent = details.name;
+                document.getElementById('modalCharacterDescription2Tessalonicenses').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal2Tessalonicenses() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtons2Tessalonicenses() {
+            const grid = document.getElementById('characterGrid2Tessalonicenses');
+            grid.innerHTML = '';
+            for (const key in characterDetails2Tessalonicenses) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModal2Tessalonicenses(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinks2Tessalonicenses() {
+            const chaptersDiv = document.getElementById('chapters2Tessalonicenses');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 3; i++) { // 2 Tessalonicenses tem 3 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/2ts/${i}`; // Link para a Bíblia Online, 2 Tessalonicenses
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 2 Tessalonicenses (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestions2Tessalonicenses = [
+            { question: "Quem são os autores da Segunda Epístola aos Tessalonicenses?", options: ["Pedro e João", "Paulo, Silvano e Timóteo", "Tiago e Judas", "Lucas e Marcos"], answer: "Paulo, Silvano e Timóteo", reference: "Introdução ao Livro de 2 Tessalonicenses" },
+            { question: "Qual era um dos principais problemas que Paulo aborda em 2 Tessalonicenses?", options: ["A falta de amor", "Mal-entendidos sobre a segunda vinda de Cristo", "Disputas sobre a lei", "Idolatria"], answer: "Mal-entendidos sobre a segunda vinda de Cristo", reference: "Introdução ao Livro de 2 Tessalonicenses" },
+            { question: "No Capítulo 1, pelo que Paulo agradece em relação aos tessalonicenses?", options: ["Sua riqueza", "Sua fé crescente e perseverança na perseguição", "Sua inteligência", "Sua popularidade"], answer: "Sua fé crescente e perseverança na perseguição", reference: "Capítulo 1" },
+            { question: "O que virá antes do Dia do Senhor, segundo 2 Tessalonicenses 2:3?", options: ["Um grande avivamento", "A apostasia e a revelação do homem da iniquidade", "Paz mundial", "A construção do templo"], answer: "A apostasia e a revelação do homem da iniquidade", reference: "Capítulo 2" },
+            { question: "Quem é o 'homem da iniquidade' mencionado no Capítulo 2?", options: ["Um profeta", "Um rei justo", "O Anticristo", "Um anjo"], answer: "O Anticristo", reference: "Capítulo 2" },
+            { question: "Qual a exortação de Paulo aos que andavam desordenadamente no Capítulo 3?", options: ["Parar de trabalhar", "Trabalhar e comer do seu próprio pão", "Pedir esmolas", "Viver na ociosidade"], answer: "Trabalhar e comer do seu próprio pão", reference: "Capítulo 3" },
+            { question: "O que Paulo pede que os tessalonicenses orem por ele no Capítulo 3?", options: ["Por sua libertação da prisão", "Para que a palavra do Senhor se propague e seja glorificada", "Por mais dinheiro", "Por fama"], answer: "Para que a palavra do Senhor se propague e seja glorificada", reference: "Capítulo 3" },
+            { question: "O que impede a revelação do homem da iniquidade, segundo 2 Tessalonicenses 2:7?", options: ["A força humana", "Um detentor", "A ignorância", "A sorte"], answer: "Um detentor", reference: "Capítulo 2" },
+            { question: "Para quem Deus enviará a operação do erro para que creiam na mentira, segundo 2 Tessalonicenses 2:11?", options: ["Para todos os homens", "Para os que não receberam o amor da verdade", "Para os justos", "Para os anjos"], answer: "Para os que não receberam o amor da verdade", reference: "Capítulo 2" },
+            { question: "O que Paulo exorta os tessalonicenses a fazerem em relação à verdade que lhes foi ensinada (2 Tessalonicenses 2:15)?", options: ["Esquecer", "Mudar a verdade", "Permanecerem firmes e reterem as tradições", "Duvidar"], answer: "Permanecerem firmes e reterem as tradições", reference: "Capítulo 2" },
+            { question: "Qual é a principal diferença entre 1 e 2 Tessalonicenses em relação à escatologia?", options: ["Não há diferença", "1 Tessalonicenses foca no arrebatamento, 2 Tessalonicenses esclarece o tempo do Dia do Senhor e a apostasia pré-vinda", "2 Tessalonicenses nega a volta de Cristo", "1 Tessalonicenses fala apenas de juízo"], answer: "1 Tessalonicenses foca no arrebatamento, 2 Tessalonicenses esclarece o tempo do Dia do Senhor e a apostasia pré-vinda", reference: "Introdução ao Livro de 2 Tessalonicenses" },
+            { question: "O que Paulo diz sobre a justiça de Deus em 2 Tessalonicenses 1:6-7?", options: ["Deus é injusto", "É justo que Deus retribua aflição aos que os afligem e descanso aos afligidos", "Deus não se importa", "Deus é indiferente"], answer: "É justo que Deus retribua aflição aos que os afligem e descanso aos afligidos", reference: "Capítulo 1" },
+            { question: "Qual o tema principal do Capítulo 2 de 2 Tessalonicenses?", options: ["O amor fraternal", "O Dia do Senhor e o homem da iniquidade", "A santificação", "A vida diária"], answer: "O Dia do Senhor e o homem da iniquidade", reference: "Esboços do Livro de 2 Tessalonicenses" },
+            { question: "O que Paulo instrui sobre o tratamento dos irmãos que andam desordenadamente no Capítulo 3?", options: ["Excluí-los da igreja", "Admoestá-los como irmãos, não como inimigos", "Ignorá-los", "Condená-los publicamente"], answer: "Admoestá-los como irmãos, não como inimigos", reference: "Capítulo 3" },
+            { question: "Qual é a fonte da consolação e boa esperança que Paulo menciona em 2 Tessalonicenses 2:16-17?", options: ["A sabedoria humana", "Os rituais religiosos", "Deus, nosso Pai, e nosso Senhor Jesus Cristo", "A sorte"], answer: "Deus, nosso Pai, e nosso Senhor Jesus Cristo", reference: "Capítulo 2" },
+            { question: "Quantos capítulos tem o livro de 2 Tessalonicenses?", options: ["2", "3", "4", "5"], answer: "3", reference: "Esboços do Livro de 2 Tessalonicenses" },
+            { question: "Qual a exortação de Paulo sobre a oração no Capítulo 3?", options: ["Não orar", "Orem por nós, para que a palavra do Senhor se propague", "Orar apenas por si mesmos", "Orar em segredo"], answer: "Orem por nós, para que a palavra do Senhor se propague", reference: "Capítulo 3" },
+            { question: "O que Paulo afirma sobre a fidelidade do Senhor em 2 Tessalonicenses 3:3?", options: ["O Senhor é infiel", "O Senhor é fiel, que os confirmará e guardará do mal", "O Senhor é indiferente", "O Senhor os abandonará"], answer: "O Senhor é fiel, que os confirmará e guardará do mal", reference: "Capítulo 3" },
+            { question: "O que Paulo exorta os tessalonicenses a fazerem para não se cansarem de fazer o bem (2 Tessalonicenses 3:13)?", options: ["Descansar", "Não se cansem de fazer o bem", "Fazer o mal", "Parar de ajudar"], answer: "Não se cansem de fazer o bem", reference: "Capítulo 3" },
+            { question: "Qual a saudação final de Paulo que serve como sinal de autenticidade da carta (2 Tessalonicenses 3:17)?", options: ["Uma bênção genérica", "A saudação de minha própria mão, de Paulo, que é o sinal em toda a epístola", "Uma assinatura secreta", "Um selo real"], answer: "A saudação de minha própria mão, de Paulo, que é o sinal em toda a epístola", reference: "Capítulo 3" },
+            { question: "Qual o foco principal do Capítulo 1 de 2 Tessalonicenses?", options: ["Alegria", "Consolo na perseguição", "Riqueza", "Conhecimento"], answer: "Consolo na perseguição", reference: "Esboços do Livro de 2 Tessalonicenses" },
+            { question: "O que Paulo diz sobre o mistério da iniquidade em 2 Tessalonicenses 2:7?", options: ["Não existe", "Já opera, mas há um que o detém", "Será revelado imediatamente", "É um segredo"], answer: "Já opera, mas há um que o detém", reference: "Capítulo 2" },
+            { question: "Qual a exortação sobre a paz no final da carta (2 Tessalonicenses 3:16)?", options: ["Que haja guerra", "O Senhor da paz vos dê sempre paz de toda maneira", "Que a paz seja apenas para alguns", "Que a paz seja temporária"], answer: "O Senhor da paz vos dê sempre paz de toda maneira", reference: "Capítulo 3" },
+            { question: "Por que alguns tessalonicenses pararam de trabalhar, segundo a carta?", options: ["Por preguiça", "Por mal-entendidos sobre a iminência da volta de Cristo", "Por doença", "Por falta de recursos"], answer: "Por mal-entendidos sobre a iminência da volta de Cristo", reference: "Introdução ao Livro de 2 Tessalonicenses" },
+            { question: "O que Paulo deseja para os tessalonicenses na saudação inicial?", options: ["Fama e poder", "Graça e paz de Deus Pai e do Senhor Jesus Cristo", "Riqueza e saúde", "Sabedoria e conhecimento"], answer: "Graça e paz de Deus Pai e do Senhor Jesus Cristo", reference: "Capítulo 1" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestions2Tessalonicenses = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestions2Tessalonicenses.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestions2Tessalonicenses = allQuizQuestions2Tessalonicenses.concat(uniqueQuizQuestions2Tessalonicenses);
+        }
+        allQuizQuestions2Tessalonicenses = allQuizQuestions2Tessalonicenses.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestions2Tessalonicenses = [];
+        let currentQuizIndex2Tessalonicenses = 0;
+        let score2Tessalonicenses = 0;
+        let wrongAnswers2Tessalonicenses = 0;
+        let tessalonicensesChartInstance2 = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestions2Tessalonicenses() {
+            shuffledQuizQuestions2Tessalonicenses = [...allQuizQuestions2Tessalonicenses]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestions2Tessalonicenses);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgress2Tessalonicenses() {
+            const progressElement = document.getElementById('quizProgress2Tessalonicenses');
+            progressElement.textContent = `${currentQuizIndex2Tessalonicenses + 1}/${shuffledQuizQuestions2Tessalonicenses.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestion2Tessalonicenses() {
+            if (currentQuizIndex2Tessalonicenses >= shuffledQuizQuestions2Tessalonicenses.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestion2Tessalonicenses').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptions2Tessalonicenses').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${score2Tessalonicenses}, Erros: ${wrongAnswers2Tessalonicenses}</p>`;
+                document.getElementById('quizFeedback2Tessalonicenses').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestions2Tessalonicenses[currentQuizIndex2Tessalonicenses];
+            document.getElementById('quizQuestion2Tessalonicenses').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptions2Tessalonicenses');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswer2Tessalonicenses(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedback2Tessalonicenses').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgress2Tessalonicenses();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswer2Tessalonicenses(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedback2Tessalonicenses');
+            const optionsButtons = document.querySelectorAll('#quizOptions2Tessalonicenses button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                score2Tessalonicenses++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswers2Tessalonicenses++;
+            }
+            document.getElementById('quizScore2Tessalonicenses').textContent = `Acertos: ${score2Tessalonicenses}, Erros: ${wrongAnswers2Tessalonicenses}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestion2Tessalonicenses() {
+            currentQuizIndex2Tessalonicenses++;
+            displayQuestion2Tessalonicenses();
+        }
+
+        // Dados para o gráfico de temas de 2 Tessalonicenses
+        const tessalonicensesChartData2 = {
+            labels: ['Segunda Vinda de Cristo', 'Homem da Iniquidade', 'Perseverança', 'Trabalho e Disciplina', 'Fidelidade de Deus', 'Oração'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 12, 10], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const tessalonicensesChartOptions2 = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 2 Tessalonicenses',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function render2TessalonicensesChart() {
+            const ctx = document.getElementById('2tessalonicensesChart').getContext('2d');
+            if (tessalonicensesChartInstance2) {
+                tessalonicensesChartInstance2.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            tessalonicensesChartInstance2 = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: tessalonicensesChartData2,
+                options: tessalonicensesChartOptions2
+            });
+        }
+    </script>
+</body>
+</html>

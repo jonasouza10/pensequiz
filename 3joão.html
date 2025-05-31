@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 3 João</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="3 João Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 3 João</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionJoao3('inicioJoao3')">Início</button>
+            <button class="nav-button" onclick="showSectionJoao3('introducaoJoao3')">Introdução</button>
+            <button class="nav-button" onclick="showSectionJoao3('panoramasJoao3')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionJoao3('personagensJoao3')">Personagens</button>
+            <button class="nav-button" onclick="showSectionJoao3('esbocosJoao3')">Esboços</button>
+            <button class="nav-button" onclick="showSectionJoao3('temasJoao3')">Temas</button>
+            <button class="nav-button" onclick="showSectionJoao3('capitulosJoao3')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionJoao3('quizJoao3')">Quiz</button>
+            <button class="nav-button" onclick="showSectionJoao3('graficoJoao3')">Gráfico</button>
+        </div>
+
+        <div id="inicioJoao3" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 3 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Terceira Epístola de João, uma breve carta que aborda a hospitalidade cristã, o apoio àqueles que trabalham pela verdade e a condenação de uma liderança arrogante. Descubra a importância de andar na verdade e de cooperar com ela. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducaoJoao3" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 3 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Terceira Epístola de João é a mais curta das epístolas joaninas e do Novo Testamento. O autor se identifica como "o presbítero", o que consistentemente aponta para o apóstolo João. A carta é endereçada a Gaio, um cristão fiel e hospitaleiro, provavelmente um líder de igreja ou uma pessoa de influência na comunidade. A data de sua escrita é geralmente aceita como sendo entre 85 e 95 d.C., no mesmo período das outras epístolas de João, refletindo as preocupações e o estilo do apóstolo em sua velhice.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O propósito principal de 3 João é triplo: (1) elogiar Gaio por sua hospitalidade e apoio aos missionários itinerantes, que saíam para pregar o evangelho e dependiam da hospitalidade dos crentes; (2) condenar Diótrefes, um líder arrogante que não aceitava a autoridade de João, difamava os apóstolos e se recusava a receber os missionários, chegando a expulsar da igreja aqueles que o faziam; e (3) recomendar Demétrio, um crente que tinha bom testemunho e que provavelmente era o portador da carta.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Esta epístola oferece um vislumbre valioso das dinâmicas internas das igrejas do primeiro século, incluindo questões de liderança, autoridade apostólica e a importância da hospitalidade no apoio à obra missionária. João enfatiza que a verdadeira fé se manifesta não apenas em crença, mas em ações práticas de amor e cooperação com a verdade, contrastando a conduta exemplar de Gaio e Demétrio com a atitude egoísta e divisiva de Diótrefes.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Versículos 1-4: Saudação e Elogio a Gaio.</strong> João saúda Gaio, expressando seu amor na verdade e alegria por sua fidelidade e prosperidade espiritual.</li>
+                <li><strong>Versículos 5-8: A Importância da Hospitalidade e do Apoio Missionário.</strong> João elogia Gaio por sua hospitalidade para com os irmãos, especialmente os que viajavam, e exorta os crentes a apoiar esses obreiros da verdade.</li>
+                <li><strong>Versículos 9-11: Condenação de Diótrefes e Exortação a Imitar o Bem.</strong> João denuncia Diótrefes por sua arrogância, por não aceitar a autoridade apostólica, por difamar João e por expulsar da igreja aqueles que recebiam os missionários. Exorta Gaio a imitar o bem, não o mal.</li>
+                <li><strong>Versículos 12-14: Recomendação de Demétrio e Conclusão.</strong> João recomenda Demétrio por seu bom testemunho e expressa o desejo de visitá-los pessoalmente em breve.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">3 João é um chamado à generosidade, à humildade e à firmeza na defesa da verdade e no apoio àqueles que a proclamam.</p>
+        </div>
+
+        <div id="panoramasJoao3" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 3 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">3 João é uma epístola que destaca a importância da hospitalidade e do apoio àqueles que servem à verdade, contrastando com a liderança arrogante.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Saudação e Elogio a Gaio (Versículos 1-4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação do Presbítero (Versículos 1-2):</strong>
+                    <ul>
+                        <li>O presbítero ao amado Gaio, a quem eu amo na verdade.</li>
+                        <li>Amado, desejo que te vá bem em todas as coisas, e que tenhas saúde, assim como bem vai a tua alma.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Alegria na Fidelidade de Gaio (Versículos 3-4):</strong>
+                    <ul>
+                        <li>Porque muito me alegrei quando vieram os irmãos e testificaram da verdade que há em ti, como tu andas na verdade.</li>
+                        <li>Não tenho maior gozo do que este: o de ouvir que os meus filhos andam na verdade.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Importância da Hospitalidade e do Apoio Missionário (Versículos 5-8)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Elogio à Hospitalidade de Gaio (Versículos 5-6):</strong>
+                    <ul>
+                        <li>Amado, procedes fielmente em tudo o que fazes para com os irmãos, e para com os estranhos.</li>
+                        <li>Os quais testificaram do teu amor perante a igreja; aos quais, se conduzires como é digno para com Deus, bem farás.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Razão para Apoiar os Missionários (Versículos 7-8):</strong>
+                    <ul>
+                        <li>Porque pelo seu nome saíram, nada recebendo dos gentios.</li>
+                        <li>Portanto, devemos receber a tais, para que sejamos cooperadores da verdade.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Condenação de Diótrefes e Exortação (Versículos 9-11)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Conduta de Diótrefes (Versículos 9-10):</strong>
+                    <ul>
+                        <li>Tenho escrito à igreja; mas Diótrefes, que gosta de ter a primazia entre eles, não nos recebe.</li>
+                        <li>Por isso, se eu for, trarei à memória as obras que ele faz, proferindo contra nós palavras maliciosas; e, não contente com isto, nem ele mesmo recebe os irmãos, e impede os que os querem receber, e os expulsa da igreja.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Exortação a Imitar o Bem (Versículo 11):</strong>
+                    <ul>
+                        <li>Amado, não sigas o mal, mas o bem. Quem faz o bem é de Deus; mas quem faz o mal não tem visto a Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Recomendação de Demétrio e Conclusão (Versículos 12-14)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Testemunho a Favor de Demétrio (Versículo 12):</strong>
+                    <ul>
+                        <li>Todos dão bom testemunho de Demétrio, e a própria verdade; e também nós testemunhamos, e vós bem sabeis que o nosso testemunho é verdadeiro.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Desejo de Visita Pessoal e Saudações Finais (Versículos 13-14):</strong>
+                    <ul>
+                        <li>Tinha muito que te escrever, mas não quero escrever-te com tinta e pena.</li>
+                        <li>Espero, porém, ver-te brevemente, e de viva voz falaremos. Paz seja contigo. Os amigos te saúdam. Saúda os amigos, um por um.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">A Terceira Epístola de João é um testemunho vívido das questões práticas que a igreja primitiva enfrentava, como a hospitalidade, o apoio missionário e os desafios de liderança. João elogia a fidelidade de Gaio em cooperar com a verdade através de suas ações hospitaleiras, enquanto condena a atitude egoísta e controladora de Diótrefes. A carta nos ensina que a verdadeira liderança cristã é marcada pela humildade, pelo serviço e pelo apoio àqueles que proclamam o evangelho. É um lembrete poderoso de que a fé deve se manifestar em obras de amor e que devemos discernir e apoiar aqueles que andam na verdade, ao mesmo tempo em que nos afastamos daqueles que buscam a primazia e prejudicam a obra de Deus.</p>
+        </div>
+
+        <div id="personagensJoao3" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridJoao3">
+            </div>
+        </div>
+
+        <div id="esbocosJoao3" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 3 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 3 João, versículo por versículo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Versículos 1-4:</strong> Saudação e elogio a Gaio.</li>
+                <li><strong>Versículos 5-8:</strong> A importância da hospitalidade e do apoio aos missionários.</li>
+                <li><strong>Versículos 9-11:</strong> Condenação de Diótrefes e exortação a imitar o bem.</li>
+                <li><strong>Versículos 12-14:</strong> Recomendação de Demétrio e conclusão.</li>
+            </ul>
+        </div>
+
+        <div id="temasJoao3" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 3 João</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Hospitalidade Cristã:</strong> Acolher e apoiar aqueles que servem a Deus.</li>
+                <li><strong>Apoio Missionário:</strong> A responsabilidade dos crentes em cooperar com a verdade através do apoio aos pregadores.</li>
+                <li><strong>Andar na Verdade:</strong> Viver em conformidade com os ensinamentos de Cristo.</li>
+                <li><strong>Liderança na Igreja:</strong> O contraste entre a liderança humilde e servidora (Gaio) e a arrogante e controladora (Diótrefes).</li>
+                <li><strong>Discernimento:</strong> A necessidade de identificar e não apoiar aqueles que prejudicam a obra de Deus.</li>
+                <li><strong>Imitar o Bem:</strong> A exortação a seguir exemplos de virtude e serviço.</li>
+            </ul>
+        </div>
+
+        <div id="capitulosJoao3" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 3 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersJoao3">
+            </div>
+        </div>
+
+        <div id="quizJoao3" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 3 João</h2>
+            <div id="quizContainerJoao3" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionJoao3"></p>
+                <div id="quizOptionsJoao3" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackJoao3" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionJoao3()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressJoao3"></span></p>
+                <p>Pontuação: <span id="quizScoreJoao3">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="graficoJoao3" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 3 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 3 João.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="joao3Chart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModalJoao3" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalJoao3()">&times;</span>
+                <h3 id="modalCharacterNameJoao3" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionJoao3" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data-joao3">
+        {
+            "name": "Livro Interativo de 3 João",
+            "short_name": "3 João",
+            "description": "Explore o livro de 3 João de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=3JO",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=3JO",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script-joao3">
+        // service-worker.js for 3 João
+        const CACHE_NAME_JOAO3 = 'joao3-interactive-v1';
+        const urlsToCacheJoao3 = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME_JOAO3)
+                    .then(cache => {
+                        console.log('Opened cache for 3 João');
+                        return cache.addAll(urlsToCacheJoao3);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME_JOAO3];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker para 3 João
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script-joao3');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker para 3 João registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker para 3 João:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente para 3 João
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data-joao3').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções de 3 João
+        function showSectionJoao3(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('active');
+            } else {
+                console.error(`Seção com ID '${sectionId}' não encontrada.`);
+            }
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagensJoao3') {
+                generateCharacterButtonsJoao3();
+            }
+            if (sectionId === 'capitulosJoao3') {
+                generateChapterLinksJoao3();
+            }
+            if (sectionId === 'quizJoao3') {
+                shuffleQuizQuestionsJoao3(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexJoao3 = 0; // Reinicia o quiz
+                scoreJoao3 = 0;
+                wrongAnswersJoao3 = 0;
+                document.getElementById('quizScoreJoao3').textContent = `Acertos: ${scoreJoao3}, Erros: ${wrongAnswersJoao3}`;
+                displayQuestionJoao3();
+            }
+            if (sectionId === 'graficoJoao3') {
+                renderJoao3Chart();
+            }
+        }
+
+        // Dados dos personagens para 3 João
+        const characterDetailsJoao3 = {
+            "João (O Presbítero)": {
+                name: "João (O Presbítero)",
+                description: "O autor da epístola, que se identifica como 'o presbítero', elogia Gaio, condena Diótrefes e recomenda Demétrio."
+            },
+            "Gaio": {
+                name: "Gaio",
+                description: "O destinatário da carta, um cristão amado e elogiado por João por sua fidelidade e hospitalidade para com os irmãos e missionários."
+            },
+            "Diótrefes": {
+                name: "Diótrefes",
+                description: "Um líder na igreja que gostava de ter a primazia, não aceitava a autoridade de João, difamava os apóstolos e se recusava a receber os missionários, expulsando quem o fazia."
+            },
+            "Demétrio": {
+                name: "Demétrio",
+                description: "Um crente recomendado por João, que tinha bom testemunho de todos e da própria verdade, provavelmente o portador da carta."
+            },
+            "Irmãos/Missionários": {
+                name: "Irmãos/Missionários",
+                description: "Crentes que viajavam para pregar o evangelho, dependendo da hospitalidade dos irmãos, e que foram bem recebidos por Gaio, mas não por Diótrefes."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalJoao3(characterName) {
+            const details = characterDetailsJoao3[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameJoao3').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionJoao3').textContent = details.description;
+                document.getElementById('characterModalJoao3').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalJoao3() {
+            document.getElementById('characterModalJoao3').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsJoao3() {
+            const grid = document.getElementById('characterGridJoao3');
+            grid.innerHTML = '';
+            for (const key in characterDetailsJoao3) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalJoao3(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos (3 João tem apenas 1 capítulo)
+        function generateChapterLinksJoao3() {
+            const chaptersDiv = document.getElementById('chaptersJoao3');
+            chaptersDiv.innerHTML = '';
+            // 3 João tem apenas 1 capítulo
+            const link = document.createElement('a');
+            link.href = `https://www.bibliaonline.com.br/acf/3jo/1`; // Link para a Bíblia Online, 3 João, Capítulo 1
+            link.target = "_blank"; // Abre em nova aba
+            link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+            link.textContent = `Capítulo 1`;
+            chaptersDiv.appendChild(link);
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 3 João (perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsJoao3 = [
+            { question: "Quem é o autor da Terceira Epístola de João?", options: ["Pedro", "Paulo", "O Presbítero (João)", "Tiago"], answer: "O Presbítero (João)", reference: "3 João 1:1" },
+            { question: "A quem João se dirige na carta?", options: ["A um imperador romano", "À eleita senhora", "A Gaio", "Aos judeus"], answer: "A Gaio", reference: "3 João 1:1" },
+            { question: "O que João deseja para Gaio além da saúde?", options: ["Riquezas", "Fama", "Que lhe vá bem em todas as coisas", "Poder"], answer: "Que lhe vá bem em todas as coisas", reference: "3 João 1:2" },
+            { question: "O que João se alegra por ouvir sobre Gaio?", options: ["Que ele ficou rico", "Que ele anda na verdade", "Que ele se tornou famoso", "Que ele ganhou um prêmio"], answer: "Que ele anda na verdade", reference: "3 João 1:3" },
+            { question: "Como Gaio procedeu fielmente?", options: ["Guardando dinheiro", "Sendo hospitaleiro para com os irmãos e estranhos", "Viajando muito", "Construindo uma casa"], answer: "Sendo hospitaleiro para com os irmãos e estranhos", reference: "3 João 1:5" },
+            { question: "Por que os irmãos saíram sem nada receber dos gentios?", options: ["Eram ricos", "Pelo nome de Jesus", "Não precisavam de nada", "Não gostavam de receber"], answer: "Pelo nome de Jesus", reference: "3 João 1:7" },
+            { question: "Qual a atitude de Diótrefes que João condena?", options: ["Ser humilde", "Gostar de ter a primazia", "Apoiar os irmãos", "Ser generoso"], answer: "Gostar de ter a primazia", reference: "3 João 1:9" },
+            { question: "O que Diótrefes fazia além de não receber os irmãos?", options: ["Pregava o evangelho", "Proferia palavras maliciosas contra João", "Construía igrejas", "Ajudava os pobres"], answer: "Proferia palavras maliciosas contra João", reference: "3 João 1:10" },
+            { question: "O que Diótrefes fazia com aqueles que queriam receber os irmãos?", options: ["Elogiava-os", "Ajudava-os", "Impedia-os e os expulsava da igreja", "Ignorava-os"], answer: "Impedia-os e os expulsava da igreja", reference: "3 João 1:10" },
+            { question: "O que João exorta Gaio a não seguir?", options: ["O bem", "O mal", "A verdade", "A justiça"], answer: "O mal", reference: "3 João 1:11" },
+            { question: "Quem faz o bem, segundo 3 João 1:11?", options: ["É do mundo", "É de Deus", "É do diabo", "Não tem visto a Deus"], answer: "É de Deus", reference: "3 João 1:11" },
+            { question: "Quem não tem visto a Deus, segundo 3 João 1:11?", options: ["Quem faz o bem", "Quem faz o mal", "Quem ora", "Quem prega"], answer: "Quem faz o mal", reference: "3 João 1:11" },
+            { question: "Quem é recomendado por João na carta?", options: ["Pedro", "Paulo", "Demétrio", "Tiago"], answer: "Demétrio", reference: "3 João 1:12" },
+            { question: "De quem Demétrio tinha bom testemunho?", options: ["De ninguém", "De todos e da própria verdade", "Apenas de João", "Apenas de Gaio"], answer: "De todos e da própria verdade", reference: "3 João 1:12" },
+            { question: "O que João espera fazer em breve com Gaio?", options: ["Escrever outra carta", "Vê-lo e falar de viva voz", "Enviar presentes", "Mandar um mensageiro"], answer: "Vê-lo e falar de viva voz", reference: "3 João 1:14" },
+            { question: "Qual o principal tema abordado em 3 João?", options: ["A criação do mundo", "A hospitalidade cristã e a liderança na igreja", "As profecias do fim dos tempos", "A história de Israel"], answer: "A hospitalidade cristã e a liderança na igreja", reference: "3 João 1:5-11" },
+            { question: "Por que devemos receber os missionários, segundo João?", options: ["Para sermos famosos", "Para sermos cooperadores da verdade", "Para ficarmos ricos", "Para termos mais amigos"], answer: "Para sermos cooperadores da verdade", reference: "3 João 1:8" },
+            { question: "O que João tem maior gozo em ouvir?", options: ["Que seus filhos andam na verdade", "Que seus filhos têm bens", "Que seus filhos são importantes", "Que seus filhos viajam"], answer: "Que seus filhos andam na verdade", reference: "3 João 1:4" },
+            { question: "Qual o desejo de João para Gaio em relação à sua alma?", options: ["Que ela seja próspera", "Que ela seja famosa", "Que ela vá bem", "Que ela seja rica"], answer: "Que ela vá bem", reference: "3 João 1:2" },
+            { question: "Como João planeja lidar com as obras de Diótrefes?", options: ["Esquecer", "Ignorar", "Trazer à memória quando for visitá-los", "Escrever uma carta pública"], answer: "Trazer à memória quando for visitá-los", reference: "3 João 1:10" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsJoao3 = [];
+        const numCopiesJoao3 = Math.ceil(200 / uniqueQuizQuestionsJoao3.length);
+        for (let i = 0; i < numCopiesJoao3; i++) {
+            allQuizQuestionsJoao3 = allQuizQuestionsJoao3.concat(uniqueQuizQuestionsJoao3);
+        }
+        allQuizQuestionsJoao3 = allQuizQuestionsJoao3.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsJoao3 = [];
+        let currentQuizIndexJoao3 = 0;
+        let scoreJoao3 = 0;
+        let wrongAnswersJoao3 = 0;
+        let joao3ChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsJoao3() {
+            shuffledQuizQuestionsJoao3 = [...allQuizQuestionsJoao3]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsJoao3);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressJoao3() {
+            const progressElement = document.getElementById('quizProgressJoao3');
+            progressElement.textContent = `${currentQuizIndexJoao3 + 1}/${shuffledQuizQuestionsJoao3.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionJoao3() {
+            if (currentQuizIndexJoao3 >= shuffledQuizQuestionsJoao3.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionJoao3').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsJoao3').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreJoao3}, Erros: ${wrongAnswersJoao3}</p>`;
+                document.getElementById('quizFeedbackJoao3').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsJoao3[currentQuizIndexJoao3];
+            document.getElementById('quizQuestionJoao3').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsJoao3');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerJoao3(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackJoao3').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressJoao3();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerJoao3(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackJoao3');
+            const optionsButtons = document.querySelectorAll('#quizOptionsJoao3 button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreJoao3++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersJoao3++;
+            }
+            document.getElementById('quizScoreJoao3').textContent = `Acertos: ${scoreJoao3}, Erros: ${wrongAnswersJoao3}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionJoao3() {
+            currentQuizIndexJoao3++;
+            displayQuestionJoao3();
+        }
+
+        // Dados para o gráfico de temas de 3 João
+        const joao3ChartData = {
+            labels: ['Hospitalidade Cristã', 'Apoio Missionário', 'Andar na Verdade', 'Liderança na Igreja', 'Discernimento', 'Imitar o Bem'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 30, 15, 10, 20], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const joao3ChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 3 João',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderJoao3Chart() {
+            const ctx = document.getElementById('joao3Chart').getContext('2d');
+            if (joao3ChartInstance) {
+                joao3ChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            joao3ChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: joao3ChartData,
+                options: joao3ChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

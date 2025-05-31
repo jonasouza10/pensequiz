@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Elias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #ef4444; /* Red border for Elijah game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #dc2626; /* Red for Elijah game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #b91c1c; /* Darker red on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #dc2626;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #dc2626;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #b91c1c;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-red-700 mb-4">A História de Elias 🔥</h1>
+        <p class="text-gray-700 mb-6">
+            Descubra a poderosa história de Elias, o profeta de fogo, que defendeu a adoração ao único Deus verdadeiro em Israel.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Elias!</p>
+            <p class="text-gray-700 mt-6">A história de Elias é um testemunho da soberania de Deus, do poder da oração e da fidelidade de um profeta em meio à apostasia.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: A Profecia da Seca',
+                location: 'Gileade e Samaria',
+                objective: 'Entender a primeira profecia de Elias e sua causa.',
+                clues: [
+                    'Elias, o tisbita, apareceu diante do rei Acabe.',
+                    'Ele profetizou que não haveria orvalho nem chuva por anos, exceto pela sua palavra.'
+                ],
+                keyVerse: '1 Reis 17:1',
+                enigma: 'Quem era o rei de Israel a quem Elias profetizou a seca?',
+                options: ['Acabe', 'Jezabel', 'Salomão'],
+                correctAnswer: 'Acabe'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: Elias no Ribeirão de Querite',
+                location: 'Ribeirão de Querite',
+                objective: 'Aprender sobre a provisão de Deus para Elias durante a seca.',
+                clues: [
+                    'Deus instruiu Elias a se esconder no ribeirão de Querite.',
+                    'Ele foi alimentado por corvos, que lhe traziam pão e carne de manhã e à noite.'
+                ],
+                keyVerse: '1 Reis 17:2-6',
+                enigma: 'Quem alimentou Elias no ribeirão de Querite?',
+                options: ['Corvos', 'Anjos', 'Uma mulher'],
+                correctAnswer: 'Corvos'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: Elias e a Viúva de Sarepta',
+                location: 'Sarepta',
+                objective: 'Descobrir o milagre da provisão na casa da viúva.',
+                clues: [
+                    'Quando o ribeirão secou, Deus enviou Elias a Sarepta.',
+                    'Uma viúva, que tinha apenas um punhado de farinha e um pouco de azeite, o alimentou, e sua farinha e azeite não se acabaram.'
+                ],
+                keyVerse: '1 Reis 17:8-16',
+                enigma: 'O que não se acabou na casa da viúva de Sarepta?',
+                options: ['Farinha e azeite', 'Água e pão', 'Vinho e carne'],
+                correctAnswer: 'Farinha e azeite'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: A Ressurreição do Filho da Viúva',
+                location: 'Sarepta',
+                objective: 'Entender o poder de Deus através de Elias para ressuscitar os mortos.',
+                clues: [
+                    'O filho da viúva de Sarepta adoeceu e morreu.',
+                    'Elias orou ao Senhor, e o Senhor ouviu sua voz, e a vida do menino voltou a ele.'
+                ],
+                keyVerse: '1 Reis 17:17-24',
+                enigma: 'Quem Elias ressuscitou na casa da viúva de Sarepta?',
+                options: ['O filho da viúva', 'Um servo', 'A própria viúva'],
+                correctAnswer: 'O filho da viúva'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: O Desafio no Monte Carmelo',
+                location: 'Monte Carmelo',
+                objective: 'Aprender sobre o confronto de Elias com os profetas de Baal.',
+                clues: [
+                    'Elias desafiou os 450 profetas de Baal e os 400 profetas de Aserá no Monte Carmelo.',
+                    'Ele propôs que cada lado preparasse um sacrifício, e o deus que respondesse com fogo seria o verdadeiro Deus.'
+                ],
+                keyVerse: '1 Reis 18:19-24',
+                enigma: 'Quantos profetas de Baal Elias desafiou no Monte Carmelo?',
+                options: ['450', '400', '850'],
+                correctAnswer: '450'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: O Fogo do Senhor no Carmelo',
+                location: 'Monte Carmelo',
+                objective: 'Testemunhar a demonstração do poder de Deus.',
+                clues: [
+                    'Os profetas de Baal clamaram por horas, mas não houve resposta.',
+                    'Elias derramou água sobre seu sacrifício três vezes, e o fogo do Senhor desceu e consumiu o holocausto, a lenha, as pedras e a água.'
+                ],
+                keyVerse: '1 Reis 18:36-39',
+                enigma: 'O que Elias derramou sobre o sacrifício antes que o fogo descesse?',
+                options: ['Água', 'Azeite', 'Vinho'],
+                correctAnswer: 'Água'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: A Chuva Retorna',
+                location: 'Monte Carmelo',
+                objective: 'Observar o fim da seca após a vitória de Deus.',
+                clues: [
+                    'Após a vitória no Carmelo, Elias orou por chuva.',
+                    'Ele enviou seu servo sete vezes para olhar para o mar, e na sétima vez, uma pequena nuvem subiu do mar, trazendo uma grande chuva.'
+                ],
+                keyVerse: '1 Reis 18:41-45',
+                enigma: 'Quantas vezes o servo de Elias olhou para o mar antes de ver a nuvem?',
+                options: ['Sete vezes', 'Três vezes', 'Uma vez'],
+                correctAnswer: 'Sete vezes'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: Elias Foge de Jezabel',
+                location: 'Jezreel e Berseba',
+                objective: 'Aprender sobre o medo de Elias e sua fuga.',
+                clues: [
+                    'Jezabel jurou matar Elias depois da derrota dos profetas de Baal.',
+                    'Elias fugiu para Berseba e depois para o deserto, desejando a morte.'
+                ],
+                keyVerse: '1 Reis 19:1-4',
+                enigma: 'De quem Elias fugiu após o Monte Carmelo?',
+                options: ['Jezabel', 'Acabe', 'O povo de Israel'],
+                correctAnswer: 'Jezabel'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: O Anjo e o Pão Cozido no Fogo',
+                location: 'Deserto',
+                objective: 'Entender a provisão de Deus para Elias no deserto.',
+                clues: [
+                    'Elias adormeceu debaixo de um zimbro, desanimado.',
+                    'Um anjo o tocou e lhe deu pão cozido no fogo e água, fortalecendo-o para uma longa jornada.'
+                ],
+                keyVerse: '1 Reis 19:5-8',
+                enigma: 'O que o anjo deu a Elias no deserto para fortalecê-lo?',
+                options: ['Pão e água', 'Carne e vinho', 'Frutas e mel'],
+                correctAnswer: 'Pão e água'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: Elias no Monte Horebe (A Voz Suave e Delicada)',
+                location: 'Monte Horebe (Sinai)',
+                objective: 'Aprender sobre o encontro de Elias com Deus no Monte Horebe.',
+                clues: [
+                    'Elias viajou quarenta dias e quarenta noites até o Monte Horebe.',
+                    'Deus não estava no vento forte, nem no terremoto, nem no fogo, mas na voz mansa e suave.'
+                ],
+                keyVerse: '1 Reis 19:11-13',
+                enigma: 'Em que forma Deus se manifestou a Elias no Monte Horebe?',
+                options: ['Uma voz mansa e suave', 'Vento forte', 'Fogo'],
+                correctAnswer: 'Uma voz mansa e suave'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: O Chamado de Eliseu',
+                location: 'Abel-Meolá',
+                objective: 'Observar o chamado de Eliseu como sucessor de Elias.',
+                clues: [
+                    'Deus instruiu Elias a ungir Eliseu como profeta em seu lugar.',
+                    'Elias encontrou Eliseu arando com doze juntas de bois e lançou seu manto sobre ele.'
+                ],
+                keyVerse: '1 Reis 19:19-21',
+                enigma: 'O que Elias lançou sobre Eliseu como sinal de seu chamado?',
+                options: ['Seu manto', 'Um cajado', 'Um livro'],
+                correctAnswer: 'Seu manto'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: A Vinha de Nabote',
+                location: 'Jezreel',
+                objective: 'Compreender a injustiça contra Nabote e a condenação de Acabe e Jezabel.',
+                clues: [
+                    'Acabe desejou a vinha de Nabote, mas Nabote recusou-se a vendê-la.',
+                    'Jezabel orquestrou a morte de Nabote para que Acabe pudesse tomar a vinha, e Elias profetizou o julgamento de Deus sobre eles.'
+                ],
+                keyVerse: '1 Reis 21:1-19',
+                enigma: 'Quem orquestrou a morte de Nabote para que Acabe tomasse sua vinha?',
+                options: ['Jezabel', 'Acabe', 'Um servo'],
+                correctAnswer: 'Jezabel'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: Elias e os Capitães de 50',
+                location: 'Samaria',
+                objective: 'Aprender sobre o julgamento de Deus sobre os mensageiros do rei Acazias.',
+                clues: [
+                    'O rei Acazias enviou mensageiros para consultar Baal-Zebube.',
+                    'Elias fez descer fogo do céu para consumir dois capitães de cinquenta homens e seus grupos.'
+                ],
+                keyVerse: '2 Reis 1:9-12',
+                enigma: 'Quantos capitães de cinquenta homens foram consumidos pelo fogo do céu?',
+                options: ['Dois', 'Um', 'Três'],
+                correctAnswer: 'Dois'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: A Separação do Jordão',
+                location: 'Rio Jordão',
+                objective: 'Observar o último milagre de Elias antes de ser levado.',
+                clues: [
+                    'Elias e Eliseu estavam atravessando o Jordão.',
+                    'Elias pegou seu manto, enrolou-o e feriu as águas, que se dividiram, e eles passaram a seco.'
+                ],
+                keyVerse: '2 Reis 2:7-8',
+                enigma: 'O que Elias usou para dividir as águas do rio Jordão?',
+                options: ['Seu manto', 'Um cajado', 'Sua mão'],
+                correctAnswer: 'Seu manto'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: Elias é Levado ao Céu',
+                location: 'Além do Jordão',
+                objective: 'Refletir sobre a ascensão de Elias ao céu.',
+                clues: [
+                    'Enquanto Elias e Eliseu caminhavam e conversavam, um carro de fogo e cavalos de fogo os separaram.',
+                    'Elias subiu ao céu num redemoinho.'
+                ],
+                keyVerse: '2 Reis 2:11',
+                enigma: 'Como Elias foi levado ao céu?',
+                options: ['Num carro de fogo e redemoinho', 'Numa nuvem', 'Numa escada'],
+                correctAnswer: 'Num carro de fogo e redemoinho'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-red-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

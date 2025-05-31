@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Apocalipse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Apocalipse Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Apocalipse</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionApocalipse('inicioApocalipse')">Início</button>
+            <button class="nav-button" onclick="showSectionApocalipse('introducaoApocalipse')">Introdução</button>
+            <button class="nav-button" onclick="showSectionApocalipse('panoramasApocalipse')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionApocalipse('personagensApocalipse')">Personagens</button>
+            <button class="nav-button" onclick="showSectionApocalipse('esbocosApocalipse')">Esboços</button>
+            <button class="nav-button" onclick="showSectionApocalipse('temasApocalipse')">Temas</button>
+            <button class="nav-button" onclick="showSectionApocalipse('capitulosApocalipse')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionApocalipse('quizApocalipse')">Quiz</button>
+            <button class="nav-button" onclick="showSectionApocalipse('graficoApocalipse')">Gráfico</button>
+        </div>
+
+        <div id="inicioApocalipse" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Apocalipse</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Apocalipse, a revelação de Jesus Cristo a João sobre os eventos que brevemente devem acontecer. Descubra as visões proféticas do fim dos tempos, o juízo divino, a batalha espiritual e o triunfo final de Cristo e de Sua igreja. Este livro oferece esperança e encorajamento para os fiéis em meio à perseguição, apontando para a nova criação e a glória vindoura. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducaoApocalipse" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Apocalipse</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Apocalipse, também conhecido como a Revelação de João, é o último livro da Bíblia e o único do Novo Testamento que se encaixa no gênero apocalíptico. O autor se identifica como João, que estava na ilha de Patmos por causa da palavra de Deus e do testemunho de Jesus (Apocalipse 1:9). Tradicionalmente, este João é identificado como o apóstolo João, filho de Zebedeu. A data de sua escrita é geralmente aceita como sendo por volta de 95 d.C., durante o reinado do imperador Domiciano, um período de intensa perseguição aos cristãos.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O propósito principal de Apocalipse é triplo: (1) revelar Jesus Cristo em Sua glória e poder como Senhor da história e Juiz de toda a terra; (2) encorajar e consolar os cristãos perseguidos, assegurando-lhes que Deus está no controle e que a vitória final pertence a Cristo e aos Seus seguidores; e (3) advertir os ímpios e os apóstatas sobre o juízo vindouro e a derrota final do mal. O livro utiliza uma rica linguagem simbólica, visões e profecias para transmitir sua mensagem de esperança e advertência.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Apocalipse não é apenas um livro sobre o fim do mundo, mas sobre a soberania de Deus sobre a história humana e o triunfo do Cordeiro que foi morto. Ele nos convida a adorar a Deus, a permanecer fiéis em meio às provações e a esperar a consumação do Reino de Deus, quando haverá novos céus e nova terra, onde Deus habitará com Seu povo e enxugará de seus olhos toda a lágrima.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-3: A Revelação de Cristo e as Cartas às Sete Igrejas.</strong> João recebe a visão de Cristo glorificado e as mensagens para as sete igrejas da Ásia Menor, que abordam seus pontos fortes, fraquezas e exortações.</li>
+                <li><strong>Capítulos 4-5: A Visão do Trono Celestial.</strong> João é transportado ao céu e vê Deus no trono, rodeado por 24 anciãos e quatro seres viventes. O Cordeiro digno de abrir o livro dos sete selos é revelado.</li>
+                <li><strong>Capítulos 6-18: O Juízo Divino e a Batalha Espiritual.</strong>
+                    <ul>
+                        <li><strong>Os Sete Selos (Cap. 6-7):</strong> Abertura dos selos, liberando juízos e revelando a proteção dos selados.</li>
+                        <li><strong>As Sete Trombetas (Cap. 8-11):</strong> Toque das trombetas, trazendo mais juízos sobre a terra, e a revelação de dois testemunhas.</li>
+                        <li><strong>Os Personagens Centrais do Conflito (Cap. 12-14):</strong> A mulher e o dragão, as duas bestas (do mar e da terra), e a mensagem dos três anjos.</li>
+                        <li><strong>As Sete Taças da Ira de Deus (Cap. 15-16):</strong> Derramamento das taças, culminando nos juízos finais.</li>
+                        <li><strong>A Queda da Grande Babilônia (Cap. 17-18):</strong> A descrição e a destruição da Babilônia, a grande meretriz.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulos 19-20: O Triunfo de Cristo e o Juízo Final.</strong> O retorno de Cristo, a derrota da Besta e do Falso Profeta, o milênio, e o juízo do grande trono branco.</li>
+                <li><strong>Capítulos 21-22: A Nova Criação e o Epílogo.</strong> A visão dos novos céus e nova terra, a Nova Jerusalém, a habitação de Deus com os homens, e as exortações finais e a promessa da vinda de Cristo.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Apocalipse é um livro de esperança para os fiéis, que revela a vitória soberana de Deus sobre o mal e a consumação de Seu plano redentor.</p>
+        </div>
+
+        <div id="panoramasApocalipse" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Apocalipse</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Apocalipse é uma revelação profética do triunfo de Jesus Cristo sobre o mal e a consumação do plano de Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Prólogo e Cartas às Sete Igrejas (Capítulos 1-3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Introdução e Visão de Cristo (Capítulo 1):</strong>
+                    <ul>
+                        <li>A revelação de Jesus Cristo a João na ilha de Patmos.</li>
+                        <li>Visão de Cristo glorificado, com sete estrelas e sete candelabros.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Cartas às Sete Igrejas (Capítulos 2-3):</strong>
+                    <ul>
+                        <li>Éfeso: Perdeu o primeiro amor.</li>
+                        <li>Esmirna: Fiel em tribulação.</li>
+                        <li>Pérgamo: Compromisso com a idolatria.</li>
+                        <li>Tiatira: Tolerância com a imoralidade.</li>
+                        <li>Sardes: Tem nome de que vive, mas está morta.</li>
+                        <li>Filadélfia: Pequena força, mas guardou a palavra.</li>
+                        <li>Laodiceia: Morna e autossuficiente.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Trono Celestial e o Cordeiro (Capítulos 4-5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Visão do Trono de Deus (Capítulo 4):</strong>
+                    <ul>
+                        <li>Deus no trono, rodeado por 24 anciãos e 4 seres viventes.</li>
+                        <li>Adoração universal a Deus Criador.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Livro e o Cordeiro (Capítulo 5):</strong>
+                    <ul>
+                        <li>O livro selado com sete selos na mão de Deus.</li>
+                        <li>O Cordeiro que foi morto é digno de abrir os selos.</li>
+                        <li>Adoração ao Cordeiro.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Os Sete Selos, Sete Trombetas e Sete Taças (Capítulos 6-16)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Os Sete Selos (Capítulos 6-7):</strong>
+                    <ul>
+                        <li>Quatro cavalos (conquista, guerra, fome, morte).</li>
+                        <li>Almas dos mártires, terremoto, escurecimento de sol e lua.</li>
+                        <li>A selagem dos 144.000 e a grande multidão.</li>
+                    </ul>
+                </li>
+                <li><strong>B. As Sete Trombetas (Capítulos 8-11):</strong>
+                    <ul>
+                        <li>Primeiras quatro trombetas (juízos sobre terra, mar, rios, astros).</li>
+                        <li>Quinta trombeta (gafanhotos do abismo).</li>
+                        <li>Sexta trombeta (exército de cavaleiros, pragas).</li>
+                        <li>O anjo forte e o livrinho, as duas testemunhas.</li>
+                        <li>Sétima trombeta (proclamação do reino de Cristo).</li>
+                    </ul>
+                </li>
+                <li><strong>C. Os Personagens e a Batalha Espiritual (Capítulos 12-14):</strong>
+                    <ul>
+                        <li>A mulher (Israel/Igreja) e o dragão (Satanás).</li>
+                        <li>A Besta que sobe do mar (poder político/imperador).</li>
+                        <li>A Besta que sobe da terra (falso profeta/religião falsa).</li>
+                        <li>O Cordeiro e os 144.000 no Monte Sião.</li>
+                        <li>As mensagens dos três anjos (evangelho eterno, queda da Babilônia, advertência contra a Besta).</li>
+                        <li>A colheita da terra e a vindima da ira de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>D. As Sete Taças da Ira de Deus (Capítulos 15-16):</strong>
+                    <ul>
+                        <li>Preparação para as taças.</li>
+                        <li>Derramamento das taças (úlceras, mar em sangue, rios em sangue, sol queimando, trevas, Eufrates seco, terremoto e granizo).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. A Queda da Babilônia e o Triunfo de Cristo (Capítulos 17-20)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Grande Meretriz e a Besta (Capítulo 17):</strong>
+                    <ul>
+                        <li>A mulher assentada sobre muitas águas, a Babilônia.</li>
+                        <li>Mistério e destruição da Babilônia.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Queda da Babilônia (Capítulo 18):</strong>
+                    <ul>
+                        <li>Lamento sobre a queda da grande cidade.</li>
+                        <li>Alegria dos céus pela sua destruição.</li>
+                    </ul>
+                </li>
+                <li><strong>C. As Bodas do Cordeiro e o Retorno de Cristo (Capítulo 19):</strong>
+                    <ul>
+                        <li>Cântico de aleluia no céu.</li>
+                        <li>As bodas do Cordeiro.</li>
+                        <li>Cristo retorna como Rei dos reis e Senhor dos senhores, derrotando a Besta e o Falso Profeta.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Milênio e o Juízo Final (Capítulo 20):</strong>
+                    <ul>
+                        <li>Satanás preso por mil anos.</li>
+                        <li>O reino milenar de Cristo com os santos.</li>
+                        <li>Satanás solto e derrotado novamente.</li>
+                        <li>O Juízo do Grande Trono Branco.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Os Novos Céus e Nova Terra (Capítulos 21-22)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Nova Jerusalém (Capítulo 21):</strong>
+                    <ul>
+                        <li>Novos céus e nova terra.</li>
+                        <li>A Nova Jerusalém descendo do céu.</li>
+                        <li>Deus habitará com os homens, enxugará toda lágrima.</li>
+                        <li>A cidade de ouro, pedras preciosas e portas de pérolas.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Rio da Vida e o Epílogo (Capítulo 22):</strong>
+                    <ul>
+                        <li>O rio da água da vida e a árvore da vida.</li>
+                        <li>A promessa da vinda de Cristo.</li>
+                        <li>Advertências e bênçãos finais.</li>
+                        <li>A graça de nosso Senhor Jesus Cristo seja com todos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Apocalipse é uma mensagem de esperança e advertência para todos os tempos. Ele revela a soberania inabalável de Deus sobre a história, o triunfo inevitável de Jesus Cristo sobre todas as forças do mal, e a gloriosa consumação do plano redentor de Deus. Para os crentes, é um livro de consolo em meio à perseguição, assegurando-lhes que a fidelidade será recompensada e que a vitória final é garantida. Para o mundo, é um chamado urgente ao arrependimento e à adoração do único Deus verdadeiro, antes que o juízo final seja derramado. Apocalipse nos lembra que a história está caminhando para um clímax divino, onde Deus estabelecerá Seu reino eterno, e a justiça e a paz reinarão para sempre.</p>
+        </div>
+
+        <div id="personagensApocalipse" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridApocalipse">
+            </div>
+        </div>
+
+        <div id="esbocosApocalipse" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Apocalipse</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Apocalipse, destacando os temas e eventos por seções principais.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-3:</strong> A Revelação de Cristo e as Cartas às Sete Igrejas.</li>
+                <li><strong>Capítulos 4-5:</strong> A Visão do Trono Celestial e o Cordeiro.</li>
+                <li><strong>Capítulos 6-7:</strong> Os Sete Selos.</li>
+                <li><strong>Capítulos 8-11:</strong> As Sete Trombetas.</li>
+                <li><strong>Capítulos 12-14:</strong> Os Personagens Centrais do Conflito e as Mensagens Angélicas.</li>
+                <li><strong>Capítulos 15-16:</strong> As Sete Taças da Ira de Deus.</li>
+                <li><strong>Capítulos 17-18:</strong> A Queda da Grande Babilônia.</li>
+                <li><strong>Capítulos 19-20:</strong> O Retorno de Cristo, o Milênio e o Juízo Final.</li>
+                <li><strong>Capítulos 21-22:</strong> Os Novos Céus e Nova Terra, e o Epílogo.</li>
+            </ul>
+        </div>
+
+        <div id="temasApocalipse" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Apocalipse</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Soberania de Deus:</strong> Deus está no controle da história e de todos os eventos.</li>
+                <li><strong>Triunfo de Cristo:</strong> Jesus Cristo é o vitorioso Cordeiro que venceu e reinará.</li>
+                <li><strong>Juízo Divino:</strong> A justiça de Deus será manifesta sobre o pecado e o mal.</li>
+                <li><strong>Adoração:</strong> A centralidade da adoração a Deus e ao Cordeiro.</li>
+                <li><strong>Perseguição e Fidelidade:</strong> O encorajamento aos crentes para permanecerem fiéis em meio às tribulações.</li>
+                <li><strong>Batalha Espiritual:</strong> O conflito entre Deus e Satanás, e suas forças.</li>
+                <li><strong>Escatologia:</strong> Os eventos do fim dos tempos e a consumação do plano de Deus.</li>
+                <li><strong>Nova Criação:</strong> A promessa de novos céus e nova terra, onde a justiça habitará.</li>
+                <li><strong>Esperança e Consolo:</strong> A certeza da vitória final para os fiéis.</li>
+            </ul>
+        </div>
+
+        <div id="capitulosApocalipse" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Apocalipse</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="chaptersApocalipse">
+            </div>
+        </div>
+
+        <div id="quizApocalipse" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Apocalipse</h2>
+            <div id="quizContainerApocalipse" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionApocalipse"></p>
+                <div id="quizOptionsApocalipse" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackApocalipse" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionApocalipse()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressApocalipse"></span></p>
+                <p>Pontuação: <span id="quizScoreApocalipse">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="graficoApocalipse" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Apocalipse</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Apocalipse.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="apocalipseChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModalApocalipse" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalApocalipse()">&times;</span>
+                <h3 id="modalCharacterNameApocalipse" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionApocalipse" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data-apocalipse">
+        {
+            "name": "Livro Interativo de Apocalipse",
+            "short_name": "Apocalipse",
+            "description": "Explore o livro de Apocalipse de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=APO",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=APO",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script-apocalipse">
+        // service-worker.js for Apocalipse
+        const CACHE_NAME_APOCALIPSE = 'apocalipse-interactive-v1';
+        const urlsToCacheApocalipse = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME_APOCALIPSE)
+                    .then(cache => {
+                        console.log('Opened cache for Apocalipse');
+                        return cache.addAll(urlsToCacheApocalipse);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME_APOCALIPSE];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker para Apocalipse
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script-apocalipse');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker para Apocalipse registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker para Apocalipse:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente para Apocalipse
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data-apocalipse').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções de Apocalipse
+        function showSectionApocalipse(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('active');
+            } else {
+                console.error(`Seção com ID '${sectionId}' não encontrada.`);
+            }
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagensApocalipse') {
+                generateCharacterButtonsApocalipse();
+            }
+            if (sectionId === 'capitulosApocalipse') {
+                generateChapterLinksApocalipse();
+            }
+            if (sectionId === 'quizApocalipse') {
+                shuffleQuizQuestionsApocalipse(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexApocalipse = 0; // Reinicia o quiz
+                scoreApocalipse = 0;
+                wrongAnswersApocalipse = 0;
+                document.getElementById('quizScoreApocalipse').textContent = `Acertos: ${scoreApocalipse}, Erros: ${wrongAnswersApocalipse}`;
+                displayQuestionApocalipse();
+            }
+            if (sectionId === 'graficoApocalipse') {
+                renderApocalipseChart();
+            }
+        }
+
+        // Dados dos personagens para Apocalipse
+        const characterDetailsApocalipse = {
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "A figura central do livro, revelado em Sua glória, poder e autoridade como o Cordeiro que foi morto e o Rei dos reis."
+            },
+            "João": {
+                name: "João",
+                description: "O autor do livro, o apóstolo que recebeu as visões na ilha de Patmos e as registrou."
+            },
+            "Deus Pai": {
+                name: "Deus Pai",
+                description: "O Soberano no trono celestial, o Criador de todas as coisas, que governa o universo e executa o juízo."
+            },
+            "Os 24 Anciãos": {
+                name: "Os 24 Anciãos",
+                description: "Representam a igreja redimida, sentados em tronos ao redor do trono de Deus, adorando e participando do governo divino."
+            },
+            "Os Quatro Seres Viventes": {
+                name: "Os Quatro Seres Viventes",
+                description: "Criaturas angelicais que cercam o trono de Deus, cheias de olhos, representando a criação e a santidade de Deus."
+            },
+            "Os Anjos": {
+                name: "Os Anjos",
+                description: "Servos de Deus que executam Seus juízos, entregam mensagens e participam da adoração celestial."
+            },
+            "Satanás / O Dragão": {
+                name: "Satanás / O Dragão",
+                description: "O inimigo de Deus e de Seu povo, a antiga serpente, que é derrotado por Cristo e lançado no lago de fogo."
+            },
+            "A Besta (do Mar)": {
+                name: "A Besta (do Mar)",
+                description: "Representa um poder político e imperial anticristão, que recebe autoridade de Satanás e persegue os santos."
+            },
+            "A Besta (da Terra) / Falso Profeta": {
+                name: "A Besta (da Terra) / Falso Profeta",
+                description: "Representa um poder religioso e enganador que promove a adoração à primeira Besta e desvia as pessoas da verdade."
+            },
+            "A Grande Meretriz / Babilônia": {
+                name: "A Grande Meretriz / Babilônia",
+                description: "Simboliza o sistema mundial de idolatria, imoralidade e oposição a Deus, que será destruído."
+            },
+            "Os Santos / Mártires": {
+                name: "Os Santos / Mártires",
+                description: "Os fiéis a Cristo, que perseveram em meio à perseguição e tribulação, e que reinarão com Ele."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalApocalipse(characterName) {
+            const details = characterDetailsApocalipse[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameApocalipse').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionApocalipse').textContent = details.description;
+                document.getElementById('characterModalApocalipse').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalApocalipse() {
+            document.getElementById('characterModalApocalipse').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsApocalipse() {
+            const grid = document.getElementById('characterGridApocalipse');
+            grid.innerHTML = '';
+            for (const key in characterDetailsApocalipse) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalApocalipse(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos (Apocalipse tem 22 capítulos)
+        function generateChapterLinksApocalipse() {
+            const chaptersDiv = document.getElementById('chaptersApocalipse');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 22; i++) {
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/ap/${i}`; // Link para a Bíblia Online, Apocalipse, Capítulo i
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Apocalipse (perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsApocalipse = [
+            { question: "Quem é o autor do Livro de Apocalipse?", options: ["Pedro", "Paulo", "João", "Tiago"], answer: "João", reference: "Apocalipse 1:1, 9" },
+            { question: "Onde João recebeu as visões do Apocalipse?", options: ["Em Jerusalém", "Na ilha de Patmos", "Em Roma", "Em Éfeso"], answer: "Na ilha de Patmos", reference: "Apocalipse 1:9" },
+            { question: "Qual o propósito principal do Livro de Apocalipse?", options: ["Contar histórias de Israel", "Revelar Jesus Cristo e eventos futuros", "Ensinar sobre a lei", "Descrever a criação"], answer: "Revelar Jesus Cristo e eventos futuros", reference: "Apocalipse 1:1" },
+            { question: "Quantas igrejas da Ásia Menor recebem cartas no início do livro?", options: ["Cinco", "Sete", "Dez", "Doze"], answer: "Sete", reference: "Apocalipse 1:4" },
+            { question: "Qual igreja é repreendida por ter deixado o primeiro amor?", options: ["Esmirna", "Pérgamo", "Éfeso", "Laodiceia"], answer: "Éfeso", reference: "Apocalipse 2:4" },
+            { question: "Quem é digno de abrir o livro selado com sete selos?", options: ["Um anjo", "João", "O Cordeiro", "Um ancião"], answer: "O Cordeiro", reference: "Apocalipse 5:2-5" },
+            { question: "Quantos selos são abertos no livro?", options: ["Três", "Cinco", "Sete", "Dez"], answer: "Sete", reference: "Apocalipse 6:1" },
+            { question: "Qual o número dos selados que são protegidos nos capítulos 7 e 14?", options: ["12.000", "144.000", "1.440.000", "12 milhões"], answer: "144.000", reference: "Apocalipse 7:4; 14:1" },
+            { question: "Quantas trombetas são tocadas, trazendo juízos sobre a terra?", options: ["Quatro", "Seis", "Sete", "Nove"], answer: "Sete", reference: "Apocalipse 8:2" },
+            { question: "Quem é o Dragão que persegue a mulher no capítulo 12?", options: ["Um anjo", "O imperador romano", "Satanás", "Um falso profeta"], answer: "Satanás", reference: "Apocalipse 12:9" },
+            { question: "De onde sobe a primeira Besta que recebe poder do Dragão?", options: ["Da terra", "Do céu", "Do abismo", "Do mar"], answer: "Do mar", reference: "Apocalipse 13:1" },
+            { question: "O que a segunda Besta (o falso profeta) faz para enganar a humanidade?", options: ["Prega o evangelho", "Faz grandes sinais e milagres", "Constrói templos", "Dá dinheiro aos pobres"], answer: "Faz grandes sinais e milagres", reference: "Apocalipse 13:13-14" },
+            { question: "Quantas taças da ira de Deus são derramadas?", options: ["Cinco", "Sete", "Dez", "Doze"], answer: "Sete", reference: "Apocalipse 16:1" },
+            { question: "Qual a cidade que é descrita como a Grande Meretriz e será destruída?", options: ["Jerusalém", "Atenas", "Roma/Babilônia", "Éfeso"], answer: "Roma/Babilônia", reference: "Apocalipse 17:1, 18:2" },
+            { question: "O que acontece com a Besta e o Falso Profeta no retorno de Cristo?", options: ["São perdoados", "São lançados no lago de fogo", "São transformados", "São presos por mil anos"], answer: "São lançados no lago de fogo", reference: "Apocalipse 19:20" },
+            { question: "Por quanto tempo Satanás é preso durante o milênio?", options: ["Cem anos", "Quinhentos anos", "Mil anos", "Para sempre"], answer: "Mil anos", reference: "Apocalipse 20:2" },
+            { question: "Onde os mortos são julgados, grandes e pequenos, no fim dos tempos?", options: ["No Monte Sião", "No Juízo do Grande Trono Branco", "No céu", "Na terra"], answer: "No Juízo do Grande Trono Branco", reference: "Apocalipse 20:11-12" },
+            { question: "O que João vê descendo do céu após o juízo final?", options: ["Uma nova Besta", "A Nova Jerusalém", "Um novo dragão", "Um novo mar"], answer: "A Nova Jerusalém", reference: "Apocalipse 21:2" },
+            { question: "O que Deus fará com toda lágrima dos olhos dos salvos na nova criação?", options: ["Multiplicará", "Enxugará", "Ignorará", "Coletará"], answer: "Enxugará", reference: "Apocalipse 21:4" },
+            { question: "O que flui do trono de Deus e do Cordeiro na Nova Jerusalém?", options: ["Fogo", "O rio da água da vida", "Vinho", "Lágrimas"], answer: "O rio da água da vida", reference: "Apocalipse 22:1" },
+            { question: "Qual a promessa final de Jesus no livro de Apocalipse?", options: ["Virei logo", "Virei em cem anos", "Não virei", "Virei apenas para alguns"], answer: "Virei logo", reference: "Apocalipse 22:7, 12, 20" },
+            { question: "Qual o tema central da mensagem para a igreja de Esmirna?", options: ["Riqueza", "Fidelidade em meio à tribulação", "Compromisso", "Mornidão"], answer: "Fidelidade em meio à tribulação", reference: "Apocalipse 2:8-11" },
+            { question: "O que a igreja de Laodiceia é descrita como?", options: ["Quente", "Fria", "Morna", "Fervente"], answer: "Morna", reference: "Apocalipse 3:15-16" },
+            { question: "Quantos anciãos estão sentados ao redor do trono de Deus?", options: ["Doze", "Vinte e quatro", "Setenta", "Cem"], answer: "Vinte e quatro", reference: "Apocalipse 4:4" },
+            { question: "O que o Cordeiro tem em Suas mãos que o torna digno de abrir os selos?", options: ["Uma espada", "O livro", "Um cetro", "Uma coroa"], answer: "O livro", reference: "Apocalipse 5:7" },
+            { question: "Qual o nome do cavalo do quarto selo?", options: ["Branco", "Vermelho", "Preto", "Amarelo/Pálido"], answer: "Amarelo/Pálido", reference: "Apocalipse 6:8" },
+            { question: "O que acontece com a terça parte do mar na segunda trombeta?", options: ["Vira mel", "Vira sangue", "Vira água doce", "Vira vinho"], answer: "Vira sangue", reference: "Apocalipse 8:8" },
+            { question: "Quem é o anjo que desce do céu com um livrinho aberto na mão?", options: ["Miguel", "Gabriel", "Um anjo forte", "Um querubim"], answer: "Um anjo forte", reference: "Apocalipse 10:1-2" },
+            { question: "Qual o número da Besta?", options: ["665", "666", "777", "888"], answer: "666", reference: "Apocalipse 13:18" },
+            { question: "O que os três anjos proclamam no capítulo 14?", options: ["A queda de Roma", "O evangelho eterno, a queda da Babilônia e a advertência contra a Besta", "A vinda de Moisés", "A construção de um novo templo"], answer: "O evangelho eterno, a queda da Babilônia e a advertência contra a Besta", reference: "Apocalipse 14:6-11" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsApocalipse = [];
+        const numCopiesApocalipse = Math.ceil(200 / uniqueQuizQuestionsApocalipse.length);
+        for (let i = 0; i < numCopiesApocalipse; i++) {
+            allQuizQuestionsApocalipse = allQuizQuestionsApocalipse.concat(uniqueQuizQuestionsApocalipse);
+        }
+        allQuizQuestionsApocalipse = allQuizQuestionsApocalipse.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsApocalipse = [];
+        let currentQuizIndexApocalipse = 0;
+        let scoreApocalipse = 0;
+        let wrongAnswersApocalipse = 0;
+        let apocalipseChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsApocalipse() {
+            shuffledQuizQuestionsApocalipse = [...allQuizQuestionsApocalipse]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsApocalipse);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressApocalipse() {
+            const progressElement = document.getElementById('quizProgressApocalipse');
+            progressElement.textContent = `${currentQuizIndexApocalipse + 1}/${shuffledQuizQuestionsApocalipse.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionApocalipse() {
+            if (currentQuizIndexApocalipse >= shuffledQuizQuestionsApocalipse.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionApocalipse').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsApocalipse').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreApocalipse}, Erros: ${wrongAnswersApocalipse}</p>`;
+                document.getElementById('quizFeedbackApocalipse').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsApocalipse[currentQuizIndexApocalipse];
+            document.getElementById('quizQuestionApocalipse').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsApocalipse');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerApocalipse(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackApocalipse').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressApocalipse();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerApocalipse(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackApocalipse');
+            const optionsButtons = document.querySelectorAll('#quizOptionsApocalipse button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreApocalipse++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersApocalipse++;
+            }
+            document.getElementById('quizScoreApocalipse').textContent = `Acertos: ${scoreApocalipse}, Erros: ${wrongAnswersApocalipse}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionApocalipse() {
+            currentQuizIndexApocalipse++;
+            displayQuestionApocalipse();
+        }
+
+        // Dados para o gráfico de temas de Apocalipse
+        const apocalipseChartData = {
+            labels: ['Soberania de Deus', 'Triunfo de Cristo', 'Juízo Divino', 'Adoração', 'Perseguição e Fidelidade', 'Batalha Espiritual', 'Escatologia', 'Nova Criação', 'Esperança e Consolo'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [15, 20, 15, 10, 10, 10, 15, 10, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(201, 203, 207, 0.6)',
+                    'rgba(255, 100, 100, 0.6)',
+                    'rgba(100, 255, 100, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(201, 203, 207, 1)',
+                    'rgba(255, 100, 100, 1)',
+                    'rgba(100, 255, 100, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const apocalipseChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Apocalipse',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderApocalipseChart() {
+            const ctx = document.getElementById('apocalipseChart').getContext('2d');
+            if (apocalipseChartInstance) {
+                apocalipseChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            apocalipseChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: apocalipseChartData,
+                options: apocalipseChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

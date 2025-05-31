@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Jonas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Jonas Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Jonas</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionJonas('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionJonas('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionJonas('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionJonas('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionJonas('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionJonas('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionJonas('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionJonas('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionJonas('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Jonas</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Jonas, uma narrativa cativante sobre a desobediência de um profeta, a soberania de Deus e Sua compaixão universal. Descubra lições profundas sobre arrependimento, perdão e a natureza do amor divino, que se estende até mesmo aos inimigos de Israel. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Jonas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Jonas é único entre os livros proféticos do Antigo Testamento, pois é primariamente uma narrativa sobre um profeta, Jonas, em vez de uma coleção de oráculos proféticos. Ele conta a história de Jonas, filho de Amitai, que é chamado por Deus para pregar arrependimento à grande cidade de Nínive, capital da Assíria, um império inimigo de Israel.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Jonas, no entanto, desobedece a Deus e tenta fugir para Társis, na direção oposta. Sua fuga é interrompida por uma grande tempestade, que leva os marinheiros a lançá-lo ao mar, onde é engolido por um grande peixe. Após três dias e três noites no ventre do peixe, Jonas ora e é vomitado em terra firme. Deus, então, reitera Seu chamado, e Jonas finalmente vai a Nínive, proclamando a mensagem de juízo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Para a surpresa e desgosto de Jonas, os ninivitas, do rei ao menor, se arrependem em massa, e Deus se arrepende do mal que havia dito que lhes faria. A história culmina com a irritação de Jonas pela misericórdia de Deus para com Nínive e uma lição divina sobre a compaixão de Deus por toda a criação, contrastada com a visão estreita e preconceituosa de Jonas.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: A Fuga de Jonas.</strong> O chamado de Deus, a desobediência de Jonas, a tempestade e o grande peixe.</li>
+                <li><strong>Capítulo 2: A Oração de Jonas.</strong> A oração de Jonas no ventre do peixe e sua libertação.</li>
+                <li><strong>Capítulo 3: A Missão Cumprida.</strong> O segundo chamado de Deus, a pregação de Jonas em Nínive e o arrependimento da cidade.</li>
+                <li><strong>Capítulo 4: A Ira de Jonas e a Compaixão de Deus.</strong> A insatisfação de Jonas com a misericórdia de Deus e a lição final de Deus sobre Sua compaixão.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Jonas é um livro que desafia as noções humanas de justiça e misericórdia, destacando a soberania de Deus e Sua preocupação com todas as nações, não apenas Israel.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Jonas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Jonas é uma narrativa didática que explora a soberania, compaixão e paciência de Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Desobediência de Jonas e a Intervenção Divina (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Chamado e a Fuga (Versículos 1-3):</strong>
+                    <ul>
+                        <li>Deus chama Jonas para pregar em Nínive.</li>
+                        <li>Jonas tenta fugir para Társis.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Tempestade e os Marinheiros (Versículos 4-10):</strong>
+                    <ul>
+                        <li>Deus envia uma grande tempestade.</li>
+                        <li>Os marinheiros oram a seus deuses e Jonas é descoberto.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Sacrifício de Jonas (Versículos 11-16):</strong>
+                    <ul>
+                        <li>Jonas pede para ser lançado ao mar.</li>
+                        <li>A tempestade cessa e os marinheiros temem ao Senhor.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Grande Peixe (Versículo 17):</strong>
+                    <ul>
+                        <li>Deus providencia um grande peixe para engolir Jonas.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Oração de Jonas e a Salvação (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Oração no Ventre do Peixe (Versículos 1-9):</strong>
+                    <ul>
+                        <li>Jonas ora a Deus em sua aflição.</li>
+                        <li>Ele reconhece a soberania de Deus e Sua salvação.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Libertação (Versículo 10):</strong>
+                    <ul>
+                        <li>O Senhor ordena ao peixe que vomite Jonas em terra.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Obediência de Jonas e o Arrependimento de Nínive (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Segundo Chamado (Versículos 1-3):</strong>
+                    <ul>
+                        <li>Deus reitera Sua ordem a Jonas.</li>
+                        <li>Jonas obedece e vai a Nínive.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Pregação de Jonas (Versículo 4):</strong>
+                    <ul>
+                        <li>Jonas proclama a destruição iminente de Nínive.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Arrependimento de Nínive (Versículos 5-9):</strong>
+                    <ul>
+                        <li>Os ninivitas creem em Deus e se arrependem.</li>
+                        <li>O rei de Nínive decreta jejum e arrependimento.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Compaixão de Deus (Versículo 10):</strong>
+                    <ul>
+                        <li>Deus vê o arrependimento deles e desiste do juízo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. A Ira de Jonas e a Lição de Compaixão de Deus (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Insatisfação de Jonas (Versículos 1-3):</strong>
+                    <ul>
+                        <li>Jonas se irrita com a misericórdia de Deus.</li>
+                        <li>Ele expressa seu desejo de morrer.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Planta, o Verme e o Vento (Versículos 4-8):</strong>
+                    <ul>
+                        <li>Deus providencia uma planta para dar sombra a Jonas.</li>
+                        <li>Deus envia um verme para secar a planta e um vento oriental.</li>
+                        <li>Jonas novamente deseja a morte.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Lição de Compaixão (Versículos 9-11):</strong>
+                    <ul>
+                        <li>Deus questiona a preocupação de Jonas com a planta e Sua própria compaixão por Nínive.</li>
+                        <li>"E não hei de eu ter compaixão de Nínive, aquela grande cidade, em que estão mais de cento e vinte mil homens, que não sabem discernir entre a sua mão direita e a sua mão esquerda, e também muitos animais?"</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Jonas é uma profunda exploração da natureza de Deus e da natureza humana. Ele revela a soberania de Deus sobre a criação e a história, Sua disposição em usar meios incomuns para cumprir Seus propósitos, e, acima de tudo, Sua vasta e incondicional compaixão. A história desafia o etnocentrismo e o preconceito, mostrando que a misericórdia de Deus se estende a todos os povos que se arrependem, independentemente de sua nacionalidade ou passado. Também serve como um lembrete da responsabilidade dos profetas (e de todos os crentes) de serem instrumentos da vontade de Deus, mesmo quando isso contraria suas próprias expectativas ou desejos.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridJonas">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Jonas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Jonas, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: A Fuga de Jonas e a Tempestade Divina</strong>
+                    <ul>
+                        <li>1.1-3: O Chamado de Deus a Jonas e sua Desobediência.</li>
+                        <li>1.4-10: A Tempestade Enviada por Deus e a Descoberta de Jonas pelos Marinheiros.</li>
+                        <li>1.11-16: Jonas é Lançado ao Mar e a Calma da Tempestade.</li>
+                        <li>1.17: O Grande Peixe Engole Jonas.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: A Oração de Jonas e Sua Libertação</strong>
+                    <ul>
+                        <li>2.1-9: A Oração de Jonas no Ventre do Peixe.</li>
+                        <li>2.10: O Peixe Vomita Jonas em Terra Seca.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: A Missão em Nínive e o Arrependimento da Cidade</strong>
+                    <ul>
+                        <li>3.1-3a: O Segundo Chamado de Deus e a Obediência de Jonas.</li>
+                        <li>3.3b-4: A Chegada de Jonas a Nínive e Sua Proclamação.</li>
+                        <li>3.5-9: O Arrependimento do Povo e do Rei de Nínive.</li>
+                        <li>3.10: A Compaixão de Deus e a Retirada do Juízo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: A Ira de Jonas e a Lição da Compaixão Divina</strong>
+                    <ul>
+                        <li>4.1-4: A Insatisfação de Jonas com a Misericórdia de Deus.</li>
+                        <li>4.5-8: A Provisão e a Destruição da Planta por Deus.</li>
+                        <li>4.9-11: O Diálogo Final entre Deus e Jonas sobre a Compaixão.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Jonas</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Soberania de Deus:</strong> Deus controla a natureza, os animais e o destino das nações.</li>
+                <li><strong>Compaixão e Misericórdia Divina:</strong> A disposição de Deus em perdoar aqueles que se arrependem, mesmo os inimigos.</li>
+                <li><strong>Arrependimento:</strong> A resposta necessária à mensagem de Deus, resultando em perdão.</li>
+                <li><strong>Obediência e Desobediência:</strong> O contraste entre a fuga de Jonas e sua eventual obediência.</li>
+                <li><strong>Preconceito e Etnocentrismo:</strong> A relutância de Jonas em ver a salvação estendida a um povo inimigo.</li>
+                <li><strong>Missão e Evangelismo:</strong> A responsabilidade de levar a mensagem de Deus a todas as nações.</li>
+                <li><strong>A Natureza do Profeta:</strong> Um olhar sobre as falhas humanas mesmo em um servo de Deus.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Jonas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersJonas">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Jonas</h2>
+            <div id="quizContainerJonas" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionJonas"></p>
+                <div id="quizOptionsJonas" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackJonas" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionJonas()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressJonas"></span></p>
+                <p>Pontuação: <span id="quizScoreJonas">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Jonas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Jonas.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="jonasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalJonas()">&times;</span>
+                <h3 id="modalCharacterNameJonas" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionJonas" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Jonas",
+            "short_name": "Jonas",
+            "description": "Explore o livro de Jonas de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=JN",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=JN",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'jonas-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionJonas(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsJonas();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksJonas();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsJonas(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexJonas = 0; // Reinicia o quiz
+                scoreJonas = 0;
+                wrongAnswersJonas = 0;
+                document.getElementById('quizScoreJonas').textContent = `Acertos: ${scoreJonas}, Erros: ${wrongAnswersJonas}`;
+                displayQuestionJonas();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderJonasChart();
+            }
+        }
+
+        // Dados dos personagens para Jonas
+        const characterDetailsJonas = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano, Compassivo e Justo Deus, que chama Jonas, controla a natureza e demonstra misericórdia a Nínive."
+            },
+            "Jonas": {
+                name: "Jonas",
+                description: "O profeta israelita chamado por Deus para pregar em Nínive, mas que tenta fugir e luta com a compaixão divina."
+            },
+            "Marinheiros": {
+                name: "Marinheiros",
+                description: "Os tripulantes do navio para Társis que, diante da tempestade, temem ao Senhor e lançam Jonas ao mar."
+            },
+            "Grande Peixe": {
+                name: "Grande Peixe",
+                description: "O animal providenciado por Deus para engolir Jonas e salvá-lo da morte no mar, mantendo-o vivo por três dias."
+            },
+            "Ninivitas": {
+                name: "Ninivitas",
+                description: "Os habitantes de Nínive, a grande cidade assíria, que se arrependem em massa após a pregação de Jonas."
+            },
+            "Rei de Nínive": {
+                name: "Rei de Nínive",
+                description: "O monarca de Nínive que, ouvindo a mensagem de Jonas, decreta jejum e arrependimento para toda a cidade."
+            },
+            "Planta": {
+                name: "Planta",
+                description: "A planta que Deus faz crescer para dar sombra a Jonas e que depois seca, servindo como uma lição sobre a compaixão de Deus."
+            },
+            "Verme": {
+                name: "Verme",
+                description: "O verme enviado por Deus para ferir e secar a planta que dava sombra a Jonas."
+            },
+            "Vento Oriental": {
+                name: "Vento Oriental",
+                description: "O vento quente e sufocante enviado por Deus para aumentar o desconforto de Jonas, complementando a lição divina."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalJonas(characterName) {
+            const details = characterDetailsJonas[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameJonas').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionJonas').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalJonas() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsJonas() {
+            const grid = document.getElementById('characterGridJonas');
+            grid.innerHTML = '';
+            for (const key in characterDetailsJonas) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalJonas(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksJonas() {
+            const chaptersDiv = document.getElementById('chaptersJonas');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 4; i++) { // Jonas tem 4 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/jn/${i}`; // Link para a Bíblia Online, Jonas
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Jonas (25 perguntas únicas)
+        const uniqueQuizQuestionsJonas = [
+            { question: "Para qual cidade Deus enviou Jonas para pregar?", options: ["Társis", "Jerusalém", "Nínive", "Babilônia"], answer: "Nínive", reference: "Jonas 1:2" },
+            { question: "Para onde Jonas tentou fugir inicialmente?", options: ["Nínive", "Társis", "Jope", "Israel"], answer: "Társis", reference: "Jonas 1:3" },
+            { question: "Qual foi o motivo da grande tempestade no mar?", options: ["Mudança climática", "Desobediência de Jonas", "Ação dos marinheiros", "Ataque de piratas"], answer: "Desobediência de Jonas", reference: "Jonas 1:4" },
+            { question: "O que os marinheiros fizeram para tentar acalmar a tempestade antes de Jonas ser lançado?", options: ["Oraram a Deus", "Lançaram Jonas ao mar", "Aliviaram a carga do navio", "Voltaram para o porto"], answer: "Aliviaram a carga do navio", reference: "Jonas 1:5" },
+            { question: "Quem sugeriu que Jonas fosse lançado ao mar para acalmar a tempestade?", options: ["O capitão do navio", "Os marinheiros", "Jonas", "Um passageiro"], answer: "Jonas", reference: "Jonas 1:12" },
+            { question: "O que aconteceu imediatamente após Jonas ser lançado ao mar?", options: ["O navio afundou", "A tempestade cessou", "Outro navio apareceu", "Jonas foi resgatado por marinheiros"], answer: "A tempestade cessou", reference: "Jonas 1:15" },
+            { question: "Qual animal Deus providenciou para engolir Jonas?", options: ["Um leão", "Uma baleia", "Um grande peixe", "Um tubarão"], answer: "Um grande peixe", reference: "Jonas 1:17" },
+            { question: "Quantos dias e noites Jonas permaneceu no ventre do peixe?", options: ["Um dia e uma noite", "Dois dias e duas noites", "Três dias e três noites", "Sete dias e sete noites"], answer: "Três dias e três noites", reference: "Jonas 1:17" },
+            { question: "O que Jonas fez enquanto estava no ventre do peixe?", options: ["Dormiu", "Escreveu um livro", "Orou ao Senhor", "Tentou escapar"], answer: "Orou ao Senhor", reference: "Jonas 2:1" },
+            { question: "Onde o peixe vomitou Jonas?", options: ["Em Nínive", "Em Társis", "Em terra seca", "No meio do mar"], answer: "Em terra seca", reference: "Jonas 2:10" },
+            { question: "Qual foi a reação dos ninivitas à pregação de Jonas?", options: ["Ignoraram-no", "Prenderam-no", "Zombaram dele", "Crêram em Deus e se arrependeram"], answer: "Crêram em Deus e se arrependeram", reference: "Jonas 3:5" },
+            { question: "O que o rei de Nínive decretou após ouvir a mensagem de Jonas?", options: ["Guerra contra Israel", "Construção de um templo", "Jejum e arrependimento para todos", "Expulsão de Jonas"], answer: "Jejum e arrependimento para todos", reference: "Jonas 3:7-9" },
+            { question: "Qual foi a atitude de Deus depois que os ninivitas se arrependeram?", options: ["Destruiu a cidade", "Perdoou-os", "Enviou outro profeta", "Ignorou o arrependimento"], answer: "Perdoou-os", reference: "Jonas 3:10" },
+            { question: "Por que Jonas ficou irado com Deus no capítulo 4?", options: ["Porque Nínive foi destruída", "Porque Deus não o abençoou", "Porque Deus teve compaixão de Nínive", "Porque ele ficou doente"], answer: "Porque Deus teve compaixão de Nínive", reference: "Jonas 4:1" },
+            { question: "O que Deus providenciou para dar sombra a Jonas enquanto ele esperava fora da cidade?", options: ["Uma tenda", "Uma rocha", "Uma planta", "Uma nuvem"], answer: "Uma planta", reference: "Jonas 4:6" },
+            { question: "O que aconteceu com a planta que dava sombra a Jonas?", options: ["Cresceu muito", "Foi queimada pelo sol", "Foi comida por um animal", "Foi ferida por um verme e secou"], answer: "Foi ferida por um verme e secou", reference: "Jonas 4:7" },
+            { question: "Além do verme, o que mais Deus enviou para aumentar o desconforto de Jonas?", options: ["Uma chuva forte", "Um terremoto", "Um vento oriental abrasador", "Gafanhotos"], answer: "Um vento oriental abrasador", reference: "Jonas 4:8" },
+            { question: "Quantas pessoas Deus menciona que não sabiam discernir entre a mão direita e a esquerda em Nínive?", options: ["Mil", "Dez mil", "Cento e vinte mil", "Um milhão"], answer: "Cento e vinte mil", reference: "Jonas 4:11" },
+            { question: "Qual é um dos principais temas do livro de Jonas?", options: ["A construção do Templo", "A lei de Moisés", "A compaixão universal de Deus", "A história de Israel"], answer: "A compaixão universal de Deus", reference: "Temas Centrais do Livro de Jonas" },
+            { question: "O que o livro de Jonas nos ensina sobre a soberania de Deus?", options: ["Que Deus só age em Israel", "Que Deus controla todos os elementos da criação", "Que Deus não se importa com as nações", "Que Deus é limitado pelo homem"], answer: "Que Deus controla todos os elementos da criação", reference: "Temas Centrais do Livro de Jonas" },
+            { question: "Qual foi a principal emoção de Jonas quando Nínive se arrependeu?", options: ["Alegria", "Tristeza", "Indiferença", "Ira"], answer: "Ira", reference: "Jonas 4:1" },
+            { question: "O que Jonas esperava que acontecesse com Nínive?", options: ["Que fosse abençoada", "Que fosse destruída", "Que se tornasse aliada de Israel", "Que se convertesse ao judaísmo"], answer: "Que fosse destruída", reference: "Jonas 4:2" },
+            { question: "A história de Jonas é mais sobre:", options: ["A história de Israel", "A história de Nínive", "A natureza e o caráter de Deus", "A vida de um profeta"], answer: "A natureza e o caráter de Deus", reference: "Significado Teológico" },
+            { question: "Qual a lição final de Deus para Jonas?", options: ["Que ele deve ser mais obediente", "Que a compaixão de Deus é maior que a justiça humana", "Que ele deve amar seus inimigos", "Que ele deve valorizar as plantas"], answer: "Que a compaixão de Deus é maior que a justiça humana", reference: "Jonas 4:10-11" },
+            { question: "Qual o nome do pai de Jonas?", options: ["Amitai", "Obadias", "Samuel", "Elias"], answer: "Amitai", reference: "Jonas 1:1" }
+        ];
+
+        let quizQuestionsJonas = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsJonas() {
+            quizQuestionsJonas = []; // Limpa as perguntas anteriores
+            while (quizQuestionsJonas.length < 200) {
+                quizQuestionsJonas.push(...uniqueQuizQuestionsJonas);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsJonas.length > 200) {
+                quizQuestionsJonas = quizQuestionsJonas.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsJonas); // Embaralha o array completo
+        }
+
+        let currentQuizIndexJonas = 0;
+        let scoreJonas = 0;
+        let wrongAnswersJonas = 0;
+
+        function displayQuestionJonas() {
+            const questionElement = document.getElementById('quizQuestionJonas');
+            const optionsElement = document.getElementById('quizOptionsJonas');
+            const feedbackElement = document.getElementById('quizFeedbackJonas');
+            const nextButton = document.querySelector('#quizContainerJonas .quiz-next');
+            const progressElement = document.getElementById('quizProgressJonas');
+
+            if (currentQuizIndexJonas < quizQuestionsJonas.length) {
+                const questionData = quizQuestionsJonas[currentQuizIndexJonas];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerJonas(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexJonas + 1}/${quizQuestionsJonas.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreJonas}, Erros: ${wrongAnswersJonas}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerJonas(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsJonas button');
+            const feedbackElement = document.getElementById('quizFeedbackJonas');
+            const nextButton = document.querySelector('#quizContainerJonas .quiz-next');
+            const scoreElement = document.getElementById('quizScoreJonas');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreJonas++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersJonas++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreJonas}, Erros: ${wrongAnswersJonas}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionJonas() {
+            currentQuizIndexJonas++;
+            displayQuestionJonas();
+        }
+
+        // Gráfico de Temas para Jonas
+        let jonasChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderJonasChart() {
+            const ctx = document.getElementById('jonasChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (jonasChartInstance) {
+                jonasChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['Soberania de Deus', 'Compaixão Divina', 'Arrependimento', 'Obediência/Desobediência', 'Preconceito', 'Missão'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [5, 6, 4, 3, 2, 4], // Valores fictícios para Jonas
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)', // Azul para Soberania
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para Compaixão
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Arrependimento
+                        'rgba(153, 102, 255, 0.7)', // Roxo para Obediência/Desobediência
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para Preconceito
+                        'rgba(201, 203, 207, 0.7)' // Cinza para Missão
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(201, 203, 207, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            jonasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Jonas',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionJonas('inicio');
+        });
+    </script>
+</body>
+</html>

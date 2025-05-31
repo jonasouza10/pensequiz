@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Cantares</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cantares Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Cantares</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionCantares('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionCantares('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionCantares('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionCantares('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionCantares('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionCantares('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionCantares('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionCantares('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionCantares('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Cantares</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Cantares (ou Cântico dos Cânticos), uma das mais belas poesias de amor da Bíblia. Mergulhe na expressão poética do amor e da atração entre um noivo e sua noiva, celebrando a beleza, o desejo e a exclusividade do amor romântico. Descubra as diversas interpretações e a riqueza literária deste livro único. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Cantares</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Cantares, também conhecido como Cântico dos Cânticos ou Cântico de Salomão, é uma das obras poéticas e sapienciais do Antigo Testamento. É uma coleção de poemas de amor que descrevem a beleza, o desejo e a alegria do amor romântico entre um homem e uma mulher. Tradicionalmente, o livro é atribuído a Salomão (Cantares 1:1), e seu estilo poético e vocabulário o colocam entre as mais belas obras da literatura hebraica.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Cantares é único na Bíblia por sua natureza explícita de cântico de amor, sem referências diretas a Deus, à Lei, ou a temas religiosos abertos. Essa característica levou a diversas interpretações ao longo da história:
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Interpretação Literal:</strong> Vê o livro como uma celebração do amor humano no casamento, santificado por Deus. É um reconhecimento da beleza e da pureza da intimidade conjugal.</li>
+                <li><strong>Interpretação Alegórica:</strong> Interpreta o relacionamento entre o noivo e a noiva como uma alegoria do amor de Deus por Israel (no judaísmo) ou do amor de Cristo pela Igreja (no cristianismo).</li>
+                <li><strong>Interpretação Típica:</strong> Considera que, embora seja um cântico de amor humano, ele também aponta e prefigura o amor divino e o relacionamento de aliança.</li>
+            </ul>
+            Independentemente da interpretação, o livro celebra a exclusividade, a paixão e a fidelidade no amor.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro é composto por diálogos entre a Sulamita (a noiva/amada), o Noivo (o Rei/amado) e um coro (as filhas de Jerusalém). A linguagem é rica em metáforas e imagens da natureza, descrevendo a beleza física e a profundidade emocional do relacionamento. Ele enfatiza a importância de nutrir o amor, protegê-lo e desfrutá-lo em seu tempo apropriado.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Cantares 1:1-2:7: O Desejo Mútuo e a Busca.</strong> A noiva expressa seu desejo pelo amado, e ambos se elogiam.</li>
+                <li><strong>Cantares 2:8-3:5: A Chegada do Amado e a Busca Noturna.</strong> O noivo visita a noiva; a noiva o procura em seus sonhos.</li>
+                <li><strong>Cantares 3:6-5:1: O Cortejo Nupcial e a Consumação do Amor.</strong> A descrição da procissão do rei e a celebração do casamento.</li>
+                <li><strong>Cantares 5:2-6:3: A Crise no Relacionamento e a Renovação da Busca.</strong> A noiva hesita, o amado se afasta, e ela o procura novamente.</li>
+                <li><strong>Cantares 6:4-8:4: A Beleza da Noiva e a Reafirmação do Amor.</strong> O noivo elogia a beleza da noiva; a noiva expressa seu desejo de levá-lo à sua terra natal.</li>
+                <li><strong>Cantares 8:5-14: A Força do Amor e o Desejo Final.</strong> A inseparabilidade do amor, a importância de proteger a pureza e o convite final.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Cantares é uma obra-prima que celebra o amor humano em sua forma mais pura e apaixonada, um reflexo do dom de Deus para a humanidade.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Cantares</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Cantares é um poema lírico que celebra o amor romântico entre um homem e uma mulher, com ricas metáforas e simbolismos.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Desejo Mútuo e a Busca (Capítulos 1:1-2:7)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Anseio da Noiva pelo Amado (Cantares 1:1-8):</strong>
+                    <ul>
+                        <li>Desejo de beijos e elogios ao amado.</li>
+                        <li>A noiva se descreve e busca o pastor.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Elogios Mútuos e a Intimidade Crescente (Cantares 1:9-2:7):</strong>
+                    <ul>
+                        <li>O noivo elogia a beleza da noiva.</li>
+                        <li>A noiva se compara a uma rosa e um lírio.</li>
+                        <li>O noivo é como uma macieira.</li>
+                        <li>O amor é forte e não deve ser despertado antes do tempo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Chegada do Amado e a Busca Noturna (Capítulos 2:8-3:5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Visita do Amado na Primavera (Cantares 2:8-17):</strong>
+                    <ul>
+                        <li>O noivo chega como um cervo, convidando a noiva para fora.</li>
+                        <li>A beleza da primavera e a voz do amado.</li>
+                        <li>Advertência contra as raposinhas que estragam as vinhas.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Busca Noturna da Noiva (Cantares 3:1-5):</strong>
+                    <ul>
+                        <li>A noiva procura o amado na cidade à noite.</li>
+                        <li>Ela o encontra e o leva para casa.</li>
+                        <li>Reafirmação de não despertar o amor antes do tempo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Cortejo Nupcial e a Consumação do Amor (Capítulos 3:6-5:1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Procissão do Rei Salomão (Cantares 3:6-11):</strong>
+                    <ul>
+                        <li>A chegada majestosa do noivo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Elogios do Noivo à Noiva (Cantares 4:1-5:1):</strong>
+                    <ul>
+                        <li>Descrição detalhada da beleza da noiva (da cabeça aos pés).</li>
+                        <li>A noiva como um jardim fechado, fonte selada.</li>
+                        <li>Convite do noivo para a intimidade.</li>
+                        <li>A resposta da noiva e a consumação do amor.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. A Crise e a Reafirmação do Amor (Capítulos 5:2-8:4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Sonho da Noiva e a Busca Renovada (Cantares 5:2-6:3):</strong>
+                    <ul>
+                        <li>A noiva hesita em abrir a porta, e o amado se vai.</li>
+                        <li>Ela o procura novamente e descreve sua beleza às filhas de Jerusalém.</li>
+                        <li>O amado está em seu jardim.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Elogios do Noivo e o Desejo da Noiva (Cantares 6:4-8:4):</strong>
+                    <ul>
+                        <li>O noivo reafirma seu amor e a beleza da noiva.</li>
+                        <li>A noiva deseja levá-lo à sua casa e à sua terra natal.</li>
+                        <li>A inseparabilidade do amor, forte como a morte.</li>
+                        <li>Advertência final contra despertar o amor.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Cantares é uma celebração do amor humano no contexto do casamento, um dom de Deus. Ele santifica a atração física e emocional entre marido e mulher, mostrando que o amor é belo, puro e exclusivo. O livro também serve como uma metáfora rica para o relacionamento de aliança entre Deus e Seu povo (Israel/Igreja), destacando a paixão, a fidelidade e o desejo mútuo. Ele nos ensina sobre a importância de nutrir e proteger o amor, e a desfrutá-lo em seu tempo, sem pressa ou superficialidade.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridCantares">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Cantares</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Cantares, capítulo por capítulo, destacando os temas e interações.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Anseio da noiva pelo amado; elogios mútuos; a noiva se descreve.</li>
+                <li><strong>Capítulo 2:</strong> O noivo visita a noiva na primavera; elogios do noivo; advertência contra as "raposinhas".</li>
+                <li><strong>Capítulo 3:</strong> A noiva procura o amado à noite e o encontra; a procissão nupcial do rei Salomão.</li>
+                <li><strong>Capítulo 4:</strong> Elogios detalhados do noivo à beleza da noiva; a noiva como um jardim fechado.</li>
+                <li><strong>Capítulo 5:</strong> O convite do noivo para a intimidade; a noiva hesita e depois procura o amado; descrição da beleza do amado.</li>
+                <li><strong>Capítulo 6:</strong> O noivo reafirma o amor pela noiva; a beleza da noiva comparada a Tiro e Jerusalém.</li>
+                <li><strong>Capítulo 7:</strong> Elogios adicionais do noivo à beleza da noiva; o desejo da noiva de ir para o campo.</li>
+                <li><strong>Capítulo 8:</strong> A força do amor; o desejo da noiva de levar o amado para sua terra; a importância de proteger a pureza; convite final.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Cantares</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Amor Romântico e Conjugal:</strong> A celebração da beleza, paixão, desejo e exclusividade do amor entre marido e mulher.</li>
+                <li><strong>Beleza Física e Atração:</strong> Descrições poéticas da beleza mútua dos amantes.</li>
+                <li><strong>Desejo e Busca:</strong> A expressão do anseio e da procura mútua dos amantes.</li>
+                <li><strong>Exclusividade e Fidelidade:</strong> O amor é um relacionamento único e dedicado.</li>
+                <li><strong>Alegria e Prazer no Casamento:</strong> O desfrute legítimo da intimidade e da companhia.</li>
+                <li><strong>Pureza e Proteção do Amor:</strong> A importância de guardar o amor e não despertá-lo antes do tempo.</li>
+                <li><strong>O Amor como Dom Divino:</strong> Embora não explícito, o amor é visto como uma dádiva abençoada por Deus.</li>
+                <li><strong>Metáfora do Amor Divino:</strong> A interpretação alegórica do amor de Deus por Seu povo (Cristo e a Igreja).</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Cantares</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersCantares">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Cantares</h2>
+            <div id="quizContainerCantares" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionCantares"></p>
+                <div id="quizOptionsCantares" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackCantares" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionCantares()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressCantares"></span></p>
+                <p>Pontuação: <span id="quizScoreCantares">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Cantares</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Cantares.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="cantaresChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalCantares()">&times;</span>
+                <h3 id="modalCharacterNameCantares" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionCantares" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Cantares",
+            "short_name": "Cantares",
+            "description": "Explore o livro de Cantares de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=CT",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=CT",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'cantares-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionCantares(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsCantares();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksCantares();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsCantares(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexCantares = 0; // Reinicia o quiz
+                scoreCantares = 0;
+                wrongAnswersCantares = 0;
+                document.getElementById('quizScoreCantares').textContent = `Acertos: ${scoreCantares}, Erros: ${wrongAnswersCantares}`;
+                displayQuestionCantares();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderCantaresChart();
+            }
+        }
+
+        // Dados dos personagens para Cantares
+        const characterDetailsCantares = {
+            "O Noivo (Rei Salomão)": {
+                name: "O Noivo (Rei Salomão)",
+                description: "Representa o amado, o rei que corteja e se casa com a Sulamita. Ele expressa seu amor e admiração pela noiva."
+            },
+            "A Noiva (Sulamita)": {
+                name: "A Noiva (Sulamita)",
+                description: "A amada, uma jovem mulher do campo que é cortejada pelo rei. Ela expressa seu desejo, sua beleza e sua fidelidade ao amado."
+            },
+            "As Filhas de Jerusalém": {
+                name: "As Filhas de Jerusalém",
+                description: "Um coro de mulheres que servem como observadoras e interlocutoras, comentando sobre o relacionamento dos amantes e sendo aconselhadas pela noiva."
+            },
+            "Os Irmãos da Noiva": {
+                name: "Os Irmãos da Noiva",
+                description: "Mencionados brevemente, eles cuidam da vinha e da pureza da noiva antes do casamento."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalCantares(characterName) {
+            const details = characterDetailsCantares[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameCantares').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionCantares').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalCantares() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsCantares() {
+            const grid = document.getElementById('characterGridCantares');
+            grid.innerHTML = '';
+            for (const key in characterDetailsCantares) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalCantares(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksCantares() {
+            const chaptersDiv = document.getElementById('chaptersCantares');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 8; i++) { // Cantares tem 8 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/ct/${i}`; // Link para a Bíblia Online, Cantares
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Cantares (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsCantares = [
+            { question: "Qual é o outro nome conhecido para o Livro de Cantares?", options: ["Livro do Amor", "Cântico de Salomão", "Poesia Sagrada", "Os Amores do Rei"], answer: "Cântico de Salomão", reference: "Cantares 1:1" },
+            { question: "Quem é o autor tradicionalmente associado ao livro de Cantares?", options: ["Davi", "Moisés", "Salomão", "Isaías"], answer: "Salomão", reference: "Cantares 1:1" },
+            { question: "Qual é a principal interpretação literal do livro de Cantares?", options: ["Uma história de guerra", "Uma alegoria sobre a sabedoria", "Uma celebração do amor humano no casamento", "Um livro de profecias"], answer: "Uma celebração do amor humano no casamento", reference: "Introdução ao Livro de Cantares" },
+            { question: "O que a noiva pede ao noivo no início do livro?", options: ["Riquezas", "Beijos", "Um palácio", "Fama"], answer: "Beijos", reference: "Cantares 1:2" },
+            { question: "A quem a noiva se compara em Cantares 2:1?", options: ["Uma rainha", "Uma rosa de Sarom e um lírio dos vales", "Uma pomba", "Uma vinha"], answer: "Uma rosa de Sarom e um lírio dos vales", reference: "Cantares 2:1" },
+            { question: "O que o noivo é para a noiva em Cantares 2:3?", options: ["Um pastor", "Uma macieira entre as árvores do bosque", "Um leão", "Uma fonte"], answer: "Uma macieira entre as árvores do bosque", reference: "Cantares 2:3" },
+            { question: "Qual é a advertência repetida no livro sobre o amor?", options: ["Desperte-o a qualquer custo", "Não o desperte antes do tempo", "Guarde-o em segredo", "Compartilhe-o com todos"], answer: "Não o desperte antes do tempo", reference: "Cantares 2:7, 3:5, 8:4" },
+            { question: "O que as 'raposinhas' simbolizam em Cantares 2:15?", options: ["Amigos fiéis", "Pequenos problemas que estragam o relacionamento", "Inimigos poderosos", "Animais de estimação"], answer: "Pequenos problemas que estragam o relacionamento", reference: "Cantares 2:15" },
+            { question: "O que a noiva faz quando procura o amado à noite em Cantares 3?", options: ["Chora", "Canta", "O encontra e o leva para casa", "Desiste da busca"], answer: "O encontra e o leva para casa", reference: "Cantares 3:1-4" },
+            { question: "A noiva é comparada a um 'jardim fechado' em qual capítulo?", options: ["Capítulo 1", "Capítulo 3", "Capítulo 4", "Capítulo 8"], answer: "Capítulo 4", reference: "Cantares 4:12" },
+            { question: "Qual é a principal característica da linguagem em Cantares?", options: ["Simples e direta", "Cheia de alegorias políticas", "Rica em metáforas e imagens da natureza", "Com foco em narrativas históricas"], answer: "Rica em metáforas e imagens da natureza", reference: "Introdução ao Livro de Cantares" },
+            { question: "O que o noivo pede à noiva para vir fazer com ele na primavera?", options: ["Trabalhar na vinha", "Cantar", "Sair para o campo", "Dançar"], answer: "Sair para o campo", reference: "Cantares 2:10-13" },
+            { question: "Quando o noivo descreve a beleza da noiva, ele menciona seus olhos como os de uma:", options: ["Pomba", "Corça", "Ovelha", "Gata"], answer: "Pomba", reference: "Cantares 1:15, 4:1" },
+            { question: "O que a noiva deseja levar o amado para fazer em Cantares 8:2?", options: ["Para a casa de sua mãe", "Para o palácio", "Para a vinha", "Para a cidade"], answer: "Para a casa de sua mãe", reference: "Cantares 8:2" },
+            { question: "O que é forte como a morte, segundo Cantares 8:6?", options: ["O ódio", "O ciúme", "O amor", "A riqueza"], answer: "O amor", reference: "Cantares 8:6" },
+            { question: "Quantos capítulos tem o Livro de Cantares?", options: ["5", "8", "10", "12"], answer: "8", reference: "Esboços do Livro de Cantares" },
+            { question: "Qual é o coro que interage com o casal no livro?", options: ["Os pastores", "As filhas de Jerusalém", "Os irmãos da noiva", "Os amigos do noivo"], answer: "As filhas de Jerusalém", reference: "Introdução ao Livro de Cantares" },
+            { question: "O que o noivo é para a noiva em Cantares 5:10, em termos de aparência?", options: ["Branco e ruivo", "Alto e forte", "Sábio e rico", "Misterioso e distante"], answer: "Branco e ruivo", reference: "Cantares 5:10" },
+            { question: "Qual é a interpretação alegórica cristã do livro de Cantares?", options: ["A história de um rei e seu povo", "O amor de Cristo pela Igreja", "A busca pela sabedoria", "A luta contra o pecado"], answer: "O amor de Cristo pela Igreja", reference: "Introdução ao Livro de Cantares" },
+            { question: "O que a noiva pede para o amor ser em Cantares 8:6?", options: ["Um selo sobre o coração", "Um tesouro escondido", "Uma canção esquecida", "Um sonho passageiro"], answer: "Um selo sobre o coração", reference: "Cantares 8:6" },
+            { question: "Onde a noiva encontra o amado após procurá-lo em seus sonhos?", options: ["No palácio", "Na rua", "No jardim", "Em sua cama"], answer: "Em sua cama", reference: "Cantares 3:1" },
+            { question: "O que o noivo compara os lábios da noiva em Cantares 4:11?", options: ["Mel", "Vinho", "Rosas", "Pão"], answer: "Mel", reference: "Cantares 4:11" },
+            { question: "Qual é o cenário principal das descrições em Cantares?", options: ["A cidade de Jerusalém", "Campos e jardins", "O templo", "O deserto"], answer: "Campos e jardins", reference: "Panoramas do Livro de Cantares (implícito pelas metáforas)" },
+            { question: "O que o livro de Cantares celebra, além do amor romântico?", options: ["A guerra", "A riqueza material", "A beleza da criação e da intimidade humana", "A política"], answer: "A beleza da criação e da intimidade humana", reference: "Introdução ao Livro de Cantares" },
+            { question: "Qual é o conselho final do livro sobre a 'irmã pequena' que não tem seios?", options: ["Construir uma torre para ela", "Fazer um muro de prata para ela", "Cuidar dela", "Deixá-la sozinha"], answer: "Fazer um muro de prata para ela", reference: "Cantares 8:8-9" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsCantares = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsCantares.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsCantares = allQuizQuestionsCantares.concat(uniqueQuizQuestionsCantares);
+        }
+        allQuizQuestionsCantares = allQuizQuestionsCantares.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsCantares = [];
+        let currentQuizIndexCantares = 0;
+        let scoreCantares = 0;
+        let wrongAnswersCantares = 0;
+        let cantaresChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsCantares() {
+            shuffledQuizQuestionsCantares = [...allQuizQuestionsCantares]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsCantares);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressCantares() {
+            const progressElement = document.getElementById('quizProgressCantares');
+            progressElement.textContent = `${currentQuizIndexCantares + 1}/${shuffledQuizQuestionsCantares.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionCantares() {
+            if (currentQuizIndexCantares >= shuffledQuizQuestionsCantares.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionCantares').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsCantares').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreCantares}, Erros: ${wrongAnswersCantares}</p>`;
+                document.getElementById('quizFeedbackCantares').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsCantares[currentQuizIndexCantares];
+            document.getElementById('quizQuestionCantares').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsCantares');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerCantares(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackCantares').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressCantares();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerCantares(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackCantares');
+            const optionsButtons = document.querySelectorAll('#quizOptionsCantares button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreCantares++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersCantares++;
+            }
+            document.getElementById('quizScoreCantares').textContent = `Acertos: ${scoreCantares}, Erros: ${wrongAnswersCantares}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionCantares() {
+            currentQuizIndexCantares++;
+            displayQuestionCantares();
+        }
+
+        // Dados para o gráfico de temas de Cantares
+        const cantaresChartData = {
+            labels: ['Amor Romântico', 'Beleza e Atração', 'Desejo e Busca', 'Exclusividade', 'Alegria no Casamento', 'Pureza do Amor', 'Amor como Dom Divino', 'Metáfora do Amor Divino'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 15, 12, 10, 8, 8, 7, 15], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(201, 203, 207, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const cantaresChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Cantares',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderCantaresChart() {
+            const ctx = document.getElementById('cantaresChart').getContext('2d');
+            if (cantaresChartInstance) {
+                cantaresChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            cantaresChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: cantaresChartData,
+                options: cantaresChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

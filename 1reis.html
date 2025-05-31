@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 1 Reis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="1 Reis Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 1 Reis</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection1Reis('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection1Reis('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection1Reis('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection1Reis('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection1Reis('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection1Reis('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection1Reis('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection1Reis('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection1Reis('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 1 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o reinado de Salomão, a construção do Templo, a divisão do reino de Israel e os reinados dos primeiros reis de Judá e Israel. Acompanhe as histórias de profetas como Elias e as consequências da obediência e desobediência a Deus. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 1 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Reis é o décimo livro da Bíblia e a continuação da narrativa da monarquia israelita, iniciada em 1 e 2 Samuel. Abrange aproximadamente 120 anos, desde os últimos dias do reinado de Davi até a morte do rei Acazias de Israel. O livro foca principalmente no reinado de Salomão, a construção do glorioso Templo em Jerusalém, a subsequente divisão do reino em Judá (sul) e Israel (norte) após a morte de Salomão, e os reinados dos primeiros reis de ambos os reinos. A narrativa é marcada pela avaliação da fidelidade ou infidelidade desses reis a Deus.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais de 1 Reis incluem a importância da obediência à aliança de Deus, as consequências devastadoras da idolatria, o papel crucial dos profetas (com destaque para Elias) como porta-vozes divinos, e a soberania de Deus sobre a história e os destinos dos reinos. O livro serve como um lembrete de que a prosperidade e a estabilidade de uma nação dependem de sua fidelidade ao Senhor.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Este livro é fundamental para entender a história de Israel, a ascensão e queda de suas dinastias, e as lições espirituais sobre a liderança e a fé. Ele prepara o cenário para os eventos ainda mais complexos narrados em 2 Reis.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-11: O Reinado de Salomão.</strong> A ascensão de Salomão ao trono, seu pedido de sabedoria, a construção do Templo e do palácio, sua riqueza e fama, e sua eventual apostasia e declínio devido à idolatria.</li>
+                <li><strong>Capítulos 12-16: A Divisão do Reino e os Primeiros Reis.</strong> A rebelião de Jeroboão, a divisão do reino em Judá (sul, com a linhagem de Davi) e Israel (norte, com várias dinastias), e os reinados dos primeiros reis de ambos os lados, com suas avaliações morais e espirituais.</li>
+                <li><strong>Capítulos 17-22: O Ministério de Elias e o Reinado de Acabe.</strong> A introdução do profeta Elias, a seca, o confronto no Monte Carmelo com os profetas de Baal, o chamado de Eliseu, e o reinado do ímpio Acabe e sua esposa Jezabel, culminando na morte de Acabe.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Reis é uma narrativa poderosa que ilustra como a fidelidade a Deus molda o destino de reis e nações.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 1 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Reis narra o reinado de Salomão, a divisão do reino e os primeiros reis, com foco nas consequências da obediência e desobediência a Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Reinado de Salomão (Capítulos 1-11)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Ascensão de Salomão ao Trono (Capítulos 1-2):</strong>
+                    <ul>
+                        <li>Adonias tenta usurpar o trono de Davi.</li>
+                        <li>Salomão é ungido e estabelecido como rei.</li>
+                        <li>Salomão consolida seu reino, executando oponentes.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Sabedoria e Riqueza de Salomão (Capítulos 3-4):</strong>
+                    <ul>
+                        <li>Salomão pede sabedoria a Deus em Gibeão.</li>
+                        <li>Seu famoso julgamento das duas prostitutas.</li>
+                        <li>A extensão e a prosperidade de seu reino.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Construção do Templo e do Palácio (Capítulos 5-8):</strong>
+                    <ul>
+                        <li>Preparativos e construção do Templo de Jerusalém.</li>
+                        <li>Construção do palácio real e outros edifícios.</li>
+                        <li>Dedicação do Templo e a oração de Salomão.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Visita da Rainha de Sabá e a Grandeza de Salomão (Capítulos 9-10):</strong>
+                    <ul>
+                        <li>Deus aparece a Salomão novamente.</li>
+                        <li>A visita da Rainha de Sabá, impressionada com sua sabedoria e riqueza.</li>
+                        <li>A vasta riqueza e glória de Salomão.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Apostasia e Declínio de Salomão (Capítulo 11):</strong>
+                    <ul>
+                        <li>Salomão se desvia de Deus por causa de suas muitas esposas estrangeiras e seus deuses.</li>
+                        <li>Deus levanta adversários contra ele.</li>
+                        <li>Profecia da divisão do reino.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Divisão do Reino e os Primeiros Reis (Capítulos 12-16)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Rebelião de Jeroboão e a Divisão (Capítulo 12):</strong>
+                    <ul>
+                        <li>Reoboão, filho de Salomão, recusa-se a aliviar a carga do povo.</li>
+                        <li>Dez tribos se rebelam e fazem Jeroboão seu rei (Reino do Norte - Israel).</li>
+                        <li>Judá e Benjamim permanecem leais a Reoboão (Reino do Sul - Judá).</li>
+                    </ul>
+                </li>
+                <li><strong>B. Reis de Judá e Israel (Capítulos 13-16):</strong>
+                    <ul>
+                        <li>Histórias dos primeiros reis de Judá (Reoboão, Abias, Asa) e Israel (Jeroboão, Nadabe, Baasa, Ela, Zinri, Onri, Acabe).</li>
+                        <li>Avaliação da obediência/desobediência de cada rei a Deus.</li>
+                        <li>A ascensão da dinastia de Onri e a construção de Samaria.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Ministério de Elias e o Reinado de Acabe (Capítulos 17-22)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Elias e a Seca (Capítulo 17):</strong>
+                    <ul>
+                        <li>Elias profetiza a seca.</li>
+                        <li>Sustentado por corvos e pela viúva de Sarepta.</li>
+                        <li>Ressuscita o filho da viúva.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Elias no Monte Carmelo (Capítulo 18):</strong>
+                    <ul>
+                        <li>Confronto dramático com os profetas de Baal.</li>
+                        <li>Deus envia fogo do céu, provando ser o único Deus verdadeiro.</li>
+                        <li>Fim da seca.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Elias no Horebe e o Chamado de Eliseu (Capítulo 19):</strong>
+                    <ul>
+                        <li>Elias foge de Jezabel e encontra Deus em uma voz mansa e delicada.</li>
+                        <li>Deus dá novas instruções a Elias, incluindo ungir Eliseu.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Guerras de Acabe e Ben-Hadade (Capítulo 20):</strong>
+                    <ul>
+                        <li>Acabe derrota Ben-Hadade da Síria em duas ocasiões.</li>
+                        <li>Acabe poupa a vida de Ben-Hadade, desagradando a Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>E. A Vinha de Nabote (Capítulo 21):</strong>
+                    <ul>
+                        <li>Acabe cobiça a vinha de Nabote.</li>
+                        <li>Jezabel orquestra a morte de Nabote.</li>
+                        <li>Elias profetiza o juízo sobre Acabe e Jezabel.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Morte de Acabe (Capítulo 22):</strong>
+                    <ul>
+                        <li>Acabe e Josafá de Judá se aliam contra a Síria.</li>
+                        <li>Micaías profetiza a morte de Acabe.</li>
+                        <li>Acabe morre em batalha, cumprindo a profecia.</li>
+                        <li>Reinado de Acazias em Israel.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">1 Reis é um testemunho da soberania de Deus sobre a história e os reinos. Ele demonstra que a fidelidade à aliança de Deus é a chave para a bênção e a prosperidade, enquanto a idolatria e a desobediência levam à ruína e ao juízo. O livro enfatiza o papel dos profetas como mensageiros de Deus, chamando o povo e seus líderes ao arrependimento. A história de Elias, em particular, destaca o poder e a fidelidade de Deus em meio à apostasia generalizada. O livro também serve como um lembrete das promessas da Aliança Davídica (estabelecida em 2 Samuel 7), mesmo que as falhas dos reis humanos tragam consequências, a promessa de um trono eterno permanece.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGrid1Reis">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 1 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 1 Reis, capítulo por capítulo, destacando os eventos e o desenvolvimento da história.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Reinado de Salomão (Capítulos 1-11)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Últimos dias de Davi; Adonias tenta usurpar o trono; Salomão é ungido rei.</li>
+                <li><strong>Capítulo 2:</strong> Últimas instruções de Davi a Salomão; Salomão consolida seu reino.</li>
+                <li><strong>Capítulo 3:</strong> Salomão pede sabedoria; seu julgamento sobre as duas prostitutas.</li>
+                <li><strong>Capítulo 4:</strong> Oficiais de Salomão; a extensão e prosperidade de seu reino.</li>
+                <li><strong>Capítulo 5:</strong> Preparativos para a construção do Templo.</li>
+                <li><strong>Capítulo 6:</strong> Construção do Templo.</li>
+                <li><strong>Capítulo 7:</strong> Construção do palácio de Salomão e dos utensílios do Templo.</li>
+                <li><strong>Capítulo 8:</strong> Dedicação do Templo.</li>
+                <li><strong>Capítulo 9:</strong> A segunda aparição de Deus a Salomão; cidades construídas por Salomão.</li>
+                <li><strong>Capítulo 10:</strong> Visita da Rainha de Sabá.</li>
+                <li><strong>Capítulo 11:</strong> Apostasia de Salomão e o juízo de Deus.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Divisão do Reino e os Primeiros Reis (Capítulos 12-16)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 12:</strong> Divisão do reino; Jeroboão se torna rei de Israel; Reoboão de Judá.</li>
+                <li><strong>Capítulo 13:</strong> O homem de Deus de Judá e o profeta velho.</li>
+                <li><strong>Capítulo 14:</strong> Juízo sobre Jeroboão; reinado de Reoboão em Judá.</li>
+                <li><strong>Capítulo 15:</strong> Reinados de Abias e Asa em Judá; Nadabe e Baasa em Israel.</li>
+                <li><strong>Capítulo 16:</strong> Reinados de Ela, Zinri, Onri e Acabe em Israel.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Ministério de Elias e o Reinado de Acabe (Capítulos 17-22)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 17:</strong> Elias e a seca; Elias na casa da viúva de Sarepta.</li>
+                <li><strong>Capítulo 18:</strong> Elias no Monte Carmelo; a derrota dos profetas de Baal.</li>
+                <li><strong>Capítulo 19:</strong> Elias foge para o Horebe; Deus fala a Elias; o chamado de Eliseu.</li>
+                <li><strong>Capítulo 20:</strong> Acabe derrota Ben-Hadade da Síria.</li>
+                <li><strong>Capítulo 21:</strong> A vinha de Nabote; Jezabel e Acabe.</li>
+                <li><strong>Capítulo 22:</strong> Acabe e Josafá; a morte de Acabe; reinado de Acazias em Israel.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 1 Reis</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Monarquia em Israel:</strong> A evolução e as complexidades do governo real, contrastando o ideal divino com a realidade humana.</li>
+                <li><strong>Obediência e Desobediência à Aliança:</strong> As bênçãos resultantes da fidelidade a Deus e as consequências severas da apostasia e da idolatria.</li>
+                <li><strong>As Consequências da Idolatria:</strong> A adoração a outros deuses como a principal causa de declínio e juízo para Israel e Judá.</li>
+                <li><strong>O Papel dos Profetas:</strong> A importância dos profetas (especialmente Elias) como mensageiros de Deus, chamando reis e povo ao arrependimento e à fidelidade.</li>
+                <li><strong>A Soberania de Deus:</strong> Deus está no controle da história, levantando e derrubando reis e reinos de acordo com Seus propósitos.</li>
+                <li><strong>A Construção e Significado do Templo:</strong> O Templo como o centro da adoração a Deus e o lugar de Sua presença, e a importância de sua santidade.</li>
+                <li><strong>A Divisão do Reino:</strong> As causas e os efeitos da divisão de Israel em dois reinos separados, Judá e Israel.</li>
+                <li><strong>Justiça e Juízo Divino:</strong> A demonstração da justiça de Deus ao punir o pecado, mesmo entre Seus escolhidos, e Sua paciência em oferecer oportunidades de arrependimento.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 1 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chapters1Reis">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 1 Reis</h2>
+            <div id="quizContainer1Reis" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestion1Reis"></p>
+                <div id="quizOptions1Reis" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedback1Reis" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestion1Reis()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgress1Reis"></span></p>
+                <p>Pontuação: <span id="quizScore1Reis">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 1 Reis</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 1 Reis.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="reisChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal1Reis()">&times;</span>
+                <h3 id="modalCharacterName1Reis" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription1Reis" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 1 Reis",
+            "short_name": "1 Reis",
+            "description": "Explore o livro de 1 Reis de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=1R",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=1R",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '1reis-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection1Reis(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtons1Reis();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinks1Reis();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestions1Reis(); // Embaralha as perguntas no início do quiz
+                currentQuizIndex1Reis = 0; // Reinicia o quiz
+                score1Reis = 0;
+                wrongAnswers1Reis = 0;
+                document.getElementById('quizScore1Reis').textContent = `Acertos: ${score1Reis}, Erros: ${wrongAnswers1Reis}`;
+                displayQuestion1Reis();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                render1ReisChart();
+            }
+        }
+
+        // Dados dos personagens para 1 Reis
+        const characterDetails1Reis = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus soberano que estabelece e remove reis, cumpre Suas promessas e juízos, e demonstra fidelidade à Sua aliança, mesmo em meio à infidelidade humana."
+            },
+            "Salomão": {
+                name: "Salomão",
+                description: "Filho de Davi e Bate-Seba, sucessor de Davi ao trono. Conhecido por sua grande sabedoria e riqueza, e por construir o Templo em Jerusalém. No entanto, sua apostasia na velhice levou à divisão do reino."
+            },
+            "Davi": {
+                name: "Davi",
+                description: "O rei de Israel, cujos últimos dias e instruções a Salomão são narrados no início do livro. Sua aliança com Deus é um tema recorrente."
+            },
+            "Natã": {
+                name: "Natã",
+                description: "Profeta de Deus que apoiou a ascensão de Salomão ao trono e aconselhou Davi."
+            },
+            "Bate-Seba": {
+                name: "Bate-Seba",
+                description: "Mãe de Salomão, que trabalhou para garantir a ascensão de seu filho ao trono."
+            },
+            "Adonias": {
+                name: "Adonias",
+                description: "Filho de Davi que tentou usurpar o trono antes de Salomão, mas foi frustrado e eventualmente executado por Salomão."
+            },
+            "Joabe": {
+                name: "Joabe",
+                description: "Comandante do exército de Davi, que apoiou Adonias e foi executado por Salomão por suas ações passadas."
+            },
+            "Abiatar": {
+                name: "Abiatar",
+                description: "Sacerdote que apoiou Adonias e foi exilado por Salomão, cumprindo uma profecia contra a casa de Eli."
+            },
+            "Zadoque": {
+                name: "Zadoque",
+                description: "Sacerdote fiel que apoiou Salomão e se tornou o sumo sacerdote principal."
+            },
+            "Jeroboão": {
+                name: "Jeroboão",
+                description: "Servo de Salomão que se tornou o primeiro rei do Reino do Norte (Israel) após a divisão. Instituiu a adoração de bezerros de ouro em Dã e Betel."
+            },
+            "Reoboão": {
+                name: "Reoboão",
+                description: "Filho de Salomão e seu sucessor. Sua recusa em aliviar a carga do povo levou à divisão do reino, e ele se tornou o primeiro rei do Reino do Sul (Judá)."
+            },
+            "Elias": {
+                name: "Elias",
+                description: "Um dos maiores profetas de Israel, ativo no Reino do Norte durante o reinado de Acabe e Jezabel. Conhecido por seu confronto com os profetas de Baal no Monte Carmelo e por sua fuga para o Horebe."
+            },
+            "Acabe": {
+                name: "Acabe",
+                description: "Um dos reis mais ímpios de Israel, marido de Jezabel. Promoveu a adoração a Baal e foi confrontado por Elias. Morreu em batalha."
+            },
+            "Jezabel": {
+                name: "Jezabel",
+                description: "Esposa fenícia de Acabe, uma rainha idólatra e cruel que promoveu a adoração a Baal em Israel e perseguiu os profetas de Deus."
+            },
+            "Obadias": {
+                name: "Obadias",
+                description: "Mordomo do palácio de Acabe que escondeu e alimentou cem profetas do Senhor durante a perseguição de Jezabel."
+            },
+            "Nabote": {
+                name: "Nabote",
+                description: "Um homem de Jezreel que possuía uma vinha cobiçada por Acabe. Foi falsamente acusado e apedrejado até a morte por ordem de Jezabel."
+            },
+            "Acazias": {
+                name: "Acazias",
+                description: "Filho de Acabe e Jezabel, que reinou sobre Israel após a morte de seu pai. Continuou a idolatria de seus pais."
+            },
+            "Rainha de Sabá": {
+                name: "Rainha de Sabá",
+                description: "Uma rainha que viajou de um reino distante para testar a sabedoria de Salomão com perguntas difíceis e ficou impressionada com sua glória e riqueza."
+            },
+            "Aías, o Silonita": {
+                name: "Aías, o Silonita",
+                description: "Profeta de Deus que profetizou a Jeroboão que ele se tornaria rei sobre dez tribos de Israel."
+            },
+            "Eliseu": {
+                name: "Eliseu",
+                description: "Sucessor de Elias como profeta. Chamado por Elias em Abel-Meolá."
+            },
+            "Josafá": {
+                name: "Josafá",
+                description: "Rei de Judá que se aliou a Acabe em batalha contra a Síria, apesar das advertências do profeta Micaías."
+            },
+            "Micaías": {
+                name: "Micaías",
+                description: "Profeta de Deus que profetizou a morte de Acabe em batalha, contrariando os profetas falsos."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModal1Reis(characterName) {
+            const details = characterDetails1Reis[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName1Reis').textContent = details.name;
+                document.getElementById('modalCharacterDescription1Reis').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal1Reis() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtons1Reis() {
+            const grid = document.getElementById('characterGrid1Reis');
+            grid.innerHTML = '';
+            for (const key in characterDetails1Reis) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModal1Reis(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinks1Reis() {
+            const chaptersDiv = document.getElementById('chapters1Reis');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 22; i++) { // 1 Reis tem 22 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/1rs/${i}`; // Link para a Bíblia Online, 1 Reis
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 1 Reis (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestions1Reis = [
+            { question: "Quem tentou usurpar o trono de Davi antes de Salomão?", options: ["Absalão", "Adonias", "Joabe", "Natã"], answer: "Adonias", reference: "1 Reis 1:5" },
+            { question: "O que Salomão pediu a Deus em Gibeão?", options: ["Riqueza", "Vida longa", "Vitória sobre inimigos", "Sabedoria para governar"], answer: "Sabedoria para governar", reference: "1 Reis 3:5-9" },
+            { question: "Quantos anos levou para Salomão construir o Templo do Senhor?", options: ["3 anos", "7 anos", "13 anos", "20 anos"], answer: "7 anos", reference: "1 Reis 6:38" },
+            { question: "Quem visitou Salomão para testar sua sabedoria com perguntas difíceis?", options: ["Rainha de Sabá", "Rainha Ester", "Rainha de Tiro", "Rainha Jezabel"], answer: "Rainha de Sabá", reference: "1 Reis 10:1" },
+            { question: "Qual foi a principal causa do desvio de Salomão de Deus em sua velhice?", options: ["Sua riqueza", "Suas muitas esposas estrangeiras e seus deuses", "Guerras constantes", "Fome na terra"], answer: "Suas muitas esposas estrangeiras e seus deuses", reference: "1 Reis 11:4" },
+            { question: "Quem profetizou a Jeroboão que ele reinaria sobre dez tribos de Israel?", options: ["Elias", "Eliseu", "Natã", "Aías, o silonita"], answer: "Aías, o silonita", reference: "1 Reis 11:29-31" },
+            { question: "Quem foi o primeiro rei do Reino do Norte (Israel) após a divisão?", options: ["Reoboão", "Davi", "Salomão", "Jeroboão"], answer: "Jeroboão", reference: "1 Reis 12:20" },
+            { question: "Quem foi o primeiro rei do Reino do Sul (Judá) após a divisão?", options: ["Jeroboão", "Reoboão", "Davi", "Salomão"], answer: "Reoboão", reference: "1 Reis 12:17" },
+            { question: "Qual profeta desafiou os profetas de Baal no Monte Carmelo?", options: ["Eliseu", "Natã", "Elias", "Samuel"], answer: "Elias", reference: "1 Reis 18:19-20" },
+            { question: "Qual era o nome do rei ímpio de Israel durante o ministério de Elias?", options: ["Jeroboão", "Onri", "Acabe", "Acazias"], answer: "Acabe", reference: "1 Reis 16:29" },
+            { question: "Qual era o nome da esposa ímpia de Acabe que promovia a adoração a Baal?", options: ["Bate-Seba", "Mical", "Jezabel", "Abigail"], answer: "Jezabel", reference: "1 Reis 16:31" },
+            { question: "O que Elias fez para parar a chuva em Israel?", options: ["Orou por uma seca", "Construiu um altar", "Sacrificou um animal", "Confrontou o rei"], answer: "Orou por uma seca", reference: "1 Reis 17:1" },
+            { question: "Para onde Elias fugiu depois que Jezabel ameaçou sua vida?", options: ["Para o Egito", "Para a Filístia", "Para o Monte Horebe", "Para Samaria"], answer: "Para o Monte Horebe", reference: "1 Reis 19:3-8" },
+            { question: "Quem Elias ungiu como seu sucessor?", options: ["Samuel", "Natã", "Eliseu", "Micaías"], answer: "Eliseu", reference: "1 Reis 19:16" },
+            { question: "Qual era o nome do homem cuja vinha Acabe cobiçou e Jezabel orquestrou sua morte?", options: ["Urias", "Nabote", "Ziba", "Ben-Hadade"], answer: "Nabote", reference: "1 Reis 21:1-16" },
+            { question: "Como o rei Acabe morreu?", options: ["Por doença", "Suicídio", "Morto em batalha por uma flecha aleatória", "Envenenado"], answer: "Morto em batalha por uma flecha aleatória", reference: "1 Reis 22:34-35" },
+            { question: "Qual foi a principal razão para a divisão do reino de Israel?", options: ["A idolatria de Salomão", "A dureza de Reoboão com o povo", "A rebelião de Jeroboão", "A morte de Salomão"], answer: "A dureza de Reoboão com o povo", reference: "1 Reis 12:12-16" },
+            { question: "Qual rei de Judá removeu os ídolos e os postes-ídolos da terra e foi devotado ao Senhor?", options: ["Reoboão", "Abias", "Asa", "Josafá"], answer: "Asa", reference: "1 Reis 15:11-12" },
+            { question: "Qual o nome da cidade que Onri, rei de Israel, construiu e fez sua capital?", options: ["Jerusalém", "Dã", "Betel", "Samaria"], answer: "Samaria", reference: "1 Reis 16:24" },
+            { question: "O que Deus ofereceu a Salomão em um sonho em Gibeão?", options: ["Riqueza ilimitada", "Vitória sobre todos os inimigos", "Qualquer coisa que ele desejasse", "Um reino eterno"], answer: "Qualquer coisa que ele desejasse", reference: "1 Reis 3:5" },
+            { question: "Quem foi o profeta que advertiu Acabe sobre a seca iminente?", options: ["Natã", "Elias", "Eliseu", "Micaías"], answer: "Elias", reference: "1 Reis 17:1" },
+            { question: "Qual foi o sinal que Deus deu no Monte Carmelo para provar que Ele era o verdadeiro Deus?", options: ["Uma voz do céu", "Um terremoto", "Fogo consumindo o sacrifício", "Uma inundação"], answer: "Fogo consumindo o sacrifício", reference: "1 Reis 18:38" },
+            { question: "Quem foi o rei de Judá que se aliou a Acabe contra a Síria?", options: ["Asa", "Abias", "Josafá", "Reoboão"], answer: "Josafá", reference: "1 Reis 22:2-4" },
+            { question: "Qual o nome do filho de Salomão que se tornou rei depois dele?", options: ["Adonias", "Jeroboão", "Reoboão", "Absalão"], answer: "Reoboão", reference: "1 Reis 11:43" },
+            { question: "Qual era o nome do rei sírio que Acabe derrotou duas vezes?", options: ["Hazael", "Ben-Hadade", "Rezom", "Tabrimom"], answer: "Ben-Hadade", reference: "1 Reis 20:1, 26" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestions1Reis = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestions1Reis.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestions1Reis = allQuizQuestions1Reis.concat(uniqueQuizQuestions1Reis);
+        }
+        allQuizQuestions1Reis = allQuizQuestions1Reis.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestions1Reis = [];
+        let currentQuizIndex1Reis = 0;
+        let score1Reis = 0;
+        let wrongAnswers1Reis = 0;
+        let reisChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestions1Reis() {
+            shuffledQuizQuestions1Reis = [...allQuizQuestions1Reis]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestions1Reis);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgress1Reis() {
+            const progressElement = document.getElementById('quizProgress1Reis');
+            progressElement.textContent = `${currentQuizIndex1Reis + 1}/${shuffledQuizQuestions1Reis.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestion1Reis() {
+            if (currentQuizIndex1Reis >= shuffledQuizQuestions1Reis.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestion1Reis').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptions1Reis').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${score1Reis}, Erros: ${wrongAnswers1Reis}</p>`;
+                document.getElementById('quizFeedback1Reis').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestions1Reis[currentQuizIndex1Reis];
+            document.getElementById('quizQuestion1Reis').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptions1Reis');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswer1Reis(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedback1Reis').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgress1Reis();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswer1Reis(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedback1Reis');
+            const optionsButtons = document.querySelectorAll('#quizOptions1Reis button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                score1Reis++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswers1Reis++;
+            }
+            document.getElementById('quizScore1Reis').textContent = `Acertos: ${score1Reis}, Erros: ${wrongAnswers1Reis}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestion1Reis() {
+            currentQuizIndex1Reis++;
+            displayQuestion1Reis();
+        }
+
+        // Dados para o gráfico de temas de 1 Reis
+        const reisChartData = {
+            labels: ['Reinado de Salomão', 'Divisão do Reino', 'Idolatria', 'Profetas (Elias)', 'Obediência/Desobediência', 'Aliança Davídica', 'Juízo Divino'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 12, 10, 8], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const reisChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 1 Reis',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function render1ReisChart() {
+            const ctx = document.getElementById('reisChart').getContext('2d');
+            if (reisChartInstance) {
+                reisChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            reisChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: reisChartData,
+                options: reisChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

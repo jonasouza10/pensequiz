@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 1 Timóteo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="1 Timóteo Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 1 Timóteo</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection1Timoteo('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection1Timoteo('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection1Timoteo('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection1Timoteo('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection1Timoteo('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection1Timoteo('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection1Timoteo('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection1Timoteo('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection1Timoteo('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio1Timoteo" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 1 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Primeira Epístola de Paulo a Timóteo, uma das 'Epístolas Pastorais'. Descubra as instruções cruciais de Paulo a seu jovem discípulo sobre a liderança da igreja, a sã doutrina, o culto, as qualificações para bispos e diáconos, e o combate às falsas doutrinas. Entenda a importância da piedade e da boa conduta para a vida cristã e o ministério. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao1Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 1 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Primeira Epístola a Timóteo é uma das três 'Epístolas Pastorais' (juntamente com 2 Timóteo e Tito), escritas por Paulo após sua primeira prisão romana, provavelmente entre 62-64 d.C., da Macedônia. Ela foi endereçada a Timóteo, um jovem e fiel discípulo de Paulo, que havia sido deixado em Éfeso para supervisionar a igreja local e combater as falsas doutrinas que estavam surgindo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito desta carta é fornecer a Timóteo instruções práticas e diretrizes sobre a organização e a conduta da igreja. Paulo aborda temas como a importância da sã doutrina em contraste com as fábulas e especulações, as qualificações para os líderes da igreja (bispos/supervisores e diáconos), o comportamento adequado para homens e mulheres no culto público, o cuidado com as viúvas, a honra devida aos presbíteros, e advertências contra o amor ao dinheiro e as falsas doutrinas que desviavam os crentes da fé.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Timóteo é uma carta de grande valor para a eclesiologia (doutrina da igreja) e para a formação de líderes cristãos. Ela enfatiza a necessidade de manter a pureza doutrinária e a ordem na casa de Deus, e exorta Timóteo a ser um exemplo de piedade e boa conduta em todas as coisas. A carta serve como um manual para a vida e o ministério na igreja, destacando a importância da verdade, da santidade e do serviço fiel.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Advertência contra Falsas Doutrinas e o Propósito da Lei.</strong> Saudação, o encargo de Timóteo, o uso correto da lei e a misericórdia de Cristo para com Paulo.</li>
+                <li><strong>Capítulos 2-3: Instruções sobre Adoração e Liderança.</strong> Oração por todos, o papel de homens e mulheres no culto, e as qualificações para bispos e diáconos.</li>
+                <li><strong>Capítulo 4: Advertências contra a Apostasia e a Devoção Pessoal de Timóteo.</strong> Falsos mestres, o exercício da piedade e a conduta exemplar do ministro.</li>
+                <li><strong>Capítulo 5: Deveres Pastorais e Relações na Igreja.</strong> Trato com idosos, jovens, viúvas, presbíteros e a disciplina.</li>
+                <li><strong>Capítulo 6: Riqueza, Falsos Ensinos e Exortações Finais.</strong> Deveres de servos, o perigo do amor ao dinheiro, o bom combate da fé e a exortação final a Timóteo.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Timóteo oferece um guia prático para a vida e a ordem da igreja, com ênfase na sã doutrina e na piedade pessoal e congregacional.</p>
+        </div>
+
+        <div id="panoramas1Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 1 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Timóteo é uma epístola pastoral que oferece diretrizes para a organização e a conduta da igreja.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Saudação e Advertência contra Falsas Doutrinas (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação (Capítulo 1:1-2):</strong>
+                    <ul>
+                        <li>Paulo, apóstolo de Jesus Cristo, a Timóteo, seu verdadeiro filho na fé.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Encarregado de Timóteo em Éfeso (Capítulo 1:3-11):</strong>
+                    <ul>
+                        <li>Advertir para que não ensinem outra doutrina, nem se deem a fábulas e genealogias intermináveis.</li>
+                        <li>O propósito da lei: para os injustos e pecadores.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Misericórdia de Cristo para com Paulo (Capítulo 1:12-17):</strong>
+                    <ul>
+                        <li>Paulo, antes blasfemo e perseguidor, recebeu misericórdia para exemplo.</li>
+                        <li>Cristo Jesus veio ao mundo para salvar os pecadores, dos quais Paulo é o principal.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Bom Combate (Capítulo 1:18-20):</strong>
+                    <ul>
+                        <li>Timóteo deve combater o bom combate, retendo a fé e a boa consciência.</li>
+                        <li>Himenéu e Alexandre, que naufragaram na fé.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Instruções sobre Adoração e Liderança (Capítulos 2-3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Oração e o Papel de Homens e Mulheres na Adoração (Capítulo 2:1-15):</strong>
+                    <ul>
+                        <li>Exortação para que se façam súplicas, orações, intercessões e ações de graças por todos os homens.</li>
+                        <li>Homens devem orar em todo lugar, levantando mãos santas.</li>
+                        <li>Mulheres devem vestir-se com modéstia e aprender em silêncio.</li>
+                        <li>A mulher não deve ensinar nem exercer autoridade sobre o homem.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Qualificações para Bispos (Capítulo 3:1-7):</strong>
+                    <ul>
+                        <li>Irrepreensível, marido de uma só mulher, temperante, sóbrio, hospitaleiro, apto para ensinar.</li>
+                        <li>Não dado ao vinho, não espancador, mas moderado, não contencioso, não avarento.</li>
+                        <li>Que governe bem a própria casa.</li>
+                        <li>Não neófito, tenha bom testemunho dos de fora.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Qualificações para Diáconos (Capítulo 3:8-13):</strong>
+                    <ul>
+                        <li>Honestos, não de língua dobre, não dados a muito vinho, não cobiçosos de torpe ganância.</li>
+                        <li>Que guardem o mistério da fé em uma consciência pura.</li>
+                        <li>Esposas de diáconos devem ser honestas, não caluniadoras, temperantes, fiéis em tudo.</li>
+                        <li>Diáconos que servem bem adquirem boa posição.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Mistério da Piedade (Capítulo 3:14-16):</strong>
+                    <ul>
+                        <li>A igreja como coluna e firmeza da verdade.</li>
+                        <li>O grande mistério da piedade: Deus se manifestou em carne, foi justificado no Espírito, visto dos anjos, pregado aos gentios, crido no mundo, recebido na glória.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Advertências e Devoção Pessoal (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Advertência contra Falsos Mestres e Apostasia (Capítulo 4:1-5):</strong>
+                    <ul>
+                        <li>Espíritos enganadores e doutrinas de demônios.</li>
+                        <li>Proibir o casamento e ordenar a abstinência de alimentos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Bom Ministro de Jesus Cristo (Capítulo 4:6-16):</strong>
+                    <ul>
+                        <li>Alimentar-se das palavras da fé e da boa doutrina.</li>
+                        <li>Exercitar-se na piedade, que é proveitosa para tudo.</li>
+                        <li>Não deixar que ninguém despreze sua mocidade.</li>
+                        <li>Ser exemplo em palavra, trato, amor, espírito, fé e pureza.</li>
+                        <li>Não negligenciar o dom que há em si.</li>
+                        <li>Perseverar na leitura, exortação e doutrina.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Deveres Pastorais e Relações na Igreja (Capítulo 5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Tratamento de Diferentes Grupos (Capítulo 5:1-2):</strong>
+                    <ul>
+                        <li>Não repreender asperamente o ancião, mas admoestá-lo como pai.</li>
+                        <li>Os jovens como irmãos, as mulheres idosas como mães, as moças como irmãs.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Cuidado com as Viúvas (Capítulo 5:3-16):</strong>
+                    <ul>
+                        <li>Honrar as viúvas que são verdadeiramente viúvas.</li>
+                        <li>Viúvas jovens devem casar e ter filhos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Honra dos Presbíteros (Capítulo 5:17-20):</strong>
+                    <ul>
+                        <li>Os presbíteros que governam bem são dignos de dupla honra.</li>
+                        <li>Não receber acusação contra presbítero senão por duas ou três testemunhas.</li>
+                        <li>Os que pecarem, repreendê-los na presença de todos.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Exortações Diversas (Capítulo 5:21-25):</strong>
+                    <ul>
+                        <li>Não fazer nada com parcialidade.</li>
+                        <li>Não impor as mãos precipitadamente sobre ninguém.</li>
+                        <li>Beber um pouco de vinho por causa do estômago.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Riqueza, Falsos Ensinos e Exortações Finais (Capítulo 6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Deveres de Servos e Senhores (Capítulo 6:1-2):</strong>
+                    <ul>
+                        <li>Servos devem honrar seus senhores.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Falsos Mestres e o Amor ao Dinheiro (Capítulo 6:3-10):</strong>
+                    <ul>
+                        <li>Se alguém ensina outra doutrina, é soberbo e nada sabe.</li>
+                        <li>A piedade com contentamento é grande ganho.</li>
+                        <li>O amor ao dinheiro é a raiz de todos os males.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Bom Combate da Fé (Capítulo 6:11-16):</strong>
+                    <ul>
+                        <li>Timóteo deve fugir dessas coisas e seguir a justiça, a piedade, a fé, o amor, a paciência, a mansidão.</li>
+                        <li>Combater o bom combate da fé e tomar posse da vida eterna.</li>
+                        <li>O Senhor Jesus Cristo, o único que tem imortalidade.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Instruções aos Ricos (Capítulo 6:17-19):</strong>
+                    <ul>
+                        <li>Não sejam altivos, nem ponham a esperança na incerteza das riquezas.</li>
+                        <li>Mas em Deus, que abundantemente nos dá todas as coisas para delas gozarmos.</li>
+                        <li>Que pratiquem o bem, sejam ricos em boas obras, prontos a repartir.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Exortação Final (Capítulo 6:20-21):</strong>
+                    <ul>
+                        <li>Guardar o depósito, evitando profanas novidades de palavras e oposições da falsa ciência.</li>
+                        <li>A graça seja contigo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">1 Timóteo é fundamental para a compreensão da estrutura e da vida da igreja primitiva. Ela estabelece padrões para a liderança e a conduta dos membros, enfatizando a importância da sã doutrina como base para uma vida cristã autêntica. A carta adverte contra os perigos das heresias e do materialismo, e exorta à piedade prática, ao serviço fiel e à perseverança na fé. É um guia atemporal para pastores e congregações que buscam viver de acordo com os princípios do evangelho.</p>
+        </div>
+
+        <div id="personagens1Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGrid1Timoteo">
+            </div>
+        </div>
+
+        <div id="esbocos1Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 1 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 1 Timóteo, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Advertências contra falsas doutrinas e o propósito da lei.</li>
+                <li><strong>Capítulo 2:</strong> Instruções sobre oração e o papel de homens e mulheres na igreja.</li>
+                <li><strong>Capítulo 3:</strong> Qualificações para bispos e diáconos.</li>
+                <li><strong>Capítulo 4:</strong> Advertências contra a apostasia e a importância da piedade.</li>
+                <li><strong>Capítulo 5:</strong> Instruções sobre o tratamento de diferentes grupos na igreja (idosos, viúvas, presbíteros).</li>
+                <li><strong>Capítulo 6:</strong> Advertências sobre a riqueza, o amor ao dinheiro e exortações finais.</li>
+            </ul>
+        </div>
+
+        <div id="temas1Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 1 Timóteo</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Sã Doutrina vs. Falsos Ensinos:</strong> A importância de manter a verdade do evangelho.</li>
+                <li><strong>Ordem e Conduta na Igreja:</strong> Diretrizes para o culto e a vida comunitária.</li>
+                <li><strong>Qualificações de Liderança:</strong> Requisitos para bispos e diáconos.</li>
+                <li><strong>Piedade e Vida Cristã:</strong> A prática da fé na vida diária.</li>
+                <li><strong>Oração e Adoração:</strong> A centralidade da comunicação com Deus no culto.</li>
+                <li><strong>O Perigo da Riqueza:</strong> Advertências contra o amor ao dinheiro e a cobiça.</li>
+                <li><strong>O Papel do Ministro:</strong> Instruções para Timóteo como líder e exemplo.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos1Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 1 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chapters1Timoteo">
+            </div>
+        </div>
+
+        <div id="quiz1Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 1 Timóteo</h2>
+            <div id="quizContainer1Timoteo" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestion1Timoteo"></p>
+                <div id="quizOptions1Timoteo" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedback1Timoteo" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestion1Timoteo()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgress1Timoteo"></span></p>
+                <p>Pontuação: <span id="quizScore1Timoteo">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico1Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 1 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 1 Timóteo.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="1timoteoChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal1Timoteo()">&times;</span>
+                <h3 id="modalCharacterName1Timoteo" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription1Timoteo" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 1 Timóteo",
+            "short_name": "1 Timóteo",
+            "description": "Explore o livro de 1 Timóteo de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=1TM",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=1TM",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '1timoteo-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection1Timoteo(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtons1Timoteo();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinks1Timoteo();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestions1Timoteo(); // Embaralha as perguntas no início do quiz
+                currentQuizIndex1Timoteo = 0; // Reinicia o quiz
+                score1Timoteo = 0;
+                wrongAnswers1Timoteo = 0;
+                document.getElementById('quizScore1Timoteo').textContent = `Acertos: ${score1Timoteo}, Erros: ${wrongAnswers1Timoteo}`;
+                displayQuestion1Timoteo();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                render1TimoteoChart();
+            }
+        }
+
+        // Dados dos personagens para 1 Timóteo
+        const characterDetails1Timoteo = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta epístola pastoral, fornecendo instruções a Timóteo sobre a liderança e a conduta na igreja."
+            },
+            "Timóteo": {
+                name: "Timóteo",
+                description: "Jovem e fiel discípulo de Paulo, que foi deixado em Éfeso para supervisionar a igreja e combater falsas doutrinas. É o destinatário desta carta."
+            },
+            "Himenéu": {
+                name: "Himenéu",
+                description: "Mencionado como um dos que naufragaram na fé e foram entregues a Satanás por Paulo (1 Tm 1:20)."
+            },
+            "Alexandre": {
+                name: "Alexandre",
+                description: "Mencionado junto com Himenéu como um dos que naufragaram na fé (1 Tm 1:20)."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, que é o centro da adoração, da sã doutrina e da vida piedosa na igreja."
+            },
+            "Falsos Mestres": {
+                name: "Falsos Mestres",
+                description: "Indivíduos que ensinavam doutrinas errôneas e fábulas, desviando os crentes da verdade, e que Paulo adverte Timóteo a combater."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModal1Timoteo(characterName) {
+            const details = characterDetails1Timoteo[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName1Timoteo').textContent = details.name;
+                document.getElementById('modalCharacterDescription1Timoteo').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal1Timoteo() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtons1Timoteo() {
+            const grid = document.getElementById('characterGrid1Timoteo');
+            grid.innerHTML = '';
+            for (const key in characterDetails1Timoteo) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModal1Timoteo(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinks1Timoteo() {
+            const chaptersDiv = document.getElementById('chapters1Timoteo');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 6; i++) { // 1 Timóteo tem 6 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/1tm/${i}`; // Link para a Bíblia Online, 1 Timóteo
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 1 Timóteo (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestions1Timoteo = [
+            { question: "Quem é o autor da Primeira Epístola a Timóteo?", options: ["Pedro", "João", "Paulo", "Tiago"], answer: "Paulo", reference: "Introdução ao Livro de 1 Timóteo" },
+            { question: "Qual o principal propósito de Paulo ao escrever a Timóteo?", options: ["Pedir dinheiro", "Instruir sobre a liderança e a conduta na igreja", "Repreender a igreja por seus pecados", "Organizar a hierarquia do império romano"], answer: "Instruir sobre a liderança e a conduta na igreja", reference: "Introdução ao Livro de 1 Timóteo" },
+            { question: "O que Paulo adverte Timóteo a evitar no Capítulo 1?", options: ["A oração", "Fábulas e genealogias intermináveis", "O estudo da lei", "O amor fraternal"], answer: "Fábulas e genealogias intermináveis", reference: "Capítulo 1" },
+            { question: "Segundo 1 Timóteo 2:1, por quem se deve fazer orações, súplicas e intercessões?", options: ["Apenas pelos crentes", "Apenas pelos líderes", "Por todos os homens", "Apenas pelos necessitados"], answer: "Por todos os homens", reference: "Capítulo 2" },
+            { question: "Quais são as qualificações para um bispo mencionadas no Capítulo 3?", options: ["Ser rico e poderoso", "Ser solteiro e sem filhos", "Irrepreensível, marido de uma só mulher, temperante, sóbrio, hospitaleiro, apto para ensinar", "Ser carismático e popular"], answer: "Irrepreensível, marido de uma só mulher, temperante, sóbrio, hospitaleiro, apto para ensinar", reference: "Capítulo 3" },
+            { question: "O que Paulo diz que é a raiz de todos os males no Capítulo 6?", options: ["A inveja", "O amor ao dinheiro", "A preguiça", "A falta de conhecimento"], answer: "O amor ao dinheiro", reference: "Capítulo 6" },
+            { question: "O que Timóteo deve combater, segundo Paulo, no Capítulo 6?", options: ["Guerras políticas", "O bom combate da fé", "Debates filosóficos", "Perseguições"], answer: "O bom combate da fé", reference: "Capítulo 6" },
+            { question: "Qual o mistério da piedade mencionado no Capítulo 3?", options: ["A riqueza material", "Deus se manifestou em carne, foi justificado no Espírito, visto dos anjos, pregado aos gentios, crido no mundo, recebido na glória", "A sabedoria humana", "Os rituais religiosos"], answer: "Deus se manifestou em carne, foi justificado no Espírito, visto dos anjos, pregado aos gentios, crido no mundo, recebido na glória", reference: "Capítulo 3" },
+            { question: "Como Timóteo deve tratar um presbítero mais velho, segundo 1 Timóteo 5:1?", options: ["Repreendê-lo asperamente", "Admoestá-lo como a um pai", "Ignorá-lo", "Desrespeitá-lo"], answer: "Admoestá-lo como a um pai", reference: "Capítulo 5" },
+            { question: "O que Paulo exorta Timóteo a não negligenciar no Capítulo 4?", options: ["Sua família", "O dom que há em si", "Seu trabalho secular", "Sua reputação"], answer: "O dom que há em si", reference: "Capítulo 4" },
+            { question: "Qual o local onde Timóteo estava servindo quando Paulo lhe escreveu esta carta?", options: ["Corinto", "Roma", "Éfeso", "Tessalônica"], answer: "Éfeso", reference: "Introdução ao Livro de 1 Timóteo" },
+            { question: "O que Paulo diz sobre a lei em 1 Timóteo 1:9?", options: ["É para os justos", "É para os injustos e pecadores", "Não tem propósito", "É para os sábios"], answer: "É para os injustos e pecadores", reference: "Capítulo 1" },
+            { question: "Qual a instrução de Paulo sobre as mulheres no culto público em 1 Timóteo 2:9-10?", options: ["Devem vestir-se com luxo", "Devem vestir-se com modéstia e boas obras", "Devem falar alto", "Devem ensinar na congregação"], answer: "Devem vestir-se com modéstia e boas obras", reference: "Capítulo 2" },
+            { question: "O que Paulo diz sobre o bom testemunho que o bispo deve ter em 1 Timóteo 3:7?", options: ["Apenas dos crentes", "Dos de fora", "Apenas da família", "De ninguém"], answer: "Dos de fora", reference: "Capítulo 3" },
+            { question: "Qual a advertência de Paulo sobre a apostasia nos últimos tempos em 1 Timóteo 4:1?", options: ["Que todos permanecerão fiéis", "Que alguns se desviarão da fé, dando ouvidos a espíritos enganadores", "Que a fé aumentará", "Que não haverá apostasia"], answer: "Que alguns se desviarão da fé, dando ouvidos a espíritos enganadores", reference: "Capítulo 4" },
+            { question: "Como Timóteo deve ser um exemplo para os crentes, segundo 1 Timóteo 4:12?", options: ["Em riqueza e poder", "Em palavra, trato, amor, espírito, fé e pureza", "Em sabedoria humana", "Em conhecimento científico"], answer: "Em palavra, trato, amor, espírito, fé e pureza", reference: "Capítulo 4" },
+            { question: "O que Paulo instrui sobre as viúvas que são verdadeiramente viúvas em 1 Timóteo 5:3?", options: ["Devem ser ignoradas", "Devem ser honradas", "Devem ser desprezadas", "Devem casar novamente imediatamente"], answer: "Devem ser honradas", reference: "Capítulo 5" },
+            { question: "O que Paulo diz sobre os presbíteros que governam bem em 1 Timóteo 5:17?", options: ["São dignos de repreensão", "São dignos de dupla honra", "São dignos de pouco reconhecimento", "Não são importantes"], answer: "São dignos de dupla honra", reference: "Capítulo 5" },
+            { question: "Qual a exortação de Paulo aos ricos em 1 Timóteo 6:17-19?", options: ["Que sejam altivos e confiem nas riquezas", "Que não sejam altivos, nem ponham a esperança na incerteza das riquezas, mas em Deus, e que pratiquem o bem", "Que acumulem mais riquezas", "Que ignorem os pobres"], answer: "Que não sejam altivos, nem ponham a esperança na incerteza das riquezas, mas em Deus, e que pratiquem o bem", reference: "Capítulo 6" },
+            { question: "O que Paulo exorta Timóteo a guardar no final da carta (1 Timóteo 6:20)?", options: ["Seus bens materiais", "O depósito (a verdade do evangelho)", "Seus segredos", "Suas opiniões pessoais"], answer: "O depósito (a verdade do evangelho)", reference: "Capítulo 6" },
+            { question: "Quantos capítulos tem o livro de 1 Timóteo?", options: ["4", "5", "6", "7"], answer: "6", reference: "Esboços do Livro de 1 Timóteo" },
+            { question: "Qual a importância da piedade, segundo 1 Timóteo 4:8?", options: ["É inútil", "É proveitosa para tudo, tendo a promessa da vida presente e da que há de vir", "É apenas para alguns", "É apenas para o futuro"], answer: "É proveitosa para tudo, tendo a promessa da vida presente e da que há de vir", reference: "Capítulo 4" },
+            { question: "O que Paulo diz sobre o desejo de ser bispo em 1 Timóteo 3:1?", options: ["É um desejo ruim", "É uma excelente obra", "É uma ambição pecaminosa", "É irrelevante"], answer: "É uma excelente obra", reference: "Capítulo 3" },
+            { question: "Qual a instrução de Paulo sobre o vinho para Timóteo em 1 Timóteo 5:23?", options: ["Não beber de forma alguma", "Beber um pouco de vinho por causa do estômago", "Beber em excesso", "Beber apenas água"], answer: "Beber um pouco de vinho por causa do estômago", reference: "Capítulo 5" },
+            { question: "O que Paulo diz sobre a consciência em 1 Timóteo 1:19?", options: ["É irrelevante", "Deve ser ignorada", "Deve ser boa, pois alguns a rejeitaram e naufragaram na fé", "É sempre correta"], answer: "Deve ser boa, pois alguns a rejeitaram e naufragaram na fé", reference: "Capítulo 1" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestions1Timoteo = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestions1Timoteo.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestions1Timoteo = allQuizQuestions1Timoteo.concat(uniqueQuizQuestions1Timoteo);
+        }
+        allQuizQuestions1Timoteo = allQuizQuestions1Timoteo.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestions1Timoteo = [];
+        let currentQuizIndex1Timoteo = 0;
+        let score1Timoteo = 0;
+        let wrongAnswers1Timoteo = 0;
+        let timoteoChartInstance1 = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestions1Timoteo() {
+            shuffledQuizQuestions1Timoteo = [...allQuizQuestions1Timoteo]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestions1Timoteo);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgress1Timoteo() {
+            const progressElement = document.getElementById('quizProgress1Timoteo');
+            progressElement.textContent = `${currentQuizIndex1Timoteo + 1}/${shuffledQuizQuestions1Timoteo.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestion1Timoteo() {
+            if (currentQuizIndex1Timoteo >= shuffledQuizQuestions1Timoteo.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestion1Timoteo').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptions1Timoteo').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${score1Timoteo}, Erros: ${wrongAnswers1Timoteo}</p>`;
+                document.getElementById('quizFeedback1Timoteo').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestions1Timoteo[currentQuizIndex1Timoteo];
+            document.getElementById('quizQuestion1Timoteo').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptions1Timoteo');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswer1Timoteo(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedback1Timoteo').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgress1Timoteo();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswer1Timoteo(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedback1Timoteo');
+            const optionsButtons = document.querySelectorAll('#quizOptions1Timoteo button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                score1Timoteo++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswers1Timoteo++;
+            }
+            document.getElementById('quizScore1Timoteo').textContent = `Acertos: ${score1Timoteo}, Erros: ${wrongAnswers1Timoteo}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestion1Timoteo() {
+            currentQuizIndex1Timoteo++;
+            displayQuestion1Timoteo();
+        }
+
+        // Dados para o gráfico de temas de 1 Timóteo
+        const timoteoChartData1 = {
+            labels: ['Sã Doutrina', 'Ordem na Igreja', 'Qualificações de Liderança', 'Piedade', 'Oração e Adoração', 'Perigo da Riqueza', 'Papel do Ministro'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 12, 10, 8], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const timoteoChartOptions1 = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 1 Timóteo',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function render1TimoteoChart() {
+            const ctx = document.getElementById('1timoteoChart').getContext('2d');
+            if (timoteoChartInstance1) {
+                timoteoChartInstance1.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            timoteoChartInstance1 = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: timoteoChartData1,
+                options: timoteoChartOptions1
+            });
+        }
+    </script>
+</body>
+</html>

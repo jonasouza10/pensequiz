@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 1 Tessalonicenses</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="1 Tessalonicenses Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 1 Tessalonicenses</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionTessalonicenses('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionTessalonicenses('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionTessalonicenses('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionTessalonicenses('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionTessalonicenses('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionTessalonicenses('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionTessalonicenses('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionTessalonicenses('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionTessalonicenses('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 1 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Primeira Epístola de Paulo aos Tessalonicenses, uma das cartas mais antigas do Novo Testamento. Descubra como Paulo encoraja uma jovem igreja em meio à perseguição, elogia sua fé, esperança e amor, e oferece instruções cruciais sobre santificação, amor fraternal e a esperança da segunda vinda de Cristo. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 1 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Primeira Epístola de Paulo aos Tessalonicenses é, provavelmente, a primeira carta escrita por Paulo no Novo Testamento (cerca de 50-52 d.C.), durante sua segunda viagem missionária, enquanto estava em Corinto. Ela foi endereçada à igreja em Tessalônica, uma cidade importante na Macedônia, onde Paulo havia pregado o evangelho e estabelecido uma comunidade de crentes em um curto período, mas que foi forçado a sair devido à perseguição.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito desta carta é encorajar e fortalecer os crentes em Tessalônica, que estavam enfrentando perseguição por causa de sua fé. Paulo expressa sua alegria e gratidão pela firmeza da fé, do amor e da esperança deles, que se tornaram um exemplo para outras igrejas. Além disso, a carta serve para esclarecer algumas questões que surgiram na comunidade, especialmente em relação à segunda vinda de Cristo e ao destino dos crentes que já haviam morrido. Paulo também oferece exortações práticas sobre como viver uma vida santa, em amor fraternal e trabalhando diligentemente.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem a fé, o amor e a esperança dos tessalonicenses, a conduta exemplar de Paulo e seus colaboradores, a santificação e a pureza sexual, o amor fraternal, o trabalho diligente e, de forma proeminente, a doutrina da segunda vinda de Cristo (escatologia), incluindo a ressurreição dos mortos em Cristo e o arrebatamento da Igreja. 1 Tessalonicenses é uma carta de encorajamento pastoral, que oferece consolo e clareza sobre a esperança cristã em meio às tribulações.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-3: Ações de Graças e o Relacionamento de Paulo com os Tessalonicenses.</strong> Gratidão pela fé e exemplo da igreja, defesa do ministério de Paulo, e o envio de Timóteo para encorajá-los.</li>
+                <li><strong>Capítulos 4-5: Exortações Práticas e Doutrina Escatológica.</strong> Instruções sobre santificação, amor fraternal, trabalho, e ensinamentos detalhados sobre a segunda vinda de Cristo e o Dia do Senhor, seguidos por exortações finais.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Tessalonicenses é uma carta vital para entender a vida da igreja primitiva e a esperança que os crentes têm na vinda de Cristo.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 1 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Tessalonicenses é uma epístola de encorajamento, louvor e instrução sobre a vida cristã e a segunda vinda de Cristo.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Ações de Graças e o Exemplo dos Tessalonicenses (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação (Capítulo 1:1):</strong>
+                    <ul>
+                        <li>Paulo, Silvano e Timóteo à igreja dos tessalonicenses.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Ações de Graças pela Fé, Amor e Esperança (Capítulo 1:2-10):</strong>
+                    <ul>
+                        <li>O trabalho da fé, o labor do amor e a paciência da esperança.</li>
+                        <li>A eleição de Deus e o poder do Espírito Santo.</li>
+                        <li>Os tessalonicenses como exemplo para os crentes na Macedônia e Acaia.</li>
+                        <li>Sua conversão dos ídolos para servir ao Deus vivo e verdadeiro e esperar Seu Filho dos céus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Ministério de Paulo em Tessalônica (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Conduta de Paulo Entre Eles (Capítulo 2:1-12):</strong>
+                    <ul>
+                        <li>Não em engano, nem em impureza, nem com dolo.</li>
+                        <li>Com brandura, como a ama que cria seus filhos.</li>
+                        <li>Trabalhando de noite e de dia para não ser pesado a ninguém.</li>
+                        <li>Exortando-os a andar dignamente de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Resposta dos Tessalonicenses (Capítulo 2:13-16):</strong>
+                    <ul>
+                        <li>Receberam a palavra de Deus não como palavra de homens, mas como realmente é.</li>
+                        <li>Sofreram perseguição como as igrejas da Judeia.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Desejo de Paulo de Vê-los Novamente (Capítulo 2:17-20):</strong>
+                    <ul>
+                        <li>Impedidos por Satanás.</li>
+                        <li>Os tessalonicenses são sua glória e alegria.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Envio de Timóteo e o Conforto de Paulo (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Envio de Timóteo (Capítulo 3:1-5):</strong>
+                    <ul>
+                        <li>Paulo não podendo mais suportar, enviou Timóteo para confirmá-los.</li>
+                        <li>Para que ninguém fosse abalado pelas tribulações.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Bom Relato de Timóteo (Capítulo 3:6-10):</strong>
+                    <ul>
+                        <li>Timóteo trouxe boas notícias da fé e do amor deles.</li>
+                        <li>Paulo foi consolado em sua aflição.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Oração de Paulo pelos Tessalonicenses (Capítulo 3:11-13):</strong>
+                    <ul>
+                        <li>Para que Deus os dirija a eles.</li>
+                        <li>Para que o Senhor os faça crescer em amor.</li>
+                        <li>Para que sejam irrepreensíveis em santidade na vinda de Cristo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Exortações à Santidade e ao Amor Fraternal (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Exortação à Santificação e Pureza Sexual (Capítulo 4:1-8):</strong>
+                    <ul>
+                        <li>Andar de modo a agradar a Deus.</li>
+                        <li>Abster-se da prostituição e possuir o vaso em santificação e honra.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Exortação ao Amor Fraternal e ao Trabalho (Capítulo 4:9-12):</strong>
+                    <ul>
+                        <li>Amar uns aos outros cada vez mais.</li>
+                        <li>Trabalhar com as próprias mãos para que andem honestamente.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Vinda do Senhor e a Ressurreição dos Mortos (Capítulo 4:13-18):</strong>
+                    <ul>
+                        <li>Não se entristecer como os que não têm esperança.</li>
+                        <li>Os que morreram em Cristo ressuscitarão primeiro.</li>
+                        <li>Os vivos serão arrebatados para encontrar o Senhor nos ares.</li>
+                        <li>Consolai-vos uns aos outros com estas palavras.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. O Dia do Senhor e Exortações Finais (Capítulo 5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Dia do Senhor Virá como Ladrão (Capítulo 5:1-11):</strong>
+                    <ul>
+                        <li>Não estão em trevas para que o dia os surpreenda.</li>
+                        <li>Vigiar e ser sóbrios, vestidos da couraça da fé e do amor, e do capacete da esperança da salvação.</li>
+                        <li>Edificar uns aos outros.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Exortações Diversas (Capítulo 5:12-22):</strong>
+                    <ul>
+                        <li>Respeitar os que trabalham entre eles.</li>
+                        <li>Admoestar os desordeiros, consolar os desanimados, sustentar os fracos, ser paciente com todos.</li>
+                        <li>Alegrar-se sempre, orar sem cessar, dar graças em tudo.</li>
+                        <li>Não apagar o Espírito, não desprezar as profecias, examinar tudo, reter o bem.</li>
+                        <li>Abster-se de toda a aparência do mal.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Oração e Saudações Finais (Capítulo 5:23-28):</strong>
+                    <ul>
+                        <li>Oração pela santificação completa.</li>
+                        <li>Fidelidade de Deus.</li>
+                        <li>Saudação e graça.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">1 Tessalonicenses é uma carta fundamental para a escatologia cristã, oferecendo uma das descrições mais claras da segunda vinda de Cristo e do arrebatamento. Além disso, ela fornece um vislumbre da vida da igreja primitiva e das preocupações pastorais de Paulo, que se dedicava a encorajar e instruir os novos convertidos. A epístola enfatiza a importância da fé, do amor e da esperança como marcas distintivas da vida cristã, e exorta os crentes a viverem em santidade e amor fraternal, aguardando com expectativa a volta do Senhor.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridTessalonicenses">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 1 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 1 Tessalonicenses, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Saudação, ação de graças e o exemplo dos tessalonicenses.</li>
+                <li><strong>Capítulo 2:</strong> O ministério de Paulo em Tessalônica e a sua conduta.</li>
+                <li><strong>Capítulo 3:</strong> O envio de Timóteo e o encorajamento de Paulo.</li>
+                <li><strong>Capítulo 4:</strong> Exortações à santidade, amor fraternal e a vinda do Senhor.</li>
+                <li><strong>Capítulo 5:</strong> O Dia do Senhor, vigilância e exortações finais.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 1 Tessalonicenses</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Segunda Vinda de Cristo (Escatologia):</strong> Um tema proeminente, com instruções sobre a ressurreição e o arrebatamento.</li>
+                <li><strong>Santificação e Pureza Sexual:</strong> Exortações para viver uma vida santa e agradável a Deus.</li>
+                <li><strong>Amor Fraternal:</strong> A importância de amar uns aos outros e crescer nesse amor.</li>
+                <li><strong>Perseverança na Fé:</strong> Encorajamento para permanecer firme em meio à perseguição.</li>
+                <li><strong>Alegria e Ação de Graças:</strong> A atitude de gratidão e alegria apesar das dificuldades.</li>
+                <li><strong>A Vida Cristã Prática:</strong> Instruções sobre trabalho, respeito e vida em comunidade.</li>
+                <li><strong>O Ministério Apostólico:</strong> A conduta e o cuidado de Paulo por seus convertidos.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 1 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersTessalonicenses">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 1 Tessalonicenses</h2>
+            <div id="quizContainerTessalonicenses" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionTessalonicenses"></p>
+                <div id="quizOptionsTessalonicenses" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackTessalonicenses" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionTessalonicenses()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressTessalonicenses"></span></p>
+                <p>Pontuação: <span id="quizScoreTessalonicenses">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 1 Tessalonicenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 1 Tessalonicenses.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="tessalonicensesChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalTessalonicenses()">&times;</span>
+                <h3 id="modalCharacterNameTessalonicenses" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionTessalonicenses" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 1 Tessalonicenses",
+            "short_name": "1 Tessalonicenses",
+            "description": "Explore o livro de 1 Tessalonicenses de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=1TS",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=1TS",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '1tessalonicenses-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionTessalonicenses(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsTessalonicenses();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksTessalonicenses();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsTessalonicenses(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexTessalonicenses = 0; // Reinicia o quiz
+                scoreTessalonicenses = 0;
+                wrongAnswersTessalonicenses = 0;
+                document.getElementById('quizScoreTessalonicenses').textContent = `Acertos: ${scoreTessalonicenses}, Erros: ${wrongAnswersTessalonicenses}`;
+                displayQuestionTessalonicenses();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderTessalonicensesChart();
+            }
+        }
+
+        // Dados dos personagens para 1 Tessalonicenses
+        const characterDetailsTessalonicenses = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta epístola, encorajando os tessalonicenses em sua fé e instruindo-os sobre a vida cristã e a segunda vinda de Cristo."
+            },
+            "Silvano (Silas)": {
+                name: "Silvano (Silas)",
+                description: "Colaborador de Paulo e co-autor da carta, que o acompanhou em sua segunda viagem missionária."
+            },
+            "Timóteo": {
+                name: "Timóteo",
+                description: "Colaborador de Paulo e co-autor da carta, enviado por Paulo a Tessalônica para fortalecer e encorajar a igreja."
+            },
+            "Igreja em Tessalônica": {
+                name: "Igreja em Tessalônica",
+                description: "A comunidade de crentes em Tessalônica, uma jovem igreja que enfrentava perseguição e era elogiada por sua fé, amor e esperança."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, que opera na salvação, santificação e sustento dos crentes, e que é o foco da esperança escatológica."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalTessalonicenses(characterName) {
+            const details = characterDetailsTessalonicenses[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameTessalonicenses').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionTessalonicenses').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalTessalonicenses() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsTessalonicenses() {
+            const grid = document.getElementById('characterGridTessalonicenses');
+            grid.innerHTML = '';
+            for (const key in characterDetailsTessalonicenses) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalTessalonicenses(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksTessalonicenses() {
+            const chaptersDiv = document.getElementById('chaptersTessalonicenses');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 5; i++) { // 1 Tessalonicenses tem 5 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/1ts/${i}`; // Link para a Bíblia Online, 1 Tessalonicenses
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 1 Tessalonicenses (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsTessalonicenses = [
+            { question: "Qual apóstolo escreveu a Primeira Epístola aos Tessalonicenses?", options: ["Pedro", "João", "Paulo", "Tiago"], answer: "Paulo", reference: "Introdução ao Livro de 1 Tessalonicenses" },
+            { question: "Em que cidade Paulo estava quando escreveu 1 Tessalonicenses?", options: ["Éfeso", "Jerusalém", "Corinto", "Antioquia"], answer: "Corinto", reference: "Introdução ao Livro de 1 Tessalonicenses" },
+            { question: "Qual era o principal propósito de Paulo ao escrever 1 Tessalonicenses?", options: ["Pedir dinheiro", "Encorajar e fortalecer os crentes em meio à perseguição", "Repreender a igreja por seus pecados", "Organizar a hierarquia da igreja"], answer: "Encorajar e fortalecer os crentes em meio à perseguição", reference: "Introdução ao Livro de 1 Tessalonicenses" },
+            { question: "O que Paulo elogia nos tessalonicenses no Capítulo 1?", options: ["Sua riqueza", "Sua fé, amor e esperança", "Sua sabedoria humana", "Sua força militar"], answer: "Sua fé, amor e esperança", reference: "Capítulo 1" },
+            { question: "Como os tessalonicenses receberam a palavra de Deus, segundo 1 Tessalonicenses 2:13?", options: ["Como palavra de homens", "Com desprezo", "Como realmente é, palavra de Deus", "Com dúvida"], answer: "Como realmente é, palavra de Deus", reference: "Capítulo 2" },
+            { question: "Quem Paulo enviou a Tessalônica para confirmar e encorajar a igreja?", options: ["Silvano", "Timóteo", "Tíquico", "Onésimo"], answer: "Timóteo", reference: "Capítulo 3" },
+            { question: "Qual é a exortação de Paulo sobre a pureza sexual em 1 Tessalonicenses 4:3?", options: ["Viver em libertinagem", "Abster-se da prostituição", "Seguir os desejos da carne", "Não se preocupar com a pureza"], answer: "Abster-se da prostituição", reference: "Capítulo 4" },
+            { question: "O que Paulo diz sobre os crentes que dormiram (morreram) em Cristo em 1 Tessalonicenses 4:16?", options: ["Eles não ressuscitarão", "Eles ressuscitarão primeiro", "Eles serão esquecidos", "Eles permanecerão na sepultura"], answer: "Eles ressuscitarão primeiro", reference: "Capítulo 4" },
+            { question: "O que acontecerá com os crentes que estiverem vivos na vinda do Senhor, segundo 1 Tessalonicenses 4:17?", options: ["Serão deixados para trás", "Serão transformados e arrebatados para encontrar o Senhor nos ares", "Serão punidos", "Serão separados dos que morreram"], answer: "Serão transformados e arrebatados para encontrar o Senhor nos ares", reference: "Capítulo 4" },
+            { question: "Como virá o Dia do Senhor, segundo 1 Tessalonicenses 5:2?", options: ["Com grande alarde", "Como ladrão de noite", "Com sinais visíveis", "Com um aviso prévio"], answer: "Como ladrão de noite", reference: "Capítulo 5" },
+            { question: "O que Paulo exorta os crentes a fazerem sempre em 1 Tessalonicenses 5:16-18?", options: ["Reclamar", "Alegrar-se, orar sem cessar e dar graças em tudo", "Entristecer-se", "Desistir"], answer: "Alegrar-se, orar sem cessar e dar graças em tudo", reference: "Capítulo 5" },
+            { question: "Qual é a exortação de Paulo sobre o Espírito em 1 Tessalonicenses 5:19?", options: ["Apagar o Espírito", "Ignorar o Espírito", "Não apagar o Espírito", "Resistir ao Espírito"], answer: "Não apagar o Espírito", reference: "Capítulo 5" },
+            { question: "Qual é um dos temas proeminentes em 1 Tessalonicenses, relacionado à volta de Cristo?", options: ["A criação do mundo", "A lei mosaica", "A segunda vinda de Cristo (Escatologia)", "A história de Israel"], answer: "A segunda vinda de Cristo (Escatologia)", reference: "Temas Centrais do Livro de 1 Tessalonicenses" },
+            { question: "Como Paulo e seus colaboradores se comportaram entre os tessalonicenses, segundo o Capítulo 2?", options: ["Com dolo e engano", "Com brandura e sem ser pesados", "Com arrogância", "Com interesse próprio"], answer: "Com brandura e sem ser pesados", reference: "Capítulo 2" },
+            { question: "O que Paulo pede em oração para que o Senhor faça crescer nos tessalonicenses, no Capítulo 3?", options: ["Riqueza material", "Conhecimento humano", "Amor uns para com os outros e para com todos", "Poder político"], answer: "Amor uns para com os outros e para com todos", reference: "Capítulo 3" },
+            { question: "Quantos capítulos tem o livro de 1 Tessalonicenses?", options: ["3", "4", "5", "6"], answer: "5", reference: "Esboços do Livro de 1 Tessalonicenses" },
+            { question: "O que Paulo exorta os crentes a fazerem em relação aos que trabalham entre eles (1 Tessalonicenses 5:12)?", options: ["Desrespeitar", "Respeitar e estimar muito em amor", "Ignorar", "Criticar"], answer: "Respeitar e estimar muito em amor", reference: "Capítulo 5" },
+            { question: "Qual a atitude que Paulo encoraja os tessalonicenses a terem em meio às tribulações?", options: ["Desespero", "Tristeza", "Alegria e ação de graças", "Revolta"], answer: "Alegria e ação de graças", reference: "Temas Centrais do Livro de 1 Tessalonicenses" },
+            { question: "O que os tessalonicenses se tornaram para todos os crentes na Macedônia e Acaia?", options: ["Um fardo", "Um exemplo", "Um problema", "Uma vergonha"], answer: "Um exemplo", reference: "Capítulo 1" },
+            { question: "O que Paulo diz sobre a paciência da esperança em 1 Tessalonicenses 1:3?", options: ["É inútil", "É uma característica da fé", "Não é necessária", "É apenas para alguns"], answer: "É uma característica da fé", reference: "Capítulo 1" },
+            { question: "O que Paulo exorta os crentes a fazerem para que andem honestamente para com os que estão de fora (1 Tessalonicenses 4:11-12)?", options: ["Viver de esmolas", "Trabalhar com as próprias mãos", "Ser preguiçoso", "Depender dos outros"], answer: "Trabalhar com as próprias mãos", reference: "Capítulo 4" },
+            { question: "Qual é a couraça que os crentes devem vestir em 1 Tessalonicenses 5:8?", options: ["De ouro", "Da fé e do amor", "De ferro", "Da justiça própria"], answer: "Da fé e do amor", reference: "Capítulo 5" },
+            { question: "O que Paulo exorta os crentes a fazerem com as profecias em 1 Tessalonicenses 5:20?", options: ["Desprezar", "Ignorar", "Não desprezar", "Criticar"], answer: "Não desprezar", reference: "Capítulo 5" },
+            { question: "Qual a principal mensagem de consolo em 1 Tessalonicenses 4:18?", options: ["Que a vida é curta", "Consolai-vos uns aos outros com estas palavras", "Que não há esperança", "Que a morte é o fim de tudo"], answer: "Consolai-vos uns aos outros com estas palavras", reference: "Capítulo 4" },
+            { question: "Quem é mencionado junto com Paulo e Silvano na saudação inicial da carta?", options: ["Pedro", "João", "Timóteo", "Lucas"], answer: "Timóteo", reference: "Capítulo 1" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsTessalonicenses = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsTessalonicenses.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsTessalonicenses = allQuizQuestionsTessalonicenses.concat(uniqueQuizQuestionsTessalonicenses);
+        }
+        allQuizQuestionsTessalonicenses = allQuizQuestionsTessalonicenses.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsTessalonicenses = [];
+        let currentQuizIndexTessalonicenses = 0;
+        let scoreTessalonicenses = 0;
+        let wrongAnswersTessalonicenses = 0;
+        let tessalonicensesChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsTessalonicenses() {
+            shuffledQuizQuestionsTessalonicenses = [...allQuizQuestionsTessalonicenses]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsTessalonicenses);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressTessalonicenses() {
+            const progressElement = document.getElementById('quizProgressTessalonicenses');
+            progressElement.textContent = `${currentQuizIndexTessalonicenses + 1}/${shuffledQuizQuestionsTessalonicenses.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionTessalonicenses() {
+            if (currentQuizIndexTessalonicenses >= shuffledQuizQuestionsTessalonicenses.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionTessalonicenses').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsTessalonicenses').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreTessalonicenses}, Erros: ${wrongAnswersTessalonicenses}</p>`;
+                document.getElementById('quizFeedbackTessalonicenses').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsTessalonicenses[currentQuizIndexTessalonicenses];
+            document.getElementById('quizQuestionTessalonicenses').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsTessalonicenses');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerTessalonicenses(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackTessalonicenses').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressTessalonicenses();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerTessalonicenses(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackTessalonicenses');
+            const optionsButtons = document.querySelectorAll('#quizOptionsTessalonicenses button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreTessalonicenses++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersTessalonicenses++;
+            }
+            document.getElementById('quizScoreTessalonicenses').textContent = `Acertos: ${scoreTessalonicenses}, Erros: ${wrongAnswersTessalonicenses}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionTessalonicenses() {
+            currentQuizIndexTessalonicenses++;
+            displayQuestionTessalonicenses();
+        }
+
+        // Dados para o gráfico de temas de 1 Tessalonicenses
+        const tessalonicensesChartData = {
+            labels: ['Segunda Vinda de Cristo', 'Santificação', 'Amor Fraternal', 'Perseverança na Fé', 'Alegria e Ação de Graças', 'Vida Cristã Prática', 'Ministério Apostólico'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 12, 10, 8], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const tessalonicensesChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 1 Tessalonicenses',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderTessalonicensesChart() {
+            const ctx = document.getElementById('tessalonicensesChart').getContext('2d');
+            if (tessalonicensesChartInstance) {
+                tessalonicensesChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            tessalonicensesChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: tessalonicensesChartData,
+                options: tessalonicensesChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

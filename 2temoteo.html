@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 2 Timóteo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2 Timóteo Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 2 Timóteo</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection2Timoteo('inicio2Timoteo')">Início</button>
+            <button class="nav-button" onclick="showSection2Timoteo('introducao2Timoteo')">Introdução</button>
+            <button class="nav-button" onclick="showSection2Timoteo('panoramas2Timoteo')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection2Timoteo('personagens2Timoteo')">Personagens</button>
+            <button class="nav-button" onclick="showSection2Timoteo('esbocos2Timoteo')">Esboços</button>
+            <button class="nav-button" onclick="showSection2Timoteo('temas2Timoteo')">Temas</button>
+            <button class="nav-button" onclick="showSection2Timoteo('capitulos2Timoteo')">Capítulos</button>
+            <button class="nav-button" onclick="showSection2Timoteo('quiz2Timoteo')">Quiz</button>
+            <button class="nav-button" onclick="showSection2Timoteo('grafico2Timoteo')">Gráfico</button>
+        </div>
+
+        <div id="inicio2Timoteo" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 2 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Segunda Epístola de Paulo a Timóteo, a última carta conhecida do apóstolo, escrita da prisão. Descubra as exortações finais de Paulo a seu fiel discípulo sobre a perseverança no evangelho, a sã doutrina, o combate às falsas doutrinas e a importância de cumprir o ministério. Entenda a inspiração das Escrituras e a esperança da glória eterna em meio ao sofrimento. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao2Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 2 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Segunda Epístola a Timóteo é a última das 'Epístolas Pastorais' e, provavelmente, a última carta escrita por Paulo antes de seu martírio em Roma, por volta de 66-67 d.C. É uma carta profundamente pessoal e emotiva, escrita de uma prisão fria e solitária, onde Paulo aguardava sua execução. Ela é endereçada a Timóteo, seu amado filho na fé e fiel colaborador, que estava em Éfeso.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito desta carta é encorajar Timóteo a permanecer firme na fé, a perseverar no ministério do evangelho, a combater as falsas doutrinas e a não se envergonhar do testemunho de Cristo ou do sofrimento por Ele. Paulo sabe que seu tempo está se esgotando e, por isso, transmite a Timóteo suas últimas instruções e exortações, como um testamento espiritual. Ele enfatiza a importância da sã doutrina, da inspiração das Escrituras e da necessidade de Timóteo encontrar substitutos fiéis para continuar a obra.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Timóteo é uma carta de grande inspiração para todos os que servem a Cristo, especialmente em tempos de dificuldade e apostasia. Ela destaca a fidelidade de Deus, a suficiência das Escrituras para equipar o crente, e a dignidade do sofrimento por causa do evangelho. O legado de Paulo é passado para Timóteo, com a esperança de que ele continue a pregar a Palavra com ousadia e a guardar o depósito da fé.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Saudação, Ações de Graças e Exortação à Fidelidade.</strong> Ações de graças pela fé de Timóteo, o dom de Deus e a exortação a não se envergonhar do evangelho.</li>
+                <li><strong>Capítulo 2: O Soldado, o Atleta e o Lavrador de Cristo; o Obreiro Aprovado.</strong> Metáforas para a perseverança no ministério, a necessidade de manejar bem a palavra da verdade e evitar discussões inúteis.</li>
+                <li><strong>Capítulo 3: A Apostasia nos Últimos Dias e a Inspiração das Escrituras.</strong> Descrição dos tempos difíceis, a importância de permanecer nas Escrituras, que são inspiradas por Deus e úteis para toda boa obra.</li>
+                <li><strong>Capítulo 4: O Encargo Final de Paulo a Timóteo e Suas Últimas Palavras.</strong> A solene exortação para pregar a Palavra, a declaração de Paulo sobre sua corrida e fé, e saudações finais.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Timóteo é um poderoso lembrete da chamada à fidelidade e ao serviço inabalável a Cristo, mesmo diante da morte.</p>
+        </div>
+
+        <div id="panoramas2Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 2 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Timóteo é a última epístola pastoral de Paulo, um testamento de fé e encorajamento.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Saudação e Exortação à Fidelidade (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação (Capítulo 1:1-2):</strong>
+                    <ul>
+                        <li>Paulo, apóstolo de Jesus Cristo, a Timóteo, seu amado filho.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Ações de Graças e Lembrete da Fé de Timóteo (Capítulo 1:3-5):</strong>
+                    <ul>
+                        <li>A fé não fingida que habitou em sua avó Loide e em sua mãe Eunice.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Exortação para Reavivar o Dom de Deus (Capítulo 1:6-14):</strong>
+                    <ul>
+                        <li>Não ter espírito de covardia, mas de poder, amor e moderação.</li>
+                        <li>Não se envergonhar do testemunho de Cristo nem de Paulo.</li>
+                        <li>Sofrer pelo evangelho segundo o poder de Deus.</li>
+                        <li>Guardar o bom depósito pelo Espírito Santo.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Exemplo de Fidelidade e Infidelidade (Capítulo 1:15-18):</strong>
+                    <ul>
+                        <li>Fígelo e Hermógenes se apartaram de Paulo.</li>
+                        <li>Onesíforo, que o confortou e não se envergonhou de suas prisões.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Obreiro Aprovado e Instrumento Útil (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Metáforas do Serviço Cristão (Capítulo 2:1-7):</strong>
+                    <ul>
+                        <li>Fortificar-se na graça que há em Cristo Jesus.</li>
+                        <li>Ensinar a homens fiéis que sejam idôneos para também ensinarem.</li>
+                        <li>O soldado, o atleta e o lavrador.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Mensagem do Evangelho e a Perseverança (Capítulo 2:8-13):</strong>
+                    <ul>
+                        <li>Lembrar-se de Jesus Cristo, ressuscitado dos mortos.</li>
+                        <li>Sofrer todas as coisas por amor dos eleitos.</li>
+                        <li>Se morremos com Ele, também com Ele viveremos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Obreiro Aprovado (Capítulo 2:14-26):</strong>
+                    <ul>
+                        <li>Manejar bem a palavra da verdade, não dando lugar a vãs contendas.</li>
+                        <li>Himenéu e Fileto, que se desviaram da verdade.</li>
+                        <li>Vaso para honra, santificado e útil para o Senhor.</li>
+                        <li>Fugir das paixões da mocidade, seguir a justiça, a fé, o amor, a paz.</li>
+                        <li>O servo do Senhor não deve contender, mas ser brando para com todos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Tempos Perigosos e a Suficiência das Escrituras (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Natureza dos Últimos Dias (Capítulo 3:1-9):</strong>
+                    <ul>
+                        <li>Homens amantes de si mesmos, avarentos, presunçosos, soberbos, blasfemos, desobedientes a pais, ingratos, profanos.</li>
+                        <li>Terão aparência de piedade, mas negarão a eficácia dela.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Fidelidade de Timóteo e o Exemplo de Paulo (Capítulo 3:10-13):</strong>
+                    <ul>
+                        <li>Timóteo conheceu a doutrina, modo de vida, propósito, fé, longanimidade, amor, paciência de Paulo.</li>
+                        <li>Todos os que piamente querem viver em Cristo Jesus padecerão perseguições.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Inspiração e Suficiência das Escrituras (Capítulo 3:14-17):</strong>
+                    <ul>
+                        <li>Permanecer nas coisas que aprendeu e das quais foi persuadido.</li>
+                        <li>As Sagradas Escrituras podem fazer-te sábio para a salvação.</li>
+                        <li>Toda a Escritura é divinamente inspirada e proveitosa para ensinar, redarguir, corrigir, instruir em justiça.</li>
+                        <li>Para que o homem de Deus seja perfeito e perfeitamente instruído para toda boa obra.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. O Encargo Final de Paulo e Suas Últimas Palavras (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Solene Exortação ao Ministério (Capítulo 4:1-5):</strong>
+                    <ul>
+                        <li>Pregar a palavra, insistir a tempo e fora de tempo, redarguir, repreender, exortar com toda longanimidade e doutrina.</li>
+                        <li>Virá tempo em que não suportarão a sã doutrina.</li>
+                        <li>Ser sóbrio em tudo, sofrer as aflições, fazer a obra de um evangelista, cumprir o ministério.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Despedida de Paulo (Capítulo 4:6-8):</strong>
+                    <ul>
+                        <li>Paulo está sendo derramado como oferta de libação.</li>
+                        <li>Combati o bom combate, acabei a carreira, guardei a fé.</li>
+                        <li>A coroa da justiça está guardada para ele.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Pedidos Pessoais e Saudações Finais (Capítulo 4:9-22):</strong>
+                    <ul>
+                        <li>Demas me desamparou, amando este mundo.</li>
+                        <li>Lucas está comigo.</li>
+                        <li>Trazer Marcos, a capa e os livros.</li>
+                        <li>Alexandre, o latoeiro, causou-lhe muitos males.</li>
+                        <li>Saudações de Eubulo, Prudente, Lino, Cláudia e todos os irmãos.</li>
+                        <li>A graça seja contigo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">2 Timóteo é um testamento comovente de Paulo, um apelo à fidelidade e à perseverança na fé, mesmo diante da morte e da apostasia. A carta enfatiza a centralidade da Palavra de Deus como a única fonte de verdade e o manual completo para a vida e o ministério cristão. Ela serve como um encorajamento para todos os crentes a permanecerem firmes na sã doutrina, a suportarem o sofrimento pelo evangelho e a cumprirem fielmente a sua vocação, confiando na soberania e fidelidade de Deus.</p>
+        </div>
+
+        <div id="personagens2Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGrid2Timoteo">
+            </div>
+        </div>
+
+        <div id="esbocos2Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 2 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 2 Timóteo, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Saudação, ações de graças e exortação à fidelidade.</li>
+                <li><strong>Capítulo 2:</strong> Obreiro aprovado e instrumento útil.</li>
+                <li><strong>Capítulo 3:</strong> Tempos perigosos e a suficiência das Escrituras.</li>
+                <li><strong>Capítulo 4:</strong> O encargo final de Paulo e suas últimas palavras.</li>
+            </ul>
+        </div>
+
+        <div id="temas2Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 2 Timóteo</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Fidelidade e Perseverança no Ministério:</strong> O chamado para permanecer firme no evangelho.</li>
+                <li><strong>Sofrimento pelo Evangelho:</strong> A dignidade de padecer por Cristo.</li>
+                <li><strong>Sã Doutrina e Combate à Heresia:</strong> A importância de guardar a verdade.</li>
+                <li><strong>A Inspiração e Suficiência das Escrituras:</strong> A Palavra de Deus como guia completo.</li>
+                <li><strong>O Exemplo de Paulo:</strong> A vida e o legado do apóstolo como modelo.</li>
+                <li><strong>Apostasia nos Últimos Dias:</strong> Advertências sobre os tempos difíceis e falsos mestres.</li>
+                <li><strong>O Cumprimento do Ministério:</strong> A responsabilidade de Timóteo em continuar a obra.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos2Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 2 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chapters2Timoteo">
+            </div>
+        </div>
+
+        <div id="quiz2Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 2 Timóteo</h2>
+            <div id="quizContainer2Timoteo" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestion2Timoteo"></p>
+                <div id="quizOptions2Timoteo" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedback2Timoteo" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestion2Timoteo()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgress2Timoteo"></span></p>
+                <p>Pontuação: <span id="quizScore2Timoteo">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico2Timoteo" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 2 Timóteo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 2 Timóteo.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="2timoteoChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal2Timoteo()">&times;</span>
+                <h3 id="modalCharacterName2Timoteo" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription2Timoteo" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 2 Timóteo",
+            "short_name": "2 Timóteo",
+            "description": "Explore o livro de 2 Timóteo de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=2TM",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=2TM",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '2timoteo-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection2Timoteo(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens2Timoteo') { // Corrigido o ID aqui
+                generateCharacterButtons2Timoteo();
+            }
+            if (sectionId === 'capitulos2Timoteo') { // Corrigido o ID aqui
+                generateChapterLinks2Timoteo();
+            }
+            if (sectionId === 'quiz2Timoteo') { // Corrigido o ID aqui
+                shuffleQuizQuestions2Timoteo(); // Embaralha as perguntas no início do quiz
+                currentQuizIndex2Timoteo = 0; // Reinicia o quiz
+                score2Timoteo = 0;
+                wrongAnswers2Timoteo = 0;
+                document.getElementById('quizScore2Timoteo').textContent = `Acertos: ${score2Timoteo}, Erros: ${wrongAnswers2Timoteo}`;
+                displayQuestion2Timoteo();
+            }
+            if (sectionId === 'grafico2Timoteo') { // Corrigido o ID aqui
+                render2TimoteoChart();
+            }
+        }
+
+        // Dados dos personagens para 2 Timóteo
+        const characterDetails2Timoteo = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta epístola, sua última carta conhecida, da prisão, encorajando Timóteo à fidelidade."
+            },
+            "Timóteo": {
+                name: "Timóteo",
+                description: "Amado discípulo e colaborador de Paulo, a quem esta carta foi endereçada, recebendo as últimas exortações e instruções do apóstolo."
+            },
+            "Loide": {
+                name: "Loide",
+                description: "Avó de Timóteo, mencionada por Paulo como tendo uma fé não fingida, que também habitava em Timóteo."
+            },
+            "Eunice": {
+                name: "Eunice",
+                description: "Mãe de Timóteo, também mencionada por Paulo como tendo uma fé não fingida, que influenciou a fé de Timóteo."
+            },
+            "Onesíforo": {
+                name: "Onesíforo",
+                description: "Um amigo fiel que não se envergonhou das prisões de Paulo e o confortou, sendo lembrado com carinho pelo apóstolo."
+            },
+            "Demas": {
+                name: "Demas",
+                description: "Um ex-colaborador de Paulo que o abandonou, amando o presente século."
+            },
+            "Lucas": {
+                name: "Lucas",
+                description: "O evangelista e médico, fiel companheiro de Paulo até o fim, mencionado como estando com Paulo na prisão."
+            },
+            "Marcos": {
+                name: "Marcos",
+                description: "João Marcos, que Paulo pede a Timóteo que traga consigo, pois lhe era útil para o ministério."
+            },
+            "Himenéu": {
+                name: "Himenéu",
+                description: "Falso mestre mencionado por Paulo como tendo se desviado da verdade, dizendo que a ressurreição já havia acontecido."
+            },
+            "Fileto": {
+                name: "Fileto",
+                description: "Associado a Himenéu, também mencionado como tendo se desviado da verdade."
+            },
+            "Alexandre, o Latoeiro": {
+                name: "Alexandre, o Latoeiro",
+                description: "Indivíduo que causou muitos males a Paulo, e de quem Timóteo deveria guardar-se."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, o centro da fé, da sã doutrina e da esperança da glória eterna."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModal2Timoteo(characterName) {
+            const details = characterDetails2Timoteo[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName2Timoteo').textContent = details.name;
+                document.getElementById('modalCharacterDescription2Timoteo').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal2Timoteo() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtons2Timoteo() {
+            const grid = document.getElementById('characterGrid2Timoteo');
+            grid.innerHTML = '';
+            for (const key in characterDetails2Timoteo) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModal2Timoteo(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinks2Timoteo() {
+            const chaptersDiv = document.getElementById('chapters2Timoteo');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 4; i++) { // 2 Timóteo tem 4 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/2tm/${i}`; // Link para a Bíblia Online, 2 Timóteo
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 2 Timóteo (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestions2Timoteo = [
+            { question: "Qual o principal propósito de Paulo ao escrever 2 Timóteo?", options: ["Pedir dinheiro", "Encorajar Timóteo a permanecer fiel e perseverar no evangelho", "Organizar a hierarquia da igreja", "Repreender a igreja por seus pecados"], answer: "Encorajar Timóteo a permanecer fiel e perseverar no evangelho", reference: "Introdução ao Livro de 2 Timóteo" },
+            { question: "De onde Paulo escreveu 2 Timóteo?", options: ["Corinto", "Éfeso", "Da prisão em Roma", "Tessalônica"], answer: "Da prisão em Roma", reference: "Introdução ao Livro de 2 Timóteo" },
+            { question: "Quem é o destinatário da carta de 2 Timóteo?", options: ["Tito", "Silvano", "Timóteo", "Priscila"], answer: "Timóteo", reference: "Introdução ao Livro de 2 Timóteo" },
+            { question: "No Capítulo 1, Paulo lembra a Timóteo da fé de quem?", options: ["De seus irmãos", "De sua avó Loide e de sua mãe Eunice", "De seus amigos", "De seus professores"], answer: "De sua avó Loide e de sua mãe Eunice", reference: "Capítulo 1" },
+            { question: "O que Paulo exorta Timóteo a não ter no Capítulo 1?", options: ["Espírito de poder", "Espírito de amor", "Espírito de covardia", "Espírito de moderação"], answer: "Espírito de covardia", reference: "Capítulo 1" },
+            { question: "Quais são as três metáforas que Paulo usa para descrever o serviço cristão no Capítulo 2?", options: ["O pescador, o pastor e o comerciante", "O soldado, o atleta e o lavrador", "O construtor, o artista e o músico", "O mestre, o aluno e o juiz"], answer: "O soldado, o atleta e o lavrador", reference: "Capítulo 2" },
+            { question: "O que o obreiro aprovado deve fazer com a palavra da verdade, segundo 2 Timóteo 2:15?", options: ["Escondê-la", "Manejar bem", "Distorcê-la", "Ignorá-la"], answer: "Manejar bem", reference: "Capítulo 2" },
+            { question: "Quem são Himenéu e Fileto, mencionados no Capítulo 2?", options: ["Colaboradores fiéis de Paulo", "Falsos mestres que se desviaram da verdade", "Amigos de Timóteo", "Inimigos de Paulo"], answer: "Falsos mestres que se desviaram da verdade", reference: "Capítulo 2" },
+            { question: "Como serão os homens nos últimos dias, segundo 2 Timóteo 3:1-5?", options: ["Amantes de Deus e do próximo", "Humildes e pacientes", "Amantes de si mesmos, avarentos, presunçosos, soberbos", "Generosos e compassivos"], answer: "Amantes de si mesmos, avarentos, presunçosos, soberbos", reference: "Capítulo 3" },
+            { question: "Qual a importância das Sagradas Escrituras, segundo 2 Timóteo 3:16-17?", options: ["São apenas histórias antigas", "São divinamente inspiradas e proveitosas para ensinar, redarguir, corrigir, instruir em justiça", "São confusas e difíceis de entender", "São apenas para os sábios"], answer: "São divinamente inspiradas e proveitosas para ensinar, redarguir, corrigir, instruir em justiça", reference: "Capítulo 3" },
+            { question: "Qual o encargo solene de Paulo a Timóteo no Capítulo 4?", options: ["Construir um templo", "Pregar a palavra, insistir a tempo e fora de tempo", "Viajar pelo mundo", "Acumular riquezas"], answer: "Pregar a palavra, insistir a tempo e fora de tempo", reference: "Capítulo 4" },
+            { question: "O que Paulo declara sobre sua própria vida no Capítulo 4?", options: ["Que ele falhou em sua missão", "Que ele combateu o bom combate, acabou a carreira e guardou a fé", "Que ele se arrependeu de seu ministério", "Que ele desistiu da fé"], answer: "Que ele combateu o bom combate, acabou a carreira e guardou a fé", reference: "Capítulo 4" },
+            { question: "Quem abandonou Paulo, amando o presente século, no Capítulo 4?", options: ["Lucas", "Marcos", "Demas", "Tito"], answer: "Demas", reference: "Capítulo 4" },
+            { question: "Quem é o único que estava com Paulo na prisão, segundo 2 Timóteo 4:11?", options: ["Timóteo", "Crescente", "Lucas", "Tito"], answer: "Lucas", reference: "Capítulo 4" },
+            { question: "O que Paulo pede a Timóteo que traga consigo no Capítulo 4?", options: ["Dinheiro e ouro", "Sua família", "A capa e os livros, especialmente os pergaminhos", "Armas"], answer: "A capa e os livros, especialmente os pergaminos", reference: "Capítulo 4" },
+            { question: "Qual o tema principal do Capítulo 3 de 2 Timóteo?", options: ["A vida familiar", "Tempos perigosos e a suficiência das Escrituras", "A organização da igreja", "A oração"], answer: "Tempos perigosos e a suficiência das Escrituras", reference: "Esboços do Livro de 2 Timóteo" },
+            { question: "O que Paulo exorta Timóteo a fugir no Capítulo 2?", options: ["Das paixões da mocidade", "Da verdade", "Do serviço", "Do sofrimento"], answer: "Das paixões da mocidade", reference: "Capítulo 2" },
+            { question: "Para que propósito toda a Escritura é proveitosa, segundo 2 Timóteo 3:16?", options: ["Para entretenimento", "Para ensinar, redarguir, corrigir, instruir em justiça", "Para debates", "Para ganhar dinheiro"], answer: "Para ensinar, redarguir, corrigir, instruir em justiça", reference: "Capítulo 3" },
+            { question: "O que Paulo deseja para Timóteo na saudação final da carta?", options: ["Riqueza e poder", "Fama e sucesso", "A graça seja contigo", "Uma vida fácil"], answer: "A graça seja contigo", reference: "Capítulo 4" },
+            { question: "Quem é Onesíforo, mencionado no Capítulo 1?", options: ["Um inimigo de Paulo", "Um amigo fiel que o confortou na prisão", "Um falso mestre", "Um parente de Timóteo"], answer: "Um amigo fiel que o confortou na prisão", reference: "Capítulo 1" },
+            { question: "Qual o conselho de Paulo a Timóteo sobre as discussões inúteis no Capítulo 2?", options: ["Participar delas", "Evitá-las, pois só servem para subverter os ouvintes", "Iniciá-las", "Promovê-las"], answer: "Evitá-las, pois só servem para subverter os ouvintes", reference: "Capítulo 2" },
+            { question: "O que Paulo diz que acontecerá com todos os que piamente querem viver em Cristo Jesus, segundo 2 Timóteo 3:12?", options: ["Serão ricos", "Padecerão perseguições", "Serão famosos", "Terão vida fácil"], answer: "Padecerão perseguições", reference: "Capítulo 3" },
+            { question: "Qual a coroa que está guardada para Paulo, segundo 2 Timóteo 4:8?", options: ["Coroa de ouro", "Coroa de glória", "Coroa da justiça", "Coroa da vida"], answer: "Coroa da justiça", reference: "Capítulo 4" },
+            { question: "O que Paulo exorta Timóteo a fazer para cumprir o ministério no Capítulo 4?", options: ["Desistir quando as coisas ficarem difíceis", "Ser sóbrio em tudo, sofrer as aflições, fazer a obra de um evangelista", "Buscar fama e reconhecimento", "Fazer o que for mais fácil"], answer: "Ser sóbrio em tudo, sofrer as aflições, fazer a obra de um evangelista", reference: "Capítulo 4" },
+            { question: "Quantos capítulos tem o livro de 2 Timóteo?", options: ["2", "3", "4", "5"], answer: "4", reference: "Esboços do Livro de 2 Timóteo" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestions2Timoteo = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestions2Timoteo.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestions2Timoteo = allQuizQuestions2Timoteo.concat(uniqueQuizQuestions2Timoteo);
+        }
+        allQuizQuestions2Timoteo = allQuizQuestions2Timoteo.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestions2Timoteo = [];
+        let currentQuizIndex2Timoteo = 0;
+        let score2Timoteo = 0;
+        let wrongAnswers2Timoteo = 0;
+        let timoteoChartInstance2 = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestions2Timoteo() {
+            shuffledQuizQuestions2Timoteo = [...allQuizQuestions2Timoteo]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestions2Timoteo);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgress2Timoteo() {
+            const progressElement = document.getElementById('quizProgress2Timoteo');
+            progressElement.textContent = `${currentQuizIndex2Timoteo + 1}/${shuffledQuizQuestions2Timoteo.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestion2Timoteo() {
+            if (currentQuizIndex2Timoteo >= shuffledQuizQuestions2Timoteo.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestion2Timoteo').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptions2Timoteo').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${score2Timoteo}, Erros: ${wrongAnswers2Timoteo}</p>`;
+                document.getElementById('quizFeedback2Timoteo').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestions2Timoteo[currentQuizIndex2Timoteo];
+            document.getElementById('quizQuestion2Timoteo').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptions2Timoteo');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswer2Timoteo(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedback2Timoteo').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgress2Timoteo();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswer2Timoteo(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedback2Timoteo');
+            const optionsButtons = document.querySelectorAll('#quizOptions2Timoteo button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                score2Timoteo++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswers2Timoteo++;
+            }
+            document.getElementById('quizScore2Timoteo').textContent = `Acertos: ${score2Timoteo}, Erros: ${wrongAnswers2Timoteo}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestion2Timoteo() {
+            currentQuizIndex2Timoteo++;
+            displayQuestion2Timoteo();
+        }
+
+        // Dados para o gráfico de temas de 2 Timóteo
+        const timoteoChartData2 = {
+            labels: ['Fidelidade e Perseverança', 'Sofrimento pelo Evangelho', 'Sã Doutrina', 'Inspiração das Escrituras', 'Exemplo de Paulo', 'Apostasia', 'Cumprimento do Ministério'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 18, 22, 20, 15, 10, 12], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const timoteoChartOptions2 = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 2 Timóteo',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function render2TimoteoChart() {
+            const ctx = document.getElementById('2timoteoChart').getContext('2d');
+            if (timoteoChartInstance2) {
+                timoteoChartInstance2.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            timoteoChartInstance2 = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: timoteoChartData2,
+                options: timoteoChartOptions2
+            });
+        }
+    </script>
+</body>
+</html>

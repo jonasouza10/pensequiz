@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Gálatas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gálatas Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Gálatas</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionGalatas('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionGalatas('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionGalatas('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionGalatas('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionGalatas('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionGalatas('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionGalatas('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionGalatas('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionGalatas('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Gálatas</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Epístola de Paulo aos Gálatas, uma poderosa defesa da justificação pela fé em Cristo e da liberdade cristã, em contraste com a tentativa de salvação pelas obras da lei. Descubra a verdade sobre a graça de Deus, a obra do Espírito Santo e a verdadeira natureza da vida em Cristo. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Gálatas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Epístola de Paulo aos Gálatas é uma das cartas mais veementes e apaixonadas do apóstolo Paulo. Escrita provavelmente entre 48-55 d.C., ela foi endereçada às igrejas da Galácia (uma província romana na Ásia Menor), que estavam sendo perturbadas por falsos mestres, conhecidos como Judaizantes. Esses mestres insistiam que os crentes gentios precisavam observar a Lei Mosaica, incluindo a circuncisão, para serem verdadeiramente justificados e aceitos por Deus.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito de Paulo nesta carta é defender a doutrina da justificação somente pela fé em Jesus Cristo, sem a necessidade das obras da lei. Ele argumenta vigorosamente que a salvação é um dom gratuito da graça de Deus, recebido pela fé, e não por mérito humano ou observância de rituais. Paulo também defende sua própria autoridade apostólica, que estava sendo questionada pelos Judaizantes, afirmando que seu evangelho veio diretamente de Cristo e não de homens.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A carta é dividida em três seções principais: uma defesa pessoal de seu apostolado e do evangelho que pregava (Capítulos 1-2); uma exposição teológica da justificação pela fé e da liberdade em Cristo (Capítulos 3-4); e exortações práticas sobre como viver a vida cristã guiada pelo Espírito, não pela carne ou pela lei (Capítulos 5-6). Gálatas é um grito de guerra pela liberdade evangélica e um lembrete atemporal de que a fé em Cristo é o único caminho para a verdadeira justiça e vida abundante.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-2: Defesa do Evangelho e do Apostolado de Paulo.</strong> A origem divina de seu evangelho, sua conversão, e seu confronto com Pedro em Antioquia.</li>
+                <li><strong>Capítulos 3-4: Exposição da Doutrina da Justificação pela Fé.</strong> A superioridade da fé sobre a lei, a promessa a Abraão, o propósito da lei e a liberdade dos filhos de Deus.</li>
+                <li><strong>Capítulos 5-6: Exortações Práticas sobre a Vida em Cristo.</strong> A liberdade cristã, o fruto do Espírito, o andar no Espírito e as responsabilidades mútuas na comunidade.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Gálatas é uma carta essencial para entender a essência do evangelho e a liberdade que temos em Cristo, longe do jugo da lei e das obras.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Gálatas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Gálatas é uma defesa apaixonada da justificação pela fé e da liberdade em Cristo.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Defesa Pessoal e Apostólica (Capítulos 1-2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudações e Advertência contra outro Evangelho (Capítulo 1:1-10):</strong>
+                    <ul>
+                        <li>Paulo defende sua autoridade apostólica.</li>
+                        <li>Anatematiza qualquer um que pregue um evangelho diferente.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Origem Divina do Evangelho de Paulo (Capítulo 1:11-24):</strong>
+                    <ul>
+                        <li>Sua conversão e chamado direto de Cristo.</li>
+                        <li>Seu tempo na Arábia e retorno a Damasco.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Paulo e os Apóstolos em Jerusalém (Capítulo 2:1-10):</strong>
+                    <ul>
+                        <li>Reconhecimento de seu evangelho pelos 'pilares' (Pedro, Tiago, João).</li>
+                        <li>A questão de Tito não ser obrigado a circuncidar-se.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Confronto com Pedro em Antioquia (Capítulo 2:11-21):</strong>
+                    <ul>
+                        <li>Paulo repreende Pedro por sua hipocrisia.</li>
+                        <li>Reafirma a justificação pela fé em Cristo, não pelas obras da lei.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Exposição Doutrinária: Justificação pela Fé (Capítulos 3-4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Experiência dos Gálatas (Capítulo 3:1-5):</strong>
+                    <ul>
+                        <li>Começaram no Espírito, querem aperfeiçoar-se na carne?</li>
+                        <li>Receberam o Espírito pelas obras da lei ou pela fé?</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Exemplo de Abraão (Capítulo 3:6-14):</strong>
+                    <ul>
+                        <li>Abraão creu em Deus, e isso lhe foi imputado como justiça.</li>
+                        <li>Os que são da fé são filhos de Abraão.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Propósito da Lei (Capítulo 3:15-29):</strong>
+                    <ul>
+                        <li>A lei veio 430 anos depois da promessa.</li>
+                        <li>A lei como aio (guardião) que nos conduz a Cristo.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Filhos e Herdeiros (Capítulo 4:1-11):</strong>
+                    <ul>
+                        <li>De escravos sob a lei a filhos e herdeiros em Cristo.</li>
+                        <li>O perigo de retornar à escravidão dos rudimentos.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Apelo Pessoal de Paulo (Capítulo 4:12-20):</strong>
+                    <ul>
+                        <li>Lembrando-os de seu primeiro encontro e amor.</li>
+                        <li>Sua angústia por eles.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Alegoria de Agar e Sara (Capítulo 4:21-31):</strong>
+                    <ul>
+                        <li>Agar representa a escravidão da lei; Sara, a liberdade da promessa.</li>
+                        <li>Os crentes são filhos da promessa, não da escravidão.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Exortação Prática: A Vida em Liberdade (Capítulos 5-6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Liberdade Cristã (Capítulo 5:1-12):</strong>
+                    <ul>
+                        <li>Permanecer firmes na liberdade de Cristo, não se submeter ao jugo da escravidão.</li>
+                        <li>A circuncisão não significa nada, mas a fé que opera pelo amor.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Andando no Espírito (Capítulo 5:13-26):</strong>
+                    <ul>
+                        <li>A liberdade não é para dar ocasião à carne, mas para servir uns aos outros.</li>
+                        <li>Obras da carne versus Fruto do Espírito.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Responsabilidades Mútuas (Capítulo 6:1-10):</strong>
+                    <ul>
+                        <li>Restaurar o irmão com mansidão.</li>
+                        <li>Levar os fardos uns dos outros.</li>
+                        <li>Semear no Espírito e fazer o bem a todos.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Conclusão e Advertência Final (Capítulo 6:11-18):</strong>
+                    <ul>
+                        <li>Paulo escreve com sua própria mão.</li>
+                        <li>Gloriar-se apenas na cruz de Cristo.</li>
+                        <li>A graça de Cristo seja com o espírito deles.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Gálatas é uma das mais importantes declarações do Novo Testamento sobre a justificação pela fé. Ela defende vigorosamente a liberdade que os crentes têm em Cristo, libertos do jugo da lei como meio de salvação. A carta enfatiza que a fé em Jesus Cristo é o único caminho para ser declarado justo diante de Deus. Além disso, Gálatas destaca o papel transformador do Espírito Santo na vida do crente, produzindo o fruto que reflete o caráter de Cristo. É um chamado à autenticidade do evangelho, à liberdade em Cristo e a uma vida de amor e serviço guiada pelo Espírito.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridGalatas">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Gálatas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Gálatas, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Saudações, advertência contra outro evangelho e a origem divina do evangelho de Paulo.</li>
+                <li><strong>Capítulo 2:</strong> Paulo e os apóstolos em Jerusalém, e o confronto com Pedro em Antioquia.</li>
+                <li><strong>Capítulo 3:</strong> A justificação pela fé, o exemplo de Abraão e o propósito da lei.</li>
+                <li><strong>Capítulo 4:</strong> De escravos a filhos e herdeiros, e a alegoria de Agar e Sara.</li>
+                <li><strong>Capítulo 5:</strong> A liberdade cristã, o andar no Espírito e o fruto do Espírito.</li>
+                <li><strong>Capítulo 6:</strong> Responsabilidades mútuas na comunidade e a glória da cruz.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Gálatas</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Justificação pela Fé:</strong> A salvação é pela graça, mediante a fé em Cristo, não pelas obras da lei.</li>
+                <li><strong>Liberdade Cristã:</strong> A libertação do jugo da lei e da escravidão do pecado.</li>
+                <li><strong>Lei e Graça:</strong> O contraste entre a incapacidade da lei de justificar e a suficiência da graça.</li>
+                <li><strong>Obras da Carne vs. Fruto do Espírito:</strong> A vida transformada pelo Espírito Santo.</li>
+                <li><strong>Autoridade Apostólica de Paulo:</strong> A defesa de seu chamado e do evangelho que pregava.</li>
+                <li><strong>Unidade em Cristo:</strong> A abolição de barreiras étnicas e sociais na fé.</li>
+                <li><strong>A Cruz de Cristo:</strong> O centro da mensagem e da nova identidade do crente.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Gálatas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersGalatas">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Gálatas</h2>
+            <div id="quizContainerGalatas" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionGalatas"></p>
+                <div id="quizOptionsGalatas" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackGalatas" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionGalatas()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressGalatas"></span></p>
+                <p>Pontuação: <span id="quizScoreGalatas">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Gálatas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Gálatas.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="galatasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalGalatas()">&times;</span>
+                <h3 id="modalCharacterNameGalatas" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionGalatas" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Gálatas",
+            "short_name": "Gálatas",
+            "description": "Explore o livro de Gálatas de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=GL",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=GL",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'galatas-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionGalatas(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsGalatas();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksGalatas();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsGalatas(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexGalatas = 0; // Reinicia o quiz
+                scoreGalatas = 0;
+                wrongAnswersGalatas = 0;
+                document.getElementById('quizScoreGalatas').textContent = `Acertos: ${scoreGalatas}, Erros: ${wrongAnswersGalatas}`;
+                displayQuestionGalatas();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderGalatasChart();
+            }
+        }
+
+        // Dados dos personagens para Gálatas
+        const characterDetailsGalatas = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta epístola, defendendo a justificação pela fé e a liberdade cristã, e sua própria autoridade apostólica."
+            },
+            "Gálatas (Igrejas da Galácia)": {
+                name: "Gálatas (Igrejas da Galácia)",
+                description: "As comunidades de crentes na província romana da Galácia, que estavam sendo influenciadas por falsos mestres e se afastando do evangelho da graça."
+            },
+            "Judaizantes": {
+                name: "Judaizantes",
+                description: "Falsos mestres que perturbavam as igrejas da Galácia, insistindo que os crentes gentios deveriam observar a Lei Mosaica para serem salvos."
+            },
+            "Pedro (Cefas)": {
+                name: "Pedro (Cefas)",
+                description: "Apóstolo que foi confrontado por Paulo em Antioquia por sua hipocrisia em relação à comunhão com os gentios."
+            },
+            "Tiago": {
+                name: "Tiago",
+                description: "Um dos 'pilares' da igreja em Jerusalém que reconheceu o ministério de Paulo aos gentios."
+            },
+            "João": {
+                name: "João",
+                description: "Um dos 'pilares' da igreja em Jerusalém que reconheceu o ministério de Paulo aos gentios."
+            },
+            "Deus (Pai/Cristo/Espírito Santo)": {
+                name: "Deus (Pai/Cristo/Espírito Santo)",
+                description: "O Deus que justifica pela fé, que enviou Cristo para nos libertar da lei, e cujo Espírito nos guia na verdadeira liberdade."
+            },
+            "Abraão": {
+                name: "Abraão",
+                description: "O patriarca cuja fé foi imputada como justiça, servindo de exemplo central para a doutrina da justificação pela fé."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalGalatas(characterName) {
+            const details = characterDetailsGalatas[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameGalatas').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionGalatas').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalGalatas() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsGalatas() {
+            const grid = document.getElementById('characterGridGalatas');
+            grid.innerHTML = '';
+            for (const key in characterDetailsGalatas) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalGalatas(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksGalatas() {
+            const chaptersDiv = document.getElementById('chaptersGalatas');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 6; i++) { // Gálatas tem 6 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/gl/${i}`; // Link para a Bíblia Online, Gálatas
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Gálatas (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsGalatas = [
+            { question: "Qual é o tema central da Epístola aos Gálatas?", options: ["A importância da circuncisão", "A justificação pela fé em Cristo", "A necessidade de guardar a lei para a salvação", "O amor ao próximo"], answer: "A justificação pela fé em Cristo", reference: "Introdução ao Livro de Gálatas" },
+            { question: "Quem eram os falsos mestres que estavam perturbando as igrejas da Galácia?", options: ["Fariseus", "Saduceus", "Judaizantes", "Romanos"], answer: "Judaizantes", reference: "Introdução ao Livro de Gálatas" },
+            { question: "De onde Paulo afirma ter recebido o evangelho que pregava?", options: ["De Pedro", "De Tiago", "Diretamente de Jesus Cristo", "Dos apóstolos em Jerusalém"], answer: "Diretamente de Jesus Cristo", reference: "Capítulo 1" },
+            { question: "Com quem Paulo teve um confronto em Antioquia por causa da hipocrisia?", options: ["Timóteo", "Tito", "Pedro", "Barnabé"], answer: "Pedro", reference: "Capítulo 2" },
+            { question: "Qual patriarca é usado por Paulo como exemplo de justificação pela fé?", options: ["Noé", "Moisés", "Abraão", "Jacó"], answer: "Abraão", reference: "Capítulo 3" },
+            { question: "Qual o propósito da lei, segundo Gálatas 3:24?", options: ["Para nos justificar", "Para nos condenar", "Para nos conduzir a Cristo", "Para nos tornar ricos"], answer: "Para nos conduzir a Cristo", reference: "Capítulo 3" },
+            { question: "O que Paulo diz que não tem valor em Cristo, mas a fé que opera pelo amor?", options: ["O batismo", "A circuncisão", "As ofertas", "A oração"], answer: "A circuncisão", reference: "Capítulo 5" },
+            { question: "Qual é o contraste apresentado em Gálatas 5:19-23?", options: ["Riqueza vs. Pobreza", "Obras da carne vs. Fruto do Espírito", "Sabedoria humana vs. Sabedoria divina", "Velho Testamento vs. Novo Testamento"], answer: "Obras da carne vs. Fruto do Espírito", reference: "Capítulo 5" },
+            { question: "Qual é o primeiro item do Fruto do Espírito mencionado em Gálatas 5:22?", options: ["Paz", "Longanimidade", "Amor", "Alegria"], answer: "Amor", reference: "Capítulo 5" },
+            { question: "O que os crentes devem fazer com os fardos uns dos outros, segundo Gálatas 6:2?", options: ["Ignorá-los", "Aumentá-los", "Levá-los", "Zombar deles"], answer: "Levá-los", reference: "Capítulo 6" },
+            { question: "Em que Paulo se gloria no final da carta?", options: ["Em seus sofrimentos", "Em suas obras", "Na cruz de nosso Senhor Jesus Cristo", "Em sua sabedoria"], answer: "Na cruz de nosso Senhor Jesus Cristo", reference: "Capítulo 6" },
+            { question: "Qual é a principal consequência de tentar ser justificado pela lei, segundo Gálatas?", options: ["Receber bênçãos extras", "Cair da graça", "Ser mais santo", "Ter mais conhecimento"], answer: "Cair da graça", reference: "Capítulo 5" },
+            { question: "Paulo se refere aos Gálatas como 'insensatos' por qual motivo?", options: ["Por não o terem recebido bem", "Por voltarem à escravidão da lei", "Por não darem ofertas", "Por não o ouvirem"], answer: "Por voltarem à escravidão da lei", reference: "Capítulo 3" },
+            { question: "O que a alegoria de Agar e Sara representa em Gálatas 4?", options: ["A fé e a incredulidade", "A lei e a graça", "O Velho e o Novo Testamento", "A escravidão e a liberdade"], answer: "A lei e a graça", reference: "Capítulo 4" },
+            { question: "Qual é a exortação de Paulo sobre semear no Espírito?", options: ["Colherá corrupção", "Colherá vida eterna", "Colherá tristeza", "Colherá escassez"], answer: "Colherá vida eterna", reference: "Capítulo 6" },
+            { question: "Para quem foi escrita a Epístola aos Gálatas?", options: ["Aos judeus em Jerusalém", "Às igrejas da Galácia", "Aos romanos", "Aos coríntios"], answer: "Às igrejas da Galácia", reference: "Introdução ao Livro de Gálatas" },
+            { question: "O que Paulo afirma sobre a lei em relação à promessa a Abraão?", options: ["A lei anula a promessa", "A lei veio antes da promessa", "A lei não anula a promessa", "A lei substitui a promessa"], answer: "A lei não anula a promessa", reference: "Capítulo 3" },
+            { question: "O que significa ser 'crucificado com Cristo' em Gálatas 2:20?", options: ["Morrer fisicamente", "Viver sob a lei", "Viver a vida de Cristo pela fé", "Ser perseguido"], answer: "Viver a vida de Cristo pela fé", reference: "Capítulo 2" },
+            { question: "Qual é a frase que resume a liberdade cristã em Gálatas 5:13?", options: ["Não useis da liberdade para dar ocasião à carne", "Fazei o que quiserdes", "A lei é para todos", "Sejai escravos uns dos outros"], answer: "Não useis da liberdade para dar ocasião à carne", reference: "Capítulo 5" },
+            { question: "O que Paulo pede aos Gálatas que não façam em relação à circuncisão?", options: ["Que se circuncidem", "Que se submetam novamente ao jugo da escravidão", "Que a ignorem", "Que a preguem"], answer: "Que se submetam novamente ao jugo da escravidão", reference: "Capítulo 5" },
+            { question: "Quantos capítulos tem o livro de Gálatas?", options: ["4", "5", "6", "7"], answer: "6", reference: "Esboços do Livro de Gálatas" },
+            { question: "O que Paulo enfatiza sobre a unidade em Cristo em Gálatas 3:28?", options: ["Não há judeu nem grego, não há servo nem livre, não há macho nem fêmea; porque todos vós sois um em Cristo Jesus", "Todos devem ser iguais em tudo", "Apenas os judeus são salvos", "Apenas os homens são importantes"], answer: "Não há judeu nem grego, não há servo nem livre, não há macho nem fêmea; porque todos vós sois um em Cristo Jesus", reference: "Capítulo 3" },
+            { question: "Qual o contraste entre a carne e o Espírito em Gálatas?", options: ["A carne é boa, o Espírito é mau", "A carne e o Espírito são a mesma coisa", "A carne produz obras pecaminosas, o Espírito produz fruto justo", "A carne é forte, o Espírito é fraco"], answer: "A carne produz obras pecaminosas, o Espírito produz fruto justo", reference: "Capítulo 5" },
+            { question: "O que Paulo afirma que é o 'verdadeiro evangelho'?", options: ["Aquele que inclui a lei", "Aquele que é pregado por homens", "Aquele que veio por revelação de Jesus Cristo", "Aquele que agrada a todos"], answer: "Aquele que veio por revelação de Jesus Cristo", reference: "Capítulo 1" },
+            { question: "Qual é a advertência final de Paulo em Gálatas 6:17?", options: ["Que ninguém o perturbe mais, pois ele traz em seu corpo as marcas de Jesus", "Que todos se circuncidem", "Que todos o sigam", "Que ele não voltará à Galácia"], answer: "Que ninguém o perturbe mais, pois ele traz em seu corpo as marcas de Jesus", reference: "Capítulo 6" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsGalatas = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsGalatas.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsGalatas = allQuizQuestionsGalatas.concat(uniqueQuizQuestionsGalatas);
+        }
+        allQuizQuestionsGalatas = allQuizQuestionsGalatas.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsGalatas = [];
+        let currentQuizIndexGalatas = 0;
+        let scoreGalatas = 0;
+        let wrongAnswersGalatas = 0;
+        let galatasChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsGalatas() {
+            shuffledQuizQuestionsGalatas = [...allQuizQuestionsGalatas]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsGalatas);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressGalatas() {
+            const progressElement = document.getElementById('quizProgressGalatas');
+            progressElement.textContent = `${currentQuizIndexGalatas + 1}/${shuffledQuizQuestionsGalatas.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionGalatas() {
+            if (currentQuizIndexGalatas >= shuffledQuizQuestionsGalatas.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionGalatas').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsGalatas').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreGalatas}, Erros: ${wrongAnswersGalatas}</p>`;
+                document.getElementById('quizFeedbackGalatas').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsGalatas[currentQuizIndexGalatas];
+            document.getElementById('quizQuestionGalatas').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsGalatas');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerGalatas(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackGalatas').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressGalatas();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerGalatas(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackGalatas');
+            const optionsButtons = document.querySelectorAll('#quizOptionsGalatas button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreGalatas++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersGalatas++;
+            }
+            document.getElementById('quizScoreGalatas').textContent = `Acertos: ${scoreGalatas}, Erros: ${wrongAnswersGalatas}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionGalatas() {
+            currentQuizIndexGalatas++;
+            displayQuestionGalatas();
+        }
+
+        // Dados para o gráfico de temas de Gálatas
+        const galatasChartData = {
+            labels: ['Justificação pela Fé', 'Liberdade Cristã', 'Lei e Graça', 'Obras da Carne vs. Fruto do Espírito', 'Autoridade Apostólica', 'Unidade em Cristo', 'A Cruz de Cristo'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 10, 7, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const galatasChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Gálatas',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderGalatasChart() {
+            const ctx = document.getElementById('galatasChart').getContext('2d');
+            if (galatasChartInstance) {
+                galatasChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            galatasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: galatasChartData,
+                options: galatasChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

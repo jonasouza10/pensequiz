@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Daniel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6; /* Blue border for Daniel game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #2563eb; /* Blue for Daniel game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #1d4ed8; /* Darker blue on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #2563eb;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #1d4ed8;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-blue-700 mb-4">A História de Daniel 🦁</h1>
+        <p class="text-gray-700 mb-6">
+            Acompanhe a vida de Daniel, o profeta que permaneceu fiel a Deus em meio aos desafios do exílio babilônico.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Daniel!</p>
+            <p class="text-gray-700 mt-6">A história de Daniel é um poderoso exemplo de fé inabalável, coragem e sabedoria divina em tempos de adversidade e perseguição.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: O Exílio na Babilônia',
+                location: 'Jerusalém e Babilônia',
+                objective: 'Entender como Daniel e seus amigos foram levados para a Babilônia.',
+                clues: [
+                    'Nabucodonosor, rei da Babilônia, cercou Jerusalém.',
+                    'Daniel e outros jovens nobres foram levados para servir no palácio real.'
+                ],
+                keyVerse: 'Daniel 1:1-4',
+                enigma: 'Qual rei levou Daniel e outros jovens para a Babilônia?',
+                options: ['Nabucodonosor', 'Dario', 'Ciro'],
+                correctAnswer: 'Nabucodonosor'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: A Recusa do Manjar do Rei',
+                location: 'Babilônia',
+                objective: 'Aprender sobre a fidelidade de Daniel e seus amigos à lei de Deus.',
+                clues: [
+                    'Daniel e seus amigos recusaram-se a comer as iguarias do rei e beber seu vinho.',
+                    'Eles pediram para comer legumes e beber água, e após dez dias, pareceram mais saudáveis.'
+                ],
+                keyVerse: 'Daniel 1:8-16',
+                enigma: 'O que Daniel e seus amigos pediram para comer em vez do manjar do rei?',
+                options: ['Legumes', 'Pão', 'Frutas'],
+                correctAnswer: 'Legumes'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: A Interpretação do Sonho de Nabucodonosor (Estátua)',
+                location: 'Babilônia',
+                objective: 'Descobrir como Daniel interpretou o sonho do rei.',
+                clues: [
+                    'Nabucodonosor teve um sonho perturbador e exigiu que seus sábios o revelassem e interpretassem.',
+                    'Daniel, através de revelação divina, descreveu a estátua do sonho e seu significado sobre os reinos futuros.'
+                ],
+                keyVerse: 'Daniel 2:31-45',
+                enigma: 'O que Nabucodonosor sonhou que Daniel interpretou?',
+                options: ['Uma grande estátua', 'Uma árvore gigante', 'Quatro animais'],
+                correctAnswer: 'Uma grande estátua'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: A Fornalha Ardente',
+                location: 'Planície de Dura',
+                objective: 'Entender a fidelidade de Sadraque, Mesaque e Abede-Nego.',
+                clues: [
+                    'Nabucodonosor construiu uma imagem de ouro e ordenou que todos a adorassem.',
+                    'Sadraque, Mesaque e Abede-Nego recusaram-se e foram lançados em uma fornalha sete vezes mais quente, mas Deus os livrou.'
+                ],
+                keyVerse: 'Daniel 3:16-18, 26-27',
+                enigma: 'Quem foi lançado na fornalha ardente por não adorar a estátua de ouro?',
+                options: ['Sadraque, Mesaque e Abede-Nego', 'Daniel', 'Os sábios da Babilônia'],
+                correctAnswer: 'Sadraque, Mesaque e Abede-Nego'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: O Sonho da Árvore de Nabucodonosor',
+                location: 'Babilônia',
+                objective: 'Aprender sobre a humildade forçada do rei Nabucodonosor.',
+                clues: [
+                    'Nabucodonosor sonhou com uma árvore que foi cortada, mas seu toco permaneceu.',
+                    'Daniel interpretou que o rei seria afastado de seu trono e viveria como um animal por sete tempos, até reconhecer a soberania de Deus.'
+                ],
+                keyVerse: 'Daniel 4:20-27',
+                enigma: 'Por quantos "tempos" Nabucodonosor viveria como um animal?',
+                options: ['Sete', 'Três', 'Doze'],
+                correctAnswer: 'Sete'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: A Escrita na Parede',
+                location: 'Babilônia (Palácio Real)',
+                objective: 'Testemunhar a condenação do rei Belsazar.',
+                clues: [
+                    'Durante um banquete, uma mão apareceu e escreveu na parede: "Mene, Mene, Tequel, Parsim".',
+                    'Daniel foi chamado para interpretar a escrita, que predizia a queda do reino de Belsazar.'
+                ],
+                keyVerse: 'Daniel 5:25-28',
+                enigma: 'Qual frase misteriosa apareceu escrita na parede durante o banquete de Belsazar?',
+                options: ['Mene, Mene, Tequel, Parsim', 'O rei é grande', 'Glória à Babilônia'],
+                correctAnswer: 'Mene, Mene, Tequel, Parsim'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: Daniel na Cova dos Leões',
+                location: 'Babilônia (Cova dos Leões)',
+                objective: 'Observar a libertação de Daniel por Deus.',
+                clues: [
+                    'Invejosos conspiraram para que o rei Dario assinasse um decreto proibindo orações a qualquer deus ou homem, exceto ao rei, por trinta dias.',
+                    'Daniel continuou a orar três vezes ao dia e foi lançado na cova dos leões, mas Deus fechou a boca dos leões.'
+                ],
+                keyVerse: 'Daniel 6:10, 22',
+                enigma: 'Quantas vezes por dia Daniel orava, apesar do decreto do rei?',
+                options: ['Três vezes', 'Uma vez', 'Sete vezes'],
+                correctAnswer: 'Três vezes'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: A Visão dos Quatro Grandes Animais',
+                location: 'Babilônia',
+                objective: 'Aprender sobre as visões proféticas de Daniel sobre os reinos mundiais.',
+                clues: [
+                    'Daniel teve uma visão de quatro grandes animais que subiam do mar, representando reinos futuros.',
+                    'Ele viu um leão com asas de águia, um urso, um leopardo com quatro asas e quatro cabeças, e uma besta terrível com dez chifres.'
+                ],
+                keyVerse: 'Daniel 7:1-8',
+                enigma: 'Quantos grandes animais Daniel viu subindo do mar em sua visão?',
+                options: ['Quatro', 'Três', 'Sete'],
+                correctAnswer: 'Quatro'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: A Visão do Carneiro e do Bode',
+                location: 'Susã',
+                objective: 'Entender as profecias de Daniel sobre os impérios Medo-Persa e Grego.',
+                clues: [
+                    'Daniel teve uma visão de um carneiro com dois chifres e um bode com um grande chifre.',
+                    'O carneiro representava os reis da Média e da Pérsia, e o bode, o rei da Grécia.'
+                ],
+                keyVerse: 'Daniel 8:20-21',
+                enigma: 'O carneiro com dois chifres na visão de Daniel representava quais reinos?',
+                options: ['Média e Pérsia', 'Grécia e Roma', 'Babilônia e Assíria'],
+                correctAnswer: 'Média e Pérsia'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: A Oração de Daniel e a Luta Espiritual',
+                location: 'Babilônia',
+                objective: 'Aprender sobre a oração de Daniel e a intervenção angelical.',
+                clues: [
+                    'Daniel orou e jejuou por vinte e um dias, buscando entendimento.',
+                    'Um anjo apareceu e explicou que sua oração foi ouvida desde o primeiro dia, mas o príncipe do reino da Pérsia o reteve.'
+                ],
+                keyVerse: 'Daniel 10:12-14',
+                enigma: 'Por quantos dias Daniel orou e jejuou antes que o anjo aparecesse?',
+                options: ['Vinte e um', 'Sete', 'Quarenta'],
+                correctAnswer: 'Vinte e um'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: A Profecia das Setenta Semanas',
+                location: 'Babilônia',
+                objective: 'Observar a profecia detalhada sobre o Messias e o futuro de Jerusalém.',
+                clues: [
+                    'Enquanto Daniel orava, o anjo Gabriel veio e lhe deu a profecia das setenta semanas.',
+                    'Esta profecia detalha o tempo até a vinda do Messias e eventos futuros relacionados a Jerusalém.'
+                ],
+                keyVerse: 'Daniel 9:24-27',
+                enigma: 'Quem revelou a Daniel a profecia das setenta semanas?',
+                options: ['O anjo Gabriel', 'O profeta Jeremias', 'O próprio Deus'],
+                correctAnswer: 'O anjo Gabriel'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: A Visão do Homem Glorioso',
+                location: 'Rio Tigre',
+                objective: 'Compreender a visão de Daniel de um ser celestial.',
+                clues: [
+                    'Daniel estava junto ao rio Tigre quando teve uma visão de um homem vestido de linho, com um cinto de ouro puro.',
+                    'Seu rosto era como um relâmpago, seus olhos como tochas de fogo, e sua voz como o som de uma multidão.'
+                ],
+                keyVerse: 'Daniel 10:4-6',
+                enigma: 'Qual rio Daniel estava perto quando teve a visão do homem glorioso?',
+                options: ['Rio Tigre', 'Rio Eufrates', 'Rio Quebar'],
+                correctAnswer: 'Rio Tigre'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: A Perseverança de Daniel',
+                location: 'Babilônia',
+                objective: 'Aprender sobre a vida de fidelidade de Daniel ao longo de vários reinados.',
+                clues: [
+                    'Daniel serviu fielmente sob Nabucodonosor, Belsazar e Dario.',
+                    'Ele é um exemplo de integridade e devoção a Deus, mesmo em um ambiente hostil.'
+                ],
+                keyVerse: 'Daniel 6:28',
+                enigma: 'Sob quantos reis Daniel serviu fielmente na Babilônia (mencionados no livro)?',
+                options: ['Três', 'Dois', 'Quatro'],
+                correctAnswer: 'Três'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: A Sabedoria de Daniel',
+                location: 'Babilônia',
+                objective: 'Observar a sabedoria e o discernimento que Deus concedeu a Daniel.',
+                clues: [
+                    'Daniel era conhecido por sua inteligência e capacidade de interpretar sonhos e visões.',
+                    'Ele foi considerado dez vezes mais sábio que todos os magos e astrólogos do reino.'
+                ],
+                keyVerse: 'Daniel 1:20',
+                enigma: 'Quantas vezes Daniel era considerado mais sábio que os magos e astrólogos do reino?',
+                options: ['Dez vezes', 'Sete vezes', 'Cinco vezes'],
+                correctAnswer: 'Dez vezes'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Legado de Daniel',
+                location: 'Israel e Babilônia',
+                objective: 'Refletir sobre o impacto duradouro da vida e das profecias de Daniel.',
+                clues: [
+                    'O livro de Daniel é uma fonte crucial de profecias sobre o fim dos tempos e a vinda do Messias.',
+                    'Sua vida é um testemunho de fé, coragem e obediência a Deus em todas as circunstâncias.'
+                ],
+                keyVerse: 'Daniel 12:13',
+                enigma: 'Qual é um dos principais legados de Daniel para as gerações futuras?',
+                options: ['Suas profecias sobre o fim dos tempos', 'Sua riqueza', 'Sua posição no palácio'],
+                correctAnswer: 'Suas profecias sobre o fim dos tempos'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-blue-600 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

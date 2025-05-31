@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Ezequiel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ezequiel Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Ezequiel</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionEzequiel('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionEzequiel('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionEzequiel('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionEzequiel('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionEzequiel('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionEzequiel('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionEzequiel('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionEzequiel('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionEzequiel('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Ezequiel</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Ezequiel, um dos mais complexos e visualmente ricos livros proféticos do Antigo Testamento. Mergulhe em suas visões impressionantes, profecias de juízo e restauração, e a ênfase na glória de Deus e na responsabilidade individual. Descubra a soberania divina e Seus planos para Israel e as nações. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Ezequiel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Ezequiel é o terceiro dos Profetas Maiores do Antigo Testamento. Escrito pelo profeta Ezequiel, filho de Buzi, um sacerdote que foi levado cativo para a Babilônia na segunda deportação de Jerusalém (597 a.C.), ele profetizou entre os exilados por cerca de 22 anos (c. 593-571 a.C.). O ministério de Ezequiel ocorreu em um período crítico da história de Israel, antes e depois da destruição final de Jerusalém em 586 a.C., servindo como um 'ataláia' (sentinela) para seu povo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro é notável por suas visões vívidas e simbólicas, ações proféticas dramáticas e uma forte ênfase na soberania e glória de Deus. Ezequiel aborda temas como o juízo iminente sobre Judá e Jerusalém devido à sua idolatria e rebelião, a responsabilidade individual pelo pecado, e as promessas de restauração futura para Israel. Ele descreve a partida da glória de Deus do Templo e da cidade, e sua eventual restauração em um novo Templo e uma nova terra.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A mensagem de Ezequiel é um chamado ao arrependimento e uma reafirmação da justiça de Deus. Ele mostra que Deus não abandonou Seu povo, mesmo no exílio, e que Ele cumprirá Suas promessas de restaurá-los e purificá-los, estabelecendo uma nova aliança e um novo coração para eles. O livro culmina com uma visão detalhada de um novo Templo e uma terra restaurada, simbolizando a presença de Deus e a plenitude de Sua bênção.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-24: Profecias de Juízo contra Judá e Jerusalém.</strong> Esta seção contém as visões iniciais de Ezequiel, seu chamado, e as mensagens de condenação contra a idolatria, a rebelião e a hipocrisia do povo, culminando na profecia da destruição de Jerusalém.</li>
+                <li><strong>Capítulos 25-32: Oráculos contra as Nações Estrangeiras.</strong> Profecias de juízo contra Amom, Moabe, Edom, Filístia, Tiro, Sidom e Egito, demonstrando a soberania de Deus sobre todas as nações.</li>
+                <li><strong>Capítulos 33-39: Profecias de Restauração para Israel.</strong> Esta seção marca uma mudança de tom, com mensagens de esperança e restauração após a queda de Jerusalém. Inclui a visão dos ossos secos (ressurreição de Israel) e as profecias contra Gogue e Magogue.</li>
+                <li><strong>Capítulos 40-48: A Visão do Novo Templo e da Terra Restaurada.</strong> Uma descrição detalhada de um Templo ideal e da divisão da terra, simbolizando a restauração da presença de Deus e a bênção para Seu povo.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Ezequiel é um livro fundamental para entender a glória de Deus, a responsabilidade individual e a esperança da restauração de Israel, apontando para o futuro reino messiânico.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Ezequiel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Ezequiel é um livro repleto de visões, simbolismos e mensagens de juízo e restauração para Israel e as nações.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Profecias de Juízo contra Judá e Jerusalém (Capítulos 1-24)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Chamado de Ezequiel e a Visão da Glória de Deus (Capítulos 1-3):</strong>
+                    <ul>
+                        <li>A visão dos seres viventes e das rodas.</li>
+                        <li>O chamado de Ezequiel como ataláia.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Sinais Simbólicos e Profecias contra Jerusalém (Capítulos 4-7):</strong>
+                    <ul>
+                        <li>O cerco de Jerusalém em miniatura.</li>
+                        <li>A navalha e os cabelos.</li>
+                        <li>O fim iminente.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Partida da Glória de Deus do Templo (Capítulos 8-11):</strong>
+                    <ul>
+                        <li>As abominações no Templo.</li>
+                        <li>A glória do Senhor deixando o Templo.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Parábolas e Alegorias de Juízo (Capítulos 12-24):</strong>
+                    <ul>
+                        <li>A alegoria da videira inútil.</li>
+                        <li>As duas águias e a videira.</li>
+                        <li>A panela fervente.</li>
+                        <li>A responsabilidade individual (Capítulo 18).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Oráculos contra as Nações Estrangeiras (Capítulos 25-32)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li>Profecias contra Amom, Moabe, Edom, Filístia.</li>
+                <li>Oráculos extensos contra Tiro e Sidom.</li>
+                <li>Lamentos e profecias contra o Egito.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Profecias de Restauração para Israel (Capítulos 33-39)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Papel do Ataláia e a Responsabilidade Individual (Capítulo 33):</strong>
+                    <ul>
+                        <li>Reafirmação do chamado de Ezequiel.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Bom Pastor e a Nova Aliança (Capítulo 34):</strong>
+                    <ul>
+                        <li>Deus como o verdadeiro Pastor de Israel.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Restauração da Terra e do Povo (Capítulos 35-37):</strong>
+                    <ul>
+                        <li>Profecia contra o Monte Seir (Edom).</li>
+                        <li>A restauração da terra de Israel.</li>
+                        <li>A visão do vale de ossos secos: a ressurreição de Israel (Capítulo 37).</li>
+                        <li>A união de Judá e Israel.</li>
+                    </ul>
+                </li>
+                <li><strong>D. As Profecias de Gogue e Magogue (Capítulos 38-39):</strong>
+                    <ul>
+                        <li>A invasão e a derrota de Gogue.</li>
+                        <li>A santificação do nome de Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. A Visão do Novo Templo e da Terra Restaurada (Capítulos 40-48)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Novo Templo e Suas Medidas (Capítulos 40-43):</strong>
+                    <ul>
+                        <li>A glória de Deus retornando ao Templo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. As Ordenanças do Templo e o Sacerdócio (Capítulos 44-46):</strong>
+                    <ul>
+                        <li>Regulamentos para o serviço do Templo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Rio que Flui do Templo e a Divisão da Terra (Capítulos 47-48):</strong>
+                    <ul>
+                        <li>O rio que traz vida e cura.</li>
+                        <li>A nova divisão das tribos.</li>
+                        <li>O nome da cidade: "O Senhor Está Ali" (Jeová-Samá).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Ezequiel é um testemunho da glória e soberania de Deus, que executa juízo sobre o pecado, mas também restaura e purifica Seu povo. Ele enfatiza a responsabilidade individual e a necessidade de um novo coração. As visões e ações simbólicas de Ezequiel ressaltam a realidade da presença de Deus, Sua partida devido à idolatria e Seu glorioso retorno para habitar entre Seu povo em um futuro reino de paz e justiça.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridEzequiel">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Ezequiel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Ezequiel, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A visão inicial da glória de Deus e dos seres viventes.</li>
+                <li><strong>Capítulo 2:</strong> O chamado de Ezequiel para ser profeta a um povo rebelde.</li>
+                <li><strong>Capítulo 3:</strong> A comissão de Ezequiel como ataláia e a ingestão do rolo.</li>
+                <li><strong>Capítulo 4:</strong> O cerco simbólico de Jerusalém.</li>
+                <li><strong>Capítulo 5:</strong> O sinal da navalha e o juízo sobre Jerusalém.</li>
+                <li><strong>Capítulo 6:</strong> Profecia contra os montes de Israel e a idolatria.</li>
+                <li><strong>Capítulo 7:</strong> O fim de Israel e a calamidade iminente.</li>
+                <li><strong>Capítulo 8:</strong> As abominações idólatras no Templo.</li>
+                <li><strong>Capítulo 9:</strong> A matança em Jerusalém e o sinal na testa.</li>
+                <li><strong>Capítulo 10:</strong> A glória de Deus deixando o Templo.</li>
+                <li><strong>Capítulo 11:</strong> Juízo sobre os líderes e a promessa de um novo coração.</li>
+                <li><strong>Capítulo 12:</strong> O sinal do exílio e a cegueira de Zedequias.</li>
+                <li><strong>Capítulo 13:</strong> Profecia contra os falsos profetas.</li>
+                <li><strong>Capítulo 14:</strong> O juízo contra a idolatria e a intercessão ineficaz.</li>
+                <li><strong>Capítulo 15:</strong> A alegoria da videira inútil.</li>
+                <li><strong>Capítulo 16:</strong> A história de Jerusalém como uma esposa infiel.</li>
+                <li><strong>Capítulo 17:</strong> A alegoria das duas águias e a videira.</li>
+                <li><strong>Capítulo 18:</strong> A responsabilidade individual pelo pecado.</li>
+                <li><strong>Capítulo 19:</strong> Lamento sobre os príncipes de Israel.</li>
+                <li><strong>Capítulo 20:</strong> A história da rebelião de Israel e a promessa de restauração.</li>
+                <li><strong>Capítulo 21:</strong> A espada do Senhor contra Israel e Amom.</li>
+                <li><strong>Capítulo 22:</strong> As iniquidades de Jerusalém.</li>
+                <li><strong>Capítulo 23:</strong> As duas irmãs, Oolá e Oolibá (Samaria e Jerusalém).</li>
+                <li><strong>Capítulo 24:</strong> A panela fervente e a morte da esposa de Ezequiel.</li>
+                <li><strong>Capítulo 25:</strong> Oráculos contra Amom, Moabe, Edom e Filístia.</li>
+                <li><strong>Capítulo 26:</strong> Oráculo contra Tiro.</li>
+                <li><strong>Capítulo 27:</strong> Lamento sobre Tiro.</li>
+                <li><strong>Capítulo 28:</strong> Oráculo contra o príncipe e o rei de Tiro, e contra Sidom.</li>
+                <li><strong>Capítulo 29:</strong> Oráculo contra o Egito.</li>
+                <li><strong>Capítulo 30:</strong> A destruição do Egito.</li>
+                <li><strong>Capítulo 31:</strong> A alegoria do cedro do Líbano (Egito).</li>
+                <li><strong>Capítulo 32:</strong> Lamento sobre o Faraó e o Egito.</li>
+                <li><strong>Capítulo 33:</strong> O ataláia de Israel e a responsabilidade individual.</li>
+                <li><strong>Capítulo 34:</strong> O bom Pastor e o juízo sobre os maus pastores.</li>
+                <li><strong>Capítulo 35:</strong> Profecia contra o Monte Seir (Edom).</li>
+                <li><strong>Capítulo 36:</strong> A restauração da terra de Israel.</li>
+                <li><strong>Capítulo 37:</strong> A visão do vale de ossos secos e a ressurreição de Israel.</li>
+                <li><strong>Capítulo 38:</strong> A profecia contra Gogue de Magogue.</li>
+                <li><strong>Capítulo 39:</strong> A derrota de Gogue e a santificação do nome de Deus.</li>
+                <li><strong>Capítulo 40:</strong> A visão do novo Templo e suas medidas.</li>
+                <li><strong>Capítulo 41:</strong> As medidas do Templo e suas dependências.</li>
+                <li><strong>Capítulo 42:</strong> As câmaras dos sacerdotes e o pátio exterior.</li>
+                <li><strong>Capítulo 43:</strong> A glória de Deus retornando ao Templo.</li>
+                <li><strong>Capítulo 44:</strong> As ordenanças para os sacerdotes e o serviço do Templo.</li>
+                <li><strong>Capítulo 45:</strong> As ofertas e a porção da terra para o príncipe e os sacerdotes.</li>
+                <li><strong>Capítulo 46:</strong> As ofertas do príncipe e os sacrifícios.</li>
+                <li><strong>Capítulo 47:</strong> O rio que flui do Templo e suas propriedades curativas.</li>
+                <li><strong>Capítulo 48:</strong> A divisão da terra para as tribos e o nome da cidade.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Ezequiel</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Glória de Deus:</strong> A presença manifesta de Deus, Sua partida e Seu retorno.</li>
+                <li><strong>Soberania Divina:</strong> O controle absoluto de Deus sobre Israel e as nações.</li>
+                <li><strong>Juízo e Destruição:</strong> As consequências do pecado e da idolatria de Israel.</li>
+                <li><strong>Restauração e Renovação:</strong> A promessa de Deus de restaurar Seu povo e a terra.</li>
+                <li><strong>Responsabilidade Individual:</strong> Cada pessoa é responsável por seus próprios pecados.</li>
+                <li><strong>O Novo Coração e o Espírito:</strong> A promessa de Deus de transformar o coração de Seu povo.</li>
+                <li><strong>O Ataláia (Sentinela):</strong> O papel do profeta em advertir o povo.</li>
+                <li><strong>O Novo Templo e a Nova Terra:</strong> A visão de um futuro ideal de adoração e habitação de Deus.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Ezequiel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersEzequiel">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Ezequiel</h2>
+            <div id="quizContainerEzequiel" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionEzequiel"></p>
+                <div id="quizOptionsEzequiel" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackEzequiel" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionEzequiel()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressEzequiel"></span></p>
+                <p>Pontuação: <span id="quizScoreEzequiel">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Ezequiel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Ezequiel.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="ezequielChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalEzequiel()">&times;</span>
+                <h3 id="modalCharacterNameEzequiel" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionEzequiel" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Ezequiel",
+            "short_name": "Ezequiel",
+            "description": "Explore o livro de Ezequiel de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=EZ",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=EZ",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'ezequiel-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionEzequiel(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsEzequiel();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksEzequiel();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsEzequiel(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexEzequiel = 0; // Reinicia o quiz
+                scoreEzequiel = 0;
+                wrongAnswersEzequiel = 0;
+                document.getElementById('quizScoreEzequiel').textContent = `Acertos: ${scoreEzequiel}, Erros: ${wrongAnswersEzequiel}`;
+                displayQuestionEzequiel();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderEzequielChart();
+            }
+        }
+
+        // Dados dos personagens para Ezequiel
+        const characterDetailsEzequiel = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O foco central do livro, cuja glória, soberania, juízo e planos de restauração são revelados através das visões e mensagens de Ezequiel."
+            },
+            "Ezequiel": {
+                name: "Ezequiel",
+                description: "O profeta sacerdote, filho de Buzi, que foi levado cativo para a Babilônia e comissionado por Deus como ataláia para o povo de Israel no exílio."
+            },
+            "O Espírito do Senhor": {
+                name: "O Espírito do Senhor",
+                description: "A força divina que capacita Ezequiel, o transporta em visões e o inspira a profetizar."
+            },
+            "O Povo de Israel/Judá": {
+                name: "O Povo de Israel/Judá",
+                description: "Os exilados na Babilônia e os remanescentes em Jerusalém, que são o alvo das profecias de juízo e restauração de Ezequiel, muitas vezes descritos como rebeldes e idólatras."
+            },
+            "Zedequias": {
+                name: "Zedequias",
+                description: "O último rei de Judá, cuja desobediência e alianças políticas levaram à destruição de Jerusalém e ao exílio."
+            },
+            "Nabucodonosor": {
+                name: "Nabucodonosor",
+                description: "Rei da Babilônia, usado por Deus como instrumento de juízo contra Jerusalém e outras nações."
+            },
+            "Gogue": {
+                name: "Gogue",
+                description: "Líder de Magogue, figura profética de um inimigo futuro que se levantará contra Israel, mas será derrotado por Deus."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalEzequiel(characterName) {
+            const details = characterDetailsEzequiel[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameEzequiel').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionEzequiel').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalEzequiel() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsEzequiel() {
+            const grid = document.getElementById('characterGridEzequiel');
+            grid.innerHTML = '';
+            for (const key in characterDetailsEzequiel) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalEzequiel(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksEzequiel() {
+            const chaptersDiv = document.getElementById('chaptersEzequiel');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 48; i++) { // Ezequiel tem 48 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/ez/${i}`; // Link para a Bíblia Online, Ezequiel
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Ezequiel (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsEzequiel = [
+            { question: "Qual era a profissão de Ezequiel antes de ser profeta?", options: ["Pastor", "Agricultor", "Sacerdote", "Soldado"], answer: "Sacerdote", reference: "Introdução ao Livro de Ezequiel" },
+            { question: "Em que local Ezequiel profetizou principalmente?", options: ["Jerusalém", "Egito", "Babilônia (entre os exilados)", "Nínive"], answer: "Babilônia (entre os exilados)", reference: "Introdução ao Livro de Ezequiel" },
+            { question: "Qual é a visão inicial e mais impressionante de Ezequiel?", options: ["O vale de ossos secos", "A glória de Deus e os seres viventes", "O novo Templo", "O rio que flui do Templo"], answer: "A glória de Deus e os seres viventes", reference: "Capítulo 1" },
+            { question: "Qual é o papel de Ezequiel, conforme Deus o designa?", options: ["Rei", "Sacerdote do Templo", "Ataláia (sentinela)", "Comandante do exército"], answer: "Ataláia (sentinela)", reference: "Ezequiel 3:17" },
+            { question: "O que Ezequiel 18 enfatiza sobre o pecado?", options: ["Que os filhos pagam pelos pecados dos pais", "Que a responsabilidade é coletiva", "Que cada indivíduo é responsável por seus próprios pecados", "Que Deus perdoa todos os pecados automaticamente"], answer: "Que cada indivíduo é responsável por seus próprios pecados", reference: "Ezequiel 18" },
+            { question: "Qual é a visão que simboliza a ressurreição e restauração de Israel?", options: ["A panela fervente", "As duas águias", "O vale de ossos secos", "A videira inútil"], answer: "O vale de ossos secos", reference: "Ezequiel 37" },
+            { question: "O que Deus promete dar ao Seu povo em Ezequiel 36:26?", options: ["Riquezas e prosperidade", "Um novo coração e um novo espírito", "Terra e gado em abundância", "Vitória sobre todos os inimigos"], answer: "Um novo coração e um novo espírito", reference: "Ezequiel 36:26" },
+            { question: "Qual nação é o foco dos oráculos de juízo nos capítulos 25-32 de Ezequiel?", options: ["Assíria", "Pérsia", "Babilônia", "Várias nações estrangeiras (Amom, Tiro, Egito, etc.)"], answer: "Várias nações estrangeiras (Amom, Tiro, Egito, etc.)", reference: "Panoramas do Livro de Ezequiel" },
+            { question: "O que acontece com a glória de Deus no Templo, conforme a visão de Ezequiel?", options: ["Ela permanece inalterada", "Ela se torna mais brilhante", "Ela parte do Templo devido às abominações", "Ela se espalha por toda a terra"], answer: "Ela parte do Templo devido às abominações", reference: "Ezequiel 10:18-19" },
+            { question: "Qual é o nome da cidade no final do livro de Ezequiel, que significa 'O Senhor Está Ali'?", options: ["Jerusalém", "Sião", "Jeová-Samá", "Babilônia"], answer: "Jeová-Samá", reference: "Ezequiel 48:35" },
+            { question: "Quantos capítulos tem o livro de Ezequiel?", options: ["39", "52", "48", "66"], answer: "48", reference: "Esboços do Livro de Ezequiel" },
+            { question: "Qual alegoria Ezequiel usa para descrever a infidelidade de Jerusalém?", options: ["Uma ovelha perdida", "Uma esposa infiel", "Um servo desobediente", "Um campo estéril"], answer: "Uma esposa infiel", reference: "Ezequiel 16" },
+            { question: "Quem é Gogue em Ezequiel 38-39?", options: ["Um rei de Israel", "Um profeta", "Um líder de Magogue, inimigo futuro de Israel", "Um anjo"], answer: "Um líder de Magogue, inimigo futuro de Israel", reference: "Ezequiel 38-39" },
+            { question: "O que o rio que flui do Templo na visão de Ezequiel 47 simboliza?", options: ["A destruição dos inimigos", "A prosperidade econômica", "Vida, cura e bênção para a terra", "Um novo caminho para o exílio"], answer: "Vida, cura e bênção para a terra", reference: "Ezequiel 47" },
+            { question: "Qual é a principal ênfase teológica do livro de Ezequiel?", options: ["A lei de Moisés", "A sabedoria humana", "A glória e soberania de Deus", "O poder dos reis"], answer: "A glória e soberania de Deus", reference: "Significado Teológico do Livro de Ezequiel" },
+            { question: "Ezequiel é levado cativo para a Babilônia em qual deportação de Jerusalém?", options: ["Primeira", "Segunda", "Terceira", "Quarta"], answer: "Segunda", reference: "Introdução ao Livro de Ezequiel" },
+            { question: "Quais são as duas 'irmãs' usadas em alegoria em Ezequiel 23?", options: ["Maria e Marta", "Raquel e Lia", "Oolá (Samaria) e Oolibá (Jerusalém)", "Rute e Noemi"], answer: "Oolá (Samaria) e Oolibá (Jerusalém)", reference: "Ezequiel 23" },
+            { question: "O que a visão da panela fervente em Ezequiel 24 simboliza?", options: ["A prosperidade de Jerusalém", "A purificação de Jerusalém", "O cerco e a destruição de Jerusalém", "A fartura de alimentos"], answer: "O cerco e a destruição de Jerusalém", reference: "Ezequiel 24" },
+            { question: "O que Ezequiel 34 descreve Deus como sendo para Seu povo?", options: ["Um juiz severo", "Um pastor que busca e cuida de suas ovelhas", "Um rei distante", "Um guerreiro invencível"], answer: "Um pastor que busca e cuida de suas ovelhas", reference: "Ezequiel 34" },
+            { question: "Qual é o tema principal da segunda parte do livro de Ezequiel (após a queda de Jerusalém)?", options: ["Juízo contínuo", "Lamentações", "Restauração e esperança", "Guerra e conquista"], answer: "Restauração e esperança", reference: "Panoramas do Livro de Ezequiel" },
+            { question: "O que as 'ações simbólicas' de Ezequiel (como deitar-se de lado) tinham como propósito?", options: ["Entreter o povo", "Confundir os inimigos", "Ilustrar as profecias de juízo e exílio", "Demonstrar sua obediência a Deus"], answer: "Ilustrar as profecias de juízo e exílio", reference: "Capítulos 4-5" },
+            { question: "Qual é a promessa de Deus em Ezequiel 11:19-20?", options: ["Dar-lhes um novo templo", "Dar-lhes um só coração e um novo espírito", "Dar-lhes muitas riquezas", "Dar-lhes vitória militar"], answer: "Dar-lhes um só coração e um novo espírito", reference: "Ezequiel 11:19-20" },
+            { question: "Como o livro de Ezequiel termina?", options: ["Com a descrição da destruição final", "Com uma visão de um novo Templo e a terra restaurada", "Com a morte do profeta", "Com a libertação do exílio"], answer: "Com uma visão de um novo Templo e a terra restaurada", reference: "Capítulos 40-48" },
+            { question: "O que o livro de Ezequiel ensina sobre a justiça de Deus?", options: ["Que ela é lenta e tardia", "Que ela é arbitrária", "Que ela é justa e retribui a cada um segundo suas obras", "Que ela pode ser subornada"], answer: "Que ela é justa e retribui a cada uno segundo suas obras", reference: "Ezequiel 18" },
+            { question: "Qual é o período de tempo que o ministério de Ezequiel abrange?", options: ["10 anos", "22 anos", "40 anos", "70 anos"], answer: "22 anos", reference: "Introdução ao Livro de Ezequiel" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsEzequiel = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsEzequiel.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsEzequiel = allQuizQuestionsEzequiel.concat(uniqueQuizQuestionsEzequiel);
+        }
+        allQuizQuestionsEzequiel = allQuizQuestionsEzequiel.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsEzequiel = [];
+        let currentQuizIndexEzequiel = 0;
+        let scoreEzequiel = 0;
+        let wrongAnswersEzequiel = 0;
+        let ezequielChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsEzequiel() {
+            shuffledQuizQuestionsEzequiel = [...allQuizQuestionsEzequiel]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsEzequiel);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressEzequiel() {
+            const progressElement = document.getElementById('quizProgressEzequiel');
+            progressElement.textContent = `${currentQuizIndexEzequiel + 1}/${shuffledQuizQuestionsEzequiel.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionEzequiel() {
+            if (currentQuizIndexEzequiel >= shuffledQuizQuestionsEzequiel.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionEzequiel').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsEzequiel').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreEzequiel}, Erros: ${wrongAnswersEzequiel}</p>`;
+                document.getElementById('quizFeedbackEzequiel').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsEzequiel[currentQuizIndexEzequiel];
+            document.getElementById('quizQuestionEzequiel').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsEzequiel');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerEzequiel(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackEzequiel').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressEzequiel();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerEzequiel(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackEzequiel');
+            const optionsButtons = document.querySelectorAll('#quizOptionsEzequiel button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreEzequiel++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersEzequiel++;
+            }
+            document.getElementById('quizScoreEzequiel').textContent = `Acertos: ${scoreEzequiel}, Erros: ${wrongAnswersEzequiel}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionEzequiel() {
+            currentQuizIndexEzequiel++;
+            displayQuestionEzequiel();
+        }
+
+        // Dados para o gráfico de temas de Ezequiel
+        const ezequielChartData = {
+            labels: ['Glória de Deus', 'Soberania Divina', 'Juízo e Destruição', 'Restauração e Renovação', 'Responsabilidade Individual', 'Novo Coração/Espírito', 'Ataláia', 'Novo Templo/Terra'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 15, 15, 10, 5, 5, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(201, 203, 207, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const ezequielChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Ezequiel',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderEzequielChart() {
+            const ctx = document.getElementById('ezequielChart').getContext('2d');
+            if (ezequielChartInstance) {
+                ezequielChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            ezequielChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: ezequielChartData,
+                options: ezequielChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

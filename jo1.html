@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A História de Jó</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #fff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .chapter-section {
+            display: none; /* Hidden by default */
+        }
+        .chapter-section.active {
+            display: block;
+        }
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .clue-list li {
+            background-color: #f9fafb;
+            border-left: 4px solid #92400e; /* Brown border for Job game */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        .key-verse {
+            font-style: italic;
+            color: #4b5563; /* Gray text */
+            margin-top: 1rem;
+        }
+        .enigma {
+            font-weight: 600;
+            color: #1f2937; /* Darker text */
+            margin-top: 1rem;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: flex-start; /* Align radio buttons to the left */
+            padding-left: 1rem; /* Indent options slightly */
+        }
+        .options-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        button {
+            background-color: #92400e; /* Brown for Job game */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* More rounded */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #7c2d12; /* Darker brown on hover */
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            border: 2px solid #92400e;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box p {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+        .message-box button {
+            background-color: #92400e;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #7c2d12;
+        }
+        .final-revelation {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981; /* Green for success */
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-amber-900 mb-4">A História de Jó 🙏</h1>
+        <p class="text-gray-700 mb-6">
+            Acompanhe a história de Jó, um homem justo que enfrentou provações extremas, mas manteve sua fé inabalável em Deus.
+        </p>
+
+        <div id="start-screen" class="active">
+            <button id="start-game-btn">Iniciar Jornada</button>
+        </div>
+
+        <div id="chapter-content-area">
+            </div>
+
+        <div id="revelation-screen" class="chapter-section">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns!</h2>
+            <p class="final-revelation">Você completou a jornada pela história de Jó!</p>
+            <p class="text-gray-700 mt-6">A história de Jó é um poderoso exemplo de fé inabalável, resiliência e a soberania de Deus em meio ao sofrimento, mostrando que a fidelidade é recompensada.</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <a href="index.html" class="game-button mt-4">Voltar ao Lançador de Jogos</a>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-text"></p>
+        <button id="close-message-btn">Fechar</button>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados de cada capítulo
+        const chapters = [
+            {
+                id: 'chapter1',
+                title: 'Capítulo 1: Jó, o Justo',
+                location: 'Terra de Uz',
+                objective: 'Entender a integridade e riqueza de Jó.',
+                clues: [
+                    'Jó era íntegro e reto, temia a Deus e desviava-se do mal.',
+                    'Ele era o homem mais rico do Oriente.'
+                ],
+                keyVerse: 'Jó 1:1-3',
+                enigma: 'Onde Jó vivia?',
+                options: ['Terra de Uz', 'Canaã', 'Egito'],
+                correctAnswer: 'Terra de Uz'
+            },
+            {
+                id: 'chapter2',
+                title: 'Capítulo 2: O Desafio de Satanás (Primeira Prova)',
+                location: 'Céu e Terra de Uz',
+                objective: 'Compreender o desafio de Satanás a Deus sobre a fé de Jó.',
+                clues: [
+                    'Satanás desafiou a Deus, dizendo que Jó só O servia por causa de suas bênçãos.',
+                    'Deus permitiu que Satanás tirasse tudo de Jó, exceto sua vida.'
+                ],
+                keyVerse: 'Jó 1:9-12',
+                enigma: 'O que Satanás não podia tirar de Jó na primeira prova?',
+                options: ['Sua vida', 'Seus bens', 'Seus filhos'],
+                correctAnswer: 'Sua vida'
+            },
+            {
+                id: 'chapter3',
+                title: 'Capítulo 3: As Perdas de Jó',
+                location: 'Terra de Uz',
+                objective: 'Aprender sobre as tragédias que se abateram sobre Jó.',
+                clues: [
+                    'Jó perdeu seus bois e jumentas para os sabeus, suas ovelhas e servos para o fogo do céu, seus camelos para os caldeus, e todos os seus filhos e filhas em um desabamento.'
+                ],
+                keyVerse: 'Jó 1:13-19',
+                enigma: 'Quem roubou os camelos de Jó?',
+                options: ['Os caldeus', 'Os sabeus', 'Os filisteus'],
+                correctAnswer: 'Os caldeus'
+            },
+            {
+                id: 'chapter4',
+                title: 'Capítulo 4: A Reação de Jó',
+                location: 'Terra de Uz',
+                objective: 'Observar a fidelidade de Jó em meio à dor.',
+                clues: [
+                    'Jó rasgou suas vestes, rapou a cabeça e prostrou-se em terra, adorando a Deus.',
+                    'Ele disse: "Nu saí do ventre de minha mãe, e nu para lá tornarei; o Senhor deu, e o Senhor tirou; bendito seja o nome do Senhor."'
+                ],
+                keyVerse: 'Jó 1:20-22',
+                enigma: 'O que Jó disse após perder tudo?',
+                options: ['"O Senhor deu, e o Senhor tirou; bendito seja o nome do Senhor."', '"Por que me fizeste isso, ó Deus?"', '"Eu amaldiçoo o dia em que nasci."'],
+                correctAnswer: '"O Senhor deu, e o Senhor tirou; bendito seja o nome do Senhor."'
+            },
+            {
+                id: 'chapter5',
+                title: 'Capítulo 5: O Desafio de Satanás (Segunda Prova)',
+                location: 'Céu e Terra de Uz',
+                objective: 'Entender a segunda permissão de Deus a Satanás.',
+                clues: [
+                    'Satanás desafiou novamente, dizendo que Jó só era fiel porque sua saúde estava intacta.',
+                    'Deus permitiu que Satanás afligisse Jó com úlceras malignas, da planta do pé ao alto da cabeça.'
+                ],
+                keyVerse: 'Jó 2:4-7',
+                enigma: 'O que Satanás afligiu em Jó na segunda prova?',
+                options: ['Sua saúde', 'Sua casa', 'Sua riqueza'],
+                correctAnswer: 'Sua saúde'
+            },
+            {
+                id: 'chapter6',
+                title: 'Capítulo 6: A Esposa de Jó',
+                location: 'Terra de Uz',
+                objective: 'Aprender sobre a atitude da esposa de Jó.',
+                clues: [
+                    'A esposa de Jó o aconselhou a amaldiçoar a Deus e morrer.',
+                    'Jó a repreendeu, dizendo que ela falava como uma louca.'
+                ],
+                keyVerse: 'Jó 2:9-10',
+                enigma: 'O que a esposa de Jó o aconselhou a fazer?',
+                options: ['Amaldiçoar a Deus e morrer', 'Orar a Deus por cura', 'Fugir de sua terra'],
+                correctAnswer: 'Amaldiçoar a Deus e morrer'
+            },
+            {
+                id: 'chapter7',
+                title: 'Capítulo 7: Os Três Amigos de Jó',
+                location: 'Terra de Uz',
+                objective: 'Conhecer os amigos que vieram consolar Jó.',
+                clues: [
+                    'Elifaz, Bildade e Zofar vieram consolar Jó.',
+                    'Eles sentaram com ele por sete dias e sete noites em silêncio, pois sua dor era muito grande.'
+                ],
+                keyVerse: 'Jó 2:11-13',
+                enigma: 'Qual destes não era um dos três amigos de Jó?',
+                options: ['Eliú', 'Elifaz', 'Bildade'],
+                correctAnswer: 'Eliú'
+            },
+            {
+                id: 'chapter8',
+                title: 'Capítulo 8: Os Discursos dos Amigos (Acusação)',
+                location: 'Terra de Uz',
+                objective: 'Entender a teologia dos amigos sobre o sofrimento de Jó.',
+                clues: [
+                    'Os amigos de Jó argumentavam que ele devia ter pecado para sofrer tanto, pois Deus é justo e só pune os ímpios.',
+                    'Eles o acusaram de hipocrisia e de pecados ocultos.'
+                ],
+                keyVerse: 'Jó 4:7-9',
+                enigma: 'Qual era a principal acusação dos amigos de Jó?',
+                options: ['Que ele havia pecado', 'Que ele não orava o suficiente', 'Que ele era muito orgulhoso'],
+                correctAnswer: 'Que ele havia pecado'
+            },
+            {
+                id: 'chapter9',
+                title: 'Capítulo 9: A Resposta de Jó aos Amigos',
+                location: 'Terra de Uz',
+                objective: 'Observar a defesa de Jó e sua angústia.',
+                clues: [
+                    'Jó insistiu em sua inocência e questionou por que estava sofrendo.',
+                    'Ele expressou sua angústia e desejo de morrer, mas manteve sua integridade diante de Deus.'
+                ],
+                keyVerse: 'Jó 6:24-26',
+                enigma: 'O que Jó manteve firmemente diante de seus amigos, apesar das acusações?',
+                options: ['Sua inocência', 'Sua riqueza', 'Sua saúde'],
+                correctAnswer: 'Sua inocência'
+            },
+            {
+                id: 'chapter10',
+                title: 'Capítulo 10: A Intervenção de Eliú',
+                location: 'Terra de Uz',
+                objective: 'Aprender sobre a perspectiva de Eliú sobre o sofrimento.',
+                clues: [
+                    'Eliú, um jovem, esperou que os mais velhos falassem e então ofereceu sua perspectiva.',
+                    'Ele argumentou que Deus usa o sofrimento para disciplinar e ensinar, e que Jó precisava se humilhar.'
+                ],
+                keyVerse: 'Jó 33:14-17',
+                enigma: 'Quem interveio na discussão após os três amigos de Jó?',
+                options: ['Eliú', 'Um mensageiro', 'Um anjo'],
+                correctAnswer: 'Eliú'
+            },
+            {
+                id: 'chapter11',
+                title: 'Capítulo 11: Deus Responde a Jó (Tempestade)',
+                location: 'Terra de Uz',
+                objective: 'Entender a resposta de Deus a Jó.',
+                clues: [
+                    'Deus respondeu a Jó do meio de uma tempestade, fazendo-lhe perguntas sobre a criação e a sabedoria divina.',
+                    'Ele mostrou a Jó a Sua soberania e poder incomparáveis.'
+                ],
+                keyVerse: 'Jó 38:1-4',
+                enigma: 'De onde Deus respondeu a Jó?',
+                options: ['De uma tempestade', 'De um monte', 'De um sonho'],
+                correctAnswer: 'De uma tempestade'
+            },
+            {
+                id: 'chapter12',
+                title: 'Capítulo 12: O Arrependimento de Jó',
+                location: 'Terra de Uz',
+                objective: 'Observar a humildade e o arrependimento de Jó.',
+                clues: [
+                    'Jó reconheceu a grandeza de Deus e sua própria insignificância.',
+                    'Ele se arrependeu em pó e cinzas, admitindo que havia falado de coisas que não entendia.'
+                ],
+                keyVerse: 'Jó 42:1-6',
+                enigma: 'Em que Jó se arrependeu diante de Deus?',
+                options: ['Em pó e cinzas', 'Em jejum e oração', 'Com sacrifícios'],
+                correctAnswer: 'Em pó e cinzas'
+            },
+            {
+                id: 'chapter13',
+                title: 'Capítulo 13: A Restauração de Jó',
+                location: 'Terra de Uz',
+                objective: 'Aprender sobre a restauração da fortuna de Jó.',
+                clues: [
+                    'Deus restaurou a Jó o dobro de tudo o que ele havia perdido.',
+                    'Ele teve mais sete filhos e três filhas, e viveu mais 140 anos.'
+                ],
+                keyVerse: 'Jó 42:10, 12-13',
+                enigma: 'Quanto Deus restaurou a Jó em comparação com o que ele havia perdido?',
+                options: ['O dobro', 'A metade', 'O triplo'],
+                correctAnswer: 'O dobro'
+            },
+            {
+                id: 'chapter14',
+                title: 'Capítulo 14: A Oração de Jó pelos Amigos',
+                location: 'Terra de Uz',
+                objective: 'Entender a intercessão de Jó por seus amigos.',
+                clues: [
+                    'Deus instruiu os amigos de Jó a oferecerem um sacrifício e pedirem que Jó orasse por eles, pois Ele aceitaria a oração de Jó.'
+                ],
+                keyVerse: 'Jó 42:7-9',
+                enigma: 'Quem Deus instruiu a orar pelos amigos de Jó?',
+                options: ['Jó', 'Um sacerdote', 'Um profeta'],
+                correctAnswer: 'Jó'
+            },
+            {
+                id: 'chapter15',
+                title: 'Capítulo 15: O Legado de Jó',
+                location: 'Terra de Uz',
+                objective: 'Refletir sobre as lições da história de Jó.',
+                clues: [
+                    'A história de Jó ensina sobre a soberania de Deus, a natureza do sofrimento, a importância da fé inabalável e a recompensa da perseverança.'
+                ],
+                keyVerse: 'Tiago 5:11',
+                enigma: 'Qual é uma das principais lições da história de Jó?',
+                options: ['A soberania de Deus no sofrimento', 'A importância da riqueza', 'A necessidade de amigos'],
+                correctAnswer: 'A soberania de Deus no sofrimento'
+            }
+        ];
+
+        let currentChapterIndex = 0; // Inicia no primeiro capítulo
+
+        // Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const chapterContentArea = document.getElementById('chapter-content-area'); // Área para conteúdo dinâmico
+        const revelationScreen = document.getElementById('revelation-screen');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBtn = document.getElementById('close-message-btn');
+
+        // Função para exibir a caixa de mensagem personalizada
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener para fechar a caixa de mensagem
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Função para iniciar o jogo
+        startGameBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active'); // Esconde a tela inicial
+            displayChapter(currentChapterIndex); // Exibe o primeiro capítulo
+        });
+
+        // Função para exibir um capítulo específico
+        function displayChapter(index) {
+            // Esconde todas as seções (incluindo a de revelação, se estiver ativa)
+            document.querySelectorAll('.chapter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (index < chapters.length) {
+                const chapterData = chapters[index];
+                const chapterDiv = document.createElement('div');
+                chapterDiv.id = chapterData.id;
+                chapterDiv.classList.add('chapter-section', 'active');
+
+                // Construção do HTML do capítulo dinamicamente
+                let cluesHtml = chapterData.clues.map(clue => `<li>${clue}</li>`).join('');
+
+                chapterDiv.innerHTML = `
+                    <h2 class="text-2xl font-semibold text-amber-900 mb-2">${chapterData.title}</h2>
+                    <p class="text-gray-600 mb-4">Local: ${chapterData.location}</p>
+                    <p class="text-gray-800 mb-4">Objetivo: ${chapterData.objective}</p>
+                    <ul class="clue-list">
+                        ${cluesHtml}
+                    </ul>
+                    <p class="key-verse">Versículo-chave: ${chapterData.keyVerse}</p>
+                    <p class="enigma">Enigma: ${chapterData.enigma}</p>
+                    <div class="options-container" id="options${index + 1}">
+                        </div>
+                    <button onclick="checkAnswer(${index + 1})">Verificar</button>
+                `;
+                chapterContentArea.appendChild(chapterDiv);
+
+                // Popula as opções do enigma
+                const optionsContainer = document.getElementById(`options${index + 1}`);
+                if (optionsContainer) {
+                    const shuffledOptions = [...chapterData.options].sort(() => Math.random() - 0.5); // Randomize order
+                    shuffledOptions.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `
+                            <input type="radio" name="answer${index + 1}" value="${option.toLowerCase()}" id="option${index + 1}-${i}">
+                            ${option}
+                        `;
+                        optionsContainer.appendChild(label);
+                    });
+                }
+            } else {
+                // Exibe a tela de revelação final
+                revelationScreen.classList.add('active');
+            }
+        }
+
+        // Função para verificar a resposta de um capítulo
+        function checkAnswer(chapterNumber) {
+            const selectedOption = document.querySelector(`input[name="answer${chapterNumber}"]:checked`);
+            if (!selectedOption) {
+                showMessage('Por favor, selecione uma opção!');
+                return;
+            }
+
+            const userAnswer = selectedOption.value.trim().toLowerCase();
+            const correctAnswer = chapters[chapterNumber - 1].correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                showMessage('Resposta correta! Você avançou para o próximo capítulo.');
+                currentChapterIndex++;
+                setTimeout(() => {
+                    displayChapter(currentChapterIndex);
+                }, 1500); // Pequeno atraso para o usuário ler a mensagem
+            } else {
+                showMessage('Resposta incorreta. Tente novamente!');
+            }
+        }
+
+        // Função para reiniciar o jogo
+        function restartGame() {
+            currentChapterIndex = 0;
+            revelationScreen.classList.remove('active'); // Esconde a tela de revelação
+            startScreen.classList.add('active'); // Volta para a tela inicial
+            chapterContentArea.innerHTML = ''; // Limpa o conteúdo dinâmico
+        }
+    </script>
+</body>
+</html>

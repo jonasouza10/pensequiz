@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Hebreus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hebreus Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Hebreus</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionHebreus('inicioHebreus')">Início</button>
+            <button class="nav-button" onclick="showSectionHebreus('introducaoHebreus')">Introdução</button>
+            <button class="nav-button" onclick="showSectionHebreus('panoramasHebreus')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionHebreus('personagensHebreus')">Personagens</button>
+            <button class="nav-button" onclick="showSectionHebreus('esbocosHebreus')">Esboços</button>
+            <button class="nav-button" onclick="showSectionHebreus('temasHebreus')">Temas</button>
+            <button class="nav-button" onclick="showSectionHebreus('capitulosHebreus')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionHebreus('quizHebreus')">Quiz</button>
+            <button class="nav-button" onclick="showSectionHebreus('graficoHebreus')">Gráfico</button>
+        </div>
+
+        <div id="inicioHebreus" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Hebreus</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Epístola aos Hebreus, um livro profundo que exalta a superioridade de Jesus Cristo sobre a antiga aliança, os anjos, Moisés e o sacerdócio levítico. Descubra a perfeição do novo pacto estabelecido por Cristo e a importância da fé para perseverar na jornada cristã. Entenda as advertências contra a apostasia e o encorajamento a se aproximar de Deus com confiança. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducaoHebreus" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Hebreus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Epístola aos Hebreus é um dos livros mais teologicamente ricos e complexos do Novo Testamento. Diferente da maioria das epístolas, ela não começa com uma saudação formal que identifique seu autor. A autoria é incerta, embora muitos a atribuam a Paulo, Barnabé, Apolo, ou outros. O mais importante é que a mensagem é divinamente inspirada. Foi escrita para uma comunidade de cristãos judeus (hebreus) que estavam enfrentando perseguição e tentações para retornar às práticas do judaísmo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito da carta é demonstrar a superioridade de Jesus Cristo e do Novo Pacto em relação ao Antigo Pacto. O autor argumenta que Jesus é superior aos anjos, a Moisés, a Josué, e ao sacerdócio levítico, e que Seu sacrifício na cruz é definitivo e perfeito, tornando desnecessários os sacrifícios contínuos do Antigo Testamento. A carta também contém sérias advertências contra a apostasia (afastar-se da fé) e encorajamentos à perseverança, à fé e à santidade.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Hebreus é uma obra-prima teológica que conecta profundamente o Antigo e o Novo Testamento, revelando como Cristo é o cumprimento de todas as promessas e tipos do Antigo Pacto. Ela nos chama a fixar os olhos em Jesus, o autor e consumador da nossa fé, e a nos aproximar de Deus com ousadia através do Seu sangue. É um livro essencial para entender a plenitude da salvação em Cristo e a natureza do sacerdócio de Melquisedeque.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-2: A Superioridade de Cristo sobre os Anjos.</strong> Jesus é o Filho de Deus, superior aos anjos, e se fez homem para sofrer e nos salvar.</li>
+                <li><strong>Capítulos 3-4: A Superioridade de Cristo sobre Moisés e o Descanso de Deus.</strong> Jesus é mais digno de glória que Moisés, e há um descanso sabático para o povo de Deus.</li>
+                <li><strong>Capítulos 5-7: O Sacerdócio de Cristo Segundo a Ordem de Melquisedeque.</strong> Jesus é o Sumo Sacerdote perfeito, superior ao sacerdócio levítico, segundo a ordem de Melquisedeque.</li>
+                <li><strong>Capítulos 8-10: O Novo e Superior Pacto.</strong> Cristo é o mediador de um pacto superior, que oferece um sacrifício perfeito e definitivo para a remissão dos pecados.</li>
+                <li><strong>Capítulos 11-12: A Natureza da Fé e a Exortação à Perseverança.</strong> O famoso 'hall da fé' e a exortação para correr com perseverança a corrida da vida cristã, olhando para Jesus.</li>
+                <li><strong>Capítulo 13: Exortações Finais e Saudações.</strong> Conselhos práticos sobre amor fraternal, hospitalidade, casamento, contentamento e obediência aos líderes.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Hebreus é um convite à fé inabalável em Cristo, o Sumo Sacerdote perfeito e o mediador de uma aliança superior.</p>
+        </div>
+
+        <div id="panoramasHebreus" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Hebreus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Hebreus é uma epístola que exalta a superioridade de Jesus Cristo e a perfeição do Novo Pacto.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Superioridade de Cristo (Capítulos 1-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Superioridade sobre os Anjos (Capítulos 1:1 - 2:18):</strong>
+                    <ul>
+                        <li>Cristo como o resplendor da glória de Deus e a expressa imagem da sua pessoa (1:1-3).</li>
+                        <li>Cristo é adorado pelos anjos (1:6).</li>
+                        <li>Advertência contra a negligência da salvação (2:1-4).</li>
+                        <li>Jesus feito um pouco menor que os anjos para sofrer a morte (2:5-9).</li>
+                        <li>Ele se tornou semelhante a Seus irmãos para ser um Sumo Sacerdote misericordioso e fiel (2:10-18).</li>
+                    </ul>
+                </li>
+                <li><strong>B. Superioridade sobre Moisés (Capítulos 3:1 - 4:13):</strong>
+                    <ul>
+                        <li>Moisés foi fiel como servo, mas Cristo como Filho sobre Sua própria casa (3:1-6).</li>
+                        <li>Advertência contra a incredulidade e o endurecimento do coração (3:7-19).</li>
+                        <li>A promessa do descanso de Deus e a eficácia da Palavra de Deus (4:1-13).</li>
+                    </ul>
+                </li>
+                <li><strong>C. Superioridade do Sacerdócio de Cristo (Capítulos 4:14 - 7:28):</strong>
+                    <ul>
+                        <li>Jesus, nosso Sumo Sacerdote, que pode compadecer-se de nossas fraquezas (4:14-16).</li>
+                        <li>A ordem de Melquisedeque, um sacerdócio eterno e sem genealogia (5:1-10; 7:1-10).</li>
+                        <li>Advertência contra a imaturidade espiritual (5:11 - 6:12).</li>
+                        <li>A certeza da promessa de Deus (6:13-20).</li>
+                        <li>Cristo, um Sumo Sacerdote perfeito, que não precisa oferecer sacrifícios diários por Si mesmo (7:11-28).</li>
+                    </ul>
+                </li>
+                <li><strong>D. Superioridade do Novo Pacto e do Sacrifício de Cristo (Capítulos 8:1 - 10:39):</strong>
+                    <ul>
+                        <li>Cristo como mediador de um pacto superior, baseado em melhores promessas (8:1-13).</li>
+                        <li>O tabernáculo terrestre como sombra do celestial (9:1-10).</li>
+                        <li>O sangue de Cristo purifica a consciência de obras mortas (9:11-14).</li>
+                        <li>A necessidade da morte para a validade do testamento (9:15-22).</li>
+                        <li>Cristo ofereceu-se uma vez por todas para tirar os pecados (9:23-28).</li>
+                        <li>A ineficácia dos sacrifícios anuais da lei (10:1-4).</li>
+                        <li>A vinda de Cristo para fazer a vontade de Deus e remover o primeiro pacto (10:5-10).</li>
+                        <li>O sacrifício perfeito e definitivo de Cristo (10:11-18).</li>
+                        <li>Exortação a nos aproximarmos de Deus com confiança (10:19-25).</li>
+                        <li>Advertência contra o pecado deliberado e a apostasia (10:26-39).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Vida de Fé e Perseverança (Capítulos 11-13)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Natureza da Fé (Capítulo 11:1-40):</strong>
+                    <ul>
+                        <li>A fé como o firme fundamento das coisas que se esperam e a prova das coisas que se não veem (11:1).</li>
+                        <li>O 'hall da fé', exemplos de fé de Abel, Enoque, Noé, Abraão, Sara, Isaque, Jacó, José, Moisés, Raabe e muitos outros (11:4-38).</li>
+                        <li>Todos estes, embora aprovados pela fé, não alcançaram a promessa (11:39-40).</li>
+                    </ul>
+                </li>
+                <li><strong>B. Exortação à Perseverança (Capítulo 12:1-29):</strong>
+                    <ul>
+                        <li>Correr com paciência a carreira que nos está proposta, olhando para Jesus (12:1-3).</li>
+                        <li>A disciplina de Deus como prova de Seu amor (12:4-11).</li>
+                        <li>Buscar a paz e a santificação (12:12-17).</li>
+                        <li>A superioridade do Monte Sião celestial sobre o Monte Sinai (12:18-29).</li>
+                    </ul>
+                </li>
+                <li><strong>C. Exortações Finais e Saudações (Capítulo 13:1-25):</strong>
+                    <ul>
+                        <li>Amor fraternal, hospitalidade, lembrança dos presos e dos maltratados (13:1-3).</li>
+                        <li>O casamento seja honrado e o leito sem mácula (13:4).</li>
+                        <li>Contentamento e confiança em Deus (13:5-6).</li>
+                        <li>Lembrar-se dos líderes e imitar sua fé (13:7).</li>
+                        <li>Jesus Cristo é o mesmo, ontem, e hoje, e eternamente (13:8).</li>
+                        <li>Não ser levado por doutrinas estranhas e variadas (13:9).</li>
+                        <li>Sair ao encontro de Cristo fora do arraial (13:10-14).</li>
+                        <li>Oferecer sacrifícios de louvor e fazer o bem (13:15-16).</li>
+                        <li>Obedecer aos líderes da igreja (13:17).</li>
+                        <li>Pedidos de oração e bênção final (13:18-25).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Hebreus é uma obra-prima que eleva Jesus Cristo ao Seu devido lugar de supremacia sobre toda a criação e sobre a antiga aliança. Ela demonstra que tudo no Antigo Testamento apontava para Cristo, que é o cumprimento perfeito e final da revelação de Deus. A carta oferece um profundo entendimento do sacerdócio de Cristo, do novo pacto e da natureza da fé. É um poderoso chamado à perseverança e à fidelidade, encorajando os crentes a não vacilarem diante das dificuldades, mas a confiarem plenamente em Jesus, o Sumo Sacerdote que nos abriu um novo e vivo caminho para Deus.</p>
+        </div>
+
+        <div id="personagensHebreus" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridHebreus">
+            </div>
+        </div>
+
+        <div id="esbocosHebreus" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Hebreus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Hebreus, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A Superioridade de Cristo sobre os Anjos.</li>
+                <li><strong>Capítulo 2:</strong> A Humanidade de Cristo e Sua Obra Redentora.</li>
+                <li><strong>Capítulo 3:</strong> Cristo Superior a Moisés e a Advertência Contra a Incredulidade.</li>
+                <li><strong>Capítulo 4:</strong> O Descanso de Deus e a Eficácia da Palavra.</li>
+                <li><strong>Capítulo 5:</strong> O Sacerdócio de Cristo e a Necessidade de Maturidade.</li>
+                <li><strong>Capítulo 6:</strong> Advertência Contra a Apostasia e a Certeza da Promessa.</li>
+                <li><strong>Capítulo 7:</strong> Melquisedeque e a Superioridade do Sacerdócio de Cristo.</li>
+                <li><strong>Capítulo 8:</strong> Cristo, Mediador de um Novo e Melhor Pacto.</li>
+                <li><strong>Capítulo 9:</strong> O Santuário Terrestre e o Sacrifício Perfeito de Cristo.</li>
+                <li><strong>Capítulo 10:</strong> A Perfeição do Sacrifício de Cristo e a Nova Aliança.</li>
+                <li><strong>Capítulo 11:</strong> A Definição e Exemplos da Fé.</li>
+                <li><strong>Capítulo 12:</strong> A Disciplina de Deus e a Corrida da Fé.</li>
+                <li><strong>Capítulo 13:</strong> Exortações Finais e Saudações.</li>
+            </ul>
+        </div>
+
+        <div id="temasHebreus" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Hebreus</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Superioridade de Jesus Cristo:</strong> Sobre anjos, Moisés, sacerdócio levítico e o Antigo Pacto.</li>
+                <li><strong>A Perfeição do Novo Pacto:</strong> Estabelecido pelo sangue de Cristo, superando o Antigo Pacto.</li>
+                <li><strong>A Fé como Essência da Vida Cristã:</strong> Exemplos de fé e a necessidade de perseverar.</li>
+                <li><strong>O Sacerdócio de Melquisedeque:</strong> A singularidade e eternidade do sacerdócio de Cristo.</li>
+                <li><strong>Advertências Contra a Apostasia:</strong> A seriedade de se afastar da fé.</li>
+                <li><strong>Perseverança e Confiança em Deus:</strong> O encorajamento para continuar na jornada cristã.</li>
+                <li><strong>A Importância do Sacrifício de Cristo:</strong> O sacrifício definitivo e suficiente para a remissão dos pecados.</li>
+            </ul>
+        </div>
+
+        <div id="capitulosHebreus" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Hebreus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersHebreus">
+            </div>
+        </div>
+
+        <div id="quizHebreus" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Hebreus</h2>
+            <div id="quizContainerHebreus" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionHebreus"></p>
+                <div id="quizOptionsHebreus" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackHebreus" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionHebreus()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressHebreus"></span></p>
+                <p>Pontuação: <span id="quizScoreHebreus">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="graficoHebreus" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Hebreus</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Hebreus.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="hebreusChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModalHebreus" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalHebreus()">&times;</span>
+                <h3 id="modalCharacterNameHebreus" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionHebreus" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data-hebreus">
+        {
+            "name": "Livro Interativo de Hebreus",
+            "short_name": "Hebreus",
+            "description": "Explore o livro de Hebreus de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=HBR",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=HBR",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script-hebreus">
+        // service-worker.js for Hebreus
+        const CACHE_NAME_HEBREUS = 'hebreus-interactive-v1';
+        const urlsToCacheHebreus = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME_HEBREUS)
+                    .then(cache => {
+                        console.log('Opened cache for Hebreus');
+                        return cache.addAll(urlsToCacheHebreus);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME_HEBREUS];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker para Hebreus
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script-hebreus');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker para Hebreus registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker para Hebreus:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente para Hebreus
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data-hebreus').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções de Hebreus
+        function showSectionHebreus(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('active');
+            } else {
+                console.error(`Seção com ID '${sectionId}' não encontrada.`);
+            }
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagensHebreus') {
+                generateCharacterButtonsHebreus();
+            }
+            if (sectionId === 'capitulosHebreus') {
+                generateChapterLinksHebreus();
+            }
+            if (sectionId === 'quizHebreus') {
+                shuffleQuizQuestionsHebreus(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexHebreus = 0; // Reinicia o quiz
+                scoreHebreus = 0;
+                wrongAnswersHebreus = 0;
+                document.getElementById('quizScoreHebreus').textContent = `Acertos: ${scoreHebreus}, Erros: ${wrongAnswersHebreus}`;
+                displayQuestionHebreus();
+            }
+            if (sectionId === 'graficoHebreus') {
+                renderHebreusChart();
+            }
+        }
+
+        // Dados dos personagens para Hebreus
+        const characterDetailsHebreus = {
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "O personagem central do livro, exaltado como o Filho de Deus, Sumo Sacerdote perfeito e mediador de um novo e superior pacto."
+            },
+            "Melquisedeque": {
+                name: "Melquisedeque",
+                description: "Rei de Salém e sacerdote do Deus Altíssimo, figura tipológica de Cristo, cujo sacerdócio é superior ao levítico."
+            },
+            "Moisés": {
+                name: "Moisés",
+                description: "Líder de Israel no Antigo Testamento, cuja fidelidade é comparada e superada pela fidelidade de Cristo."
+            },
+            "Arão": {
+                name: "Arão",
+                description: "O primeiro sumo sacerdote levítico, cujo sacerdócio é contrastado com o sacerdócio perfeito de Cristo."
+            },
+            "Abel": {
+                name: "Abel",
+                description: "Primeiro exemplo de fé no capítulo 11, que ofereceu a Deus um sacrifício mais excelente que o de Caim."
+            },
+            "Enoque": {
+                name: "Enoque",
+                description: "Exemplo de fé no capítulo 11, que foi trasladado para não ver a morte, porque agradou a Deus."
+            },
+            "Noé": {
+                name: "Noé",
+                description: "Exemplo de fé no capítulo 11, que, divinamente avisado, preparou a arca para a salvação de sua família."
+            },
+            "Abraão": {
+                name: "Abraão",
+                description: "O pai da fé, que obedeceu ao chamado de Deus para sair de sua terra e recebeu as promessas."
+            },
+            "Sara": {
+                name: "Sara",
+                description: "Esposa de Abraão, que pela fé recebeu força para conceber, mesmo sendo estéril e idosa."
+            },
+            "Isaque": {
+                name: "Isaque",
+                description: "Filho da promessa de Abraão e Sara, que pela fé abençoou Jacó e Esaú."
+            },
+            "Jacó": {
+                name: "Jacó",
+                description: "Filho de Isaque, que pela fé abençoou cada um dos filhos de José."
+            },
+            "José": {
+                name: "José",
+                description: "Filho de Jacó, que pela fé, ao morrer, fez menção da saída dos filhos de Israel e deu ordens acerca de seus ossos."
+            },
+            "Raabe": {
+                name: "Raabe",
+                description: "Prostituta de Jericó, que pela fé acolheu os espias e não pereceu com os desobedientes."
+            },
+            "Gideão": {
+                name: "Gideão",
+                description: "Juiz de Israel, exemplo de fé no capítulo 11."
+            },
+            "Baraque": {
+                name: "Baraque",
+                description: "Comandante militar de Israel, exemplo de fé no capítulo 11."
+            },
+            "Sansão": {
+                name: "Sansão",
+                description: "Juiz de Israel, exemplo de fé no capítulo 11."
+            },
+            "Jefté": {
+                name: "Jefté",
+                description: "Juiz de Israel, exemplo de fé no capítulo 11."
+            },
+            "Davi": {
+                name: "Davi",
+                description: "Rei de Israel, exemplo de fé no capítulo 11."
+            },
+            "Samuel": {
+                name: "Samuel",
+                description: "Profeta e juiz de Israel, exemplo de fé no capítulo 11."
+            },
+            "Profetas": {
+                name: "Profetas",
+                description: "Muitos outros profetas do Antigo Testamento são mencionados como exemplos de fé."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, o objeto e a fonte de toda fé e salvação."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalHebreus(characterName) {
+            const details = characterDetailsHebreus[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameHebreus').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionHebreus').textContent = details.description;
+                document.getElementById('characterModalHebreus').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalHebreus() {
+            document.getElementById('characterModalHebreus').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsHebreus() {
+            const grid = document.getElementById('characterGridHebreus');
+            grid.innerHTML = '';
+            for (const key in characterDetailsHebreus) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalHebreus(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos (Hebreus tem 13 capítulos)
+        function generateChapterLinksHebreus() {
+            const chaptersDiv = document.getElementById('chaptersHebreus');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 13; i++) { // Hebreus tem 13 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/hb/${i}`; // Link para a Bíblia Online, Hebreus
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Hebreus (perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsHebreus = [
+            { question: "Qual o tema central do livro de Hebreus?", options: ["A criação do mundo", "A superioridade de Jesus Cristo", "As leis de Moisés", "A história de Israel"], answer: "A superioridade de Jesus Cristo", reference: "Introdução ao Livro de Hebreus" },
+            { question: "Sobre quem Jesus é superior no Capítulo 1?", options: ["Sobre os profetas", "Sobre os anjos", "Sobre os reis", "Sobre os sacerdotes"], answer: "Sobre os anjos", reference: "Capítulo 1" },
+            { question: "Por que Jesus se fez um pouco menor que os anjos, segundo Hebreus 2?", options: ["Para ser glorificado", "Para sofrer a morte e provar a morte por todos", "Para ter poder", "Para ser adorado"], answer: "Para sofrer a morte e provar a morte por todos", reference: "Capítulo 2:9" },
+            { question: "Quem é considerado mais digno de glória que Moisés, segundo Hebreus 3?", options: ["Arão", "Josué", "Jesus", "Davi"], answer: "Jesus", reference: "Capítulo 3:3" },
+            { question: "Qual é a promessa que ainda resta para o povo de Deus, segundo Hebreus 4?", options: ["Riquezas", "Fama", "Um descanso sabático", "Poder"], answer: "Um descanso sabático", reference: "Capítulo 4:9" },
+            { question: "Segundo Hebreus 5, Jesus é Sumo Sacerdote segundo a ordem de quem?", options: ["Arão", "Leví", "Melquisedeque", "Pedro"], answer: "Melquisedeque", reference: "Capítulo 5:6" },
+            { question: "Qual a advertência séria feita em Hebreus 6?", options: ["Contra a preguiça", "Contra a incredulidade", "Contra a apostasia", "Contra a falta de oração"], answer: "Contra a apostasia", reference: "Capítulo 6:4-6" },
+            { question: "Qual a principal característica do sacerdócio de Melquisedeque, segundo Hebreus 7?", options: ["É hereditário", "É temporário", "É eterno e sem genealogia", "É baseado em sacrifícios de animais"], answer: "É eterno e sem genealogia", reference: "Capítulo 7:3" },
+            { question: "De que Jesus é mediador, segundo Hebreus 8?", options: ["De um pacto antigo", "De um pacto inferior", "De um pacto superior e de melhores promessas", "De um pacto temporário"], answer: "De um pacto superior e de melhores promessas", reference: "Capítulo 8:6" },
+            { question: "O que o sangue de Cristo purifica, segundo Hebreus 9?", options: ["O corpo físico", "A consciência de obras mortas", "As roupas", "Os objetos do templo"], answer: "A consciência de obras mortas", reference: "Capítulo 9:14" },
+            { question: "Quantas vezes Cristo se ofereceu para tirar os pecados, segundo Hebreus 9?", options: ["Muitas vezes", "Todos os anos", "Uma vez por todas", "Diariamente"], answer: "Uma vez por todas", reference: "Capítulo 9:28" },
+            { question: "O que é a fé, segundo Hebreus 11:1?", options: ["Um sentimento", "A certeza das coisas que se esperam e a prova das coisas que se não veem", "A riqueza material", "A fama"], answer: "A certeza das coisas que se esperam e a prova das coisas que se não veem", reference: "Capítulo 11:1" },
+            { question: "Quem é o 'autor e consumador da nossa fé', segundo Hebreus 12?", options: ["Moisés", "Abraão", "Jesus", "Paulo"], answer: "Jesus", reference: "Capítulo 12:2" },
+            { question: "O que os crentes devem buscar, segundo Hebreus 12:14?", options: ["Riquezas", "Fama", "A paz com todos e a santificação", "Poder"], answer: "A paz com todos e a santificação", reference: "Capítulo 12:14" },
+            { question: "O que Jesus Cristo é, segundo Hebreus 13:8?", options: ["Mutável", "Diferente a cada dia", "O mesmo, ontem, e hoje, e eternamente", "Temporário"], answer: "O mesmo, ontem, e hoje, e eternamente", reference: "Capítulo 13:8" },
+            { question: "Qual o tema central do Capítulo 11 de Hebreus?", options: ["A lei de Moisés", "A definição e exemplos da fé", "A criação do mundo", "A vida de Jesus"], answer: "A definição e exemplos da fé", reference: "Esboços do Livro de Hebreus" },
+            { question: "O que Paulo exorta os crentes a fazerem em relação aos seus líderes, em Hebreus 13?", options: ["Desobedecer", "Criticar", "Obedecer e sujeitar-se", "Ignorar"], answer: "Obedecer e sujeitar-se", reference: "Capítulo 13:17" },
+            { question: "Qual o propósito do sacrifício de Cristo, segundo Hebreus 10?", options: ["Para cobrir os pecados temporariamente", "Para remover o primeiro pacto e santificar os que são oferecidos", "Para ser repetido anualmente", "Para glorificar os sacerdotes"], answer: "Para remover o primeiro pacto e santificar os que são oferecidos", reference: "Capítulo 10:9-10" },
+            { question: "O que a Epístola aos Hebreus enfatiza sobre o sacerdócio de Cristo?", options: ["É inferior ao levítico", "É temporário", "É perfeito e eterno", "É apenas para judeus"], answer: "É perfeito e eterno", reference: "Temas Centrais do Livro de Hebreus" },
+            { question: "Qual o significado da frase 'sair ao encontro dele fora do arraial' em Hebreus 13:13?", options: ["Deixar a igreja", "Seguir a Cristo, mesmo que isso signifique sofrer rejeição e vergonha", "Retornar ao judaísmo", "Buscar conforto no mundo"], answer: "Seguir a Cristo, mesmo que isso signifique sofrer rejeição e vergonha", reference: "Capítulo 13:13" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsHebreus = [];
+        const numCopiesHebreus = Math.ceil(200 / uniqueQuizQuestionsHebreus.length);
+        for (let i = 0; i < numCopiesHebreus; i++) {
+            allQuizQuestionsHebreus = allQuizQuestionsHebreus.concat(uniqueQuizQuestionsHebreus);
+        }
+        allQuizQuestionsHebreus = allQuizQuestionsHebreus.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsHebreus = [];
+        let currentQuizIndexHebreus = 0;
+        let scoreHebreus = 0;
+        let wrongAnswersHebreus = 0;
+        let hebreusChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsHebreus() {
+            shuffledQuizQuestionsHebreus = [...allQuizQuestionsHebreus]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsHebreus);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressHebreus() {
+            const progressElement = document.getElementById('quizProgressHebreus');
+            progressElement.textContent = `${currentQuizIndexHebreus + 1}/${shuffledQuizQuestionsHebreus.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionHebreus() {
+            if (currentQuizIndexHebreus >= shuffledQuizQuestionsHebreus.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionHebreus').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsHebreus').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreHebreus}, Erros: ${wrongAnswersHebreus}</p>`;
+                document.getElementById('quizFeedbackHebreus').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsHebreus[currentQuizIndexHebreus];
+            document.getElementById('quizQuestionHebreus').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsHebreus');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerHebreus(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackHebreus').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressHebreus();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerHebreus(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackHebreus');
+            const optionsButtons = document.querySelectorAll('#quizOptionsHebreus button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! �";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreHebreus++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersHebreus++;
+            }
+            document.getElementById('quizScoreHebreus').textContent = `Acertos: ${scoreHebreus}, Erros: ${wrongAnswersHebreus}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionHebreus() {
+            currentQuizIndexHebreus++;
+            displayQuestionHebreus();
+        }
+
+        // Dados para o gráfico de temas de Hebreus
+        const hebreusChartData = {
+            labels: ['Superioridade de Cristo', 'Perfeição do Novo Pacto', 'A Fé', 'Sacerdócio de Melquisedeque', 'Advertências Apostasia', 'Perseverança', 'Sacrifício de Cristo'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [30, 25, 20, 15, 10, 15, 20], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const hebreusChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Hebreus',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderHebreusChart() {
+            const ctx = document.getElementById('hebreusChart').getContext('2d');
+            if (hebreusChartInstance) {
+                hebreusChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            hebreusChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: hebreusChartData,
+                options: hebreusChartOptions
+            });
+        }
+    </script>
+</body>
+</html>
+�

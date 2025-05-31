@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 2 Pedro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2 Pedro Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 2 Pedro</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionPedro2('inicioPedro2')">Início</button>
+            <button class="nav-button" onclick="showSectionPedro2('introducaoPedro2')">Introdução</button>
+            <button class="nav-button" onclick="showSectionPedro2('panoramasPedro2')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionPedro2('personagensPedro2')">Personagens</button>
+            <button class="nav-button" onclick="showSectionPedro2('esbocosPedro2')">Esboços</button>
+            <button class="nav-button" onclick="showSectionPedro2('temasPedro2')">Temas</button>
+            <button class="nav-button" onclick="showSectionPedro2('capitulosPedro2')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionPedro2('quizPedro2')">Quiz</button>
+            <button class="nav-button" onclick="showSectionPedro2('graficoPedro2')">Gráfico</button>
+        </div>
+
+        <div id="inicioPedro2" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 2 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Segunda Epístola de Pedro, uma carta crucial que adverte contra os falsos mestres e a imoralidade, e reafirma a certeza da segunda vinda de Jesus Cristo. Descubra a importância do crescimento na graça e no conhecimento do Senhor, a defesa da verdade apostólica e a exortação à santidade e à paciência enquanto aguardamos os novos céus e nova terra. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducaoPedro2" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 2 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Segunda Epístola de Pedro é a última carta escrita pelo apóstolo Pedro antes de seu martírio. Ele se identifica como "Simão Pedro, servo e apóstolo de Jesus Cristo, àqueles que alcançaram fé igualmente preciosa conosco" (2 Pedro 1:1). A carta é dirigida aos mesmos crentes da Primeira Epístola, mas com um enfoque diferente: a defesa da verdade contra as heresias e a certeza da vinda do Senhor.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Escrita provavelmente entre 64 e 66 d.C., pouco antes da morte de Pedro, a carta reflete sua preocupação com o surgimento de falsos mestres e zombadores que negavam a autoridade apostólica e a promessa do retorno de Cristo. Pedro adverte severamente contra esses enganadores, descrevendo suas características e o juízo que os aguarda. Ao mesmo tempo, ele encoraja os crentes a crescerem em sua fé e conhecimento de Jesus Cristo, vivendo vidas santas e aguardando com paciência o Dia do Senhor.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Pedro é um livro fundamental para a apologética cristã, pois defende a veracidade da Palavra de Deus e a realidade da segunda vinda de Cristo. Ele nos chama a permanecer firmes na fé, a discernir a verdade do erro e a viver com um senso de urgência e propósito, sabendo que o Senhor virá e estabelecerá um novo céu e uma nova terra. A carta é um testamento final da paixão de Pedro pela verdade e pelo bem-estar espiritual dos crentes.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Crescimento na Graça e no Conhecimento de Cristo.</strong> Pedro exorta os crentes a adicionar virtudes à sua fé, garantindo sua vocação e eleição, e testifica da verdade da Palavra profética.</li>
+                <li><strong>Capítulo 2: Advertência Contra os Falsos Mestres.</strong> Descrição dos falsos mestres, suas características imorais e o juízo certo que os aguarda, usando exemplos do Antigo Testamento.</li>
+                <li><strong>Capítulo 3: A Certeza da Vinda do Senhor e o Novo Céu e Nova Terra.</strong> Pedro refuta os zombadores que duvidam da vinda de Cristo, explica a paciência de Deus e descreve a destruição do mundo atual e a expectativa de um novo.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Pedro é um chamado à vigilância, ao crescimento espiritual e à esperança inabalável na promessa do retorno de Cristo.</p>
+        </div>
+
+        <div id="panoramasPedro2" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 2 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Pedro é uma epístola que adverte contra falsos mestres e reafirma a certeza da segunda vinda de Cristo, exortando ao crescimento espiritual e à santidade.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Crescimento Espiritual e Certeza da Vocação (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação e Bênção (Capítulo 1:1-4):</strong>
+                    <ul>
+                        <li>Simão Pedro, servo e apóstolo de Jesus Cristo, àqueles que alcançaram fé igualmente preciosa.</li>
+                        <li>Graça e paz vos sejam multiplicadas pelo conhecimento de Deus e de Jesus, nosso Senhor.</li>
+                        <li>Suas divinas virtudes nos deram tudo o que diz respeito à vida e piedade.</li>
+                        <li>Grandíssimas e preciosas promessas, para que por elas vos torneis participantes da natureza divina.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Caminho do Crescimento (Capítulo 1:5-11):</strong>
+                    <ul>
+                        <li>Adicionai à vossa fé a virtude, ao conhecimento o domínio próprio, à paciência a piedade, ao amor fraternal a caridade.</li>
+                        <li>Se estas coisas em vós houverem e aumentarem, não vos deixarão ociosos nem estéreis no conhecimento de nosso Senhor Jesus Cristo.</li>
+                        <li>Fazei cada vez mais firme a vossa vocação e eleição.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Certeza da Palavra Profética (Capítulo 1:12-21):</strong>
+                    <ul>
+                        <li>Pedro se esforça para que, depois de sua partida, os crentes se lembrem dessas coisas.</li>
+                        <li>Testemunho da transfiguração de Cristo.</li>
+                        <li>Temos a palavra profética mais firme, à qual bem fazeis em estar atentos.</li>
+                        <li>Nenhuma profecia da Escritura é de particular interpretação, mas homens santos de Deus falaram inspirados pelo Espírito Santo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Advertência Contra os Falsos Mestres (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Natureza dos Falsos Mestres (Capítulo 2:1-3):</strong>
+                    <ul>
+                        <li>Surgirão falsos profetas e falsos doutores, que introduzirão encobertamente heresias de perdição.</li>
+                        <li>Por avareza farão de vós negócio com palavras fingidas.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Exemplos de Juízo Divino (Capítulo 2:4-10a):</strong>
+                    <ul>
+                        <li>Anjos que pecaram, lançados no inferno.</li>
+                        <li>O mundo antigo não foi poupado, mas Noé foi guardado.</li>
+                        <li>Cidades de Sodoma e Gomorra reduzidas a cinzas.</li>
+                        <li>Ló, o justo, livrado.</li>
+                        <li>O Senhor sabe livrar da tentação os piedosos e reservar os injustos para o Dia do Juízo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. As Características dos Falsos Mestres (Capítulo 2:10b-19):</strong>
+                    <ul>
+                        <li>Ousados, arrogantes, não temem blasfemar das dignidades.</li>
+                        <li>Como animais irracionais, seguem a corrupção.</li>
+                        <li>Amam o prêmio da injustiça, como Balaão.</li>
+                        <li>São fontes sem água, nuvens levadas pela força da tempestade.</li>
+                        <li>Prometem liberdade, mas são eles mesmos servos da corrupção.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Pior Estado dos Desviados (Capítulo 2:20-22):</strong>
+                    <ul>
+                        <li>Se, depois de terem escapado das corrupções do mundo, se enredam de novo nelas, o seu último estado é pior do que o primeiro.</li>
+                        <li>O cão voltou ao seu vômito, e a porca lavada ao espojadouro de lama.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Certeza da Vinda do Senhor e o Novo Céu e Nova Terra (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Propósito da Carta (Capítulo 3:1-2):</strong>
+                    <ul>
+                        <li>Para despertar a vossa mente sincera, para que vos lembreis das palavras dos santos profetas e do mandamento do Senhor e Salvador, pelos vossos apóstolos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Os Zombadores e a Vinda do Senhor (Capítulo 3:3-7):</strong>
+                    <ul>
+                        <li>Nos últimos dias virão escarnecedores, andando segundo as suas próprias concupiscências.</li>
+                        <li>Dizendo: Onde está a promessa da sua vinda?</li>
+                        <li>O céu e a terra de agora estão reservados para o fogo, guardados para o Dia do Juízo e da perdição dos homens ímpios.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Paciência de Deus (Capítulo 3:8-10):</strong>
+                    <ul>
+                        <li>Um dia para o Senhor é como mil anos, e mil anos como um dia.</li>
+                        <li>O Senhor não retarda a sua promessa, mas é longânimo para conosco, não querendo que alguns se percam, senão que todos venham a arrepender-se.</li>
+                        <li>O Dia do Senhor virá como o ladrão de noite.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Novo Céu e Nova Terra (Capítulo 3:11-13):</strong>
+                    <ul>
+                        <li>Visto que todas essas coisas hão de ser dissolvidas, que pessoas vos convém ser em santo trato e piedade?</li>
+                        <li>Aguardando e apressando a vinda do Dia de Deus.</li>
+                        <li>Esperamos novos céus e nova terra, em que habita a justiça.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Exortações Finais (Capítulo 3:14-18):</strong>
+                    <ul>
+                        <li>Procurai que ele vos ache em paz, sem mácula e irrepreensíveis.</li>
+                        <li>Considerai a longanimidade de nosso Senhor como salvação.</li>
+                        <li>Crescei na graça e no conhecimento de nosso Senhor e Salvador Jesus Cristo.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">A Segunda Epístola de Pedro é um forte alerta contra a apostasia e a heresia, e um lembrete vívido da certeza da segunda vinda de Cristo. Pedro defende a autoridade da revelação divina e a integridade da fé cristã, exortando os crentes a um crescimento contínuo em santidade e conhecimento. A carta nos desafia a viver com um senso de urgência e propósito, discernindo a verdade do erro e aguardando com paciência e expectativa a consumação de todas as coisas nos novos céus e nova terra. É uma obra essencial para fortalecer a fé em tempos de engano e para motivar uma vida piedosa em antecipação ao retorno do Senhor.</p>
+        </div>
+
+        <div id="personagensPedro2" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridPedro2">
+            </div>
+        </div>
+
+        <div id="esbocosPedro2" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 2 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 2 Pedro, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Crescimento na Graça e no Conhecimento de Cristo.</li>
+                <li><strong>Capítulo 2:</strong> Advertência Contra os Falsos Mestres.</li>
+                <li><strong>Capítulo 3:</strong> A Certeza da Vinda do Senhor e o Novo Céu e Nova Terra.</li>
+            </ul>
+        </div>
+
+        <div id="temasPedro2" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 2 Pedro</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Crescimento Espiritual:</strong> A necessidade de adicionar virtudes à fé e crescer no conhecimento de Cristo.</li>
+                <li><strong>Falsos Mestres e Heresias:</strong> Advertências severas contra enganadores e suas doutrinas de perdição.</li>
+                <li><strong>A Segunda Vinda de Cristo:</strong> A certeza do retorno do Senhor e a refutação dos zombadores.</li>
+                <li><strong>O Dia do Senhor:</strong> A descrição da destruição do mundo atual e a vinda de novos céus e nova terra.</li>
+                <li><strong>A Autoridade da Palavra de Deus:</strong> A inspiração divina das Escrituras e a firmeza da profecia.</li>
+                <li><strong>Santidade e Piedade:</strong> O chamado a viver uma vida santa em antecipação ao retorno de Cristo.</li>
+            </ul>
+        </div>
+
+        <div id="capitulosPedro2" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 2 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersPedro2">
+            </div>
+        </div>
+
+        <div id="quizPedro2" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 2 Pedro</h2>
+            <div id="quizContainerPedro2" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionPedro2"></p>
+                <div id="quizOptionsPedro2" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackPedro2" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionPedro2()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressPedro2"></span></p>
+                <p>Pontuação: <span id="quizScorePedro2">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="graficoPedro2" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 2 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 2 Pedro.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="pedro2Chart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModalPedro2" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalPedro2()">&times;</span>
+                <h3 id="modalCharacterNamePedro2" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionPedro2" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data-pedro2">
+        {
+            "name": "Livro Interativo de 2 Pedro",
+            "short_name": "2 Pedro",
+            "description": "Explore o livro de 2 Pedro de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=2PE",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=2PE",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script-pedro2">
+        // service-worker.js for 2 Pedro
+        const CACHE_NAME_PEDRO2 = 'pedro2-interactive-v1';
+        const urlsToCachePedro2 = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME_PEDRO2)
+                    .then(cache => {
+                        console.log('Opened cache for 2 Pedro');
+                        return cache.addAll(urlsToCachePedro2);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME_PEDRO2];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker para 2 Pedro
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script-pedro2');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker para 2 Pedro registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker para 2 Pedro:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente para 2 Pedro
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data-pedro2').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções de 2 Pedro
+        function showSectionPedro2(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('active');
+            } else {
+                console.error(`Seção com ID '${sectionId}' não encontrada.`);
+            }
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagensPedro2') {
+                generateCharacterButtonsPedro2();
+            }
+            if (sectionId === 'capitulosPedro2') {
+                generateChapterLinksPedro2();
+            }
+            if (sectionId === 'quizPedro2') {
+                shuffleQuizQuestionsPedro2(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexPedro2 = 0; // Reinicia o quiz
+                scorePedro2 = 0;
+                wrongAnswersPedro2 = 0;
+                document.getElementById('quizScorePedro2').textContent = `Acertos: ${scorePedro2}, Erros: ${wrongAnswersPedro2}`;
+                displayQuestionPedro2();
+            }
+            if (sectionId === 'graficoPedro2') {
+                renderPedro2Chart();
+            }
+        }
+
+        // Dados dos personagens para 2 Pedro
+        const characterDetailsPedro2 = {
+            "Pedro": {
+                name: "Pedro",
+                description: "O autor da epístola, servo e apóstolo de Jesus Cristo, que adverte contra os falsos mestres e reafirma a vinda do Senhor."
+            },
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "O Senhor e Salvador, cujo conhecimento é a chave para o crescimento espiritual e cuja vinda é o foco da esperança cristã."
+            },
+            "Falsos Mestres": {
+                name: "Falsos Mestres",
+                description: "Indivíduos que introduzem heresias de perdição, negam o Senhor que os resgatou e vivem na imoralidade, sendo alvo de severas advertências de Pedro."
+            },
+            "Noé": {
+                name: "Noé",
+                description: "Exemplo de justiça mencionado por Pedro, que foi livrado do dilúvio enquanto o mundo antigo era destruído."
+            },
+            "Ló": {
+                name: "Ló",
+                description: "Exemplo de justo que foi livrado da destruição de Sodoma e Gomorra."
+            },
+            "Balaão": {
+                name: "Balaão",
+                description: "Profeta que amou o prêmio da injustiça, usado como exemplo de falsos mestres que seguem o caminho da avareza."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, a fonte de todo poder, verdade e paciência, que virá para julgar o mundo e estabelecer novos céus e nova terra."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalPedro2(characterName) {
+            const details = characterDetailsPedro2[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNamePedro2').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionPedro2').textContent = details.description;
+                document.getElementById('characterModalPedro2').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalPedro2() {
+            document.getElementById('characterModalPedro2').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsPedro2() {
+            const grid = document.getElementById('characterGridPedro2');
+            grid.innerHTML = '';
+            for (const key in characterDetailsPedro2) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalPedro2(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos (2 Pedro tem 3 capítulos)
+        function generateChapterLinksPedro2() {
+            const chaptersDiv = document.getElementById('chaptersPedro2');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 3; i++) { // 2 Pedro tem 3 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/2pe/${i}`; // Link para a Bíblia Online, 2 Pedro
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 2 Pedro (perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsPedro2 = [
+            { question: "Quem é o autor da Segunda Epístola de Pedro?", options: ["Paulo", "João", "Pedro", "Tiago"], answer: "Pedro", reference: "2 Pedro 1:1" },
+            { question: "O que Pedro exorta os crentes a adicionar à sua fé no Capítulo 1?", options: ["Riquezas", "Virtudes como conhecimento e domínio próprio", "Poder", "Fama"], answer: "Virtudes como conhecimento e domínio próprio", reference: "2 Pedro 1:5-7" },
+            { question: "O que Pedro testifica ter visto em relação à vinda de Cristo?", options: ["Um sonho", "A transfiguração de Cristo no monte", "Uma visão no deserto", "Um anjo"], answer: "A transfiguração de Cristo no monte", reference: "2 Pedro 1:16-18" },
+            { question: "De onde vêm as profecias, segundo 2 Pedro 1:21?", options: ["Da vontade humana", "De homens santos de Deus, inspirados pelo Espírito Santo", "De anjos", "De sonhos"], answer: "De homens santos de Deus, inspirados pelo Espírito Santo", reference: "2 Pedro 1:21" },
+            { question: "O que Pedro adverte que surgirá entre o povo no Capítulo 2?", options: ["Grandes avivamentos", "Falsos profetas e falsos doutores", "Novas leis", "Novas cidades"], answer: "Falsos profetas e falsos doutores", reference: "2 Pedro 2:1" },
+            { question: "Que exemplo do Antigo Testamento Pedro usa para mostrar o juízo de Deus?", options: ["A criação do mundo", "O dilúvio e a destruição de Sodoma e Gomorra", "A saída do Egito", "A construção do templo"], answer: "O dilúvio e a destruição de Sodoma e Gomorra", reference: "2 Pedro 2:5-6" },
+            { question: "Como os falsos mestres são descritos em relação à sua imoralidade?", options: ["Virtuosos e justos", "Ousados, arrogantes e seguem a corrupção", "Humildes e piedosos", "Sábios e discretos"], answer: "Ousados, arrogantes e seguem a corrupção", reference: "2 Pedro 2:10-14" },
+            { question: "Qual o exemplo de avareza que Pedro usa para os falsos mestres?", options: ["Abraão", "Moisés", "Balaão", "Davi"], answer: "Balaão", reference: "2 Pedro 2:15-16" },
+            { question: "O que os zombadores dirão nos últimos dias, segundo 2 Pedro 3:4?", options: ["Cristo já veio!", "Onde está a promessa da sua vinda?", "O mundo vai acabar amanhã!", "Deus não existe!"], answer: "Onde está a promessa da sua vinda?", reference: "2 Pedro 3:4" },
+            { question: "Como Pedro explica a paciência de Deus em relação à vinda do Senhor?", options: ["Ele é lento para cumprir", "Ele é longânimo, não querendo que alguns se percam", "Ele esqueceu sua promessa", "Ele não se importa"], answer: "Ele é longânimo, não querendo que alguns se percam", reference: "2 Pedro 3:9" },
+            { question: "Como virá o Dia do Senhor, segundo 2 Pedro 3:10?", options: ["Com grande alarde", "Como o ladrão de noite", "Com sinais visíveis", "Com um aviso prévio"], answer: "Como o ladrão de noite", reference: "2 Pedro 3:10" },
+            { question: "O que os crentes esperam, segundo 2 Pedro 3:13?", options: ["Um reino terreno", "Novos céus e nova terra, em que habita a justiça", "Riquezas materiais", "Uma vida sem problemas"], answer: "Novos céus e nova terra, em que habita a justiça", reference: "2 Pedro 3:13" },
+            { question: "O que Pedro exorta os crentes a fazerem em antecipação à vinda do Senhor?", options: ["Desistir da fé", "Viver em santo trato e piedade", "Viver como quiserem", "Ignorar as profecias"], answer: "Viver em santo trato e piedade", reference: "2 Pedro 3:11" },
+            { question: "O que Pedro diz para os crentes crescerem no final da carta?", options: ["Em riqueza", "Na graça e no conhecimento de nosso Senhor e Salvador Jesus Cristo", "Em poder", "Em fama"], answer: "Na graça e no conhecimento de nosso Senhor e Salvador Jesus Cristo", reference: "2 Pedro 3:18" },
+            { question: "Que tipo de heresias os falsos mestres introduzirão, segundo 2 Pedro 2:1?", options: ["Heresias de salvação", "Heresias de perdição", "Heresias de prosperidade", "Heresias de cura"], answer: "Heresias de perdição", reference: "2 Pedro 2:1" },
+            { question: "O que acontecerá com os céus e a terra atuais no Dia do Senhor?", options: ["Serão preservados", "Serão dissolvidos e queimados", "Serão transformados em ouro", "Serão levados para outro lugar"], answer: "Serão dissolvidos e queimados", reference: "2 Pedro 3:10" },
+            { question: "Qual a finalidade da longanimidade de Deus, segundo 2 Pedro 3:9?", options: ["Para nos punir", "Para que alguns se percam", "Para que todos venham a arrepender-se", "Para atrasar a vinda de Cristo"], answer: "Para que todos venham a arrepender-se", reference: "2 Pedro 3:9" },
+            { question: "O que os falsos mestres prometem, mas são eles mesmos?", options: ["Escravidão", "Liberdade, mas são servos da corrupção", "Riqueza", "Conhecimento"], answer: "Liberdade, mas são servos da corrupção", reference: "2 Pedro 2:19" },
+            { question: "O que Pedro diz que devemos fazer para que nossa vocação e eleição sejam firmes?", options: ["Fazer grandes obras", "Adicionar virtudes à nossa fé", "Ter muito dinheiro", "Ser famoso"], answer: "Adicionar virtudes à nossa fé", reference: "2 Pedro 1:10" },
+            { question: "O que acontece com o estado final daqueles que se desviam da verdade após conhecê-la?", options: ["É melhor que o primeiro", "É igual ao primeiro", "É pior que o primeiro", "Não há mudança"], answer: "É pior que o primeiro", reference: "2 Pedro 2:20" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsPedro2 = [];
+        const numCopiesPedro2 = Math.ceil(200 / uniqueQuizQuestionsPedro2.length);
+        for (let i = 0; i < numCopiesPedro2; i++) {
+            allQuizQuestionsPedro2 = allQuizQuestionsPedro2.concat(uniqueQuizQuestionsPedro2);
+        }
+        allQuizQuestionsPedro2 = allQuizQuestionsPedro2.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsPedro2 = [];
+        let currentQuizIndexPedro2 = 0;
+        let scorePedro2 = 0;
+        let wrongAnswersPedro2 = 0;
+        let pedro2ChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsPedro2() {
+            shuffledQuizQuestionsPedro2 = [...allQuizQuestionsPedro2]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsPedro2);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressPedro2() {
+            const progressElement = document.getElementById('quizProgressPedro2');
+            progressElement.textContent = `${currentQuizIndexPedro2 + 1}/${shuffledQuizQuestionsPedro2.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionPedro2() {
+            if (currentQuizIndexPedro2 >= shuffledQuizQuestionsPedro2.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionPedro2').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsPedro2').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scorePedro2}, Erros: ${wrongAnswersPedro2}</p>`;
+                document.getElementById('quizFeedbackPedro2').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsPedro2[currentQuizIndexPedro2];
+            document.getElementById('quizQuestionPedro2').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsPedro2');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerPedro2(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackPedro2').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressPedro2();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerPedro2(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackPedro2');
+            const optionsButtons = document.querySelectorAll('#quizOptionsPedro2 button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scorePedro2++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersPedro2++;
+            }
+            document.getElementById('quizScorePedro2').textContent = `Acertos: ${scorePedro2}, Erros: ${wrongAnswersPedro2}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionPedro2() {
+            currentQuizIndexPedro2++;
+            displayQuestionPedro2();
+        }
+
+        // Dados para o gráfico de temas de 2 Pedro
+        const pedro2ChartData = {
+            labels: ['Crescimento Espiritual', 'Falsos Mestres', 'Segunda Vinda de Cristo', 'Dia do Senhor', 'Autoridade da Palavra', 'Santidade e Piedade'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [20, 35, 30, 15, 10, 22], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const pedro2ChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 2 Pedro',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderPedro2Chart() {
+            const ctx = document.getElementById('pedro2Chart').getContext('2d');
+            if (pedro2ChartInstance) {
+                pedro2ChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            pedro2ChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: pedro2ChartData,
+                options: pedro2ChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

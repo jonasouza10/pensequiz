@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Esdras</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Esdras Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Esdras</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionEsdras('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionEsdras('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionEsdras('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionEsdras('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionEsdras('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionEsdras('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionEsdras('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionEsdras('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionEsdras('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Esdras</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a fascinante história do retorno dos judeus do exílio babilônico, a reconstrução do Templo em Jerusalém e a restauração espiritual da comunidade sob a liderança de Zorobabel e Esdras. Entenda a importância da obediência à Lei de Deus e o desafio de manter a pureza da fé após o cativeiro. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Esdras</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Esdras é um dos livros históricos do Antigo Testamento, narrando eventos cruciais do período pós-exílico do povo judeu. Ele é frequentemente estudado em conjunto com Neemias, pois ambos os livros abordam a restauração da comunidade judaica em Jerusalém após o cativeiro babilônico. Esdras foca em dois retornos distintos: o primeiro, liderado por Zorobabel, que se concentra na reconstrução do Templo (Capítulos 1-6); e o segundo, liderado por Esdras, que se dedica à restauração espiritual e social do povo através da Lei de Deus (Capítulos 7-10).</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro de Esdras destaca a fidelidade de Deus em cumprir Suas promessas de restauração e o papel central do Templo e da Lei na vida do povo. Ele também aborda os desafios enfrentados pelos repatriados, incluindo a oposição externa e os problemas internos de assimilação cultural e religiosa. Esdras, como sacerdote e escriba, desempenha um papel fundamental na reeducação do povo na Lei de Moisés e na promoção da pureza da adoração.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Este livro é essencial para entender a transição da nação de Israel de um reino para uma comunidade religiosa focada na Lei e no Templo, preparando o cenário para o judaísmo posterior e a esperança messiânica.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Parte 1: O Primeiro Retorno e a Reconstrução do Templo (Capítulos 1-6).</strong> O decreto de Ciro, o retorno sob Zorobabel, a reconstrução do altar e a colocação dos alicerces do Templo, a oposição dos samaritanos, a intervenção dos profetas Ageu e Zacarias, e a conclusão e dedicação do Templo.</li>
+                <li><strong>Parte 2: O Segundo Retorno e a Reforma de Esdras (Capítulos 7-10).</strong> A chegada de Esdras a Jerusalém, sua autoridade para ensinar a Lei, a descoberta de casamentos mistos com povos estrangeiros, a confissão do povo e as reformas para separar-se dessas práticas.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Esdras é uma narrativa de restauração, fé e a importância da obediência à Palavra de Deus para a identidade e a sobrevivência de um povo.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Esdras</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Esdras narra o retorno dos judeus do exílio, a reconstrução do Templo e a restauração espiritual da comunidade sob a liderança de Zorobabel e Esdras.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Primeiro Retorno e a Reconstrução do Templo (Capítulos 1-6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Decreto de Ciro e o Primeiro Retorno (Capítulo 1):</strong>
+                    <ul>
+                        <li>Ciro, rei da Pérsia, emite um decreto permitindo o retorno dos judeus e a reconstrução do Templo.</li>
+                        <li>Os utensílios do Templo são devolvidos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Lista dos Retornados (Capítulo 2):</strong>
+                    <ul>
+                        <li>Lista das famílias e indivíduos que retornaram com Zorobabel e Jesua.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Reconstrução do Altar e Alicerces do Templo (Capítulo 3):</strong>
+                    <ul>
+                        <li>O altar é reconstruído e os sacrifícios são retomados.</li>
+                        <li>Os alicerces do segundo Templo são lançados em meio a alegria e choro.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Oposição à Reconstrução (Capítulo 4):</strong>
+                    <ul>
+                        <li>Os adversários (samaritanos) oferecem ajuda, são rejeitados e tentam impedir a obra.</li>
+                        <li>A obra é paralisada por decreto real até o reinado de Dario.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Retomada e Conclusão da Obra (Capítulos 5-6):</strong>
+                    <ul>
+                        <li>Os profetas Ageu e Zacarias encorajam o povo a retomar a construção.</li>
+                        <li>Investigação persa e a confirmação do decreto de Ciro por Dario.</li>
+                        <li>O Templo é concluído e dedicado com grande alegria.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Segundo Retorno e a Reforma de Esdras (Capítulos 7-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Chegada de Esdras a Jerusalém (Capítulo 7):</strong>
+                    <ul>
+                        <li>Esdras, um sacerdote e escriba, retorna a Jerusalém com a autorização do rei Artaxerxes.</li>
+                        <li>Sua missão é ensinar a Lei de Deus e restaurar a ordem religiosa.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Jornada de Esdras e Seus Companheiros (Capítulo 8):</strong>
+                    <ul>
+                        <li>Lista dos que retornaram com Esdras.</li>
+                        <li>A jornada e a provisão de Deus para a viagem.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Pecado dos Casamentos Mistos (Capítulo 9):</strong>
+                    <ul>
+                        <li>Esdras descobre que muitos judeus se casaram com mulheres estrangeiras, violando a Lei.</li>
+                        <li>Sua profunda angústia e oração de confissão a Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Reforma da Comunidade (Capítulo 10):</strong>
+                    <ul>
+                        <li>O povo se arrepende e se compromete a se separar das esposas estrangeiras.</li>
+                        <li>Ações tomadas para purificar a comunidade e restaurar a obediência à Lei.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O livro de Esdras demonstra a fidelidade de Deus em restaurar Seu povo à sua terra e em cumprir Suas promessas. Ele enfatiza a importância da Lei de Deus como guia para a vida da comunidade e a centralidade do Templo como lugar de adoração. A oposição e os desafios internos mostram a necessidade de perseverança na fé e de compromisso radical com a pureza da adoração. Esdras é um testemunho do poder da Palavra de Deus para transformar e restaurar um povo.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridEsdras">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Esdras</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Esdras, capítulo por capítulo, destacando os eventos e o desenvolvimento da história.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Primeiro Retorno e a Reconstrução do Templo (Capítulos 1-6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Decreto de Ciro; retorno dos primeiros exilados.</li>
+                <li><strong>Capítulo 2:</strong> Lista dos que retornaram com Zorobabel.</li>
+                <li><strong>Capítulo 3:</strong> Reconstrução do altar; lançamento dos alicerces do Templo.</li>
+                <li><strong>Capítulo 4:</strong> Oposição à reconstrução do Templo.</li>
+                <li><strong>Capítulo 5:</strong> Profetas Ageu e Zacarias encorajam a retomada da obra.</li>
+                <li><strong>Capítulo 6:</strong> O Templo é concluído e dedicado.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Segundo Retorno e a Reforma de Esdras (Capítulos 7-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 7:</strong> Esdras retorna a Jerusalém com autorização de Artaxerxes.</li>
+                <li><strong>Capítulo 8:</strong> Companheiros de Esdras e a jornada.</li>
+                <li><strong>Capítulo 9:</strong> Esdras descobre os casamentos mistos e ora.</li>
+                <li><strong>Capítulo 10:</strong> O povo se arrepende e se separa das esposas estrangeiras.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Esdras</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Retorno do Exílio:</strong> O cumprimento das profecias e a fidelidade de Deus em trazer Seu povo de volta à terra prometida.</li>
+                <li><strong>Reconstrução do Templo:</strong> A restauração do centro da adoração e da presença de Deus entre Seu povo.</li>
+                <li><strong>Restauração Espiritual:</strong> A importância da obediência à Lei de Deus e a purificação da comunidade.</li>
+                <li><strong>Liderança Piedosa:</strong> O papel crucial de líderes como Zorobabel e Esdras na condução do povo.</li>
+                <li><strong>Oposição e Perseverança:</strong> Os desafios enfrentados na reconstrução e a necessidade de confiar em Deus.</li>
+                <li><strong>A Soberania de Deus:</strong> Deus usando reis pagãos (Ciro, Dario, Artaxerxes) para cumprir Seus propósitos.</li>
+                <li><strong>Pureza da Comunidade:</strong> A preocupação em manter a identidade e a santidade do povo de Deus, especialmente em relação aos casamentos mistos.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Esdras</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersEsdras">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Esdras</h2>
+            <div id="quizContainerEsdras" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionEsdras"></p>
+                <div id="quizOptionsEsdras" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackEsdras" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionEsdras()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressEsdras"></span></p>
+                <p>Pontuação: <span id="quizScoreEsdras">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Esdras</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Esdras.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="esdrasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalEsdras()">&times;</span>
+                <h3 id="modalCharacterNameEsdras" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionEsdras" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Esdras",
+            "short_name": "Esdras",
+            "description": "Explore o livro de Esdras de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=ES",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=ES",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'esdras-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionEsdras(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsEsdras();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksEsdras();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsEsdras(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexEsdras = 0; // Reinicia o quiz
+                scoreEsdras = 0;
+                wrongAnswersEsdras = 0;
+                document.getElementById('quizScoreEsdras').textContent = `Acertos: ${scoreEsdras}, Erros: ${wrongAnswersEsdras}`;
+                displayQuestionEsdras();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderEsdrasChart();
+            }
+        }
+
+        // Dados dos personagens para Esdras
+        const characterDetailsEsdras = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus soberano que cumpre Suas promessas de restauração, capacita Seu povo a reconstruir e exige obediência à Sua Lei."
+            },
+            "Ciro": {
+                name: "Ciro",
+                description: "Rei da Pérsia que emitiu o decreto permitindo o retorno dos judeus a Jerusalém e a reconstrução do Templo."
+            },
+            "Zorobabel": {
+                name: "Zorobabel",
+                description: "Líder político do primeiro grupo de exilados que retornou a Jerusalém e supervisionou a reconstrução do Templo."
+            },
+            "Jesua (Josué)": {
+                name: "Jesua (Josué)",
+                description: "O sumo sacerdote que retornou com Zorobabel e trabalhou com ele na reconstrução do Templo."
+            },
+            "Ageu": {
+                name: "Ageu",
+                description: "Profeta que, junto com Zacarias, encorajou o povo a retomar a construção do Templo após um período de paralisação."
+            },
+            "Zacarias": {
+                name: "Zacarias",
+                description: "Profeta que, junto com Ageu, motivou os judeus a continuar a obra do Templo, oferecendo visões de esperança e restauração."
+            },
+            "Artaxerxes": {
+                name: "Artaxerxes",
+                description: "Rei da Pérsia que autorizou Esdras a retornar a Jerusalém para ensinar a Lei de Deus e restaurar a ordem religiosa."
+            },
+            "Esdras": {
+                name: "Esdras",
+                description: "Sacerdote e escriba que liderou o segundo grupo de exilados de volta a Jerusalém. Focou na restauração espiritual e social do povo através da Lei de Moisés."
+            },
+            "Shecaniah": {
+                name: "Shecaniah",
+                description: "Um dos líderes do povo que confessou o pecado dos casamentos mistos e propôs uma aliança para se separar das esposas estrangeiras."
+            },
+            "Rehum": {
+                name: "Rehum",
+                description: "Oficial persa que se opôs à reconstrução do Templo, enviando uma carta ao rei Artaxerxes para parar a obra."
+            },
+            "Tatenai": {
+                name: "Tatenai",
+                description: "Governador da província 'Além do Eufrates' que investigou a reconstrução do Templo e confirmou a autorização de Ciro."
+            },
+            "Dario": {
+                name: "Dario",
+                description: "Rei da Pérsia que confirmou o decreto de Ciro e ordenou que a construção do Templo fosse retomada e financiada pelo tesouro real."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalEsdras(characterName) {
+            const details = characterDetailsEsdras[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameEsdras').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionEsdras').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalEsdras() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsEsdras() {
+            const grid = document.getElementById('characterGridEsdras');
+            grid.innerHTML = '';
+            for (const key in characterDetailsEsdras) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalEsdras(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksEsdras() {
+            const chaptersDiv = document.getElementById('chaptersEsdras');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 10; i++) { // Esdras tem 10 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/esd/${i}`; // Link para a Bíblia Online, Esdras
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Esdras (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsEsdras = [
+            { question: "Qual rei persa emitiu o decreto permitindo o retorno dos judeus e a reconstrução do Templo?", options: ["Dario", "Artaxerxes", "Ciro", "Xerxes"], answer: "Ciro", reference: "Esdras 1:1-4" },
+            { question: "Quem liderou o primeiro grupo de exilados de volta a Jerusalém para reconstruir o Templo?", options: ["Esdras", "Neemias", "Zorobabel", "Jesua"], answer: "Zorobabel", reference: "Esdras 2:2" },
+            { question: "Qual foi a primeira coisa que os exilados reconstruíram ao retornar a Jerusalém?", options: ["Os muros da cidade", "Suas casas", "O altar", "O Templo completo"], answer: "O altar", reference: "Esdras 3:1-3" },
+            { question: "Quem se opôs à reconstrução do Templo, tentando desanimar e frustrar os judeus?", options: ["Egípcios", "Babilônios", "Samaritanos", "Filisteus"], answer: "Samaritanos", reference: "Esdras 4:1-5" },
+            { question: "Quais profetas encorajaram o povo a retomar a construção do Templo após a paralisação?", options: ["Isaías e Jeremias", "Ezequiel e Daniel", "Ageu e Zacarias", "Elias e Eliseu"], answer: "Ageu e Zacarias", reference: "Esdras 5:1-2" },
+            { question: "Em qual reinado o Templo foi finalmente concluído e dedicado?", options: ["Ciro", "Artaxerxes", "Dario", "Xerxes"], answer: "Dario", reference: "Esdras 6:13-15" },
+            { question: "Quem liderou o segundo grupo de exilados de volta a Jerusalém, com foco na restauração espiritual e da Lei?", options: ["Zorobabel", "Neemias", "Esdras", "Jesua"], answer: "Esdras", reference: "Esdras 7:1-10" },
+            { question: "Qual era a profissão principal de Esdras?", options: ["Rei", "Profeta", "Guerreiro", "Sacerdote e Escriba"], answer: "Sacerdote e Escriba", reference: "Esdras 7:6, 11" },
+            { question: "Qual rei persa autorizou Esdras a retornar a Jerusalém?", options: ["Ciro", "Dario", "Artaxerxes", "Assuero"], answer: "Artaxerxes", reference: "Esdras 7:11-26" },
+            { question: "Qual foi o grande pecado que Esdras descobriu entre o povo ao chegar a Jerusalém?", options: ["Idolatria", "Casamentos mistos com povos estrangeiros", "Roubo no Templo", "Rebelião contra o rei"], answer: "Casamentos mistos com povos estrangeiros", reference: "Esdras 9:1-2" },
+            { question: "Como Esdras reagiu ao descobrir o pecado dos casamentos mistos?", options: ["Ignorou o problema", "Ficou irado e puniu o povo imediatamente", "Rasgou suas vestes, arrancou cabelos e barba, e orou em angústia", "Consultou o rei persa"], answer: "Rasgou suas vestes, arrancou cabelos e barba, e orou em angústia", reference: "Esdras 9:3-5" },
+            { question: "Qual foi a solução proposta pelo povo para lidar com o problema dos casamentos mistos?", options: ["Construir um novo Templo", "Expulsar Esdras", "Fazer uma aliança para se separar das esposas estrangeiras", "Pedir mais ouro ao rei"], answer: "Fazer uma aliança para se separar das esposas estrangeiras", reference: "Esdras 10:2-3" },
+            { question: "O que o livro de Esdras enfatiza como central para a restauração da comunidade?", options: ["A força militar", "A riqueza material", "A Lei de Deus e o Templo", "Alianças com nações vizinhas"], answer: "A Lei de Deus e o Templo", reference: "Temas gerais do livro" },
+            { question: "Qual era o nome do sumo sacerdote que retornou com Zorobabel?", options: ["Esdras", "Neemias", "Jesua", "Shecaniah"], answer: "Jesua", reference: "Esdras 2:2" },
+            { question: "Por que a obra do Templo foi paralisada por um tempo?", options: ["Falta de materiais", "Oposição dos adversários e um decreto real", "Falta de trabalhadores", "Uma praga na cidade"], answer: "Oposição dos adversários e um decreto real", reference: "Esdras 4:21-24" },
+            { question: "Qual o propósito principal do livro de Esdras?", options: ["Narrar a história de um grande rei", "Detalhar as genealogias de Israel", "Documentar o retorno do exílio, a reconstrução do Templo e a restauração espiritual", "Descrever as guerras de Israel"], answer: "Documentar o retorno do exílio, a reconstrução do Templo e a restauração espiritual", reference: "Introdução do livro" },
+            { question: "Qual foi o resultado da oração de Esdras sobre os casamentos mistos?", options: ["O povo o ignorou", "O povo se arrependeu e agiu", "O rei persa interveio", "Uma praga atingiu a cidade"], answer: "O povo se arrependeu e agiu", reference: "Esdras 10:1-12" },
+            { question: "Quem é mencionado como o escriba que estava 'preparado para buscar a Lei do Senhor e para a cumprir e para ensinar em Israel os seus estatutos e juízos'?", options: ["Zorobabel", "Jesua", "Esdras", "Neemias"], answer: "Esdras", reference: "Esdras 7:10" },
+            { question: "Qual a relação entre o livro de Esdras e o livro de Neemias?", options: ["São livros completamente separados", "Esdras é uma continuação de Neemias", "Eles abordam períodos e temas complementares do período pós-exílico", "Neemias é uma continuação de Esdras"], answer: "Eles abordam períodos e temas complementares do período pós-exílico", reference: "Introdução do livro" },
+            { question: "Qual foi a reação do povo quando os alicerces do Templo foram lançados?", options: ["Todos choraram de tristeza", "Todos gritaram de alegria", "Alguns choraram e outros gritaram de alegria", "Ficaram indiferentes"], answer: "Alguns choraram e outros gritaram de alegria", reference: "Esdras 3:12-13" },
+            { question: "O que Ciro devolveu aos judeus que haviam sido levados da casa do Senhor por Nabucodonosor?", options: ["Tesouros de ouro e prata", "Utensílios do Templo", "Armas e cavalos", "Terras e cidades"], answer: "Utensílios do Templo", reference: "Esdras 1:7-11" },
+            { question: "Qual foi a duração da paralisação da obra do Templo, mencionada em Esdras 4?", options: ["Sete anos", "Vinte anos", "Desde o reinado de Artaxerxes até o segundo ano de Dario", "Três anos"], answer: "Desde o reinado de Artaxerxes até o segundo ano de Dario", reference: "Esdras 4:24" },
+            { question: "Qual o nome do oficial persa que investigou a construção do Templo e confirmou o decreto de Ciro?", options: ["Rehum", "Shimshai", "Tatenai", "Bishlam"], answer: "Tatenai", reference: "Esdras 5:3-6" },
+            { question: "O que o livro de Esdras ensina sobre a fidelidade de Deus?", options: ["Que Deus esquece Suas promessas", "Que Deus só age através de Israel", "Que Deus cumpre Suas promessas de restauração, mesmo usando reis pagãos", "Que Deus só se importa com a adoração no Templo"], answer: "Que Deus cumpre Suas promessas de restauração, mesmo usando reis pagãos", reference: "Temas gerais do livro" },
+            { question: "Qual era o principal objetivo da missão de Esdras ao retornar a Jerusalém?", options: ["Reconstruir os muros da cidade", "Estabelecer um exército", "Ensinar a Lei de Deus e restaurar a ordem religiosa", "Negociar com os inimigos de Israel"], answer: "Ensinar a Lei de Deus e restaurar a ordem religiosa", reference: "Esdras 7:10, 25-26" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsEsdras = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsEsdras.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsEsdras = allQuizQuestionsEsdras.concat(uniqueQuizQuestionsEsdras);
+        }
+        allQuizQuestionsEsdras = allQuizQuestionsEsdras.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsEsdras = [];
+        let currentQuizIndexEsdras = 0;
+        let scoreEsdras = 0;
+        let wrongAnswersEsdras = 0;
+        let esdrasChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsEsdras() {
+            shuffledQuizQuestionsEsdras = [...allQuizQuestionsEsdras]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsEsdras);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressEsdras() {
+            const progressElement = document.getElementById('quizProgressEsdras');
+            progressElement.textContent = `${currentQuizIndexEsdras + 1}/${shuffledQuizQuestionsEsdras.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionEsdras() {
+            if (currentQuizIndexEsdras >= shuffledQuizQuestionsEsdras.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionEsdras').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsEsdras').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreEsdras}, Erros: ${wrongAnswersEsdras}</p>`;
+                document.getElementById('quizFeedbackEsdras').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsEsdras[currentQuizIndexEsdras];
+            document.getElementById('quizQuestionEsdras').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsEsdras');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerEsdras(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackEsdras').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressEsdras();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerEsdras(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackEsdras');
+            const optionsButtons = document.querySelectorAll('#quizOptionsEsdras button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreEsdras++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersEsdras++;
+            }
+            document.getElementById('quizScoreEsdras').textContent = `Acertos: ${scoreEsdras}, Erros: ${wrongAnswersEsdras}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionEsdras() {
+            currentQuizIndexEsdras++;
+            displayQuestionEsdras();
+        }
+
+        // Dados para o gráfico de temas de Esdras
+        const esdrasChartData = {
+            labels: ['Retorno do Exílio', 'Reconstrução do Templo', 'Restauração Espiritual', 'Liderança', 'Oposição', 'Fidelidade de Deus', 'Pureza da Comunidade'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 15, 10, 10, 10, 10], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const esdrasChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Esdras',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderEsdrasChart() {
+            const ctx = document.getElementById('esdrasChart').getContext('2d');
+            if (esdrasChartInstance) {
+                esdrasChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            esdrasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: esdrasChartData,
+                options: esdrasChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

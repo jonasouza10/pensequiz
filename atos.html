@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Atos dos Apóstolos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Atos Interativo">
+
+<style>
+    /* Global styles for the document body, using the Inter font and dark navy gradient */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Dark navy gradient */
+        color: #e2e8f0; /* Very light gray text */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Hides the scrollbar for the modal, but allows content scrolling */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Dark navy for the main container */
+        border: 1px solid #2d3748; /* Medium gray border */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* More pronounced and darker shadow */
+        border-radius: 1rem; /* More rounded corners */
+        max-width: 960px; /* Slightly increased max width */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Medium gray background for the navigation bar */
+        border-radius: 0.75rem; /* Rounded corners */
+    }
+
+    /* Base style for all navigation and quiz buttons */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Grayish blue for buttons */
+        color: #ffffff; /* White text */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Adjusted padding */
+        border-radius: 0.5rem; /* Rounded corners */
+        transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+        cursor: pointer;
+        border: none; /* Remove default border */
+    }
+
+    /* Hover and active effects for buttons */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Darker grayish blue on hover */
+        transform: translateY(-2px) scale(1.02); /* Slight lift and enlarge */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* More pronounced shadow on hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Even darker grayish blue on active */
+        transform: translateY(0) scale(1.0); /* Return to original position */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Softer shadow on active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Dark navy background for sections */
+        border: 1px solid #2d3748; /* Medium gray border */
+        border-radius: 1rem; /* More rounded corners */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Very light white titles */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* For paragraph text */
+        color: #cbd5e0; /* Adjusted to light bluish gray */
+    }
+    .text-gray-400, .text-gray-600 { /* For references and smaller descriptions */
+        color: #a0aec0; /* Medium bluish gray */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Very light white quiz question */
+    }
+
+    /* Styles for quiz feedback */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Correct answer in green */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Wrong answer in red */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Correct feedback in green */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Wrong feedback in red */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Dark navy modal background */
+        color: #e2e8f0; /* Very light gray modal text */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Medium bluish gray close button */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Light bluish gray close button on hover */
+    }
+    /* Styles for the chart */
+    canvas {
+        background-color: #2d3748; /* Dark gray chart background */
+        border-radius: 0.5rem; /* Rounded corners */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Atos dos Apóstolos</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionAtos('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionAtos('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionAtos('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionAtos('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionAtos('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionAtos('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionAtos('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionAtos('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionAtos('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Atos dos Apóstolos</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Atos dos Apóstolos, a narrativa inspiradora do nascimento e expansão da Igreja primitiva, impulsionada pelo poder do Espírito Santo. Acompanhe a ousadia dos apóstolos, a pregação do Evangelho de Jerusalém a Roma, os milagres, as perseguições e o crescimento exponencial da comunidade cristã. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Atos dos Apóstolos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Atos dos Apóstolos é a continuação do Evangelho de Lucas, ambos escritos pelo mesmo autor, Lucas, um médico gentio e companheiro do apóstolo Paulo. Atos narra a história do nascimento e da expansão da Igreja cristã primitiva, começando em Jerusalém e se estendendo "até os confins da terra" (Atos 1:8), culminando com a chegada de Paulo a Roma. Foi provavelmente escrito entre 62 e 64 d.C.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O propósito principal de Atos é demonstrar como o Evangelho de Jesus Cristo, impulsionado pelo poder do Espírito Santo, se espalhou do judaísmo para o mundo gentio. Lucas registra a fidelidade de Deus em cumprir Suas promessas, o papel central do Espírito Santo na capacitação dos crentes para o testemunho, e a natureza universal da mensagem de salvação. Ele defende a legitimidade do cristianismo perante as autoridades romanas, mostrando que não era uma ameaça ao império, mas uma religião pacífica e verdadeira.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Atos é um livro de transição, que liga os Evangelhos (a vida de Jesus) às Epístolas (a doutrina e prática da Igreja). Ele documenta a formação da Igreja, o dia de Pentecostes, os primeiros sermões, a vida comunitária dos primeiros cristãos, os desafios da perseguição e a superação de barreiras culturais e religiosas. A narrativa foca nas figuras proeminentes de Pedro (nos primeiros capítulos, focado no ministério aos judeus) e Paulo (nos capítulos posteriores, focado no ministério aos gentios), mostrando como Deus usou diferentes indivíduos para cumprir Sua grande comissão.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem o poder e a atuação do Espírito Santo, o testemunho e a evangelização, o crescimento e a expansão da Igreja, a perseguição e o sofrimento por causa do Evangelho, a universalidade da salvação (incluindo gentios), a oração, a soberania de Deus e a unidade dos crentes. Atos é um livro dinâmico que inspira os crentes a viverem uma fé ativa e a participarem da missão de Deus no mundo.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-7: A Igreja em Jerusalém.</strong> Ascensão de Jesus, Pentecostes, primeiros sermões de Pedro, vida da comunidade, perseguição e martírio de Estêvão.</li>
+                <li><strong>Capítulos 8-12: A Igreja em Judeia e Samaria.</strong> A evangelização de Samaria por Filipe, a conversão de Saulo (Paulo), a visão de Pedro e a conversão de Cornélio, a perseguição de Herodes.</li>
+                <li><strong>Capítulos 13-28: A Igreja aos Confins da Terra.</strong> As três viagens missionárias de Paulo, o Concílio de Jerusalém, prisões e julgamentos de Paulo, e sua viagem a Roma.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Atos é um registro vital de como o Evangelho começou a transformar o mundo, capacitando os seguidores de Cristo a serem Suas testemunhas.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Atos dos Apóstolos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Atos narra a expansão do Evangelho através do poder do Espírito Santo.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Igreja em Jerusalém (Capítulos 1-7)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Preparação para a Missão (1:1-26):</strong>
+                    <ul>
+                        <li>A Ascensão de Jesus, a promessa do Espírito Santo, a eleição de Matias.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Dia de Pentecostes (2:1-47):</strong>
+                    <ul>
+                        <li>A descida do Espírito Santo, o sermão de Pedro, a formação da Igreja.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Crescimento da Igreja em Jerusalém (3:1-6:7):</strong>
+                    <ul>
+                        <li>Cura do coxo, sermões de Pedro, perseguição e ousadia, Ananias e Safira, escolha dos sete diáconos.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Martírio de Estêvão (6:8-7:60):</strong>
+                    <ul>
+                        <li>O testemunho e a morte do primeiro mártir cristão.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Igreja em Judeia e Samaria (Capítulos 8-12)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Dispersão e a Evangelização de Samaria (8:1-40):</strong>
+                    <ul>
+                        <li>Filipe em Samaria, Simão, o Mago, o eunuco etíope.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Conversão de Saulo (9:1-31):</strong>
+                    <ul>
+                        <li>O encontro na estrada de Damasco, Ananias.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Ministério de Pedro (9:32-11:18):</strong>
+                    <ul>
+                        <li>Cura de Eneias, ressurreição de Dorcas, a visão de Pedro e a conversão de Cornélio (primeiro gentio).</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Igreja em Antioquia e a Perseguição de Herodes (11:19-12:25):</strong>
+                    <ul>
+                        <li>O Evangelho chega a Antioquia, Barnabé e Saulo, martírio de Tiago, prisão de Pedro.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Igreja Aos Confins da Terra (Capítulos 13-28)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Primeira Viagem Missionária de Paulo (13:1-14:28):</strong>
+                    <ul>
+                        <li>Barnabé e Saulo enviados, Chipre, Antioquia da Pisídia, Icônio, Listra e Derbe.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Concílio de Jerusalém (15:1-35):</strong>
+                    <ul>
+                        <li>A questão da circuncisão dos gentios.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Segunda Viagem Missionária de Paulo (15:36-18:22):</strong>
+                    <ul>
+                        <li>Silas, Timóteo, Lídia, o carcereiro de Filipos, Tessalônica, Bereia, Atenas, Corinto.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Terceira Viagem Missionária de Paulo (18:23-21:16):</strong>
+                    <ul>
+                        <li>Éfeso (Apóstolo, Aquila e Priscila, os filhos de Ceva), Macedônia e Acaia, Trôade, Mileto.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Prisão de Paulo em Jerusalém (21:17-23:35):</strong>
+                    <ul>
+                        <li>Tumulto no Templo, defesa de Paulo, conspiração.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Julgamentos de Paulo (24:1-26:32):</strong>
+                    <ul>
+                        <li>Diante de Félix, Festo e Agripa.</li>
+                    </ul>
+                </li>
+                <li><strong>G. Viagem de Paulo a Roma (27:1-28:31):</strong>
+                    <ul>
+                        <li>Naufrágio em Malta, chegada a Roma, ministério de Paulo em prisão domiciliar.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Atos dos Apóstolos é o registro da transição da Igreja de uma comunidade judaica para um movimento global, impulsionado pelo Espírito Santo. Ele demonstra a continuidade do plano de Deus através de Jesus Cristo e a Igreja, e a fidelidade de Deus em cumprir Suas promessas. O livro enfatiza a importância do testemunho ousado, a centralidade da oração, o poder transformador do Evangelho e a capacidade da Igreja de superar desafios e perseguições. Atos serve como um modelo para a missão cristã, mostrando que o Evangelho deve ser proclamado a todas as nações, capacitando os crentes a serem testemunhas eficazes de Cristo em seu próprio contexto e além.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridAtos">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Atos dos Apóstolos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Atos, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: A Ascensão e a Promessa do Espírito</strong>
+                    <ul>
+                        <li>1.1-11: A Ascensão de Jesus.</li>
+                        <li>1.12-26: A Eleição de Matias.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: O Dia de Pentecostes</strong>
+                    <ul>
+                        <li>2.1-13: A Descida do Espírito Santo.</li>
+                        <li>2.14-41: O Sermão de Pedro.</li>
+                        <li>2.42-47: A Vida da Comunidade Primitiva.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: Cura e Sermão de Pedro</strong>
+                    <ul>
+                        <li>3.1-10: Cura do Coxo na Porta do Templo.</li>
+                        <li>3.11-26: O Segundo Sermão de Pedro.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: Perseguição e Ousadia</strong>
+                    <ul>
+                        <li>4.1-22: Pedro e João Diante do Sinédrio.</li>
+                        <li>4.23-31: A Oração da Comunidade.</li>
+                        <li>4.32-37: A Vida em Comunidade.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 5: Ananias e Safira; Sinais e Prodígios</strong>
+                    <ul>
+                        <li>5.1-11: Ananias e Safira.</li>
+                        <li>5.12-16: Muitos Sinais e Prodígios.</li>
+                        <li>5.17-42: A Prisão e Libertação dos Apóstolos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 6: Escolha dos Diáconos e Estêvão</strong>
+                    <ul>
+                        <li>6.1-7: A Escolha dos Sete.</li>
+                        <li>6.8-15: Estêvão Acusado.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 7: O Discurso e Martírio de Estêvão</strong>
+                    <ul>
+                        <li>7.1-53: O Discurso de Estêvão.</li>
+                        <li>7.54-60: O Martírio de Estêvão.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 8: A Dispersão e Filipe em Samaria</strong>
+                    <ul>
+                        <li>8.1-8: A Perseguição e a Dispersão.</li>
+                        <li>8.9-25: Simão, o Mago.</li>
+                        <li>8.26-40: Filipe e o Eunuco Etíope.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 9: A Conversão de Saulo</strong>
+                    <ul>
+                        <li>9.1-19: A Conversão de Saulo.</li>
+                        <li>9.20-31: Saulo Prega em Damasco e Jerusalém.</li>
+                        <li>9.32-43: Pedro Cura Eneias e Ressuscita Dorcas.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 10: A Conversão de Cornélio</strong>
+                    <ul>
+                        <li>10.1-23: A Visão de Cornélio e Pedro.</li>
+                        <li>10.24-48: Pedro Prega na Casa de Cornélio.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 11: Pedro Relata e a Igreja em Antioquia</strong>
+                    <ul>
+                        <li>11.1-18: Pedro Relata sua Visita a Cornélio.</li>
+                        <li>11.19-30: A Igreja em Antioquia.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 12: Perseguição de Herodes e Libertação de Pedro</strong>
+                    <ul>
+                        <li>12.1-5: Martírio de Tiago e Prisão de Pedro.</li>
+                        <li>12.6-19: A Libertação de Pedro.</li>
+                        <li>12.20-25: A Morte de Herodes.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 13: Primeira Viagem Missionária de Paulo</strong>
+                    <ul>
+                        <li>13.1-12: Barnabé e Saulo em Chipre.</li>
+                        <li>13.13-52: Em Antioquia da Pisídia.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 14: Icônio, Listra e Derbe</strong>
+                    <ul>
+                        <li>14.1-7: Em Icônio.</li>
+                        <li>14.8-20: Em Listra e Derbe.</li>
+                        <li>14.21-28: O Retorno a Antioquia.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 15: O Concílio de Jerusalém</strong>
+                    <ul>
+                        <li>15.1-21: A Questão da Circuncisão.</li>
+                        <li>15.22-35: A Decisão do Concílio.</li>
+                        <li>15.36-41: Paulo e Barnabé se Separam.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 16: Filipos e o Carcereiro</strong>
+                    <ul>
+                        <li>16.1-10: Timóteo e a Visão da Macedônia.</li>
+                        <li>16.11-40: Em Filipos (Lídia, o Carcereiro).</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 17: Tessalônica, Bereia e Atenas</strong>
+                    <ul>
+                        <li>17.1-9: Em Tessalônica.</li>
+                        <li>17.10-15: Em Bereia.</li>
+                        <li>17.16-34: Em Atenas (Areópago).</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 18: Corinto e Éfeso</strong>
+                    <ul>
+                        <li>18.1-17: Em Corinto (Áquila e Priscila).</li>
+                        <li>18.18-23: Retorno a Antioquia.</li>
+                        <li>18.24-28: Apolo em Éfeso e Corinto.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 19: Paulo em Éfeso</strong>
+                    <ul>
+                        <li>19.1-7: Discípulos do Batista.</li>
+                        <li>19.8-22: O Ministério de Paulo em Éfeso.</li>
+                        <li>19.23-41: O Tumulto em Éfeso.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 20: Viagem de Retorno a Jerusalém</strong>
+                    <ul>
+                        <li>20.1-12: Viagem pela Macedônia e Grécia; Eutico.</li>
+                        <li>20.13-38: Despedida de Paulo aos Presbíteros de Éfeso em Mileto.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 21: Paulo em Jerusalém e Prisão</strong>
+                    <ul>
+                        <li>21.1-16: A Viagem para Jerusalém; Agabo.</li>
+                        <li>21.17-26: Paulo no Templo.</li>
+                        <li>21.27-40: A Prisão de Paulo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 22: Defesa de Paulo no Templo</strong>
+                    <ul>
+                        <li>22.1-21: Paulo se Defende Perante a Multidão.</li>
+                        <li>22.22-30: Paulo e o Comandante Romano.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 23: Paulo Diante do Sinédrio</strong>
+                    <ul>
+                        <li>23.1-11: Paulo Diante do Sinédrio.</li>
+                        <li>23.12-35: Conspiração contra Paulo e Sua Transferência.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 24: Paulo Diante de Félix</strong>
+                    <ul>
+                        <li>24.1-27: Paulo Diante de Félix.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 25: Paulo Diante de Festo e Apelo a César</strong>
+                    <ul>
+                        <li>25.1-12: Paulo Diante de Festo.</li>
+                        <li>25.13-27: Festo Consulta o Rei Agripa.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 26: Paulo Diante de Agripa</strong>
+                    <ul>
+                        <li>26.1-32: A Defesa de Paulo Perante Agripa.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 27: Viagem de Paulo a Roma e Naufrágio</strong>
+                    <ul>
+                        <li>27.1-20: A Viagem Marítima.</li>
+                        <li>27.21-44: O Naufrágio.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 28: Em Malta e Chegada a Roma</strong>
+                    <ul>
+                        <li>28.1-10: Em Malta.</li>
+                        <li>28.11-16: Chegada a Roma.</li>
+                        <li>28.17-31: Paulo em Roma.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Atos dos Apóstolos</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>O Espírito Santo:</strong> Sua descida, capacitação e direção na vida da Igreja e dos crentes.</li>
+                <li><strong>O Testemunho e a Missão:</strong> O cumprimento da Grande Comissão de Jesus (Atos 1:8) e a propagação do Evangelho.</li>
+                <li><strong>O Crescimento da Igreja:</strong> A multiplicação de crentes e comunidades em diferentes regiões.</li>
+                <li><strong>Perseguição e Sofrimento:</strong> Os desafios enfrentados pelos cristãos e a fidelidade de Deus em meio à adversidade.</li>
+                <li><strong>A Universalidade do Evangelho:</strong> A quebra de barreiras culturais e religiosas para incluir judeus e gentios.</li>
+                <li><strong>A Oração:</strong> A dependência constante da Igreja e dos apóstolos na oração.</li>
+                <li><strong>Milagres e Sinais:</strong> A confirmação divina da mensagem do Evangelho através de atos sobrenaturais.</li>
+                <li><strong>A Soberania de Deus:</strong> O controle de Deus sobre os eventos e a história da Igreja.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Atos dos Apóstolos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersAtos">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Atos dos Apóstolos</h2>
+            <div id="quizContainerAtos" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionAtos"></p>
+                <div id="quizOptionsAtos" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackAtos" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionAtos()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressAtos"></span></p>
+                <p>Pontuação: <span id="quizScoreAtos">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Atos dos Apóstolos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Atos.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="atosChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalAtos()">&times;</span>
+                <h3 id="modalCharacterNameAtos" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionAtos" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Atos dos Apóstolos",
+            "short_name": "Atos",
+            "description": "Explore o livro de Atos dos Apóstolos de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=AT",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=AT",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'atos-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Ensure Chart.js is cached
+            // Add other static resources you want to cache here
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Register the Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // Function to load manifest.json dynamically
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Functions for section control
+        function showSectionAtos(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Ensure character buttons and chapter links are generated when entering respective sections
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsAtos();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksAtos();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsAtos(); // Shuffle questions at the start of the quiz
+                currentQuizIndexAtos = 0; // Reset the quiz
+                scoreAtos = 0;
+                wrongAnswersAtos = 0;
+                document.getElementById('quizScoreAtos').textContent = `Acertos: ${scoreAtos}, Erros: ${wrongAnswersAtos}`;
+                displayQuestionAtos();
+            }
+            if (sectionId === 'grafico') { // Call the chart function when the section is displayed
+                renderAtosChart();
+            }
+        }
+
+        // Character data for Acts
+        const characterDetailsAtos = {
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "O Senhor ressuscitado e ascendido, cuja comissão aos discípulos impulsiona a narrativa de Atos."
+            },
+            "Lucas": {
+                name: "Lucas",
+                description: "O autor do livro de Atos e do Evangelho de Lucas, um médico e companheiro de Paulo."
+            },
+            "Teófilo": {
+                name: "Teófilo",
+                description: "O destinatário do livro de Atos, provavelmente um oficial romano de alto escalão."
+            },
+            "Pedro": {
+                name: "Pedro",
+                description: "Um dos principais apóstolos nos primeiros capítulos de Atos, pregando no Pentecostes e liderando a Igreja em Jerusalém."
+            },
+            "Paulo (Saulo)": {
+                name: "Paulo (Saulo)",
+                description: "Originalmente Saulo de Tarso, um perseguidor de cristãos que se converteu e se tornou o principal apóstolo aos gentios, liderando as viagens missionárias."
+            },
+            "Estêvão": {
+                name: "Estêvão",
+                description: "Um dos sete diáconos escolhidos, o primeiro mártir cristão, cujo testemunho e morte são registrados em Atos 6-7."
+            },
+            "Filipe": {
+                name: "Filipe",
+                description: "Um dos sete diáconos, um evangelista que pregou em Samaria e ao eunuco etíope."
+            },
+            "Cornélio": {
+                name: "Cornélio",
+                description: "Um centurião romano, o primeiro gentio convertido e batizado, marcando um ponto crucial na expansão do Evangelho."
+            },
+            "Barnabé": {
+                name: "Barnabé",
+                description: "Um levita de Chipre, companheiro de Paulo em sua primeira viagem missionária, conhecido por seu encorajamento."
+            },
+            "Tiago (irmão de Jesus)": {
+                name: "Tiago (irmão de Jesus)",
+                description: "Líder da Igreja em Jerusalém, que preside o Concílio de Jerusalém."
+            },
+            "Silas": {
+                name: "Silas",
+                description: "Companheiro de Paulo em sua segunda viagem missionária."
+            },
+            "Timóteo": {
+                name: "Timóteo",
+                description: "Jovem discípulo e companheiro de Paulo em suas viagens missionárias."
+            },
+            "Áquila e Priscila": {
+                name: "Áquila e Priscila",
+                description: "Um casal de fabricantes de tendas e missionários, que auxiliaram Paulo e Apolo."
+            },
+            "Lídia": {
+                name: "Lídia",
+                description: "Uma vendedora de púrpura em Filipos, a primeira convertida registrada na Europa."
+            },
+            "Ananias (de Damasco)": {
+                name: "Ananias (de Damasco)",
+                description: "O discípulo que foi enviado por Deus para orar por Saulo após sua conversão."
+            },
+            "Ananias e Safira": {
+                name: "Ananias e Safira",
+                description: "Um casal que morreu por mentir ao Espírito Santo sobre a venda de uma propriedade."
+            },
+            "Gamaliel": {
+                name: "Gamaliel",
+                description: "Um fariseu respeitado e mestre da lei, que aconselhou o Sinédrio a não perseguir os apóstolos."
+            },
+            "Félix": {
+                name: "Félix",
+                description: "O procurador romano diante de quem Paulo foi julgado pela primeira vez na Cesareia."
+            },
+            "Festo": {
+                name: "Festo",
+                description: "O sucessor de Félix como procurador, diante de quem Paulo também foi julgado."
+            },
+            "Rei Agripa II": {
+                name: "Rei Agripa II",
+                description: "O rei que ouviu a defesa de Paulo e quase se convenceu a se tornar cristão."
+            }
+        };
+
+        // Function to display the character modal
+        function displayCharacterModalAtos(characterName) {
+            const details = characterDetailsAtos[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameAtos').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionAtos').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Function to close the modal
+        function closeCharacterModalAtos() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Generate character buttons
+        function generateCharacterButtonsAtos() {
+            const grid = document.getElementById('characterGridAtos');
+            grid.innerHTML = '';
+            for (const key in characterDetailsAtos) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalAtos(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Generate chapter links
+        function generateChapterLinksAtos() {
+            const chaptersDiv = document.getElementById('chaptersAtos');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 28; i++) { // Acts has 28 chapters
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/atos/${i}`; // Link to Biblia Online, Acts
+                link.target = "_blank"; // Open in new tab
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Function to shuffle an array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Quiz data for Acts (25 unique questions)
+        const uniqueQuizQuestionsAtos = [
+            { question: "Quem é o autor do livro de Atos dos Apóstolos?", options: ["Pedro", "Paulo", "Lucas", "João"], answer: "Lucas", reference: "Introdução ao Livro de Atos" },
+            { question: "Qual evento marca o início do livro de Atos?", options: ["O nascimento de Jesus", "A crucificação de Jesus", "A ascensão de Jesus", "O batismo de João Batista"], answer: "A ascensão de Jesus", reference: "Atos 1:9-11" },
+            { question: "Qual o evento que ocorre no dia de Pentecostes em Atos 2?", options: ["A cura de um coxo", "A descida do Espírito Santo", "A conversão de Saulo", "A eleição de Matias"], answer: "A descida do Espírito Santo", reference: "Atos 2:1-4" },
+            { question: "Quem foi o primeiro mártir cristão registrado em Atos?", options: ["Pedro", "Tiago", "Estêvão", "Paulo"], answer: "Estêvão", reference: "Atos 7:54-60" },
+            { question: "Quem foi o apóstolo que pregou o primeiro sermão no dia de Pentecostes?", options: ["João", "Tiago", "Pedro", "André"], answer: "Pedro", reference: "Atos 2:14-41" },
+            { question: "Qual a cidade onde os discípulos foram chamados de 'cristãos' pela primeira vez?", options: ["Jerusalém", "Antioquia", "Roma", "Éfeso"], answer: "Antioquia", reference: "Atos 11:26" },
+            { question: "Quem foi o centurião romano, o primeiro gentio convertido, na casa de quem Pedro pregou?", options: ["Félix", "Festo", "Cornélio", "Sérgio Paulo"], answer: "Cornélio", reference: "Atos 10:1-48" },
+            { question: "Qual o nome do fariseu que aconselhou o Sinédrio a não perseguir os apóstolos, dizendo 'se é de Deus, não podereis desfazê-la'?", options: ["Caifás", "Anás", "Gamaliel", "Nicodemos"], answer: "Gamaliel", reference: "Atos 5:34-39" },
+            { question: "Qual o nome do homem que ficou cego na estrada de Damasco e depois se tornou um grande apóstolo?", options: ["Pedro", "João", "Saulo (Paulo)", "Filipe"], answer: "Saulo (Paulo)", reference: "Atos 9:1-9" },
+            { question: "Quem foi o companheiro de Paulo em sua primeira viagem missionária?", options: ["Silas", "Timóteo", "Barnabé", "João Marcos"], answer: "Barnabé", reference: "Atos 13:2" },
+            { question: "Qual o tema principal do livro de Atos?", options: ["A vida de Jesus", "A história de Israel", "A expansão do Evangelho pelo Espírito Santo", "As profecias do Antigo Testamento"], answer: "A expansão do Evangelho pelo Espírito Santo", reference: "Temas Centrais do Livro de Atos" },
+            { question: "Quantos capítulos tem o livro de Atos?", options: ["21", "24", "28", "30"], answer: "28", reference: "Esboços do Livro de Atos" },
+            { question: "Em qual cidade Paulo foi apedrejado e deixado como morto, mas sobreviveu?", options: ["Icônio", "Listra", "Derbe", "Antioquia da Pisídia"], answer: "Listra", reference: "Atos 14:19-20" },
+            { question: "Qual o nome da vendedora de púrpura em Filipos, que foi a primeira convertida na Europa?", options: ["Priscila", "Lídia", "Dorcas", "Febe"], answer: "Lídia", reference: "Atos 16:14-15" },
+            { question: "Qual o nome do jovem que caiu de uma janela enquanto Paulo pregava e foi ressuscitado?", options: ["Tíquico", "Eutico", "Aristarco", "Trófimo"], answer: "Eutico", reference: "Atos 20:7-12" },
+            { question: "O que foi decidido no Concílio de Jerusalém?", options: ["Que os gentios deveriam ser circuncidados", "Que os gentios não precisavam ser circuncidados para serem salvos", "Que os apóstolos deveriam ir para Roma", "Que a lei mosaica deveria ser totalmente observada"], answer: "Que os gentios não precisavam ser circuncidados para serem salvos", reference: "Atos 15:1-35" },
+            { question: "Qual a promessa de Jesus aos discípulos em Atos 1:8?", options: ["Que eles seriam ricos", "Que eles teriam poder ao receber o Espírito Santo e seriam Suas testemunhas", "Que eles governariam Israel", "Que eles não sofreriam perseguição"], answer: "Que eles teriam poder ao receber o Espírito Santo e seriam Suas testemunhas", reference: "Atos 1:8" },
+            { question: "Quem foi o discípulo que foi enviado por Deus para orar por Saulo após sua conversão?", options: ["Pedro", "Barnabé", "Ananias (de Damasco)", "Filipe"], answer: "Ananias (de Damasco)", reference: "Atos 9:10-19" },
+            { question: "Em qual cidade Paulo pregou no Areópago sobre o 'Deus Desconhecido'?", options: ["Corinto", "Éfeso", "Atenas", "Filipos"], answer: "Atenas", reference: "Atos 17:16-34" },
+            { question: "Qual o nome do casal que morreu por mentir ao Espírito Santo sobre a venda de uma propriedade?", options: ["Áquila e Priscila", "Filipe e Lídia", "Ananias e Safira", "Cornélio e sua família"], answer: "Ananias e Safira", reference: "Atos 5:1-11" },
+            { question: "Qual o destino final da viagem de Paulo no livro de Atos?", options: ["Jerusalém", "Antioquia", "Roma", "Éfeso"], answer: "Roma", reference: "Atos 28:11-31" },
+            { question: "Quem foi o procurador romano diante de quem Paulo foi julgado pela primeira vez na Cesareia?", options: ["Festo", "Agripa", "Félix", "Pilatos"], answer: "Félix", reference: "Atos 24:1-27" },
+            { question: "Qual o tema recorrente em Atos que mostra a dependência da Igreja em Deus?", options: ["O jejum", "A oração", "O dízimo", "A leitura da lei"], answer: "A oração", reference: "Temas Centrais do Livro de Atos" },
+            { question: "Qual o papel principal do Espírito Santo em Atos?", options: ["Apenas para milagres", "Capacitar os crentes para o testemunho e a missão", "Para dar visões", "Para falar em línguas"], answer: "Capacitar os crentes para o testemunho e a missão", reference: "Temas Centrais do Livro de Atos" },
+            { question: "Quem é o irmão de Jesus que se tornou líder da Igreja em Jerusalém?", options: ["Pedro", "João", "Tiago", "Judas"], answer: "Tiago", reference: "Atos 15:13-21" }
+        ];
+
+        let quizQuestionsAtos = []; // This array will store the 200 shuffled questions
+
+        // Function to populate and shuffle quiz questions
+        function shuffleQuizQuestionsAtos() {
+            quizQuestionsAtos = []; // Clear previous questions
+            while (quizQuestionsAtos.length < 200) {
+                quizQuestionsAtos.push(...uniqueQuizQuestionsAtos);
+            }
+            // Ensure the array has exactly 200 questions, in case duplication exceeds
+            if (quizQuestionsAtos.length > 200) {
+                quizQuestionsAtos = quizQuestionsAtos.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsAtos); // Shuffle the complete array
+        }
+
+        let currentQuizIndexAtos = 0;
+        let scoreAtos = 0;
+        let wrongAnswersAtos = 0;
+
+        function displayQuestionAtos() {
+            const questionElement = document.getElementById('quizQuestionAtos');
+            const optionsElement = document.getElementById('quizOptionsAtos');
+            const feedbackElement = document.getElementById('quizFeedbackAtos');
+            const nextButton = document.querySelector('#quizContainerAtos .quiz-next');
+            const progressElement = document.getElementById('quizProgressAtos');
+
+            if (currentQuizIndexAtos < quizQuestionsAtos.length) {
+                const questionData = quizQuestionsAtos[currentQuizIndexAtos];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Shuffle options
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerAtos(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexAtos + 1}/${quizQuestionsAtos.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreAtos}, Erros: ${wrongAnswersAtos}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerAtos(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsAtos button');
+            const feedbackElement = document.getElementById('quizFeedbackAtos');
+            const nextButton = document.querySelector('#quizContainerAtos .quiz-next');
+            const scoreElement = document.getElementById('quizScoreAtos');
+
+            // Disable all option buttons to prevent multiple selections
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreAtos++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersAtos++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreAtos}, Erros: ${wrongAnswersAtos}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionAtos() {
+            currentQuizIndexAtos++;
+            displayQuestionAtos();
+        }
+
+        // Chart for Acts Themes
+        let atosChartInstance = null; // Variable to store the chart instance
+
+        function renderAtosChart() {
+            const ctx = document.getElementById('atosChart').getContext('2d');
+
+            // Destroy the previous chart instance if it exists
+            if (atosChartInstance) {
+                atosChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['O Espírito Santo', 'O Testemunho e a Missão', 'O Crescimento da Igreja', 'Perseguição e Sofrimento', 'A Universalidade do Evangelho', 'A Oração', 'Milagres e Sinais', 'A Soberania de Deus'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [10, 9, 8, 7, 7, 6, 6, 5], // Fictitious values for Acts
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Red for Holy Spirit
+                        'rgba(54, 162, 235, 0.7)', // Blue for Witness/Mission
+                        'rgba(255, 206, 86, 0.7)', // Yellow for Church Growth
+                        'rgba(75, 192, 192, 0.7)', // Teal for Persecution
+                        'rgba(153, 102, 255, 0.7)', // Purple for Universality
+                        'rgba(255, 159, 64, 0.7)', // Orange for Prayer
+                        'rgba(201, 203, 207, 0.7)', // Gray for Miracles
+                        'rgba(100, 149, 237, 0.7)' // Light blue for God's Sovereignty
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)',
+                        'rgba(100, 149, 237, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            atosChartInstance = new Chart(ctx, {
+                type: 'bar', // Can be 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Color of Y-axis labels
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Color of Y-axis grid lines
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Color of X-axis labels
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Color of X-axis grid lines
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Color of legend text
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Atos dos Apóstolos',
+                            color: '#f8fafc', // Color of chart title
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the home section on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionAtos('inicio');
+        });
+    </script>
+</body>
+</html>

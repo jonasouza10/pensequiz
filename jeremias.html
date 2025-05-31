@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Jeremias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Jeremias Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Jeremias</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionJeremias('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionJeremias('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionJeremias('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionJeremias('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionJeremias('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionJeremias('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionJeremias('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionJeremias('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionJeremias('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Jeremias</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Jeremias, o 'profeta chorão', e mergulhe em suas mensagens de advertência, juízo e esperança para Judá antes e durante o exílio babilônico. Descubra a fidelidade de Deus em meio à infidelidade de Seu povo e as promessas de uma Nova Aliança. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Jeremias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Jeremias é o segundo dos Profetas Maiores do Antigo Testamento. Escrito pelo profeta Jeremias, filho de Hilquias, ele profetizou em Judá por mais de 40 anos (c. 627-586 a.C.), durante os reinados de Josias, Jeoacaz, Jeoaquim, Joaquim e Zedequias. Este foi um período turbulento na história de Judá, marcado pela decadência espiritual, instabilidade política e a ascensão do Império Babilônico, que culminaria na destruição de Jerusalém e no exílio do povo judeu.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A mensagem de Jeremias é predominantemente de juízo devido à persistente idolatria, injustiça social e apostasia de Judá. Ele é frequentemente chamado de "profeta chorão" por causa de sua profunda angústia e tristeza diante da desobediência do povo e do juízo iminente de Deus. Apesar do tom sombrio, o livro também contém mensagens de esperança e restauração, especialmente a promessa de uma Nova Aliança (Jeremias 31:31-34), onde Deus escreveria Sua lei nos corações de Seu povo e perdoaria seus pecados.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Jeremias enfrentou grande oposição, perseguição e desprezo por parte dos reis, sacerdotes, falsos profetas e do próprio povo, que se recusavam a ouvir a palavra de Deus através dele. Sua vida e ministério são um testemunho da fidelidade de Deus em chamar e usar Seus servos, mesmo em circunstâncias difíceis, para proclamar a verdade, não importa o custo pessoal.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-25: Chamado de Jeremias e Mensagens de Juízo contra Judá.</strong> Esta seção inclui o chamado do profeta, a denúncia da idolatria e apostasia de Judá, e as advertências sobre a invasão babilônica como juízo divino.</li>
+                <li><strong>Capítulos 26-45: Narrativas Biográficas e Profecias durante o Cerco e Queda de Jerusalém.</strong> Relatam a perseguição de Jeremias, seus conflitos com falsos profetas, a queda de Jerusalém, o exílio e os eventos após a destruição.</li>
+                <li><strong>Capítulos 46-51: Oráculos contra as Nações Estrangeiras.</strong> Profecias de juízo contra o Egito, Filístia, Moabe, Amom, Edom, Damasco, Elão e Babilônia.</li>
+                <li><strong>Capítulo 52: Apêndice Histórico.</strong> Um resumo da queda de Jerusalém e do exílio, servindo como confirmação das profecias de Jeremias.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Jeremias é um livro crucial para entender a justiça de Deus em relação ao pecado e Sua misericórdia em oferecer um caminho de redenção e restauração através de uma nova aliança.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Jeremias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Jeremias é um livro complexo que detalha a mensagem de Deus a Judá em um período de crise, alternando entre juízo e promessas de restauração.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Chamado de Jeremias e Mensagens de Juízo (Capítulos 1-25)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Chamado e a Comissão de Jeremias (Capítulo 1):</strong>
+                    <ul>
+                        <li>Deus chama Jeremias desde o ventre e o comissiona como profeta às nações.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Apostasia de Judá e a Infidelidade (Capítulos 2-6):</strong>
+                    <ul>
+                        <li>Denúncia da idolatria, da quebra da aliança e da rebelião do povo.</li>
+                        <li>Advertências sobre o inimigo do Norte (Babilônia).</li>
+                    </ul>
+                </li>
+                <li><strong>C. Sermões e Símbolos de Juízo (Capítulos 7-20):</strong>
+                    <ul>
+                        <li>O Sermão do Templo: confiança falsa na presença do templo.</li>
+                        <li>O oleiro e o barro: a soberania de Deus para destruir e edificar.</li>
+                        <li>Perseguição de Jeremias e suas lamentações.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Profecias contra os Reis e Falsos Profetas (Capítulos 21-25):</strong>
+                    <ul>
+                        <li>Juízo sobre os últimos reis de Judá.</li>
+                        <li>A denúncia dos falsos profetas que prometiam paz.</li>
+                        <li>Profecia dos 70 anos de cativeiro babilônico.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Narrativas Biográficas e Eventos do Exílio (Capítulos 26-45)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Perseguição e Conflitos de Jeremias (Capítulos 26-29):</strong>
+                    <ul>
+                        <li>Jeremias é ameaçado de morte por suas profecias.</li>
+                        <li>Conflito com o falso profeta Hananias.</li>
+                        <li>Cartas aos exilados na Babilônia.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Livro da Consolação: A Nova Aliança (Capítulos 30-33):</strong>
+                    <ul>
+                        <li>Promessas de restauração para Israel e Judá.</li>
+                        <li>A Nova Aliança (Jeremias 31:31-34): a lei escrita no coração.</li>
+                        <li>A compra do campo de Anatote como sinal de esperança.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Queda de Jerusalém e o Exílio (Capítulos 34-39):</strong>
+                    <ul>
+                        <li>A desobediência aos mandamentos sobre os escravos.</li>
+                        <li>A lealdade dos recabitas em contraste com Judá.</li>
+                        <li>O cerco e a destruição de Jerusalém.</li>
+                        <li>Jeremias é poupado e levado por Gedalias.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Eventos Pós-Destruição (Capítulos 40-45):</strong>
+                    <ul>
+                        <li>O assassinato de Gedalias.</li>
+                        <li>A fuga para o Egito contra a vontade de Deus.</li>
+                        <li>A advertência de Jeremias no Egito.</li>
+                        <li>Mensagem a Baruque.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Oráculos contra as Nações e Apêndice (Capítulos 46-52)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Oráculos contra Egito, Filístia, Moabe, Amom, Edom, Damasco, Elão (Capítulos 46-49).</strong></li>
+                <li><strong>B. Oráculo contra a Babilônia (Capítulos 50-51):</strong>
+                    <ul>
+                        <li>Profecia da queda da Babilônia como juízo de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Apêndice Histórico (Capítulo 52):</strong>
+                    <ul>
+                        <li>Reafirmação da destruição de Jerusalém e do exílio.</li>
+                        <li>Libertação de Joaquim do cativeiro.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Jeremias destaca a justiça e a fidelidade de Deus em cumprir Suas advertências e promessas. Ele revela a profundidade do pecado humano e a necessidade de um coração transformado (a Nova Aliança). A soberania de Deus sobre as nações e a história é enfatizada, mostrando que Ele usa impérios para Seus propósitos de juízo e redenção. Apesar da dor e do sofrimento do profeta e do povo, a mensagem final de Jeremias é de esperança na restauração futura e na fidelidade inabalável de Deus à Sua aliança.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridJeremias">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Jeremias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Jeremias, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> O chamado de Jeremias e sua comissão profética.</li>
+                <li><strong>Capítulo 2:</strong> A infidelidade de Israel e o abandono do Senhor.</li>
+                <li><strong>Capítulo 3:</strong> O chamado de Israel e Judá ao arrependimento.</li>
+                <li><strong>Capítulo 4:</strong> A iminente invasão do inimigo do Norte.</li>
+                <li><strong>Capítulo 5:</strong> A corrupção e a rebelião em Jerusalém.</li>
+                <li><strong>Capítulo 6:</strong> O cerco iminente e a rejeição da palavra de Deus.</li>
+                <li><strong>Capítulo 7:</strong> O Sermão do Templo: confiança falsa na religião.</li>
+                <li><strong>Capítulo 8:</strong> A calamidade e a lamentação pela destruição.</li>
+                <li><strong>Capítulo 9:</strong> A dor de Jeremias pelo pecado do povo.</li>
+                <li><strong>Capítulo 10:</strong> A futilidade dos ídolos em contraste com o Deus vivo.</li>
+                <li><strong>Capítulo 11:</strong> A aliança quebrada e a conspiração contra Jeremias.</li>
+                <li><strong>Capítulo 12:</strong> A queixa de Jeremias e a resposta de Deus.</li>
+                <li><strong>Capítulo 13:</strong> O cinto de linho e a destruição da soberba.</li>
+                <li><strong>Capítulo 14:</strong> A seca e a oração de Jeremias.</li>
+                <li><strong>Capítulo 15:</strong> A rejeição de Jeremias e a persistência do juízo.</li>
+                <li><strong>Capítulo 16:</strong> Sinais do juízo: proibição de casamento e luto.</li>
+                <li><strong>Capítulo 17:</strong> O pecado de Judá e a maldição da confiança no homem.</li>
+                <li><strong>Capítulo 18:</strong> O oleiro e o barro: a soberania de Deus.</li>
+                <li><strong>Capítulo 19:</strong> O vaso de barro quebrado como sinal de destruição.</li>
+                <li><strong>Capítulo 20:</strong> A perseguição de Jeremias e sua queixa.</li>
+                <li><strong>Capítulo 21:</strong> Profecia contra Zedequias e a escolha entre vida e morte.</li>
+                <li><strong>Capítulo 22:</strong> Juízo sobre os reis de Judá (Salum, Jeoaquim, Joaquim).</li>
+                <li><strong>Capítulo 23:</strong> Os maus pastores e a promessa do Renovo Justo.</li>
+                <li><strong>Capítulo 24:</strong> A visão dos figos bons e maus (exilados e remanescentes).</li>
+                <li><strong>Capítulo 25:</strong> Profecia dos 70 anos de cativeiro babilônico.</li>
+                <li><strong>Capítulo 26:</strong> Jeremias é ameaçado de morte, mas é salvo.</li>
+                <li><strong>Capítulo 27:</strong> Os jugos de madeira e a submissão à Babilônia.</li>
+                <li><strong>Capítulo 28:</strong> Conflito com o falso profeta Hananias.</li>
+                <li><strong>Capítulo 29:</strong> Carta de Jeremias aos exilados na Babilônia.</li>
+                <li><strong>Capítulo 30:</strong> Promessas de restauração e a volta do cativeiro.</li>
+                <li><strong>Capítulo 31:</strong> A Nova Aliança e a restauração de Israel e Judá.</li>
+                <li><strong>Capítulo 32:</strong> Jeremias compra um campo como sinal de esperança.</li>
+                <li><strong>Capítulo 33:</strong> Promessas de restauração e o Renovo Justo.</li>
+                <li><strong>Capítulo 34:</strong> A desobediência aos mandamentos sobre os escravos.</li>
+                <li><strong>Capítulo 35:</strong> A lealdade dos recabitas em contraste com Judá.</li>
+                <li><strong>Capítulo 36:</strong> Jeoaquim queima o rolo de Jeremias.</li>
+                <li><strong>Capítulo 37:</strong> Jeremias é preso durante o cerco.</li>
+                <li><strong>Capítulo 38:</strong> Jeremias é jogado na cisterna e resgatado.</li>
+                <li><strong>Capítulo 39:</strong> A queda de Jerusalém e o destino de Jeremias.</li>
+                <li><strong>Capítulo 40:</strong> Jeremias é libertado e vai com Gedalias.</li>
+                <li><strong>Capítulo 41:</strong> O assassinato de Gedalias.</li>
+                <li><strong>Capítulo 42:</strong> A consulta a Jeremias e a decisão de ir para o Egito.</li>
+                <li><strong>Capítulo 43:</strong> A fuga para o Egito e a profecia contra o Egito.</li>
+                <li><strong>Capítulo 44:</strong> A idolatria em Patros (Egito) e o juízo.</li>
+                <li><strong>Capítulo 45:</strong> Mensagem de consolo a Baruque.</li>
+                <li><strong>Capítulo 46:</strong> Oráculo contra o Egito.</li>
+                <li><strong>Capítulo 47:</strong> Oráculo contra a Filístia.</li>
+                <li><strong>Capítulo 48:</strong> Oráculo contra Moabe.</li>
+                <li><strong>Capítulo 49:</strong> Oráculos contra Amom, Edom, Damasco, Quedar e Elão.</li>
+                <li><strong>Capítulo 50:</strong> Oráculo contra a Babilônia.</li>
+                <li><strong>Capítulo 51:</strong> A queda da Babilônia e a vingança do Senhor.</li>
+                <li><strong>Capítulo 52:</strong> Apêndice histórico: a queda de Jerusalém e o exílio.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Jeremias</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Juízo Divino:</strong> A consequência da desobediência e idolatria de Judá.</li>
+                <li><strong>Pecado e Apostasia:</strong> A persistente infidelidade do povo de Deus.</li>
+                <li><strong>A Nova Aliança:</strong> A promessa de um relacionamento transformado com Deus, com a lei escrita no coração.</li>
+                <li><strong>O Profeta Sofredor:</strong> A vida e o ministério de Jeremias como um exemplo de fidelidade em meio à perseguição.</li>
+                <li><strong>Fidelidade de Deus:</strong> A soberania de Deus em cumprir Suas palavras, tanto de juízo quanto de restauração.</li>
+                <li><strong>O Exílio:</strong> A deportação para a Babilônia como cumprimento das profecias.</li>
+                <li><strong>Restauração Futura:</strong> A esperança de um retorno e renovação para Israel.</li>
+                <li><strong>Soberania sobre as Nações:</strong> Deus usa impérios como instrumentos de Seu juízo e propósito.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Jeremias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersJeremias">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Jeremias</h2>
+            <div id="quizContainerJeremias" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionJeremias"></p>
+                <div id="quizOptionsJeremias" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackJeremias" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionJeremias()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressJeremias"></span></p>
+                <p>Pontuação: <span id="quizScoreJeremias">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Jeremias</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Jeremias.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="jeremiasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalJeremias()">&times;</span>
+                <h3 id="modalCharacterNameJeremias" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionJeremias" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Jeremias",
+            "short_name": "Jeremias",
+            "description": "Explore o livro de Jeremias de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=JR",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=JR",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'jeremias-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionJeremias(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsJeremias();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksJeremias();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsJeremias(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexJeremias = 0; // Reinicia o quiz
+                scoreJeremias = 0;
+                wrongAnswersJeremias = 0;
+                document.getElementById('quizScoreJeremias').textContent = `Acertos: ${scoreJeremias}, Erros: ${wrongAnswersJeremias}`;
+                displayQuestionJeremias();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderJeremiasChart();
+            }
+        }
+
+        // Dados dos personagens para Jeremias
+        const characterDetailsJeremias = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Deus de Israel, que chama Jeremias e entrega mensagens de juízo e esperança ao Seu povo."
+            },
+            "Jeremias": {
+                name: "Jeremias",
+                description: "O profeta 'chorão', filho de Hilquias, comissionado por Deus para proclamar a palavra de juízo e restauração a Judá e às nações."
+            },
+            "Josias": {
+                name: "Josias",
+                description: "Rei de Judá, durante cujo reinado Jeremias começou seu ministério. Josias foi um rei justo que promoveu reformas religiosas."
+            },
+            "Jeoaquim": {
+                name: "Jeoaquim",
+                description: "Rei de Judá, que se opôs a Jeremias, queimou seu rolo de profecias e levou Judá mais fundo na apostasia."
+            },
+            "Zedequias": {
+                name: "Zedequias",
+                description: "O último rei de Judá, que buscou conselho de Jeremias, mas falhou em obedecer à palavra de Deus, resultando na queda de Jerusalém."
+            },
+            "Baruque": {
+                name: "Baruque",
+                description: "O escriba e fiel companheiro de Jeremias, que registrou suas profecias e o acompanhou em seu ministério."
+            },
+            "Nabucodonosor": {
+                name: "Nabucodonosor",
+                description: "Rei da Babilônia, usado por Deus como instrumento de juízo contra Judá e as nações."
+            },
+            "Gedalias": {
+                name: "Gedalias",
+                description: "Governador nomeado pelos babilônios sobre o remanescente em Judá após a queda de Jerusalém, mas foi assassinado."
+            },
+            "Hananias": {
+                name: "Hananias",
+                description: "Um falso profeta que se opôs a Jeremias, prometendo paz e o rápido retorno dos exilados, mas foi desmascarado e morreu."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalJeremias(characterName) {
+            const details = characterDetailsJeremias[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameJeremias').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionJeremias').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalJeremias() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsJeremias() {
+            const grid = document.getElementById('characterGridJeremias');
+            grid.innerHTML = '';
+            for (const key in characterDetailsJeremias) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalJeremias(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksJeremias() {
+            const chaptersDiv = document.getElementById('chaptersJeremias');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 52; i++) { // Jeremias tem 52 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/jr/${i}`; // Link para a Bíblia Online, Jeremias
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Jeremias (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsJeremias = [
+            { question: "Qual é o apelido de Jeremias?", options: ["O Profeta da Justiça", "O Profeta do Fogo", "O Profeta Chorão", "O Profeta da Glória"], answer: "O Profeta Chorão", reference: "Introdução ao Livro de Jeremias" },
+            { question: "Durante o reinado de qual rei Jeremias começou seu ministério?", options: ["Acaz", "Ezequias", "Josias", "Zedequias"], answer: "Josias", reference: "Jeremias 1:2-3" },
+            { question: "Qual é a principal mensagem de Jeremias para Judá?", options: ["Prosperidade e paz", "Juízo e destruição devido à idolatria", "Vitória sobre os inimigos", "Reconstrução do templo"], answer: "Juízo e destruição devido à idolatria", reference: "Introdução ao Livro de Jeremias" },
+            { question: "O que Deus prometeu escrever nos corações em Jeremias 31:33?", options: ["Seu nome", "Sua lei", "Sua história", "Seus mandamentos"], answer: "Sua lei", reference: "Jeremias 31:33" },
+            { question: "Quem é o escriba e fiel companheiro de Jeremias?", options: ["Isaías", "Ezequiel", "Baruque", "Daniel"], answer: "Baruque", reference: "Jeremias 36:4" },
+            { question: "Quantos capítulos tem o livro de Jeremias?", options: ["39", "52", "66", "45"], answer: "52", reference: "Esboços do Livro de Jeremias" },
+            { question: "Qual é o símbolo usado por Deus para mostrar Sua soberania sobre Judá, comparando-o a um oleiro?", options: ["Uma árvore", "Um vaso de barro", "Um rio", "Uma montanha"], answer: "Um vaso de barro", reference: "Jeremias 18:1-6" },
+            { question: "Qual rei de Judá queimou o rolo das profecias de Jeremias?", options: ["Josias", "Zedequias", "Jeoaquim", "Joaquim"], answer: "Jeoaquim", reference: "Jeremias 36:23" },
+            { question: "Qual império é usado por Deus como instrumento de juízo contra Judá?", options: ["Assíria", "Egito", "Pérsia", "Babilônia"], answer: "Babilônia", reference: "Introdução ao Livro de Jeremias" },
+            { question: "O que Jeremias 29:11 promete aos exilados na Babilônia?", options: ["Sofrimento eterno", "Um futuro de esperança e paz", "Riquezas imediatas", "Retorno imediato"], answer: "Um futuro de esperança e paz", reference: "Jeremias 29:11" },
+            { question: "Quem foi o falso profeta que se opôs a Jeremias e profetizou paz?", options: ["Urias", "Pasur", "Hananias", "Semaías"], answer: "Hananias", reference: "Jeremias 28" },
+            { question: "Qual é a promessa central da 'Nova Aliança' em Jeremias?", options: ["Um novo templo", "Um novo rei", "Um coração transformado e o perdão dos pecados", "Novas leis"], answer: "Um coração transformado e o perdão dos pecados", reference: "Jeremias 31:31-34" },
+            { question: "O que Jeremias é proibido de fazer como sinal do juízo iminente?", options: ["Comer pão", "Casar-se e ter filhos", "Falar em público", "Viajar"], answer: "Casar-se e ter filhos", reference: "Jeremias 16:1-4" },
+            { question: "Qual é a cidade que Jeremias profetizou que seria destruída e depois restaurada?", options: ["Samaria", "Nínive", "Jerusalém", "Babilônia"], answer: "Jerusalém", reference: "Jeremias 32:44" },
+            { question: "O que a lealdade dos recabitas ensinou a Judá?", options: ["A importância da agricultura", "A obediência aos mandamentos de seus antepassados", "A necessidade de beber vinho", "A construção de casas"], answer: "A obediência aos mandamentos de seus antepassados", reference: "Jeremias 35" },
+            { question: "Qual é a duração do cativeiro babilônico profetizada por Jeremias?", options: ["40 anos", "50 anos", "70 anos", "100 anos"], answer: "70 anos", reference: "Jeremias 25:11" },
+            { question: "Qual é a condição do coração humano descrita em Jeremias 17:9?", options: ["Puro e sincero", "Enganoso e perverso", "Forte e corajoso", "Fraco e temente"], answer: "Enganoso e perverso", reference: "Jeremias 17:9" },
+            { question: "Para onde Jeremias foi levado contra sua vontade após a queda de Jerusalém?", options: ["Babilônia", "Assíria", "Egito", "Moabe"], answer: "Egito", reference: "Jeremias 43:5-7" },
+            { question: "O que Jeremias 33:3 convida o povo a fazer?", options: ["Construir um templo", "Clamar a Deus para que Ele revele coisas grandes e ocultas", "Fazer sacrifícios", "Esquecer o passado"], answer: "Clamar a Deus para que Ele revele coisas grandes e ocultas", reference: "Jeremias 33:3" },
+            { question: "Qual é o tema principal dos capítulos 46-51 de Jeremias?", options: ["Profecias sobre o Messias", "Histórias dos reis de Judá", "Oráculos contra as nações estrangeiras", "Leis e mandamentos"], answer: "Oráculos contra as nações estrangeiras", reference: "Panoramas do Livro de Jeremias" },
+            { question: "O que Jeremias comprou como um sinal de esperança na restauração futura?", options: ["Um rebanho", "Um campo", "Uma casa", "Uma vinha"], answer: "Um campo", reference: "Jeremias 32:6-15" },
+            { question: "Quem foi o último rei de Judá antes da destruição de Jerusalém?", options: ["Josias", "Jeoaquim", "Joaquim", "Zedequias"], answer: "Zedequias", reference: "Introdução ao Livro de Jeremias" },
+            { question: "Qual é a principal característica do estilo de Jeremias?", options: ["Poético e alegórico", "Histórico e narrativo", "Profético com lamentações e biografias", "Sapiencial e didático"], answer: "Profético com lamentações e biografias", reference: "Introdução ao Livro de Jeremias" },
+            { question: "O que Jeremias 17:7-8 afirma sobre o homem que confia no Senhor?", options: ["Será como um arbusto no deserto", "Será como uma árvore plantada junto às águas", "Será como um rio que seca", "Será como uma casa sobre a areia"], answer: "Será como uma árvore plantada junto às águas", reference: "Jeremias 17:7-8" },
+            { question: "O que o livro de Jeremias enfatiza sobre a justiça de Deus?", options: ["Que ela é lenta", "Que ela é arbitrária", "Que ela é inevitável para o pecado", "Que ela pode ser evitada com sacrifícios"], answer: "Que ela é inevitável para o pecado", reference: "Significado Teológico do Livro de Jeremias" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsJeremias = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsJeremias.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsJeremias = allQuizQuestionsJeremias.concat(uniqueQuizQuestionsJeremias);
+        }
+        allQuizQuestionsJeremias = allQuizQuestionsJeremias.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsJeremias = [];
+        let currentQuizIndexJeremias = 0;
+        let scoreJeremias = 0;
+        let wrongAnswersJeremias = 0;
+        let jeremiasChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsJeremias() {
+            shuffledQuizQuestionsJeremias = [...allQuizQuestionsJeremias]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsJeremias);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressJeremias() {
+            const progressElement = document.getElementById('quizProgressJeremias');
+            progressElement.textContent = `${currentQuizIndexJeremias + 1}/${shuffledQuizQuestionsJeremias.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionJeremias() {
+            if (currentQuizIndexJeremias >= shuffledQuizQuestionsJeremias.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionJeremias').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsJeremias').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreJeremias}, Erros: ${wrongAnswersJeremias}</p>`;
+                document.getElementById('quizFeedbackJeremias').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsJeremias[currentQuizIndexJeremias];
+            document.getElementById('quizQuestionJeremias').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsJeremias');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerJeremias(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackJeremias').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressJeremias();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerJeremias(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackJeremias');
+            const optionsButtons = document.querySelectorAll('#quizOptionsJeremias button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreJeremias++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersJeremias++;
+            }
+            document.getElementById('quizScoreJeremias').textContent = `Acertos: ${scoreJeremias}, Erros: ${wrongAnswersJeremias}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionJeremias() {
+            currentQuizIndexJeremias++;
+            displayQuestionJeremias();
+        }
+
+        // Dados para o gráfico de temas de Jeremias
+        const jeremiasChartData = {
+            labels: ['Juízo Divino', 'Pecado e Apostasia', 'Nova Aliança', 'Profeta Sofredor', 'Fidelidade de Deus', 'O Exílio', 'Restauração Futura', 'Soberania sobre Nações'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 15, 10, 10, 10, 5, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(201, 203, 207, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const jeremiasChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Jeremias',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderJeremiasChart() {
+            const ctx = document.getElementById('jeremiasChart').getContext('2d');
+            if (jeremiasChartInstance) {
+                jeremiasChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            jeremiasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: jeremiasChartData,
+                options: jeremiasChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Eclesiastes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Eclesiastes Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Eclesiastes</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionEclesiastes('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionEclesiastes('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionEclesiastes('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionEclesiastes('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionEclesiastes('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionEclesiastes('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionEclesiastes('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionEclesiastes('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionEclesiastes('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Eclesiastes</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Eclesiastes, uma profunda meditação sobre o sentido da vida sob o sol. Acompanhe a jornada do Pregador em sua busca por significado e satisfação em todas as áreas da existência humana. Descubra as conclusões sobre a vaidade de tudo e a importância de temer a Deus e guardar Seus mandamentos. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Eclesiastes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Eclesiastes é uma das obras sapienciais do Antigo Testamento, uma profunda e muitas vezes melancólica reflexão sobre o sentido da vida. O autor se identifica como "o Pregador, filho de Davi, rei em Jerusalém" (Eclesiastes 1:1), tradicionalmente associado a Salomão. O livro explora a busca humana por significado e satisfação em diversas áreas da vida, como sabedoria, prazer, trabalho, riqueza e fama, concluindo repetidamente que tudo é "vaidade" (hebraico: *hebel*), que pode significar futilidade, insignificância, ou algo efêmero como um sopro.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A perspectiva do Pregador é frequentemente descrita como "sob o sol", o que implica uma visão da vida sem a revelação divina explícita ou a esperança da eternidade. Ele observa as injustiças, as desigualdades e a inevitabilidade da morte, que nivela a todos, sábios e tolos, ricos e pobres. Essa observação leva a um ceticismo aparente e a uma sensação de desilusão com as realizações terrenas.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">No entanto, apesar do tom pessimista inicial, Eclesiastes não é um livro niilista. O Pregador, através de sua jornada de experimentação e observação, chega a conclusões importantes. Ele reconhece que, embora a vida seja cheia de mistérios e frustrações, há dons de Deus a serem desfrutados (como comida, bebida, trabalho e relacionamentos) e que a verdadeira sabedoria e o propósito final da vida estão em temer a Deus e guardar Seus mandamentos. O livro termina com uma exortação clara para "temer a Deus e guardar os seus mandamentos; porque este é o dever de todo homem" (Eclesiastes 12:13).</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Eclesiastes é um livro que nos convida a refletir sobre a transitoriedade da vida e a buscar um propósito que transcenda as realidades terrenas, apontando para a eternidade e para o Criador.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-2: A Busca por Significado.</strong> O Pregador experimenta a sabedoria, o prazer, o trabalho e a riqueza, concluindo que tudo é vaidade.</li>
+                <li><strong>Capítulos 3-5: O Tempo e a Injustiça.</strong> Reflexões sobre os ciclos da vida, a inevitabilidade da morte, a injustiça social e a futilidade da riqueza.</li>
+                <li><strong>Capítulos 6-8: A Limitação da Sabedoria Humana.</strong> Observações sobre a insatisfação, a morte, a reputação e a dificuldade de compreender os caminhos de Deus.</li>
+                <li><strong>Capítulos 9-11: A Incerteza da Vida.</strong> A igualdade da morte, a importância de desfrutar a vida enquanto se pode, e a necessidade de semear o bem.</li>
+                <li><strong>Capítulo 12: A Conclusão.</strong> A exortação a lembrar do Criador na juventude e a conclusão final sobre o temor de Deus.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Eclesiastes é uma jornada intelectual e espiritual que, ao confrontar a vaidade da existência, nos direciona para a única fonte de verdadeiro sentido: Deus.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Eclesiastes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Eclesiastes é uma exploração filosófica da vida "sob o sol", concluindo que tudo é vaidade, exceto o temor do Senhor.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Busca por Significado e a Conclusão da Vaidade (Capítulos 1-2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Introdução: Tudo é Vaidade (Capítulo 1:1-11):</strong>
+                    <ul>
+                        <li>O ciclo repetitivo da natureza e a falta de novidade.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Busca pela Sabedoria (Capítulo 1:12-18):</strong>
+                    <ul>
+                        <li>Descoberta de que o aumento do conhecimento aumenta a dor.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Busca pelo Prazer (Capítulo 2:1-11):</strong>
+                    <ul>
+                        <li>Experimentação com alegria, vinho, grandes obras, posses.</li>
+                        <li>Conclusão: também é vaidade.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Vaidade da Sabedoria e da Loucura (Capítulo 2:12-17):</strong>
+                    <ul>
+                        <li>O mesmo destino (morte) aguarda a ambos.</li>
+                    </ul>
+                </li>
+                <li><strong>E. A Vaidade do Trabalho e da Riqueza (Capítulo 2:18-26):</strong>
+                    <ul>
+                        <li>O fruto do trabalho pode ir para quem não trabalhou.</li>
+                        <li>O dom de Deus é desfrutar o trabalho.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Tempo, a Injustiça e a Inevitabilidade da Morte (Capítulos 3-5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Há Tempo para Tudo (Capítulo 3:1-15):</strong>
+                    <ul>
+                        <li>Os ciclos da vida sob o controle de Deus, mas o homem não entende.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Injustiça e Opressão (Capítulo 3:16-4:3):</strong>
+                    <ul>
+                        <li>A observação da maldade no lugar da justiça.</li>
+                        <li>A morte nivela a todos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Vaidade do Esforço e da Solidão (Capítulo 4:4-16):</strong>
+                    <ul>
+                        <li>A inveja e a falta de companhia.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Conselhos sobre a Adoração e a Riqueza (Capítulo 5:1-20):</strong>
+                    <ul>
+                        <li>Seja cuidadoso ao fazer votos a Deus.</li>
+                        <li>A vaidade do acúmulo de riquezas.</li>
+                        <li>O dom de Deus é desfrutar os bens.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Limitação da Sabedoria Humana e a Morte (Capítulos 6-8)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Insatisfação com a Riqueza (Capítulo 6:1-12):</strong>
+                    <ul>
+                        <li>Não há satisfação em ter muito sem poder desfrutar.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Sabedoria e a Morte (Capítulo 7:1-14):</strong>
+                    <ul>
+                        <li>Melhor o dia da morte que o do nascimento.</li>
+                        <li>A sabedoria é melhor que a loucura, mas ambas enfrentam a morte.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Dificuldade de Compreender os Caminhos de Deus (Capítulo 7:15-8:17):</strong>
+                    <ul>
+                        <li>A observação de justos que perecem e ímpios que prosperam.</li>
+                        <li>Ninguém pode entender a obra de Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. A Incerteza da Vida e a Exortação ao Gozo (Capítulos 9-11)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Destino Comum: A Morte (Capítulo 9:1-12):</strong>
+                    <ul>
+                        <li>Todos, justos e ímpios, enfrentam a morte.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Desfrute a Vida (Capítulo 9:7-10):</strong>
+                    <ul>
+                        <li>Coma, beba, vista-se bem, desfrute sua esposa.</li>
+                        <li>Faça tudo o que suas mãos encontrarem para fazer.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Sabedoria e a Loucura na Prática (Capítulo 9:13-10:20):</strong>
+                    <ul>
+                        <li>A sabedoria é melhor que a força, mas é desprezada.</li>
+                        <li>A tolice em diversas situações.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Necessidade de Investir e Semear (Capítulo 11:1-6):</strong>
+                    <ul>
+                        <li>Lance o pão sobre as águas, pois não sabe o futuro.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Goze a Juventude, mas Lembre-se do Juízo (Capítulo 11:7-10):</strong>
+                    <ul>
+                        <li>Desfrute os dias da sua mocidade, mas saiba que Deus o julgará.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Conclusão: O Temor do Senhor (Capítulo 12)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Lembre-se do seu Criador (Capítulo 12:1-8):</strong>
+                    <ul>
+                        <li>A descrição poética da velhice e da morte.</li>
+                        <li>O retorno do pó à terra e do espírito a Deus.</li>
+                        <li>"Vaidade de vaidades! Tudo é vaidade!"</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Propósito do Pregador (Capítulo 12:9-12):</strong>
+                    <ul>
+                        <li>Buscou palavras agradáveis e verdadeiras.</li>
+                        <li>Advertência contra muitos livros.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Conclusão de Tudo (Capítulo 12:13-14):</strong>
+                    <ul>
+                        <li>"Teme a Deus e guarda os seus mandamentos; porque este é o dever de todo homem."</li>
+                        <li>Deus trará a juízo toda obra.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Eclesiastes desafia a visão simplista de que a vida justa sempre traz prosperidade terrena. Ele confronta a futilidade das buscas humanas por significado fora de Deus, revelando que a verdadeira satisfação e propósito vêm apenas de um relacionamento com o Criador. O livro enfatiza a soberania de Deus sobre o tempo e os eventos, a inevitabilidade da morte e a responsabilidade humana de temer a Deus e obedecer aos Seus mandamentos como o único caminho para uma vida com verdadeiro sentido, apesar das incertezas e injustiças "sob o sol".</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridEclesiastes">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Eclesiastes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Eclesiastes, capítulo por capítulo, destacando os temas e gêneros.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Introdução à vaidade; o ciclo repetitivo da vida; a busca pela sabedoria.</li>
+                <li><strong>Capítulo 2:</strong> A busca pelo prazer, trabalho e riqueza; a vaidade de tudo.</li>
+                <li><strong>Capítulo 3:</strong> Há tempo para tudo; a eternidade no coração do homem; a igualdade da morte.</li>
+                <li><strong>Capítulo 4:</strong> A opressão e a vaidade do esforço e da solidão.</li>
+                <li><strong>Capítulo 5:</strong> Conselhos sobre votos, riqueza e o dom de desfrutar.</li>
+                <li><strong>Capítulo 6:</strong> A insatisfação com a riqueza e a futilidade da vida sem desfrute.</li>
+                <li><strong>Capítulo 7:</strong> A sabedoria em contraste com a loucura; a dificuldade de encontrar a retidão.</li>
+                <li><strong>Capítulo 8:</strong> A obediência ao rei; a dificuldade de entender os caminhos de Deus.</li>
+                <li><strong>Capítulo 9:</strong> O destino comum da morte; a importância de desfrutar a vida.</li>
+                <li><strong>Capítulo 10:</strong> A tolice e seus efeitos; a sabedoria e a loucura na prática.</li>
+                <li><strong>Capítulo 11:</strong> A necessidade de investir e semear; goze a juventude, mas lembre-se do juízo.</li>
+                <li><strong>Capítulo 12:</strong> Lembre-se do Criador na juventude; a velhice e a morte; a conclusão final: temer a Deus.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Eclesiastes</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Vaidade (Hebel):</strong> A futilidade e insignificância de todas as coisas "sob o sol" sem Deus.</li>
+                <li><strong>O Sentido da Vida:</strong> A busca por propósito e significado em meio à transitoriedade da existência.</li>
+                <li><strong>A Inevitabilidade da Morte:</strong> A morte como o destino comum de todos, sábios e tolos.</li>
+                <li><strong>O Temor do Senhor:</strong> A conclusão final e o verdadeiro propósito da vida.</li>
+                <li><strong>O Gozo da Vida:</strong> A exortação para desfrutar os dons de Deus (comida, trabalho, relacionamentos) como bênçãos divinas.</li>
+                <li><strong>A Injustiça no Mundo:</strong> A observação das desigualdades e da aparente falta de retribuição terrena.</li>
+                <li><strong>A Limitação da Sabedoria Humana:</strong> A incapacidade do homem de compreender plenamente os caminhos de Deus.</li>
+                <li><strong>A Soberania de Deus:</strong> Deus controla o tempo e os eventos, mesmo que Seus propósitos não sejam compreendidos.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Eclesiastes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersEclesiastes">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Eclesiastes</h2>
+            <div id="quizContainerEclesiastes" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionEclesiastes"></p>
+                <div id="quizOptionsEclesiastes" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackEclesiastes" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionEclesiastes()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressEclesiastes"></span></p>
+                <p>Pontuação: <span id="quizScoreEclesiastes">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Eclesiastes</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Eclesiastes.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="eclesiastesChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalEclesiastes()">&times;</span>
+                <h3 id="modalCharacterNameEclesiastes" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionEclesiastes" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Eclesiastes",
+            "short_name": "Eclesiastes",
+            "description": "Explore o livro de Eclesiastes de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=EC",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=EC",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'eclesiastes-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionEclesiastes(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsEclesiastes();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksEclesiastes();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsEclesiastes(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexEclesiastes = 0; // Reinicia o quiz
+                scoreEclesiastes = 0;
+                wrongAnswersEclesiastes = 0;
+                document.getElementById('quizScoreEclesiastes').textContent = `Acertos: ${scoreEclesiastes}, Erros: ${wrongAnswersEclesiastes}`;
+                displayQuestionEclesiastes();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderEclesiastesChart();
+            }
+        }
+
+        // Dados dos personagens para Eclesiastes
+        const characterDetailsEclesiastes = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Criador e Soberano sobre todas as coisas, a quem o Pregador conclui que se deve temer e obedecer."
+            },
+            "O Pregador (Coélet)": {
+                name: "O Pregador (Coélet)",
+                description: "O autor do livro, tradicionalmente identificado como Salomão, que explora a vida e a busca por sentido 'sob o sol'."
+            },
+            "O Sábio": {
+                name: "O Sábio",
+                description: "O indivíduo que busca e aplica a sabedoria, mas que, sob a perspectiva do Pregador, ainda enfrenta a vaidade e a morte."
+            },
+            "O Tolo": {
+                name: "O Tolo",
+                description: "O indivíduo que vive sem sabedoria e discernimento, muitas vezes com consequências negativas, mas que também compartilha o mesmo destino final da morte."
+            },
+            "O Oprimido": {
+                name: "O Oprimido",
+                description: "As pessoas que sofrem injustiças e opressão no mundo, cujas lágrimas são observadas pelo Pregador."
+            },
+            "O Rico": {
+                name: "O Rico",
+                description: "Aquele que acumula bens e riquezas, mas que o Pregador conclui que muitas vezes não encontra satisfação e não pode levar nada consigo."
+            },
+            "O Pobre": {
+                name: "O Pobre",
+                description: "Aquele que vive na pobreza, mas que, às vezes, pode ter mais paz e satisfação do que o rico insatisfeito."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalEclesiastes(characterName) {
+            const details = characterDetailsEclesiastes[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameEclesiastes').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionEclesiastes').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalEclesiastes() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsEclesiastes() {
+            const grid = document.getElementById('characterGridEclesiastes');
+            grid.innerHTML = '';
+            for (const key in characterDetailsEclesiastes) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalEclesiastes(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksEclesiastes() {
+            const chaptersDiv = document.getElementById('chaptersEclesiastes');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 12; i++) { // Eclesiastes tem 12 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/ec/${i}`; // Link para a Bíblia Online, Eclesiastes
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Eclesiastes (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsEclesiastes = [
+            { question: "Qual a palavra que o Pregador usa repetidamente para descrever tudo 'debaixo do sol'?", options: ["Alegria", "Sabedoria", "Vaidade", "Riqueza"], answer: "Vaidade", reference: "Eclesiastes 1:2" },
+            { question: "Quem é o autor do livro de Eclesiastes, segundo a tradição?", options: ["Davi", "Moisés", "Salomão", "Jeremias"], answer: "Salomão", reference: "Eclesiastes 1:1" },
+            { question: "O que o Pregador conclui sobre o aumento do conhecimento?", options: ["Aumenta a alegria", "Aumenta a dor", "Aumenta a riqueza", "Aumenta a fama"], answer: "Aumenta a dor", reference: "Eclesiastes 1:18" },
+            { question: "Qual é a principal conclusão do Pregador sobre o prazer?", options: ["É a única coisa que importa", "É duradouro", "É vaidade", "É a fonte da sabedoria"], answer: "É vaidade", reference: "Eclesiastes 2:1" },
+            { question: "O que acontece tanto com o sábio quanto com o tolo, segundo Eclesiastes?", options: ["Ambos se tornam ricos", "Ambos morrem", "Ambos são famosos", "Ambos vivem muito"], answer: "Ambos morrem", reference: "Eclesiastes 2:16" },
+            { question: "Para tudo há um tempo, e qual é o tempo para toda a obra debaixo do céu?", options: ["Um tempo para nascer e um tempo para morrer", "Um tempo para trabalhar e um tempo para descansar", "Um tempo para rir e um tempo para chorar", "Todas as anteriores"], answer: "Todas as anteriores", reference: "Eclesiastes 3:1-8" },
+            { question: "O que o Pregador observa no lugar da justiça?", options: ["Retidão", "Maldade", "Paz", "Felicidade"], answer: "Maldade", reference: "Eclesiastes 3:16" },
+            { question: "O que é melhor do que a pessoa que ainda não nasceu, segundo Eclesiastes 4:3?", options: ["O sábio", "O tolo", "Os que já morreram", "O rico"], answer: "Os que já morreram", reference: "Eclesiastes 4:3" },
+            { question: "Qual é o conselho sobre fazer votos a Deus?", options: ["Faça muitos votos", "Não faça votos", "Cumpra o que prometer", "Faça votos e esqueça"], answer: "Cumpra o que prometer", reference: "Eclesiastes 5:4-5" },
+            { question: "O que o homem que tem riquezas, mas não pode desfrutá-las, experimenta?", options: ["Felicidade", "Paz", "Uma doença grave", "Uma aflição dolorosa"], answer: "Uma aflição dolorosa", reference: "Eclesiastes 6:2" },
+            { question: "O que é melhor: o dia da morte ou o dia do nascimento?", options: ["O dia do nascimento", "O dia da morte", "Ambos são iguais", "Depende da pessoa"], answer: "O dia da morte", reference: "Eclesiastes 7:1" },
+            { question: "O que é impossível para o homem entender, segundo Eclesiastes 8:17?", options: ["A riqueza", "A obra que Deus faz debaixo do sol", "A vida após a morte", "O amor"], answer: "A obra que Deus faz debaixo do sol", reference: "Eclesiastes 8:17" },
+            { question: "Qual é o destino comum de todos os seres humanos, justos e ímpios?", options: ["Fama", "Riqueza", "Morte", "Poder"], answer: "Morte", reference: "Eclesiastes 9:2-3" },
+            { question: "Qual é o conselho do Pregador sobre desfrutar a vida?", options: ["Coma, beba e alegre-se", "Trabalhe sem parar", "Acumule riquezas", "Busque a fama"], answer: "Coma, beba e alegre-se", reference: "Eclesiastes 9:7" },
+            { question: "O que o Pregador aconselha a fazer com o pão sobre as águas?", options: ["Guardá-lo", "Comê-lo imediatamente", "Lançá-lo, pois não se sabe o que virá", "Vendê-lo"], answer: "Lançá-lo, pois não se sabe o que virá", reference: "Eclesiastes 11:1" },
+            { question: "O que o jovem deve fazer nos dias da sua mocidade?", options: ["Esquecer de Deus", "Lembrar-se do seu Criador", "Buscar apenas o prazer", "Ignorar o futuro"], answer: "Lembrar-se do seu Criador", reference: "Eclesiastes 12:1" },
+            { question: "Qual é a conclusão final do livro de Eclesiastes?", options: ["A vida é sem sentido", "Busque a riqueza", "Teme a Deus e guarda os seus mandamentos", "O prazer é tudo"], answer: "Teme a Deus e guarda os seus mandamentos", reference: "Eclesiastes 12:13" },
+            { question: "O que o Pregador diz sobre o espírito do homem quando ele morre?", options: ["Vai para o nada", "Volta para a terra", "Volta para Deus que o deu", "Permanece na sepultura"], answer: "Volta para Deus que o deu", reference: "Eclesiastes 12:7" },
+            { question: "Qual é o significado da palavra hebraica 'hebel'?", options: ["Sabedoria", "Felicidade", "Vaidade/Futilidade/Sopro", "Justiça"], answer: "Vaidade/Futilidade/Sopro", reference: "Introdução ao Livro de Eclesiastes" },
+            { question: "O que o Pregador afirma ser melhor do que a força em Eclesiastes 9:16?", options: ["A riqueza", "A sabedoria", "A beleza", "A juventude"], answer: "A sabedoria", reference: "Eclesiastes 9:16" },
+            { question: "O que o Pregador aconselha a fazer com o que as suas mãos encontrarem para fazer?", options: ["Deixar para depois", "Fazer com toda a sua força", "Fazer de qualquer jeito", "Não fazer nada"], answer: "Fazer com toda a sua força", reference: "Eclesiastes 9:10" },
+            { question: "Qual é a principal observação do Pregador sobre a justiça terrena?", options: ["Ela sempre prevalece", "Ela é frequentemente ausente", "Ela é perfeita", "Ela é fácil de encontrar"], answer: "Ela é frequentemente ausente", reference: "Eclesiastes 3:16, 7:15" },
+            { question: "O que o Pregador diz sobre o riso e a alegria?", options: ["São sempre bons", "São vaidade", "São a única fonte de felicidade", "São necessários para a vida"], answer: "São vaidade", reference: "Eclesiastes 2:2" },
+            { question: "Qual é a advertência final do Pregador sobre muitos livros?", options: ["Eles trazem sabedoria", "Eles são cansativos para a carne", "Eles são sempre bons", "Eles são raros"], answer: "Eles são cansativos para a carne", reference: "Eclesiastes 12:12" },
+            { question: "O que o Pregador diz sobre o homem que tem tudo, mas não pode desfrutar?", options: ["Ele é abençoado", "Ele é feliz", "Ele é um tolo", "Ele é um infortunado"], answer: "Ele é um infortunado", reference: "Eclesiastes 6:1-2" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsEclesiastes = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsEclesiastes.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsEclesiastes = allQuizQuestionsEclesiastes.concat(uniqueQuizQuestionsEclesiastes);
+        }
+        allQuizQuestionsEclesiastes = allQuizQuestionsEclesiastes.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsEclesiastes = [];
+        let currentQuizIndexEclesiastes = 0;
+        let scoreEclesiastes = 0;
+        let wrongAnswersEclesiastes = 0;
+        let eclesiastesChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsEclesiastes() {
+            shuffledQuizQuestionsEclesiastes = [...allQuizQuestionsEclesiastes]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsEclesiastes);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressEclesiastes() {
+            const progressElement = document.getElementById('quizProgressEclesiastes');
+            progressElement.textContent = `${currentQuizIndexEclesiastes + 1}/${shuffledQuizQuestionsEclesiastes.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionEclesiastes() {
+            if (currentQuizIndexEclesiastes >= shuffledQuizQuestionsEclesiastes.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionEclesiastes').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsEclesiastes').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreEclesiastes}, Erros: ${wrongAnswersEclesiastes}</p>`;
+                document.getElementById('quizFeedbackEclesiastes').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsEclesiastes[currentQuizIndexEclesiastes];
+            document.getElementById('quizQuestionEclesiastes').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsEclesiastes');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerEclesiastes(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackEclesiastes').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressEclesiastes();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerEclesiastes(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackEclesiastes');
+            const optionsButtons = document.querySelectorAll('#quizOptionsEclesiastes button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreEclesiastes++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersEclesiastes++;
+            }
+            document.getElementById('quizScoreEclesiastes').textContent = `Acertos: ${scoreEclesiastes}, Erros: ${wrongAnswersEclesiastes}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionEclesiastes() {
+            currentQuizIndexEclesiastes++;
+            displayQuestionEclesiastes();
+        }
+
+        // Dados para o gráfico de temas de Eclesiastes
+        const eclesiastesChartData = {
+            labels: ['Vaidade (Hebel)', 'O Sentido da Vida', 'A Inevitabilidade da Morte', 'O Temor do Senhor', 'O Gozo da Vida', 'A Injustiça no Mundo', 'Limitação da Sabedoria Humana', 'A Soberania de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [30, 15, 15, 10, 10, 8, 7, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(201, 203, 207, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const eclesiastesChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Eclesiastes',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderEclesiastesChart() {
+            const ctx = document.getElementById('eclesiastesChart').getContext('2d');
+            if (eclesiastesChartInstance) {
+                eclesiastesChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            eclesiastesChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: eclesiastesChartData,
+                options: eclesiastesChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

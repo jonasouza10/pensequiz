@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Efésios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Efésios Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Efésios</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionEfesios('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionEfesios('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionEfesios('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionEfesios('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionEfesios('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionEfesios('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionEfesios('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionEfesios('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionEfesios('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Efésios</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Epístola de Paulo aos Efésios, uma carta profunda que revela a riqueza das bênçãos espirituais em Cristo, o mistério da Igreja como corpo de Cristo e as exortações práticas para uma vida santa e unida. Descubra a verdade sobre sua identidade em Cristo, a unidade entre judeus e gentios, e a armadura de Deus para a batalha espiritual. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Efésios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Epístola de Paulo aos Efésios é uma das mais ricas e teologicamente profundas cartas do Novo Testamento. Escrita por Paulo durante seu primeiro aprisionamento em Roma (cerca de 60-62 d.C.), ela é uma das 'Epístolas da Prisão' (junto com Filipenses, Colossenses e Filemom). Embora endereçada especificamente à igreja em Éfeso, muitos estudiosos acreditam que ela também pode ter sido uma carta circular destinada a várias igrejas na Ásia Menor, dada a sua natureza geral e a falta de saudações pessoais.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O propósito principal de Efésios é exaltar a glória de Deus em Cristo e revelar o grande plano divino para a Igreja. Paulo enfatiza a união dos crentes em Cristo, tanto individualmente quanto como corpo, e a unidade entre judeus e gentios em um só povo de Deus. A carta é dividida em duas seções principais: a doutrinária (Capítulos 1-3), que descreve as bênçãos espirituais e o mistério da Igreja, e a prática (Capítulos 4-6), que exorta os crentes a viverem de acordo com sua nova identidade em Cristo, promovendo a unidade, a santidade e a resistência espiritual.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem a eleição e predestinação em Cristo, a redenção e o perdão dos pecados, a obra unificadora do Espírito Santo, a Igreja como o corpo de Cristo (com Cristo como cabeça), a unidade entre judeus e gentios, o andar digno da vocação, a santidade na conduta, os relacionamentos cristãos (marido/mulher, pais/filhos, senhores/servos) e a batalha espiritual contra as forças do mal, culminando na exortação para vestir toda a armadura de Deus. Efésios é um chamado à compreensão da nossa rica herança em Cristo e a uma vida que reflita essa verdade.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-3: A Posição do Crente em Cristo e o Mistério da Igreja.</strong> Bênçãos espirituais, a obra da Trindade na salvação, a ressurreição e exaltação de Cristo, a união de judeus e gentios, a oração de Paulo pela iluminação dos crentes.</li>
+                <li><strong>Capítulos 4-6: A Conduta do Crente em Cristo.</strong> Exortação à unidade, dons espirituais, andar em santidade, relacionamentos familiares e sociais, e a armadura de Deus para a batalha espiritual.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Efésios é uma carta essencial para compreender a profundidade da nossa salvação e o propósito de Deus para a Sua Igreja, capacitando-nos a viver uma vida que glorifique a Ele.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Efésios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Efésios é uma epístola sobre a riqueza das bênçãos em Cristo e a vida prática da Igreja.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Doutrina: A Posição do Crente em Cristo (Capítulos 1-3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudações e Bênçãos Espirituais em Cristo (Capítulo 1:1-14):</strong>
+                    <ul>
+                        <li>Saudação e ações de graças.</li>
+                        <li>A eleição, redenção e selo do Espírito Santo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Oração de Paulo pela Iluminação (Capítulo 1:15-23):</strong>
+                    <ul>
+                        <li>Para que conheçam a esperança, a riqueza da herança e o poder de Deus.</li>
+                        <li>A exaltação de Cristo acima de tudo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. De Mortos a Vivos em Cristo (Capítulo 2:1-10):</strong>
+                    <ul>
+                        <li>A condição anterior de pecado e morte.</li>
+                        <li>A salvação pela graça, mediante a fé.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Unidade de Judeus e Gentios em Cristo (Capítulo 2:11-22):</strong>
+                    <ul>
+                        <li>A quebra da barreira entre eles.</li>
+                        <li>A Igreja como um novo templo, edificada sobre Cristo.</li>
+                    </ul>
+                </li>
+                <li><strong>E. O Mistério de Cristo Revelado (Capítulo 3:1-13):</strong>
+                    <ul>
+                        <li>O mistério de que os gentios são co-herdeiros e co-participantes da promessa.</li>
+                        <li>O ministério de Paulo aos gentios.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Oração de Paulo pela Plenitude de Deus (Capítulo 3:14-21):</strong>
+                    <ul>
+                        <li>Para que sejam cheios de toda a plenitude de Deus.</li>
+                        <li>Doxologia.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Prática: A Conduta do Crente em Cristo (Capítulos 4-6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Andar Digno da Vocação (Capítulo 4:1-16):</strong>
+                    <ul>
+                        <li>Exortação à unidade do Espírito.</li>
+                        <li>Dons ministeriais para o aperfeiçoamento dos santos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Nova Vida em Cristo (Capítulo 4:17-32):</strong>
+                    <ul>
+                        <li>Abandonar o velho homem e revestir-se do novo.</li>
+                        <li>Exortações contra o pecado e para a santidade.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Andar em Amor, Luz e Sabedoria (Capítulo 5:1-21):</strong>
+                    <ul>
+                        <li>Imitar a Deus, andar em amor.</li>
+                        <li>Andar como filhos da luz, não como insensatos.</li>
+                        <li>Ser cheio do Espírito.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Relacionamentos Cristãos (Capítulo 5:22 - 6:9):</strong>
+                    <ul>
+                        <li>Esposas e maridos.</li>
+                        <li>Filhos e pais.</li>
+                        <li>Servos e senhores.</li>
+                    </ul>
+                </li>
+                <li><strong>E. A Armadura de Deus (Capítulo 6:10-20):</strong>
+                    <ul>
+                        <li>Fortalecer-se no Senhor e na força do seu poder.</li>
+                        <li>A luta contra as hostes espirituais da maldade.</li>
+                        <li>As peças da armadura de Deus e a oração.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Saudações Finais (Capítulo 6:21-24):</strong>
+                    <ul>
+                        <li>Tíquico como portador da carta.</li>
+                        <li>Graça e paz.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Efésios é uma carta monumental que eleva a compreensão da Igreja e da vida cristã. Ela revela o plano eterno de Deus para redimir e unir todas as coisas em Cristo, culminando na formação da Igreja como Seu corpo. A epístola enfatiza a riqueza das bênçãos espirituais que os crentes já possuem em Cristo e, a partir dessa base doutrinária, exorta a uma vida prática que reflita essa realidade. A unidade, a santidade, o amor, a sabedoria e a prontidão para a batalha espiritual são temas cruciais que capacitam os crentes a viverem de forma digna da sua vocação celestial.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridEfesios">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Efésios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Efésios, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Bênçãos espirituais em Cristo e a exaltação de Cristo.</li>
+                <li><strong>Capítulo 2:</strong> De mortos a vivos em Cristo e a unidade de judeus e gentios.</li>
+                <li><strong>Capítulo 3:</strong> O mistério de Cristo revelado aos gentios e a oração de Paulo.</li>
+                <li><strong>Capítulo 4:</strong> Exortação à unidade, dons e a nova vida em Cristo.</li>
+                <li><strong>Capítulo 5:</strong> Andar em amor, luz e sabedoria; relacionamentos em Cristo.</li>
+                <li><strong>Capítulo 6:</strong> Relacionamentos familiares, a armadura de Deus e saudações finais.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Efésios</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Bênçãos Espirituais em Cristo:</strong> A riqueza da herança dos crentes.</li>
+                <li><strong>A Igreja como Corpo de Cristo:</strong> Sua unidade, crescimento e propósito.</li>
+                <li><strong>Unidade entre Judeus e Gentios:</strong> A quebra de barreiras em Cristo.</li>
+                <li><strong>Salvação pela Graça:</strong> Dom gratuito de Deus, não por obras.</li>
+                <li><strong>Vida em Santidade:</strong> Andar digno da vocação cristã.</li>
+                <li><strong>Relacionamentos Cristãos:</strong> Princípios para família e sociedade.</li>
+                <li><strong>Batalha Espiritual:</strong> A necessidade da armadura de Deus.</li>
+                <li><strong>O Plano Eterno de Deus:</strong> A soberania divina na redenção.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Efésios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersEfesios">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Efésios</h2>
+            <div id="quizContainerEfesios" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionEfesios"></p>
+                <div id="quizOptionsEfesios" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackEfesios" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionEfesios()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressEfesios"></span></p>
+                <p>Pontuação: <span id="quizScoreEfesios">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Efésios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Efésios.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="efesiosChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalEfesios()">&times;</span>
+                <h3 id="modalCharacterNameEfesios" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionEfesios" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Efésios",
+            "short_name": "Efésios",
+            "description": "Explore o livro de Efésios de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=EF",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=EF",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'efesios-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionEfesios(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsEfesios();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksEfesios();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsEfesios(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexEfesios = 0; // Reinicia o quiz
+                scoreEfesios = 0;
+                wrongAnswersEfesios = 0;
+                document.getElementById('quizScoreEfesios').textContent = `Acertos: ${scoreEfesios}, Erros: ${wrongAnswersEfesios}`;
+                displayQuestionEfesios();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderEfesiosChart();
+            }
+        }
+
+        // Dados dos personagens para Efésios
+        const characterDetailsEfesios = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta epístola da prisão, revelando o plano eterno de Deus para a Igreja e exortando os crentes a viverem em unidade e santidade."
+            },
+            "Igreja em Éfeso (e outras igrejas da Ásia Menor)": {
+                name: "Igreja em Éfeso (e outras igrejas da Ásia Menor)",
+                description: "A comunidade de crentes em Éfeso, e possivelmente outras igrejas na região, que receberam esta carta sobre as riquezas em Cristo e a vida prática cristã."
+            },
+            "Tíquico": {
+                name: "Tíquico",
+                description: "O fiel colaborador de Paulo que foi o portador desta epístola (e também de Colossenses) para as igrejas na Ásia Menor."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, que planejou, executou e aplica a salvação, unindo todas as coisas em Cristo e edificando a Sua Igreja."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalEfesios(characterName) {
+            const details = characterDetailsEfesios[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameEfesios').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionEfesios').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalEfesios() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsEfesios() {
+            const grid = document.getElementById('characterGridEfesios');
+            grid.innerHTML = '';
+            for (const key in characterDetailsEfesios) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalEfesios(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksEfesios() {
+            const chaptersDiv = document.getElementById('chaptersEfesios');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 6; i++) { // Efésios tem 6 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/ef/${i}`; // Link para a Bíblia Online, Efésios
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Efésios (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsEfesios = [
+            { question: "Qual apóstolo escreveu a Epístola aos Efésios?", options: ["Pedro", "João", "Paulo", "Tiago"], answer: "Paulo", reference: "Introdução ao Livro de Efésios" },
+            { question: "Em que período Paulo escreveu Efésios?", options: ["Durante sua primeira viagem missionária", "Durante sua prisão em Roma", "Após sua libertação", "Antes de sua conversão"], answer: "Durante sua prisão em Roma", reference: "Introdução ao Livro de Efésios" },
+            { question: "O que Paulo descreve como a base das bênçãos espirituais em Cristo?", options: ["As obras da lei", "A herança dos pais", "A eleição de Deus antes da fundação do mundo", "A sabedoria humana"], answer: "A eleição de Deus antes da fundação do mundo", reference: "Capítulo 1" },
+            { question: "Como éramos antes de sermos vivificados em Cristo, segundo Efésios 2:1?", options: ["Santos e perfeitos", "Mortos em ofensas e pecados", "Justos por natureza", "Cheios de sabedoria"], answer: "Mortos em ofensas e pecados", reference: "Capítulo 2" },
+            { question: "Qual é o principal tema do capítulo 2 de Efésios em relação a judeus e gentios?", options: ["A separação entre eles", "A inimizade contínua", "A unidade em Cristo", "A superioridade de um sobre o outro"], answer: "A unidade em Cristo", reference: "Capítulo 2" },
+            { question: "O que Paulo revela como um 'mistério' em Efésios 3:6?", options: ["O fim dos tempos", "Que os gentios são co-herdeiros e co-participantes da promessa em Cristo", "A data da volta de Cristo", "O nome do anticristo"], answer: "Que os gentios são co-herdeiros e co-participantes da promessa em Cristo", reference: "Capítulo 3" },
+            { question: "Qual é a exortação principal de Paulo em Efésios 4:1?", options: ["Que andem de modo digno da vocação a que foram chamados", "Que se gloriem em suas obras", "Que busquem a riqueza material", "Que vivam para si mesmos"], answer: "Que andem de modo digno da vocação a que foram chamados", reference: "Capítulo 4" },
+            { question: "Para que propósito Deus deu dons ministeriais à Igreja (Efésios 4:12)?", options: ["Para que os líderes se exaltem", "Para o aperfeiçoamento dos santos para a obra do ministério", "Para que a igreja seja dividida", "Para que haja competição"], answer: "Para o aperfeiçoamento dos santos para a obra do ministério", reference: "Capítulo 4" },
+            { question: "O que os crentes devem despojar e revestir, segundo Efésios 4:22-24?", options: ["Roupas velhas e novas", "O velho homem e o novo homem", "Dúvidas e certezas", "Medos e coragem"], answer: "O velho homem e o novo homem", reference: "Capítulo 4" },
+            { question: "Qual é a exortação de Paulo sobre o andar em Efésios 5:2?", options: ["Andem em trevas", "Andem em amor, como Cristo nos amou", "Andem em contendas", "Andem em egoísmo"], answer: "Andem em amor, como Cristo nos amou", reference: "Capítulo 5" },
+            { question: "O que Paulo exorta os crentes a fazerem em vez de se embriagarem com vinho (Efésios 5:18)?", options: ["Serem cheios de si mesmos", "Serem cheios do Espírito", "Serem cheios de sabedoria humana", "Serem cheios de ira"], answer: "Serem cheios do Espírito", reference: "Capítulo 5" },
+            { question: "Qual é o primeiro relacionamento familiar abordado em Efésios 5:22?", options: ["Pais e filhos", "Senhores e servos", "Esposas e maridos", "Irmãos e irmãs"], answer: "Esposas e maridos", reference: "Capítulo 5" },
+            { question: "Contra quem é a nossa luta, segundo Efésios 6:12?", options: ["Contra carne e sangue", "Contra governos e autoridades humanas", "Contra as hostes espirituais da maldade nos lugares celestiais", "Contra nossos inimigos pessoais"], answer: "Contra as hostes espirituais da maldade nos lugares celestiais", reference: "Capítulo 6" },
+            { question: "Qual é a primeira peça da armadura de Deus mencionada em Efésios 6:14?", options: ["O escudo da fé", "O capacete da salvação", "O cinto da verdade", "A espada do Espírito"], answer: "O cinto da verdade", reference: "Capítulo 6" },
+            { question: "O que é a espada do Espírito?", options: ["A oração", "A Palavra de Deus", "O amor", "A fé"], answer: "A Palavra de Deus", reference: "Capítulo 6" },
+            { question: "Quem foi o portador da carta de Efésios, segundo o próprio Paulo?", options: ["Timóteo", "Tito", "Tíquico", "Lucas"], answer: "Tíquico", reference: "Capítulo 6" },
+            { question: "Qual é a principal ênfase da primeira parte de Efésios (Capítulos 1-3)?", options: ["A conduta prática", "A doutrina da posição do crente em Cristo", "As regras da igreja", "A história de Israel"], answer: "A doutrina da posição do crente em Cristo", reference: "Panoramas do Livro de Efésios" },
+            { question: "Qual é a principal ênfase da segunda parte de Efésios (Capítulos 4-6)?", options: ["A doutrina da salvação", "A conduta prática do crente", "As profecias do fim", "A lei mosaica"], answer: "A conduta prática do crente", reference: "Panoramas do Livro de Efésios" },
+            { question: "O que Paulo ora para que os efésios conheçam em Efésios 1:18?", options: ["A riqueza material", "A esperança da sua vocação, a riqueza da glória da sua herança e a sobreexcelente grandeza do seu poder", "O número dos seus dias", "Os segredos do universo"], answer: "A esperança da sua vocação, a riqueza da glória da sua herança e a sobreexcelente grandeza do seu poder", reference: "Capítulo 1" },
+            { question: "De que modo somos salvos, segundo Efésios 2:8-9?", options: ["Por obras da lei", "Pela graça, mediante a fé", "Por mérito próprio", "Por herança familiar"], answer: "Pela graça, mediante a fé", reference: "Capítulo 2" },
+            { question: "O que Cristo fez com a parede de inimizade que separava judeus e gentios?", options: ["Aumentou-a", "Destruiu-a", "Ignorou-a", "Reforçou-a"], answer: "Destruiu-a", reference: "Capítulo 2" },
+            { question: "Qual é a exortação de Paulo sobre a ira em Efésios 4:26?", options: ["Permaneçam irados", "Não se ponha o sol sobre a vossa ira", "Deixem a ira dominar", "Usem a ira para punir"], answer: "Não se ponha o sol sobre a vossa ira", reference: "Capítulo 4" },
+            { question: "O que Paulo compara ao relacionamento entre Cristo e a Igreja em Efésios 5?", options: ["Mestre e discípulo", "Rei e súditos", "Cabeça e corpo", "Amigo e amigo"], answer: "Cabeça e corpo", reference: "Capítulo 5" },
+            { question: "Qual é o mandamento para os filhos em Efésios 6:1?", options: ["Desobedecer aos pais", "Honrar pai e mãe", "Ignorar os pais", "Rebelar-se contra os pais"], answer: "Honrar pai e mãe", reference: "Capítulo 6" },
+            { question: "Qual é o propósito de vestir toda a armadura de Deus?", options: ["Para impressionar os outros", "Para resistir no dia mau e permanecer firmes", "Para se exibir", "Para lutar contra pessoas"], answer: "Para resistir no dia mau e permanecer firmes", reference: "Capítulo 6" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsEfesios = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsEfesios.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsEfesios = allQuizQuestionsEfesios.concat(uniqueQuizQuestionsEfesios);
+        }
+        allQuizQuestionsEfesios = allQuizQuestionsEfesios.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsEfesios = [];
+        let currentQuizIndexEfesios = 0;
+        let scoreEfesios = 0;
+        let wrongAnswersEfesios = 0;
+        let efesiosChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsEfesios() {
+            shuffledQuizQuestionsEfesios = [...allQuizQuestionsEfesios]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsEfesios);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressEfesios() {
+            const progressElement = document.getElementById('quizProgressEfesios');
+            progressElement.textContent = `${currentQuizIndexEfesios + 1}/${shuffledQuizQuestionsEfesios.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionEfesios() {
+            if (currentQuizIndexEfesios >= shuffledQuizQuestionsEfesios.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionEfesios').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsEfesios').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreEfesios}, Erros: ${wrongAnswersEfesios}</p>`;
+                document.getElementById('quizFeedbackEfesios').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsEfesios[currentQuizIndexEfesios];
+            document.getElementById('quizQuestionEfesios').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsEfesios');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerEfesios(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackEfesios').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressEfesios();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerEfesios(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackEfesios');
+            const optionsButtons = document.querySelectorAll('#quizOptionsEfesios button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreEfesios++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersEfesios++;
+            }
+            document.getElementById('quizScoreEfesios').textContent = `Acertos: ${scoreEfesios}, Erros: ${wrongAnswersEfesios}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionEfesios() {
+            currentQuizIndexEfesios++;
+            displayQuestionEfesios();
+        }
+
+        // Dados para o gráfico de temas de Efésios
+        const efesiosChartData = {
+            labels: ['Bênçãos Espirituais', 'Igreja como Corpo', 'Unidade Judeus/Gentios', 'Salvação pela Graça', 'Vida em Santidade', 'Relacionamentos Cristãos', 'Batalha Espiritual', 'Plano Eterno de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [20, 18, 15, 12, 10, 8, 7, 10], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(80, 200, 120, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(80, 200, 120, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const efesiosChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Efésios',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderEfesiosChart() {
+            const ctx = document.getElementById('efesiosChart').getContext('2d');
+            if (efesiosChartInstance) {
+                efesiosChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            efesiosChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: efesiosChartData,
+                options: efesiosChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

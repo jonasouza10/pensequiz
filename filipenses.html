@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Filipenses</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Filipenses Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Filipenses</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionFilipenses('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionFilipenses('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionFilipenses('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionFilipenses('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionFilipenses('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionFilipenses('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionFilipenses('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionFilipenses('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionFilipenses('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Filipenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Epístola de Paulo aos Filipenses, uma carta de alegria e encorajamento escrita da prisão. Descubra a verdade sobre a alegria em Cristo em todas as circunstâncias, a humildade e o serviço, a importância de buscar a Cristo acima de tudo e a confiança na provisão divina. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Filipenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Epístola de Paulo aos Filipenses é uma das mais calorosas e pessoais cartas do apóstolo Paulo, frequentemente chamada de 'Epístola da Alegria'. Escrita por Paulo durante seu primeiro aprisionamento em Roma (cerca de 60-62 d.C.), ela é uma das 'Epístolas da Prisão' (junto com Efésios, Colossenses e Filemom). Diferentemente de outras cartas que tratam de problemas doutrinários ou disciplinares, Filipenses é uma carta de agradecimento, encorajamento e exortação aos crentes em Filipos, uma cidade romana na Macedônia e a primeira cidade europeia onde Paulo pregou o evangelho.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal propósito de Paulo nesta carta é expressar sua gratidão pela generosidade e parceria dos filipenses no evangelho, especialmente pelo envio de uma oferta através de Epafrodito. Além disso, ele os encoraja a permanecerem firmes na fé em meio à perseguição, a viverem em unidade e humildade, a buscarem a Cristo como o supremo valor e a confiarem na provisão e paz de Deus. A alegria em Cristo é um tema recorrente, mencionada mais de 16 vezes na carta, mesmo com Paulo escrevendo de uma prisão.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A carta pode ser dividida em quatro seções principais: a gratidão de Paulo e sua perspectiva sobre o sofrimento (Capítulo 1); a exortação à humildade e unidade, com o exemplo de Cristo (Capítulo 2); a advertência contra os legalistas e a busca pela justiça em Cristo (Capítulo 3); e as exortações finais à alegria, paz, contentamento e gratidão (Capítulo 4). Filipenses é um lembrete poderoso de que a verdadeira alegria não depende das circunstâncias externas, mas de uma profunda relação com Cristo e uma vida vivida para Ele.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Gratidão, Oração e Propósito do Sofrimento.</strong> Ações de graças, oração por crescimento, e a certeza de que o aprisionamento de Paulo serve para o avanço do evangelho.</li>
+                <li><strong>Capítulo 2: Humildade, Unidade e o Exemplo de Cristo.</strong> Exortação à unidade e ao pensamento de Cristo, com o hino cristológico sobre a humilhação e exaltação de Jesus.</li>
+                <li><strong>Capítulo 3: Advertência contra os Legalistas e a Busca por Cristo.</strong> Paulo adverte contra a confiança na carne e exalta o conhecimento de Cristo como o maior ganho.</li>
+                <li><strong>Capítulo 4: Alegria, Paz, Contentamento e Saudações Finais.</strong> Exortações à alegria, paz que excede todo entendimento, contentamento em todas as coisas e agradecimentos pela oferta.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Filipenses é uma carta que inspira os crentes a encontrarem a verdadeira alegria em Cristo, a viverem em unidade e a prosseguirem para o alvo da soberana vocação de Deus.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Filipenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Filipenses é uma epístola de alegria, unidade e foco em Cristo, escrita da prisão.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Alegria de Paulo no Sofrimento (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudações e Ações de Graças (Capítulo 1:1-11):</strong>
+                    <ul>
+                        <li>Gratidão pela parceria dos filipenses no evangelho.</li>
+                        <li>Oração por amor, conhecimento e discernimento.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Avanço do Evangelho Através da Prisão (Capítulo 1:12-26):</strong>
+                    <ul>
+                        <li>A prisão de Paulo serviu para a propagação do evangelho.</li>
+                        <li>Cristo é magnificado, seja pela vida ou pela morte.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Exortação à Digna Conduta (Capítulo 1:27-30):</strong>
+                    <ul>
+                        <li>Viver dignamente do evangelho.</li>
+                        <li>Permanecer firmes na unidade e enfrentar a perseguição.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Humildade e Unidade em Cristo (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Exortação à Unidade e Humildade (Capítulo 2:1-4):</strong>
+                    <ul>
+                        <li>Ter o mesmo sentimento de Cristo.</li>
+                        <li>Considerar os outros superiores a si mesmos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Exemplo de Cristo (Capítulo 2:5-11):</strong>
+                    <ul>
+                        <li>O hino cristológico: Cristo se esvaziou, tornou-se servo e foi exaltado.</li>
+                        <li>Toda língua confessará que Jesus Cristo é o Senhor.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Trabalhando a Salvação e o Exemplo de Timóteo e Epafrodito (Capítulo 2:12-30):</strong>
+                    <ul>
+                        <li>Desenvolver a própria salvação com temor e tremor.</li>
+                        <li>Elogios a Timóteo e Epafrodito como exemplos de serviço.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. A Busca pela Justiça em Cristo (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Advertência contra os Legalistas (Capítulo 3:1-3):</strong>
+                    <ul>
+                        <li>Cuidado com os 'cães' e 'maus obreiros' que confiam na carne.</li>
+                        <li>A verdadeira circuncisão é a do Espírito.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Perda de Tudo por Cristo (Capítulo 3:4-11):</strong>
+                    <ul>
+                        <li>Paulo lista suas credenciais judaicas e as considera como lixo por Cristo.</li>
+                        <li>Buscar a justiça que vem de Deus pela fé.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Prosseguindo para o Alvo (Capítulo 3:12-21):</strong>
+                    <ul>
+                        <li>Não que já tenha alcançado, mas prossegue para o alvo.</li>
+                        <li>Nossa pátria está nos céus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Exortações Finais e Agradecimentos (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Exortações à Alegria e Paz (Capítulo 4:1-9):</strong>
+                    <ul>
+                        <li>Alegrem-se sempre no Senhor.</li>
+                        <li>A paz de Deus que excede todo entendimento.</li>
+                        <li>Pensar no que é verdadeiro, honesto, justo, puro, amável, de boa fama.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Contentamento e Provisão (Capítulo 4:10-20):</strong>
+                    <ul>
+                        <li>Paulo aprendeu a contentar-se em toda e qualquer situação.</li>
+                        <li>Tudo posso naquele que me fortalece.</li>
+                        <li>Agradecimento pela oferta dos filipenses.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Saudações Finais (Capítulo 4:21-23):</strong>
+                    <ul>
+                        <li>Saudações aos santos, especialmente os da casa de César.</li>
+                        <li>A graça de nosso Senhor Jesus Cristo seja com todos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Filipenses é uma carta que celebra a alegria cristã, a unidade em Cristo e a supremacia do conhecimento de Jesus. Ela demonstra que a verdadeira alegria não é baseada em circunstâncias, mas em uma vida centrada em Cristo, que se humilhou para nos salvar e nos dá poder para viver. A epístola enfatiza a importância da humildade, do serviço mútuo e da perseverança na fé, mesmo diante de oposição. É um convite a viver uma vida de propósito, buscando a justiça de Cristo e experimentando a paz que excede todo entendimento.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridFilipenses">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Filipenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Filipenses, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Ações de graças, oração, e o avanço do evangelho através da prisão de Paulo.</li>
+                <li><strong>Capítulo 2:</strong> Exortação à humildade e unidade, com o exemplo de Cristo, Timóteo e Epafrodito.</li>
+                <li><strong>Capítulo 3:</strong> Advertência contra os legalistas e a busca pela justiça em Cristo.</li>
+                <li><strong>Capítulo 4:</strong> Exortações à alegria, paz, contentamento e agradecimentos pela oferta.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Filipenses</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Alegria em Cristo:</strong> A alegria que transcende as circunstâncias.</li>
+                <li><strong>Unidade e Humildade:</strong> O exemplo de Cristo como modelo de serviço.</li>
+                <li><strong>A Supremacia de Cristo:</strong> Buscar a Cristo como o maior valor.</li>
+                <li><strong>Justiça pela Fé:</strong> A confiança em Cristo, não nas obras da lei.</li>
+                <li><strong>Contentamento:</strong> Aprender a estar satisfeito em todas as situações.</li>
+                <li><strong>Parceria no Evangelho:</strong> A colaboração entre Paulo e os filipenses.</li>
+                <li><strong>Paz de Deus:</strong> A paz que excede todo entendimento.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Filipenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersFilipenses">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Filipenses</h2>
+            <div id="quizContainerFilipenses" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionFilipenses"></p>
+                <div id="quizOptionsFilipenses" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackFilipenses" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionFilipenses()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressFilipenses"></span></p>
+                <p>Pontuação: <span id="quizScoreFilipenses">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Filipenses</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Filipenses.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="filipensesChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalFilipenses()">&times;</span>
+                <h3 id="modalCharacterNameFilipenses" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionFilipenses" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Filipenses",
+            "short_name": "Filipenses",
+            "description": "Explore o livro de Filipenses de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=FP",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=FP",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'filipenses-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionFilipenses(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsFilipenses();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksFilipenses();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsFilipenses(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexFilipenses = 0; // Reinicia o quiz
+                scoreFilipenses = 0;
+                wrongAnswersFilipenses = 0;
+                document.getElementById('quizScoreFilipenses').textContent = `Acertos: ${scoreFilipenses}, Erros: ${wrongAnswersFilipenses}`;
+                displayQuestionFilipenses();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderFilipensesChart();
+            }
+        }
+
+        // Dados dos personagens para Filipenses
+        const characterDetailsFilipenses = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta epístola da prisão, expressando sua alegria, gratidão e exortando os filipenses à unidade e ao foco em Cristo."
+            },
+            "Timóteo": {
+                name: "Timóteo",
+                description: "Colaborador de Paulo, mencionado no início da carta e elogiado como um exemplo de serviço altruísta."
+            },
+            "Epafrodito": {
+                name: "Epafrodito",
+                description: "Enviado pelos filipenses para levar uma oferta a Paulo na prisão; Paulo o elogia por seu serviço fiel e por ter arriscado a vida pelo evangelho."
+            },
+            "Igreja em Filipos": {
+                name: "Igreja em Filipos",
+                description: "A comunidade de crentes em Filipos, parceira de Paulo no evangelho, destinatária desta carta de alegria, encorajamento e exortação."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A fonte de toda alegria, paz e provisão, que opera nos crentes e através deles para o avanço do evangelho."
+            },
+            "Euódia e Síntique": {
+                name: "Euódia e Síntique",
+                description: "Duas mulheres na igreja de Filipos que Paulo exorta a terem o mesmo sentimento no Senhor, indicando uma possível desarmonia entre elas."
+            },
+            "Clemente": {
+                name: "Clemente",
+                description: "Um colaborador de Paulo mencionado na carta, cujo nome está no livro da vida."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalFilipenses(characterName) {
+            const details = characterDetailsFilipenses[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameFilipenses').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionFilipenses').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalFilipenses() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsFilipenses() {
+            const grid = document.getElementById('characterGridFilipenses');
+            grid.innerHTML = '';
+            for (const key in characterDetailsFilipenses) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalFilipenses(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksFilipenses() {
+            const chaptersDiv = document.getElementById('chaptersFilipenses');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 4; i++) { // Filipenses tem 4 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/fp/${i}`; // Link para a Bíblia Online, Filipenses
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Filipenses (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsFilipenses = [
+            { question: "Qual é o tema principal da Epístola aos Filipenses?", options: ["A lei de Moisés", "A alegria em Cristo", "A circuncisão", "A condenação do pecado"], answer: "A alegria em Cristo", reference: "Introdução ao Livro de Filipenses" },
+            { question: "De onde Paulo escreveu a carta aos Filipenses?", options: ["De Éfeso", "De Jerusalém", "Da prisão em Roma", "De Antioquia"], answer: "Da prisão em Roma", reference: "Introdução ao Livro de Filipenses" },
+            { question: "O que Paulo diz sobre o seu aprisionamento em Filipenses 1:12?", options: ["Que foi um fracasso", "Que serviu para o progresso do evangelho", "Que o deixou triste", "Que o fez desistir"], answer: "Que serviu para o progresso do evangelho", reference: "Capítulo 1" },
+            { question: "Qual é a exortação de Paulo sobre a humildade em Filipenses 2:3?", options: ["Que cada um considere a si mesmo superior", "Que cada um considere os outros superiores a si mesmo", "Que cada um busque seus próprios interesses", "Que cada um se exalte"], answer: "Que cada um considere os outros superiores a si mesmo", reference: "Capítulo 2" },
+            { question: "Qual personagem é elogiado por Paulo como um exemplo de serviço altruísta em Filipenses 2:19-24?", options: ["Epafrodito", "Timóteo", "Clemente", "Síntique"], answer: "Timóteo", reference: "Capítulo 2" },
+            { question: "Quem foi o portador da oferta dos filipenses a Paulo?", options: ["Timóteo", "Epafrodito", "Clemente", "Lucas"], answer: "Epafrodito", reference: "Introdução ao Livro de Filipenses" },
+            { question: "O que Paulo considera 'perda' e 'lixo' em Filipenses 3:7-8?", options: ["Seus bens materiais", "Suas credenciais judaicas e sua própria justiça", "Seus amigos", "Seu tempo livre"], answer: "Suas credenciais judaicas e sua própria justiça", reference: "Capítulo 3" },
+            { question: "Qual é o alvo para o qual Paulo prossegue em Filipenses 3:14?", options: ["A riqueza terrena", "O prêmio da soberana vocação de Deus em Cristo Jesus", "A fama entre os homens", "O poder político"], answer: "O prêmio da soberana vocação de Deus em Cristo Jesus", reference: "Capítulo 3" },
+            { question: "O que Paulo exorta os filipenses a fazerem 'sempre no Senhor' em Filipenses 4:4?", options: ["Preocupar-se", "Alegrarem-se", "Entristecer-se", "Desistir"], answer: "Alegrarem-se", reference: "Capítulo 4" },
+            { question: "Qual é a promessa de Deus para aqueles que apresentam suas petições com ações de graças em Filipenses 4:6-7?", options: ["Riqueza imediata", "A paz de Deus que excede todo entendimento", "Fama e reconhecimento", "Uma vida sem problemas"], answer: "A paz de Deus que excede todo entendimento", reference: "Capítulo 4" },
+            { question: "Qual é a famosa declaração de Paulo sobre sua capacidade em Filipenses 4:13?", options: ["Posso tudo sozinho", "Tudo posso naquele que me fortalece", "Não posso fazer nada", "Posso fazer algumas coisas"], answer: "Tudo posso naquele que me fortalece", reference: "Capítulo 4" },
+            { question: "O que Paulo aprendeu a ter em toda e qualquer situação?", options: ["Medo", "Contentamento", "Tristeza", "Desespero"], answer: "Contentamento", reference: "Capítulo 4" },
+            { question: "Quem são as duas mulheres na igreja de Filipos que Paulo exorta a terem o mesmo sentimento no Senhor?", options: ["Maria e Marta", "Priscila e Áquila", "Euódia e Síntique", "Lídia e Dorcas"], answer: "Euódia e Síntique", reference: "Capítulo 4" },
+            { question: "Qual é a pátria dos crentes, segundo Filipenses 3:20?", options: ["Na terra", "Nos céus", "Em Jerusalém", "Em Roma"], answer: "Nos céus", reference: "Capítulo 3" },
+            { question: "O que Paulo deseja conhecer em Filipenses 3:10?", options: ["A riqueza do mundo", "A Cristo, e a virtude da sua ressurreição, e a comunicação de suas aflições", "Os segredos dos homens", "O futuro"], answer: "A Cristo, e a virtude da sua ressurreição, e a comunicação de suas aflições", reference: "Capítulo 3" },
+            { question: "Quantos capítulos tem o livro de Filipenses?", options: ["3", "4", "5", "6"], answer: "4", reference: "Esboços do Livro de Filipenses" },
+            { question: "Qual é o principal exemplo de humildade e serviço em Filipenses 2?", options: ["Timóteo", "Epafrodito", "Paulo", "Jesus Cristo"], answer: "Jesus Cristo", reference: "Capítulo 2" },
+            { question: "O que a carta aos Filipenses é frequentemente chamada?", options: ["Epístola da Lei", "Epístola da Alegria", "Epístola da Ira", "Epístola da Tristeza"], answer: "Epístola da Alegria", reference: "Introdução ao Livro de Filipenses" },
+            { question: "O que Paulo pede aos filipenses que pensem em Filipenses 4:8?", options: ["Em tudo que é mau", "Em tudo que é verdadeiro, honesto, justo, puro, amável, de boa fama", "Em tudo que é egoísta", "Em tudo que é material"], answer: "Em tudo que é verdadeiro, honesto, justo, puro, amável, de boa fama", reference: "Capítulo 4" },
+            { question: "Qual é a atitude de Paulo em relação à vida e à morte em Filipenses 1:21?", options: ["Viver é Cristo, e morrer é lucro", "Viver é sofrer, e morrer é fugir", "Viver é ter sucesso, e morrer é fracasso", "Viver é trabalhar, e morrer é descansar"], answer: "Viver é Cristo, e morrer é lucro", reference: "Capítulo 1" },
+            { question: "Qual o nome do colaborador de Paulo cujo nome está no livro da vida?", options: ["Epafrodito", "Timóteo", "Clemente", "Síntique"], answer: "Clemente", reference: "Capítulo 4" },
+            { question: "O que Paulo exorta os filipenses a fazerem em relação à sua salvação em Filipenses 2:12?", options: ["Trabalhar com temor e tremor", "Ignorar a salvação", "Comprar a salvação", "Apenas esperar"], answer: "Trabalhar com temor e tremor", reference: "Capítulo 2" },
+            { question: "Qual o significado da frase 'Tudo posso naquele que me fortalece'?", options: ["Posso fazer qualquer coisa que eu queira", "Tenho força para superar desafios através de Cristo", "Sou invencível", "Não preciso de ajuda"], answer: "Tenho força para superar desafios através de Cristo", reference: "Capítulo 4" },
+            { question: "O que Paulo deseja que abunde cada vez mais na vida dos filipenses (Filipenses 1:9)?", options: ["Riqueza", "Conhecimento humano", "Amor em ciência e em todo o conhecimento", "Poder político"], answer: "Amor em ciência e em todo o conhecimento", reference: "Capítulo 1" },
+            { question: "Qual é a fonte da paz que excede todo entendimento?", options: ["A riqueza", "A sabedoria humana", "Deus em Cristo Jesus", "O sucesso material"], answer: "Deus em Cristo Jesus", reference: "Capítulo 4" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsFilipenses = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsFilipenses.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsFilipenses = allQuizQuestionsFilipenses.concat(uniqueQuizQuestionsFilipenses);
+        }
+        allQuizQuestionsFilipenses = allQuizQuestionsFilipenses.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsFilipenses = [];
+        let currentQuizIndexFilipenses = 0;
+        let scoreFilipenses = 0;
+        let wrongAnswersFilipenses = 0;
+        let filipensesChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsFilipenses() {
+            shuffledQuizQuestionsFilipenses = [...allQuizQuestionsFilipenses]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsFilipenses);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressFilipenses() {
+            const progressElement = document.getElementById('quizProgressFilipenses');
+            progressElement.textContent = `${currentQuizIndexFilipenses + 1}/${shuffledQuizQuestionsFilipenses.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionFilipenses() {
+            if (currentQuizIndexFilipenses >= shuffledQuizQuestionsFilipenses.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionFilipenses').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsFilipenses').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreFilipenses}, Erros: ${wrongAnswersFilipenses}</p>`;
+                document.getElementById('quizFeedbackFilipenses').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsFilipenses[currentQuizIndexFilipenses];
+            document.getElementById('quizQuestionFilipenses').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsFilipenses');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerFilipenses(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackFilipenses').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressFilipenses();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerFilipenses(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackFilipenses');
+            const optionsButtons = document.querySelectorAll('#quizOptionsFilipenses button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreFilipenses++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersFilipenses++;
+            }
+            document.getElementById('quizScoreFilipenses').textContent = `Acertos: ${scoreFilipenses}, Erros: ${wrongAnswersFilipenses}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionFilipenses() {
+            currentQuizIndexFilipenses++;
+            displayQuestionFilipenses();
+        }
+
+        // Dados para o gráfico de temas de Filipenses
+        const filipensesChartData = {
+            labels: ['Alegria em Cristo', 'Unidade e Humildade', 'Supremacia de Cristo', 'Justiça pela Fé', 'Contentamento', 'Parceria no Evangelho', 'Paz de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 12, 10, 8], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const filipensesChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Filipenses',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderFilipensesChart() {
+            const ctx = document.getElementById('filipensesChart').getContext('2d');
+            if (filipensesChartInstance) {
+                filipensesChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            filipensesChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: filipensesChartData,
+                options: filipensesChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

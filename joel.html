@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Joel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Joel Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Joel</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionJoel('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionJoel('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionJoel('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionJoel('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionJoel('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionJoel('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionJoel('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionJoel('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionJoel('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Joel</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Joel, uma profecia sobre o "Dia do Senhor", um tempo de juízo e restauração. Através de uma praga de gafanhotos e uma seca devastadora, Joel chama o povo ao arrependimento sincero e descreve as promessas de Deus para um futuro de bênçãos e o derramamento do Espírito. Descubra a urgência do arrependimento e a esperança da restauração divina. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Joel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Joel é o segundo dos doze profetas menores do Antigo Testamento. Embora a data exata de sua profecia seja incerta, a maioria dos estudiosos o situa em algum momento após o exílio babilônico, possivelmente no século V ou IV a.C., devido à sua ênfase em Jerusalém e no Templo, e à ausência de menção a um rei. Joel profetizou para Judá, o Reino do Sul.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro começa com uma descrição vívida de uma devastadora praga de gafanhotos e uma severa seca, que servem como um prenúncio do "Dia do Senhor" – um dia de juízo iminente. Joel usa essa calamidade natural para chamar o povo ao arrependimento sincero, com jejum, choro e lamentação. Ele enfatiza que o arrependimento deve vir do coração, não apenas de ritos externos.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A segunda parte do livro se volta para as promessas de Deus de restauração após o arrependimento. Deus promete remover a praga, restaurar a terra e, mais notavelmente, derramar o Seu Espírito sobre toda a carne. Esta profecia do derramamento do Espírito é citada por Pedro no dia de Pentecostes em Atos 2, indicando seu cumprimento inicial e sua relevância contínua. O livro termina com a promessa do juízo final sobre as nações e a bênção e restauração de Judá e Jerusalém.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: A Calamidade Presente.</strong> Descrição da praga de gafanhotos e da seca, e o chamado ao lamento e ao arrependimento.</li>
+                <li><strong>Capítulo 2: O Dia do Senhor e o Chamado ao Arrependimento.</strong> Uma descrição mais intensa do Dia do Senhor, a urgência do arrependimento e a promessa do derramamento do Espírito e da restauração.</li>
+                <li><strong>Capítulo 3: O Juízo sobre as Nações e a Restauração de Judá.</strong> O juízo de Deus sobre as nações inimigas e a bênção final e restauração de Israel.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Joel é um livro que destaca a soberania de Deus sobre a natureza e a história, a necessidade do arrependimento genuíno e a gloriosa promessa do derramamento do Espírito, que aponta para a era messiânica.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Joel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Joel é uma profecia concisa que aborda o juízo iminente e a gloriosa restauração no "Dia do Senhor".</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Calamidade Presente: O Dia do Senhor como Praga de Gafanhotos (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Devastação da Terra (Versículos 1-12):</strong>
+                    <ul>
+                        <li>Descrição da praga de gafanhotos em quatro estágios.</li>
+                        <li>A seca e a destruição da vegetação.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Chamado ao Lamento e ao Arrependimento (Versículos 13-20):</strong>
+                    <ul>
+                        <li>Exortação aos sacerdotes e ao povo para jejuar e lamentar.</li>
+                        <li>A terra geme e os animais sofrem.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Dia do Senhor e o Chamado ao Arrependimento (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Descrição do Dia do Senhor (Versículos 1-11):</strong>
+                    <ul>
+                        <li>Um dia de trevas, escuridão e densas nuvens.</li>
+                        <li>O exército de Deus (gafanhotos ou exército inimigo) avança.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Chamado ao Arrependimento Genuíno (Versículos 12-17):</strong>
+                    <ul>
+                        <li>"Rasgai o vosso coração, e não as vossas vestes."</li>
+                        <li>A promessa de misericórdia e bênção após o arrependimento.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Promessa de Restauração e o Derramamento do Espírito (Versículos 18-32):</strong>
+                    <ul>
+                        <li>Deus tem ciúmes de Sua terra e Se compadece de Seu povo.</li>
+                        <li>Remoção da praga e restauração da colheita.</li>
+                        <li>A profecia do derramamento do Espírito sobre toda a carne.</li>
+                        <li>Sinais nos céus e na terra antes do grande Dia do Senhor.</li>
+                        <li>Salvação para aqueles que invocarem o nome do Senhor.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Juízo sobre as Nações e a Restauração de Judá (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Juízo no Vale de Josafá (Versículos 1-8):</strong>
+                    <ul>
+                        <li>Deus reúne as nações para julgamento por seus atos contra Israel.</li>
+                        <li>Retribuição pelos danos causados ao povo de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Convocação para a Batalha e a Intervenção Divina (Versículos 9-17):</strong>
+                    <ul>
+                        <li>As nações são convocadas para a batalha final.</li>
+                        <li>Deus defende Seu povo e habita em Sião.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Benção e a Prosperidade Futura de Judá (Versículos 18-21):</strong>
+                    <ul>
+                        <li>Montes e colinas gotejando vinho novo.</li>
+                        <li>As fontes jorrando água.</li>
+                        <li>Eternidade de Judá e Jerusalém.</li>
+                        <li>Deus purifica o sangue e habita em Sião.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Joel é uma poderosa mensagem sobre a soberania de Deus no juízo e na restauração. Ele usa uma calamidade imediata para apontar para o grande e terrível "Dia do Senhor", um tempo de juízo final, mas também de salvação para aqueles que se arrependem. A profecia do derramamento do Espírito é um ponto alto, indicando a nova era da aliança onde a presença de Deus estaria acessível a todos. Joel é um chamado à santidade, ao arrependimento genuíno e à confiança nas promessas de Deus de redenção e bênção.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridJoel">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Joel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Joel, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A praga de gafanhotos e a seca, e o chamado ao lamento e ao arrependimento.</li>
+                <li><strong>Capítulo 2:</strong> A descrição do grande e terrível Dia do Senhor, o chamado ao arrependimento sincero e a promessa do derramamento do Espírito.</li>
+                <li><strong>Capítulo 3:</strong> O juízo de Deus sobre as nações inimigas no Vale de Josafá e a restauração final de Judá e Jerusalém.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Joel</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>O Dia do Senhor:</strong> Um tema central que abrange juízo e salvação.</li>
+                <li><strong>Arrependimento Genuíno:</strong> A necessidade de um retorno sincero a Deus, não apenas ritos externos.</li>
+                <li><strong>Derramamento do Espírito:</strong> A promessa de Deus de derramar Seu Espírito sobre toda a carne.</li>
+                <li><strong>Juízo Divino:</strong> As consequências do pecado e da desobediência.</li>
+                <li><strong>Restauração e Bênção:</strong> As promessas de Deus de restaurar a terra e o povo após o arrependimento.</li>
+                <li><strong>Soberania de Deus:</strong> O controle de Deus sobre a natureza, a história e o destino das nações.</li>
+                <li><strong>Sinais Escatológicos:</strong> Eventos que precedem o grande Dia do Senhor.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Joel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersJoel">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Joel</h2>
+            <div id="quizContainerJoel" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionJoel"></p>
+                <div id="quizOptionsJoel" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackJoel" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionJoel()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressJoel"></span></p>
+                <p>Pontuação: <span id="quizScoreJoel">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Joel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Joel.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="joelChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalJoel()">&times;</span>
+                <h3 id="modalCharacterNameJoel" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionJoel" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Joel",
+            "short_name": "Joel",
+            "description": "Explore o livro de Joel de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=JL",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=JL",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'joel-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionJoel(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsJoel();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksJoel();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsJoel(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexJoel = 0; // Reinicia o quiz
+                scoreJoel = 0;
+                wrongAnswersJoel = 0;
+                document.getElementById('quizScoreJoel').textContent = `Acertos: ${scoreJoel}, Erros: ${wrongAnswersJoel}`;
+                displayQuestionJoel();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderJoelChart();
+            }
+        }
+
+        // Dados dos personagens para Joel
+        const characterDetailsJoel = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano que envia juízo e oferece restauração, e que promete derramar o Seu Espírito."
+            },
+            "Joel": {
+                name: "Joel",
+                description: "O profeta que clama ao povo para se arrepender diante da calamidade e anuncia o grande Dia do Senhor e as promessas de restauração."
+            },
+            "Povo de Judá": {
+                name: "Povo de Judá",
+                description: "Os habitantes de Judá a quem Joel profetiza, chamando-os ao jejum, lamento e arrependimento sincero."
+            },
+            "Sacerdotes": {
+                name: "Sacerdotes",
+                description: "Os líderes religiosos de Judá, exortados por Joel a liderar o povo no arrependimento e na lamentação."
+            },
+            "Gafanhotos": {
+                name: "Gafanhotos",
+                description: "Uma praga literal e simbólica que devasta a terra, servindo como um prenúncio do Dia do Senhor."
+            },
+            "Nações": {
+                name: "Nações",
+                description: "Os povos estrangeiros que serão julgados por Deus no Vale de Josafá por suas ações contra Israel."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalJoel(characterName) {
+            const details = characterDetailsJoel[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameJoel').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionJoel').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalJoel() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsJoel() {
+            const grid = document.getElementById('characterGridJoel');
+            grid.innerHTML = '';
+            for (const key in characterDetailsJoel) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalJoel(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksJoel() {
+            const chaptersDiv = document.getElementById('chaptersJoel');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 3; i++) { // Joel tem 3 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/jl/${i}`; // Link para a Bíblia Online, Joel
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Joel (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsJoel = [
+            { question: "Qual profeta começa seu livro descrevendo uma praga de gafanhotos?", options: ["Amós", "Obadias", "Joel", "Jonas"], answer: "Joel", reference: "Capítulo 1" },
+            { question: "O que a praga de gafanhotos em Joel simboliza?", options: ["Um tempo de paz", "Um prenúncio do Dia do Senhor", "Uma bênção divina", "Uma colheita abundante"], answer: "Um prenúncio do Dia do Senhor", reference: "Introdução ao Livro de Joel" },
+            { question: "Qual é o tema principal do livro de Joel?", options: ["A construção do Templo", "O Dia do Senhor", "A história dos reis", "Leis e mandamentos"], answer: "O Dia do Senhor", reference: "Temas Centrais do Livro de Joel" },
+            { question: "O que Joel exorta o povo a fazer em resposta à calamidade?", options: ["Construir muros", "Fugir para outras terras", "Jejuar, chorar e lamentar com arrependimento sincero", "Oferecer mais sacrifícios de animais"], answer: "Jejuar, chorar e lamentar com arrependimento sincero", reference: "Capítulo 1" },
+            { question: "O que Deus promete derramar sobre toda a carne em Joel 2:28?", options: ["Chuvas abundantes", "Riquezas", "Seu Espírito", "Poder militar"], answer: "Seu Espírito", reference: "Capítulo 2" },
+            { question: "Quem citou a profecia de Joel sobre o derramamento do Espírito no dia de Pentecostes?", options: ["Paulo", "João", "Pedro", "Tiago"], answer: "Pedro", reference: "Introdução ao Livro de Joel" },
+            { question: "Onde as nações serão julgadas por Deus, segundo Joel 3?", options: ["No deserto", "No Vale de Josafá", "No Monte Sião", "No Egito"], answer: "No Vale de Josafá", reference: "Capítulo 3" },
+            { question: "Quantos capítulos tem o livro de Joel?", options: ["2", "3", "4", "5"], answer: "3", reference: "Esboços do Livro de Joel" },
+            { question: "Qual a natureza do arrependimento que Joel busca?", options: ["Apenas ritos externos", "Sacrifícios de animais", "Um retorno sincero do coração", "Ofertas de grãos"], answer: "Um retorno sincero do coração", reference: "Capítulo 2" },
+            { question: "O que Deus promete restaurar para Judá após o arrependimento?", options: ["Seu exército", "Sua riqueza", "A terra e a colheita", "Seus inimigos"], answer: "A terra e a colheita", reference: "Capítulo 2" },
+            { question: "O que o Dia do Senhor trará, além de juízo?", options: ["Paz eterna", "Salvação para os que invocam o nome do Senhor", "Destruição total", "Escravidão"], answer: "Salvação para os que invocam o nome do Senhor", reference: "Capítulo 2" },
+            { question: "Qual calamidade natural é mencionada junto com a praga de gafanhotos?", options: ["Inundação", "Terremoto", "Seca", "Tempestade de neve"], answer: "Seca", reference: "Capítulo 1" },
+            { question: "Joel profetizou principalmente para qual reino?", options: ["Reino do Norte (Israel)", "Reino do Sul (Judá)", "Assíria", "Babilônia"], answer: "Reino do Sul (Judá)", reference: "Introdução ao Livro de Joel" },
+            { question: "O que significa 'Rasgai o vosso coração, e não as vossas vestes'?", options: ["Destruir suas roupas", "Ter um arrependimento superficial", "Ter um arrependimento genuíno e interior", "Não se importar com a aparência"], answer: "Ter um arrependimento genuíno e interior", reference: "Capítulo 2" },
+            { question: "Qual é a promessa de Deus para a terra de Judá no final do livro?", options: ["Seca contínua", "Desolação", "Prosperidade e fertilidade", "Invasões inimigas"], answer: "Prosperidade e fertilidade", reference: "Capítulo 3" },
+            { question: "Que tipo de sinais precederão o grande e terrível Dia do Senhor?", options: ["Sinais na natureza", "Sinais nos céus e na terra", "Sinais de guerra", "Sinais de paz"], answer: "Sinais nos céus e na terra", reference: "Capítulo 2" },
+            { question: "O que o livro de Joel ensina sobre a soberania de Deus?", options: ["Que Deus não se importa com a humanidade", "Que Deus está no controle da natureza e da história", "Que o destino é aleatório", "Que o homem governa tudo"], answer: "Que Deus está no controle da natureza e da história", reference: "Temas Centrais do Livro de Joel" },
+            { question: "Qual é a principal mensagem de esperança em Joel?", options: ["A riqueza material", "O poder militar", "O derramamento do Espírito e a salvação", "A ausência de juízo"], answer: "O derramamento do Espírito e a salvação", reference: "Introdução ao Livro de Joel" },
+            { question: "Quem é exortado a lamentar e jejuar no capítulo 1?", options: ["Apenas os profetas", "Apenas os reis", "Os sacerdotes e todo o povo", "Apenas os idosos"], answer: "Os sacerdotes e todo o povo", reference: "Capítulo 1" },
+            { question: "O que o livro de Joel enfatiza sobre o juízo de Deus?", options: ["Que é arbitrário", "Que é justo e inevitável para o pecado", "Que é sempre adiado", "Que é apenas para os inimigos"], answer: "Que é justo e inevitável para o pecado", reference: "Temas Centrais do Livro de Joel" },
+            { question: "Qual é o nome do profeta que escreveu este livro?", options: ["Jonas", "Naum", "Habacuque", "Joel"], answer: "Joel", reference: "Introdução ao Livro de Joel" },
+            { question: "O que significa 'Vale de Josafá' no contexto de Joel 3?", options: ["Um vale fértil", "Um lugar de batalha", "Um lugar de juízo divino", "Um vale de paz"], answer: "Um lugar de juízo divino", reference: "Capítulo 3" },
+            { question: "Qual é a promessa de Deus para Jerusalém no final do livro?", options: ["Será desolada", "Será habitada para sempre e santificada", "Será invadida", "Será esquecida"], answer: "Será habitada para sempre e santificada", reference: "Capítulo 3" },
+            { question: "O que a praga de gafanhotos faz com a colheita?", options: ["Aumenta a colheita", "Destrói completamente a colheita", "Não afeta a colheita", "Apenas come algumas folhas"], answer: "Destrói completamente a colheita", reference: "Capítulo 1" },
+            { question: "Qual é a condição para que Deus derrame Seu Espírito e restaure a terra?", options: ["Grandes sacrifícios", "Oração constante", "Arrependimento sincero do povo", "Apenas o tempo"], answer: "Arrependimento sincero do povo", reference: "Capítulo 2" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsJoel = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsJoel.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsJoel = allQuizQuestionsJoel.concat(uniqueQuizQuestionsJoel);
+        }
+        allQuizQuestionsJoel = allQuizQuestionsJoel.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsJoel = [];
+        let currentQuizIndexJoel = 0;
+        let scoreJoel = 0;
+        let wrongAnswersJoel = 0;
+        let joelChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsJoel() {
+            shuffledQuizQuestionsJoel = [...allQuizQuestionsJoel]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsJoel);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressJoel() {
+            const progressElement = document.getElementById('quizProgressJoel');
+            progressElement.textContent = `${currentQuizIndexJoel + 1}/${shuffledQuizQuestionsJoel.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionJoel() {
+            if (currentQuizIndexJoel >= shuffledQuizQuestionsJoel.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionJoel').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsJoel').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreJoel}, Erros: ${wrongAnswersJoel}</p>`;
+                document.getElementById('quizFeedbackJoel').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsJoel[currentQuizIndexJoel];
+            document.getElementById('quizQuestionJoel').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsJoel');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerJoel(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackJoel').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressJoel();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerJoel(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackJoel');
+            const optionsButtons = document.querySelectorAll('#quizOptionsJoel button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreJoel++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersJoel++;
+            }
+            document.getElementById('quizScoreJoel').textContent = `Acertos: ${scoreJoel}, Erros: ${wrongAnswersJoel}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionJoel() {
+            currentQuizIndexJoel++;
+            displayQuestionJoel();
+        }
+
+        // Dados para o gráfico de temas de Joel
+        const joelChartData = {
+            labels: ['O Dia do Senhor', 'Arrependimento Genuíno', 'Derramamento do Espírito', 'Juízo Divino', 'Restauração/Bênção', 'Soberania de Deus', 'Sinais Escatológicos'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [30, 20, 20, 15, 10, 5, 10], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const joelChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Joel',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderJoelChart() {
+            const ctx = document.getElementById('joelChart').getContext('2d');
+            if (joelChartInstance) {
+                joelChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            joelChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: joelChartData,
+                options: joelChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 2 Coríntios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2 Coríntios Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 2 Coríntios</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionCorintios2('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionCorintios2('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionCorintios2('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionCorintios2('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionCorintios2('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionCorintios2('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionCorintios2('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionCorintios2('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionCorintios2('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 2 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Segunda Epístola de Paulo aos Coríntios, uma carta profundamente pessoal que revela o coração do apóstolo em meio a sofrimentos, acusações e a defesa de seu ministério. Descubra a verdade sobre o consolo divino, a nova aliança, a generosidade cristã e a autenticidade do apostolado. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 2 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Segunda Epístola de Paulo aos Coríntios é uma das cartas mais pessoais e reveladoras do apóstolo Paulo. Escrita provavelmente de Macedônia, cerca de um ano após a Primeira Epístola, ela reflete a complexa relação de Paulo com a igreja de Corinto. Após a 1 Coríntios, Paulo fez uma visita dolorosa a Corinto e escreveu uma "carta severa" (agora perdida ou parte de 2 Coríntios) para tratar de questões de disciplina e oposição.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Esta carta tem múltiplos propósitos: expressar o alívio e a alegria de Paulo após receber notícias positivas de Tito sobre o arrependimento da maioria da igreja; defender seu apostolado contra falsos mestres e acusadores que questionavam sua autoridade, integridade e métodos; exortar os coríntios a completarem a coleta para os santos em Jerusalém; e preparar a igreja para sua terceira visita, advertindo os que ainda persistiam em desobediência.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem o consolo de Deus no sofrimento, o ministério da nova aliança, a importância da generosidade, a defesa da autenticidade apostólica de Paulo (muitas vezes contrastando fraqueza humana com poder divino), a reconciliação e a santidade. Paulo aborda as acusações de seus oponentes com grande paixão, revelando sua vulnerabilidade, mas também sua inabalável confiança em Deus e no evangelho que pregava.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-7:</strong> O consolo de Paulo em seu sofrimento, a natureza de seu ministério (a nova aliança), o perdão ao ofensor e a alegria de Tito.</li>
+                <li><strong>Capítulos 8-9:</strong> Exortação à generosidade na coleta para os santos de Jerusalém.</li>
+                <li><strong>Capítulos 10-13:</strong> A defesa vigorosa do apostolado de Paulo contra os falsos apóstolos, sua "loucura" em gloriar-se em suas fraquezas e advertências finais.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Coríntios é uma carta que nos convida a entender o verdadeiro custo e a glória do ministério cristão, a confiar no poder de Deus em nossa fraqueza e a viver uma vida de generosidade e reconciliação.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 2 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Coríntios é uma epístola que combina defesa apostólica, exortação e revelações pessoais sobre o sofrimento e o ministério de Paulo.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Defesa e Caráter do Ministério de Paulo (Capítulos 1-7)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudações e Consolo no Sofrimento (Capítulo 1):</strong>
+                    <ul>
+                        <li>Ações de graças a Deus pelo consolo em todas as aflições.</li>
+                        <li>Explicação da mudança de planos de viagem de Paulo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Perdão e a Nova Aliança (Capítulos 2-3):</strong>
+                    <ul>
+                        <li>Exortação para perdoar o ofensor arrependido.</li>
+                        <li>O ministério da nova aliança, da glória do Espírito, não da letra.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Tesouro em Vasos de Barro (Capítulos 4-5):</strong>
+                    <ul>
+                        <li>A glória do evangelho em contraste com a fraqueza humana.</li>
+                        <li>A certeza da vida eterna e o ministério da reconciliação.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Exortações e Apelo Final (Capítulos 6-7):</strong>
+                    <ul>
+                        <li>Chamado à separação do mundo e à santidade.</li>
+                        <li>A alegria de Paulo com o arrependimento dos coríntios.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Coleta para os Santos (Capítulos 8-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Exemplo da Generosidade Macedônica (Capítulo 8):</strong>
+                    <ul>
+                        <li>A generosidade das igrejas da Macedônia em sua pobreza.</li>
+                        <li>Exortação para os coríntios completarem sua promessa.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Princípios da Generosidade (Capítulo 9):</strong>
+                    <ul>
+                        <li>Semear com liberalidade para colher com liberalidade.</li>
+                        <li>Deus ama ao que dá com alegria.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Defesa do Apostolado de Paulo (Capítulos 10-13)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Autoridade Espiritual de Paulo (Capítulo 10):</strong>
+                    <ul>
+                        <li>Defesa contra acusações de fraqueza pessoal e autoridade.</li>
+                        <li>As armas da nossa milícia não são carnais.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A "Loucura" de Paulo (Capítulo 11):</strong>
+                    <ul>
+                        <li>Contrastando-se com os falsos apóstolos.</li>
+                        <li>Gloriando-se em seus sofrimentos e fraquezas por Cristo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Visões, Fraquezas e Advertências Finais (Capítulos 12-13):</strong>
+                    <ul>
+                        <li>O espinho na carne de Paulo e a graça de Deus.</li>
+                        <li>Advertências aos que ainda não se arrependeram.</li>
+                        <li>Exortação à autoexame e saudação final.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">2 Coríntios é um tesouro teológico que aborda a autenticidade do ministério cristão, a suficiência da graça de Deus no sofrimento, a glória da nova aliança em Cristo e a importância da generosidade sacrificial. Paulo defende seu apostolado não com base em sua própria força, mas na manifestação do poder de Deus em sua fraqueza. A carta também enfatiza a reconciliação como o cerne da mensagem cristã e a necessidade de viver uma vida de santidade e integridade diante de Deus e dos homens.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridCorintios2">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 2 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 2 Coríntios, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Saudações, consolo nas aflições e explicação da mudança de planos de Paulo.</li>
+                <li><strong>Capítulo 2:</strong> O perdão ao ofensor arrependido e o triunfo de Cristo.</li>
+                <li><strong>Capítulo 3:</strong> O ministério da nova aliança, da glória do Espírito.</li>
+                <li><strong>Capítulo 4:</strong> O tesouro em vasos de barro: a glória do evangelho em fraqueza.</li>
+                <li><strong>Capítulo 5:</strong> A certeza da vida eterna, o juízo e o ministério da reconciliação.</li>
+                <li><strong>Capítulo 6:</strong> O ministério de Paulo em meio a sofrimentos e exortação à separação.</li>
+                <li><strong>Capítulo 7:</strong> A alegria de Paulo com o arrependimento dos coríntios.</li>
+                <li><strong>Capítulo 8:</strong> Exortação à generosidade, com o exemplo da Macedônia.</li>
+                <li><strong>Capítulo 9:</strong> Princípios da generosidade e as bênçãos de dar com alegria.</li>
+                <li><strong>Capítulo 10:</strong> A defesa da autoridade espiritual de Paulo contra acusações.</li>
+                <li><strong>Capítulo 11:</strong> Paulo se gloria em suas fraquezas e sofrimentos, contrastando com falsos apóstolos.</li>
+                <li><strong>Capítulo 12:</strong> As visões e revelações de Paulo, seu espinho na carne e a suficiência da graça.</li>
+                <li><strong>Capítulo 13:</strong> Advertências finais, exortação à autoexame e saudação.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 2 Coríntios</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Sofrimento e Consolo:</strong> A experiência de Paulo e o consolo que vem de Deus.</li>
+                <li><strong>Nova Aliança:</strong> O ministério do Espírito em contraste com a lei.</li>
+                <li><strong>Autenticidade Apostólica:</strong> A defesa de Paulo de seu chamado e autoridade.</li>
+                <li><strong>Fraqueza e Poder Divino:</strong> A manifestação do poder de Deus na fraqueza humana.</li>
+                <li><strong>Generosidade Cristã:</strong> A exortação à liberalidade na doação.</li>
+                <li><strong>Reconciliação:</strong> O cerne da mensagem e do ministério cristão.</li>
+                <li><strong>Integridade e Caráter:</strong> A vida de Paulo como exemplo de fidelidade.</li>
+                <li><strong>Santidade:</strong> O chamado para viver uma vida separada para Deus.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 2 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersCorintios2">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 2 Coríntios</h2>
+            <div id="quizContainerCorintios2" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionCorintios2"></p>
+                <div id="quizOptionsCorintios2" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackCorintios2" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionCorintios2()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressCorintios2"></span></p>
+                <p>Pontuação: <span id="quizScoreCorintios2">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 2 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 2 Coríntios.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="corintios2Chart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalCorintios2()">&times;</span>
+                <h3 id="modalCharacterNameCorintios2" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionCorintios2" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 2 Coríntios",
+            "short_name": "2 Coríntios",
+            "description": "Explore o livro de 2 Coríntios de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=2CO",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=2CO",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '2corintios-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionCorintios2(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsCorintios2();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksCorintios2();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsCorintios2(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexCorintios2 = 0; // Reinicia o quiz
+                scoreCorintios2 = 0;
+                wrongAnswersCorintios2 = 0;
+                document.getElementById('quizScoreCorintios2').textContent = `Acertos: ${scoreCorintios2}, Erros: ${wrongAnswersCorintios2}`;
+                displayQuestionCorintios2();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderCorintios2Chart();
+            }
+        }
+
+        // Dados dos personagens para 2 Coríntios
+        const characterDetailsCorintios2 = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O apóstolo que escreveu esta epístola, defendendo seu ministério, expressando seu amor pela igreja e exortando-os à santidade e generosidade."
+            },
+            "Timóteo": {
+                name: "Timóteo",
+                description: "Colaborador de Paulo, mencionado no início da carta como co-remetente."
+            },
+            "Tito": {
+                name: "Tito",
+                description: "Um companheiro de Paulo que trouxe notícias encorajadoras de Corinto, aliviando a aflição de Paulo e sendo um exemplo de generosidade."
+            },
+            "Igreja de Corinto": {
+                name: "Igreja de Corinto",
+                description: "A comunidade de crentes em Corinto, destinatária da carta, que enfrentava divisões, imoralidade e questionamentos ao apostolado de Paulo."
+            },
+            "Falsos Apóstolos/Oponentes": {
+                name: "Falsos Apóstolos/Oponentes",
+                description: "Indivíduos que se opunham a Paulo em Corinto, questionando sua autoridade, integridade e métodos, e que Paulo confronta vigorosamente na carta."
+            },
+            "Deus (Pai/Senhor/Cristo/Espírito)": {
+                name: "Deus (Pai/Senhor/Cristo/Espírito)",
+                description: "O Deus de todo consolo, que age através de Paulo, estabelece a nova aliança e é a fonte de toda graça e poder."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalCorintios2(characterName) {
+            const details = characterDetailsCorintios2[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameCorintios2').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionCorintios2').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalCorintios2() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsCorintios2() {
+            const grid = document.getElementById('characterGridCorintios2');
+            grid.innerHTML = '';
+            for (const key in characterDetailsCorintios2) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalCorintios2(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksCorintios2() {
+            const chaptersDiv = document.getElementById('chaptersCorintios2');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 13; i++) { // 2 Coríntios tem 13 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/2co/${i}`; // Link para a Bíblia Online, 2 Coríntios
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 2 Coríntios (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsCorintios2 = [
+            { question: "Qual apóstolo escreveu a Segunda Epístola aos Coríntios?", options: ["Pedro", "João", "Paulo", "Tiago"], answer: "Paulo", reference: "Introdução ao Livro de 2 Coríntios" },
+            { question: "Qual é um dos temas centrais de 2 Coríntios em relação ao sofrimento?", options: ["Rejeição do sofrimento", "Sofrimento como punição", "Consolo de Deus no sofrimento", "Sofrimento como sinal de fraqueza"], answer: "Consolo de Deus no sofrimento", reference: "Temas Centrais do Livro de 2 Coríntios" },
+            { question: "Em que Paulo se gloria em 2 Coríntios, em contraste com seus oponentes?", options: ["Em sua riqueza", "Em sua eloquência", "Em suas fraquezas e sofrimentos", "Em sua sabedoria"], answer: "Em suas fraquezas e sofrimentos", reference: "Capítulo 11" },
+            { question: "Quem trouxe notícias encorajadoras a Paulo de Corinto?", options: ["Timóteo", "Barnabé", "Tito", "Silas"], answer: "Tito", reference: "Introdução ao Livro de 2 Coríntios" },
+            { question: "O que Paulo descreve como 'tesouro em vasos de barro'?", options: ["Riquezas materiais", "A vida eterna", "O evangelho e o poder de Deus em fraqueza humana", "A sabedoria humana"], answer: "O evangelho e o poder de Deus em fraqueza humana", reference: "Capítulo 4" },
+            { question: "Qual é o principal propósito da coleta mencionada em 2 Coríntios 8-9?", options: ["Para a construção de um novo templo", "Para o sustento de Paulo", "Para os santos pobres em Jerusalém", "Para pagar impostos a Roma"], answer: "Para os santos pobres em Jerusalém", reference: "Capítulos 8-9" },
+            { question: "O que Deus ama, segundo 2 Coríntios 9:7?", options: ["Aquele que dá com tristeza", "Aquele que dá por obrigação", "Aquele que dá com alegria", "Aquele que não dá"], answer: "Aquele que dá com alegria", reference: "Capítulo 9" },
+            { question: "Qual é o ministério central que Paulo descreve em 2 Coríntios 5:18?", options: ["O ministério da condenação", "O ministério da lei", "O ministério da reconciliação", "O ministério da riqueza"], answer: "O ministério da reconciliação", reference: "Capítulo 5" },
+            { question: "O que Paulo tinha 'na carne' que o afligia, mas que a graça de Deus era suficiente?", options: ["Uma doença grave", "Perseguição constante", "Um espinho na carne", "Dúvidas sobre sua fé"], answer: "Um espinho na carne", reference: "Capítulo 12" },
+            { question: "O que Paulo exorta os coríntios a fazerem em relação ao ofensor arrependido?", options: ["Punir severamente", "Expulsar da igreja", "Perdoar e consolar", "Ignorar completamente"], answer: "Perdoar e consolar", reference: "Capítulo 2" },
+            { question: "2 Coríntios é uma carta mais pessoal ou mais doutrinária?", options: ["Mais doutrinária", "Totalmente impessoal", "Profundamente pessoal", "Apenas histórica"], answer: "Profundamente pessoal", reference: "Introdução ao Livro de 2 Coríntios" },
+            { question: "O que Paulo contrasta com a glória do ministério da lei (velha aliança)?", options: ["A glória do ministério da condenação", "A glória do ministério do Espírito (nova aliança)", "A glória do ministério dos anjos", "A glória dos falsos apóstolos"], answer: "A glória do ministério do Espírito (nova aliança)", reference: "Capítulo 3" },
+            { question: "Qual é a exortação de Paulo em 2 Coríntios 6:14 sobre 'jugo desigual'?", options: ["Não se casar com descrentes", "Não se associar com descrentes em negócios", "Não se unir a descrentes em coisas espirituais", "Todas as alternativas anteriores"], answer: "Não se unir a descrentes em coisas espirituais", reference: "Capítulo 6" },
+            { question: "O que Paulo afirma sobre as armas de sua milícia em 2 Coríntios 10:4?", options: ["São carnais e poderosas", "São espirituais e poderosas em Deus", "São frágeis e ineficazes", "São apenas palavras vazias"], answer: "São espirituais e poderosas em Deus", reference: "Capítulo 10" },
+            { question: "Qual é a principal acusação que Paulo refuta em 2 Coríntios 10-13?", options: ["Que ele era rico", "Que ele era fraco em sua presença e forte em suas cartas", "Que ele não amava os coríntios", "Que ele não era um apóstolo verdadeiro"], answer: "Que ele era fraco em sua presença e forte em suas cartas", reference: "Capítulo 10" },
+            { question: "O que a experiência de Paulo de ser 'levado ao terceiro céu' demonstra?", options: ["Sua superioridade sobre outros apóstolos", "A glória das revelações divinas", "Sua capacidade de viajar no tempo", "Sua fraqueza e necessidade da graça de Deus"], answer: "A glória das revelações divinas", reference: "Capítulo 12" },
+            { question: "Qual a importância da generosidade em 2 Coríntios?", options: ["É uma obrigação legal", "É para acumular tesouros na terra", "É uma expressão da graça de Deus e produz gratidão", "É apenas para os ricos"], answer: "É uma expressão da graça de Deus e produz gratidão", reference: "Capítulo 9" },
+            { question: "O que Paulo exorta os coríntios a fazerem em 2 Coríntios 13:5?", options: ["Julgar os outros", "Examinarem-se a si mesmos", "Gloriar-se em suas obras", "Esperar por um sinal"], answer: "Examinarem-se a si mesmos", reference: "Capítulo 13" },
+            { question: "O que Paulo afirma que Deus faz em todas as suas aflições?", options: ["Ele os abandona", "Ele os pune", "Ele os consola", "Ele os ignora"], answer: "Ele os consola", reference: "Capítulo 1" },
+            { question: "Qual é a base da nova aliança, segundo 2 Coríntios 3?", options: ["A lei escrita em pedras", "A lei escrita no coração pelo Espírito", "Tradições humanas", "Rituais e sacrifícios"], answer: "A lei escrita no coração pelo Espírito", reference: "Capítulo 3" },
+            { question: "Qual a atitude de Paulo em relação às acusações de seus oponentes?", options: ["Ele as ignora", "Ele as aceita", "Ele as refuta com paixão e argumentos", "Ele se esconde"], answer: "Ele as refuta com paixão e argumentos", reference: "Introdução ao Livro de 2 Coríntios" },
+            { question: "O que Paulo diz que acontece quando alguém está em Cristo (2 Coríntios 5:17)?", options: ["Torna-se rico", "Torna-se uma nova criatura", "Torna-se um líder político", "Torna-se imune ao sofrimento"], answer: "Torna-se uma nova criatura", reference: "Capítulo 5" },
+            { question: "Qual o propósito da 'carta severa' de Paulo aos coríntios (mencionada em 2 Coríntios)?", options: ["Para elogiá-los", "Para repreendê-los e discipliná-los", "Para pedir dinheiro", "Para anunciar sua aposentadoria"], answer: "Para repreendê-los e discipliná-los", reference: "Introdução ao Livro de 2 Coríntios" },
+            { question: "O que Paulo deseja que os coríntios demonstrem em sua terceira visita?", options: ["Que eles o temam", "Que eles o recebam com presentes", "Que eles tenham se arrependido e estejam em ordem", "Que eles tenham construído um templo"], answer: "Que eles tenham se arrependido e estejam em ordem", reference: "Introdução ao Livro de 2 Coríntios" },
+            { question: "Qual é a saudação final de Paulo em 2 Coríntios 13:14?", options: ["Paz seja convosco", "A graça do Senhor Jesus Cristo, e o amor de Deus, e a comunhão do Espírito Santo sejam com todos vós", "Amém e amém", "Vão em paz"], answer: "A graça do Senhor Jesus Cristo, e o amor de Deus, e a comunhão do Espírito Santo sejam com todos vós", reference: "Capítulo 13" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsCorintios2 = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsCorintios2.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsCorintios2 = allQuizQuestionsCorintios2.concat(uniqueQuizQuestionsCorintios2);
+        }
+        allQuizQuestionsCorintios2 = allQuizQuestionsCorintios2.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsCorintios2 = [];
+        let currentQuizIndexCorintios2 = 0;
+        let scoreCorintios2 = 0;
+        let wrongAnswersCorintios2 = 0;
+        let corintios2ChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsCorintios2() {
+            shuffledQuizQuestionsCorintios2 = [...allQuizQuestionsCorintios2]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsCorintios2);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressCorintios2() {
+            const progressElement = document.getElementById('quizProgressCorintios2');
+            progressElement.textContent = `${currentQuizIndexCorintios2 + 1}/${shuffledQuizQuestionsCorintios2.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionCorintios2() {
+            if (currentQuizIndexCorintios2 >= shuffledQuizQuestionsCorintios2.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionCorintios2').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsCorintios2').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreCorintios2}, Erros: ${wrongAnswersCorintios2}</p>`;
+                document.getElementById('quizFeedbackCorintios2').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsCorintios2[currentQuizIndexCorintios2];
+            document.getElementById('quizQuestionCorintios2').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsCorintios2');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerCorintios2(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackCorintios2').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressCorintios2();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerCorintios2(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackCorintios2');
+            const optionsButtons = document.querySelectorAll('#quizOptionsCorintios2 button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreCorintios2++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersCorintios2++;
+            }
+            document.getElementById('quizScoreCorintios2').textContent = `Acertos: ${scoreCorintios2}, Erros: ${wrongAnswersCorintios2}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionCorintios2() {
+            currentQuizIndexCorintios2++;
+            displayQuestionCorintios2();
+        }
+
+        // Dados para o gráfico de temas de 2 Coríntios
+        const corintios2ChartData = {
+            labels: ['Sofrimento/Consolo', 'Nova Aliança', 'Autenticidade Apostólica', 'Fraqueza/Poder Divino', 'Generosidade', 'Reconciliação', 'Integridade/Caráter', 'Santidade'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [18, 15, 22, 17, 10, 8, 5, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(80, 200, 120, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(80, 200, 120, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const corintios2ChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 2 Coríntios',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderCorintios2Chart() {
+            const ctx = document.getElementById('corintios2Chart').getContext('2d');
+            if (corintios2ChartInstance) {
+                corintios2ChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            corintios2ChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: corintios2ChartData,
+                options: corintios2ChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

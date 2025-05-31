@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Ageu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ageu Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Ageu</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionAgeu('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionAgeu('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionAgeu('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionAgeu('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionAgeu('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionAgeu('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionAgeu('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionAgeu('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionAgeu('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Ageu</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Ageu, uma profecia concisa que desafiou o povo judeu a priorizar a reconstrução do Templo de Jerusalém após o retorno do exílio babilônico. Descubra a importância da obediência a Deus, as consequências da negligência espiritual e as promessas de bênção e glória futura. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Ageu</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Ageu é um dos doze profetas menores do Antigo Testamento e é o primeiro dos três profetas pós-exílicos (juntamente com Zacarias e Malaquias). O nome "Ageu" pode significar "meu festival" ou "festivo", possivelmente indicando que ele nasceu em um dia de festa ou que sua mensagem traria alegria.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Ageu profetizou em 520 a.C., cerca de 18 anos após o retorno dos primeiros exilados judeus da Babilônia para Jerusalém, sob a liderança de Zorobabel (governador) e Josué (sumo sacerdote). Embora o rei Ciro da Pérsia tivesse autorizado a reconstrução do Templo em 538 a.C., o trabalho havia parado por cerca de 16 anos devido à oposição externa e à apatia do povo. Os judeus estavam mais preocupados em construir suas próprias casas e prosperar materialmente do que em restaurar a casa de Deus.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A mensagem de Ageu é direta e focada na urgência da reconstrução do Templo. Ele repreende o povo por suas prioridades equivocadas, mostrando que a falta de bênção material (má colheita, escassez) era uma consequência direta de sua negligência espiritual. O profeta encoraja o povo, Zorobabel e Josué a retomarem a obra, prometendo a presença de Deus e a futura glória do Templo, que seria maior que a do Templo de Salomão.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro é notável por sua brevidade (apenas dois capítulos) e pela clareza de suas quatro mensagens proféticas, entregues em um período de quatro meses. A pregação de Ageu, juntamente com a de Zacarias, foi fundamental para motivar o povo a finalmente concluir a reconstrução do Templo em 516 a.C.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Chamado à Reconstrução.</strong> Repreensão pela negligência do Templo e o desafio para retomar a obra.</li>
+                <li><strong>Capítulo 2: Promessas de Glória e Bênção.</strong> Encorajamento, a glória futura do Templo e a promessa a Zorobabel.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Ageu é um lembrete poderoso de que a prioridade de Deus deve ser a prioridade de Seu povo, e que a obediência a Ele traz bênçãos e a manifestação de Sua glória.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Ageu</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Ageu desafia o povo a reconstruir o Templo e promete bênçãos e glória.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Primeira Mensagem: Um Chamado à Reconstrução (Capítulo 1:1-11)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A data e os destinatários (Versículo 1):</strong>
+                    <ul>
+                        <li>No segundo ano do rei Dario, no sexto mês, no primeiro dia do mês.</li>
+                        <li>A Zorobabel e Josué.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A repreensão pela negligência do templo (Versículos 2-6):</strong>
+                    <ul>
+                        <li>"É tempo de vós morardes em vossas casas forradas, enquanto esta casa fica deserta?"</li>
+                        <li>As consequências da desobediência: sem prosperidade.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O chamado à ação (Versículos 7-8):</strong>
+                    <ul>
+                        <li>"Considerai os vossos caminhos."</li>
+                        <li>Subir ao monte, trazer madeira e edificar a casa.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A resposta do povo (Versículos 9-11):</strong>
+                    <ul>
+                        <li>O povo ouve e obedece.</li>
+                        <li>O Senhor desperta o espírito de Zorobabel, Josué e todo o remanescente.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Segunda Mensagem: A Glória do Segundo Templo (Capítulo 2:1-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Encorajamento para os desanimados (Versículos 1-3):</strong>
+                    <ul>
+                        <li>Sete meses depois, uma nova mensagem.</li>
+                        <li>"Quem há entre vós que viu esta casa na sua primeira glória?"</li>
+                        <li>Não desanimar, pois a glória futura será maior.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A promessa da presença de Deus (Versículos 4-5):</strong>
+                    <ul>
+                        <li>"Eu sou convosco, diz o Senhor dos Exércitos."</li>
+                        <li>O Espírito de Deus permanece no meio deles.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A glória futura do templo (Versículos 6-9):</strong>
+                    <ul>
+                        <li>Deus abalará os céus e a terra, e virá o Desejado de todas as nações.</li>
+                        <li>A prata e o ouro são do Senhor.</li>
+                        <li>A glória da última casa será maior que a da primeira.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Terceira Mensagem: A Santidade e a Bênção (Capítulo 2:10-19)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A questão da santidade e contaminação (Versículos 10-14):</strong>
+                    <ul>
+                        <li>Uma pergunta aos sacerdotes sobre a lei.</li>
+                        <li>A contaminação espiritual afeta tudo.</li>
+                        <li>O povo está contaminado por suas obras.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A promessa de bênção a partir da obediência (Versículos 15-19):</strong>
+                    <ul>
+                        <li>Considerar o passado e o futuro.</li>
+                        <li>Desde o dia em que o fundamento do templo foi lançado, Deus os abençoará.</li>
+                        <li>"Desde este dia vos abençoarei."</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Quarta Mensagem: A Promessa a Zorobabel (Capítulo 2:20-23)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A derrubada dos reinos (Versículos 20-22):</strong>
+                    <ul>
+                        <li>Deus abalará os céus e a terra novamente.</li>
+                        <li>Destruição do poder das nações.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Zorobabel como selo de Deus (Versículo 23):</strong>
+                    <ul>
+                        <li>"Naquele dia te tomarei, ó Zorobabel, servo meu, diz o Senhor, e te porei como anel de selar."</li>
+                        <li>Ele será escolhido por Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Ageu destaca a importância da prioridade espiritual e da obediência a Deus. Ele ensina que a bênção material está ligada à fidelidade na obra de Deus. A mensagem de Ageu também aponta para a soberania de Deus sobre a história e as nações, e para a glória futura do Seu reino. A promessa a Zorobabel é messiânica, apontando para o futuro Messias que viria da linhagem de Davi, que seria o "anel de selar" de Deus, o escolhido e o governante final. O livro encoraja o povo de Deus a não desanimar diante das dificuldades, mas a confiar nas promessas divinas e a agir com fé.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridAgeu">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Ageu</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Ageu, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Chamado à Reconstrução do Templo</strong>
+                    <ul>
+                        <li>1.1: A Primeira Mensagem de Ageu.</li>
+                        <li>1.2-6: A Repreensão pela Negligência.</li>
+                        <li>1.7-8: O Desafio para Edificar.</li>
+                        <li>1.9-11: As Consequências da Desobediência.</li>
+                        <li>1.12-15: A Resposta e Obra do Povo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: Promessas de Glória e Bênção Futura</strong>
+                    <ul>
+                        <li>2.1-9: A Segunda Mensagem: A Glória do Novo Templo.</li>
+                        <li>2.10-19: A Terceira Mensagem: Santidade e Bênção.</li>
+                        <li>2.20-23: A Quarta Mensagem: A Promessa a Zorobabel.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Ageu</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Reconstrução do Templo:</strong> O foco central e a prioridade divina.</li>
+                <li><strong>Prioridades Espirituais:</strong> A importância de colocar Deus em primeiro lugar.</li>
+                <li><strong>Obediência e Bênção:</strong> A conexão entre a fidelidade a Deus e a prosperidade.</li>
+                <li><strong>A Presença de Deus:</strong> A promessa de que Deus está com Seu povo.</li>
+                <li><strong>A Glória Futura:</strong> A promessa de que o segundo Templo teria uma glória maior.</li>
+                <li><strong>A Soberania de Deus:</strong> O controle de Deus sobre os reinos e a história.</li>
+                <li><strong>A Esperança Messiânica:</strong> A promessa a Zorobabel apontando para o Messias.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Ageu</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersAgeu">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Ageu</h2>
+            <div id="quizContainerAgeu" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionAgeu"></p>
+                <div id="quizOptionsAgeu" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackAgeu" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionAgeu()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressAgeu"></span></p>
+                <p>Pontuação: <span id="quizScoreAgeu">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Ageu</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Ageu.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="ageuChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalAgeu()">&times;</span>
+                <h3 id="modalCharacterNameAgeu" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionAgeu" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Ageu",
+            "short_name": "Ageu",
+            "description": "Explore o livro de Ageu de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=AG",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=AG",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'ageu-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionAgeu(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsAgeu();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksAgeu();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsAgeu(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexAgeu = 0; // Reinicia o quiz
+                scoreAgeu = 0;
+                wrongAnswersAgeu = 0;
+                document.getElementById('quizScoreAgeu').textContent = `Acertos: ${scoreAgeu}, Erros: ${wrongAnswersAgeu}`;
+                displayQuestionAgeu();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderAgeuChart();
+            }
+        }
+
+        // Dados dos personagens para Ageu
+        const characterDetailsAgeu = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano que chama o povo à obediência, promete bênçãos e a glória futura do Templo."
+            },
+            "Ageu": {
+                name: "Ageu",
+                description: "O profeta pós-exílico que entregou quatro mensagens diretas para motivar a reconstrução do Templo."
+            },
+            "Zorobabel": {
+                name: "Zorobabel",
+                description: "O governador de Judá, líder político do retorno do exílio, a quem Ageu e Zacarias dirigiram suas mensagens."
+            },
+            "Josué (Sumo Sacerdote)": {
+                name: "Josué (Sumo Sacerdote)",
+                description: "O sumo sacerdote, líder espiritual do retorno do exílio, que trabalhou com Zorobabel na reconstrução do Templo."
+            },
+            "O Povo de Judá": {
+                name: "O Povo de Judá",
+                description: "Os exilados judeus que retornaram a Jerusalém, inicialmente negligentes na reconstrução do Templo."
+            },
+            "Dario I": {
+                name: "Dario I",
+                description: "O rei da Pérsia durante cujo reinado Ageu profetizou e o Templo foi finalmente concluído."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalAgeu(characterName) {
+            const details = characterDetailsAgeu[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameAgeu').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionAgeu').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalAgeu() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsAgeu() {
+            const grid = document.getElementById('characterGridAgeu');
+            grid.innerHTML = '';
+            for (const key in characterDetailsAgeu) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalAgeu(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksAgeu() {
+            const chaptersDiv = document.getElementById('chaptersAgeu');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 2; i++) { // Ageu tem 2 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/ag/${i}`; // Link para a Bíblia Online, Ageu
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Ageu (25 perguntas únicas)
+        const uniqueQuizQuestionsAgeu = [
+            { question: "Qual o principal objetivo da profecia de Ageu?", options: ["Anunciar a vinda do Messias", "Chamar o povo ao arrependimento moral", "Incentivar a reconstrução do Templo", "Profetizar a queda de reinos vizinhos"], answer: "Incentivar a reconstrução do Templo", reference: "Introdução ao Livro de Ageu" },
+            { question: "Em que ano (aproximadamente) Ageu profetizou?", options: ["722 a.C.", "586 a.C.", "520 a.C.", "444 a.C."], answer: "520 a.C.", reference: "Introdução ao Livro de Ageu" },
+            { question: "Quem eram os dois principais líderes a quem Ageu dirigiu suas mensagens?", options: ["Esdras e Neemias", "Davi e Salomão", "Zorobabel e Josué", "Ciro e Dario"], answer: "Zorobabel e Josué", reference: "Ageu 1:1" },
+            { question: "Qual era a desculpa do povo para não reconstruir o Templo, segundo Ageu 1:2?", options: ["Não temos recursos", "Não é tempo de edificar a casa do Senhor", "Os inimigos são muitos", "Estamos construindo nossas próprias casas"], answer: "Não é tempo de edificar a casa do Senhor", reference: "Ageu 1:2" },
+            { question: "O que Deus disse que o povo estava fazendo, enquanto o Templo estava em ruínas (Ageu 1:4)?", options: ["Orando e jejuando", "Morando em casas forradas", "Plantando lavouras", "Lutando contra os inimigos"], answer: "Morando em casas forradas", reference: "Ageu 1:4" },
+            { question: "Qual a consequência da negligência do Templo, segundo Ageu 1:6?", options: ["Grande prosperidade", "Paz com os inimigos", "Semear muito e colher pouco", "Aumento da população"], answer: "Semear muito e colher pouco", reference: "Ageu 1:6" },
+            { question: "O que o Senhor prometeu ao povo se eles retomassem a obra (Ageu 1:8)?", options: ["Eu me agradarei dela e serei glorificado", "Eu lhes darei ouro e prata", "Eu os farei reis", "Eu os levarei de volta ao exílio"], answer: "Eu me agradarei dela e serei glorificado", reference: "Ageu 1:8" },
+            { question: "Quantos capítulos tem o livro de Ageu?", options: ["1", "2", "3", "4"], answer: "2", reference: "Esboços do Livro de Ageu" },
+            { question: "Qual a promessa de Deus para o segundo Templo em Ageu 2:9?", options: ["Será menor que o primeiro", "Sua glória será maior que a da primeira", "Será destruído novamente", "Será um lugar de sacrifícios diários"], answer: "Sua glória será maior que a da primeira", reference: "Ageu 2:9" },
+            { question: "O que Deus promete abalar em Ageu 2:6-7?", options: ["Apenas as casas", "Os céus e a terra, e virá o Desejado de todas as nações", "Os fundamentos do Templo", "As montanhas"], answer: "Os céus e a terra, e virá o Desejado de todas as nações", reference: "Ageu 2:6-7" },
+            { question: "Qual é o nome do sumo sacerdote mencionado no livro de Ageu?", options: ["Esdras", "Neemias", "Josué", "Zacarias"], answer: "Josué", reference: "Ageu 1:1" },
+            { question: "Qual é o nome do governador mencionado no livro de Ageu?", options: ["Ciro", "Dario", "Zorobabel", "Artaxerxes"], answer: "Zorobabel", reference: "Ageu 1:1" },
+            { question: "O que o povo fez após a primeira mensagem de Ageu (Ageu 1:12)?", options: ["Ignoraram a mensagem", "Ficaram com medo", "Obedeceram à voz do Senhor", "Consultaram outros profetas"], answer: "Obedeceram à voz do Senhor", reference: "Ageu 1:12" },
+            { question: "A partir de que dia Deus prometeu abençoar o povo em Ageu 2:19?", options: ["Desde o dia da colheita", "Desde o dia em que o fundamento do templo foi lançado", "Desde o dia da Páscoa", "Desde o dia do exílio"], answer: "Desde o dia em que o fundamento do templo foi lançado", reference: "Ageu 2:19" },
+            { question: "Qual a metáfora usada para Zorobabel em Ageu 2:23?", options: ["Uma rocha", "Uma árvore", "Um anel de selar", "Um vaso de ouro"], answer: "Um anel de selar", reference: "Ageu 2:23" },
+            { question: "Qual era a condição espiritual do povo que impedia as bênçãos de Deus (Ageu 2:14)?", options: ["Eles eram pobres", "Eles eram impuros em suas obras", "Eles eram poucos em número", "Eles eram fracos"], answer: "Eles eram impuros em suas obras", reference: "Ageu 2:14" },
+            { question: "Quantas mensagens proféticas Ageu entregou no livro?", options: ["Duas", "Três", "Quatro", "Cinco"], answer: "Quatro", reference: "Introdução ao Livro de Ageu" },
+            { question: "O que o Senhor dos Exércitos disse que estava com o povo em Ageu 1:13?", options: ["Minha espada", "Minha bênção", "Eu sou convosco", "Minha ira"], answer: "Eu sou convosco", reference: "Ageu 1:13" },
+            { question: "Qual a principal lição do livro de Ageu sobre as prioridades?", options: ["Construir casas luxuosas", "Priorizar a obra de Deus antes dos interesses pessoais", "Fazer sacrifícios abundantes", "Lutar contra os inimigos"], answer: "Priorizar a obra de Deus antes dos interesses pessoais", reference: "Significado Teológico" },
+            { question: "O que o livro de Ageu ensina sobre a relação entre obediência e prosperidade?", options: ["Não há relação", "A obediência garante prosperidade imediata", "A desobediência leva à escassez", "A prosperidade vem sem esforço"], answer: "A desobediência leva à escassez", reference: "Significado Teológico" },
+            { question: "O que o Senhor faria com os reinos das nações em Ageu 2:22?", options: ["Farão aliança com eles", "Os derrubaria", "Os abençoaria", "Os ignoraria"], answer: "Os derrubaria", reference: "Ageu 2:22" },
+            { question: "A profecia de Ageu foi fundamental para a conclusão de qual obra?", options: ["Os muros de Jerusalém", "A cidade de Samaria", "O segundo Templo", "A reconstrução do palácio real"], answer: "O segundo Templo", reference: "Introdução ao Livro de Ageu" },
+            { question: "Qual a data da primeira mensagem de Ageu?", options: ["No primeiro ano do rei Dario", "No segundo ano do rei Dario, no sexto mês, no primeiro dia", "No terceiro ano do rei Ciro", "No décimo ano do rei Josias"], answer: "No segundo ano do rei Dario, no sexto mês, no primeiro dia", reference: "Ageu 1:1" },
+            { question: "O que o povo plantava, mas não colhia muito, segundo Ageu 1:6?", options: ["Frutas", "Cereais", "Vinho", "Legumes"], answer: "Cereais", reference: "Ageu 1:6" },
+            { question: "Qual a promessa para Zorobabel em Ageu 2:23, que aponta para o Messias?", options: ["Ele será um grande guerreiro", "Ele será rico", "Ele será um anel de selar, o escolhido de Deus", "Ele governará todas as nações"], answer: "Ele será um anel de selar, o escolhido de Deus", reference: "Ageu 2:23" }
+        ];
+
+        let quizQuestionsAgeu = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsAgeu() {
+            quizQuestionsAgeu = []; // Limpa as perguntas anteriores
+            while (quizQuestionsAgeu.length < 200) {
+                quizQuestionsAgeu.push(...uniqueQuizQuestionsAgeu);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsAgeu.length > 200) {
+                quizQuestionsAgeu = quizQuestionsAgeu.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsAgeu); // Embaralha o array completo
+        }
+
+        let currentQuizIndexAgeu = 0;
+        let scoreAgeu = 0;
+        let wrongAnswersAgeu = 0;
+
+        function displayQuestionAgeu() {
+            const questionElement = document.getElementById('quizQuestionAgeu');
+            const optionsElement = document.getElementById('quizOptionsAgeu');
+            const feedbackElement = document.getElementById('quizFeedbackAgeu');
+            const nextButton = document.querySelector('#quizContainerAgeu .quiz-next');
+            const progressElement = document.getElementById('quizProgressAgeu');
+
+            if (currentQuizIndexAgeu < quizQuestionsAgeu.length) {
+                const questionData = quizQuestionsAgeu[currentQuizIndexAgeu];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerAgeu(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexAgeu + 1}/${quizQuestionsAgeu.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreAgeu}, Erros: ${wrongAnswersAgeu}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerAgeu(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsAgeu button');
+            const feedbackElement = document.getElementById('quizFeedbackAgeu');
+            const nextButton = document.querySelector('#quizContainerAgeu .quiz-next');
+            const scoreElement = document.getElementById('quizScoreAgeu');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreAgeu++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersAgeu++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreAgeu}, Erros: ${wrongAnswersAgeu}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionAgeu() {
+            currentQuizIndexAgeu++;
+            displayQuestionAgeu();
+        }
+
+        // Gráfico de Temas para Ageu
+        let ageuChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderAgeuChart() {
+            const ctx = document.getElementById('ageuChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (ageuChartInstance) {
+                ageuChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['Reconstrução do Templo', 'Prioridades Espirituais', 'Obediência e Bênção', 'A Presença de Deus', 'A Glória Futura', 'A Soberania de Deus', 'A Esperança Messiânica'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [7, 6, 6, 5, 5, 4, 3], // Valores fictícios para Ageu
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para Reconstrução do Templo
+                        'rgba(54, 162, 235, 0.7)', // Azul para Prioridades Espirituais
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Obediência e Bênção
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para A Presença de Deus
+                        'rgba(153, 102, 255, 0.7)', // Roxo para A Glória Futura
+                        'rgba(255, 159, 64, 0.7)', // Laranja para A Soberania de Deus
+                        'rgba(201, 203, 207, 0.7)' // Cinza para A Esperança Messiânica
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            ageuChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Ageu',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionAgeu('inicio');
+        });
+    </script>
+</body>
+</html>

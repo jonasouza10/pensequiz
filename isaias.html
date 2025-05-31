@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Isaías</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Isaías Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Isaías</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionIsaias('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionIsaias('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionIsaias('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionIsaias('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionIsaias('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionIsaias('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionIsaias('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionIsaias('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionIsaias('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Isaías</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Isaías, um dos maiores profetas do Antigo Testamento. Mergulhe em suas mensagens de juízo e salvação, profecias sobre o Messias e visões do futuro glorioso de Israel e das nações. Descubra a santidade de Deus e Seus planos soberanos para a humanidade. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Isaías</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Isaías é o primeiro e mais extenso dos Profetas Maiores do Antigo Testamento. O autor é o profeta Isaías, filho de Amoz, que profetizou em Judá durante os reinados de Uzias, Jotão, Acaz e Ezequias (Isaías 1:1), abrangendo um período de cerca de 40 a 60 anos no século VIII a.C. Este foi um tempo de grande instabilidade política e espiritual para Judá, com a ascensão do Império Assírio ameaçando a soberania das nações vizinhas, incluindo Israel e Judá.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro de Isaías é notável por sua profundidade teológica, sua beleza poética e o vasto escopo de suas profecias. Ele aborda temas como a santidade inigualável de Deus, o pecado e a rebelião de Israel, o juízo iminente sobre Judá e as nações, e a promessa gloriosa de salvação e redenção através do Messias. Isaías é frequentemente chamado de "o profeta evangélico" devido às suas numerosas e detalhadas profecias sobre Jesus Cristo, incluindo seu nascimento virginal (7:14), sua natureza divina (9:6), seu sofrimento e sacrifício como Servo do Senhor (53), e seu reino de paz (11).</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A mensagem de Isaías é um chamado urgente ao arrependimento e à fé em Deus, mesmo em meio à adversidade. Ele aponta para um futuro de restauração e glória, onde Deus estabelecerá um novo céu e uma nova terra, e onde a justiça e a paz reinarão sob o governo do Messias.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Parte I: Juízo sobre Judá e as Nações (Capítulos 1-39).</strong> Esta seção contém profecias de condenação contra Judá por sua idolatria e injustiça, advertências contra alianças estrangeiras, e oráculos contra várias nações. Inclui o chamado de Isaías (Cap. 6) e narrativas históricas dos reinados de Acaz e Ezequias (Cap. 36-39).</li>
+                <li><strong>Parte II: O Livro da Consolação (Capítulos 40-66).</strong> Esta seção muda o tom para a esperança e a redenção. Foca na libertação do exílio babilônico, na soberania de Deus sobre a história, e nas profecias detalhadas sobre o Servo Sofredor (o Messias) que trará salvação. Culmina com a visão de novos céus e nova terra e o estabelecimento do reino eterno de Deus.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Isaías é um livro fundamental para entender a teologia bíblica da redenção e a identidade do Messias, oferecendo esperança e consolo em meio ao juízo.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Isaías</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Isaías é um livro extenso que abrange mensagens de juízo, salvação e profecias messiânicas, dividindo-se em duas grandes partes.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Juízo sobre Judá e as Nações (Capítulos 1-39)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Pecado de Judá e o Chamado ao Arrependimento (Capítulos 1-5):</strong>
+                    <ul>
+                        <li>A rebelião de Israel e a necessidade de purificação.</li>
+                        <li>A vinha do Senhor.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Chamado e a Visão de Isaías (Capítulo 6):</strong>
+                    <ul>
+                        <li>A santidade de Deus e a purificação do profeta.</li>
+                        <li>A comissão para profetizar.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Profecias sobre Emanuel e o Reino Messiânico (Capítulos 7-12):</strong>
+                    <ul>
+                        <li>O sinal de Emanuel (Isaías 7:14).</li>
+                        <li>O nascimento e o reinado do Príncipe da Paz (Isaías 9:6-7).</li>
+                        <li>O renovo de Jessé e o reino de paz (Isaías 11).</li>
+                    </ul>
+                </li>
+                <li><strong>D. Oráculos contra as Nações (Capítulos 13-23):</strong>
+                    <ul>
+                        <li>Babilônia, Assíria, Filístia, Moabe, Damasco, Egito, etc.</li>
+                        <li>A soberania de Deus sobre todas as nações.</li>
+                    </ul>
+                </li>
+                <li><strong>E. O "Pequeno Apocalipse" de Isaías (Capítulos 24-27):</strong>
+                    <ul>
+                        <li>O juízo universal e a restauração final.</li>
+                        <li>A ressurreição dos mortos e a vitória sobre a morte.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Ai de Israel e Judá (Capítulos 28-35):</strong>
+                    <ul>
+                        <li>Advertências contra a soberba e a confiança em alianças humanas.</li>
+                        <li>A promessa de livramento e a glória de Sião.</li>
+                    </ul>
+                </li>
+                <li><strong>G. Narrativas Históricas (Capítulos 36-39):</strong>
+                    <ul>
+                        <li>A invasão de Senaqueribe e o livramento de Jerusalém (reinado de Ezequias).</li>
+                        <li>A doença e a cura de Ezequias.</li>
+                        <li>A visita dos embaixadores da Babilônia e a profecia do exílio.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Livro da Consolação (Capítulos 40-66)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Consolação de Israel e a Grandeza de Deus (Capítulos 40-48):</strong>
+                    <ul>
+                        <li>O chamado para consolar o povo de Deus.</li>
+                        <li>A incomparabilidade de Deus como Criador e Redentor.</li>
+                        <li>Profecias sobre Ciro como instrumento de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Os Cânticos do Servo do Senhor (Capítulos 49-55):</strong>
+                    <ul>
+                        <li>A identidade e a missão do Servo.</li>
+                        <li>O sofrimento vicário do Servo (Isaías 53).</li>
+                        <li>O convite à salvação e a aliança eterna (Isaías 55).</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Reino Futuro e a Nova Criação (Capítulos 56-66):</strong>
+                    <ul>
+                        <li>A justiça e a retidão como requisitos para o reino.</li>
+                        <li>A glória de Sião e a inclusão dos gentios.</li>
+                        <li>Novos céus e nova terra (Isaías 65:17-25, 66:22-24).</li>
+                        <li>O juízo final e a adoração universal.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Isaías é um testemunho poderoso da santidade, soberania e fidelidade de Deus. Ele revela a profundidade do pecado humano e a inevitabilidade do juízo divino, mas também proclama a abundante graça e o plano redentor de Deus. Central para sua mensagem é a figura do Messias, que trará salvação, justiça e um reino eterno de paz. Isaías oferece uma visão abrangente da história da salvação, desde o exílio até a nova criação, consolidando a esperança do povo de Deus no retorno e na restauração divinos.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridIsaias">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Isaías</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Isaías, capítulo por capítulo, destacando os temas e gêneros.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A rebelião de Judá e o chamado ao arrependimento.</li>
+                <li><strong>Capítulo 2:</strong> O reino de paz futuro e o juízo sobre a soberba.</li>
+                <li><strong>Capítulo 3:</strong> O juízo sobre Jerusalém e Judá.</li>
+                <li><strong>Capítulo 4:</strong> A purificação e a glória de Sião.</li>
+                <li><strong>Capítulo 5:</strong> A parábola da vinha e os ais contra Israel.</li>
+                <li><strong>Capítulo 6:</strong> A visão e o chamado de Isaías.</li>
+                <li><strong>Capítulo 7:</strong> O sinal de Emanuel para Acaz.</li>
+                <li><strong>Capítulo 8:</strong> O filho de Isaías (Maer-Salal-Has-Baz) e a invasão assíria.</li>
+                <li><strong>Capítulo 9:</strong> O Príncipe da Paz e seu reino.</li>
+                <li><strong>Capítulo 10:</strong> O juízo sobre a Assíria e a restauração do remanescente.</li>
+                <li><strong>Capítulo 11:</strong> O renovo de Jessé e o reino messiânico de paz.</li>
+                <li><strong>Capítulo 12:</strong> Cântico de louvor pela salvação.</li>
+                <li><strong>Capítulo 13-14:</strong> Oráculo contra a Babilônia.</li>
+                <li><strong>Capítulo 15-16:</strong> Oráculo contra Moabe.</li>
+                <li><strong>Capítulo 17:</strong> Oráculo contra Damasco.</li>
+                <li><strong>Capítulo 18:</strong> Oráculo contra a Etiópia.</li>
+                <li><strong>Capítulo 19:</strong> Oráculo contra o Egito.</li>
+                <li><strong>Capítulo 20:</strong> O sinal de Isaías contra o Egito e a Etiópia.</li>
+                <li><strong>Capítulo 21:</strong> Oráculos contra o deserto do mar, Dumá e Arábia.</li>
+                <li><strong>Capítulo 22:</strong> Oráculo contra o Vale da Visão (Jerusalém).</li>
+                <li><strong>Capítulo 23:</strong> Oráculo contra Tiro.</li>
+                <li><strong>Capítulo 24-27:</strong> O "Pequeno Apocalipse": juízo universal e restauração final.</li>
+                <li><strong>Capítulo 28:</strong> Ai de Efraim e a pedra angular de Sião.</li>
+                <li><strong>Capítulo 29:</strong> Ai de Ariel (Jerusalém) e a cegueira espiritual.</li>
+                <li><strong>Capítulo 30:</strong> Ai dos que confiam no Egito e a fidelidade de Deus.</li>
+                <li><strong>Capítulo 31:</strong> Ai dos que confiam em cavalos e carros.</li>
+                <li><strong>Capítulo 32:</strong> O reinado justo e a paz.</li>
+                <li><strong>Capítulo 33:</strong> O Senhor como Rei e Salvador.</li>
+                <li><strong>Capítulo 34:</strong> O juízo sobre as nações e Edom.</li>
+                <li><strong>Capítulo 35:</strong> A glória do Senhor e o caminho da santidade.</li>
+                <li><strong>Capítulo 36-37:</strong> A invasão de Senaqueribe e o livramento de Jerusalém.</li>
+                <li><strong>Capítulo 38:</strong> A doença e a cura do rei Ezequias.</li>
+                <li><strong>Capítulo 39:</strong> A visita dos embaixadores babilônicos e a profecia do exílio.</li>
+                <li><strong>Capítulo 40:</strong> A consolação de Israel e a grandeza de Deus.</li>
+                <li><strong>Capítulo 41:</strong> O Senhor como o único Deus e ajudador de Israel.</li>
+                <li><strong>Capítulo 42:</strong> O primeiro cântico do Servo do Senhor.</li>
+                <li><strong>Capítulo 43:</strong> O Senhor como Redentor e a restauração de Israel.</li>
+                <li><strong>Capítulo 44:</strong> O Senhor como Criador e a futilidade dos ídolos.</li>
+                <li><strong>Capítulo 45:</strong> Ciro, instrumento de Deus, e a soberania divina.</li>
+                <li><strong>Capítulo 46:</strong> A queda dos ídolos da Babilônia.</li>
+                <li><strong>Capítulo 47:</strong> A queda da Babilônia.</li>
+                <li><strong>Capítulo 48:</strong> A teimosia de Israel e a libertação do exílio.</li>
+                <li><strong>Capítulo 49:</strong> O segundo cântico do Servo do Senhor e a restauração de Israel.</li>
+                <li><strong>Capítulo 50:</strong> O terceiro cântico do Servo do Senhor e a obediência.</li>
+                <li><strong>Capítulo 51:</strong> O consolo e a salvação do Senhor.</li>
+                <li><strong>Capítulo 52:</strong> A vinda do mensageiro da paz e a glória do Servo.</li>
+                <li><strong>Capítulo 53:</strong> O sofrimento e o sacrifício do Servo do Senhor.</li>
+                <li><strong>Capítulo 54:</strong> A alegria da Jerusalém restaurada.</li>
+                <li><strong>Capítulo 55:</strong> O convite à salvação e à aliança eterna.</li>
+                <li><strong>Capítulo 56:</strong> A inclusão dos gentios e a justiça.</li>
+                <li><strong>Capítulo 57:</strong> A idolatria e a verdadeira paz.</li>
+                <li><strong>Capítulo 58:</strong> O verdadeiro jejum e a retidão.</li>
+                <li><strong>Capítulo 59:</strong> O pecado de Israel e a intervenção de Deus.</li>
+                <li><strong>Capítulo 60:</strong> A glória de Sião e a vinda das nações.</li>
+                <li><strong>Capítulo 61:</strong> A missão do Ungido do Senhor.</li>
+                <li><strong>Capítulo 62:</strong> A glória e a restauração de Sião.</li>
+                <li><strong>Capítulo 63:</strong> A vingança do Senhor e a oração do povo.</li>
+                <li><strong>Capítulo 64:</strong> Oração por intervenção divina.</li>
+                <li><strong>Capítulo 65:</strong> Novos céus e nova terra.</li>
+                <li><strong>Capítulo 66:</strong> O juízo final e a adoração universal.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Isaías</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Santidade de Deus:</strong> A majestade, pureza e poder inigualáveis do Senhor.</li>
+                <li><strong>Pecado e Juízo:</strong> A rebelião de Israel e das nações, e as consequências divinas.</li>
+                <li><strong>Salvação e Redenção:</strong> O plano de Deus para restaurar Seu povo e a humanidade.</li>
+                <li><strong>O Messias:</strong> Profecias detalhadas sobre a vinda, o caráter, o sofrimento e o reino de Jesus Cristo (Emanuel, Servo Sofredor, Príncipe da Paz).</li>
+                <li><strong>O Remanescente:</strong> A promessa de que um grupo fiel de Israel será preservado e restaurado.</li>
+                <li><strong>A Soberania de Deus:</strong> O controle absoluto de Deus sobre a história, as nações e os indivíduos.</li>
+                <li><strong>Novos Céus e Nova Terra:</strong> A visão escatológica de uma criação renovada e um reino eterno de paz e justiça.</li>
+                <li><strong>A Glória de Sião/Jerusalém:</strong> O papel central de Jerusalém no plano de Deus para a salvação e adoração universal.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Isaías</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersIsaias">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Isaías</h2>
+            <div id="quizContainerIsaias" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionIsaias"></p>
+                <div id="quizOptionsIsaias" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackIsaias" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionIsaias()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressIsaias"></span></p>
+                <p>Pontuação: <span id="quizScoreIsaias">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Isaías</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Isaías.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="isaiasChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalIsaias()">&times;</span>
+                <h3 id="modalCharacterNameIsaias" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionIsaias" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Isaías",
+            "short_name": "Isaías",
+            "description": "Explore o livro de Isaías de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=IS",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=IS",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'isaias-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionIsaias(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsIsaias();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksIsaias();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsIsaias(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexIsaias = 0; // Reinicia o quiz
+                scoreIsaias = 0;
+                wrongAnswersIsaias = 0;
+                document.getElementById('quizScoreIsaias').textContent = `Acertos: ${scoreIsaias}, Erros: ${wrongAnswersIsaias}`;
+                displayQuestionIsaias();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderIsaiasChart();
+            }
+        }
+
+        // Dados dos personagens para Isaías
+        const characterDetailsIsaias = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O foco central do livro, cuja santidade, soberania e planos de juízo e salvação são revelados."
+            },
+            "Isaías": {
+                name: "Isaías",
+                description: "O profeta, filho de Amoz, que recebeu e proclamou as mensagens de Deus a Judá e às nações."
+            },
+            "Acaz": {
+                name: "Acaz",
+                description: "Rei de Judá, cuja incredulidade e alianças com a Assíria foram um ponto focal das profecias de Isaías."
+            },
+            "Ezequias": {
+                name: "Ezequias",
+                description: "Rei de Judá, que demonstrou fé em Deus durante a invasão assíria e cuja vida e reinado são narrados em Isaías 36-39."
+            },
+            "Senaqueribe": {
+                name: "Senaqueribe",
+                description: "Rei da Assíria, que tentou invadir Judá e sitiar Jerusalém, mas foi derrotado por intervenção divina."
+            },
+            "Ciro": {
+                name: "Ciro",
+                description: "Rei da Pérsia, profetizado por Isaías (muito antes de seu nascimento) como o libertador de Israel do cativeiro babilônico."
+            },
+            "O Servo do Senhor": {
+                name: "O Servo do Senhor",
+                description: "Uma figura central nas profecias de Isaías, que se refere tanto a Israel quanto, mais proeminentemente, ao Messias, que sofreria e morreria para a redenção de muitos."
+            },
+            "O Remanescente": {
+                name: "O Remanescente",
+                description: "Um grupo fiel de israelitas que sobreviveria ao juízo e seria restaurado por Deus, representando a esperança futura de Israel."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalIsaias(characterName) {
+            const details = characterDetailsIsaias[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameIsaias').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionIsaias').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalIsaias() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsIsaias() {
+            const grid = document.getElementById('characterGridIsaias');
+            grid.innerHTML = '';
+            for (const key in characterDetailsIsaias) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalIsaias(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksIsaias() {
+            const chaptersDiv = document.getElementById('chaptersIsaias');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 66; i++) { // Isaías tem 66 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/is/${i}`; // Link para a Bíblia Online, Isaías
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Isaías (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsIsaias = [
+            { question: "Qual é o nome do profeta que escreveu o livro de Isaías?", options: ["Jeremias", "Ezequiel", "Isaías", "Daniel"], answer: "Isaías", reference: "Isaías 1:1" },
+            { question: "Durante o reinado de quais reis de Judá Isaías profetizou?", options: ["Davi e Salomão", "Uzias, Jotão, Acaz e Ezequias", "Manassés e Amom", "Josias e Jeoaquim"], answer: "Uzias, Jotão, Acaz e Ezequias", reference: "Isaías 1:1" },
+            { question: "Qual é o tema principal do livro de Isaías?", options: ["A história de Israel", "A sabedoria para a vida diária", "Juízo e Salvação", "Leis e mandamentos"], answer: "Juízo e Salvação", reference: "Introdução ao Livro de Isaías" },
+            { question: "Qual é o nome do filho que nasceria de uma virgem, profetizado em Isaías 7:14?", options: ["Josias", "Emanuel", "Davi", "Salomão"], answer: "Emanuel", reference: "Isaías 7:14" },
+            { question: "Quem é a figura central descrita em Isaías 53?", options: ["O rei Acaz", "O profeta Isaías", "O Servo Sofredor", "O rei Ezequias"], answer: "O Servo Sofredor", reference: "Isaías 53" },
+            { question: "Quantos capítulos tem o livro de Isaías?", options: ["39", "50", "66", "72"], answer: "66", reference: "Esboços do Livro de Isaías" },
+            { question: "O que Isaías 40:8 afirma sobre a palavra de Deus?", options: ["Ela falha", "Ela é esquecida", "Ela permanece para sempre", "Ela muda com o tempo"], answer: "Ela permanece para sempre", reference: "Isaías 40:8" },
+            { question: "Qual é a promessa em Isaías 9:6 sobre o nascimento de um menino?", options: ["Ele será um grande rei", "Ele trará paz e justiça", "Ele será chamado Maravilhoso Conselheiro, Deus Forte, Pai da Eternidade, Príncipe da Paz", "Todas as anteriores"], answer: "Todas as anteriores", reference: "Isaías 9:6" },
+            { question: "Em Isaías 6, qual é a visão que o profeta tem de Deus?", options: ["Deus como um pastor", "Deus entronizado, cercado por serafins", "Deus como um guerreiro", "Deus como um juiz"], answer: "Deus entronizado, cercado por serafins", reference: "Isaías 6:1-3" },
+            { question: "Qual império é uma grande ameaça para Judá na primeira parte de Isaías?", options: ["Egito", "Babilônia", "Assíria", "Pérsia"], answer: "Assíria", reference: "Panoramas do Livro de Isaías (Cap. 36-37)" },
+            { question: "O que Isaías 53 descreve principalmente?", options: ["A glória de Jerusalém", "O sofrimento vicário do Messias", "A queda da Babilônia", "A criação do mundo"], answer: "O sofrimento vicário do Messias", reference: "Isaías 53" },
+            { question: "Qual é a profecia sobre 'novos céus e nova terra'?", options: ["A restauração de Israel", "A criação de um novo universo", "Um futuro reino de paz e justiça sob Deus", "Apenas uma metáfora"], answer: "Um futuro reino de paz e justiça sob Deus", reference: "Isaías 65:17, 66:22" },
+            { question: "Qual rei de Judá recebeu um sinal de Deus sobre sua cura e teve sua vida prolongada?", options: ["Acaz", "Manassés", "Ezequias", "Jotão"], answer: "Ezequias", reference: "Isaías 38" },
+            { question: "O que representa o 'toco de Jessé' em Isaías 11:1?", options: ["A nação de Israel em ruínas", "Uma nova linhagem real de Davi (o Messias)", "Um símbolo de destruição", "A sabedoria dos antepassados"], answer: "Uma nova linhagem real de Davi (o Messias)", reference: "Isaías 11:1" },
+            { question: "O que Isaías 35:8 descreve como o 'caminho da santidade'?", options: ["Um caminho para os ímpios", "Um caminho exclusivo para os sacerdotes", "Um caminho seguro para os redimidos do Senhor", "Um caminho cheio de perigos"], answer: "Um caminho seguro para os redimidos do Senhor", reference: "Isaías 35:8" },
+            { question: "O que Isaías 55:8-9 diz sobre os pensamentos e caminhos de Deus?", options: ["São iguais aos nossos", "São inferiores aos nossos", "São mais altos que os nossos", "São incompreensíveis"], answer: "São mais altos que os nossos", reference: "Isaías 55:8-9" },
+            { question: "Qual é o papel do 'remanescente' em Isaías?", options: ["O grupo que será destruído", "O grupo que se rebelará contra Deus", "O grupo fiel de Israel que será preservado e restaurado", "O grupo que se misturará com as nações"], answer: "O grupo fiel de Israel que será preservado e restaurado", reference: "Panoramas do Livro de Isaías" },
+            { question: "O que Isaías 1:18 diz sobre os pecados, mesmo que sejam como escarlate?", options: ["Permanecerão vermelhos", "Não podem ser perdoados", "Se tornarão brancos como a neve", "Serão esquecidos por Deus"], answer: "Se tornarão brancos como a neve", reference: "Isaías 1:18" },
+            { question: "Qual é o nome do reino onde o lobo habitará com o cordeiro, descrito em Isaías 11?", options: ["O Reino da Abundância", "O Reino da Justiça", "O Reino da Paz", "O Reino de Davi"], answer: "O Reino da Paz", reference: "Isaías 11:6-9" },
+            { question: "Qual é o chamado à conversão em Isaías 1:16-17?", options: ["Sacrifícios e ofertas", "Lavar-se, purificar-se e aprender a fazer o bem", "Construir templos", "Fazer muitas orações"], answer: "Lavar-se, purificar-se e aprender a fazer o bem", reference: "Isaías 1:16-17" },
+            { question: "Qual nação é profetizada para cair em Isaías 13-14?", options: ["Egito", "Assíria", "Babilônia", "Filístia"], answer: "Babilônia", reference: "Isaías 13-14" },
+            { question: "O que Isaías 35 promete para o deserto e a terra seca?", options: ["Seca e desolação", "Florescerão e se alegrarão", "Serão habitados por animais selvagens", "Serão esquecidos"], answer: "Florescerão e se alegrarão", reference: "Isaías 35:1-2" },
+            { question: "O que Isaías 43:18-19 aconselha a não fazer e a fazer, respectivamente?", options: ["Não se lembrar do passado, fazer coisas novas", "Lembrar-se do passado, não fazer coisas novas", "Não confiar em Deus, confiar em si mesmo", "Fazer o mal, não fazer o bem"], answer: "Não se lembrar do passado, fazer coisas novas", reference: "Isaías 43:18-19" },
+            { question: "Qual é o propósito dos 'Cânticos do Servo' em Isaías?", options: ["Descrever a vida de Isaías", "Detalhar a missão e o sofrimento do Messias", "Celebrar a vitória de Israel em batalhas", "Exaltar os reis de Judá"], answer: "Detalhar a missão e o sofrimento do Messias", reference: "Panoramas do Livro de Isaías" },
+            { question: "Qual é a esperança máxima apresentada no livro de Isaías?", options: ["A prosperidade material de Israel", "A dominação de Israel sobre as nações", "A vinda do Messias e o estabelecimento do reino eterno de Deus", "A construção de um novo templo"], answer: "A vinda do Messias e o estabelecimento do reino eterno de Deus", reference: "Introdução ao Livro de Isaías" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsIsaias = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsIsaias.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsIsaias = allQuizQuestionsIsaias.concat(uniqueQuizQuestionsIsaias);
+        }
+        allQuizQuestionsIsaias = allQuizQuestionsIsaias.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsIsaias = [];
+        let currentQuizIndexIsaias = 0;
+        let scoreIsaias = 0;
+        let wrongAnswersIsaias = 0;
+        let isaiasChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsIsaias() {
+            shuffledQuizQuestionsIsaias = [...allQuizQuestionsIsaias]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsIsaias);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressIsaias() {
+            const progressElement = document.getElementById('quizProgressIsaias');
+            progressElement.textContent = `${currentQuizIndexIsaias + 1}/${shuffledQuizQuestionsIsaias.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionIsaias() {
+            if (currentQuizIndexIsaias >= shuffledQuizQuestionsIsaias.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionIsaias').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsIsaias').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreIsaias}, Erros: ${wrongAnswersIsaias}</p>`;
+                document.getElementById('quizFeedbackIsaias').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsIsaias[currentQuizIndexIsaias];
+            document.getElementById('quizQuestionIsaias').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsIsaias');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerIsaias(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackIsaias').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressIsaias();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerIsaias(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackIsaias');
+            const optionsButtons = document.querySelectorAll('#quizOptionsIsaias button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreIsaias++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersIsaias++;
+            }
+            document.getElementById('quizScoreIsaias').textContent = `Acertos: ${scoreIsaias}, Erros: ${wrongAnswersIsaias}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionIsaias() {
+            currentQuizIndexIsaias++;
+            displayQuestionIsaias();
+        }
+
+        // Dados para o gráfico de temas de Isaías
+        const isaiasChartData = {
+            labels: ['Santidade de Deus', 'Juízo e Pecado', 'Salvação e Redenção', 'O Messias', 'O Remanescente', 'Soberania Divina', 'Novos Céus e Nova Terra', 'Glória de Sião'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [20, 18, 17, 25, 10, 10, 5, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(201, 203, 207, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const isaiasChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Isaías',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderIsaiasChart() {
+            const ctx = document.getElementById('isaiasChart').getContext('2d');
+            if (isaiasChartInstance) {
+                isaiasChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            isaiasChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: isaiasChartData,
+                options: isaiasChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

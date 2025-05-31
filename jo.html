@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Jó</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Jó Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Jó</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionJob('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionJob('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionJob('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionJob('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionJob('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionJob('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionJob('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionJob('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionJob('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Jó</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a profunda e desafiadora história de Jó, um homem justo que enfrenta um sofrimento inexplicável. Mergulhe nas discussões sobre a natureza do sofrimento, a justiça de Deus e a sabedoria divina. Descubra como Jó lida com a dor, as acusações de seus amigos e sua busca por respostas. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Jó</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Jó é uma das obras mais antigas e profundas da literatura sapiencial do Antigo Testamento. Ele aborda a questão atemporal e universal do sofrimento dos justos, desafiando a teologia tradicional da retribuição (que associa prosperidade à retidão e sofrimento ao pecado). A narrativa se desenrola em um cenário não israelita, sugerindo que suas verdades são aplicáveis a toda a humanidade.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A história começa com Jó, um homem "íntegro e reto, temente a Deus e que se desviava do mal", que é submetido a uma série de calamidades devastadoras por permissão divina, após um desafio de Satanás. Ele perde seus bens, seus filhos e sua saúde, sendo afligido por feridas dolorosas. Três de seus amigos — Elifaz, Bildade e Zofar — vêm consolá-lo, mas acabam se tornando seus acusadores, insistindo que seu sofrimento deve ser resultado de algum pecado oculto.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O cerne do livro consiste em longos diálogos poéticos entre Jó e seus amigos, onde Jó defende sua inocência e questiona a justiça de Deus, enquanto seus amigos defendem a justiça divina através da teologia da retribuição. Um quarto personagem, Eliú, mais jovem, surge para oferecer uma nova perspectiva, sugerindo que o sofrimento pode ter propósitos disciplinares e de purificação. Finalmente, Deus responde a Jó de um redemoinho, não explicando o porquê do sofrimento, mas reafirmando Sua soberania, sabedoria e poder inquestionáveis. Jó se humilha, e o livro termina com a restauração de Jó, que recebe o dobro de tudo o que havia perdido.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Jó é uma obra-prima literária que explora a complexidade do sofrimento, a natureza da fé e a incompreensibilidade da sabedoria de Deus. Ele nos ensina que a fé não é a ausência de dúvidas, mas a confiança em Deus mesmo em meio à dor e à falta de respostas.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Prólogo (Capítulos 1-2):</strong> A apresentação de Jó, o desafio de Satanás e as calamidades que o atingem.</li>
+                <li><strong>Diálogos (Capítulos 3-31):</strong> As lamentações de Jó e as três rodadas de debates entre Jó e seus amigos (Elifaz, Bildade, Zofar).</li>
+                <li><strong>Discursos de Eliú (Capítulos 32-37):</strong> Eliú oferece uma nova perspectiva sobre o sofrimento.</li>
+                <li><strong>Discursos de Deus (Capítulos 38-41):</strong> Deus responde a Jó, revelando Sua grandeza e sabedoria.</li>
+                <li><strong>Epílogo (Capítulo 42):</strong> A humilhação de Jó, a repreensão dos amigos, a restauração e a bênção de Jó.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Jó é uma jornada através da dor e da fé, culminando na submissão à sabedoria insondável de Deus.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Jó</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Jó explora o sofrimento dos justos, a soberania de Deus e a limitação da sabedoria humana diante dos caminhos divinos.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Prólogo: A Prova de Jó (Capítulos 1-2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Jó, o Homem Justo (Capítulo 1:1-5):</strong>
+                    <ul>
+                        <li>Descrição da integridade e prosperidade de Jó.</li>
+                        <li>Seu cuidado espiritual com a família.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Desafio de Satanás (Capítulo 1:6-12):</strong>
+                    <ul>
+                        <li>Satanás questiona a motivação da fé de Jó.</li>
+                        <li>Deus permite que Satanás teste Jó, mas com limites.</li>
+                    </ul>
+                </li>
+                <li><strong>C. As Calamidades de Jó (Capítulo 1:13-22):</strong>
+                    <ul>
+                        <li>Perda dos bens (bois, jumentas, ovelhas, camelos) e dos filhos.</li>
+                        <li>A reação de Jó: rasga as vestes, raspa a cabeça, adora a Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Segundo Desafio e a Doença de Jó (Capítulo 2:1-10):</strong>
+                    <ul>
+                        <li>Satanás ataca a saúde de Jó com úlceras malignas.</li>
+                        <li>A esposa de Jó o incita a amaldiçoar a Deus.</li>
+                        <li>A resposta de Jó: "Receberemos o bem de Deus, e não receberíamos o mal?"</li>
+                    </ul>
+                </li>
+                <li><strong>E. A Chegada dos Amigos (Capítulo 2:11-13):</strong>
+                    <ul>
+                        <li>Elifaz, Bildade e Zofar vêm consolar Jó.</li>
+                        <li>Eles se sentam em silêncio com ele por sete dias.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Diálogos: O Debate sobre o Sofrimento (Capítulos 3-31)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Lamentação de Jó (Capítulo 3):</strong>
+                    <ul>
+                        <li>Jó quebra o silêncio, amaldiçoando o dia de seu nascimento.</li>
+                        <li>Deseja a morte como alívio do sofrimento.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Três Rodadas de Debates (Capítulos 4-27):</strong>
+                    <ul>
+                        <li>Os amigos defendem a teologia da retribuição: sofrimento é resultado de pecado.</li>
+                        <li>Jó insiste em sua inocência e anseia por uma audiência com Deus.</li>
+                        <li>O debate se intensifica, com os amigos se tornando mais duros e Jó mais desesperado.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Discurso de Jó sobre a Sabedoria (Capítulo 28):</strong>
+                    <ul>
+                        <li>Jó reconhece que a sabedoria é inatingível para os homens.</li>
+                        <li>A verdadeira sabedoria é temer a Deus e desviar-se do mal.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Último Discurso de Jó (Capítulos 29-31):</strong>
+                    <ul>
+                        <li>Jó relembra sua antiga prosperidade e reputação.</li>
+                        <li>Lamenta sua condição atual e reitera sua integridade.</li>
+                        <li>Faz um juramento final de inocência.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Discursos de Eliú: Uma Nova Perspectiva (Capítulos 32-37)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Ira de Eliú (Capítulo 32):</strong>
+                    <ul>
+                        <li>Eliú entra no debate, irritado com Jó e seus amigos.</li>
+                        <li>Afirma que falará em nome de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Sofrimento como Disciplina (Capítulos 33-37):</strong>
+                    <ul>
+                        <li>Eliú argumenta que Deus usa o sofrimento para instruir e purificar.</li>
+                        <li>Enfatiza a grandeza e a justiça de Deus, que está além da compreensão humana.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Discursos de Deus: A Resposta Divina (Capítulos 38-41)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Deus Responde a Jó de um Redemoinho (Capítulo 38:1-3):</strong>
+                    <ul>
+                        <li>Deus confronta Jó com perguntas sobre a criação e o universo.</li>
+                        <li>Desafia a capacidade de Jó de compreender os caminhos divinos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Grandeza da Criação (Capítulos 38:4-39:30):</strong>
+                    <ul>
+                        <li>Deus descreve maravilhas da natureza e animais selvagens.</li>
+                        <li>Demonstra Sua sabedoria e poder inigualáveis.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Desafio de Jó (Capítulo 40:1-2):</strong>
+                    <ul>
+                        <li>Deus desafia Jó a responder.</li>
+                        <li>Jó se cala e reconhece sua insignificância.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Beemote e Leviatã (Capítulos 40:3-41:34):</strong>
+                    <ul>
+                        <li>Deus descreve criaturas poderosas, simbolizando o poder que Ele controla.</li>
+                        <li>Reafirma Sua soberania sobre todas as coisas.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Epílogo: A Restauração de Jó (Capítulo 42)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Resposta de Jó a Deus (Capítulo 42:1-6):</strong>
+                    <ul>
+                        <li>Jó se arrepende em pó e cinzas, reconhecendo a soberania de Deus.</li>
+                        <li>Sua compreensão de Deus é aprofundada pela experiência.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Repreensão aos Amigos (Capítulo 42:7-9):</strong>
+                    <ul>
+                        <li>Deus repreende os amigos de Jó por não terem falado o que era reto.</li>
+                        <li>Jó intercede por eles.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Restauração de Jó (Capítulo 42:10-17):</strong>
+                    <ul>
+                        <li>Jó recebe o dobro de tudo o que havia perdido.</li>
+                        <li>Ele tem mais filhos e filhas, e vive uma vida longa e próspera.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O livro de Jó é uma refutação à ideia simplista de que todo sofrimento é punição pelo pecado. Ele revela que Deus é soberano e que Seus caminhos são insondáveis. A fé de Jó é testada ao extremo, mas ele emerge com uma compreensão mais profunda e pessoal de Deus, não baseada em bênçãos, mas na própria natureza de Deus. O livro nos ensina sobre a perseverança na fé, a humildade diante da sabedoria divina e a complexidade do plano de Deus para a humanidade.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridJob">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Jó</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Jó, capítulo por capítulo, destacando os eventos e o desenvolvimento da história.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A integridade de Jó; Satanás o desafia; Jó perde bens e filhos.</li>
+                <li><strong>Capítulo 2:</strong> Satanás ataca a saúde de Jó; a esposa de Jó e a chegada dos amigos.</li>
+                <li><strong>Capítulo 3:</strong> Jó amaldiçoa o dia de seu nascimento.</li>
+                <li><strong>Capítulo 4-5:</strong> Primeiro discurso de Elifaz: o sofrimento como resultado do pecado.</li>
+                <li><strong>Capítulo 6-7:</strong> Resposta de Jó a Elifaz: lamenta sua dor e deseja a morte.</li>
+                <li><strong>Capítulo 8:</strong> Primeiro discurso de Bildade: a justiça de Deus e a punição dos ímpios.</li>
+                <li><strong>Capítulo 9-10:</strong> Resposta de Jó a Bildade: a impossibilidade de argumentar com Deus; sua dor e questionamentos.</li>
+                <li><strong>Capítulo 11:</strong> Primeiro discurso de Zofar: a sabedoria de Deus e a necessidade de Jó se arrepender.</li>
+                <li><strong>Capítulo 12-14:</strong> Resposta de Jó a Zofar: a sabedoria está com Deus; a fragilidade da vida humana.</li>
+                <li><strong>Capítulo 15:</strong> Segundo discurso de Elifaz: acusa Jó de impiedade.</li>
+                <li><strong>Capítulo 16-17:</strong> Resposta de Jó a Elifaz: lamenta a falta de consolo dos amigos.</li>
+                <li><strong>Capítulo 18:</strong> Segundo discurso de Bildade: a desgraça dos ímpios.</li>
+                <li><strong>Capítulo 19:</strong> Resposta de Jó a Bildade: sua esperança no Redentor.</li>
+                <li><strong>Capítulo 20:</strong> Segundo discurso de Zofar: a breve prosperidade dos ímpios.</li>
+                <li><strong>Capítulo 21:</strong> Resposta de Jó a Zofar: os ímpios muitas vezes prosperam.</li>
+                <li><strong>Capítulo 22:</strong> Terceiro discurso de Elifaz: acusa Jó de pecados específicos.</li>
+                <li><strong>Capítulo 23-24:</strong> Resposta de Jó a Elifaz: anseia por encontrar Deus e lamenta a injustiça no mundo.</li>
+                <li><strong>Capítulo 25:</strong> Terceiro discurso de Bildade: a grandeza de Deus.</li>
+                <li><strong>Capítulo 26-27:</strong> Resposta de Jó a Bildade e Zofar: reafirma a soberania de Deus e sua própria integridade.</li>
+                <li><strong>Capítulo 28:</strong> O discurso de Jó sobre a sabedoria.</li>
+                <li><strong>Capítulo 29:</strong> Jó relembra sua antiga prosperidade e honra.</li>
+                <li><strong>Capítulo 30:</strong> Jó lamenta sua condição atual e o desprezo que sofre.</li>
+                <li><strong>Capítulo 31:</strong> O juramento final de inocência de Jó.</li>
+                <li><strong>Capítulo 32:</strong> Eliú entra no debate, criticando Jó e seus amigos.</li>
+                <li><strong>Capítulo 33:</strong> Eliú argumenta que Deus usa o sofrimento para instruir.</li>
+                <li><strong>Capítulo 34:</strong> Eliú defende a justiça de Deus.</li>
+                <li><strong>Capítulo 35:</strong> Eliú fala sobre a insignificância do homem diante de Deus.</li>
+                <li><strong>Capítulo 36-37:</strong> Eliú exalta a grandeza e o poder de Deus na natureza.</li>
+                <li><strong>Capítulo 38:</strong> Deus responde a Jó de um redemoinho, questionando sua sabedoria sobre a criação.</li>
+                <li><strong>Capítulo 39:</strong> Deus continua a descrever Sua criação e Seu controle.</li>
+                <li><strong>Capítulo 40:</strong> Deus desafia Jó a responder; Jó se humilha; Deus descreve Beemote.</li>
+                <li><strong>Capítulo 41:</strong> Deus descreve Leviatã, mostrando Seu poder incomparável.</li>
+                <li><strong>Capítulo 42:</strong> Jó se arrepende; Deus repreende os amigos; Jó é restaurado e abençoado.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Jó</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>O Problema do Sofrimento:</strong> A questão central da dor e do mal no mundo, especialmente para os justos, e a inadequação das explicações humanas.</li>
+                <li><strong>Soberania de Deus:</strong> Deus tem o controle supremo sobre todas as coisas, incluindo o sofrimento, e Seus caminhos são insondáveis.</li>
+                <li><strong>A Justiça Divina:</strong> A complexidade da justiça de Deus, que vai além da compreensão humana da retribuição simples (causa e efeito).</li>
+                <li><strong>Integridade e Fé:</strong> A perseverança de Jó em sua fé e integridade, mesmo quando não entende o porquê de seu sofrimento.</li>
+                <li><strong>A Sabedoria Humana vs. Divina:</strong> A limitação do conhecimento e da compreensão humana diante da infinita sabedoria e poder de Deus.</li>
+                <li><strong>O Papel da Oração e Lamentação:</strong> Jó expressa sua dor, questionamentos e anseios a Deus de forma honesta e profunda.</li>
+                <li><strong>Arrependimento e Restauração:</strong> A humildade de Jó ao reconhecer a grandeza de Deus e sua eventual restauração e bênção.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Jó</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersJob">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Jó</h2>
+            <div id="quizContainerJob" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionJob"></p>
+                <div id="quizOptionsJob" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackJob" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionJob()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressJob"></span></p>
+                <p>Pontuação: <span id="quizScoreJob">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Jó</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Jó.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="jobChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalJob()">&times;</span>
+                <h3 id="modalCharacterNameJob" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionJob" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Jó",
+            "short_name": "Jó",
+            "description": "Explore o livro de Jó de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=JO",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=JO",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'jo-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionJob(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsJob();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksJob();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsJob(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexJob = 0; // Reinicia o quiz
+                scoreJob = 0;
+                wrongAnswersJob = 0;
+                document.getElementById('quizScoreJob').textContent = `Acertos: ${scoreJob}, Erros: ${wrongAnswersJob}`;
+                displayQuestionJob();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderJobChart();
+            }
+        }
+
+        // Dados dos personagens para Jó
+        const characterDetailsJob = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus soberano, criador e sustentador de todas as coisas, que permite o sofrimento de Jó e depois o restaura, revelando Sua sabedoria insondável."
+            },
+            "Jó": {
+                name: "Jó",
+                description: "O protagonista do livro, um homem íntegro e reto, temente a Deus, que sofre perdas devastadoras mas mantém sua integridade e fé."
+            },
+            "Satanás": {
+                name: "Satanás",
+                description: "O adversário, que desafia a sinceridade da fé de Jó diante de Deus, alegando que Jó serve a Deus apenas por interesse."
+            },
+            "Elifaz, o Temanita": {
+                name: "Elifaz, o Temanita",
+                description: "Um dos três amigos de Jó, que argumenta que o sofrimento é uma consequência direta do pecado, baseando-se em sua experiência e revelação."
+            },
+            "Bildade, o Suíta": {
+                name: "Bildade, o Suíta",
+                description: "Outro amigo de Jó, que insiste na justiça de Deus e na punição dos ímpios, sugerindo que os filhos de Jó pecaram."
+            },
+            "Zofar, o Naamatita": {
+                name: "Zofar, o Naamatita",
+                description: "O terceiro amigo de Jó, o mais dogmático e impaciente, que acusa Jó de falar demais e o exorta a se arrepender de seus pecados ocultos."
+            },
+            "Eliú, filho de Baraquel, o Buzita": {
+                name: "Eliú, filho de Baraquel, o Buzita",
+                description: "Um jovem que entra no debate após os amigos de Jó, oferecendo uma nova perspectiva: o sofrimento pode ser disciplinar e instrutivo, e Deus é maior do que a compreensão humana."
+            },
+            "Esposa de Jó": {
+                name: "Esposa de Jó",
+                description: "Aconselha Jó a amaldiçoar a Deus e morrer em meio ao seu sofrimento, mostrando a profundidade do desespero."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalJob(characterName) {
+            const details = characterDetailsJob[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameJob').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionJob').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalJob() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsJob() {
+            const grid = document.getElementById('characterGridJob');
+            grid.innerHTML = '';
+            for (const key in characterDetailsJob) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalJob(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksJob() {
+            const chaptersDiv = document.getElementById('chaptersJob');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 42; i++) { // Jó tem 42 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/jo/${i}`; // Link para a Bíblia Online, Jó
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Jó (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsJob = [
+            { question: "Qual era a característica principal de Jó no início do livro?", options: ["Rico e ambicioso", "Sábio e solitário", "Íntegro e reto, temente a Deus", "Poderoso e guerreiro"], answer: "Íntegro e reto, temente a Deus", reference: "Jó 1:1" },
+            { question: "Quem desafiou a fé de Jó diante de Deus?", options: ["Elifaz", "Bildade", "Satanás", "Zofar"], answer: "Satanás", reference: "Jó 1:6-11" },
+            { question: "Quantos filhos e filhas Jó tinha antes das calamidades?", options: ["5 filhos e 5 filhas", "7 filhos e 3 filhas", "3 filhos e 7 filhas", "10 filhos e 10 filhas"], answer: "7 filhos e 3 filhas", reference: "Jó 1:2" },
+            { question: "O que Jó fez ao receber as notícias de suas perdas?", options: ["Amaldiçoou a Deus", "Fugiu para outra terra", "Rasgou suas vestes, raspou a cabeça e adorou", "Caiu em desespero e se isolou"], answer: "Rasgou suas vestes, raspou a cabeça e adorou", reference: "Jó 1:20-21" },
+            { question: "Qual doença afligiu Jó em sua segunda provação?", options: ["Febre alta", "Cegueira", "Úlceras malignas", "Paralisia"], answer: "Úlceras malignas", reference: "Jó 2:7" },
+            { question: "Qual foi o conselho da esposa de Jó a ele?", options: ["Busque a Deus", "Amaldiçoe a Deus e morra", "Tenha paciência", "Procure outros amigos"], answer: "Amaldiçoe a Deus e morra", reference: "Jó 2:9" },
+            { question: "Quantos amigos vieram consolar Jó no início?", options: ["Dois", "Três", "Quatro", "Cinco"], answer: "Três", reference: "Jó 2:11" },
+            { question: "Qual dos amigos de Jó argumentou que o sofrimento é resultado do pecado?", options: ["Eliú", "Bildade", "Zofar", "Elifaz"], answer: "Elifaz", reference: "Jó 4:7-9" },
+            { question: "Qual foi a principal queixa de Jó contra seus amigos?", options: ["Eles não o visitaram", "Eles não trouxeram presentes", "Eles eram consoladores importunos e o acusavam", "Eles não o deixaram falar"], answer: "Eles eram consoladores importunos e o acusavam", reference: "Jó 16:2" },
+            { question: "Quem é o jovem que entra no debate após os três amigos de Jó?", options: ["Jesaías", "Eliú", "Baruque", "Natã"], answer: "Eliú", reference: "Jó 32:2" },
+            { question: "De onde Deus respondeu a Jó?", options: ["De um monte", "De um redemoinho", "De um templo", "De um sonho"], answer: "De um redemoinho", reference: "Jó 38:1" },
+            { question: "O que Deus questiona Jó em Seus discursos?", options: ["Sua riqueza", "Sua sabedoria e compreensão da criação", "Seu relacionamento com os amigos", "Sua paciência"], answer: "Sua sabedoria e compreensão da criação", reference: "Jó 38-39" },
+            { question: "Como Jó reagiu à resposta de Deus?", options: ["Ele argumentou mais", "Ele se revoltou", "Ele se arrependeu em pó e cinzas", "Ele pediu mais explicações"], answer: "Ele se arrependeu em pó e cinzas", reference: "Jó 42:6" },
+            { question: "O que Deus fez com Jó no final do livro?", options: ["Deixou-o em seu sofrimento", "Deu-lhe o dobro de tudo o que havia perdido", "Enviou-o para outra terra", "Fez dele um rei"], answer: "Deu-lhe o dobro de tudo o que havia perdido", reference: "Jó 42:10" },
+            { question: "Quantos filhos e filhas Jó teve após sua restauração?", options: ["5 filhos e 5 filhas", "7 filhos e 3 filhas", "3 filhos e 7 filhas", "10 filhos e 10 filhas"], answer: "7 filhos e 3 filhas", reference: "Jó 42:13" },
+            { question: "Qual o nome do primeiro amigo de Jó a falar?", options: ["Bildade", "Zofar", "Eliú", "Elifaz"], answer: "Elifaz", reference: "Jó 4:1" },
+            { question: "Qual animal mitológico é descrito por Deus para mostrar Seu poder?", options: ["Dragão", "Grifo", "Beemote e Leviatã", "Fênix"], answer: "Beemote e Leviatã", reference: "Jó 40:15, 41:1" },
+            { question: "Qual a principal questão teológica abordada no livro de Jó?", options: ["A criação do mundo", "A lei de Moisés", "O problema do sofrimento dos justos", "A história de Israel"], answer: "O problema do sofrimento dos justos", reference: "Introdução do livro" },
+            { question: "O que Jó afirmou sobre a sabedoria no capítulo 28?", options: ["Ela pode ser comprada com ouro", "Ela é encontrada na natureza", "Ela é inatingível para os homens, mas Deus a conhece", "Ela vem com a idade"], answer: "Ela é inatingível para os homens, mas Deus a conhece", reference: "Jó 28:12-28" },
+            { question: "Qual foi a resposta de Deus à oração de Jó pelos seus amigos?", options: ["Ele os puniu", "Ele os perdoou por causa da intercessão de Jó", "Ele os ignorou", "Ele os fez sofrer também"], answer: "Ele os perdoou por causa da intercessão de Jó", reference: "Jó 42:7-9" },
+            { question: "De que terra era Jó?", options: ["Uz", "Canaã", "Egito", "Babilônia"], answer: "Uz", reference: "Jó 1:1" },
+            { question: "Qual a idade de Jó quando ele morreu?", options: ["100 anos", "120 anos", "140 anos", "Viveu muitos anos depois disso"], answer: "Viveu muitos anos depois disso", reference: "Jó 42:16-17" },
+            { question: "Qual a principal diferença na abordagem de Eliú em relação aos outros amigos?", options: ["Ele era mais velho", "Ele era mais calado", "Ele sugeriu que o sofrimento pode ser para disciplina e crescimento", "Ele culpou Satanás"], answer: "Ele sugeriu que o sofrimento pode ser para disciplina e crescimento", reference: "Jó 33:14-30" },
+            { question: "O que Jó disse em sua resposta inicial às calamidades?", options: ["'O Senhor deu, e o Senhor tirou; bendito seja o nome do Senhor.'", "'Por que eu?'", "'Isso não é justo!'", "'Vou me vingar!'"], answer: "'O Senhor deu, e o Senhor tirou; bendito seja o nome do Senhor.'", reference: "Jó 1:21" },
+            { question: "Qual o tema recorrente nos discursos dos amigos de Jó?", options: ["A misericórdia de Deus", "A prosperidade dos justos", "A retribuição divina: sofrimento é punição pelo pecado", "A soberania de Satanás"], answer: "A retribuição divina: sofrimento é punição pelo pecado", reference: "Vários capítulos, ex: Jó 4, 8, 11" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsJob = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsJob.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsJob = allQuizQuestionsJob.concat(uniqueQuizQuestionsJob);
+        }
+        allQuizQuestionsJob = allQuizQuestionsJob.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsJob = [];
+        let currentQuizIndexJob = 0;
+        let scoreJob = 0;
+        let wrongAnswersJob = 0;
+        let jobChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsJob() {
+            shuffledQuizQuestionsJob = [...allQuizQuestionsJob]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsJob);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressJob() {
+            const progressElement = document.getElementById('quizProgressJob');
+            progressElement.textContent = `${currentQuizIndexJob + 1}/${shuffledQuizQuestionsJob.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionJob() {
+            if (currentQuizIndexJob >= shuffledQuizQuestionsJob.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionJob').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsJob').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreJob}, Erros: ${wrongAnswersJob}</p>`;
+                document.getElementById('quizFeedbackJob').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsJob[currentQuizIndexJob];
+            document.getElementById('quizQuestionJob').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsJob');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerJob(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackJob').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressJob();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerJob(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackJob');
+            const optionsButtons = document.querySelectorAll('#quizOptionsJob button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreJob++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersJob++;
+            }
+            document.getElementById('quizScoreJob').textContent = `Acertos: ${scoreJob}, Erros: ${wrongAnswersJob}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionJob() {
+            currentQuizIndexJob++;
+            displayQuestionJob();
+        }
+
+        // Dados para o gráfico de temas de Jó
+        const jobChartData = {
+            labels: ['Problema do Sofrimento', 'Soberania de Deus', 'Justiça Divina', 'Integridade e Fé', 'Sabedoria Humana vs. Divina', 'Oração e Lamentação', 'Arrependimento e Restauração'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [30, 20, 15, 10, 10, 8, 7], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const jobChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Jó',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderJobChart() {
+            const ctx = document.getElementById('jobChart').getContext('2d');
+            if (jobChartInstance) {
+                jobChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            jobChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: jobChartData,
+                options: jobChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

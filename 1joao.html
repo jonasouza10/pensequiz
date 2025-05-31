@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 1 João</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="1 João Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 1 João</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionJoao1('inicioJoao1')">Início</button>
+            <button class="nav-button" onclick="showSectionJoao1('introducaoJoao1')">Introdução</button>
+            <button class="nav-button" onclick="showSectionJoao1('panoramasJoao1')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionJoao1('personagensJoao1')">Personagens</button>
+            <button class="nav-button" onclick="showSectionJoao1('esbocosJoao1')">Esboços</button>
+            <button class="nav-button" onclick="showSectionJoao1('temasJoao1')">Temas</button>
+            <button class="nav-button" onclick="showSectionJoao1('capitulosJoao1')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionJoao1('quizJoao1')">Quiz</button>
+            <button class="nav-button" onclick="showSectionJoao1('graficoJoao1')">Gráfico</button>
+        </div>
+
+        <div id="inicioJoao1" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 1 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Primeira Epístola de João, uma carta profunda que enfatiza a comunhão com Deus e com os irmãos, a importância de andar na luz, a realidade do amor divino e a certeza da vida eterna. Descubra como João combate as falsas doutrinas e exorta os crentes a viverem uma vida de justiça, amor e obediência. Entenda os sinais da verdadeira fé e a vitória sobre o mundo. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducaoJoao1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 1 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Primeira Epístola de João é uma das epístolas gerais do Novo Testamento, escrita pelo apóstolo João, o 'discípulo amado'. Embora não se identifique explicitamente, o estilo, vocabulário e temas são fortemente consistentes com o Evangelho de João. A carta é dirigida a crentes em geral, possivelmente em várias igrejas na Ásia Menor, e foi escrita para combater falsas doutrinas que estavam surgindo na época, principalmente o gnosticismo incipiente, que negava a encarnação plena de Jesus Cristo e promovia uma moralidade frouxa.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A data de sua escrita é geralmente aceita como sendo entre 85 e 95 d.C., no final do primeiro século, quando João era um dos últimos apóstolos vivos. O propósito principal de João é triplo: (1) afirmar a verdadeira natureza de Jesus Cristo como Deus e homem, (2) promover a comunhão dos crentes com Deus e uns com os outros, e (3) encorajar os crentes a viverem uma vida de justiça e amor, que são as evidências da verdadeira fé e do novo nascimento.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 João é caracterizada por seus 'testes' ou 'sinais' da verdadeira fé: andar na luz, praticar a justiça, amar os irmãos e crer corretamente em Jesus Cristo. João enfatiza a importância da verdade, do amor e da obediência como pilares da vida cristã. A carta é um lembrete poderoso de que a fé genuína não é apenas uma crença intelectual, mas uma transformação de vida que se manifesta em comunhão com Deus e amor prático pelos outros.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: A Realidade de Cristo, a Luz e a Comunhão.</strong> João testifica sobre Jesus, a Palavra da vida, e exorta a andar na luz para ter comunhão com Deus e uns com os outros, confessando pecados.</li>
+                <li><strong>Capítulo 2: Cristo como Advogado, o Mandamento do Amor e Advertência Contra o Mundo.</strong> Jesus como Advogado, o mandamento do amor (novo e antigo), advertência contra o amor ao mundo, a vinda do anticristo e a unção do Espírito.</li>
+                <li><strong>Capítulo 3: Filhos de Deus, o Amor e a Justiça.</strong> A identidade dos filhos de Deus, a prática da justiça como sinal de filiação, o amor fraternal como evidência da vida em Cristo.</li>
+                <li><strong>Capítulo 4: Discernimento de Espíritos e Deus é Amor.</strong> A importância de provar os espíritos, a verdade sobre Jesus Cristo, e a centralidade do amor de Deus e do amor mútuo.</li>
+                <li><strong>Capítulo 5: A Fé que Vence o Mundo, o Testemunho de Deus e a Certeza da Vida Eterna.</strong> A fé como vitória sobre o mundo, o testemunho triplo de Deus (Espírito, água e sangue), a oração pelos irmãos e a certeza da vida eterna.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 João é um convite à comunhão profunda com Deus, à vida em amor e à confiança na verdade de Cristo.</p>
+        </div>
+
+        <div id="panoramasJoao1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 1 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 João é uma epístola que explora a natureza da verdadeira fé cristã, enfatizando a comunhão, a luz, o amor e a justiça.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Realidade de Cristo, a Luz e a Comunhão (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Testemunho da Palavra da Vida (Capítulo 1:1-4):</strong>
+                    <ul>
+                        <li>O que era desde o princípio, o que ouvimos, o que vimos com os nossos olhos, o que contemplamos e as nossas mãos tocaram.</li>
+                        <li>Para que também vós tenhais comunhão conosco; e a nossa comunhão é com o Pai e com seu Filho Jesus Cristo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Andar na Luz e a Confissão de Pecados (Capítulo 1:5-10):</strong>
+                    <ul>
+                        <li>Deus é luz, e não há nele trevas nenhumas.</li>
+                        <li>Se dissermos que temos comunhão com ele e andarmos em trevas, mentimos.</li>
+                        <li>Se andarmos na luz, como ele na luz está, temos comunhão uns com os outros, e o sangue de Jesus Cristo, seu Filho, nos purifica de todo o pecado.</li>
+                        <li>Se confessarmos os nossos pecados, ele é fiel e justo para nos perdoar.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Cristo como Advogado, o Mandamento do Amor e Advertência Contra o Mundo (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Cristo, Nosso Advogado (Capítulo 2:1-2):</strong>
+                    <ul>
+                        <li>Se alguém pecar, temos um Advogado para com o Pai, Jesus Cristo, o Justo.</li>
+                        <li>Ele é a propiciação pelos nossos pecados, e não somente pelos nossos, mas também pelos de todo o mundo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Obediência e o Mandamento do Amor (Capítulo 2:3-11):</strong>
+                    <ul>
+                        <li>Se guardarmos os seus mandamentos, nisto conhecemos que o conhecemos.</li>
+                        <li>Aquele que diz que está na luz e aborrece a seu irmão, até agora está em trevas.</li>
+                        <li>Aquele que ama seu irmão permanece na luz.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Advertência Contra o Mundo e o Anticristo (Capítulo 2:12-29):</strong>
+                    <ul>
+                        <li>Não ameis o mundo, nem o que no mundo há.</li>
+                        <li>Tudo o que há no mundo é concupiscência da carne, concupiscência dos olhos e soberba da vida.</li>
+                        <li>Já é a última hora; e, como ouvistes que vem o anticristo, também agora muitos anticristos têm surgido.</li>
+                        <li>A unção que recebestes dele fica em vós, e não necessitais de que alguém vos ensine.</li>
+                        <li>Permanecei nele, para que, quando ele se manifestar, tenhamos confiança.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Filhos de Deus, o Amor e a Justiça (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Identidade dos Filhos de Deus (Capítulo 3:1-3):</strong>
+                    <ul>
+                        <li>Vede que grande amor nos tem concedido o Pai: que fôssemos chamados filhos de Deus.</li>
+                        <li>Ainda não é manifestado o que havemos de ser, mas sabemos que, quando ele se manifestar, seremos semelhantes a ele.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Prática da Justiça e do Pecado (Capítulo 3:4-10):</strong>
+                    <ul>
+                        <li>Qualquer que comete pecado, também comete iniquidade; e o pecado é iniquidade.</li>
+                        <li>Aquele que é nascido de Deus não peca; porque a sua semente permanece nele.</li>
+                        <li>Nisto são manifestos os filhos de Deus e os filhos do diabo: qualquer que não pratica a justiça e não ama a seu irmão não é de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Amor Fraternal (Capítulo 3:11-24):</strong>
+                    <ul>
+                        <li>Que nos amemos uns aos outros.</li>
+                        <li>Não como Caim, que era do maligno e matou a seu irmão.</li>
+                        <li>Conhecemos o amor nisto: que ele deu a sua vida por nós, e nós devemos dar a vida pelos irmãos.</li>
+                        <li>Não amemos de palavra nem de língua, mas por obra e em verdade.</li>
+                        <li>E nisto conhecemos que somos da verdade e diante dele asseguraremos os nossos corações.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Discernimento de Espíritos e Deus é Amor (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Provando os Espíritos (Capítulo 4:1-6):</strong>
+                    <ul>
+                        <li>Não creiais a todo espírito, mas provai se os espíritos são de Deus.</li>
+                        <li>Todo espírito que confessa que Jesus Cristo veio em carne é de Deus.</li>
+                        <li>Todo espírito que não confessa a Jesus Cristo não é de Deus; mas este é o espírito do anticristo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Deus é Amor (Capítulo 4:7-21):</strong>
+                    <ul>
+                        <li>Amados, amemo-nos uns aos outros, porque o amor é de Deus.</li>
+                        <li>Deus é amor.</li>
+                        <li>Nisto se manifestou o amor de Deus em nós: em que Deus enviou seu Filho unigênito ao mundo, para que por ele vivamos.</li>
+                        <li>Se amamos a Deus, amemos também a nosso irmão.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. A Fé que Vence o Mundo e a Certeza da Vida Eterna (Capítulo 5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Fé que Vence o Mundo (Capítulo 5:1-5):</strong>
+                    <ul>
+                        <li>Qualquer que crê que Jesus é o Cristo é nascido de Deus.</li>
+                        <li>O que vence o mundo senão aquele que crê que Jesus é o Filho de Deus?</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Testemunho de Deus (Capítulo 5:6-12):</strong>
+                    <ul>
+                        <li>Este é aquele que veio por água e sangue, isto é, Jesus Cristo.</li>
+                        <li>Três são os que testificam na terra: o Espírito, e a água, e o sangue; e estes três concordam em um.</li>
+                        <li>Quem tem o Filho tem a vida; quem não tem o Filho de Deus não tem a vida.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Certeza da Vida Eterna e Oração (Capítulo 5:13-17):</strong>
+                    <ul>
+                        <li>Para que saibais que tendes a vida eterna.</li>
+                        <li>Se pedirmos alguma coisa segundo a sua vontade, ele nos ouve.</li>
+                        <li>Há pecado que é para morte; não digo que se ore por esse.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Conhecimento e Advertência Final (Capítulo 5:18-21):</strong>
+                    <ul>
+                        <li>Sabemos que todo aquele que é nascido de Deus não peca.</li>
+                        <li>Sabemos que somos de Deus e que todo o mundo jaz no maligno.</li>
+                        <li>Sabemos que já o Filho de Deus é vindo e nos deu entendimento para conhecermos o que é verdadeiro Deus.</li>
+                        <li>Filhinhos, guardai-vos dos ídolos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">A Primeira Epístola de João é uma poderosa declaração da essência da fé cristã. Ela reafirma a divindade e humanidade de Jesus Cristo, a necessidade de andar na luz e de praticar a justiça como evidências do novo nascimento. O tema central do amor permeia toda a carta, mostrando que o amor a Deus se manifesta no amor ao próximo. João oferece segurança aos crentes sobre sua salvação e os alerta contra as falsas doutrinas e o espírito do anticristo. É um livro que nos chama a uma comunhão íntima com Deus, a uma vida de obediência e amor, e a uma confiança inabalável na verdade de Cristo.</p>
+        </div>
+
+        <div id="personagensJoao1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridJoao1">
+            </div>
+        </div>
+
+        <div id="esbocosJoao1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 1 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 1 João, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A Realidade de Cristo, a Luz e a Comunhão.</li>
+                <li><strong>Capítulo 2:</strong> Cristo como Advogado, o Mandamento do Amor e Advertência Contra o Mundo.</li>
+                <li><strong>Capítulo 3:</strong> Filhos de Deus, o Amor e a Justiça.</li>
+                <li><strong>Capítulo 4:</strong> Discernimento de Espíritos e Deus é Amor.</li>
+                <li><strong>Capítulo 5:</strong> A Fé que Vence o Mundo, o Testemunho de Deus e a Certeza da Vida Eterna.</li>
+            </ul>
+        </div>
+
+        <div id="temasJoao1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 1 João</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Comunhão com Deus:</strong> Andar na luz e ter relacionamento com o Pai e o Filho.</li>
+                <li><strong>Amor:</strong> O amor de Deus por nós e o mandamento de amar uns aos outros.</li>
+                <li><strong>Luz e Trevas:</strong> A distinção entre viver em retidão e viver no pecado.</li>
+                <li><strong>Verdade e Mentira:</strong> A defesa da verdade sobre Jesus Cristo contra as heresias.</li>
+                <li><strong>Anticristo e Falsos Mestres:</strong> Advertências e a necessidade de discernimento espiritual.</li>
+                <li><strong>Certeza da Salvação:</strong> A garantia da vida eterna para aqueles que creem.</li>
+                <li><strong>Justiça e Obediência:</strong> A prática da justiça como evidência da fé genuína.</li>
+            </ul>
+        </div>
+
+        <div id="capitulosJoao1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 1 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersJoao1">
+            </div>
+        </div>
+
+        <div id="quizJoao1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 1 João</h2>
+            <div id="quizContainerJoao1" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionJoao1"></p>
+                <div id="quizOptionsJoao1" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackJoao1" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionJoao1()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressJoao1"></span></p>
+                <p>Pontuação: <span id="quizScoreJoao1">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="graficoJoao1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 1 João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 1 João.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="joao1Chart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModalJoao1" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalJoao1()">&times;</span>
+                <h3 id="modalCharacterNameJoao1" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionJoao1" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data-joao1">
+        {
+            "name": "Livro Interativo de 1 João",
+            "short_name": "1 João",
+            "description": "Explore o livro de 1 João de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=1JO",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=1JO",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script-joao1">
+        // service-worker.js for 1 João
+        const CACHE_NAME_JOAO1 = 'joao1-interactive-v1';
+        const urlsToCacheJoao1 = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME_JOAO1)
+                    .then(cache => {
+                        console.log('Opened cache for 1 João');
+                        return cache.addAll(urlsToCacheJoao1);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME_JOAO1];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker para 1 João
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script-joao1');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker para 1 João registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker para 1 João:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente para 1 João
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data-joao1').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções de 1 João
+        function showSectionJoao1(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('active');
+            } else {
+                console.error(`Seção com ID '${sectionId}' não encontrada.`);
+            }
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagensJoao1') {
+                generateCharacterButtonsJoao1();
+            }
+            if (sectionId === 'capitulosJoao1') {
+                generateChapterLinksJoao1();
+            }
+            if (sectionId === 'quizJoao1') {
+                shuffleQuizQuestionsJoao1(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexJoao1 = 0; // Reinicia o quiz
+                scoreJoao1 = 0;
+                wrongAnswersJoao1 = 0;
+                document.getElementById('quizScoreJoao1').textContent = `Acertos: ${scoreJoao1}, Erros: ${wrongAnswersJoao1}`;
+                displayQuestionJoao1();
+            }
+            if (sectionId === 'graficoJoao1') {
+                renderJoao1Chart();
+            }
+        }
+
+        // Dados dos personagens para 1 João
+        const characterDetailsJoao1 = {
+            "João": {
+                name: "João",
+                description: "O autor da epístola, o apóstolo 'discípulo amado', que enfatiza a comunhão, o amor e a verdade em Cristo."
+            },
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "A Palavra da vida, o Advogado, a propiciação pelos pecados, o Filho de Deus que veio em carne e nos deu vida eterna."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "Deus é luz e amor, a fonte de toda verdade e vida eterna, que nos concedeu ser chamados filhos de Deus."
+            },
+            "Anticristo/Falsos Mestres": {
+                name: "Anticristo/Falsos Mestres",
+                description: "Indivíduos que negam a verdade sobre Jesus Cristo (especialmente sua encarnação) e promovem doutrinas enganosas, sendo combatidos por João."
+            },
+            "Crentes/Filhos de Deus": {
+                name: "Crentes/Filhos de Deus",
+                description: "A audiência da carta, aqueles que nasceram de Deus, andam na luz, praticam a justiça e amam uns aos outros."
+            },
+            "Diabo": {
+                name: "Diabo",
+                description: "Aquele que peca desde o princípio e cujo poder é quebrado por Jesus Cristo; o mundo jaz no maligno."
+            },
+            "Caim": {
+                name: "Caim",
+                description: "Mencionado como exemplo de alguém que era do maligno e matou seu irmão, contrastando com o amor fraternal."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalJoao1(characterName) {
+            const details = characterDetailsJoao1[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameJoao1').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionJoao1').textContent = details.description;
+                document.getElementById('characterModalJoao1').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalJoao1() {
+            document.getElementById('characterModalJoao1').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsJoao1() {
+            const grid = document.getElementById('characterGridJoao1');
+            grid.innerHTML = '';
+            for (const key in characterDetailsJoao1) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalJoao1(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos (1 João tem 5 capítulos)
+        function generateChapterLinksJoao1() {
+            const chaptersDiv = document.getElementById('chaptersJoao1');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 5; i++) { // 1 João tem 5 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/1jo/${i}`; // Link para a Bíblia Online, 1 João
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 1 João (perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsJoao1 = [
+            { question: "Quem é o autor da Primeira Epístola de João?", options: ["Pedro", "Paulo", "João", "Tiago"], answer: "João", reference: "1 João 1:1" },
+            { question: "O que João testifica ter visto, ouvido e tocado?", options: ["Um anjo", "A Palavra da vida (Jesus)", "Um livro", "Um tesouro"], answer: "A Palavra da vida (Jesus)", reference: "1 João 1:1" },
+            { question: "O que acontece se andarmos na luz, segundo 1 João 1:7?", options: ["Temos problemas", "Temos comunhão uns com os outros e o sangue de Jesus nos purifica", "Ficamos ricos", "Ficamos sozinhos"], answer: "Temos comunhão uns com os outros e o sangue de Jesus nos purifica", reference: "1 João 1:7" },
+            { question: "O que acontece se confessarmos os nossos pecados, segundo 1 João 1:9?", options: ["Seremos condenados", "Ele é fiel e justo para nos perdoar", "Nossos pecados aumentarão", "Seremos esquecidos"], answer: "Ele é fiel e justo para nos perdoar", reference: "1 João 1:9" },
+            { question: "Quem é o nosso Advogado para com o Pai, segundo 1 João 2:1?", options: ["Um anjo", "Jesus Cristo, o Justo", "Um profeta", "Um sacerdote"], answer: "Jesus Cristo, o Justo", reference: "1 João 2:1" },
+            { question: "Qual o mandamento que João diz ser antigo e novo, segundo 1 João 2:7-8?", options: ["O mandamento da lei", "O mandamento do amor fraternal", "O mandamento da oração", "O mandamento do sacrifício"], answer: "O mandamento do amor fraternal", reference: "1 João 2:7-8" },
+            { question: "O que não devemos amar, segundo 1 João 2:15?", options: ["Nossos irmãos", "O mundo, nem o que no mundo há", "A Deus", "A verdade"], answer: "O mundo, nem o que no mundo há", reference: "1 João 2:15" },
+            { question: "O que João diz que já é a última hora em 1 João 2:18?", options: ["A vinda de Cristo", "O fim do mundo", "A vinda do anticristo", "O início de um novo milênio"], answer: "A vinda do anticristo", reference: "1 João 2:18" },
+            { question: "O que nos foi concedido pelo Pai, segundo 1 João 3:1?", options: ["Riquezas", "Fama", "Ser chamados filhos de Deus", "Poder"], answer: "Ser chamados filhos de Deus", reference: "1 João 3:1" },
+            { question: "Qual a evidência de que alguém é nascido de Deus, segundo 1 João 3:9?", options: ["Não peca", "É rico", "É famoso", "É sábio"], answer: "Não peca", reference: "1 João 3:9" },
+            { question: "Como conhecemos o amor de Deus, segundo 1 João 3:16?", options: ["Por palavras", "Porque ele deu a sua vida por nós", "Por sinais no céu", "Por milagres"], answer: "Porque ele deu a sua vida por nós", reference: "1 João 3:16" },
+            { question: "O que devemos fazer antes de crer em todo espírito, segundo 1 João 4:1?", options: ["Aceitar tudo", "Provar se os espíritos são de Deus", "Ignorar", "Rejeitar tudo"], answer: "Provar se os espíritos são de Deus", reference: "1 João 4:1" },
+            { question: "O que todo espírito que confessa que Jesus Cristo veio em carne é?", options: ["Do diabo", "Do mundo", "De Deus", "Falso"], answer: "De Deus", reference: "1 João 4:2" },
+            { question: "Qual a definição de Deus, segundo 1 João 4:8?", options: ["Deus é juiz", "Deus é amor", "Deus é poder", "Deus é luz"], answer: "Deus é amor", reference: "1 João 4:8" },
+            { question: "Quem é aquele que vence o mundo, segundo 1 João 5:5?", options: ["Aquele que tem dinheiro", "Aquele que crê que Jesus é o Filho de Deus", "Aquele que é forte", "Aquele que é sábio"], answer: "Aquele que crê que Jesus é o Filho de Deus", reference: "1 João 5:5" },
+            { question: "Quantos são os que testificam na terra, segundo 1 João 5:8?", options: ["Um", "Dois", "Três (Espírito, água e sangue)", "Quatro"], answer: "Três (Espírito, água e sangue)", reference: "1 João 5:8" },
+            { question: "Para que João escreve essas coisas, segundo 1 João 5:13?", options: ["Para nos confundir", "Para que saibais que tendes a vida eterna", "Para nos condenar", "Para nos assustar"], answer: "Para que saibais que tendes a vida eterna", reference: "1 João 5:13" },
+            { question: "O que acontece se pedirmos alguma coisa segundo a vontade de Deus?", options: ["Ele não nos ouve", "Ele nos ouve", "Ele nos ignora", "Ele nos pune"], answer: "Ele nos ouve", reference: "1 João 5:14" },
+            { question: "O que João diz para os filhinhos se guardarem no final da carta?", options: ["Do mundo", "Dos ídolos", "Do pecado", "Dos falsos mestres"], answer: "Dos ídolos", reference: "1 João 5:21" },
+            { question: "O que significa 'andar em trevas', segundo 1 João 1:6?", options: ["Viver na luz", "Mentir sobre ter comunhão com Deus", "Praticar a justiça", "Amar a Deus"], answer: "Mentir sobre ter comunhão com Deus", reference: "1 João 1:6" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsJoao1 = [];
+        const numCopiesJoao1 = Math.ceil(200 / uniqueQuizQuestionsJoao1.length);
+        for (let i = 0; i < numCopiesJoao1; i++) {
+            allQuizQuestionsJoao1 = allQuizQuestionsJoao1.concat(uniqueQuizQuestionsJoao1);
+        }
+        allQuizQuestionsJoao1 = allQuizQuestionsJoao1.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsJoao1 = [];
+        let currentQuizIndexJoao1 = 0;
+        let scoreJoao1 = 0;
+        let wrongAnswersJoao1 = 0;
+        let joao1ChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsJoao1() {
+            shuffledQuizQuestionsJoao1 = [...allQuizQuestionsJoao1]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsJoao1);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressJoao1() {
+            const progressElement = document.getElementById('quizProgressJoao1');
+            progressElement.textContent = `${currentQuizIndexJoao1 + 1}/${shuffledQuizQuestionsJoao1.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionJoao1() {
+            if (currentQuizIndexJoao1 >= shuffledQuizQuestionsJoao1.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionJoao1').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsJoao1').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreJoao1}, Erros: ${wrongAnswersJoao1}</p>`;
+                document.getElementById('quizFeedbackJoao1').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsJoao1[currentQuizIndexJoao1];
+            document.getElementById('quizQuestionJoao1').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsJoao1');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerJoao1(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackJoao1').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressJoao1();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerJoao1(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackJoao1');
+            const optionsButtons = document.querySelectorAll('#quizOptionsJoao1 button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! �";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreJoao1++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersJoao1++;
+            }
+            document.getElementById('quizScoreJoao1').textContent = `Acertos: ${scoreJoao1}, Erros: ${wrongAnswersJoao1}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionJoao1() {
+            currentQuizIndexJoao1++;
+            displayQuestionJoao1();
+        }
+
+        // Dados para o gráfico de temas de 1 João
+        const joao1ChartData = {
+            labels: ['Comunhão com Deus', 'Amor', 'Luz e Trevas', 'Verdade e Mentira', 'Anticristo/Falsos Mestres', 'Certeza da Salvação', 'Justiça e Obediência'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [20, 30, 15, 18, 12, 10, 25], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const joao1ChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 1 João',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderJoao1Chart() {
+            const ctx = document.getElementById('joao1Chart').getContext('2d');
+            if (joao1ChartInstance) {
+                joao1ChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            joao1ChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: joao1ChartData,
+                options: joao1ChartOptions
+            });
+        }
+    </script>
+</body>
+</html>
+�

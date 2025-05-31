@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 2 Crônicas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2 Crônicas Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 2 Crônicas</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection2Cronicas('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection2Cronicas('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection2Cronicas('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection2Cronicas('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection2Cronicas('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection2Cronicas('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection2Cronicas('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection2Cronicas('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection2Cronicas('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 2 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o reinado de Salomão, a construção e dedicação do Templo, a história dos reis de Judá (com foco na sua fidelidade ou infidelidade a Deus), e a eventual queda de Jerusalém e o retorno do exílio. Entenda as consequências da obediência e desobediência. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 2 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Crônicas é o décimo quarto livro da Bíblia e a continuação de 1 Crônicas, formando uma única obra na tradição hebraica. Este livro abrange um período de aproximadamente 400 anos, desde o início do reinado de Salomão até o decreto de Ciro, que permitiu o retorno dos judeus do exílio babilônico. Diferente dos livros de Reis, que narram a história de ambos os reinos (Israel e Judá), 2 Crônicas foca quase exclusivamente na história dos reis de Judá, a linhagem de Davi, e a centralidade do Templo e da adoração em Jerusalém.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O principal objetivo de 2 Crônicas é encorajar a comunidade pós-exílio, reafirmando a fidelidade de Deus à Sua aliança com Davi e a importância da obediência e da adoração correta. O livro destaca como a prosperidade e a segurança dos reis de Judá estavam diretamente ligadas à sua fidelidade a Deus, e como a idolatria e a desobediência resultavam em juízo e desastre. Há uma ênfase particular nos reis que buscaram a Deus e realizaram reformas religiosas (como Asa, Josafá, Ezequias e Josias) e nas consequências dos reis ímpios.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Este livro serve como um lembrete da importância da adoração verdadeira, da responsabilidade da liderança e da soberania de Deus sobre a história. Ele termina com uma nota de esperança, apontando para o retorno do povo à sua terra e a reconstrução do Templo, preparando o cenário para os livros de Esdras e Neemias.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-9: O Reinado de Salomão.</strong> O pedido de sabedoria de Salomão, a construção e dedicação do glorioso Templo em Jerusalém, sua riqueza e fama, e o declínio devido à idolatria.</li>
+                <li><strong>Capítulos 10-36: Os Reis de Judá e a Queda de Jerusalém.</strong> A divisão do reino, e os reinados dos reis de Judá, com detalhamento de suas reformas religiosas ou apostasias. A intervenção de profetas, guerras, e a eventual destruição de Jerusalém e o exílio babilônico, culminando com o decreto de Ciro.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Crônicas é uma poderosa lição sobre a história de Judá, a importância da adoração e a fidelidade de Deus em meio às falhas humanas.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 2 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">2 Crônicas narra a história dos reis de Judá, a construção do Templo, e as consequências da obediência e desobediência a Deus, culminando no exílio e na esperança de retorno.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Reinado de Salomão (Capítulos 1-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Sabedoria e Riqueza de Salomão (Capítulo 1):</strong>
+                    <ul>
+                        <li>Salomão pede sabedoria a Deus em Gibeão e é abençoado com riqueza e honra.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Preparativos e Construção do Templo (Capítulos 2-7):</strong>
+                    <ul>
+                        <li>Preparativos para a construção do Templo e do palácio.</li>
+                        <li>A construção do Templo de Jerusalém.</li>
+                        <li>Dedicação do Templo, a oração de Salomão e a glória de Deus enchendo o Templo.</li>
+                        <li>A aliança de Deus com Salomão.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Glória e Declínio de Salomão (Capítulos 8-9):</strong>
+                    <ul>
+                        <li>Realizações de Salomão e a visita da Rainha de Sabá.</li>
+                        <li>Sua vasta riqueza e fama.</li>
+                        <li>O declínio de Salomão (implícito, sem os detalhes negativos de 1 Reis).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Os Reis de Judá e a Queda de Jerusalém (Capítulos 10-36)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Divisão do Reino e Reoboão (Capítulos 10-12):</strong>
+                    <ul>
+                        <li>A rebelião de Jeroboão e a divisão do reino.</li>
+                        <li>Reinado de Reoboão em Judá e sua apostasia.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Reis de Judá: Obediência e Reforma (Capítulos 13-20):</strong>
+                    <ul>
+                        <li>Reinado de Abias, Asa (reformas religiosas e confiança em Deus).</li>
+                        <li>Reinado de Josafá (reformas, alianças e vitórias).</li>
+                    </ul>
+                </li>
+                <li><strong>C. Reis de Judá: Declínio e Juízo (Capítulos 21-28):</strong>
+                    <ul>
+                        <li>Reinados de Jorão, Acazias, Atalia, Joás (reforma inicial, depois apostasia), Amazias, Uzias, Jotão, Acaz (grande idolatria e desastre).</li>
+                    </ul>
+                </li>
+                <li><strong>D. Reis de Judá: Reforma e Últimos Dias (Capítulos 29-35):</strong>
+                    <ul>
+                        <li>Reinado de Ezequias (grande reforma religiosa, Páscoa).</li>
+                        <li>Reinado de Manassés (impiedade, depois arrependimento).</li>
+                        <li>Reinado de Amom.</li>
+                        <li>Reinado de Josias (a maior reforma religiosa, encontro do Livro da Lei, morte trágica).</li>
+                    </ul>
+                </li>
+                <li><strong>E. A Queda de Jerusalém e o Exílio (Capítulo 36):</strong>
+                    <ul>
+                        <li>Os últimos reis de Judá (Jeoacaz, Jeoaquim, Joaquim, Zedequias).</li>
+                        <li>A destruição de Jerusalém e do Templo pela Babilônia.</li>
+                        <li>O exílio babilônico.</li>
+                        <li>O decreto de Ciro, permitindo o retorno dos judeus, oferecendo esperança.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">2 Crônicas enfatiza a retribuição divina: obediência traz bênçãos, desobediência traz juízo. O Templo é o centro da vida espiritual e nacional. A linhagem davídica é mantida, apontando para a fidelidade de Deus e a esperança messiânica. O livro serve como um guia para a comunidade pós-exílio, mostrando que a restauração depende da fidelidade a Deus e da adoração correta.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGrid2Cronicas">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 2 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 2 Crônicas, capítulo por capítulo, destacando os eventos e o desenvolvimento da história.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Reinado de Salomão (Capítulos 1-9)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Salomão pede sabedoria; sua riqueza.</li>
+                <li><strong>Capítulo 2:</strong> Preparativos para o Templo.</li>
+                <li><strong>Capítulo 3:</strong> Construção do Templo.</li>
+                <li><strong>Capítulo 4:</strong> Utensílios do Templo.</li>
+                <li><strong>Capítulo 5:</strong> A Arca é trazida para o Templo.</li>
+                <li><strong>Capítulo 6:</strong> Oração de dedicação de Salomão.</li>
+                <li><strong>Capítulo 7:</strong> Fogo do céu; glória de Deus enche o Templo; Deus aparece a Salomão.</li>
+                <li><strong>Capítulo 8:</strong> Realizações de Salomão.</li>
+                <li><strong>Capítulo 9:</strong> Visita da Rainha de Sabá; riqueza e morte de Salomão.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Os Reis de Judá e a Queda de Jerusalém (Capítulos 10-36)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 10:</strong> A divisão do reino.</li>
+                <li><strong>Capítulo 11:</strong> Fortificações de Reoboão; levitas vêm para Judá.</li>
+                <li><strong>Capítulo 12:</strong> Invasão de Sisaque; apostasia de Reoboão.</li>
+                <li><strong>Capítulo 13:</strong> Guerra entre Abias e Jeroboão.</li>
+                <li><strong>Capítulo 14:</strong> Reinado de Asa; sua reforma e vitória.</li>
+                <li><strong>Capítulo 15:</strong> Reforma de Asa e renovação da aliança.</li>
+                <li><strong>Capítulo 16:</strong> Fim do reinado de Asa.</li>
+                <li><strong>Capítulo 17:</strong> Reinado de Josafá; sua reforma e prosperidade.</li>
+                <li><strong>Capítulo 18:</strong> Josafá e Acabe; Micaías profetiza.</li>
+                <li><strong>Capítulo 19:</strong> Josafá nomeia juízes.</li>
+                <li><strong>Capítulo 20:</strong> Josafá e a vitória contra Moabe e Amom.</li>
+                <li><strong>Capítulo 21:</strong> Reinado de Jorão; sua impiedade.</li>
+                <li><strong>Capítulo 22:</strong> Reinado de Acazias; Atalia usurpa o trono.</li>
+                <li><strong>Capítulo 23:</strong> Joás é feito rei; morte de Atalia.</li>
+                <li><strong>Capítulo 24:</strong> Joás repara o Templo; sua apostasia e morte.</li>
+                <li><strong>Capítulo 25:</strong> Reinado de Amazias; sua vitória e idolatria.</li>
+                <li><strong>Capítulo 26:</strong> Reinado de Uzias; sua prosperidade e lepra.</li>
+                <li><strong>Capítulo 27:</strong> Reinado de Jotão.</li>
+                <li><strong>Capítulo 28:</strong> Reinado de Acaz; sua grande impiedade.</li>
+                <li><strong>Capítulo 29:</strong> Reinado de Ezequias; purificação do Templo.</li>
+                <li><strong>Capítulo 30:</strong> Ezequias celebra a Páscoa.</li>
+                <li><strong>Capítulo 31:</strong> Reformas de Ezequias.</li>
+                <li><strong>Capítulo 32:</strong> Invasão de Senaqueribe; doença e morte de Ezequias.</li>
+                <li><strong>Capítulo 33:</strong> Reinado de Manassés (impiedade e arrependimento); Amom.</li>
+                <li><strong>Capítulo 34:</strong> Reinado de Josias; reforma religiosa.</li>
+                <li><strong>Capítulo 35:</strong> Josias celebra a Páscoa; sua morte.</li>
+                <li><strong>Capítulo 36:</strong> Os últimos reis de Judá; queda de Jerusalém e o decreto de Ciro.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 2 Crônicas</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Centralidade do Templo:</strong> O Templo como o lugar da presença de Deus e o foco da adoração verdadeira e da vida nacional.</li>
+                <li><strong>Retribuição Divina:</strong> O princípio de que a obediência a Deus traz bênçãos e prosperidade, enquanto a desobediência e a idolatria levam ao juízo e à destruição.</li>
+                <li><strong>A Linhagem Davídica:</strong> A contínua fidelidade de Deus à Sua aliança com Davi, mantendo a linhagem real de Judá, apesar das falhas dos reis.</li>
+                <li><strong>O Papel dos Reis:</strong> A avaliação dos reis de Judá com base em sua fidelidade a Deus e seu compromisso com a adoração correta.</li>
+                <li><strong>Arrependimento e Restauração:</strong> Exemplos de reis que se arrependeram e foram restaurados, demonstrando a misericórdia de Deus.</li>
+                <li><strong>A Soberania de Deus:</strong> Deus usando nações estrangeiras como instrumentos de Seu juízo, mas também provendo esperança e um caminho para o retorno.</li>
+                <li><strong>A Importância da Páscoa:</strong> A celebração da Páscoa como um momento de renovação da aliança e de retorno à adoração correta.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 2 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chapters2Cronicas">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 2 Crônicas</h2>
+            <div id="quizContainer2Cronicas" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestion2Cronicas"></p>
+                <div id="quizOptions2Cronicas" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedback2Cronicas" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestion2Cronicas()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgress2Cronicas"></span></p>
+                <p>Pontuação: <span id="quizScore2Cronicas">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 2 Crônicas</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 2 Crônicas.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="cronicas2Chart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal2Cronicas()">&times;</span>
+                <h3 id="modalCharacterName2Cronicas" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription2Cronicas" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 2 Crônicas",
+            "short_name": "2 Crônicas",
+            "description": "Explore o livro de 2 Crônicas de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=2C",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=2C",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '2cronicas-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection2Cronicas(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtons2Cronicas();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinks2Cronicas();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestions2Cronicas(); // Embaralha as perguntas no início do quiz
+                currentQuizIndex2Cronicas = 0; // Reinicia o quiz
+                score2Cronicas = 0;
+                wrongAnswers2Cronicas = 0;
+                document.getElementById('quizScore2Cronicas').textContent = `Acertos: ${score2Cronicas}, Erros: ${wrongAnswers2Cronicas}`;
+                displayQuestion2Cronicas();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                render2CronicasChart();
+            }
+        }
+
+        // Dados dos personagens para 2 Crônicas
+        const characterDetails2Cronicas = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus soberano que abençoa a obediência e julga a desobediência, mantendo Sua aliança com Davi e o Templo como centro de Sua presença."
+            },
+            "Salomão": {
+                name: "Salomão",
+                description: "Rei de Israel, filho de Davi, conhecido por sua sabedoria, riqueza e, principalmente, por construir e dedicar o Templo em Jerusalém."
+            },
+            "Reoboão": {
+                name: "Reoboão",
+                description: "Filho e sucessor de Salomão. Sua recusa em aliviar a carga do povo levou à divisão do reino."
+            },
+            "Asa": {
+                name: "Asa",
+                description: "Rei de Judá que promoveu reformas religiosas, removeu a idolatria e confiou em Deus em meio a conflitos."
+            },
+            "Josafá": {
+                name: "Josafá",
+                description: "Rei de Judá que continuou as reformas de Asa, fortaleceu o reino e buscou a Deus em meio a ameaças militares."
+            },
+            "Joiada": {
+                name: "Joiada",
+                description: "Sacerdote que protegeu o jovem Joás da rainha Atalia e o ungiu rei de Judá, liderando uma reforma religiosa."
+            },
+            "Joás": {
+                name: "Joás",
+                description: "Rei de Judá que começou bem sob a orientação de Joiada, reparando o Templo, mas se desviou após a morte do sacerdote."
+            },
+            "Uzias": {
+                name: "Uzias",
+                description: "Rei de Judá que prosperou enquanto buscou a Deus, mas se tornou orgulhoso e foi atingido com lepra por tentar oferecer incenso no Templo."
+            },
+            "Acaz": {
+                name: "Acaz",
+                description: "Rei ímpio de Judá que praticou a idolatria em larga escala, fechou o Templo e trouxe grande aflição sobre Judá."
+            },
+            "Ezequias": {
+                name: "Ezequias",
+                description: "Um dos reis mais justos de Judá. Liderou uma grande reforma religiosa, purificou o Templo e confiou em Deus contra a invasão assíria."
+            },
+            "Manassés": {
+                name: "Manassés",
+                description: "Filho de Ezequias e o rei mais ímpio de Judá, que reverteu as reformas de seu pai. Arrependeu-se no exílio e foi restaurado."
+            },
+            "Josias": {
+                name: "Josias",
+                description: "Um dos reis mais justos de Judá. Liderou uma reforma religiosa abrangente após a descoberta do Livro da Lei, mas morreu tragicamente em batalha."
+            },
+            "Hulda": {
+                name: "Hulda",
+                description: "Profetisa que confirmou a autenticidade do Livro da Lei encontrado durante o reinado de Josias e profetizou o juízo sobre Judá."
+            },
+            "Nabucodonosor": {
+                name: "Nabucodonosor",
+                description: "Rei da Babilônia que sitiou e destruiu Jerusalém e o Templo, levando o povo de Judá para o exílio."
+            },
+            "Ciro": {
+                name: "Ciro",
+                description: "Rei da Pérsia que emitiu um decreto permitindo que os judeus retornassem a Jerusalém e reconstruíssem o Templo, marcando o fim do exílio."
+            },
+            "Sisaque": {
+                name: "Sisaque",
+                description: "Rei do Egito que invadiu Judá durante o reinado de Reoboão."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModal2Cronicas(characterName) {
+            const details = characterDetails2Cronicas[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName2Cronicas').textContent = details.name;
+                document.getElementById('modalCharacterDescription2Cronicas').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal2Cronicas() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtons2Cronicas() {
+            const grid = document.getElementById('characterGrid2Cronicas');
+            grid.innerHTML = '';
+            for (const key in characterDetails2Cronicas) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModal2Cronicas(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinks2Cronicas() {
+            const chaptersDiv = document.getElementById('chapters2Cronicas');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 36; i++) { // 2 Crônicas tem 36 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/2cr/${i}`; // Link para a Bíblia Online, 2 Crônicas
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 2 Crônicas (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestions2Cronicas = [
+            { question: "Qual rei de Judá pediu sabedoria a Deus em Gibeão?", options: ["Davi", "Salomão", "Reoboão", "Josias"], answer: "Salomão", reference: "2 Crônicas 1:7-12" },
+            { question: "Quem construiu o Templo em Jerusalém?", options: ["Davi", "Salomão", "Ezequias", "Josias"], answer: "Salomão", reference: "2 Crônicas 3:1-2" },
+            { question: "Qual evento marcou a dedicação do Templo, com a glória de Deus enchendo o lugar?", options: ["Um terremoto", "Fogo do céu e a glória do Senhor", "Uma voz do céu", "A Arca da Aliança flutuando"], answer: "Fogo do céu e a glória do Senhor", reference: "2 Crônicas 7:1-3" },
+            { question: "Qual rei de Judá foi atingido com lepra por tentar oferecer incenso no Templo?", options: ["Asa", "Josafá", "Uzias", "Acaz"], answer: "Uzias", reference: "2 Crônicas 26:16-21" },
+            { question: "Qual rei de Judá liderou uma grande reforma religiosa, purificando o Templo e celebrando a Páscoa?", options: ["Manassés", "Amom", "Ezequias", "Josias"], answer: "Ezequias", reference: "2 Crônicas 29:1-31:21" },
+            { question: "Quem foi o rei mais ímpio de Judá, que se arrependeu no exílio e foi restaurado?", options: ["Acaz", "Manassés", "Jeoaquim", "Zedequias"], answer: "Manassés", reference: "2 Crônicas 33:1-13" },
+            { question: "Qual rei de Judá encontrou o Livro da Lei no Templo e liderou uma reforma religiosa ainda maior?", options: ["Ezequias", "Josias", "Joás", "Uzias"], answer: "Josias", reference: "2 Crônicas 34:14-35:19" },
+            { question: "Qual império destruiu Jerusalém e o Templo, levando Judá para o exílio?", options: ["Assíria", "Egito", "Babilônia", "Pérsia"], answer: "Babilônia", reference: "2 Crônicas 36:17-20" },
+            { question: "Quem foi o rei persa que emitiu o decreto permitindo o retorno dos judeus e a reconstrução do Templo?", options: ["Dario", "Artaxerxes", "Ciro", "Xerxes"], answer: "Ciro", reference: "2 Crônicas 36:22-23" },
+            { question: "Qual rei de Judá foi protegido pelo sacerdote Joiada e ungido rei em sua infância?", options: ["Amazias", "Joás", "Uzias", "Jotão"], answer: "Joás", reference: "2 Crônicas 23:1-11" },
+            { question: "Durante o reinado de qual rei de Judá o rei Sisaque do Egito invadiu e levou os tesouros do Templo?", options: ["Salomão", "Reoboão", "Asa", "Josafá"], answer: "Reoboão", reference: "2 Crônicas 12:1-12" },
+            { question: "Qual rei de Judá buscou a Deus e obteve uma grande vitória contra Moabe e Amom sem lutar?", options: ["Asa", "Josafá", "Jorão", "Amazias"], answer: "Josafá", reference: "2 Crônicas 20:1-30" },
+            { question: "Qual profetisa confirmou a autenticidade do Livro da Lei encontrado por Josias?", options: ["Débora", "Miriã", "Hulda", "Ana"], answer: "Hulda", reference: "2 Crônicas 34:22-28" },
+            { question: "Qual foi a causa da morte trágica do rei Josias?", options: ["Doença", "Velhice", "Em batalha contra o rei Necao do Egito", "Assassinado por seus servos"], answer: "Em batalha contra o rei Necao do Egito", reference: "2 Crônicas 35:20-24" },
+            { question: "Qual rei de Judá fechou as portas do Templo e removeu os utensílios sagrados?", options: ["Manassés", "Acaz", "Amom", "Zedequias"], answer: "Acaz", reference: "2 Crônicas 28:24" },
+            { question: "O que aconteceu com o rei Uzias depois que ele tentou oferecer incenso no Templo?", options: ["Ele foi morto", "Ele foi exilado", "Ele foi atingido com lepra", "Ele se tornou cego"], answer: "Ele foi atingido com lepra", reference: "2 Crônicas 26:19-21" },
+            { question: "Qual rei de Judá é conhecido por sua prosperidade e por ter um grande exército, mas depois se tornou orgulhoso?", options: ["Asa", "Josafá", "Uzias", "Jotão"], answer: "Uzias", reference: "2 Crônicas 26:5-15" },
+            { question: "Quem foi o pai de Reoboão?", options: ["Davi", "Salomão", "Absalão", "Adonias"], answer: "Salomão", reference: "2 Crônicas 9:31" },
+            { question: "Qual rei de Judá fez uma aliança com Acabe, rei de Israel, e foi repreendido por um profeta?", options: ["Asa", "Josafá", "Jorão", "Amazias"], answer: "Josafá", reference: "2 Crônicas 18:1-3; 19:1-3" },
+            { question: "Qual o nome do profeta que repreendeu o rei Asa por confiar no rei da Síria em vez de em Deus?", options: ["Natã", "Elias", "Hanani", "Odede"], answer: "Hanani", reference: "2 Crônicas 16:7-10" },
+            { question: "Qual o nome do rei de Judá que foi restaurado ao trono após se arrepender no exílio babilônico?", options: ["Jeoaquim", "Joaquim", "Manassés", "Zedequias"], answer: "Manassés", reference: "2 Crônicas 33:11-13" },
+            { question: "Qual a última frase do livro de 2 Crônicas?", options: ["E o povo serviu ao Senhor", "E a glória do Senhor encheu o Templo", "Quem dentre vós é de todo o seu povo, suba!", "E o reino de Judá prosperou"], answer: "Quem dentre vós é de todo o seu povo, suba!", reference: "2 Crônicas 36:23" },
+            { question: "Durante o reinado de qual rei de Judá a Arca da Aliança foi trazida para o Templo?", options: ["Davi", "Salomão", "Ezequias", "Josias"], answer: "Salomão", reference: "2 Crônicas 5:2-10" },
+            { question: "Qual rei de Judá foi morto por seus próprios servos por causa de sua apostasia?", options: ["Asa", "Josafá", "Joás", "Amazias"], answer: "Joás", reference: "2 Crônicas 24:25" },
+            { question: "Qual o nome do sacerdote que liderou a reforma religiosa durante o reinado de Joás?", options: ["Zadoque", "Abiatar", "Joiada", "Urias"], answer: "Joiada", reference: "2 Crônicas 23:1-16" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestions2Cronicas = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestions2Cronicas.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestions2Cronicas = allQuizQuestions2Cronicas.concat(uniqueQuizQuestions2Cronicas);
+        }
+        allQuizQuestions2Cronicas = allQuizQuestions2Cronicas.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestions2Cronicas = [];
+        let currentQuizIndex2Cronicas = 0;
+        let score2Cronicas = 0;
+        let wrongAnswers2Cronicas = 0;
+        let cronicas2ChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestions2Cronicas() {
+            shuffledQuizQuestions2Cronicas = [...allQuizQuestions2Cronicas]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestions2Cronicas);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgress2Cronicas() {
+            const progressElement = document.getElementById('quizProgress2Cronicas');
+            progressElement.textContent = `${currentQuizIndex2Cronicas + 1}/${shuffledQuizQuestions2Cronicas.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestion2Cronicas() {
+            if (currentQuizIndex2Cronicas >= shuffledQuizQuestions2Cronicas.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestion2Cronicas').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptions2Cronicas').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${score2Cronicas}, Erros: ${wrongAnswers2Cronicas}</p>`;
+                document.getElementById('quizFeedback2Cronicas').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestions2Cronicas[currentQuizIndex2Cronicas];
+            document.getElementById('quizQuestion2Cronicas').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptions2Cronicas');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswer2Cronicas(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedback2Cronicas').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgress2Cronicas();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswer2Cronicas(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedback2Cronicas');
+            const optionsButtons = document.querySelectorAll('#quizOptions2Cronicas button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                score2Cronicas++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswers2Cronicas++;
+            }
+            document.getElementById('quizScore2Cronicas').textContent = `Acertos: ${score2Cronicas}, Erros: ${wrongAnswers2Cronicas}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestion2Cronicas() {
+            currentQuizIndex2Cronicas++;
+            displayQuestion2Cronicas();
+        }
+
+        // Dados para o gráfico de temas de 2 Crônicas
+        const cronicas2ChartData = {
+            labels: ['Reinado de Salomão', 'Templo', 'Reis de Judá', 'Obediência/Desobediência', 'Reformas Religiosas', 'Exílio', 'Retorno/Esperança'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [15, 20, 30, 25, 10, 5, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const cronicas2ChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 2 Crônicas',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function render2CronicasChart() {
+            const ctx = document.getElementById('cronicas2Chart').getContext('2d');
+            if (cronicas2ChartInstance) {
+                cronicas2ChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            cronicas2ChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: cronicas2ChartData,
+                options: cronicas2ChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

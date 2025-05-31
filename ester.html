@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Ester</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ester Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Ester</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionEster('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionEster('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionEster('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionEster('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionEster('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionEster('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionEster('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionEster('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionEster('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Ester</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a fascinante história de Ester, uma jovem judia que se torna rainha da Pérsia e, com coragem e sabedoria, salva seu povo de um plano genocida. Acompanhe os eventos que levaram ao estabelecimento da festa de Purim, um testemunho da providência divina e da resiliência do povo judeu. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Ester</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Ester é uma narrativa histórica do Antigo Testamento, única por não mencionar explicitamente o nome de Deus, mas que revela Sua providência e soberania de forma notável. A história se passa na Pérsia, na cidade de Susã, durante o reinado do rei Assuero (identificado como Xerxes I, que reinou de 486 a 465 a.C.), aproximadamente 50 anos após o primeiro retorno dos judeus do exílio babilônico, liderado por Zorobabel.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro narra como uma jovem judia órfã, Hadassa, que se torna conhecida como Ester, é levada ao harém do rei e, por sua beleza e graça, é escolhida como rainha. Paralelamente, seu primo e tutor, Mordecai, descobre uma conspiração para destruir todos os judeus no império persa, orquestrada pelo ambicioso primeiro-ministro Hamã. Através de uma série de eventos dramáticos, Ester, com grande coragem e sob a orientação de Mordecai, arrisca sua vida para interceder por seu povo junto ao rei.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Ester é um testemunho da fidelidade de Deus em proteger Seu povo, mesmo quando eles estão dispersos e sob domínio estrangeiro. O livro culmina com a reversão do decreto de Hamã, a derrota dos inimigos dos judeus e o estabelecimento da festa de Purim, uma celebração anual que comemora a libertação e a vitória. A ausência do nome de Deus no texto serve para enfatizar que Ele age nos bastidores da história, orquestrando eventos para cumprir Seus propósitos.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-2: A Ascensão de Ester.</strong> A deposição da rainha Vasti e a escolha de Ester como sua sucessora.</li>
+                <li><strong>Capítulos 3-4: A Conspiração de Hamã.</strong> A exaltação de Hamã, seu ódio por Mordecai e o decreto para aniquilar os judeus. O apelo de Mordecai a Ester para intervir.</li>
+                <li><strong>Capítulos 5-7: O Plano de Ester e a Queda de Hamã.</strong> Os banquetes de Ester, a noite de insônia do rei, a honra de Mordecai e a execução de Hamã.</li>
+                <li><strong>Capítulos 8-10: A Libertação dos Judeus e o Purim.</strong> O novo decreto real permitindo aos judeus se defenderem, a vitória sobre seus inimigos e o estabelecimento da festa de Purim. A exaltação de Mordecai e a grandeza do rei Assuero.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Ester é uma história de fé, coragem e a providência oculta de Deus, que opera através de circunstâncias e pessoas para proteger Seu povo.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Ester</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Ester narra a história de uma rainha judia que, com coragem, salva seu povo de um plano genocida, revelando a providência divina.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Ascensão de Ester e o Decreto de Hamã (Capítulos 1-4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Deposição da Rainha Vasti (Capítulo 1):</strong>
+                    <ul>
+                        <li>O grande banquete do rei Assuero.</li>
+                        <li>Vasti se recusa a comparecer e é deposta.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Ester se Torna Rainha (Capítulo 2):</strong>
+                    <ul>
+                        <li>Busca por uma nova rainha em todo o império.</li>
+                        <li>Ester (Hadassa) é levada ao harém e é escolhida pelo rei.</li>
+                        <li>Mordecai descobre e frustra uma conspiração contra o rei.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Conspiração de Hamã (Capítulo 3):</strong>
+                    <ul>
+                        <li>Hamã é exaltado e todos devem se curvar a ele.</li>
+                        <li>Mordecai se recusa a se curvar.</li>
+                        <li>Hamã, cheio de ira, trama a destruição de todos os judeus no império.</li>
+                        <li>Um decreto é emitido para aniquilar os judeus.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Desafio de Ester (Capítulo 4):</strong>
+                    <ul>
+                        <li>Mordecai lamenta publicamente e informa Ester sobre o decreto.</li>
+                        <li>Ester hesita em se aproximar do rei sem ser chamada, devido ao risco de morte.</li>
+                        <li>Mordecai a desafia, sugerindo que ela pode ter chegado à posição de rainha para "um tempo como este".</li>
+                        <li>Ester concorda em jejuar e ir ao rei, dizendo: "Se perecer, pereci."</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Triunfo dos Judeus e o Estabelecimento do Purim (Capítulos 5-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Ester se Aproxima do Rei e os Banquetes (Capítulo 5):</strong>
+                    <ul>
+                        <li>Ester se aproxima do rei, que estende seu cetro.</li>
+                        <li>Ela convida o rei e Hamã para um banquete.</li>
+                        <li>No banquete, ela os convida para um segundo banquete no dia seguinte.</li>
+                        <li>Hamã, orgulhoso, prepara uma forca para Mordecai.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Honra de Mordecai e a Queda de Hamã (Capítulos 6-7):</strong>
+                    <ul>
+                        <li>O rei tem uma noite de insônia e pede que lhe leiam os registros.</li>
+                        <li>Ele descobre que Mordecai não foi recompensado por salvar sua vida.</li>
+                        <li>O rei pergunta a Hamã como honrar alguém que o rei deseja honrar, e Hamã, pensando que era ele, sugere grandes honras.</li>
+                        <li>Mordecai é honrado publicamente por Hamã.</li>
+                        <li>No segundo banquete, Ester revela a conspiração de Hamã e pede pela vida de seu povo.</li>
+                        <li>Hamã é enforcado na forca que preparou para Mordecai.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Novo Decreto e a Vitória dos Judeus (Capítulo 8-9):</strong>
+                    <ul>
+                        <li>O rei dá a Hamã a casa de Ester e a Mordecai seu anel.</li>
+                        <li>Ester e Mordecai escrevem um novo decreto, permitindo aos judeus se defenderem.</li>
+                        <li>Os judeus se reúnem e destroem seus inimigos em todo o império.</li>
+                        <li>Os dez filhos de Hamã são mortos.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Estabelecimento do Purim e a Grandeza de Mordecai (Capítulo 9-10):</strong>
+                    <ul>
+                        <li>A festa de Purim é estabelecida para comemorar a libertação.</li>
+                        <li>Mordecai é exaltado e se torna o segundo no comando do rei Assuero.</li>
+                        <li>A grandeza e o poder do rei Assuero.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O livro de Ester, embora não mencione Deus, é um poderoso testemunho de Sua providência e cuidado com Seu povo. Ele demonstra que Deus age nos bastidores da história, usando pessoas e circunstâncias para cumprir Seus propósitos e proteger os Seus. Enfatiza a coragem, a obediência e a importância da solidariedade do povo judeu. A festa de Purim serve como um lembrete perpétuo da libertação divina e da vitória sobre a perseguição.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridEster">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Ester</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Ester, capítulo por capítulo, destacando os eventos e o desenvolvimento da história.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A rainha Vasti desobedece ao rei Assuero e é deposta.</li>
+                <li><strong>Capítulo 2:</strong> Ester é escolhida como rainha; Mordecai descobre uma conspiração.</li>
+                <li><strong>Capítulo 3:</strong> Hamã é exaltado e trama a destruição dos judeus.</li>
+                <li><strong>Capítulo 4:</strong> Mordecai pede a Ester para intervir por seu povo.</li>
+                <li><strong>Capítulo 5:</strong> Ester se aproxima do rei e convida o rei e Hamã para um banquete.</li>
+                <li><strong>Capítulo 6:</strong> O rei honra Mordecai por sua lealdade.</li>
+                <li><strong>Capítulo 7:</strong> O segundo banquete; Ester revela a trama de Hamã; Hamã é enforcado.</li>
+                <li><strong>Capítulo 8:</strong> O decreto de Hamã é revertido; Mordecai é exaltado.</li>
+                <li><strong>Capítulo 9:</strong> Os judeus se defendem de seus inimigos e estabelecem a festa de Purim.</li>
+                <li><strong>Capítulo 10:</strong> A grandeza do rei Assuero e a proeminência de Mordecai.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Ester</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Providência Divina:</strong> A mão de Deus agindo nos bastidores, mesmo sem ser explicitamente mencionada, para proteger Seu povo.</li>
+                <li><strong>Coragem e Intervenção:</strong> O exemplo de Ester arriscando sua vida para salvar os judeus.</li>
+                <li><strong>Anti-semitismo e Libertação:</strong> A ameaça de extermínio contra os judeus e sua milagrosa libertação.</li>
+                <li><strong>O Papel da Liderança:</strong> A influência e responsabilidade de Ester e Mordecai em suas posições.</li>
+                <li><strong>A Festa do Purim:</strong> A instituição de uma celebração para lembrar a salvação e a vitória.</li>
+                <li><strong>Identidade Judaica:</strong> A importância de manter a identidade e a solidariedade do povo judeu em terras estrangeiras.</li>
+                <li><strong>Justiça e Vingança:</strong> A reversão do destino e a queda dos inimigos do povo de Deus.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Ester</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersEster">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Ester</h2>
+            <div id="quizContainerEster" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionEster"></p>
+                <div id="quizOptionsEster" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackEster" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionEster()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressEster"></span></p>
+                <p>Pontuação: <span id="quizScoreEster">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Ester</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Ester.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="esterChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalEster()">&times;</span>
+                <h3 id="modalCharacterNameEster" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionEster" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Ester",
+            "short_name": "Ester",
+            "description": "Explore o livro de Ester de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=ET",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=ET",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'ester-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionEster(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsEster();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksEster();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsEster(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexEster = 0; // Reinicia o quiz
+                scoreEster = 0;
+                wrongAnswersEster = 0;
+                document.getElementById('quizScoreEster').textContent = `Acertos: ${scoreEster}, Erros: ${wrongAnswersEster}`;
+                displayQuestionEster();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderEsterChart();
+            }
+        }
+
+        // Dados dos personagens para Ester
+        const characterDetailsEster = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus soberano que, mesmo não sendo explicitamente mencionado, age nos bastidores da história para proteger e libertar Seu povo."
+            },
+            "Ester (Hadassa)": {
+                name: "Ester (Hadassa)",
+                description: "Uma jovem judia órfã que se torna rainha da Pérsia e, com coragem e sabedoria, arrisca sua vida para salvar seu povo."
+            },
+            "Mordecai": {
+                name: "Mordecai",
+                description: "Primo e tutor de Ester, um judeu leal que descobre a conspiração contra o rei e desempenha um papel crucial na salvação de seu povo."
+            },
+            "Assuero (Xerxes)": {
+                name: "Assuero (Xerxes)",
+                description: "Rei do vasto Império Persa, conhecido por seus grandes banquetes e por ser o monarca que se casa com Ester."
+            },
+            "Hamã": {
+                name: "Hamã",
+                description: "O ambicioso e orgulhoso primeiro-ministro do rei Assuero, que nutre um ódio profundo pelos judeus e trama seu extermínio."
+            },
+            "Vasti": {
+                name: "Vasti",
+                description: "A rainha anterior de Assuero, deposta por se recusar a obedecer a uma ordem do rei durante um banquete."
+            },
+            "Harbona": {
+                name: "Harbona",
+                description: "Um dos eunucos do rei que sugere a Assuero que Hamã seja enforcado na forca que ele preparou para Mordecai."
+            },
+            "Hegai": {
+                name: "Hegai",
+                description: "O eunuco responsável pelo harém do rei, que cuida de Ester antes de ela ser apresentada a Assuero."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalEster(characterName) {
+            const details = characterDetailsEster[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameEster').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionEster').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalEster() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsEster() {
+            const grid = document.getElementById('characterGridEster');
+            grid.innerHTML = '';
+            for (const key in characterDetailsEster) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalEster(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksEster() {
+            const chaptersDiv = document.getElementById('chaptersEster');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 10; i++) { // Ester tem 10 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/et/${i}`; // Link para a Bíblia Online, Ester
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Ester (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsEster = [
+            { question: "Qual era o nome do rei persa no livro de Ester?", options: ["Dario", "Artaxerxes", "Assuero", "Ciro"], answer: "Assuero", reference: "Ester 1:1" },
+            { question: "Qual rainha foi deposta antes de Ester?", options: ["Sara", "Rebeca", "Vasti", "Raquel"], answer: "Vasti", reference: "Ester 1:19" },
+            { question: "Qual era o nome hebraico de Ester?", options: ["Débora", "Hadassa", "Miriam", "Rute"], answer: "Hadassa", reference: "Ester 2:7" },
+            { question: "Quem era o primo e tutor de Ester?", options: ["Hamã", "Assuero", "Mordecai", "Hegai"], answer: "Mordecai", reference: "Ester 2:7" },
+            { question: "Quem tramou a destruição de todos os judeus no império persa?", options: ["Sambalate", "Tobias", "Hamã", "Nabucodonosor"], answer: "Hamã", reference: "Ester 3:5-6" },
+            { question: "Em que cidade se passa a maior parte da história de Ester?", options: ["Jerusalém", "Babilônia", "Susã", "Nínive"], answer: "Susã", reference: "Ester 1:2" },
+            { question: "O que Mordecai se recusou a fazer a Hamã?", options: ["Pagar impostos", "Curvar-se ou ajoelhar-se", "Fazer um sacrifício", "Deixar a cidade"], answer: "Curvar-se ou ajoelhar-se", reference: "Ester 3:2" },
+            { question: "Como Ester se aproximou do rei para fazer seu pedido?", options: ["Com uma carta", "Através de um mensageiro", "Sem ser chamada, arriscando a vida", "Durante um banquete público"], answer: "Sem ser chamada, arriscando a vida", reference: "Ester 4:11, 5:1-2" },
+            { question: "O que o rei ofereceu a Ester no primeiro banquete?", options: ["Uma nova casa", "Até metade do reino", "Um exército", "Riquezas ilimitadas"], answer: "Até metade do reino", reference: "Ester 5:3" },
+            { question: "O que Hamã preparou para Mordecai?", options: ["Um trono", "Uma forca", "Um presente", "Uma viagem"], answer: "Uma forca", reference: "Ester 5:14" },
+            { question: "O que o rei descobriu em seus registros que o levou a honrar Mordecai?", options: ["Que Mordecai era rico", "Que Mordecai havia salvo sua vida de uma conspiração", "Que Mordecai era um bom escriba", "Que Mordecai era um parente distante"], answer: "Mordecai havia salvo sua vida de uma conspiração", reference: "Ester 6:1-3" },
+            { question: "Onde Hamã foi enforcado?", options: ["No palácio", "Na praça da cidade", "Na forca que ele preparou para Mordecai", "Fora dos muros da cidade"], answer: "Na forca que ele preparou para Mordecai", reference: "Ester 7:9-10" },
+            { question: "Qual festa foi estabelecida para comemorar a libertação dos judeus?", options: ["Páscoa", "Pentecostes", "Purim", "Festa dos Tabernáculos"], answer: "Purim", reference: "Ester 9:26-28" },
+            { question: "O que o rei permitiu aos judeus fazer após o decreto de Hamã?", options: ["Esconder-se", "Fugir do império", "Defender-se e destruir seus inimigos", "Negociar com Hamã"], answer: "Defender-se e destruir seus inimigos", reference: "Ester 8:11" },
+            { question: "Quem foi o pai de Ester?", options: ["Mordecai", "Abiail", "Hamã", "Assuero"], answer: "Abiail", reference: "Ester 2:15" },
+            { question: "Qual era a etnia de Mordecai e Ester?", options: ["Persas", "Babilônios", "Egípcios", "Judeus"], answer: "Judeus", reference: "Ester 2:5-7" },
+            { question: "Qual era o cargo de Hamã no império persa?", options: ["General", "Copeiro", "Primeiro-ministro ou vizir", "Escriba"], answer: "Primeiro-ministro ou vizir", reference: "Ester 3:1" },
+            { question: "Quantos dias durou o banquete do rei Assuero no capítulo 1?", options: ["7 dias", "30 dias", "180 dias", "365 dias"], answer: "180 dias", reference: "Ester 1:4" },
+            { question: "Quem era o eunuco responsável pelas mulheres do harém do rei?", options: ["Harbona", "Hegai", "Semaias", "Zete"], answer: "Hegai", reference: "Ester 2:3" },
+            { question: "Qual era o nome do pai de Hamã?", options: ["Abiail", "Hamedata", "Zeres", "Hegai"], answer: "Hamedata", reference: "Ester 3:1" },
+            { question: "Por que Ester hesitou em ir ao rei no capítulo 4?", options: ["Ela estava doente", "Ela tinha medo de Hamã", "Pois não havia sido chamada e a pena era a morte", "Ela não queria ser rainha"], answer: "Pois não havia sido chamada e a pena era a morte", reference: "Ester 4:11" },
+            { question: "O que Mordecai vestiu quando soube do decreto de Hamã?", options: ["Roupas reais", "Saco e cinza", "Armadura", "Roupas de festa"], answer: "Saco e cinza", reference: "Ester 4:1" },
+            { question: "Qual foi a reação dos judeus ao saber do decreto de Hamã?", options: ["Eles se alegraram", "Eles lamentaram, choraram e jejuaram", "Eles se revoltaram", "Eles fugiram da cidade"], answer: "Lamento, choro, jejum", reference: "Ester 4:3" },
+            { question: "Quem foi o último a ser enforcado no livro de Ester, além de Hamã?", options: ["Mordecai", "Os dez filhos de Hamã", "Zete", "Harbona"], answer: "Os dez filhos de Hamã", reference: "Ester 9:10" },
+            { question: "O que significa o nome Purim?", options: ["Vitória", "Libertação", "Sortes", "Festa"], answer: "Sortes", reference: "Ester 9:26" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsEster = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsEster.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsEster = allQuizQuestionsEster.concat(uniqueQuizQuestionsEster);
+        }
+        allQuizQuestionsEster = allQuizQuestionsEster.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsEster = [];
+        let currentQuizIndexEster = 0;
+        let scoreEster = 0;
+        let wrongAnswersEster = 0;
+        let esterChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsEster() {
+            shuffledQuizQuestionsEster = [...allQuizQuestionsEster]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsEster);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressEster() {
+            const progressElement = document.getElementById('quizProgressEster');
+            progressElement.textContent = `${currentQuizIndexEster + 1}/${shuffledQuizQuestionsEster.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionEster() {
+            if (currentQuizIndexEster >= shuffledQuizQuestionsEster.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionEster').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsEster').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreEster}, Erros: ${wrongAnswersEster}</p>`;
+                document.getElementById('quizFeedbackEster').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsEster[currentQuizIndexEster];
+            document.getElementById('quizQuestionEster').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsEster');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerEster(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackEster').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressEster();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerEster(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackEster');
+            const optionsButtons = document.querySelectorAll('#quizOptionsEster button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreEster++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersEster++;
+            }
+            document.getElementById('quizScoreEster').textContent = `Acertos: ${scoreEster}, Erros: ${wrongAnswersEster}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionEster() {
+            currentQuizIndexEster++;
+            displayQuestionEster();
+        }
+
+        // Dados para o gráfico de temas de Ester
+        const esterChartData = {
+            labels: ['Providência Divina', 'Coragem', 'Oposição/Perseguição', 'Libertação', 'Liderança', 'Festa do Purim', 'Identidade Judaica'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 15, 15, 10, 10, 5], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const esterChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Ester',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderEsterChart() {
+            const ctx = document.getElementById('esterChart').getContext('2d');
+            if (esterChartInstance) {
+                esterChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            esterChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: esterChartData,
+                options: esterChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

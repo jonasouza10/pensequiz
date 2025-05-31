@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Êxodo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Êxodo Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Êxodo</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Êxodo</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a libertação de Israel da escravidão no Egito, a jornada pelo deserto e a revelação da Lei no Monte Sinai. Entenda a formação de Israel como nação e a construção do Tabernáculo. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Êxodo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Êxodo, o segundo livro do Pentateuco, narra a dramática libertação dos israelitas da escravidão no Egito, a jornada pelo deserto em direção à Terra Prometida e a revelação da Lei de Deus no Monte Sinai. É um livro fundamental para a compreensão da identidade e da fé do povo de Israel.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Atribuído a Moisés, o livro de Êxodo detalha a intervenção divina na história, a formação de um povo para Deus e o estabelecimento de uma aliança baseada na Lei. Ele se divide em duas grandes seções:</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-18: Libertação e Jornada.</strong> Descreve a opressão israelita no Egito, o nascimento e chamado de Moisés, as Dez Pragas, a Páscoa, a saída do Egito, a travessia do Mar Vermelho e os primeiros milagres no deserto.</li>
+                <li><strong>Capítulos 19-40: Aliança e Adoração.</strong> Detalha a entrega dos Dez Mandamentos e outras leis no Monte Sinai, a construção do Tabernáculo e a instituição do sacerdócio.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Êxodo estabelece temas cruciais como a soberania de Deus, a redenção, a santidade, a aliança e a adoração. É a história da libertação de Deus e do Seu desejo de habitar entre o Seu povo.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Êxodo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Êxodo relata a libertação, a legislação e a construção do Tabernáculo, formando Israel como nação.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Libertação de Israel (Capítulos 1-18)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Escravidão e Preparação (Capítulos 1-4):</strong> A opressão dos israelitas no Egito e o nascimento e chamado de Moisés.</li>
+                <li><strong>B. As Pragas e a Páscoa (Capítulos 5-12):</strong> O confronto entre Moisés e Faraó, as dez pragas e a instituição da Páscoa como memorial da libertação.</li>
+                <li><strong>C. A Saída do Egito (Capítulos 13-18):</strong> A travessia do Mar Vermelho, os primeiros milagres no deserto (maná, água da rocha) e a chegada ao Monte Sinai.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Aliança e a Adoração (Capítulos 19-40)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Lei no Sinai (Capítulos 19-24):</strong> A chegada ao Monte Sinai, a entrega dos Dez Mandamentos e a confirmação da aliança.</li>
+                <li><strong>B. O Tabernáculo e o Sacerdócio (Capítulos 25-31):</strong> Instruções detalhadas para a construção do Tabernáculo e a consagração dos sacerdotes.</li>
+                <li><strong>C. O Bezerro de Ouro e a Renovação da Aliança (Capítulos 32-34):</strong> A idolatria do povo, a intercessão de Moisés e a renovação da aliança.</li>
+                <li><strong>D. A Construção do Tabernáculo (Capítulos 35-40):</strong> A execução das instruções para o Tabernáculo e a manifestação da glória de Deus.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Êxodo é o livro da redenção, onde Deus demonstra seu poder libertador para com seu povo. Ele revela a natureza de Deus como o Senhor que cumpre suas promessas e exige santidade de seu povo. A Lei é dada não como meio de salvação, mas como um guia para a vida em aliança com Deus. O Tabernáculo, por sua vez, simboliza a presença de Deus em meio ao seu povo, apontando para a habitação futura de Deus entre os homens.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridExodus">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Êxodo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Êxodo, capítulo por capítulo e por blocos temáticos, destacando as narrativas fundamentais.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Libertação de Israel do Egito (Capítulos 1-18)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-2:</strong> A Opressão Israelita e o Nascimento de Moisés.</li>
+                <li><strong>Capítulos 3-4:</strong> O Chamado de Moisés no Monte Horebe.</li>
+                <li><strong>Capítulos 5-11:</strong> Moisés e Arão perante Faraó; as Dez Pragas.</li>
+                <li><strong>Capítulos 12:</strong> A Instituição da Páscoa.</li>
+                <li><strong>Capítulos 13-14:</strong> A Saída do Egito e a Travessia do Mar Vermelho.</li>
+                <li><strong>Capítulos 15-18:</strong> A Jornada no Deserto: Águas Amargas, Maná, Água da Rocha, Batalha contra Amaleque e o Conselho de Jetro.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Aliança no Sinai e a Adoração (Capítulos 19-40)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 19-20:</strong> A Chegada ao Sinai e a Entrega dos Dez Mandamentos.</li>
+                <li><strong>Capítulos 21-23:</strong> Leis Civis e Sociais.</li>
+                <li><strong>Capítulos 24:</strong> A Confirmação da Aliança.</li>
+                <li><strong>Capítulos 25-31:</strong> Instruções para o Tabernáculo e o Sacerdócio.</li>
+                <li><strong>Capítulos 32-34:</strong> O Bezerro de Ouro, a Intercessão de Moisés e a Renovação da Aliança.</li>
+                <li><strong>Capítulos 35-40:</strong> A Construção e Dedicação do Tabernáculo; a Glória de Deus o enche.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Êxodo</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Redenção e Libertação:</strong> Deus age poderosamente para libertar seu povo da escravidão, estabelecendo um padrão para a salvação futura.</li>
+                <li><strong>Aliança:</strong> A formalização da aliança mosaica no Sinai, onde Deus estabelece sua lei como base para o relacionamento com Israel.</li>
+                <li><strong>Presença de Deus:</strong> A glória de Deus manifestada no Tabernáculo, que serve como morada de Deus entre seu povo.</li>
+                <li><strong>Santidade:</strong> A exigência de Deus por santidade de seu povo, tanto em sua conduta quanto em sua adoração.</li>
+                <li><strong>Soberania Divina:</strong> Deus demonstra seu controle absoluto sobre a história, sobre nações e sobre os elementos da natureza.</li>
+                <li><strong>Mediador:</strong> Moisés como o principal mediador entre Deus e Israel, prefigurando o papel de Cristo.</li>
+                <li><strong>Adoração e Sacrifício:</strong> A instituição do sistema sacrificial e das festas, que apontam para a necessidade de expiação e para a futura obra de Cristo.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Êxodo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersExodus">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Êxodo</h2>
+            <div id="quizContainerExodus" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionExodus"></p>
+                <div id="quizOptionsExodus" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackExodus" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionExodus()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressExodus"></span></p>
+                <p>Pontuação: <span id="quizScoreExodus">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Êxodo</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Êxodo.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="exodusChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal()">&times;</span>
+                <h3 id="modalCharacterName" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Êxodo",
+            "short_name": "Êxodo",
+            "description": "Explore o livro de Êxodo de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=EX",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=EX",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'exodus-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsExodus();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksExodus();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsExodus(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexExodus = 0; // Reinicia o quiz
+                scoreExodus = 0;
+                wrongAnswersExodus = 0;
+                document.getElementById('quizScoreExodus').textContent = `Acertos: ${scoreExodus}, Erros: ${wrongAnswersExodus}`;
+                displayQuestionExodus();
+            }
+            if (sectionId === 'grafico') {
+                renderExodusChart();
+            }
+        }
+
+        // Dados dos personagens para Êxodo
+        const characterDetailsExodus = {
+            "Deus": {
+                name: "Deus (Jeová/Elohim)",
+                description: "O Deus de Israel que se revela a Moisés, liberta seu povo com poder, estabelece sua aliança e habita em meio a eles através do Tabernáculo."
+            },
+            "Moisés": {
+                name: "Moisés",
+                description: "O principal líder de Israel, escolhido por Deus para libertar seu povo do Egito, mediador da aliança no Sinai e construtor do Tabernáculo."
+            },
+            "Arão": {
+                name: "Arão",
+                description: "Irmão de Moisés, porta-voz de Deus perante Faraó e o povo, e o primeiro sumo sacerdote de Israel."
+            },
+            "Faraó": {
+                name: "Faraó (do Egito)",
+                description: "O governante do Egito que oprimiu os israelitas e cujo coração foi endurecido, levando às Dez Pragas e à libertação de Israel."
+            },
+            "Miriã": {
+                name: "Miriã",
+                description: "Irmã de Moisés e Arão, uma profetisa que liderou as mulheres de Israel em cânticos de louvor após a travessia do Mar Vermelho."
+            },
+            "Jetro": {
+                name: "Jetro",
+                description: "Sogro de Moisés, sacerdote de Midiã, que aconselhou Moisés sobre a organização da liderança do povo no deserto."
+            },
+            "Bezalel": {
+                name: "Bezalel",
+                description: "Chefe dos artesãos, dotado por Deus com sabedoria, entendimento e conhecimento para construir o Tabernáculo e seus utensílios."
+            },
+            "Aoliabe": {
+                name: "Aoliabe",
+                description: "Assistente de Bezalel, também dotado por Deus para ajudar na construção do Tabernáculo."
+            },
+            "As Parteiras (Sifrá e Puá)": {
+                name: "Sifrá e Puá",
+                description: "Parteiras hebréias que desobedeceram à ordem de Faraó de matar os bebês israelitas, temendo a Deus."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModal(characterName) {
+            const details = characterDetailsExodus[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName').textContent = details.name;
+                document.getElementById('modalCharacterDescription').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsExodus() {
+            const grid = document.getElementById('characterGridExodus');
+            grid.innerHTML = '';
+            for (const key in characterDetailsExodus) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModal(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksExodus() {
+            const chaptersDiv = document.getElementById('chaptersExodus');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 40; i++) { // Êxodo tem 40 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/ex/${i}`; // Link para a Bíblia Online, Êxodo
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Dados do quiz para Êxodo
+        let allQuizQuestionsExodus = [
+            { question: "Qual é o significado do nome 'Êxodo'?", options: ["Aliança", "Partida", "Lei", "Deserto"], answer: "Partida", reference: "Introdução ao livro" },
+            { question: "Em que país os israelitas estavam escravizados no início de Êxodo?", options: ["Canaã", "Babilônia", "Assíria", "Egito"], answer: "Egito", reference: "Êxodo 1:11" },
+            { question: "Quem foi o líder escolhido por Deus para libertar os israelitas?", options: ["Arão", "Josué", "Moisés", "Calebe"], answer: "Moisés", reference: "Êxodo 3:10" },
+            { question: "Qual foi o sinal que Deus deu a Moisés no Monte Horebe?", options: ["Uma nuvem escura", "Um arbusto em chamas que não se consumia", "Um rio se transformando em sangue", "Uma voz do céu"], answer: "Um arbusto em chamas que não se consumia", reference: "Êxodo 3:2" },
+            { question: "Qual o nome do irmão de Moisés, que se tornou seu porta-voz?", options: ["Jetro", "Josué", "Arão", "Calebe"], answer: "Arão", reference: "Êxodo 4:14" },
+            { question: "Quantas pragas Deus enviou sobre o Egito?", options: ["Sete", "Dez", "Doze", "Cinco"], answer: "Dez", reference: "Êxodo 7-12" },
+            { question: "Qual foi a última praga que Deus enviou sobre o Egito?", options: ["Água em sangue", "Rãs", "Piolhos", "Morte dos primogênitos"], answer: "Morte dos primogênitos", reference: "Êxodo 12:29-30" },
+            { question: "Que festa foi instituída para celebrar a libertação de Israel do Egito?", options: ["Festa dos Tabernáculos", "Páscoa", "Pentecostes", "Dia da Expiação"], answer: "Páscoa", reference: "Êxodo 12:14" },
+            { question: "Que corpo de água os israelitas atravessaram em sua fuga do Egito?", options: ["Rio Nilo", "Mar da Galileia", "Mar Vermelho", "Rio Jordão"], answer: "Mar Vermelho", reference: "Êxodo 14:21-22" },
+            { question: "O que Deus proveu para o povo de Israel comer no deserto?", options: ["Frutas", "Maná e codornizes", "Pão e peixe", "Carne"], answer: "Maná e codornizes", reference: "Êxodo 16:13-15" },
+            { question: "De onde Moisés fez a água sair para o povo no deserto?", options: ["De uma árvore", "De uma rocha", "De um poço", "Do céu"], answer: "De uma rocha", reference: "Êxodo 17:6" },
+            { question: "No Monte Sinai, o que Deus deu a Moisés para o povo de Israel?", options: ["Um mapa", "Os Dez Mandamentos", "Roupas novas", "Alimentos"], answer: "Os Dez Mandamentos", reference: "Êxodo 20:1-17" },
+            { question: "Qual foi o primeiro mandamento dado por Deus?", options: ["Não matarás", "Não terás outros deuses diante de mim", "Honra teu pai e tua mãe", "Não furtarás"], answer: "Não terás outros deuses diante de mim", reference: "Êxodo 20:3" },
+            { question: "O que o povo de Israel fez enquanto Moisés estava no Monte Sinai recebendo a Lei?", options: ["Construíram um templo", "Adoraram um bezerro de ouro", "Rebelaram-se contra Arão", "Foram à guerra"], answer: "Adoraram um bezerro de ouro", reference: "Êxodo 32:4" },
+            { question: "Qual foi o nome da tenda de encontro onde Deus se manifestava ao povo?", options: ["Templo de Salomão", "Arca da Aliança", "Tabernáculo", "Sinagoga"], answer: "Tabernáculo", reference: "Êxodo 25:8-9" },
+            { question: "Qual material precioso foi usado extensivamente na construção do Tabernáculo?", options: ["Ferro", "Bronze", "Ouro", "Prata"], answer: "Ouro", reference: "Êxodo 25:11, 17, 24, 31, etc." },
+            { question: "Quem foi o primeiro sumo sacerdote de Israel?", options: ["Moisés", "Josué", "Arão", "Calebe"], answer: "Arão", reference: "Êxodo 28:1" },
+            { question: "O que estava dentro da Arca da Aliança?", options: ["Maná, o bordão de Arão e as tábuas da Lei", "Pedras preciosas e ouro", "Armas e mantimentos", "Vestes sacerdotais"], answer: "Maná, o bordão de Arão e as tábuas da Lei", reference: "Êxodo 25:16, Hebreus 9:4" },
+            { question: "Como a glória de Deus se manifestou quando o Tabernáculo foi concluído?", options: ["Com um grande terremoto", "Com fogo do céu", "Com uma nuvem cobrindo a tenda", "Com um anjo descendo"], answer: "Com uma nuvem cobrindo a tenda", reference: "Êxodo 40:34-35" },
+            { question: "Qual foi o nome do pai de Moisés?", options: ["Arão", "Levi", "Anrão", "Corá"], answer: "Anrão", reference: "Êxodo 6:20" },
+            { question: "Qual foi o nome da mãe de Moisés?", options: ["Miriã", "Joquebede", "Zípora", "Rebeca"], answer: "Joquebede", reference: "Êxodo 6:20" },
+            { question: "Qual rio Moisés foi lançado em um cesto?", options: ["Rio Jordão", "Rio Tigre", "Rio Eufrates", "Rio Nilo"], answer: "Rio Nilo", reference: "Êxodo 2:3" },
+            { question: "Quem tirou Moisés do rio?", options: ["Sifrá", "A filha de Faraó", "Miriã", "Zípora"], answer: "A filha de Faraó", reference: "Êxodo 2:5-6" },
+            { question: "Onde Moisés fugiu depois de matar um egípcio?", options: ["Canaã", "Midiã", "Mesopotâmia", "Harã"], answer: "Midiã", reference: "Êxodo 2:15" },
+            { question: "Quem era a esposa de Moisés?", options: ["Leia", "Raquel", "Zípora", "Rebeca"], answer: "Zípora", reference: "Êxodo 2:21" },
+            { question: "Qual o nome do sogro de Moisés?", options: ["Labão", "Ismael", "Jetro", "Uri"], answer: "Jetro", reference: "Êxodo 3:1" },
+            { question: "Qual a idade de Moisés quando ele e Arão falaram com Faraó pela primeira vez?", options: ["60 e 63 anos", "70 e 73 anos", "80 e 83 anos", "90 e 93 anos"], answer: "80 e 83 anos", reference: "Êxodo 7:7" },
+            { question: "Qual foi a primeira praga?", options: ["Rãs", "Água em sangue", "Moscas", "Piolhos"], answer: "Água em sangue", reference: "Êxodo 7:20-21" },
+            { question: "O que os magos do Egito conseguiram replicar nas primeiras pragas?", options: ["Todas as pragas", "Nenhuma praga", "As três primeiras pragas", "As duas primeiras pragas"], answer: "As duas primeiras pragas", reference: "Êxodo 7:22, 8:7" },
+            { question: "Qual praga afetou apenas os egípcios e não os israelitas?", options: ["Rãs", "Piolhos", "Moscas", "Todas as pragas"], answer: "Moscas", reference: "Êxodo 8:22-23" },
+            { question: "Qual foi a praga que causou tumores nos egípcios?", options: ["Sarna e úlceras", "Moscas", "Gafanhotos", "Trevas"], answer: "Sarna e úlceras", reference: "Êxodo 9:9-11" },
+            { question: "Por quantos dias durou a praga das trevas?", options: ["Um dia", "Três dias", "Sete dias", "Dez dias"], answer: "Três dias", reference: "Êxodo 10:22" },
+            { question: "O que os israelitas deviam usar nos umbrais e na verga das portas para serem poupados na décima praga?", options: ["Óleo", "Água", "Sangue de cordeiro", "Sal"], answer: "Sangue de cordeiro", reference: "Êxodo 12:7" },
+            { question: "Qual o nome do local onde os israelitas acamparam antes de atravessar o Mar Vermelho?", options: ["Elim", "Mara", "Pi-Hairote", "Refidim"], answer: "Pi-Hairote", reference: "Êxodo 14:2" },
+            { question: "De que coluna Deus guiava os israelitas de dia no deserto?", options: ["Fogo", "Fumaça", "Nuvem", "Luz"], answer: "Nuvem", reference: "Êxodo 13:21" },
+            { question: "E de que coluna Deus guiava os israelitas de noite no deserto?", options: ["Nuvem", "Fumaça", "Fogo", "Luz"], answer: "Fogo", reference: "Êxodo 13:21" },
+            { question: "Qual o nome do lugar onde as águas eram amargas e foram adoçadas por Moisés?", options: ["Elim", "Mara", "Refidim", "Sinai"], answer: "Mara", reference: "Êxodo 15:23-25" },
+            { question: "O que significa 'Maná'?", options: ["Pão do céu", "O que é isso?", "Comida de anjo", "Doce"], answer: "O que é isso?", reference: "Êxodo 16:15" },
+            { question: "Que povo atacou os israelitas em Refidim?", options: ["Moabitas", "Amalequitas", "Cananeus", "Filisteus"], answer: "Amalequitas", reference: "Êxodo 17:8" },
+            { question: "Quem segurou as mãos de Moisés durante a batalha contra os amalequitas?", options: ["Arão e Hur", "Josué e Calebe", "Jetro e Arão", "Miriã e Hur"], answer: "Arão e Hur", reference: "Êxodo 17:12" },
+            { question: "Qual o nome do monte onde a Lei foi dada a Israel?", options: ["Monte Moriá", "Monte Carmelo", "Monte Sinai (Horebe)", "Monte Sião"], answer: "Monte Sinai (Horebe)", reference: "Êxodo 19:1-2" },
+            { question: "Quantos Mandamentos principais foram dados por Deus no Sinai?", options: ["Cinco", "Sete", "Dez", "Doze"], answer: "Dez", reference: "Êxodo 20:1-17" },
+            { question: "Qual foi o nome do filho de Moisés nascido em Midiã, que significa 'forasteiro ali'?", options: ["Gérson", "Eliézer", "Arão", "Josué"], answer: "Gérson", reference: "Êxodo 2:22" },
+            { question: "Qual o nome do outro filho de Moisés, cujo nome significa 'Deus é meu auxílio'?", options: ["Gérson", "Eliézer", "Josué", "Calebe"], answer: "Eliézer", reference: "Êxodo 18:4" },
+            { question: "O que era o 'propiciatório' no Tabernáculo?", options: ["A pia de bronze", "O altar do holocausto", "A tampa da Arca da Aliança", "A mesa dos pães da proposição"], answer: "A tampa da Arca da Aliança", reference: "Êxodo 25:17-22" },
+            { question: "Quantos 'cortinas' formavam as paredes do Tabernáculo?", options: ["Dez", "Doze", "Vinte", "Oito"], answer: "Dez", reference: "Êxodo 26:1" },
+            { question: "Qual a cor principal das vestes sacerdotais, simbolizando a pureza?", options: ["Vermelho", "Azul", "Branco", "Púrpura"], answer: "Branco", reference: "Êxodo 28:6, 39:27" },
+            { question: "Que pedra preciosa estava no peitoral do sumo sacerdote, representando a tribo de Judá?", options: ["Rubi", "Safira", "Esmeralda", "Carbunclo"], answer: "Carbunclo", reference: "Êxodo 28:18 (conforme algumas traduções, Judá era a terceira pedra, a esmeralda ou carbunclo)" },
+            { question: "Qual o nome do local mais santo no Tabernáculo?", options: ["Átrio Exterior", "Lugar Santo", "Santo dos Santos", "Altar"], answer: "Santo dos Santos", reference: "Êxodo 26:33-34" },
+            { question: "Quem eram os dois artesãos principais encarregados da construção do Tabernáculo?", options: ["Josué e Calebe", "Bezalel e Aoliabe", "Arão e Hur", "Dã e Naftali"], answer: "Bezalel e Aoliabe", reference: "Êxodo 31:2-6" },
+            { question: "O que Moisés quebrou ao ver o bezerro de ouro?", options: ["Seu cajado", "As tábuas da Lei", "Uma jarra de maná", "Sua tenda"], answer: "As tábuas da Lei", reference: "Êxodo 32:19" },
+            { question: "Como Moisés purificou o bezerro de ouro?", options: ["Queimou-o, moeu-o, espalhou-o na água e fez o povo beber", "Enterrou-o no deserto", "Queimou-o e espalhou as cinzas", "Levou-o de volta ao Egito"], answer: "Queimou-o, moeu-o, espalhou-o na água e fez o povo beber", reference: "Êxodo 32:20" },
+            { question: "Quem se posicionou ao lado de Moisés para punir os idólatras do bezerro de ouro?", options: ["A tribo de Judá", "A tribo de Levi", "A tribo de Benjamim", "A tribo de Simeão"], answer: "A tribo de Levi", reference: "Êxodo 32:26-28" },
+            { question: "O que Moisés pediu para ver de Deus após o incidente do bezerro de ouro?", options: ["Sua mão", "Sua glória", "Sua face", "Sua voz"], answer: "Sua glória", reference: "Êxodo 33:18" },
+            { question: "O que Deus escreveu nas segundas tábuas da Lei?", options: ["Os Dez Mandamentos", "A história do dilúvio", "Os nomes das tribos", "A história de Abraão"], answer: "Os Dez Mandamentos", reference: "Êxodo 34:1, 28" },
+            { question: "Qual o nome da montanha onde Moisés recebeu a Lei?", options: ["Monte Carmelo", "Monte Sinai", "Monte Sião", "Monte Horebe"], answer: "Monte Sinai", reference: "Êxodo 19:20" },
+            { question: "Que animal foi oferecido como sacrifício na Páscoa?", options: ["Um novilho", "Um bode", "Um cordeiro", "Uma ovelha"], answer: "Um cordeiro", reference: "Êxodo 12:3, 5" },
+            { question: "Como os israelitas conseguiram passar pelo Mar Vermelho?", options: ["Nadando", "Em barcos", "As águas se abriram", "Atravessaram na maré baixa"], answer: "As águas se abriram", reference: "Êxodo 14:21" },
+            { question: "Qual era o objetivo principal do Tabernáculo?", options: ["Um lugar de morada para o povo", "Um local para guardar tesouros", "Um lugar para Deus habitar entre seu povo", "Uma fortaleza militar"], answer: "Um lugar para Deus habitar entre seu povo", reference: "Êxodo 25:8" },
+            { question: "Qual o nome do sumo sacerdote que ungiu Arão e seus filhos?", options: ["Moisés", "Josué", "Jetro", "Eliézer"], answer: "Moisés", reference: "Êxodo 40:12-15" },
+            { question: "Quantos anos tinham os israelitas quando saíram do Egito?", options: ["400 anos", "215 anos", "Cerca de 430 anos", "70 anos"], answer: "Cerca de 430 anos", reference: "Êxodo 12:40-41" },
+            { question: "Qual o nome da comida que o povo de Israel comeu por 40 anos no deserto?", options: ["Pão", "Maná", "Carne", "Frutas"], answer: "Maná", reference: "Êxodo 16:35" },
+            { question: "Deus feriu os egípcios com __, mas os israelitas não foram afetados.", options: ["Pestilências", "Fogo", "Terremotos", "Inundações"], answer: "Pestilências", reference: "Êxodo 9:6" },
+            { question: "Qual o nome do metal usado para a pia de bronze no Tabernáculo?", options: ["Ouro", "Prata", "Bronze", "Ferro"], answer: "Bronze", reference: "Êxodo 30:18" },
+            { question: "O que significa 'Shekinah'?", options: ["Glória de Deus", "Nuvem", "Fogo", "Presença"], answer: "Glória de Deus", reference: "Conceito teológico associado à presença divina manifestada" },
+            { question: "Qual a punição para quem adorasse outros deuses?", options: ["Exílio", "Morte", "Prisão", "Multa"], answer: "Morte", reference: "Êxodo 22:20" },
+            { question: "Qual o nome da lei que diz 'olho por olho, dente por dente'?", options: ["Lei do Retorno", "Lei da Justiça", "Lei de Talião", "Lei da Vingança"], answer: "Lei de Talião", reference: "Êxodo 21:24" },
+            { question: "Quantos dias e noites Moisés ficou no Monte Sinai recebendo a Lei?", options: ["20 dias e 20 noites", "30 dias e 30 noites", "40 dias e 40 noites", "50 dias e 50 noites"], answer: "40 dias e 40 noites", reference: "Êxodo 24:18" },
+            { question: "Qual foi o motivo da construção do Tabernáculo?", options: ["Para ter um lugar de reunião", "Para Deus habitar entre os israelitas", "Para guardar as ofertas", "Para ser uma fortaleza"], answer: "Para Deus habitar entre os israelitas", reference: "Êxodo 25:8" },
+            { question: "Quem eram os principais líderes do povo antes de Moisés?", options: ["Os anciãos de Israel", "Os príncipes do Egito", "Os capitães do exército", "Os magos"], answer: "Os anciãos de Israel", reference: "Êxodo 3:16" },
+            { question: "Qual o nome do local onde os israelitas receberam pela primeira vez o maná?", options: ["Refidim", "Deserto de Sim", "Mara", "Elim"], answer: "Deserto de Sim", reference: "Êxodo 16:1" },
+            { question: "Que aves Deus enviou para alimentar os israelitas no deserto?", options: ["Pombas", "Codornizes", "Pardais", "Gaivotas"], answer: "Codornizes", reference: "Êxodo 16:13" },
+            { question: "O que aconteceu quando Moisés ergueu sua mão com o bordão durante a batalha contra os amalequitas?", options: ["Os amalequitas fugiram", "Os israelitas prevaleciam", "Deus enviou fogo", "O sol parou"], answer: "Os israelitas prevaleciam", reference: "Êxodo 17:11" },
+            { question: "Qual conselho Jetro deu a Moisés?", options: ["Voltar ao Egito", "Designar líderes para ajudar a julgar o povo", "Atacar os cananeus", "Construir um templo imediatamente"], answer: "Designar líderes para ajudar a julgar o povo", reference: "Êxodo 18:17-23" },
+            { question: "O que representavam os chifres do altar do holocausto?", options: ["Força e poder", "Sacrifício e redenção", "Autoridade e proteção", "Beleza e santidade"], answer: "Autoridade e proteção", reference: "Êxodo 27:2 (uso simbólico na Bíblia)" },
+            { question: "Qual a punição para o sequestro no código mosaico?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Êxodo 21:16" },
+            { question: "O que a 'nuvem de glória' de Deus simbolizava sobre o Tabernáculo?", options: ["Um bom presságio", "A partida de Deus", "A presença e guia de Deus", "Um tempo de descanso"], answer: "A presença e guia de Deus", reference: "Êxodo 40:34-38" },
+            { question: "Que tipo de serpente Deus transformou o cajado de Moisés?", options: ["Cobra-real", "Naja", "Serpente do deserto", "Cobra"], answer: "Cobra", reference: "Êxodo 4:3, 7:10" },
+            { question: "Qual foi a praga que trouxe enxames de moscas sobre todo o Egito?", options: ["Quarta praga", "Sexta praga", "Oitava praga", "Décima praga"], answer: "Quarta praga", reference: "Êxodo 8:20-24" },
+            { question: "Para que servia o altar de incenso no Tabernáculo?", options: ["Para queimar sacrifícios", "Para queimar incenso aromático", "Para queimar lixo", "Para preparar comida"], answer: "Para queimar incenso aromático", reference: "Êxodo 30:1, 7-8" },
+            { question: "O que era o 'efod' no vestuário do sumo sacerdote?", options: ["Um cinto", "Um chapéu", "Uma túnica sem mangas com duas ombreiras", "Um manto"], answer: "Uma túnica sem mangas com duas ombreiras", reference: "Êxodo 28:6-12" },
+            { question: "Qual o nome do monte onde Jetro se encontrou com Moisés?", options: ["Monte Sião", "Monte Sinai", "Monte Carmelo", "Monte das Oliveiras"], answer: "Monte Sinai", reference: "Êxodo 18:5" },
+            { question: "Qual a referência bíblica para os Dez Mandamentos?", options: ["Êxodo 15", "Êxodo 20", "Êxodo 25", "Êxodo 30"], answer: "Êxodo 20", reference: "Êxodo 20:1-17" },
+            { question: "O que Deus disse a Moisés sobre a Terra Prometida?", options: ["Que era uma terra de montanhas", "Que manava leite e mel", "Que era um deserto", "Que era uma ilha"], answer: "Que manava leite e mel", reference: "Êxodo 3:8" },
+            { question: "Quem foi o faraó que endureceu o coração contra Moisés?", options: ["Ramsés II", "Amenhotep", "Tutancâmon", "O texto não o nomeia"], answer: "O texto não o nomeia", reference: "O texto bíblico não fornece o nome específico." },
+            { question: "Qual a idade de Arão quando ele e Moisés falaram com Faraó pela primeira vez?", options: ["70 anos", "73 anos", "80 anos", "83 anos"], answer: "83 anos", reference: "Êxodo 7:7" },
+            { question: "O que aconteceu com os egípcios que perseguiram os israelitas no Mar Vermelho?", options: ["Foram capturados", "Afogaram-se", "Voltaram para o Egito", "Se perderam no deserto"], answer: "Afogaram-se", reference: "Êxodo 14:27-28" },
+            { question: "Quantas tribos de Israel são mencionadas no livro de Êxodo?", options: ["Dez", "Doze", "Sete", "Cinco"], answer: "Doze", reference: "Êxodo 24:4" },
+            { question: "Qual foi a primeira lei que Deus deu a Moisés no Sinai?", options: ["Não roubarás", "Não matarás", "Eu sou o Senhor teu Deus", "Não darás falso testemunho"], answer: "Eu sou o Senhor teu Deus", reference: "Êxodo 20:2" },
+            { question: "Que tipo de madeira foi usada para a construção da Arca da Aliança?", options: ["Carvalho", "Cipreste", "Acácia", "Cedro"], answer: "Acácia", reference: "Êxodo 25:10" },
+            { question: "Qual o nome da pedra no peitoral do sumo sacerdote que representava a tribo de Levi?", options: ["Jaspe", "Ágata", "Berilo", "Topázio"], answer: "Berilo", reference: "Êxodo 28:19 (conforme algumas traduções)" },
+            { question: "Qual o nome do lugar onde Moisés encontrou Deus na sarça ardente?", options: ["Monte Sinai", "Horebe", "Elim", "Mara"], answer: "Horebe", reference: "Êxodo 3:1" },
+            { question: "O que Moisés usava para separar as águas do Mar Vermelho?", options: ["Sua mão", "Sua voz", "Seu bordão", "Uma espada"], answer: "Seu bordão", reference: "Êxodo 14:16" },
+            { question: "Quantos filhos tinha Moisés com Zípora?", options: ["Um", "Dois", "Três", "Quatro"], answer: "Dois", reference: "Êxodo 18:3-4" },
+            { question: "Qual o nome da serpente que engoliu as serpentes dos magos do Egito?", options: ["A serpente de Arão", "A serpente de Moisés", "A serpente de Faraó", "A serpente do Nilo"], answer: "A serpente de Arão", reference: "Êxodo 7:12" },
+            { question: "Para que os israelitas saquearam os egípcios antes de partir?", options: ["Para construir um novo lar", "Para fazer armas", "Para cumprir a palavra de Deus", "Para comprar alimentos"], answer: "Para cumprir a palavra de Deus", reference: "Êxodo 3:21-22, 12:35-36" },
+            { question: "Qual o significado da coluna de fogo e nuvem?", options: ["Proteção e luz", "Guia e presença divina", "Calor e sombra", "Advertência e castigo"], answer: "Guia e presença divina", reference: "Êxodo 13:21-22" },
+            { question: "O que aconteceu com a água de Mara depois da ação de Moisés?", options: ["Ficou salgada", "Ficou doce", "Desapareceu", "Ficou lamacenta"], answer: "Ficou doce", reference: "Êxodo 15:25" },
+            { question: "Qual foi o nome do lugar onde não havia pão nem água, e o povo murmurou contra Moisés?", options: ["Mara", "Refidim", "Elim", "Deserto de Sim"], answer: "Refidim", reference: "Êxodo 17:1" },
+            { question: "Quem ajudou Moisés a julgar o povo no deserto?", options: ["Arão", "Os anciãos", "Seus filhos", "Setenta homens"], answer: "Os anciãos", reference: "Êxodo 18:25" },
+            { question: "Qual era o propósito dos sacrifícios no Tabernáculo?", options: ["Alimentar os sacerdotes", "Agradar a Deus e expiar pecados", "Decorar o Tabernáculo", "Distrair o povo"], answer: "Agradar a Deus e expiar pecados", reference: "Geral dos sistemas de sacrifícios" },
+            { question: "Qual foi o material principal para o incenso sagrado?", options: ["Ouro", "Especiarias e gomas aromáticas", "Óleos e perfumes", "Flores secas"], answer: "Especiarias e gomas aromáticas", reference: "Êxodo 30:34-38" },
+            { question: "O que Deus disse a Moisés sobre o dia de sábado?", options: ["Deve ser um dia de festa", "Deve ser um dia de trabalho", "Deve ser um dia de descanso e santidade", "Deve ser um dia de jejum"], answer: "Deve ser um dia de descanso e santidade", reference: "Êxodo 20:8-11" },
+            { question: "Para que o povo de Israel contribuiu com materiais preciosos?", options: ["Para comprar terras", "Para construir o Tabernáculo", "Para dar aos sacerdotes", "Para negociar com outros povos"], answer: "Para construir o Tabernáculo", reference: "Êxodo 35:4-9" },
+            { question: "Qual o metal menos usado na construção do Tabernáculo?", options: ["Ouro", "Prata", "Bronze", "Ferro"], answer: "Ferro", reference: "O ferro não é listado entre os materiais do Tabernáculo em Êxodo" },
+            { question: "Quem eram os guardiões do Tabernáculo?", options: ["A tribo de Judá", "A tribo de Levi", "A tribo de Benjamim", "Todos os israelitas"], answer: "A tribo de Levi", reference: "Números 1:50-53 (contexto de Êxodo)" },
+            { question: "Que praga forçou Faraó a deixar os israelitas irem pela primeira vez?", options: ["As rãs", "Os piolhos", "As moscas", "A morte dos primogênitos"], answer: "A morte dos primogênitos", reference: "Êxodo 12:31-32" },
+            { question: "Qual era a finalidade dos querubins sobre o propiciatório?", options: ["Guardar a Arca", "Simbolizar a presença de Deus", "Representar os anjos", "Decorar o santuário"], answer: "Simbolizar a presença de Deus", reference: "Êxodo 25:18-22" },
+            { question: "Qual a cor do véu que separava o Santo Lugar do Santo dos Santos?", options: ["Branco", "Azul, púrpura e carmesim com querubins", "Vermelho", "Verde"], answer: "Azul, púrpura e carmesim com querubins", reference: "Êxodo 26:31-33" },
+            { question: "Quantos anos Moisés viveu?", options: ["100", "120", "110", "130"], answer: "120", reference: "Deuteronômio 34:7" },
+            { question: "Qual o animal que as leis dietéticas no deserto proibiam o consumo?", options: ["Gado", "Ovelhas", "Porcos", "Cabras"], answer: "Porcos", reference: "Levítico 11:7 (contexto da Lei mosaica)" },
+            { question: "Onde o Maná caía?", options: ["Nas árvores", "No chão", "Nas tendas", "Nos rios"], answer: "No chão", reference: "Êxodo 16:4" },
+            { question: "O que Moisés fez com a serpente de bronze que Deus o instruiu a fazer?", options: ["Queimou-a", "Enterrou-a", "Ergueu-a em um poste para curar os picados", "Escondeu-a"], answer: "Ergueu-a em um poste para curar os picados", reference: "Números 21:8-9 (contexto de Êxodo/Números)" },
+            { question: "Quem eram os dois primeiros filhos de Arão?", options: ["Nadabe e Abiú", "Gérson e Eliézer", "Eleazar e Itamar", "Corá e Datã"], answer: "Nadabe e Abiú", reference: "Êxodo 6:23" },
+            { question: "Qual a ordem das pragas?", options: ["Água em sangue, rãs, piolhos, moscas, peste, tumores, saraiva, gafanhotos, trevas, morte dos primogênitos", "Rãs, água em sangue, moscas, piolhos, tumores, peste, gafanhotos, saraiva, trevas, morte dos primogênitos", "Água em sangue, rãs, piolhos, peste, moscas, tumores, gafanhotos, saraiva, trevas, morte dos primogênitos", "Morte dos primogênitos, trevas, gafanhotos, saraiva, tumores, peste, moscas, piolhos, rãs, água em sangue"], answer: "Água em sangue, rãs, piolhos, moscas, peste, tumores, saraiva, gafanhotos, trevas, morte dos primogênitos", reference: "Êxodo 7-12" },
+            { question: "Que instrumento musical foi usado para louvar a Deus após a travessia do Mar Vermelho?", options: ["Harpa", "Tamborim", "Trombeta", "Cítara"], answer: "Tamborim", reference: "Êxodo 15:20" },
+            { question: "O que significava o 'Sinal de Sangue' da Páscoa?", options: ["Um aviso para o inimigo", "Proteção e salvação da morte", "Um sinal de guerra", "Um símbolo de poder"], answer: "Proteção e salvação da morte", reference: "Êxodo 12:13" },
+            { question: "Qual era o principal trabalho dos levitas no Tabernáculo?", options: ["Construir o Tabernáculo", "Cuidar dos animais", "Servir no Tabernáculo e transportá-lo", "Cultivar alimentos"], answer: "Servir no Tabernáculo e transportá-lo", reference: "Números 1:50-53" },
+            { question: "Qual era o propósito do cinto de Arão?", options: ["Segurar suas vestes", "Decorar o sacerdote", "Conter os Urim e Tumim", "Símbolo de autoridade"], answer: "Segurar suas vestes", reference: "Êxodo 28:39" },
+            { question: "O que Moisés fez com as primeiras tábuas da Lei depois de quebrar?", options: ["As escondeu", "As jogou fora", "As moeu em pó", "Deus o instruiu a fazer novas"], answer: "Deus o instruiu a fazer novas", reference: "Êxodo 34:1" },
+            { question: "Qual o nome da montanha onde a glória de Deus desceu como fogo?", options: ["Monte Carmelo", "Monte Sinai", "Monte Hermon", "Monte Sião"], answer: "Monte Sinai", reference: "Êxodo 19:18" },
+            { question: "Como Faraó tentou controlar o crescimento dos israelitas antes de Moisés?", options: ["Aumentando seus impostos", "Forçando-os a trabalhar mais e matando os bebês meninos", "Enviando-os para a guerra", "Vendendo-os como escravos a outras nações"], answer: "Forçando-os a trabalhar mais e matando os bebês meninos", reference: "Êxodo 1:11, 16" },
+            { question: "Qual o nome do pai de Jetro?", options: ["Reuel", "Labão", "Ismael", "Uri"], answer: "Reuel", reference: "Êxodo 2:18" },
+            { question: "O que Deus disse que faria se Faraó não libertasse o povo?", options: ["Enviaria um exército", "Destruiria o Egito", "Faria morrer o primogênito de Faraó", "Enviaria uma doença"], answer: "Faria morrer o primogênito de Faraó", reference: "Êxodo 4:23" },
+            { question: "Qual a diferença entre a Lei e os Dez Mandamentos?", options: ["São a mesma coisa", "Os Dez Mandamentos são parte da Lei, que é mais abrangente", "A Lei é apenas para sacerdotes", "Os Dez Mandamentos são a única Lei"], answer: "Os Dez Mandamentos são parte da Lei, que é mais abrangente", reference: "Contexto bíblico" },
+            { question: "Que parte do Tabernáculo continha o candelabro e a mesa dos pães da proposição?", options: ["O Santo dos Santos", "O Átrio Exterior", "O Lugar Santo", "A Porta do Tabernáculo"], answer: "O Lugar Santo", reference: "Êxodo 26:35" },
+            { question: "Qual o nome do óleo usado para ungir os sacerdotes e o Tabernáculo?", options: ["Óleo de oliva", "Óleo sagrado da unção", "Óleo de mirra", "Óleo de bálsamo"], answer: "Óleo sagrado da unção", reference: "Êxodo 30:22-33" },
+            { question: "Qual o significado de 'maná'?", options: ["O que é isso?", "Comida do deserto", "Pão do céu", "Alimento divino"], answer: "O que é isso?", reference: "Êxodo 16:15" },
+            { question: "Quem ajudou Moisés a falar com Faraó, pois Moisés se considerava 'pesado de boca'?", options: ["Jetro", "Josué", "Arão", "Miriã"], answer: "Arão", reference: "Êxodo 4:10-16" },
+            { question: "Qual o nome do rio onde os israelitas foram forçados a lançar seus filhos?", options: ["Eufrates", "Jordão", "Nilo", "Tigre"], answer: "Nilo", reference: "Êxodo 1:22" },
+            { question: "O que a coluna de nuvem e fogo fez quando o exército egípcio perseguiu os israelitas?", options: ["Os cegou", "Os guiou", "Os cobriu", "Separou os israelitas dos egípcios"], answer: "Separou os israelitas dos egípcios", reference: "Êxodo 14:19-20" },
+            { question: "Quantos anos o povo de Israel ficou no deserto, conforme profetizado?", options: ["20 anos", "40 anos", "60 anos", "80 anos"], answer: "40 anos", reference: "Números 14:33 (contexto de Êxodo)" },
+            { question: "Qual era a fonte de luz no Lugar Santo do Tabernáculo?", options: ["Janelas", "Velas", "O Candelabro (Menorá)", "Lampiões"], answer: "O Candelabro (Menorá)", reference: "Êxodo 25:31-40" },
+            { question: "O que foi feito com o sangue do cordeiro da Páscoa?", options: ["Jogado no rio", "Passado nos umbrais das portas", "Enterrado", "Derramado no altar"], answer: "Passado nos umbrais das portas", reference: "Êxodo 12:7" },
+            { question: "Que praga transformou a água em sangue?", options: ["A primeira praga", "A segunda praga", "A terceira praga", "A quarta praga"], answer: "A primeira praga", reference: "Êxodo 7:19-21" },
+            { question: "Qual o nome da cidade de onde os israelitas partiram do Egito?", options: ["Cairo", "Alexandria", "Ramessés", "Memphis"], answer: "Ramessés", reference: "Êxodo 12:37" },
+            { question: "Para que serviam os sinos nas vestes de Arão?", options: ["Para fazer barulho", "Para anunciar sua presença", "Para assustar demônios", "Para decorar a veste"], answer: "Para anunciar sua presença", reference: "Êxodo 28:33-35" },
+            { question: "Qual a punição para quem ferisse um homem grávido e a mulher abortasse, mas sem mais danos?", options: ["Morte", "Multa", "Prisão", "Exílio"], answer: "Multa", reference: "Êxodo 21:22" },
+            { question: "Qual a festa anual que os israelitas deveriam celebrar em memória da saída do Egito?", options: ["Festa das Semanas", "Festa dos Pães Asmos", "Festa dos Tabernáculos", "Festa das Trombetas"], answer: "Festa dos Pães Asmos", reference: "Êxodo 12:15-20" },
+            { question: "Qual o nome da esposa de Arão?", options: ["Joquebede", "Elisabete", "Miriã", "Zípora"], answer: "Elisabete", reference: "Êxodo 6:23" },
+            { question: "Onde o Senhor falava com Moisés 'face a face, como fala qualquer a seu amigo'?", options: ["No Tabernáculo", "No Monte Sinai", "Na Tenda da Congregação", "No Egito"], answer: "Na Tenda da Congregação", reference: "Êxodo 33:11" },
+            { question: "Qual o nome do avô de Moisés?", options: ["Levi", "Coate", "Anrão", "Merari"], answer: "Coate", reference: "Êxodo 6:18" },
+            { question: "Qual a pedra preciosa que estava no ombro de Arão, representando as tribos de Israel?", options: ["Ônix", "Diamante", "Rubi", "Safira"], answer: "Ônix", reference: "Êxodo 28:9-12" },
+            { question: "Qual a única praga que os magos do Egito não conseguiram reproduzir?", options: ["Rãs", "Piolhos", "Moscas", "Peste"], answer: "Piolhos", reference: "Êxodo 8:18" },
+            { question: "Para que servia o 'Urim e Tumim' no peitoral do sumo sacerdote?", options: ["Para decoração", "Para iluminação", "Para consultar a vontade de Deus", "Para pesar ofertas"], answer: "Para consultar a vontade de Deus", reference: "Êxodo 28:30" },
+            { question: "O que os israelitas murmuravam no deserto?", options: ["Contra Moisés e Arão por falta de comida e água", "Contra Deus por não terem voltado ao Egito", "Pela dureza da jornada", "Por não terem líderes"], answer: "Contra Moisés e Arão por falta de comida e água", reference: "Êxodo 15:24, 16:2, 17:3" },
+            { question: "Qual o nome do monte onde o povo viu relâmpagos e trovões e ouviu o som de uma trombeta muito forte?", options: ["Monte Moriá", "Monte Sinai", "Monte Carmelo", "Monte Sião"], answer: "Monte Sinai", reference: "Êxodo 19:16" },
+            { question: "Qual o animal que não devia ser cozido no leite da sua mãe?", options: ["Cabra", "Cordeiro", "Novilho", "Bode"], answer: "Cordeiro", reference: "Êxodo 23:19" },
+            { question: "Qual era a profissão de Moisés antes de ser chamado por Deus?", options: ["Pastor de ovelhas", "Carpinteiro", "Pescador", "Escritor"], answer: "Pastor de ovelhas", reference: "Êxodo 3:1" },
+            { question: "Qual foi a praga que destruiu as plantações e árvores no Egito?", options: ["Gafanhotos", "Saraiva", "Peste", "Trevas"], answer: "Saraiva", reference: "Êxodo 9:23-25" },
+            { question: "Que milagre aconteceu com as sandálias de Moisés no monte da sarça ardente?", options: ["Elas flutuaram", "Elas se desintegraram", "Deus o instruiu a tirá-las por ser terra santa", "Elas mudaram de cor"], answer: "Deus o instruiu a tirá-las por ser terra santa", reference: "Êxodo 3:5" },
+            { question: "O que simbolizava o pão asmo na Páscoa?", options: ["A pressa na saída do Egito", "A pobreza dos israelitas", "A ausência de pecado", "A abundância de alimentos"], answer: "A pressa na saída do Egito", reference: "Êxodo 12:34" },
+            { question: "Que praga veio depois das rãs?", options: ["Piolhos", "Moscas", "Tumores", "Peste"], answer: "Piolhos", reference: "Êxodo 8:16" },
+            { question: "Qual a quantidade de maná que cada pessoa deveria colher por dia?", options: ["Um ômer", "Dois ômeres", "Meio ômer", "Três ômeres"], answer: "Um ômer", reference: "Êxodo 16:16" },
+            { question: "Qual a idade de Moisés quando morreu?", options: ["100", "110", "120", "130"], answer: "120", reference: "Deuteronômio 34:7" },
+            { question: "Qual o nome da profetisa que cantou um cântico de louvor após a travessia do Mar Vermelho?", options: ["Débora", "Ana", "Miriã", "Ester"], answer: "Miriã", reference: "Êxodo 15:20" },
+            { question: "Qual a principal oferta de sacrifício para a expiação dos pecados no Tabernáculo?", options: ["Oferta de cereal", "Oferta de bebida", "Oferta queimada (holocausto)", "Oferta de paz"], answer: "Oferta queimada (holocausto)", reference: "Levítico 1 (contexto de Êxodo)" },
+            { question: "O que representavam as tábuas da Lei?", options: ["Contrato de paz", "Aliança entre Deus e Israel", "Livro de histórias", "Mapa do deserto"], answer: "Aliança entre Deus e Israel", reference: "Êxodo 24:12" },
+            { question: "Quem foi o sucessor de Moisés, mencionado indiretamente em Êxodo?", options: ["Josué", "Arão", "Calebe", "Jetro"], answer: "Josué", reference: "Êxodo 17:9, 24:13, 33:11" },
+            { question: "Que animal não foi afetado pela praga da peste nos rebanhos do Egito?", options: ["Cavalos", "Cães", "Ratos", "Os rebanhos de Israel"], answer: "Os rebanhos de Israel", reference: "Êxodo 9:4, 6" },
+            { question: "Qual a punição para o assassinato premeditado no código mosaico?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Êxodo 21:12" },
+            { question: "Qual a cor dos cordões que adornavam o efod do sumo sacerdote?", options: ["Dourados", "Prateados", "Azuis", "Carmesim"], answer: "Azuis", reference: "Êxodo 28:28" },
+            { question: "Para que Moisés ergueu as mãos durante a batalha contra Amaleque?", options: ["Para se render", "Para pedir a Deus por vitória", "Para se comunicar com o povo", "Para se proteger"], answer: "Para pedir a Deus por vitória", reference: "Êxodo 17:11" },
+            { question: "Qual foi a praga que trouxe gafanhotos sobre a terra do Egito?", options: ["Sétima praga", "Oitava praga", "Nona praga", "Décima praga"], answer: "Oitava praga", reference: "Êxodo 10:12-15" },
+            // Novas 100 perguntas
+            { question: "Quantos anos os filhos de Israel habitaram no Egito?", options: ["215 anos", "300 anos", "430 anos", "500 anos"], answer: "430 anos", reference: "Êxodo 12:40" },
+            { question: "Qual foi a primeira cidade que os israelitas construíram para Faraó?", options: ["Cairo", "Gizé", "Pitom e Ramessés", "Tebas"], answer: "Pitom e Ramessés", reference: "Êxodo 1:11" },
+            { question: "Que tipo de trabalho pesado os egípcios impuseram aos israelitas?", options: ["Construção de pirâmides", "Fabricação de tijolos e todo o trabalho do campo", "Pesca e agricultura", "Comércio e artesanato"], answer: "Fabricação de tijolos e todo o trabalho do campo", reference: "Êxodo 1:14" },
+            { question: "Qual foi a ordem de Faraó para as parteiras hebréias?", options: ["Matar todas as meninas", "Matar todos os meninos", "Deixar todos viverem", "Escravizar todos os recém-nascidos"], answer: "Matar todos os meninos", reference: "Êxodo 1:16" },
+            { question: "Por que as parteiras não obedeceram à ordem de Faraó?", options: ["Tinham medo de Faraó", "Eram amigas das mulheres hebréias", "Temeram a Deus", "Não tinham força suficiente"], answer: "Temeram a Deus", reference: "Êxodo 1:17" },
+            { question: "Qual foi a recompensa de Deus para as parteiras?", options: ["Riquezas", "Terras", "Deus lhes constituiu casas", "Libertação da escravidão"], answer: "Deus lhes constituiu casas", reference: "Êxodo 1:20-21" },
+            { question: "Quem era o pai de Arão e Moisés?", options: ["Levi", "Coate", "Anrão", "Merari"], answer: "Anrão", reference: "Êxodo 6:20" },
+            { question: "Quem era a mãe de Arão e Moisés?", options: ["Miriã", "Zípora", "Joquebede", "Elisabete"], answer: "Joquebede", reference: "Êxodo 6:20" },
+            { question: "Qual o nome da irmã de Moisés?", options: ["Zípora", "Elisabete", "Miriã", "Leia"], answer: "Miriã", reference: "Êxodo 15:20" },
+            { question: "Onde Moisés foi apascentar o rebanho de Jetro quando Deus o chamou?", options: ["No deserto de Sim", "No Monte Sinai (Horebe)", "Em Midiã", "Em Refidim"], answer: "No Monte Sinai (Horebe)", reference: "Êxodo 3:1" },
+            { question: "Qual o nome de Deus revelado a Moisés na sarça ardente?", options: ["Adonai", "El Shaddai", "EU SOU O QUE SOU", "Jeová Jireh"], answer: "EU SOU O QUE SOU", reference: "Êxodo 3:14" },
+            { question: "Que milagre Moisés realizou para provar seu chamado aos israelitas?", options: ["Transformou água em vinho", "Curou um leproso", "Transformou seu bordão em serpente e sua mão em leprosa", "Fez chover fogo"], answer: "Transformou seu bordão em serpente e sua mão em leprosa", reference: "Êxodo 4:2-8" },
+            { question: "Qual foi a desculpa de Moisés para não ir a Faraó?", options: ["Era muito jovem", "Não sabia falar bem", "Não era forte o suficiente", "Tinha medo de Faraó"], answer: "Não sabia falar bem", reference: "Êxodo 4:10" },
+            { question: "Quem foi enviado por Deus para ajudar Moisés a falar?", options: ["Josué", "Calebe", "Arão", "Jetro"], answer: "Arão", reference: "Êxodo 4:14" },
+            { question: "O que Faraó fez para aumentar a opressão dos israelitas depois da primeira demanda de Moisés?", options: ["Dobrou os impostos", "Exigiu a mesma quantidade de tijolos sem palha", "Prendeu os líderes israelitas", "Os forçou a construir mais cidades"], answer: "Exigiu a mesma quantidade de tijolos sem palha", reference: "Êxodo 5:6-9" },
+            { question: "Qual foi a segunda praga sobre o Egito?", options: ["Piolhos", "Moscas", "Rãs", "Saraiva"], answer: "Rãs", reference: "Êxodo 8:6" },
+            { question: "Qual foi a terceira praga sobre o Egito?", options: ["Moscas", "Piolhos", "Peste", "Tumores"], answer: "Piolhos", reference: "Êxodo 8:17" },
+            { question: "Qual foi a quinta praga sobre o Egito?", options: ["Tumores", "Saraiva", "Gafanhotos", "Peste nos rebanhos"], answer: "Peste nos rebanhos", reference: "Êxodo 9:3" },
+            { question: "Qual foi a sexta praga sobre o Egito?", options: ["Saraiva", "Gafanhotos", "Tumores e úlceras", "Trevas"], answer: "Tumores e úlceras", reference: "Êxodo 9:10" },
+            { question: "Qual foi a sétima praga sobre o Egito?", options: ["Gafanhotos", "Trevas", "Saraiva e fogo", "Morte dos primogênitos"], answer: "Saraiva e fogo", reference: "Êxodo 9:23" },
+            { question: "Qual foi a nona praga sobre o Egito?", options: ["Gafanhotos", "Trevas", "Morte dos primogênitos", "Saraiva"], answer: "Trevas", reference: "Êxodo 10:22" },
+            { question: "Quantos dias durou a praga das trevas?", options: ["Um dia", "Dois dias", "Três dias", "Sete dias"], answer: "Três dias", reference: "Êxodo 10:22" },
+            { question: "O que os israelitas deveriam fazer com o cordeiro da Páscoa?", options: ["Cozer na água", "Assar no fogo", "Comer cru", "Oferecer a Faraó"], answer: "Assar no fogo", reference: "Êxodo 12:8" },
+            { question: "Com o que o cordeiro da Páscoa deveria ser comido?", options: ["Com pão levedado e mel", "Com ervas amargas e pães asmos", "Com frutas e vinho", "Com legumes e carne"], answer: "Com ervas amargas e pães asmos", reference: "Êxodo 12:8" },
+            { question: "O que os israelitas deveriam fazer com o que sobrasse do cordeiro da Páscoa?", options: ["Guardar para o dia seguinte", "Dar aos egípcios", "Queimar no fogo", "Enterrar"], answer: "Queimar no fogo", reference: "Êxodo 12:10" },
+            { question: "Por que os israelitas deveriam comer o cordeiro da Páscoa apressadamente?", options: ["Porque estavam com fome", "Porque era um mandamento", "Porque sairiam do Egito naquela noite", "Porque o cordeiro estragaria"], answer: "Porque sairiam do Egito naquela noite", reference: "Êxodo 12:11" },
+            { question: "Qual o nome do mar que os israelitas atravessaram a pé enxuto?", options: ["Mar Morto", "Mar da Galileia", "Mar Vermelho", "Mar Mediterrâneo"], answer: "Mar Vermelho", reference: "Êxodo 14:21" },
+            { question: "O que aconteceu com o exército de Faraó no Mar Vermelho?", options: ["Foram capturados", "Se renderam", "Foram afogados pelas águas que retornaram", "Conseguiram atravessar"], answer: "Foram afogados pelas águas que retornaram", reference: "Êxodo 14:27-28" },
+            { question: "Qual o nome do cântico que Moisés e os filhos de Israel cantaram após a travessia do Mar Vermelho?", options: ["Cântico de Débora", "Cântico de Moisés", "Cântico da Libertação", "Cântico do Mar"], answer: "Cântico de Moisés", reference: "Êxodo 15:1" },
+            { question: "O que Miriã, a profetisa, fez após o cântico de Moisés?", options: ["Dança e louvor com tamborins", "Orou em silêncio", "Construiu um altar", "Profetizou sobre o futuro"], answer: "Dança e louvor com tamborins", reference: "Êxodo 15:20" },
+            { question: "Em que lugar os israelitas murmuraram por não ter água potável?", options: ["Elim", "Refidim", "Mara", "Deserto de Sim"], answer: "Mara", reference: "Êxodo 15:23-24" },
+            { question: "Como Moisés tornou a água amarga de Mara doce?", options: ["Com sal", "Com mel", "Lançando um pedaço de madeira na água", "Com uma oração especial"], answer: "Lançando um pedaço de madeira na água", reference: "Êxodo 15:25" },
+            { question: "Onde os israelitas encontraram doze fontes de água e setenta palmeiras?", options: ["Mara", "Refidim", "Elim", "Deserto de Sim"], answer: "Elim", reference: "Êxodo 15:27" },
+            { question: "Qual o nome do deserto onde o maná começou a cair?", options: ["Deserto de Parã", "Deserto de Zim", "Deserto de Sim", "Deserto de Sinai"], answer: "Deserto de Sim", reference: "Êxodo 16:1" },
+            { question: "Por quantos dias o maná caía?", options: ["Seis dias", "Sete dias", "Cinco dias", "Todos os dias"], answer: "Seis dias", reference: "Êxodo 16:26" },
+            { question: "O que acontecia com o maná que era guardado para o dia seguinte, exceto no sábado?", options: ["Ficava doce", "Derretia", "Criava bichos e cheirava mal", "Multiplicava-se"], answer: "Criava bichos e cheirava mal", reference: "Êxodo 16:20" },
+            { question: "No sexto dia, quanto maná os israelitas deveriam colher?", options: ["Metade do normal", "O dobro do normal", "A mesma quantidade", "Nenhum"], answer: "O dobro do normal", reference: "Êxodo 16:22" },
+            { question: "O que Deus disse que faria para provar se o povo andaria na Sua lei ou não?", options: ["Enviaria pragas", "Daria maná", "Os levaria para a guerra", "Os faria passar fome"], answer: "Daria maná", reference: "Êxodo 16:4" },
+            { question: "O que os israelitas deveriam guardar como memorial do maná?", options: ["Um pedaço de pão", "Um vaso de maná", "Uma pedra", "Um pedaço de carne"], answer: "Um vaso de maná", reference: "Êxodo 16:33" },
+            { question: "Onde o vaso de maná foi colocado?", options: ["No altar", "Dentro da Arca da Aliança", "Na tenda de Moisés", "No deserto"], answer: "Dentro da Arca da Aliança", reference: "Êxodo 16:34" },
+            { question: "Em que lugar Moisés feriu a rocha para que saísse água?", options: ["Mara", "Elim", "Refidim", "Sinai"], answer: "Refidim", reference: "Êxodo 17:6" },
+            { question: "Qual o nome do local onde os israelitas lutaram contra os amalequitas?", options: ["Mara", "Elim", "Refidim", "Sinai"], answer: "Refidim", reference: "Êxodo 17:8" },
+            { question: "Quem foi o comandante do exército de Israel na batalha contra Amaleque?", options: ["Arão", "Hur", "Josué", "Calebe"], answer: "Josué", reference: "Êxodo 17:9" },
+            { question: "Qual a atitude de Moisés que garantia a vitória de Israel sobre Amaleque?", options: ["Sua oração", "Suas mãos levantadas", "Sua espada", "Sua estratégia militar"], answer: "Suas mãos levantadas", reference: "Êxodo 17:11" },
+            { question: "Qual o nome do altar que Moisés construiu após a vitória sobre Amaleque?", options: ["Jeová-Jireh", "Jeová-Nissi", "Jeová-Shalom", "Jeová-Rafá"], answer: "Jeová-Nissi", reference: "Êxodo 17:15" },
+            { question: "Quem trouxe a esposa e os filhos de Moisés para ele no deserto?", options: ["Arão", "Miriã", "Jetro", "Josué"], answer: "Jetro", reference: "Êxodo 18:5" },
+            { question: "Qual o nome do filho de Moisés que significa 'Deus é meu auxílio'?", options: ["Gérson", "Eliézer", "Levi", "Judá"], answer: "Eliézer", reference: "Êxodo 18:4" },
+            { question: "O que Jetro aconselhou Moisés a fazer para aliviar sua carga de trabalho?", options: ["Voltar ao Egito", "Nomear juízes e chefes de milhares, centenas, cinquentas e dezenas", "Construir um templo", "Pedir mais maná"], answer: "Nomear juízes e chefes de milhares, centenas, cinquentas e dezenas", reference: "Êxodo 18:21-22" },
+            { question: "Quando os israelitas chegaram ao deserto do Sinai?", options: ["No primeiro mês", "No segundo mês", "No terceiro mês", "No quarto mês"], answer: "No terceiro mês", reference: "Êxodo 19:1" },
+            { question: "O que Deus disse que faria com Israel se eles obedecessem à Sua voz e guardassem Sua aliança?", options: ["Seriam uma nação poderosa", "Seriam um reino de sacerdotes e nação santa", "Teriam muitas riquezas", "Viveriam em paz"], answer: "Seriam um reino de sacerdotes e nação santa", reference: "Êxodo 19:5-6" },
+            { question: "O que o povo deveria fazer antes de Deus descer no Monte Sinai?", options: ["Jejuar", "Lavar suas vestes e santificar-se", "Oferecer sacrifícios", "Construir um altar"], answer: "Lavar suas vestes e santificar-se", reference: "Êxodo 19:10" },
+            { question: "Qual o limite que foi estabelecido para o povo não ultrapassar no Monte Sinai?", options: ["Uma cerca", "Uma linha", "Um altar", "Um muro"], answer: "Uma linha", reference: "Êxodo 19:12" },
+            { question: "O que aconteceu no terceiro dia no Monte Sinai?", options: ["Um terremoto", "Relâmpagos, trovões, uma espessa nuvem e som de trombeta", "Apareceram anjos", "Choveu fogo"], answer: "Relâmpagos, trovões, uma espessa nuvem e som de trombeta", reference: "Êxodo 19:16" },
+            { question: "Qual o segundo mandamento?", options: ["Não matarás", "Não terás outros deuses", "Não farás para ti imagem de escultura", "Não furtarás"], answer: "Não farás para ti imagem de escultura", reference: "Êxodo 20:4" },
+            { question: "Qual o terceiro mandamento?", options: ["Não tomarás o nome do Senhor teu Deus em vão", "Lembra-te do dia do sábado", "Honra teu pai e tua mãe", "Não adulterarás"], answer: "Não tomarás o nome do Senhor teu Deus em vão", reference: "Êxodo 20:7" },
+            { question: "Qual o quarto mandamento?", options: ["Não furtarás", "Não darás falso testemunho", "Lembra-te do dia do sábado, para o santificar", "Não cobiçarás"], answer: "Lembra-te do dia do sábado, para o santificar", reference: "Êxodo 20:8" },
+            { question: "Qual o quinto mandamento?", options: ["Honra teu pai e tua mãe", "Não matarás", "Não adulterarás", "Não furtarás"], answer: "Honra teu pai e tua mãe", reference: "Êxodo 20:12" },
+            { question: "Qual o sexto mandamento?", options: ["Não adulterarás", "Não matarás", "Não furtarás", "Não darás falso testemunho"], answer: "Não matarás", reference: "Êxodo 20:13" },
+            { question: "Qual o sétimo mandamento?", options: ["Não furtarás", "Não adulterarás", "Não darás falso testemunho", "Não cobiçarás"], answer: "Não adulterarás", reference: "Êxodo 20:14" },
+            { question: "Qual o oitavo mandamento?", options: ["Não darás falso testemunho", "Não furtarás", "Não cobiçarás", "Não adulterarás"], answer: "Não furtarás", reference: "Êxodo 20:15" },
+            { question: "Qual o nono mandamento?", options: ["Não cobiçarás", "Não darás falso testemunho contra o teu próximo", "Honra teu pai e tua mãe", "Não matarás"], answer: "Não darás falso testemunho contra o teu próximo", reference: "Êxodo 20:16" },
+            { question: "Qual o décimo mandamento?", options: ["Não adulterarás", "Não furtarás", "Não cobiçarás a casa do teu próximo", "Honra teu pai e tua mãe"], answer: "Não cobiçarás a casa do teu próximo", reference: "Êxodo 20:17" },
+            { question: "O que os israelitas pediram a Moisés depois de ouvirem a voz de Deus no Sinai?", options: ["Que Deus falasse diretamente com eles", "Que Moisés falasse com Deus em seu lugar", "Que lhes desse um rei", "Que os levasse de volta ao Egito"], answer: "Que Moisés falasse com Deus em seu lugar", reference: "Êxodo 20:19" },
+            { question: "Qual o tipo de altar que Deus instruiu Moisés a construir?", options: ["De pedras lavradas", "De ouro puro", "De pedras brutas ou de terra", "De madeira"], answer: "De pedras brutas ou de terra", reference: "Êxodo 20:24-25" },
+            { question: "Qual a punição para quem amaldiçoasse pai ou mãe?", options: ["Exílio", "Multa", "Morte", "Prisão"], answer: "Morte", reference: "Êxodo 21:17" },
+            { question: "Se um boi chifrar alguém até a morte, e o boi já era conhecido por ser chifrador, qual a punição para o dono do boi?", options: ["Multa", "Prisão", "Morte", "Exílio"], answer: "Morte", reference: "Êxodo 21:29" },
+            { question: "Qual a punição para o ladrão que fosse pego arrombando uma casa à noite e fosse morto?", options: ["O assassino seria punido", "Não haveria culpa de sangue para o assassino", "O ladrão seria enterrado", "O ladrão seria preso"], answer: "Não haveria culpa de sangue para o assassino", reference: "Êxodo 22:2" },
+            { question: "O que aconteceria se um ladrão fosse pego depois do nascer do sol?", options: ["Seria morto", "Seria preso", "Seria vendido como escravo", "Deveria restituir o roubo"], answer: "Deveria restituir o roubo", reference: "Êxodo 22:3" },
+            { question: "Qual o tratamento que Deus exige para o estrangeiro, a viúva e o órfão?", options: ["Opressão", "Exploração", "Não os oprimir nem afligir", "Ignorá-los"], answer: "Não os oprimir nem afligir", reference: "Êxodo 22:21-22" },
+            { question: "O que aconteceria se alguém emprestasse dinheiro a um pobre do povo de Deus?", options: ["Deveria cobrar juros altos", "Não deveria agir como usurário e nem cobrar juros", "Deveria cobrar juros baixos", "Não deveria emprestar"], answer: "Não deveria agir como usurário e nem cobrar juros", reference: "Êxodo 22:25" },
+            { question: "Qual o dia da semana em que os israelitas deveriam descansar?", options: ["Domingo", "Sábado", "Sexta-feira", "Qualquer dia"], answer: "Sábado", reference: "Êxodo 23:12" },
+            { question: "Quantas vezes por ano todos os homens de Israel deveriam comparecer perante o Senhor?", options: ["Uma vez", "Duas vezes", "Três vezes", "Quatro vezes"], answer: "Três vezes", reference: "Êxodo 23:14, 17" },
+            { question: "Quais eram as três festas anuais que os israelitas deveriam celebrar?", options: ["Páscoa, Pentecoste e Tabernáculos", "Purim, Dedicação e Páscoa", "Ano Novo, Dia da Expiação e Páscoa", "Sábado, Lua Nova e Aniversário"], answer: "Páscoa, Pentecoste e Tabernáculos", reference: "Êxodo 23:14-17" },
+            { question: "Quem acompanhou Moisés ao Monte Sinai para receber as tábuas da Lei?", options: ["Arão", "Josué", "Os anciãos", "Arão e os anciãos"], answer: "Josué", reference: "Êxodo 24:13" },
+            { question: "O que Moisés fez com o sangue da aliança no Monte Sinai?", options: ["Derramou no altar", "Aspergiu sobre o povo e sobre o livro da aliança", "Guardou em um vaso", "Ofereceu como sacrifício"], answer: "Aspergiu sobre o povo e sobre o livro da aliança", reference: "Êxodo 24:8" },
+            { question: "Qual a cor dos tecidos para o Tabernáculo, além do linho fino?", options: ["Vermelho, amarelo e preto", "Azul, púrpura e carmesim", "Verde, marrom e cinza", "Preto, branco e dourado"], answer: "Azul, púrpura e carmesim", reference: "Êxodo 25:4" },
+            { question: "Que metais preciosos foram usados para a construção do Tabernáculo?", options: ["Ferro e cobre", "Ouro, prata e bronze", "Estanho e chumbo", "Nenhum, apenas madeira"], answer: "Ouro, prata e bronze", reference: "Êxodo 25:3" },
+            { question: "Qual o nome da mesa no Lugar Santo?", options: ["Mesa do Altar", "Mesa da Presença", "Mesa dos Pães da Proposição", "Mesa do Candelabro"], answer: "Mesa dos Pães da Proposição", reference: "Êxodo 25:23-30" },
+            { question: "Quantas lâmpadas tinha o candelabro (Menorá)?", options: ["Cinco", "Sete", "Dez", "Doze"], answer: "Sete", reference: "Êxodo 25:37" },
+            { question: "De que material era feito o candelabro?", options: ["Bronze", "Prata", "Ouro puro batido", "Cobre"], answer: "Ouro puro batido", reference: "Êxodo 25:31" },
+            { question: "Qual o nome da cortina que separava o Santo Lugar do Santo dos Santos?", options: ["Cortina da Entrada", "Cortina da Separação", "Véu", "Cortina Sagrada"], answer: "Véu", reference: "Êxodo 26:31-33" },
+            { question: "Onde ficava a Arca da Aliança no Tabernáculo?", options: ["No Átrio Exterior", "No Lugar Santo", "No Santo dos Santos", "Na entrada"], answer: "No Santo dos Santos", reference: "Êxodo 26:33-34" },
+            { question: "De que material era feito o altar do holocausto?", options: ["Ouro", "Prata", "Madeira de acácia revestida de bronze", "Pedra"], answer: "Madeira de acácia revestida de bronze", reference: "Êxodo 27:1-2" },
+            { question: "Qual o nome da pia de bronze para a lavagem dos sacerdotes?", options: ["Fonte de Água", "Bacia", "Pia de Bronze", "Tanque"], answer: "Pia de Bronze", reference: "Êxodo 30:18" },
+            { question: "O que os sacerdotes deveriam fazer antes de entrar na Tenda da Congregação ou se aproximar do altar?", options: ["Comer", "Dormir", "Lavar as mãos e os pés", "Oferecer sacrifício"], answer: "Lavar as mãos e os pés", reference: "Êxodo 30:19-21" },
+            { question: "Qual o nome do óleo usado para ungir o Tabernáculo e seus utensílios, e os sacerdotes?", options: ["Óleo de azeite", "Óleo da alegria", "Óleo sagrado da unção", "Óleo de mirra"], answer: "Óleo sagrado da unção", reference: "Êxodo 30:22-33" },
+            { question: "O que aconteceria se alguém fizesse um incenso igual ao sagrado para cheirar?", options: ["Seria abençoado", "Seria morto", "Seria expulso do povo", "Seria perdoado"], answer: "Seria expulso do povo", reference: "Êxodo 30:37-38" },
+            { question: "Qual o nome do pai de Hur?", options: ["Calebe", "Uri", "Jetro", "Josué"], answer: "Uri", reference: "Êxodo 31:2" },
+            { question: "O que Arão fez com o ouro que o povo trouxe para fazer um deus?", options: ["Escondeu-o", "Fez um bezerro de ouro", "Fez um altar", "Fez joias"], answer: "Fez um bezerro de ouro", reference: "Êxodo 32:4" },
+            { question: "O que Moisés fez com o bezerro de ouro depois de descer do monte?", options: ["Enterrou-o", "Queimou-o, moeu-o e espalhou na água", "Escondeu-o", "Deu-o aos levitas"], answer: "Queimou-o, moeu-o e espalhou na água", reference: "Êxodo 32:20" },
+            { question: "Quantos homens morreram por causa do bezerro de ouro?", options: ["Mil", "Dois mil", "Três mil", "Cinco mil"], answer: "Três mil", reference: "Êxodo 32:28" },
+            { question: "O que Moisés fez com as tábuas da Lei que quebrou?", options: ["As colou novamente", "As enterrou", "Deus fez novas tábuas", "Deus o instruiu a fazer novas"], answer: "Deus o instruiu a fazer novas", reference: "Êxodo 34:1" },
+            { question: "Quando Moisés desceu do Monte Sinai com as segundas tábuas da Lei, o que aconteceu com seu rosto?", options: ["Ficou pálido", "Brilhava", "Ficou vermelho", "Ficou escuro"], answer: "Brilhava", reference: "Êxodo 34:29" },
+            { question: "O que Moisés usava para cobrir seu rosto quando falava com o povo?", options: ["Um chapéu", "Um véu", "Uma máscara", "Suas mãos"], answer: "Um véu", reference: "Êxodo 34:33" },
+            { question: "Qual o dia da semana em que não se deveria fazer nenhum trabalho para o Senhor?", options: ["Primeiro dia", "Terceiro dia", "Sexto dia", "Sábado"], answer: "Sábado", reference: "Êxodo 35:2" },
+            { question: "Quem eram as mulheres que teciam com sabedoria para o Tabernáculo?", options: ["As esposas dos sacerdotes", "Todas as mulheres", "As mulheres de coração sábio", "As filhas de Arão"], answer: "As mulheres de coração sábio", reference: "Êxodo 35:25" },
+            { question: "O que o povo trouxe em abundância para a construção do Tabernáculo?", options: ["Comida", "Água", "Ofertas voluntárias de materiais", "Armas"], answer: "Ofertas voluntárias de materiais", reference: "Êxodo 35:29" },
+            { question: "Quem eram os responsáveis por toda a obra do Tabernáculo?", options: ["Moisés e Arão", "Bezalel e Aoliabe, e todos os homens hábeis", "Os levitas", "Os anciãos de Israel"], answer: "Bezalel e Aoliabe, e todos os homens hábeis", reference: "Êxodo 36:1" },
+            { question: "O que Moisés teve que ordenar ao povo para parar de trazer ofertas?", options: ["Que não trouxessem mais nada", "Que trouxessem menos", "Que as ofertas fossem suficientes", "Que as ofertas eram demais"], answer: "Que as ofertas eram demais", reference: "Êxodo 36:5-7" },
+            { question: "Quantas cortinas de linho fino torcido foram feitas para o Tabernáculo?", options: ["Cinco", "Dez", "Doze", "Vinte"], answer: "Dez", reference: "Êxodo 36:8" },
+            { question: "De que material eram feitos os ganchos e as colunas do pátio do Tabernáculo?", options: ["Ouro", "Prata", "Bronze", "Ferro"], answer: "Bronze", reference: "Êxodo 38:10, 11, 17" },
+            { question: "Qual o peso do ouro usado na construção do Tabernáculo?", options: ["Um talento", "Dez talentos", "Vinte e nove talentos e setecentos e trinta siclos", "Cem talentos"], answer: "Vinte e nove talentos e setecentos e trinta siclos", reference: "Êxodo 38:24" },
+            { question: "Qual o peso da prata usada na construção do Tabernáculo?", options: ["Cem talentos e mil setecentos e setenta e cinco siclos", "Cinquenta talentos", "Duzentos talentos", "Trezentos talentos"], answer: "Cem talentos e mil setecentos e setenta e cinco siclos", reference: "Êxodo 38:25" },
+            { question: "De que material eram feitos os botões e as argolas para as cortinas do Tabernáculo?", options: ["Ouro", "Prata", "Bronze", "Cobre"], answer: "Ouro", reference: "Êxodo 36:13" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de Rúben?", options: ["Sardônio", "Topázio", "Carbunclo", "Esmeralda"], answer: "Sardônio", reference: "Êxodo 28:17 (primeira pedra)" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de Simeão?", options: ["Sardônio", "Topázio", "Carbunclo", "Esmeralda"], answer: "Topázio", reference: "Êxodo 28:17 (segunda pedra)" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de Judá?", options: ["Sardônio", "Topázio", "Carbunclo", "Esmeralda"], answer: "Carbunclo", reference: "Êxodo 28:18 (terceira pedra)" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de Issacar?", options: ["Safira", "Jaspe", "Ágata", "Berilo"], answer: "Safira", reference: "Êxodo 28:18 (quarta pedra)" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de Zebulom?", options: ["Safira", "Jaspe", "Ágata", "Berilo"], answer: "Jaspe", reference: "Êxodo 28:18 (sexta pedra, algumas traduções usam 'diamante' para a quinta e 'jaspe' para a sexta, ou outras variações)" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de Gade?", options: ["Lígure", "Ágata", "Ametista", "Berilo"], answer: "Ágata", reference: "Êxodo 28:19 (oitava pedra)" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de Aser?", options: ["Lígure", "Ágata", "Ametista", "Berilo"], answer: "Ametista", reference: "Êxodo 28:19 (nona pedra)" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de Naftali?", options: ["Lígure", "Ágata", "Ametista", "Berilo"], answer: "Berilo", reference: "Êxodo 28:19 (décima pedra)" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de José?", options: ["Ônix", "Jaspe", "Safira", "Topázio"], answer: "Ônix", reference: "Êxodo 28:20 (décima primeira pedra)" },
+            { question: "Qual o nome da pedra preciosa no peitoral que representava a tribo de Benjamim?", options: ["Ônix", "Jaspe", "Safira", "Topázio"], answer: "Jaspe", reference: "Êxodo 28:20 (décima segunda pedra)" },
+            { question: "Qual o nome do primeiro filho de Arão?", options: ["Nadabe", "Abiú", "Eleazar", "Itamar"], answer: "Nadabe", reference: "Êxodo 6:23" },
+            { question: "Qual o nome do segundo filho de Arão?", options: ["Nadabe", "Abiú", "Eleazar", "Itamar"], answer: "Abiú", reference: "Êxodo 6:23" },
+            { question: "Qual o nome do terceiro filho de Arão?", options: ["Nadabe", "Abiú", "Eleazar", "Itamar"], answer: "Eleazar", reference: "Êxodo 6:23" },
+            { question: "Qual o nome do quarto filho de Arão?", options: ["Nadabe", "Abiú", "Eleazar", "Itamar"], answer: "Itamar", reference: "Êxodo 6:23" },
+            { question: "O que Moisés fez depois de receber as instruções para o Tabernáculo e o sacerdócio?", options: ["Começou a construir imediatamente", "Contou ao povo", "Ficou 40 dias e 40 noites no monte", "Desceu do monte"], answer: "Ficou 40 dias e 40 noites no monte", reference: "Êxodo 24:18" },
+            { question: "Qual o nome do monte onde Moisés foi para receber as tábuas da Lei?", options: ["Horebe", "Carmelo", "Sião", "Moriá"], answer: "Horebe", reference: "Êxodo 3:1" },
+            { question: "O que os israelitas deveriam fazer com o sangue do cordeiro da Páscoa?", options: ["Beber", "Passar nos umbrais e na verga da porta", "Derramar no chão", "Queimar"], answer: "Passar nos umbrais e na verga da porta", reference: "Êxodo 12:7" },
+            { question: "Qual a idade de Moisés quando ele morreu?", options: ["100 anos", "110 anos", "120 anos", "130 anos"], answer: "120 anos", reference: "Deuteronômio 34:7 (contexto final de Moisés, mas relevante para sua vida)" },
+            { question: "O que Deus disse que faria com o primogênito de Faraó?", options: ["O abençoaria", "O mataria", "O faria adoecer", "O exilaria"], answer: "O mataria", reference: "Êxodo 4:23" },
+            { question: "Qual o nome da primeira esposa de Moisés?", options: ["Miriã", "Joquebede", "Zípora", "Rebeca"], answer: "Zípora", reference: "Êxodo 2:21" },
+            { question: "Qual o nome do filho de Moisés que foi circuncidado por Zípora?", options: ["Eliézer", "Gérson", "Josué", "Arão"], answer: "Gérson", reference: "Êxodo 4:25" },
+            { question: "O que aconteceu com a vara de Arão quando ele a lançou diante de Faraó?", options: ["Virou uma cobra", "Virou um peixe", "Virou uma árvore", "Virou uma pedra"], answer: "Virou uma cobra", reference: "Êxodo 7:10" },
+            { question: "Qual a praga que trouxe rãs sobre o Egito?", options: ["Primeira", "Segunda", "Terceira", "Quarta"], answer: "Segunda", reference: "Êxodo 8:6" },
+            { question: "Qual a praga que trouxe piolhos sobre o Egito?", options: ["Segunda", "Terceira", "Quarta", "Quinta"], answer: "Terceira", reference: "Êxodo 8:17" },
+            { question: "Qual a praga que trouxe moscas sobre o Egito?", options: ["Terceira", "Quarta", "Quinta", "Sexta"], answer: "Quarta", reference: "Êxodo 8:24" },
+            { question: "Qual a praga que trouxe peste sobre os rebanhos do Egito?", options: ["Quarta", "Quinta", "Sexta", "Sétima"], answer: "Quinta", reference: "Êxodo 9:3" },
+            { question: "Qual a praga que trouxe úlceras e tumores sobre os egípcios?", options: ["Quinta", "Sexta", "Sétima", "Oitava"], answer: "Sexta", reference: "Êxodo 9:10" },
+            { question: "Qual a praga que trouxe saraiva e fogo sobre o Egito?", options: ["Sexta", "Sétima", "Oitava", "Nona"], answer: "Sétima", reference: "Êxodo 9:23" },
+            { question: "Qual a praga que trouxe gafanhotos sobre o Egito?", options: ["Sétima", "Oitava", "Nona", "Décima"], answer: "Oitava", reference: "Êxodo 10:12" },
+            { question: "Qual a praga que trouxe trevas sobre o Egito?", options: ["Oitava", "Nona", "Décima", "Primeira"], answer: "Nona", reference: "Êxodo 10:21" },
+            { question: "Qual a praga que trouxe a morte dos primogênitos sobre o Egito?", options: ["Nona", "Décima", "Primeira", "Segunda"], answer: "Décima", reference: "Êxodo 12:29" },
+            { question: "O que o povo de Israel deveria fazer com as primícias de suas colheitas?", options: ["Vender", "Oferecer a Deus", "Guardar para si", "Dar aos pobres"], answer: "Oferecer a Deus", reference: "Êxodo 23:19" },
+            { question: "Qual o nome do anjo que Deus prometeu enviar diante de Israel para guardá-los no caminho?", options: ["Gabriel", "Miguel", "Meu Anjo", "Rafael"], answer: "Meu Anjo", reference: "Êxodo 23:20" },
+            { question: "O que Deus prometeu fazer com os inimigos de Israel se eles obedecessem?", options: ["Fortalecê-los", "Expulsá-los da terra", "Fazer aliança com eles", "Torná-los amigos"], answer: "Expulsá-los da terra", reference: "Êxodo 23:23, 27-28" },
+            { question: "Qual a punição para quem não guardasse o sábado?", options: ["Multa", "Prisão", "Morte", "Exílio"], answer: "Morte", reference: "Êxodo 31:15" },
+            { question: "O que Deus deu a Moisés no Monte Sinai depois de falar com ele?", options: ["Um livro", "Duas tábuas de pedra, escritas pelo dedo de Deus", "Um cajado novo", "Um mapa"], answer: "Duas tábuas de pedra, escritas pelo dedo de Deus", reference: "Êxodo 31:18" },
+            { question: "Qual o nome do pai de Hur, que era da tribo de Judá?", options: ["Uri", "Calebe", "Josué", "Jetro"], answer: "Uri", reference: "Êxodo 31:2" },
+            { question: "Qual o nome do pai de Aoliabe, da tribo de Dã?", options: ["Aísa", "Aísa", "Aísa", "Aísa"], answer: "Aísa", reference: "Êxodo 31:6 (o nome de seu pai é 'Aísa' ou 'Ahisamach' dependendo da tradução)" },
+            { question: "Qual o propósito do altar de incenso?", options: ["Queimar sacrifícios", "Queimar incenso aromático diante do Senhor", "Queimar lixo", "Queimar ofertas de cereais"], answer: "Queimar incenso aromático diante do Senhor", reference: "Êxodo 30:7-8" },
+            { question: "Qual o nome do óleo usado para ungir Arão e seus filhos?", options: ["Óleo de oliva", "Óleo sagrado da unção", "Óleo de mirra", "Óleo de bálsamo"], answer: "Óleo sagrado da unção", reference: "Êxodo 30:22-30" },
+            { question: "O que era o 'peitoral do juízo'?", options: ["Um escudo", "Uma parte da veste sacerdotal com doze pedras e Urim e Tumim", "Um capacete", "Um cinto"], answer: "Uma parte da veste sacerdotal com doze pedras e Urim e Tumim", reference: "Êxodo 28:15, 30" },
+            { question: "Quantas pedras preciosas havia no peitoral do sumo sacerdote?", options: ["Seis", "Oito", "Dez", "Doze"], answer: "Doze", reference: "Êxodo 28:17-20" },
+            { question: "O que estava gravado nas pedras do peitoral?", options: ["Os nomes dos profetas", "Os nomes das doze tribos de Israel", "Os mandamentos", "Os nomes dos sacerdotes"], answer: "Os nomes das doze tribos de Israel", reference: "Êxodo 28:21" },
+            { question: "Qual o material dos sinos que deveriam estar na orla do manto de Arão?", options: ["Prata", "Bronze", "Ouro", "Cobre"], answer: "Ouro", reference: "Êxodo 28:33-34" },
+            { question: "Para que serviam os sinos nas vestes de Arão?", options: ["Para fazer barulho", "Para que seu som fosse ouvido ao entrar e sair do Lugar Santo", "Para afastar os maus espíritos", "Para chamar a atenção do povo"], answer: "Para que seu som fosse ouvido ao entrar e sair do Lugar Santo", reference: "Êxodo 28:35" },
+            { question: "O que estava escrito na lâmina de ouro na mitra do sumo sacerdote?", options: ["Santo é o Senhor", "Santidade ao Senhor", "Deus é Grande", "Israel é Santo"], answer: "Santidade ao Senhor", reference: "Êxodo 28:36" },
+            { question: "O que Moisés fez depois de receber todas as instruções para o Tabernáculo?", options: ["Começou a construir", "Contou tudo ao povo", "Ficou no monte por mais tempo", "Desceu com as tábuas da Lei"], answer: "Desceu com as tábuas da Lei", reference: "Êxodo 31:18" },
+            { question: "Qual a reação do povo ao ver Moisés demorar a descer do monte?", options: ["Oraram", "Construíram um altar", "Pediram a Arão que lhes fizesse deuses", "Se arrependeram"], answer: "Pediram a Arão que lhes fizesse deuses", reference: "Êxodo 32:1" },
+            { question: "O que Moisés fez com as tábuas da Lei ao ver o bezerro de ouro e a dança?", options: ["As guardou", "As quebrou ao pé do monte", "As entregou ao povo", "As escondeu"], answer: "As quebrou ao pé do monte", reference: "Êxodo 32:19" },
+            { question: "Como Moisés intercedeu por Israel após o incidente do bezerro de ouro?", options: ["Pediu a Deus para os destruir", "Ofereceu sua própria vida em troca da deles", "Fez um sacrifício", "Apenas repreendeu o povo"], answer: "Ofereceu sua própria vida em troca da deles", reference: "Êxodo 32:32" },
+            { question: "O que Deus disse que enviaria diante de Israel para expulsar os cananeus?", options: ["Um exército", "Sua presença", "Um anjo", "Uma praga"], answer: "Um anjo", reference: "Êxodo 33:2" },
+            { question: "Onde Moisés armava a tenda da congregação fora do arraial?", options: ["No meio do arraial", "Longe do arraial", "Perto do monte", "Perto do rio"], answer: "Longe do arraial", reference: "Êxodo 33:7" },
+            { question: "O que acontecia quando Moisés entrava na tenda da congregação?", options: ["Uma nuvem descia e parava à porta da tenda", "O povo se ajoelhava", "O som de trombetas era ouvido", "Fogo descia do céu"], answer: "Uma nuvem descia e parava à porta da tenda", reference: "Êxodo 33:9" },
+            { question: "O que Moisés pediu a Deus que lhe mostrasse para que ele pudesse conhecer a Deus e achar graça aos Seus olhos?", options: ["Sua mão", "Sua face", "Sua glória", "Sua voz"], answer: "Sua glória", reference: "Êxodo 33:18" },
+            { question: "O que Deus disse a Moisés que faria passar diante dele?", options: ["Um exército", "Toda a Sua bondade", "Um anjo", "Uma nuvem"], answer: "Toda a Sua bondade", reference: "Êxodo 33:19" },
+            { question: "Onde Deus colocou Moisés para que ele pudesse ver a Sua glória passar?", options: ["Numa caverna", "Numa fenda da rocha", "Num vale", "Numa montanha"], answer: "Numa fenda da rocha", reference: "Êxodo 33:22" },
+            { question: "O que Deus proibiu Israel de fazer com os habitantes da terra prometida?", options: ["Fazer aliança com eles", "Comer com eles", "Casar com eles", "Comerciar com eles"], answer: "Fazer aliança com eles", reference: "Êxodo 34:15" },
+            { question: "Qual a festa que os israelitas deveriam celebrar no mês de Abibe?", options: ["Festa dos Tabernáculos", "Festa das Semanas", "Festa dos Pães Asmos", "Festa da Páscoa"], answer: "Festa dos Pães Asmos", reference: "Êxodo 34:18" },
+            { question: "O que os israelitas deveriam fazer com os primogênitos de seus jumentos?", options: ["Oferecer em sacrifício", "Resgatar com um cordeiro", "Vender", "Matar"], answer: "Resgatar com um cordeiro", reference: "Êxodo 34:20" },
+            { question: "Qual a festa que deveria ser celebrada no fim do ano?", options: ["Festa da Páscoa", "Festa das Semanas", "Festa da Colheita (Tabernáculos)", "Festa das Trombetas"], answer: "Festa da Colheita (Tabernáculos)", reference: "Êxodo 34:22" },
+            { question: "O que Moisés fez por quarenta dias e quarenta noites no Monte Sinai, na segunda vez?", options: ["Não comeu pão nem bebeu água", "Construiu um altar", "Lutou contra inimigos", "Dormiu"], answer: "Não comeu pão nem bebeu água", reference: "Êxodo 34:28" },
+            { question: "Qual a primeira coisa que Moisés ordenou ao povo após descer do Sinai pela segunda vez?", options: ["Construir o Tabernáculo", "Guardar o sábado", "Fazer ofertas", "Adorar a Deus"], answer: "Guardar o sábado", reference: "Êxodo 35:2-3" },
+            { question: "Qual o nome da mulher que teceu com sabedoria para o Tabernáculo?", options: ["Miriã", "Débora", "Não é nomeada, apenas 'mulheres de coração sábio'", "Zípora"], answer: "Não é nomeada, apenas 'mulheres de coração sábio'", reference: "Êxodo 35:25" },
+            { question: "O que os israelitas trouxeram para o Tabernáculo que era de grande valor?", options: ["Pedras preciosas e óleo para azeite", "Comida e água", "Armas", "Roupas"], answer: "Pedras preciosas e óleo para azeite", reference: "Êxodo 35:27-28" },
+            { question: "Qual o material que foi usado para fazer os utensílios do Tabernáculo, como as panelas e as pás?", options: ["Ouro", "Prata", "Bronze", "Ferro"], answer: "Bronze", reference: "Êxodo 38:3" },
+            { question: "Qual o material usado para as bases das tábuas do Tabernáculo?", options: ["Ouro", "Prata", "Bronze", "Cobre"], answer: "Prata", reference: "Êxodo 38:27" },
+            { question: "Quantas bases de prata foram feitas para as tábuas do Tabernáculo?", options: ["Quarenta", "Cinquenta", "Sessenta", "Setenta"], answer: "Cem", reference: "Êxodo 38:27" },
+            { question: "Qual o nome do sumo sacerdote que foi ungido junto com Arão?", options: ["Nadabe", "Abiú", "Eleazar", "Itamar"], answer: "Eleazar", reference: "Êxodo 40:15 (Eleazar e Itamar são ungidos com Arão)" },
+            { question: "Em que dia do primeiro mês o Tabernáculo foi levantado?", options: ["No primeiro dia", "No décimo quarto dia", "No vigésimo quarto dia", "No último dia"], answer: "No primeiro dia", reference: "Êxodo 40:2" },
+            { question: "Quem levantou o Tabernáculo?", options: ["Arão", "Os levitas", "Moisés", "Bezalel e Aoliabe"], answer: "Moisés", reference: "Êxodo 40:18" },
+            { question: "O que Moisés colocou dentro da Arca da Aliança?", options: ["O maná", "O bordão de Arão", "O Testemunho (as tábuas da Lei)", "As vestes sacerdotais"], answer: "O Testemunho (as tábuas da Lei)", reference: "Êxodo 40:20" },
+            { question: "Onde Moisés colocou a mesa dos pães da proposição?", options: ["No Santo dos Santos", "No Lugar Santo, ao lado norte", "No Átrio Exterior", "Na entrada do Tabernáculo"], answer: "No Lugar Santo, ao lado norte", reference: "Êxodo 40:22" },
+            { question: "Onde Moisés colocou o candelabro?", options: ["No Lugar Santo, ao lado sul", "No Santo dos Santos", "Na entrada do Tabernáculo", "No Átrio Exterior"], answer: "No Lugar Santo, ao lado sul", reference: "Êxodo 40:24" },
+            { question: "Onde Moisés colocou o altar de ouro para o incenso?", options: ["No Santo dos Santos", "No Lugar Santo, diante do véu", "No Átrio Exterior", "Na entrada do Tabernáculo"], answer: "No Lugar Santo, diante do véu", reference: "Êxodo 40:26" },
+            { question: "Onde Moisés colocou o altar do holocausto?", options: ["No Átrio Exterior, diante da porta do Tabernáculo", "No Lugar Santo", "No Santo dos Santos", "Na entrada do Tabernáculo"], answer: "No Átrio Exterior, diante da porta do Tabernáculo", reference: "Êxodo 40:29" },
+            { question: "Onde Moisés colocou a pia de bronze?", options: ["No Santo dos Santos", "No Lugar Santo", "Entre a tenda da congregação e o altar", "Na entrada do Tabernáculo"], answer: "Entre a tenda da congregação e o altar", reference: "Êxodo 40:30" },
+            { question: "O que cobriu a Tenda da Congregação depois que Moisés levantou o Tabernáculo?", options: ["Fumaça", "Fogo", "A nuvem da glória do Senhor", "Um arco-íris"], answer: "A nuvem da glória do Senhor", reference: "Êxodo 40:34" },
+            { question: "Quando a nuvem se levantava de sobre o Tabernáculo, o que os israelitas faziam?", options: ["Acampavam", "Seguiam viagem", "Ofereciam sacrifícios", "Oravam"], answer: "Seguiam viagem", reference: "Êxodo 40:36" },
+            { question: "Quando a nuvem não se levantava, o que os israelitas faziam?", options: ["Seguiam viagem", "Acampavam", "Ofereciam sacrifícios", "Oravam"], answer: "Acampavam", reference: "Êxodo 40:37" },
+            { question: "De que forma a nuvem estava sobre o Tabernáculo de dia?", options: ["Como fogo", "Como fumaça", "Como uma nuvem normal", "Como um pilar"], answer: "Como uma nuvem normal", reference: "Êxodo 40:38" },
+            { question: "De que forma a nuvem estava sobre o Tabernáculo de noite?", options: ["Como uma nuvem normal", "Como fogo", "Como fumaça", "Como um pilar"], answer: "Como fogo", reference: "Êxodo 40:38" },
+            { question: "Qual o nome da tribo de onde Moisés e Arão descendiam?", options: ["Judá", "Benjamim", "Levi", "Rúben"], answer: "Levi", reference: "Êxodo 2:1, 6:16-20" },
+            { question: "Qual o nome do rio onde Faraó ordenou que todos os meninos hebreus fossem lançados?", options: ["Eufrates", "Jordão", "Nilo", "Tigre"], answer: "Nilo", reference: "Êxodo 1:22" },
+            { question: "O que a filha de Faraó fez com Moisés depois de encontrá-lo no cesto?", options: ["O devolveu à mãe", "O adotou como filho", "O matou", "O vendeu como escravo"], answer: "O adotou como filho", reference: "Êxodo 2:10" },
+            { question: "Qual o nome da terra para onde Moisés fugiu depois de matar o egípcio?", options: ["Canaã", "Midiã", "Assíria", "Babilônia"], answer: "Midiã", reference: "Êxodo 2:15" },
+            { question: "Quem eram as sete filhas de Jetro?", options: ["Miriã e Zípora e outras", "Zípora e suas irmãs", "Não são nomeadas", "Leia e Raquel e outras"], answer: "Zípora e suas irmãs", reference: "Êxodo 2:16" },
+            { question: "O que Moisés estava fazendo quando Deus o chamou na sarça ardente?", options: ["Orando", "Dormindo", "Apascentando o rebanho", "Caçando"], answer: "Apascentando o rebanho", reference: "Êxodo 3:1" },
+            { question: "Qual a primeira coisa que Deus disse a Moisés na sarça ardente?", options: ["Tira as sandálias dos teus pés", "Eu sou o Senhor", "Vai a Faraó", "Eu te enviarei"], answer: "Tira as sandálias dos teus pés", reference: "Êxodo 3:5" },
+            { question: "Qual o sinal que Deus deu a Moisés de que Ele o havia enviado?", options: ["Faria chover maná", "Faria a vara virar serpente", "Adorariam a Deus naquele monte", "Faria a água virar sangue"], answer: "Adorariam a Deus naquele monte", reference: "Êxodo 3:12" },
+            { question: "O que os israelitas deveriam pedir aos egípcios antes de sair?", options: ["Dinheiro", "Alimentos", "Artigos de prata, ouro e vestes", "Armas"], answer: "Artigos de prata, ouro e vestes", reference: "Êxodo 3:22" },
+            { question: "Qual o nome do lugar onde Moisés e Arão se encontraram antes de ir a Faraó?", options: ["Horebe", "Deserto de Sim", "Monte Sinai", "No deserto"], answer: "No des deserto", reference: "Êxodo 4:27" },
+            { question: "O que os israelitas fizeram quando Moisés e Arão lhes contaram as palavras de Deus e viram os sinais?", options: ["Murmuraram", "Não acreditaram", "Crêem e se inclinaram e adoraram", "Ficaram com medo"], answer: "Crêem e se inclinaram e adoraram", reference: "Êxodo 4:31" },
+            { question: "Qual a reação de Faraó à primeira demanda de Moisés e Arão?", options: ["Libertou o povo", "Aumentou a opressão", "Negociou com eles", "Ignorou-os"], answer: "Aumentou a opressão", reference: "Êxodo 5:4-9" },
+            { question: "O que os capatazes israelitas reclamaram a Faraó?", options: ["Falta de comida", "Falta de água", "Falta de palha para os tijolos", "Excesso de trabalho"], answer: "Falta de palha para os tijolos", reference: "Êxodo 5:16" },
+            { question: "O que Deus disse a Moisés que faria para que Faraó deixasse o povo ir?", options: ["Enviaria um anjo", "Faria grandes juízos", "Faria uma aliança", "Faria um milagre"], answer: "Faria grandes juízos", reference: "Êxodo 6:6" },
+            { question: "Qual a idade de Moisés e Arão quando falaram com Faraó?", options: ["60 e 63", "70 e 73", "80 e 83", "90 e 93"], answer: "80 e 83", reference: "Êxodo 7:7" },
+            { question: "O que os magos do Egito disseram quando não conseguiram reproduzir a praga dos piolhos?", options: ["É feitiçaria", "É o dedo de Deus", "É magia", "É impossível"], answer: "É o dedo de Deus", reference: "Êxodo 8:19" },
+            { question: "Qual a praga que trouxe moscas sobre as casas de Faraó e seus servos, mas não sobre a terra de Gósen?", options: ["Piolhos", "Moscas", "Peste", "Tumores"], answer: "Moscas", reference: "Êxodo 8:21-22" },
+            { question: "O que Faraó prometeu fazer se Moisés e Arão removessem as moscas?", options: ["Libertar o povo", "Dar-lhes riquezas", "Deixá-los ir adorar a Deus no deserto", "Construir um templo"], answer: "Deixá-los ir adorar a Deus no deserto", reference: "Êxodo 8:28" },
+            { question: "Qual a praga que atingiu os cavalos, jumentos, camelos, bois e ovelhas dos egípcios?", options: ["Moscas", "Peste", "Saraiva", "Gafanhotos"], answer: "Peste", reference: "Êxodo 9:3" },
+            { question: "O que Moisés e Arão jogaram para causar a praga de úlceras e tumores?", options: ["Água", "Pó da fornalha", "Sangue", "Terra"], answer: "Pó da fornalha", reference: "Êxodo 9:8" },
+            { question: "Qual a praga que Faraó disse que nunca havia acontecido antes no Egito?", options: ["Rãs", "Piolhos", "Saraiva", "Morte dos primogênitos"], answer: "Saraiva", reference: "Êxodo 9:24" },
+            { question: "O que os gafanhotos comeram no Egito?", options: ["Somente as folhas", "Toda a erva da terra e todo o fruto das árvores", "Somente os cereais", "Somente as flores"], answer: "Toda a erva da terra e todo o fruto das árvores", reference: "Êxodo 10:15" },
+            { question: "O que os israelitas fizeram durante a praga das trevas?", options: ["Ficaram parados", "Tiveram luz em suas habitações", "Adoraram a Deus", "Fugiram"], answer: "Tiveram luz em suas habitações", reference: "Êxodo 10:23" },
+            { question: "O que Faraó disse a Moisés que aconteceria se ele visse seu rosto novamente?", options: ["Seria recompensado", "Seria preso", "Morreria", "Seria expulso"], answer: "Morreria", reference: "Êxodo 10:28" },
+            { question: "Qual a ordem de Deus para os israelitas antes da Páscoa, em relação ao cordeiro?", options: ["Comê-lo em casa", "Comê-lo em grupos familiares", "Comê-lo no templo", "Comê-lo no deserto"], answer: "Comê-lo em grupos familiares", reference: "Êxodo 12:4" },
+            { question: "Qual o mês em que a Páscoa deveria ser celebrada?", options: ["Nisã (Abibe)", "Tishrei", "Sivã", "Tamuz"], answer: "Nisã (Abibe)", reference: "Êxodo 12:2" },
+            { question: "O que os israelitas deveriam fazer com os ossos do cordeiro da Páscoa?", options: ["Queimar", "Quebrar", "Não quebrar nenhum osso", "Enterrar"], answer: "Não quebrar nenhum osso", reference: "Êxodo 12:46" },
+            { question: "Quantos homens, aproximadamente, saíram do Egito, sem contar mulheres e crianças?", options: ["100 mil", "300 mil", "600 mil", "1 milhão"], answer: "600 mil", reference: "Êxodo 12:37" },
+            { question: "O que os israelitas levaram do Egito que era de grande valor?", options: ["Armas", "Comida", "Maná", "Ouro, prata e vestes"], answer: "Ouro, prata e vestes", reference: "Êxodo 12:35-36" },
+            { question: "Qual o nome do lugar onde os israelitas acamparam depois de sair de Ramessés?", options: ["Sucote", "Etã", "Pi-Hairote", "Mara"], answer: "Sucote", reference: "Êxodo 12:37" },
+            { question: "O que Deus disse que consagraria a Ele?", options: ["Todos os homens", "Todos os animais", "Todo primogênito", "Todas as mulheres"], answer: "Todo primogênito", reference: "Êxodo 13:2" },
+            { question: "Qual o caminho que Deus não levou os israelitas, para que não se arrependessem ao ver a guerra?", options: ["O caminho do deserto", "O caminho da terra dos filisteus", "O caminho do mar", "O caminho das montanhas"], answer: "O caminho da terra dos filisteus", reference: "Êxodo 13:17" },
+            { question: "O que Moisés levou consigo do Egito?", options: ["Ouro", "As tábuas da Lei", "Os ossos de José", "O maná"], answer: "Os ossos de José", reference: "Êxodo 13:19" }
+        ];
+
+
+        let shuffledQuizQuestionsExodus = [];
+        let currentQuizIndexExodus = 0;
+        let scoreExodus = 0;
+        let wrongAnswersExodus = 0;
+
+        function shuffleQuizQuestionsExodus() {
+            shuffledQuizQuestionsExodus = [...allQuizQuestionsExodus];
+            for (let i = shuffledQuizQuestionsExodus.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledQuizQuestionsExodus[i], shuffledQuizQuestionsExodus[j]] = [shuffledQuizQuestionsExodus[j], shuffledQuizQuestionsExodus[i]];
+            }
+        }
+
+        function displayQuestionExodus() {
+            const questionElement = document.getElementById('quizQuestionExodus');
+            const optionsDiv = document.getElementById('quizOptionsExodus');
+            const feedbackElement = document.getElementById('quizFeedbackExodus');
+            const nextButton = document.querySelector('#quizContainerExodus .quiz-next');
+            const progressElement = document.getElementById('quizProgressExodus');
+
+            if (currentQuizIndexExodus < shuffledQuizQuestionsExodus.length) {
+                const currentQuestion = shuffledQuizQuestionsExodus[currentQuizIndexExodus];
+                questionElement.textContent = currentQuestion.question;
+                optionsDiv.innerHTML = '';
+                feedbackElement.textContent = '';
+                nextButton.classList.add('hidden');
+
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerExodus(option, currentQuestion.answer, currentQuestion.reference);
+                    optionsDiv.appendChild(button);
+                });
+
+                // Atualizar progresso
+                progressElement.textContent = `${currentQuizIndexExodus + 1}/${shuffledQuizQuestionsExodus.length}`;
+            } else {
+                // Quiz concluído
+                questionElement.textContent = "Quiz Concluído!";
+                optionsDiv.innerHTML = '';
+                feedbackElement.textContent = `Você acertou ${scoreExodus} de ${shuffledQuizQuestionsExodus.length} perguntas.`;
+                nextButton.classList.add('hidden');
+                progressElement.textContent = "Fim";
+            }
+        }
+
+        function checkAnswerExodus(selectedOption, correctAnswer, reference) {
+            const optionsDiv = document.getElementById('quizOptionsExodus');
+            const feedbackElement = document.getElementById('quizFeedbackExodus');
+            const nextButton = document.querySelector('#quizContainerExodus .quiz-next');
+            const scoreElement = document.getElementById('quizScoreExodus');
+
+            // Desabilitar botões após a seleção
+            Array.from(optionsDiv.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto!";
+                feedbackElement.classList.remove('text-red-500');
+                feedbackElement.classList.add('text-green-500');
+                scoreExodus++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}. (Referência: ${reference})`;
+                feedbackElement.classList.remove('text-green-500');
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersExodus++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreExodus}, Erros: ${wrongAnswersExodus}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionExodus() {
+            currentQuizIndexExodus++;
+            displayQuestionExodus();
+        }
+
+        // Gráfico de Temas de Êxodo
+        let exodusChartInstance = null; // Para armazenar a instância do Chart.js
+
+        function renderExodusChart() {
+            const ctx = document.getElementById('exodusChart').getContext('2d');
+
+            if (exodusChartInstance) {
+                exodusChartInstance.destroy(); // Destroi a instância anterior do gráfico, se existir
+            }
+
+            exodusChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Libertação', 'Aliança', 'Presença de Deus', 'Santidade', 'Soberania Divina', 'Mediador', 'Adoração'],
+                    datasets: [{
+                        label: 'Frequência Temática (Estimativa)',
+                        data: [25, 20, 15, 12, 10, 8, 10], // Dados de exemplo para Êxodo
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)', // Azul
+                            'rgba(255, 206, 86, 0.7)', // Amarelo
+                            'rgba(75, 192, 192, 0.7)', // Verde-água
+                            'rgba(153, 102, 255, 0.7)', // Roxo
+                            'rgba(255, 99, 132, 0.7)', // Vermelho
+                            'rgba(255, 159, 64, 0.7)', // Laranja
+                            'rgba(201, 203, 207, 0.7)' // Cinza
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(201, 203, 207, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor do texto dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: '#4a5568' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor do texto dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: '#4a5568' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição Temática no Livro de Êxodo',
+                            color: '#f8fafc' // Cor do título do gráfico
+                        }
+                    }
+                }
+            });
+        }
+
+        // Exibir a seção inicial ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('inicio');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Daniel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Daniel Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Daniel</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionDaniel('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionDaniel('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionDaniel('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionDaniel('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionDaniel('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionDaniel('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionDaniel('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionDaniel('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionDaniel('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Daniel</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Daniel, uma narrativa fascinante de fé e fidelidade em meio ao exílio babilônico, repleta de visões proféticas sobre o futuro das nações e o reino eterno de Deus. Descubra a soberania divina e o triunfo da luz sobre as trevas. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Daniel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Daniel é um dos livros proféticos do Antigo Testamento, notável por suas narrativas históricas e suas visões apocalípticas. Escrito por Daniel, um jovem judeu levado cativo para a Babilônia no primeiro exílio (605 a.C.), ele serviu na corte de vários reis babilônicos e persas (Nabucodonosor, Belsazar, Dario e Ciro). O livro abrange um período de cerca de 70 anos, desde o início do exílio até o primeiro ano de Ciro.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Daniel é dividido em duas partes principais: a primeira (capítulos 1-6) contém narrativas sobre a vida de Daniel e seus amigos na corte babilônica, destacando sua fidelidade a Deus em meio a desafios e perseguições. A segunda parte (capítulos 7-12) apresenta uma série de visões proféticas que revelam o plano de Deus para o futuro, incluindo a ascensão e queda de impérios mundiais e a vinda do reino eterno de Deus, simbolizado pelo "Filho do Homem".</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais do livro incluem a soberania de Deus sobre a história e os reinos humanos, a fidelidade dos crentes em tempos de provação, a importância da oração e a certeza da vitória final de Deus sobre o mal. Daniel é um livro fundamental para a compreensão da escatologia bíblica e da natureza do reino de Deus.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-6: Narrativas Históricas.</strong> Contam as experiências de Daniel e seus amigos (Hananias, Misael e Azarias, também conhecidos como Sadraque, Mesaque e Abede-Nego) na Babilônia, incluindo a prova dos alimentos, a interpretação de sonhos e escritas na parede, e o livramento da fornalha ardente e da cova dos leões.</li>
+                <li><strong>Capítulos 7-12: Visões Proféticas.</strong> Descrevem visões apocalípticas de Daniel sobre impérios mundiais (representados por animais e estátuas), o "Ancião de Dias", o "Filho do Homem", e detalhes sobre o futuro de Israel e as nações, culminando na ressurreição e no fim dos tempos.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Daniel é um livro que inspira fé e confiança na soberania de Deus, mesmo quando as circunstâncias parecem sombrias, e oferece uma perspectiva divina sobre a história e o futuro.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Daniel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Daniel é um livro que combina narrativas de fé com visões proféticas sobre o controle de Deus sobre a história.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Narrativas Históricas (Capítulos 1-6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Introdução e Fidelidade de Daniel e Seus Amigos (Capítulo 1):</strong>
+                    <ul>
+                        <li>Daniel e seus amigos levados para a Babilônia.</li>
+                        <li>A prova dos alimentos e a bênção de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Sonho de Nabucodonosor e a Estátua (Capítulo 2):</strong>
+                    <ul>
+                        <li>Daniel interpreta o sonho da grande estátua, revelando reinos futuros.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Fornalha Ardente e a Fidelidade dos Três Amigos (Capítulo 3):</strong>
+                    <ul>
+                        <li>Sadraque, Mesaque e Abede-Nego se recusam a adorar a imagem de ouro.</li>
+                        <li>Livramento milagroso na fornalha.</li>
+                    </ul>
+                </li>
+                <li><strong>D. O Sonho da Árvore e a Loucura de Nabucodonosor (Capítulo 4):</strong>
+                    <ul>
+                        <li>Daniel interpreta o sonho do rei sobre sua humilhação.</li>
+                        <li>A soberania de Deus sobre os reis da terra.</li>
+                    </ul>
+                </li>
+                <li><strong>E. A Escrita na Parede e a Queda de Belsazar (Capítulo 5):</strong>
+                    <ul>
+                        <li>O banquete de Belsazar e a escrita misteriosa.</li>
+                        <li>Daniel interpreta a mensagem e a queda do império.</li>
+                    </ul>
+                </li>
+                <li><strong>F. Daniel na Cova dos Leões (Capítulo 6):</strong>
+                    <ul>
+                        <li>A conspiração contra Daniel e sua fidelidade na oração.</li>
+                        <li>Livramento milagroso da cova dos leões.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Visões Proféticas (Capítulos 7-12)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Visão dos Quatro Animais e o Ancião de Dias (Capítulo 7):</strong>
+                    <ul>
+                        <li>Visão dos impérios mundiais e o juízo divino.</li>
+                        <li>A vinda do Filho do Homem e o reino eterno.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Visão do Carneiro e do Bode (Capítulo 8):</strong>
+                    <ul>
+                        <li>Profecia sobre os impérios Medo-Persa e Grego.</li>
+                        <li>O chifre pequeno e a profanação do santuário.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Profecia das Setenta Semanas (Capítulo 9):</strong>
+                    <ul>
+                        <li>A oração de Daniel e a revelação das setenta semanas.</li>
+                        <li>Profecia sobre a vinda do Messias e a destruição de Jerusalém.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Visão do Homem Glorioso e as Guerras Futuras (Capítulos 10-11):</strong>
+                    <ul>
+                        <li>A visão de um ser celestial e a luta espiritual.</li>
+                        <li>Detalhes sobre os reis do Norte e do Sul.</li>
+                    </ul>
+                </li>
+                <li><strong>E. O Fim dos Tempos e a Ressurreição (Capítulo 12):</strong>
+                    <ul>
+                        <li>A grande tribulação e o livramento do povo de Deus.</li>
+                        <li>A ressurreição dos mortos e o destino final.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Daniel é um poderoso testemunho da soberania de Deus sobre a história humana e os reinos do mundo. Ele revela que Deus tem um plano soberano que se desenrola através dos séculos, culminando no estabelecimento de Seu reino eterno. O livro também enfatiza a importância da fidelidade pessoal a Deus em meio à adversidade e perseguição, e a certeza da intervenção divina em favor de Seu povo. As profecias apocalípticas de Daniel oferecem esperança e encorajamento para os crentes, assegurando que Deus está no controle e que Seu propósito prevalecerá.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridDaniel">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Daniel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Daniel, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> Daniel e seus amigos na corte babilônica: a prova dos alimentos.</li>
+                <li><strong>Capítulo 2:</strong> O sonho de Nabucodonosor da grande estátua e sua interpretação.</li>
+                <li><strong>Capítulo 3:</strong> Sadraque, Mesaque e Abede-Nego na fornalha ardente.</li>
+                <li><strong>Capítulo 4:</strong> O sonho de Nabucodonosor da grande árvore e sua humilhação.</li>
+                <li><strong>Capítulo 5:</strong> O banquete de Belsazar e a escrita na parede.</li>
+                <li><strong>Capítulo 6:</strong> Daniel na cova dos leões.</li>
+                <li><strong>Capítulo 7:</strong> A visão dos quatro animais e o Ancião de Dias.</li>
+                <li><strong>Capítulo 8:</strong> A visão do carneiro e do bode.</li>
+                <li><strong>Capítulo 9:</strong> A oração de Daniel e a profecia das setenta semanas.</li>
+                <li><strong>Capítulo 10:</strong> A visão de Daniel de um ser celestial.</li>
+                <li><strong>Capítulo 11:</strong> As guerras entre os reis do Norte e do Sul.</li>
+                <li><strong>Capítulo 12:</strong> O fim dos tempos, a ressurreição e o destino dos justos.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Daniel</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Soberania de Deus:</strong> Deus está no controle de todas as nações e da história.</li>
+                <li><strong>Fidelidade em Meio ao Exílio:</strong> A importância de permanecer fiel a Deus em circunstâncias difíceis.</li>
+                <li><strong>O Reino de Deus:</strong> O reino eterno de Deus que prevalecerá sobre todos os reinos humanos.</li>
+                <li><strong>Profecia e Apocalipse:</strong> Revelações sobre o futuro e o fim dos tempos.</li>
+                <li><strong>Oração e Intercessão:</strong> A comunicação com Deus como fonte de força e revelação.</li>
+                <li><strong>Juízo Divino:</strong> A justiça de Deus manifestada contra a impiedade e a arrogância.</li>
+                <li><strong>A Glória de Deus:</strong> A exaltação do nome de Deus através de Seus atos poderosos.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Daniel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersDaniel">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Daniel</h2>
+            <div id="quizContainerDaniel" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionDaniel"></p>
+                <div id="quizOptionsDaniel" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackDaniel" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionDaniel()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressDaniel"></span></p>
+                <p>Pontuação: <span id="quizScoreDaniel">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Daniel</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Daniel.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="danielChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalDaniel()">&times;</span>
+                <h3 id="modalCharacterNameDaniel" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionDaniel" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Daniel",
+            "short_name": "Daniel",
+            "description": "Explore o livro de Daniel de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=DN",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=DN",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'daniel-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionDaniel(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsDaniel();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksDaniel();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsDaniel(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexDaniel = 0; // Reinicia o quiz
+                scoreDaniel = 0;
+                wrongAnswersDaniel = 0;
+                document.getElementById('quizScoreDaniel').textContent = `Acertos: ${scoreDaniel}, Erros: ${wrongAnswersDaniel}`;
+                displayQuestionDaniel();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderDanielChart();
+            }
+        }
+
+        // Dados dos personagens para Daniel
+        const characterDetailsDaniel = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano de toda a história e reinos, que revela Seus planos a Daniel e liberta Seus servos fiéis."
+            },
+            "Daniel": {
+                name: "Daniel",
+                description: "O profeta e intérprete de sonhos, conhecido por sua fidelidade inabalável a Deus, sabedoria e visões apocalípticas."
+            },
+            "Nabucodonosor": {
+                name: "Nabucodonosor",
+                description: "Rei da Babilônia, que tem sonhos interpretados por Daniel e reconhece a soberania do Deus de Daniel após ser humilhado."
+            },
+            "Sadraque, Mesaque e Abede-Nego": {
+                name: "Sadraque, Mesaque e Abede-Nego",
+                description: "Amigos de Daniel que se recusam a adorar a imagem de ouro e são milagrosamente livrados da fornalha ardente."
+            },
+            "Belsazar": {
+                name: "Belsazar",
+                description: "Rei da Babilônia que profana os utensílios do Templo e tem seu reino julgado por Deus através da escrita na parede."
+            },
+            "Dario, o Medo": {
+                name: "Dario, o Medo",
+                description: "Rei que sucede Belsazar e, influenciado por oficiais invejosos, lança Daniel na cova dos leões, mas depois reconhece o poder de Deus."
+            },
+            "Gabriel": {
+                name: "Gabriel",
+                description: "Anjo que aparece a Daniel para explicar suas visões e trazer mensagens de Deus."
+            },
+            "Miguel": {
+                name: "Miguel",
+                description: "Um dos principais príncipes celestiais, que ajuda na batalha espiritual e é mencionado em visões futuras."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalDaniel(characterName) {
+            const details = characterDetailsDaniel[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameDaniel').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionDaniel').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalDaniel() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsDaniel() {
+            const grid = document.getElementById('characterGridDaniel');
+            grid.innerHTML = '';
+            for (const key in characterDetailsDaniel) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalDaniel(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksDaniel() {
+            const chaptersDiv = document.getElementById('chaptersDaniel');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 12; i++) { // Daniel tem 12 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/dn/${i}`; // Link para a Bíblia Online, Daniel
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Daniel (25 perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsDaniel = [
+            { question: "Qual profeta foi levado cativo para a Babilônia no primeiro exílio?", options: ["Jeremias", "Ezequiel", "Daniel", "Isaías"], answer: "Daniel", reference: "Introdução ao Livro de Daniel" },
+            { question: "Em qual império Daniel e seus amigos serviram no início do livro?", options: ["Assírio", "Egípcio", "Babilônico", "Persa"], answer: "Babilônico", reference: "Capítulo 1" },
+            { question: "Qual rei babilônico teve um sonho com uma grande estátua, interpretado por Daniel?", options: ["Belsazar", "Dario", "Ciro", "Nabucodonosor"], answer: "Nabucodonosor", reference: "Capítulo 2" },
+            { question: "Qual era o nome babilônico de Daniel?", options: ["Sadraque", "Mesaque", "Abede-Nego", "Beltessazar"], answer: "Beltessazar", reference: "Daniel 1:7" },
+            { question: "O que Sadraque, Mesaque e Abede-Nego se recusaram a fazer que os levou à fornalha ardente?", options: ["Comer a comida do rei", "Interpretar um sonho", "Adorar uma imagem de ouro", "Servir ao rei"], answer: "Adorar uma imagem de ouro", reference: "Capítulo 3" },
+            { question: "Quem apareceu com os três jovens na fornalha ardente?", options: ["Um anjo", "O próprio rei", "Um quarto homem semelhante a um filho dos deuses", "Daniel"], answer: "Um quarto homem semelhante a um filho dos deuses", reference: "Daniel 3:25" },
+            { question: "Qual rei viu uma escrita misteriosa na parede durante um banquete?", options: ["Nabucodonosor", "Dario", "Belsazar", "Ciro"], answer: "Belsazar", reference: "Capítulo 5" },
+            { question: "O que a escrita na parede 'Mene, Mene, Tequel, Parsim' significava?", options: ["Paz e prosperidade", "Deus é grande", "Pesado, pesado, pesado, dividido (seu reino foi pesado e dividido)", "Vitória e poder"], answer: "Pesado, pesado, pesado, dividido (seu reino foi pesado e dividido)", reference: "Daniel 5:25-28" },
+            { question: "Por que Daniel foi lançado na cova dos leões?", options: ["Por roubar", "Por adorar a Deus", "Por interpretar um sonho", "Por se recusar a servir ao rei"], answer: "Por adorar a Deus", reference: "Capítulo 6" },
+            { question: "Quantos capítulos tem o livro de Daniel?", options: ["6", "10", "12", "14"], answer: "12", reference: "Esboços do Livro de Daniel" },
+            { question: "Qual animal na visão de Daniel 7 simboliza o império Medo-Persa?", options: ["Leão", "Urso", "Leopardo", "Animal terrível e espantoso"], answer: "Urso", reference: "Daniel 7:5" },
+            { question: "Quem é o 'Ancião de Dias' na visão de Daniel 7?", options: ["Um rei terreno", "Um anjo", "Deus Pai", "Daniel"], answer: "Deus Pai", reference: "Daniel 7:9" },
+            { question: "Quem é o 'Filho do Homem' que recebe um reino eterno em Daniel 7?", options: ["Um profeta", "Um rei humano", "Jesus Cristo", "Um anjo"], answer: "Jesus Cristo", reference: "Daniel 7:13-14" },
+            { question: "A profecia das 'setenta semanas' em Daniel 9 se refere principalmente a quê?", options: ["A um período de tempo para a reconstrução do Templo", "A um período de tempo até a vinda do Messias e eventos futuros", "A duração do exílio babilônico", "A um período de paz mundial"], answer: "A um período de tempo até a vinda do Messias e eventos futuros", reference: "Capítulo 9" },
+            { question: "Qual anjo aparece a Daniel para explicar suas visões?", options: ["Miguel", "Rafael", "Gabriel", "Uriel"], answer: "Gabriel", reference: "Daniel 8:16, 9:21" },
+            { question: "O que o Livro de Daniel enfatiza sobre a soberania de Deus?", options: ["Que Deus só governa Israel", "Que Deus governa sobre todos os reinos humanos", "Que Deus não se importa com os reinos terrenos", "Que o destino é determinado pelo homem"], answer: "Que Deus governa sobre todos os reinos humanos", reference: "Significado Teológico do Livro de Daniel" },
+            { question: "Qual é o tema principal da segunda parte do livro de Daniel (capítulos 7-12)?", options: ["Histórias da corte", "Leis e mandamentos", "Visões proféticas e apocalípticas", "Poemas de lamento"], answer: "Visões proféticas e apocalípticas", reference: "Introdução ao Livro de Daniel" },
+            { question: "O que acontece com Nabucodonosor em Daniel 4 como resultado de sua soberba?", options: ["Ele é deposto e morto", "Ele se torna um animal por sete tempos", "Ele perde seu reino para Dario", "Ele se torna mais poderoso"], answer: "Ele se torna um animal por sete tempos", reference: "Capítulo 4" },
+            { question: "Qual é a promessa final para Daniel no capítulo 12?", options: ["Ele viverá para sempre na terra", "Ele terá um descanso e se levantará para receber sua herança no fim dos dias", "Ele se tornará rei", "Ele será esquecido"], answer: "Ele terá um descanso e se levantará para receber sua herança no fim dos dias", reference: "Daniel 12:13" },
+            { question: "O que o livro de Daniel nos ensina sobre a oração?", options: ["Que é desnecessária", "Que é uma forma de manipulação divina", "Que é uma ferramenta poderosa para buscar a vontade de Deus e interceder", "Que só deve ser feita em público"], answer: "Que é uma ferramenta poderosa para buscar a vontade de Deus e interceder", reference: "Temas Centrais do Livro de Daniel" },
+            { question: "Qual império é simbolizado pelo leopardo com quatro asas e quatro cabeças em Daniel 7?", options: ["Babilônico", "Medo-Persa", "Grego", "Romano"], answer: "Grego", reference: "Daniel 7:6" },
+            { question: "Além de Daniel, quais outros três jovens judeus são proeminentes nas narrativas?", options: ["José, Benjamim e Levi", "Pedro, Tiago e João", "Sadraque, Mesaque e Abede-Nego", "Sansão, Gideão e Davi"], answer: "Sadraque, Mesaque e Abede-Nego", reference: "Capítulo 3" },
+            { question: "O que o livro de Daniel revela sobre o futuro dos impérios mundiais?", options: ["Que eles durarão para sempre", "Que eles serão substituídos pelo reino de Deus", "Que eles se unirão em um único império", "Que eles se autodestruirão"], answer: "Que eles serão substituídos pelo reino de Deus", reference: "Capítulo 2, 7" },
+            { question: "Qual é a principal mensagem do livro de Daniel para os crentes em tempos de perseguição?", options: ["Desistir da fé", "Comprometer seus princípios", "Manter a fidelidade e confiar na soberania de Deus", "Buscar refúgio em outras nações"], answer: "Manter a fidelidade e confiar na soberania de Deus", reference: "Significado Teológico do Livro de Daniel" },
+            { question: "Em qual idioma parte do livro de Daniel foi escrita?", options: ["Grego", "Hebraico e Aramaico", "Latim", "Egípcio"], answer: "Hebraico e Aramaico", reference: "Introdução ao Livro de Daniel" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsDaniel = [];
+        const numCopies = Math.ceil(200 / uniqueQuizQuestionsDaniel.length);
+        for (let i = 0; i < numCopies; i++) {
+            allQuizQuestionsDaniel = allQuizQuestionsDaniel.concat(uniqueQuizQuestionsDaniel);
+        }
+        allQuizQuestionsDaniel = allQuizQuestionsDaniel.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsDaniel = [];
+        let currentQuizIndexDaniel = 0;
+        let scoreDaniel = 0;
+        let wrongAnswersDaniel = 0;
+        let danielChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsDaniel() {
+            shuffledQuizQuestionsDaniel = [...allQuizQuestionsDaniel]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsDaniel);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressDaniel() {
+            const progressElement = document.getElementById('quizProgressDaniel');
+            progressElement.textContent = `${currentQuizIndexDaniel + 1}/${shuffledQuizQuestionsDaniel.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionDaniel() {
+            if (currentQuizIndexDaniel >= shuffledQuizQuestionsDaniel.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionDaniel').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsDaniel').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scoreDaniel}, Erros: ${wrongAnswersDaniel}</p>`;
+                document.getElementById('quizFeedbackDaniel').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsDaniel[currentQuizIndexDaniel];
+            document.getElementById('quizQuestionDaniel').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsDaniel');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerDaniel(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackDaniel').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressDaniel();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerDaniel(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackDaniel');
+            const optionsButtons = document.querySelectorAll('#quizOptionsDaniel button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scoreDaniel++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersDaniel++;
+            }
+            document.getElementById('quizScoreDaniel').textContent = `Acertos: ${scoreDaniel}, Erros: ${wrongAnswersDaniel}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionDaniel() {
+            currentQuizIndexDaniel++;
+            displayQuestionDaniel();
+        }
+
+        // Dados para o gráfico de temas de Daniel
+        const danielChartData = {
+            labels: ['Soberania de Deus', 'Fidelidade no Exílio', 'Reino de Deus', 'Profecia/Apocalipse', 'Oração', 'Juízo Divino', 'Glória de Deus'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 15, 15, 10, 5, 10], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const danielChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de Daniel',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderDanielChart() {
+            const ctx = document.getElementById('danielChart').getContext('2d');
+            if (danielChartInstance) {
+                danielChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            danielChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: danielChartData,
+                options: danielChartOptions
+            });
+        }
+    </script>
+</body>
+</html>

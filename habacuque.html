@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Habacuque</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Habacuque Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Habacuque</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionHabacuque('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionHabacuque('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionHabacuque('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionHabacuque('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionHabacuque('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionHabacuque('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionHabacuque('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionHabacuque('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionHabacuque('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Habacuque</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de Habacuque, uma profecia única que apresenta um diálogo entre o profeta e Deus. Habacuque questiona a justiça divina diante da maldade em Judá e o surgimento dos babilônios. Descubra as respostas de Deus, a famosa declaração "o justo viverá pela sua fé", e a oração de fé e louvor do profeta em meio à adversidade. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Habacuque</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de Habacuque é um dos doze profetas menores do Antigo Testamento, e se destaca por sua estrutura dialógica. Diferente de muitos livros proféticos onde Deus fala diretamente ao povo através do profeta, em Habacuque, o profeta é quem questiona a Deus, e Deus responde. O nome "Habacuque" pode significar "abraçar" ou "lutar", o que reflete a natureza do seu livro.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Habacuque profetizou em Judá durante um período de grande turbulência, provavelmente no final do século VII a.C., antes da primeira invasão babilônica de Jerusalém (605 a.C.) ou entre as invasões. Ele estava profundamente perturbado pela injustiça e violência que via em sua própria nação (Judá) e, mais ainda, pela ascensão do cruel Império Babilônico (caldeus), que Deus usaria como instrumento de juízo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro aborda questões profundas sobre a justiça e a soberania de Deus diante do sofrimento e da aparente impunidade do mal. Deus responde às queixas de Habacuque, revelando Seus planos e reafirmando que Ele é justo e soberano. A mensagem central do livro é encontrada em Habacuque 2:4: "Mas o justo viverá pela sua fé." Esta passagem é fundamental e é citada três vezes no Novo Testamento (Romanos 1:17, Gálatas 3:11, Hebreus 10:38), enfatizando a importância da fé para a salvação e a vida cristã.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O livro termina com uma magnífica oração de fé e louvor, onde Habacuque expressa sua confiança inabalável em Deus, mesmo que todas as circunstâncias pareçam desfavoráveis. É uma poderosa declaração de fé que transcende as dificuldades presentes.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: A Primeira Queixa de Habacuque e a Resposta de Deus.</strong> O profeta lamenta a injustiça em Judá e Deus responde que levantará os babilônios.</li>
+                <li><strong>Capítulo 2: A Segunda Queixa de Habacuque e a Resposta de Deus.</strong> Habacuque questiona o uso de um povo tão cruel e Deus responde com a visão e a declaração sobre a fé.</li>
+                <li><strong>Capítulo 3: A Oração de Habacuque.</strong> Uma oração poética de fé e louvor, expressando confiança em Deus apesar das adversidades.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Habacuque é um livro que encoraja os crentes a perseverar na fé e a confiar na justiça e soberania de Deus, mesmo quando Seus caminhos são incompreensíveis para a mente humana.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Habacuque</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Habacuque apresenta um diálogo entre o profeta e Deus sobre a justiça divina e a fé.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Diálogo do Profeta com Deus (Capítulos 1-2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Primeira Queixa de Habacuque (Capítulo 1:1-4):</strong>
+                    <ul>
+                        <li>O profeta lamenta a violência e a injustiça em Judá.</li>
+                        <li>"Até quando, Senhor, clamarei eu, e tu não me escutarás?"</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Primeira Resposta de Deus (Capítulo 1:5-11):</strong>
+                    <ul>
+                        <li>Deus anuncia que levantará os caldeus (babilônios) para julgar Judá.</li>
+                        <li>Descrição da crueldade e rapidez dos caldeus.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Segunda Queixa de Habacuque (Capítulo 1:12-2:1):</strong>
+                    <ul>
+                        <li>O profeta questiona por que Deus usaria um povo mais ímpio para punir Judá.</li>
+                        <li>Ele espera pela resposta de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>D. A Segunda Resposta de Deus (Capítulo 2:2-20):</strong>
+                    <ul>
+                        <li>Deus ordena a Habacuque que escreva a visão claramente.</li>
+                        <li>A declaração fundamental: "Mas o justo viverá pela sua fé." (2:4)</li>
+                        <li>Cinco "ais" contra a Babilônia por sua cobiça, violência, opressão, devassidão e idolatria.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. A Oração de Habacuque (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Oração por Avivamento (Versículos 1-2):</strong>
+                    <ul>
+                        <li>"Ouvi, Senhor, a tua palavra, e temi; aviva, ó Senhor, a tua obra no meio dos anos."</li>
+                        <li>Pedido para que Deus se lembre da misericórdia em meio à ira.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Glória e o Poder de Deus (Versículos 3-15):</strong>
+                    <ul>
+                        <li>Descrição poética da vinda de Deus em majestade e poder.</li>
+                        <li>A natureza treme diante Dele.</li>
+                        <li>Deus age para salvar Seu povo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Resposta de Fé do Profeta (Versículos 16-19):</strong>
+                    <ul>
+                        <li>Habacuque treme diante da visão do juízo, mas se regozija no Senhor.</li>
+                        <li>Apesar da ausência de frutos, rebanhos e lavouras, ele confia em Deus.</li>
+                        <li>"Todavia eu me alegrarei no Senhor; exultarei no Deus da minha salvação." (3:18)</li>
+                        <li>"O Senhor Deus é a minha força, e fará os meus pés como os das cervas, e me fará andar sobre as minhas alturas." (3:19)</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Livro de Habacuque é uma poderosa meditação sobre a teodiceia – a questão da justiça de Deus diante do mal e do sofrimento no mundo. Ele ensina que, mesmo quando os caminhos de Deus são misteriosos e parecem contradizer nossa compreensão de justiça, devemos confiar em Sua soberania e bondade. A fé é apresentada como a resposta adequada à revelação de Deus, especialmente em tempos de crise. O livro enfatiza que a fé não é a ausência de dúvidas ou perguntas, mas a confiança inabalável em Deus, mesmo quando as respostas não são imediatas ou fáceis. A oração final de Habacuque é um modelo de como a fé pode levar à alegria e à força, independentemente das circunstâncias externas.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridHabacuque">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Habacuque</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Habacuque, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: A Queixa de Habacuque e a Resposta de Deus</strong>
+                    <ul>
+                        <li>1.1-4: A Primeira Queixa: A Injustiça em Judá.</li>
+                        <li>1.5-11: A Primeira Resposta: O Levantamento dos Caldeus.</li>
+                        <li>1.12-17: A Segunda Queixa: Por Que Usar os Ímpios?</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: A Resposta de Deus e os "Ais" contra a Babilônia</strong>
+                    <ul>
+                        <li>2.1-3: Habacuque Espera e a Ordem para Escrever a Visão.</li>
+                        <li>2.4: A Declaração Central: "O Justo Viverá pela Sua Fé."</li>
+                        <li>2.5-20: Os Cinco "Ais" contra os Caldeus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: A Oração de Fé de Habacuque</strong>
+                    <ul>
+                        <li>3.1-2: Oração por Avivamento e Misericórdia.</li>
+                        <li>3.3-15: A Manifestação Gloriosa de Deus.</li>
+                        <li>3.16-19: A Resposta de Fé e Confiança do Profeta.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Habacuque</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Justiça de Deus:</strong> Como Deus age diante da maldade e do sofrimento.</li>
+                <li><strong>A Soberania Divina:</strong> O controle de Deus sobre a história e as nações.</li>
+                <li><strong>Fé e Confiança:</strong> A importância de confiar em Deus mesmo em meio à incompreensão.</li>
+                <li><strong>O Justo Viverá pela Fé:</strong> A verdade central do livro e sua relevância para a salvação.</li>
+                <li><strong>O Sofrimento e o Mal:</strong> A luta com a existência da injustiça no mundo.</li>
+                <li><strong>O Juízo de Deus:</strong> A certeza de que Deus punirá o pecado, tanto em Judá quanto na Babilônia.</li>
+                <li><strong>Louvor em Meio à Adversidade:</strong> A capacidade de se alegrar em Deus apesar das circunstâncias.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Habacuque</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersHabacuque">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Habacuque</h2>
+            <div id="quizContainerHabacuque" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionHabacuque"></p>
+                <div id="quizOptionsHabacuque" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackHabacuque" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionHabacuque()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressHabacuque"></span></p>
+                <p>Pontuação: <span id="quizScoreHabacuque">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Habacuque</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Habacuque.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="habacuqueChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalHabacuque()">&times;</span>
+                <h3 id="modalCharacterNameHabacuque" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionHabacuque" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Habacuque",
+            "short_name": "Habacuque",
+            "description": "Explore o livro de Habacuque de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=HC",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=HC",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'habacuque-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionHabacuque(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsHabacuque();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksHabacuque();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsHabacuque(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexHabacuque = 0; // Reinicia o quiz
+                scoreHabacuque = 0;
+                wrongAnswersHabacuque = 0;
+                document.getElementById('quizScoreHabacuque').textContent = `Acertos: ${scoreHabacuque}, Erros: ${wrongAnswersHabacuque}`;
+                displayQuestionHabacuque();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderHabacuqueChart();
+            }
+        }
+
+        // Dados dos personagens para Habacuque
+        const characterDetailsHabacuque = {
+            "Deus (Senhor/Jeová)": {
+                name: "Deus (Senhor/Jeová)",
+                description: "O Soberano e Justo Deus, que responde às queixas de Habacuque, revela Seus planos e reafirma Sua fidelidade."
+            },
+            "Habacuque": {
+                name: "Habacuque",
+                description: "O profeta que dialoga com Deus, questionando a justiça divina diante da maldade e do sofrimento."
+            },
+            "Povo de Judá": {
+                name: "Povo de Judá",
+                description: "A nação de Judá, cujas injustiças e violência preocupavam Habacuque e seriam julgadas por Deus."
+            },
+            "Caldeus (Babilônios)": {
+                name: "Caldeus (Babilônios)",
+                description: "O império cruel que Deus levantaria como instrumento de juízo contra Judá, mas que também seria julgado."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalHabacuque(characterName) {
+            const details = characterDetailsHabacuque[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameHabacuque').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionHabacuque').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalHabacuque() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsHabacuque() {
+            const grid = document.getElementById('characterGridHabacuque');
+            grid.innerHTML = '';
+            for (const key in characterDetailsHabacuque) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalHabacuque(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksHabacuque() {
+            const chaptersDiv = document.getElementById('chaptersHabacuque');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 3; i++) { // Habacuque tem 3 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/hc/${i}`; // Link para a Bíblia Online, Habacuque
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para Habacuque (25 perguntas únicas)
+        const uniqueQuizQuestionsHabacuque = [
+            { question: "Qual a principal característica do livro de Habacuque?", options: ["É uma narrativa histórica", "É uma coleção de salmos", "É um diálogo entre o profeta e Deus", "É um livro de leis"], answer: "É um diálogo entre o profeta e Deus", reference: "Introdução ao Livro de Habacuque" },
+            { question: "Qual o significado provável do nome 'Habacuque'?", options: ["Profeta", "Luz", "Abraçar ou Lutar", "Esperança"], answer: "Abraçar ou Lutar", reference: "Introdução ao Livro de Habacuque" },
+            { question: "Qual era a primeira queixa de Habacuque a Deus?", options: ["A fome na terra", "A injustiça e violência em Judá", "A invasão de inimigos", "A falta de chuva"], answer: "A injustiça e violência em Judá", reference: "Habacuque 1:2-4" },
+            { question: "Quem Deus anuncia que levantaria para julgar Judá?", options: ["Os egípcios", "Os assírios", "Os caldeus (babilônios)", "Os persas"], answer: "Os caldeus (babilônios)", reference: "Habacuque 1:6" },
+            { question: "Qual é a famosa declaração central do livro de Habacuque?", options: ["Deus é amor", "O Senhor é meu pastor", "O justo viverá pela sua fé", "Tudo tem o seu tempo"], answer: "O justo viverá pela sua fé", reference: "Habacuque 2:4" },
+            { question: "Em quantos 'ais' Deus condena a Babilônia no capítulo 2?", options: ["Três", "Quatro", "Cinco", "Sete"], answer: "Cinco", reference: "Habacuque 2:6-20" },
+            { question: "O que Habacuque pede a Deus no início de sua oração no capítulo 3?", options: ["Riquezas", "Paz", "Aviva a tua obra no meio dos anos", "Vingança"], answer: "Aviva a tua obra no meio dos anos", reference: "Habacuque 3:2" },
+            { question: "Mesmo que as circunstâncias sejam desfavoráveis, em quem Habacuque declara que se alegrará?", options: ["Nos amigos", "Na colheita", "No Senhor", "Na família"], answer: "No Senhor", reference: "Habacuque 3:18" },
+            { question: "Qual é a principal questão teológica abordada por Habacuque?", options: ["A criação do mundo", "A lei de Moisés", "A justiça de Deus diante do mal (teodiceia)", "A vida após a morte"], answer: "A justiça de Deus diante do mal (teodiceia)", reference: "Significado Teológico" },
+            { question: "Quantos capítulos tem o livro de Habacuque?", options: ["2", "3", "4", "5"], answer: "3", reference: "Esboços do Livro de Habacuque" },
+            { question: "O que Deus ordena a Habacuque que faça com a visão?", options: ["Que a esconda", "Que a escreva claramente", "Que a pregue apenas em segredo", "Que a esqueça"], answer: "Que a escreva claramente", reference: "Habacuque 2:2" },
+            { question: "Qual é a atitude final de Habacuque no livro?", options: ["Desespero", "Revolta", "Confiança inabalável e louvor", "Indiferença"], answer: "Confiança inabalável e louvor", reference: "Habacuque 3:17-19" },
+            { question: "A frase 'o justo viverá pela sua fé' é citada em qual livro do Novo Testamento?", options: ["Mateus", "Atos", "Romanos", "Apocalipse"], answer: "Romanos", reference: "Introdução ao Livro de Habacuque" },
+            { question: "Habacuque profetizou em qual reino?", options: ["Israel (Norte)", "Judá (Sul)", "Egito", "Babilônia"], answer: "Judá (Sul)", reference: "Introdução ao Livro de Habacuque" },
+            { question: "O que os caldeus não temem, segundo Habacuque 1:7?", options: ["Deus", "Reis", "Leis", "Nenhuma das alternativas"], answer: "Nenhuma das alternativas", reference: "Habacuque 1:7 (eles não temem rei nem príncipe)" },
+            { question: "Qual o versículo que descreve a força de Deus para Habacuque no final do livro?", options: ["Habacuque 1:1", "Habacuque 2:4", "Habacuque 3:19", "Habacuque 3:2"], answer: "Habacuque 3:19", reference: "Habacuque 3:19" },
+            { question: "Qual era a segunda queixa de Habacuque, após a resposta de Deus?", options: ["Por que a colheita era pouca?", "Por que Deus usaria um povo mais ímpio para punir Judá?", "Por que a guerra durava tanto?", "Por que ele era profeta?"], answer: "Por que Deus usaria um povo mais ímpio para punir Judá?", reference: "Habacuque 1:13" },
+            { question: "O que Habacuque 3:17-18 descreve como uma situação de grande adversidade?", options: ["Ataque de inimigos", "Falta de alimentos e rebanhos", "Doença generalizada", "Seca prolongada"], answer: "Falta de alimentos e rebanhos", reference: "Habacuque 3:17" },
+            { question: "Qual o tema principal do capítulo 3 de Habacuque?", options: ["Denúncias contra Judá", "A oração de fé do profeta", "A história da Babilônia", "A lei de Deus"], answer: "A oração de fé do profeta", reference: "Esboços do Livro de Habacuque" },
+            { question: "O que a Babilônia é condenada por fazer, entre outras coisas, no capítulo 2?", options: ["Construir cidades", "Beber vinho e se embriagar", "Comerciar com outras nações", "Fazer alianças"], answer: "Beber vinho e se embriagar", reference: "Habacuque 2:5" },
+            { question: "Qual a atitude dos caldeus em relação à justiça, segundo Habacuque 1:7?", options: ["Eles a praticam", "Eles a ignoram", "Eles a pervertem", "Eles a ensinam"], answer: "Eles a pervertem", reference: "Habacuque 1:7 (o seu juízo e a sua dignidade procederão deles mesmos)" },
+            { question: "O que Habacuque 2:20 afirma sobre o Senhor?", options: ["Ele está dormindo", "Ele está em seu santo templo", "Ele está ausente", "Ele está irado"], answer: "Ele está em seu santo templo", reference: "Habacuque 2:20" },
+            { question: "A oração de Habacuque no capítulo 3 é um exemplo de:", options: ["Lamento", "Profecia", "Hino de louvor e confiança", "Maldição"], answer: "Hino de louvor e confiança", reference: "Significado Teológico" },
+            { question: "O que Habacuque 1:13 diz que Deus não pode contemplar?", options: ["A pobreza", "A injustiça e a maldade", "A alegria", "A paz"], answer: "A injustiça e a maldade", reference: "Habacuque 1:13" },
+            { question: "Qual é a promessa de Deus para a visão em Habacuque 2:3?", options: ["Ela se atrasará", "Ela se cumprirá no tempo certo", "Ela não acontecerá", "Ela será esquecida"], answer: "Ela se cumprirá no tempo certo", reference: "Habacuque 2:3" }
+        ];
+
+        let quizQuestionsHabacuque = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsHabacuque() {
+            quizQuestionsHabacuque = []; // Limpa as perguntas anteriores
+            while (quizQuestionsHabacuque.length < 200) {
+                quizQuestionsHabacuque.push(...uniqueQuizQuestionsHabacuque);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsHabacuque.length > 200) {
+                quizQuestionsHabacuque = quizQuestionsHabacuque.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsHabacuque); // Embaralha o array completo
+        }
+
+        let currentQuizIndexHabacuque = 0;
+        let scoreHabacuque = 0;
+        let wrongAnswersHabacuque = 0;
+
+        function displayQuestionHabacuque() {
+            const questionElement = document.getElementById('quizQuestionHabacuque');
+            const optionsElement = document.getElementById('quizOptionsHabacuque');
+            const feedbackElement = document.getElementById('quizFeedbackHabacuque');
+            const nextButton = document.querySelector('#quizContainerHabacuque .quiz-next');
+            const progressElement = document.getElementById('quizProgressHabacuque');
+
+            if (currentQuizIndexHabacuque < quizQuestionsHabacuque.length) {
+                const questionData = quizQuestionsHabacuque[currentQuizIndexHabacuque];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerHabacuque(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexHabacuque + 1}/${quizQuestionsHabacuque.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreHabacuque}, Erros: ${wrongAnswersHabacuque}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerHabacuque(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsHabacuque button');
+            const feedbackElement = document.getElementById('quizFeedbackHabacuque');
+            const nextButton = document.querySelector('#quizContainerHabacuque .quiz-next');
+            const scoreElement = document.getElementById('quizScoreHabacuque');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreHabacuque++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersHabacuque++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreHabacuque}, Erros: ${wrongAnswersHabacuque}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionHabacuque() {
+            currentQuizIndexHabacuque++;
+            displayQuestionHabacuque();
+        }
+
+        // Gráfico de Temas para Habacuque
+        let habacuqueChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderHabacuqueChart() {
+            const ctx = document.getElementById('habacuqueChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (habacuqueChartInstance) {
+                habacuqueChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['Justiça de Deus', 'Soberania Divina', 'Fé e Confiança', 'O Justo Viverá pela Fé', 'Sofrimento e Mal', 'Juízo de Deus', 'Louvor na Adversidade'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [6, 5, 7, 7, 5, 6, 5], // Valores fictícios para Habacuque
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para Justiça de Deus
+                        'rgba(54, 162, 235, 0.7)', // Azul para Soberania Divina
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Fé e Confiança
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para O Justo Viverá pela Fé
+                        'rgba(153, 102, 255, 0.7)', // Roxo para Sofrimento e Mal
+                        'rgba(255, 159, 64, 0.7)', // Laranja para Juízo de Deus
+                        'rgba(201, 203, 207, 0.7)' // Cinza para Louvor na Adversidade
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            habacuqueChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de Habacuque',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionHabacuque('inicio');
+        });
+    </script>
+</body>
+</html>

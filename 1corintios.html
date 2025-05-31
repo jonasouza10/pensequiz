@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 1 Coríntios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="1 Coríntios Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 1 Coríntios</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionCorintios1('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionCorintios1('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionCorintios1('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionCorintios1('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionCorintios1('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionCorintios1('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionCorintios1('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionCorintios1('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionCorintios1('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 1 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Primeira Epístola de Paulo aos Coríntios, uma carta essencial que aborda os desafios e problemas enfrentados por uma igreja em uma cidade cosmopolita e moralmente complexa. Descubra os ensinamentos de Paulo sobre divisões na igreja, imoralidade, litígios, casamento, liberdade cristã, dons espirituais, ordem no culto e a ressurreição dos mortos. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 1 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Primeira Epístola de Paulo aos Coríntios é uma das cartas mais importantes do Novo Testamento, escrita pelo apóstolo Paulo por volta de 55-56 d.C., durante sua terceira viagem missionária, provavelmente de Éfeso. A carta é dirigida à igreja em Corinto, uma cidade portuária grega conhecida por sua riqueza, diversidade cultural e, infelizmente, por sua notória imoralidade e paganismo.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Paulo havia fundado a igreja em Corinto (Atos 18) e, após sua partida, surgiram vários problemas e divisões. A carta de 1 Coríntios é uma resposta a relatórios que Paulo recebeu (de 'Cloe e os seus') e a uma carta que a própria igreja lhe enviou (1 Co 7:1). O propósito de Paulo é corrigir os erros doutrinários e práticos, restaurar a ordem e a unidade, e instruir os crentes sobre como viver uma vida que glorifique a Deus em um ambiente hostil ao evangelho.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os problemas abordados na carta são diversos e refletem os desafios de uma comunidade cristã em um contexto pagão: divisões e partidarismo (1-4), imoralidade sexual (5), litígios entre irmãos (6), questões sobre casamento e celibato (7), comida sacrificada a ídolos (8-10), ordem no culto (11), uso e abuso dos dons espirituais (12-14), e a negação da ressurreição dos mortos (15). Em meio a essas correções, Paulo apresenta ensinamentos profundos sobre o amor (capítulo 13), a unidade do corpo de Cristo e a importância da ressurreição de Cristo como fundamento da fé cristã.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem a unidade da Igreja, a santidade pessoal e comunitária, a sabedoria de Deus versus a sabedoria humana, a liberdade cristã e a responsabilidade, o propósito e o uso correto dos dons espirituais, a supremacia do amor, a ordem no culto público e a certeza da ressurreição.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-4: Divisões na Igreja.</strong> A sabedoria de Deus, o ministério apostólico.</li>
+                <li><strong>Capítulos 5-6: Imoralidade e Litígios.</strong> Disciplina e pureza da igreja, ações judiciais entre crentes.</li>
+                <li><strong>Capítulos 7-10: Questões Éticas e Práticas.</strong> Casamento, celibato, comida sacrificada a ídolos, liberdade cristã.</li>
+                <li><strong>Capítulos 11-14: Ordem no Culto e Dons Espirituais.</strong> Uso do véu, Ceia do Senhor, diversidade e unidade dos dons, o amor como caminho mais excelente, ordem na profecia e línguas.</li>
+                <li><strong>Capítulos 15: A Ressurreição dos Mortos.</strong> A centralidade da ressurreição de Cristo e a esperança da ressurreição dos crentes.</li>
+                <li><strong>Capítulo 16: Coleta e Planos de Viagem.</strong> Coleta para os santos em Jerusalém, planos de Paulo.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Coríntios é uma carta prática e relevante, oferecendo princípios atemporais para a vida da igreja e do crente em qualquer contexto.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 1 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Coríntios aborda problemas práticos e doutrinários na igreja de Corinto, enfatizando a unidade e a santidade.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Introdução e Divisões na Igreja (Capítulos 1-4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação e Ação de Graças (1:1-9):</strong>
+                    <ul>
+                        <li>Chamados à santidade e à comunhão com Cristo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Divisões e Partidarismo (1:10-17):</strong>
+                    <ul>
+                        <li>A exortação à unidade em Cristo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Sabedoria de Deus e a Loucura da Cruz (1:18-2:16):</strong>
+                    <ul>
+                        <li>Cristo crucificado como poder e sabedoria de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Ministros de Cristo e Mordomos de Deus (3:1-4:21):</strong>
+                    <ul>
+                        <li>O papel dos líderes e a verdadeira sabedoria.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Imoralidade e Litígios (Capítulos 5-6)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Imoralidade Sexual na Igreja (5:1-13):</strong>
+                    <ul>
+                        <li>Disciplina e pureza da comunidade.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Litígios entre Irmãos (6:1-11):</strong>
+                    <ul>
+                        <li>Não levar uns aos outros a tribunais pagãos.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Corpo é Templo do Espírito Santo (6:12-20):</strong>
+                    <ul>
+                        <li>Fuga da imoralidade.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Questões Éticas e Práticas (Capítulos 7-10)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Casamento e Celibato (7:1-40):</strong>
+                    <ul>
+                        <li>Princípios para solteiros, casados e viúvos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Comida Sacrificada a Ídolos (8:1-11:1):</strong>
+                    <ul>
+                        <li>Liberdade cristã e a consciência do irmão.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Ordem no Culto e Dons Espirituais (Capítulos 11-14)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Véu e a Ceia do Senhor (11:2-34):</strong>
+                    <ul>
+                        <li>Decoro no culto, a instituição e significado da Ceia.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Dons Espirituais: Diversidade na Unidade (12:1-31):</strong>
+                    <ul>
+                        <li>O corpo de Cristo e a função de cada membro.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Caminho Mais Excelente: O Amor (13:1-13):</strong>
+                    <ul>
+                        <li>A supremacia do amor sobre todos os dons.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Ordem na Profecia e Línguas (14:1-40):</strong>
+                    <ul>
+                        <li>Edificação da igreja e decência no culto.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. A Ressurreição dos Mortos (Capítulo 15)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Realidade da Ressurreição de Cristo (15:1-11):</strong>
+                    <ul>
+                        <li>O fundamento do evangelho.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Necessidade da Ressurreição dos Crentes (15:12-34):</strong>
+                    <ul>
+                        <li>Sem ressurreição, nossa fé é vã.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Corpo Ressurreto (15:35-58):</strong>
+                    <ul>
+                        <li>A natureza do corpo glorificado e a vitória sobre a morte.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">VI. Coleta e Planos de Viagem (Capítulo 16)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Coleta para os Santos (16:1-4):</strong>
+                    <ul>
+                        <li>Instruções sobre a oferta.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Planos de Viagem e Saudações (16:5-24):</strong>
+                    <ul>
+                        <li>Timóteo, Apolo, Aquila e Priscila.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">A Primeira Epístola aos Coríntios é um manual prático para a vida da igreja, abordando uma ampla gama de problemas que surgem em uma comunidade de crentes em um mundo caído. Paulo enfatiza a importância da unidade em Cristo, a necessidade de santidade pessoal e corporativa, e a supremacia do amor como o princípio que deve reger todas as interações e o uso dos dons espirituais. A carta também oferece uma das mais detalhadas defesas da doutrina da ressurreição de Cristo e dos crentes, fundamentando a esperança cristã. 1 Coríntios continua a ser extremamente relevante para as igrejas de hoje, fornecendo sabedoria divina para lidar com divisões, imoralidade, questões éticas e o uso adequado dos dons, sempre com o objetivo de edificar o corpo de Cristo e glorificar a Deus.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridCorintios1">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 1 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 1 Coríntios, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Divisões e a Sabedoria de Deus</strong>
+                    <ul>
+                        <li>1.1-9: Saudação e Ação de Graças.</li>
+                        <li>1.10-17: Divisões na Igreja.</li>
+                        <li>1.18-31: Cristo, a Sabedoria e o Poder de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: Sabedoria Espiritual</strong>
+                    <ul>
+                        <li>2.1-5: A Pregação de Paulo.</li>
+                        <li>2.6-16: A Sabedoria de Deus Revelada pelo Espírito.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: Ministros de Deus e Edificação</strong>
+                    <ul>
+                        <li>3.1-9: A Imaturidade dos Coríntios e os Ministros de Deus.</li>
+                        <li>3.10-17: Edificando sobre o Fundamento.</li>
+                        <li>3.18-23: A Verdadeira Sabedoria.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: Apóstolos como Servos e Mordomos</strong>
+                    <ul>
+                        <li>4.1-5: A Verdadeira Avaliação dos Ministros.</li>
+                        <li>4.6-13: A Humildade Apostólica.</li>
+                        <li>4.14-21: Paulo, Pai Espiritual e sua Autoridade.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 5: Imoralidade Sexual e Disciplina</strong>
+                    <ul>
+                        <li>5.1-8: O Caso de Imoralidade.</li>
+                        <li>5.9-13: A Necessidade de Disciplina.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 6: Litígios entre Irmãos e Pureza Sexual</strong>
+                    <ul>
+                        <li>6.1-11: Não Levar Irmãos a Tribunais Pagãos.</li>
+                        <li>6.12-20: O Corpo é Templo do Espírito Santo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 7: Casamento e Celibato</strong>
+                    <ul>
+                        <li>7.1-7: Deveres Conjugais.</li>
+                        <li>7.8-16: Solteiros, Viúvas e Casamentos Mistos.</li>
+                        <li>7.17-24: Permanecer na Vocação.</li>
+                        <li>7.25-40: Celibato e Casamento.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 8: Comida Sacrificada a Ídolos e Consciência</strong>
+                    <ul>
+                        <li>8.1-13: Conhecimento e Amor.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 9: A Liberdade Apostólica de Paulo</strong>
+                    <ul>
+                        <li>9.1-14: O Direito de um Apóstolo.</li>
+                        <li>9.15-23: Paulo, o Servo de Todos.</li>
+                        <li>9.24-27: A Disciplina do Atleta.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 10: Advertências da História de Israel</strong>
+                    <ul>
+                        <li>10.1-13: Os Exemplos de Israel.</li>
+                        <li>10.14-22: Idolatria e a Mesa do Senhor.</li>
+                        <li>10.23-11:1: A Glória de Deus e o Bem do Próximo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 11: Decoro no Culto e a Ceia do Senhor</strong>
+                    <ul>
+                        <li>11.2-16: O Uso do Véu.</li>
+                        <li>11.17-34: A Ceia do Senhor.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 12: Dons Espirituais: Unidade na Diversidade</strong>
+                    <ul>
+                        <li>12.1-11: A Diversidade dos Dons.</li>
+                        <li>12.12-31: O Corpo de Cristo e Seus Membros.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 13: O Caminho Mais Excelente: O Amor</strong>
+                    <ul>
+                        <li>13.1-13: A Supremacia do Amor.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 14: Ordem na Profecia e Línguas</strong>
+                    <ul>
+                        <li>14.1-25: Profecia e Línguas.</li>
+                        <li>14.26-40: Ordem no Culto.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 15: A Ressurreição dos Mortos</strong>
+                    <ul>
+                        <li>15.1-11: O Evangelho da Ressurreição de Cristo.</li>
+                        <li>15.12-34: A Necessidade da Ressurreição dos Crentes.</li>
+                        <li>15.35-49: O Corpo Ressurreto.</li>
+                        <li>15.50-58: A Vitória sobre a Morte.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 16: Coleta, Planos e Saudações Finais</strong>
+                    <ul>
+                        <li>16.1-4: A Coleta para os Santos.</li>
+                        <li>16.5-12: Planos de Viagem.</li>
+                        <li>16.13-24: Exortações Finais e Saudações.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 1 Coríntios</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Unidade na Igreja:</strong> Superar divisões e partidarismo.</li>
+                <li><strong>Santidade Pessoal e Comunitária:</strong> Abordagem da imoralidade e pureza.</li>
+                <li><strong>Sabedoria de Deus vs. Sabedoria Humana:</strong> A loucura da cruz como poder de Deus.</li>
+                <li><strong>Liberdade Cristã e Responsabilidade:</strong> O uso da liberdade sem causar tropeço.</li>
+                <li><strong>Dons Espirituais:</strong> Propósito, diversidade e uso adequado para a edificação.</li>
+                <li><strong>A Supremacia do Amor:</strong> O capítulo 13 como o "hino ao amor".</li>
+                <li><strong>Ordem no Culto Público:</strong> Decoro e edificação nas reuniões da igreja.</li>
+                <li><strong>A Ressurreição de Cristo e dos Crentes:</strong> O fundamento da fé e da esperança cristã.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 1 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersCorintios1">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 1 Coríntios</h2>
+            <div id="quizContainerCorintios1" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionCorintios1"></p>
+                <div id="quizOptionsCorintios1" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackCorintios1" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionCorintios1()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressCorintios1"></span></p>
+                <p>Pontuação: <span id="quizScoreCorintios1">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 1 Coríntios</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 1 Coríntios.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="corintios1Chart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalCorintios1()">&times;</span>
+                <h3 id="modalCharacterNameCorintios1" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionCorintios1" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de 1 Coríntios",
+            "short_name": "1 Coríntios",
+            "description": "Explore o livro de 1 Coríntios de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=1CO",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=1CO",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = '1corintios-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Ensure Chart.js is cached
+            // Add other static resources you want to cache here
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Register the Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // Function to load manifest.json dynamically
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Functions for section control
+        function showSectionCorintios1(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Ensure character buttons and chapter links are generated when entering respective sections
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsCorintios1();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksCorintios1();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsCorintios1(); // Shuffle questions at the start of the quiz
+                currentQuizIndexCorintios1 = 0; // Reset the quiz
+                scoreCorintios1 = 0;
+                wrongAnswersCorintios1 = 0;
+                document.getElementById('quizScoreCorintios1').textContent = `Acertos: ${scoreCorintios1}, Erros: ${wrongAnswersCorintios1}`;
+                displayQuestionCorintios1();
+            }
+            if (sectionId === 'grafico') { // Call the chart function when the section is displayed
+                renderCorintios1Chart();
+            }
+        }
+
+        // Character data for 1 Corinthians
+        const characterDetailsCorintios1 = {
+            "Paulo": {
+                name: "Paulo",
+                description: "O autor da Primeira Epístola aos Coríntios, apóstolo que fundou a igreja em Corinto e escreveu para corrigir seus problemas."
+            },
+            "Timóteo": {
+                name: "Timóteo",
+                description: "Jovem companheiro de Paulo, enviado a Corinto para ajudar a resolver os problemas da igreja."
+            },
+            "Apolo": {
+                name: "Apolo",
+                description: "Um eloquente pregador do evangelho, que ministrou em Corinto e cujo nome foi usado em uma das facções da igreja."
+            },
+            "Cefas (Pedro)": {
+                name: "Cefas (Pedro)",
+                description: "Mencionado como líder de uma das facções na igreja de Corinto, embora não diretamente envolvido nas divisões."
+            },
+            "Cloe": {
+                name: "Cloe",
+                description: "Membros da casa de Cloe relataram a Paulo sobre as divisões na igreja de Corinto."
+            },
+            "Estéfanas": {
+                name: "Estéfanas",
+                description: "O primeiro convertido da Acaia e um dos que visitaram Paulo em Éfeso, levando informações sobre a igreja de Corinto."
+            },
+            "Fortunato": {
+                name: "Fortunato",
+                description: "Um dos que visitaram Paulo em Éfeso, junto com Estéfanas e Acaico."
+            },
+            "Acaico": {
+                name: "Acaico",
+                description: "Um dos que visitaram Paulo em Éfeso, junto com Estéfanas e Fortunato."
+            },
+            "Crispo": {
+                name: "Crispo",
+                description: "Líder da sinagoga em Corinto que se converteu e foi batizado por Paulo."
+            },
+            "Gaio": {
+                name: "Gaio",
+                description: "Um dos poucos que Paulo batizou em Corinto; também é mencionado como anfitrião de Paulo em Romanos."
+            },
+            "Priscila e Áquila": {
+                name: "Priscila e Áquila",
+                description: "Um casal de fabricantes de tendas e missionários que hospedaram Paulo em Corinto e Éfeso."
+            }
+        };
+
+        // Function to display the character modal
+        function displayCharacterModalCorintios1(characterName) {
+            const details = characterDetailsCorintios1[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameCorintios1').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionCorintios1').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Function to close the modal
+        function closeCharacterModalCorintios1() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Generate character buttons
+        function generateCharacterButtonsCorintios1() {
+            const grid = document.getElementById('characterGridCorintios1');
+            grid.innerHTML = '';
+            for (const key in characterDetailsCorintios1) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalCorintios1(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Generate chapter links
+        function generateChapterLinksCorintios1() {
+            const chaptersDiv = document.getElementById('chaptersCorintios1');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 16; i++) { // 1 Corinthians has 16 chapters
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/1co/${i}`; // Link to Biblia Online, 1 Corinthians
+                link.target = "_blank"; // Open in new tab
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Function to shuffle an array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Quiz data for 1 Corinthians (25 unique questions)
+        const uniqueQuizQuestionsCorintios1 = [
+            { question: "Quem é o autor da Primeira Epístola aos Coríntios?", options: ["Pedro", "João", "Paulo", "Tiago"], answer: "Paulo", reference: "Introdução ao Livro de 1 Coríntios" },
+            { question: "Qual o principal problema abordado por Paulo nos capítulos iniciais de 1 Coríntios?", options: ["Perseguição externa", "Divisões e partidarismo", "Falta de fé", "Problemas financeiros"], answer: "Divisões e partidarismo", reference: "1 Coríntios 1:10-17" },
+            { question: "Segundo 1 Coríntios 1:18, o que a mensagem da cruz é para os que perecem?", options: ["Sabedoria", "Loucura", "Poder", "Justiça"], answer: "Loucura", reference: "1 Coríntios 1:18" },
+            { question: "Em 1 Coríntios 5, Paulo exorta a igreja a lidar com que tipo de problema?", options: ["Dúvidas doutrinárias", "Imoralidade sexual", "Falta de amor", "Problemas de liderança"], answer: "Imoralidade sexual", reference: "1 Coríntios 5:1-13" },
+            { question: "Qual o conselho de Paulo sobre litígios entre irmãos em 1 Coríntios 6?", options: ["Ir aos tribunais pagãos", "Resolver entre si, mesmo que sofram injustiça", "Ignorar o problema", "Buscar vingança"], answer: "Resolver entre si, mesmo que sofram injustiça", reference: "1 Coríntios 6:1-11" },
+            { question: "O que Paulo ensina em 1 Coríntios 6:19 sobre o corpo do crente?", options: ["Que o corpo é para o pecado", "Que o corpo é templo do Espírito Santo", "Que o corpo não importa", "Que o corpo deve ser adorado"], answer: "Que o corpo é templo do Espírito Santo", reference: "1 Coríntios 6:19" },
+            { question: "Qual o capítulo de 1 Coríntios que é conhecido como o 'hino ao amor'?", options: ["Capítulo 12", "Capítulo 13", "Capítulo 14", "Capítulo 15"], answer: "Capítulo 13", reference: "1 Coríntios 13" },
+            { question: "Em 1 Coríntios 12, Paulo compara a igreja a quê?", options: ["Um exército", "Uma família", "Um corpo com muitos membros", "Um templo"], answer: "Um corpo com muitos membros", reference: "1 Coríntios 12:12-27" },
+            { question: "Qual a doutrina fundamental que Paulo defende extensivamente no capítulo 15 de 1 Coríntios?", options: ["A justificação pela fé", "A santificação", "A ressurreição dos mortos", "A soberania de Deus"], answer: "A ressurreição dos mortos", reference: "1 Coríntios 15" },
+            { question: "Segundo 1 Coríntios 14, qual dom espiritual Paulo valoriza mais para a edificação da igreja em público?", options: ["Línguas", "Interpretação de línguas", "Profecia", "Cura"], answer: "Profecia", reference: "1 Coríntios 14:1-5" },
+            { question: "Quem eram os membros da casa que relataram a Paulo sobre as divisões em Corinto?", options: ["Apolo", "Cefas", "Cloe", "Timóteo"], answer: "Cloe", reference: "1 Coríntios 1:11" },
+            { question: "Qual o conselho de Paulo sobre o casamento em 1 Coríntios 7?", options: ["Todos devem casar", "Todos devem permanecer solteiros", "É bom casar, mas é melhor permanecer como Paulo", "É proibido casar"], answer: "É bom casar, mas é melhor permanecer como Paulo", reference: "1 Coríntios 7:8-9" },
+            { question: "O que Paulo diz em 1 Coríntios 10:31 que devemos fazer em tudo?", options: ["Comer e beber", "Fazer tudo para a glória de Deus", "Apenas orar", "Apenas pregar"], answer: "Fazer tudo para a glória de Deus", reference: "1 Coríntios 10:31" },
+            { question: "Qual o propósito principal dos dons espirituais, segundo 1 Coríntios 12:7?", options: ["Para glória pessoal", "Para a edificação da igreja", "Para ganhar dinheiro", "Para ter poder"], answer: "Para a edificação da igreja", reference: "1 Coríntios 12:7" },
+            { question: "Se Cristo não ressuscitou, o que Paulo afirma sobre a fé dos coríntios em 1 Coríntios 15:17?", options: ["É forte", "É vã", "É perfeita", "É inabalável"], answer: "É vã", reference: "1 Coríntios 15:17" },
+            { question: "Qual o nome do jovem companheiro de Paulo que ele enviou a Corinto?", options: ["Silas", "Tito", "Timóteo", "Lucas"], answer: "Timóteo", reference: "1 Coríntios 4:17" },
+            { question: "Paulo adverte os coríntios contra a participação em que tipo de mesa, além da Mesa do Senhor?", options: ["Mesa de banquetes", "Mesa de demônios", "Mesa de amigos", "Mesa de negócios"], answer: "Mesa de demônios", reference: "1 Coríntios 10:21" },
+            { question: "O que Paulo diz sobre o conhecimento em 1 Coríntios 8:1?", options: ["Ele edifica", "Ele incha", "Ele cura", "Ele liberta"], answer: "Ele incha", reference: "1 Coríntios 8:1" },
+            { question: "Qual a instrução de Paulo sobre a coleta para os santos em Jerusalém em 1 Coríntios 16?", options: ["Fazer quando ele chegasse", "Fazer no primeiro dia da semana", "Fazer uma vez por ano", "Não fazer"], answer: "Fazer no primeiro dia da semana", reference: "1 Coríntios 16:1-2" },
+            { question: "Qual o significado da Ceia do Senhor, conforme 1 Coríntios 11:26?", options: ["Uma refeição comum", "Anunciar a morte do Senhor até que Ele venha", "Uma festa de celebração", "Um ritual sem significado"], answer: "Anunciar a morte do Senhor até que Ele venha", reference: "1 Coríntios 11:26" },
+            { question: "Paulo se refere a si mesmo e a Apolo como o que em 1 Coríntios 3:5-9?", options: ["Líderes supremos", "Servos de Cristo e cooperadores de Deus", "Mestres da sabedoria", "Fundadores da igreja"], answer: "Servos de Cristo e cooperadores de Deus", reference: "1 Coríntios 3:5-9" },
+            { question: "Em 1 Coríntios 14:33, Paulo afirma que Deus não é Deus de quê?", options: ["Confusão", "Paz", "Ordem", "Amor"], answer: "Confusão", reference: "1 Coríntios 14:33" },
+            { question: "O que Paulo diz que é a 'primeira fruta' dos que dormem (morreram) em 1 Coríntios 15:20?", options: ["A ressurreição dos crentes", "A ressurreição de Cristo", "A vida eterna", "O Espírito Santo"], answer: "A ressurreição de Cristo", reference: "1 Coríntios 15:20" },
+            { question: "Qual o conselho de Paulo para os casais em 1 Coríntios 7:5?", options: ["Separar-se por um tempo", "Privar-se um ao outro, exceto por mútuo consentimento para se dedicar à oração", "Viver separados", "Não ter mais relações"], answer: "Privar-se um ao outro, exceto por mútuo consentimento para se dedicar à oração", reference: "1 Coríntios 7:5" },
+            { question: "Qual o tema do capítulo 10 de 1 Coríntios?", options: ["Dons espirituais", "A ressurreição", "Advertências da história de Israel e idolatria", "Casamento"], answer: "Advertências da história de Israel e idolatria", reference: "1 Coríntios 10" }
+        ];
+
+        let quizQuestionsCorintios1 = []; // This array will store the 200 shuffled questions
+
+        // Function to populate and shuffle quiz questions
+        function shuffleQuizQuestionsCorintios1() {
+            quizQuestionsCorintios1 = []; // Clear previous questions
+            while (quizQuestionsCorintios1.length < 200) {
+                quizQuestionsCorintios1.push(...uniqueQuizQuestionsCorintios1);
+            }
+            // Ensure the array has exactly 200 questions, in case duplication exceeds
+            if (quizQuestionsCorintios1.length > 200) {
+                quizQuestionsCorintios1 = quizQuestionsCorintios1.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsCorintios1); // Shuffle the complete array
+        }
+
+        let currentQuizIndexCorintios1 = 0;
+        let scoreCorintios1 = 0;
+        let wrongAnswersCorintios1 = 0;
+
+        function displayQuestionCorintios1() {
+            const questionElement = document.getElementById('quizQuestionCorintios1');
+            const optionsElement = document.getElementById('quizOptionsCorintios1');
+            const feedbackElement = document.getElementById('quizFeedbackCorintios1');
+            const nextButton = document.querySelector('#quizContainerCorintios1 .quiz-next');
+            const progressElement = document.getElementById('quizProgressCorintios1');
+
+            if (currentQuizIndexCorintios1 < quizQuestionsCorintios1.length) {
+                const questionData = quizQuestionsCorintios1[currentQuizIndexCorintios1];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Shuffle options
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerCorintios1(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexCorintios1 + 1}/${quizQuestionsCorintios1.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreCorintios1}, Erros: ${wrongAnswersCorintios1}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerCorintios1(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsCorintios1 button');
+            const feedbackElement = document.getElementById('quizFeedbackCorintios1');
+            const nextButton = document.querySelector('#quizContainerCorintios1 .quiz-next');
+            const scoreElement = document.getElementById('quizScoreCorintios1');
+
+            // Disable all option buttons to prevent multiple selections
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreCorintios1++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersCorintios1++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreCorintios1}, Erros: ${wrongAnswersCorintios1}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionCorintios1() {
+            currentQuizIndexCorintios1++;
+            displayQuestionCorintios1();
+        }
+
+        // Chart for 1 Corinthians Themes
+        let corintios1ChartInstance = null; // Variable to store the chart instance
+
+        function renderCorintios1Chart() {
+            const ctx = document.getElementById('corintios1Chart').getContext('2d');
+
+            // Destroy the previous chart instance if it exists
+            if (corintios1ChartInstance) {
+                corintios1ChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['Unidade na Igreja', 'Santidade Pessoal e Comunitária', 'Sabedoria de Deus vs. Humana', 'Liberdade Cristã e Responsabilidade', 'Dons Espirituais', 'A Supremacia do Amor', 'Ordem no Culto Público', 'A Ressurreição'],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [9, 8, 7, 6, 10, 9, 7, 10], // Fictitious values for 1 Corinthians
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Red for Unidade
+                        'rgba(54, 162, 235, 0.7)', // Blue for Santidade
+                        'rgba(255, 206, 86, 0.7)', // Yellow for Sabedoria
+                        'rgba(75, 192, 192, 0.7)', // Teal for Liberdade
+                        'rgba(153, 102, 255, 0.7)', // Purple for Dons
+                        'rgba(255, 159, 64, 0.7)', // Orange for Amor
+                        'rgba(201, 203, 207, 0.7)', // Gray for Ordem
+                        'rgba(100, 149, 237, 0.7)' // Light blue for Ressurreição
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)',
+                        'rgba(100, 149, 237, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            corintios1ChartInstance = new Chart(ctx, {
+                type: 'bar', // Can be 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Color of Y-axis labels
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Color of Y-axis grid lines
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Color of X-axis labels
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Color of X-axis grid lines
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Color of legend text
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de 1 Coríntios',
+                            color: '#f8fafc', // Color of chart title
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the home section on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionCorintios1('inicio');
+        });
+    </script>
+</body>
+</html>

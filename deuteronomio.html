@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de Deuteronômio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Deuteronômio Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de Deuteronômio</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSection('inicio')">Início</button>
+            <button class="nav-button" onclick="showSection('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSection('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSection('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSection('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSection('temas')">Temas</button>
+            <button class="nav-button" onclick="showSection('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSection('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSection('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de Deuteronômio</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore as últimas palavras e ensinamentos de Moisés ao povo de Israel antes de entrarem na Terra Prometida. Relembre a Lei, as alianças de Deus e as admoestações para uma vida de obediência e amor. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de Deuteronômio</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Deuteronômio, o quinto e último livro do Pentateuco, significa "segunda lei" ou "repetição da lei". Não é uma nova lei, mas uma recapitulação e explicação das leis dadas no Sinai, apresentadas por Moisés à nova geração de israelitas nas planícies de Moabe, antes de entrarem na Terra Prometida. O livro serve como um testamento final de Moisés, um chamado à obediência e um lembrete da fidelidade de Deus.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Tradicionalmente atribuído a Moisés, Deuteronômio é composto principalmente por uma série de discursos de Moisés. Ele olha para trás, relembrando a história de Israel no deserto e as leis divinas; olha para o presente, enfatizando a importância da obediência no momento; e olha para o futuro, prevendo a vida de Israel na terra e as consequências da obediência ou desobediência.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Deuteronômio é fundamental para entender a teologia da aliança e a relação entre Deus e Israel. Ele enfatiza o amor de Deus, a necessidade de amar a Deus de todo o coração, alma e força (o Shemá), e a centralidade da obediência como resposta ao amor de Deus. O livro estabelece as bases para a vida em Canaã, delineando as bênçãos da obediência e as maldições da desobediência.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulos 1-4: Primeiro Discurso de Moisés.</strong> Uma retrospectiva da jornada de Israel desde o Sinai, enfatizando a fidelidade de Deus e a desobediência do povo.</li>
+                <li><strong>Capítulos 5-26: Segundo Discurso de Moisés.</strong> A recapitulação da Lei (Dez Mandamentos), o Shemá (Dt 6:4-9), e uma série de estatutos e ordenanças que governam a vida em Canaã (leis sobre adoração, justiça, moralidade, festas, etc.).</li>
+                <li><strong>Capítulos 27-30: Terceiro Discurso de Moisés.</strong> As bênçãos pela obediência e as maldições pela desobediência, o estabelecimento da aliança na terra de Moabe, e o chamado ao arrependimento e restauração.</li>
+                <li><strong>Capítulos 31-34: Últimos Atos de Moisés.</strong> A nomeação de Josué como sucessor, o Cântico de Moisés, a bênção final de Moisés sobre as tribos e a narrativa de sua morte no Monte Nebo.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Deuteronômio é um apelo apaixonado à lealdade a Jeová, o único Deus verdadeiro, e à obediência aos Seus mandamentos como o caminho para a vida e a bênção na Terra Prometida.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de Deuteronômio</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Deuteronômio é o testamento final de Moisés, um apelo à obediência e um lembrete da aliança de Deus com Israel.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Primeiro Discurso de Moisés: Retrospectiva (Capítulos 1-4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Jornada do Sinai a Cades-Barneia (Capítulo 1):</strong>
+                    <ul>
+                        <li>Relembra a nomeação de juízes e o envio dos espias.</li>
+                        <li>A desobediência do povo e a sentença de 40 anos no deserto.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Peregrinação e as Vitórias (Capítulos 2-3):</strong>
+                    <ul>
+                        <li>As viagens ao redor de Edom, Moabe e Amom.</li>
+                        <li>Vitórias sobre Siom e Ogue e a divisão de suas terras.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Exortação à Obediência (Capítulo 4):</strong>
+                    <ul>
+                        <li>Chamado para guardar os estatutos e juízos de Deus.</li>
+                        <li>Advertência contra a idolatria e a importância da Lei.</li>
+                        <li>Estabelecimento das cidades de refúgio a leste do Jordão.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Segundo Discurso de Moisés: A Lei (Capítulos 5-26)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Recapitulação da Lei (Capítulos 5-11):</strong>
+                    <ul>
+                        <li>Os Dez Mandamentos.</li>
+                        <li>O Shemá: Amar a Deus de todo o coração, alma e força.</li>
+                        <li>Advertências contra o esquecimento de Deus e a idolatria.</li>
+                        <li>A importância de ensinar a Lei aos filhos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Estatutos e Juízos para a Terra Prometida (Capítulos 12-26):</strong>
+                    <ul>
+                        <li>Leis sobre adoração (lugar central de adoração, falsos profetas, idolatria).</li>
+                        <li>Leis sobre pureza e alimentação.</li>
+                        <li>Leis sobre o dízimo e as festas anuais.</li>
+                        <li>Leis sobre o rei, sacerdotes e profetas.</li>
+                        <li>Leis civis e sociais (justiça, escravos, casamento, guerra, etc.).</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Terceiro Discurso de Moisés: Aliança e Consequências (Capítulos 27-30)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. A Aliança no Monte Ebal e Gerizim (Capítulo 27):</strong>
+                    <ul>
+                        <li>Instruções para escrever a Lei em pedras e construir um altar.</li>
+                        <li>As maldições pronunciadas no Monte Ebal.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Bênçãos e Maldições (Capítulo 28):</strong>
+                    <ul>
+                        <li>As bênçãos da obediência à aliança.</li>
+                        <li>As terríveis maldições da desobediência.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Renovação da Aliança e Chamado ao Arrependimento (Capítulos 29-30):</strong>
+                    <ul>
+                        <li>A aliança feita em Moabe.</li>
+                        <li>A promessa de restauração após o exílio, se o povo se arrepender.</li>
+                        <li>A escolha entre a vida e a morte, a bênção e a maldição.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Últimos Atos de Moisés (Capítulos 31-34)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Transmissão da Liderança a Josué (Capítulo 31):</strong>
+                    <ul>
+                        <li>Moisés encoraja Josué e o povo.</li>
+                        <li>A Lei é entregue aos levitas para ser lida a cada sete anos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Cântico de Moisés (Capítulo 32):</strong> Um poema que resume a história de Israel e a fidelidade de Deus.</li>
+                <li><strong>C. A Bênção de Moisés (Capítulo 33):</strong> Bênçãos individuais para cada tribo de Israel.</li>
+                <li><strong>D. A Morte de Moisés (Capítulo 34):</strong> Moisés vê a Terra Prometida do Monte Nebo e morre. Josué assume a liderança.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">Deuteronômio é um livro de amor e exortação. Ele revela o coração de Deus que deseja um relacionamento de aliança com Seu povo, baseado no amor e na obediência. A repetição da Lei serve para gravar os princípios divinos na mente da nova geração. O livro aponta para a necessidade de um coração circuncidado (Dt 30:6) e prefigura a vinda de um Profeta como Moisés (Dt 18:15), que é Jesus Cristo, o cumprimento final da Lei e da Aliança.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridDeuteronomy">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de Deuteronômio</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de Deuteronômio, capítulo por capítulo e por blocos temáticos, destacando os eventos e leis.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. Primeiro Discurso de Moisés: Retrospectiva (Capítulos 1-4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A jornada do Sinai a Cades-Barneia e a desobediência do povo.</li>
+                <li><strong>Capítulo 2:</strong> A peregrinação pelo deserto e as vitórias sobre os povos vizinhos.</li>
+                <li><strong>Capítulo 3:</strong> A conquista das terras de Siom e Ogue, e a divisão das terras a leste do Jordão.</li>
+                <li><strong>Capítulo 4:</strong> Exortação à obediência, advertência contra a idolatria e as cidades de refúgio.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Segundo Discurso de Moisés: A Lei (Capítulos 5-26)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 5:</strong> Recapitulação dos Dez Mandamentos.</li>
+                <li><strong>Capítulo 6:</strong> O Grande Mandamento (Shemá) e a importância de amar a Deus.</li>
+                <li><strong>Capítulo 7:</strong> Advertências contra as nações cananeias e a idolatria.</li>
+                <li><strong>Capítulo 8:</strong> Lembretes da provisão de Deus no deserto e advertências contra o esquecimento.</li>
+                <li><strong>Capítulo 9:</strong> A persistente rebelião de Israel e a graça de Deus.</li>
+                <li><strong>Capítulo 10:</strong> A renovação das tábuas da Lei e o chamado para temer e amar a Deus.</li>
+                <li><strong>Capítulo 11:</strong> A escolha entre bênção e maldição.</li>
+                <li><strong>Capítulos 12-16:</strong> Leis sobre adoração, falsos profetas, dízimos e festas.</li>
+                <li><strong>Capítulos 17-18:</strong> Leis sobre o rei, sacerdotes e profetas.</li>
+                <li><strong>Capítulos 19-20:</strong> Leis sobre cidades de refúgio, limites de propriedade e guerra.</li>
+                <li><strong>Capítulos 21-25:</strong> Leis civis, sociais e morais diversas.</li>
+                <li><strong>Capítulo 26:</strong> As ofertas das primícias e o dízimo.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Terceiro Discurso de Moisés: Aliança e Consequências (Capítulos 27-30)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 27:</strong> As maldições no Monte Ebal.</li>
+                <li><strong>Capítulo 28:</strong> As bênçãos pela obediência e as maldições pela desobediência.</li>
+                <li><strong>Capítulo 29:</strong> A renovação da aliança em Moabe.</li>
+                <li><strong>Capítulo 30:</strong> O chamado ao arrependimento, a promessa de restauração e a escolha entre vida e morte.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Últimos Atos de Moisés (Capítulos 31-34)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 31:</strong> A nomeação de Josué, a entrega da Lei e a profecia de futura apostasia.</li>
+                <li><strong>Capítulo 32:</strong> O Cântico de Moisés.</li>
+                <li><strong>Capítulo 33:</strong> A bênção de Moisés sobre as tribos de Israel.</li>
+                <li><strong>Capítulo 34:</strong> A morte de Moisés no Monte Nebo e a sucessão de Josué.</li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de Deuteronômio</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Lei:</strong> Não apenas uma repetição, mas uma explicação e aplicação da Lei para a vida na Terra Prometida, enfatizando seu propósito e espírito.</li>
+                <li><strong>A Aliança:</strong> A reafirmação da aliança mosaica, com suas bênçãos e maldições, e o chamado à lealdade exclusiva a Jeová.</li>
+                <li><strong>Amor a Deus:</strong> O mandamento central de amar a Deus de todo o coração, alma e força (Shemá), que é a base para toda a obediência.</li>
+                <li><strong>Obediência:</strong> A obediência não como um fardo, mas como a resposta natural ao amor de Deus e o caminho para a vida e a prosperidade.</li>
+                <li><strong>Memória e Lembrete:</strong> A constante exortação para que Israel se lembre do que Deus fez por eles no passado e não se esqueça de Seus mandamentos.</li>
+                <li><strong>A Terra Prometida:</strong> O foco do livro é a entrada e a vida na terra, que é um dom de Deus, mas também um lugar onde a obediência é crucial para a permanência.</li>
+                <li><strong>Justiça Social:</strong> Leis que promovem a equidade e o cuidado com os pobres, órfãos, viúvas e estrangeiros, refletindo o caráter justo de Deus.</li>
+                <li><strong>Um Deus Único:</strong> A ênfase na exclusividade de Jeová como o único Deus verdadeiro, contrastando com a idolatria das nações vizinhas.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de Deuteronômio</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersDeuteronomy">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre Deuteronômio</h2>
+            <div id="quizContainerDeuteronomy" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionDeuteronomy"></p>
+                <div id="quizOptionsDeuteronomy" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackDeuteronomy" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionDeuteronomy()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressDeuteronomy"></span></p>
+                <p>Pontuação: <span id="quizScoreDeuteronomy">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de Deuteronômio</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de Deuteronômio.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="deuteronomyChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModal()">&times;</span>
+                <h3 id="modalCharacterName" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescription" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de Deuteronômio",
+            "short_name": "Deuteronômio",
+            "description": "Explore o livro de Deuteronômio de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=DT",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=DT",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'deuteronomio-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsDeuteronomy();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksDeuteronomy();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsDeuteronomy(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexDeuteronomy = 0; // Reinicia o quiz
+                scoreDeuteronomy = 0;
+                wrongAnswersDeuteronomy = 0;
+                document.getElementById('quizScoreDeuteronomy').textContent = `Acertos: ${scoreDeuteronomy}, Erros: ${wrongAnswersDeuteronomy}`;
+                displayQuestionDeuteronomy();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderDeuteronomyChart();
+            }
+        }
+
+        // Dados dos personagens para Deuteronômio
+        const characterDetailsDeuteronomy = {
+            "Jeová (Deus)": {
+                name: "Jeová (Deus)",
+                description: "O Deus de Israel, que fez aliança com Seu povo, os libertou do Egito e lhes deu a Lei. Ele é o foco central da adoração e obediência em Deuteronômio."
+            },
+            "Moisés": {
+                name: "Moisés",
+                description: "O principal orador do livro, que recapitula a Lei e a história de Israel, exorta o povo à obediência e nomeia Josué como seu sucessor antes de morrer."
+            },
+            "Josué": {
+                name: "Josué",
+                description: "O sucessor de Moisés, escolhido por Deus para liderar Israel na conquista da Terra Prometida. É encorajado por Moisés e recebe a autoridade."
+            },
+            "A Congregação de Israel": {
+                name: "A Congregação de Israel",
+                description: "A nova geração que está prestes a entrar na Terra Prometida. São os ouvintes dos discursos de Moisés e os destinatários das leis e exortações."
+            },
+            "Os Levitas": {
+                name: "Os Levitas",
+                description: "A tribo designada para o serviço do Tabernáculo/Templo, responsáveis por ensinar a Lei e guardar a aliança."
+            },
+            "Os Sacerdotes": {
+                name: "Os Sacerdotes",
+                description: "Descendentes de Arão, responsáveis por oficiar os sacrifícios e rituais, e também por ensinar a Lei ao povo."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalDeuteronomy(characterName) {
+            const details = characterDetailsDeuteronomy[characterName];
+            if (details) {
+                document.getElementById('modalCharacterName').textContent = details.name;
+                document.getElementById('modalCharacterDescription').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModal() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsDeuteronomy() {
+            const grid = document.getElementById('characterGridDeuteronomy');
+            grid.innerHTML = '';
+            for (const key in characterDetailsDeuteronomy) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalDeuteronomy(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksDeuteronomy() {
+            const chaptersDiv = document.getElementById('chaptersDeuteronomy');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 34; i++) { // Deuteronômio tem 34 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/dt/${i}`; // Link para a Bíblia Online, Deuteronômio
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Dados do quiz para Deuteronômio (200 perguntas)
+        let allQuizQuestionsDeuteronomy = [
+            { question: "Qual o significado do nome 'Deuteronômio'?", options: ["Primeira Lei", "Nova Aliança", "Segunda Lei ou Repetição da Lei", "Livro de Batalhas"], answer: "Segunda Lei ou Repetição da Lei", reference: "Introdução ao livro" },
+            { question: "Onde Moisés proferiu os discursos registrados em Deuteronômio?", options: ["No Monte Sinai", "No deserto de Zim", "Nas planícies de Moabe", "No Egito"], answer: "Nas planícies de Moabe", reference: "Deuteronômio 1:1" },
+            { question: "Qual o principal tema do primeiro discurso de Moisés?", options: ["Leis sobre sacrifícios", "Retrospectiva da jornada de Israel no deserto", "Profecias sobre o futuro", "Organização do exército"], answer: "Retrospectiva da jornada de Israel no deserto", reference: "Deuteronômio 1-4" },
+            { question: "Por que a primeira geração de israelitas não entrou na Terra Prometida?", options: ["Por causa da velhice", "Por causa da desobediência e incredulidade em Cades-Barneia", "Por causa de doenças", "Por causa da guerra"], answer: "Por causa da desobediência e incredulidade em Cades-Barneia", reference: "Deuteronômio 1:34-35" },
+            { question: "Qual a idade de Moisés quando proferiu esses discursos?", options: ["80 anos", "100 anos", "120 anos", "90 anos"], answer: "120 anos", reference: "Deuteronômio 34:7" },
+            { question: "Que reis amorreus Israel derrotou a leste do Jordão?", options: ["Faraó e Balaque", "Siom e Ogue", "Canaã e Filisteus", "Edom e Moabe"], answer: "Siom e Ogue", reference: "Deuteronômio 2:30-36, 3:1-7" },
+            { question: "Qual a advertência principal de Moisés em Deuteronômio 4?", options: ["Não construir cidades", "Não fazer imagens de escultura e não se esquecer de Deus", "Não comer carne", "Não se casar"], answer: "Não fazer imagens de escultura e não se esquecer de Deus", reference: "Deuteronômio 4:15-24" },
+            { question: "Quantas cidades de refúgio foram estabelecidas a leste do Jordão?", options: ["Uma", "Duas", "Três", "Quatro"], answer: "Três", reference: "Deuteronômio 4:41-43" },
+            { question: "Qual o principal tema do segundo discurso de Moisés?", options: ["A história da criação", "A recapitulação da Lei", "A vida de Moisés", "As profecias messiânicas"], answer: "A recapitulação da Lei", reference: "Deuteronômio 5-26" },
+            { question: "O que é o Shemá, o mandamento central de Deuteronômio 6?", options: ["Amar o próximo como a si mesmo", "Não matarás", "Amarás o Senhor teu Deus de todo o teu coração, alma e força", "Honra teu pai e tua mãe"], answer: "Amarás o Senhor teu Deus de todo o teu coração, alma e força", reference: "Deuteronômio 6:4-5" },
+            { question: "O que os israelitas deveriam fazer com as palavras da Lei?", options: ["Escondê-las", "Escrevê-las nos umbrais de suas casas e portas, e ensiná-las aos filhos", "Queimá-las", "Esquecê-las"], answer: "Escrevê-las nos umbrais de suas casas e portas, e ensiná-las aos filhos", reference: "Deuteronômio 6:7-9" },
+            { question: "Qual a proibição em relação às nações cananeias ao entrar na terra?", options: ["Fazer aliança com elas", "Expulsá-las e destruir seus altares e ídolos", "Casar com elas", "Torná-las escravas"], answer: "Expulsá-las e destruir seus altares e ídolos", reference: "Deuteronômio 7:2-5" },
+            { question: "Por que Deus escolheu Israel?", options: ["Por serem numerosos", "Por serem fortes", "Por Seu amor e fidelidade à aliança com seus pais", "Por serem justos"], answer: "Por Seu amor e fidelidade à aliança com seus pais", reference: "Deuteronômio 7:7-8" },
+            { question: "O que Deus fez por Israel no deserto para os humilhar e provar?", options: ["Os deixou com fome e os alimentou com maná", "Os fez lutar guerras", "Os deixou com sede", "Os fez construir cidades"], answer: "Os deixou com fome e os alimentou com maná", reference: "Deuteronômio 8:2-3" },
+            { question: "Qual a advertência de Moisés sobre a prosperidade na Terra Prometida?", options: ["Para se esquecerem de Deus", "Para não dizerem que foi sua própria força que lhes deu a riqueza", "Para adorarem outros deuses", "Para se tornarem arrogantes"], answer: "Para não dizerem que foi sua própria força que lhes deu a riqueza", reference: "Deuteronômio 8:17-18" },
+            { question: "O que Moisés quebrou ao descer do Monte Sinai pela primeira vez?", options: ["Sua vara", "As tábuas da Lei", "O altar", "O candelabro"], answer: "As tábuas da Lei", reference: "Deuteronômio 9:17" },
+            { question: "O que Deus mandou Moisés fazer novamente para receber a Lei?", options: ["Subir ao monte e esculpir novas tábuas de pedra", "Esperar por novas tábuas", "Enviar Arão", "Escrever em papiro"], answer: "Subir ao monte e esculpir novas tábuas de pedra", reference: "Deuteronômio 10:1-2" },
+            { question: "O que Deus exige de Israel em Deuteronômio 10?", options: ["Sacrifícios caros", "Temer a Deus, andar em Seus caminhos, amá-Lo e servi-Lo de todo o coração", "Construir um grande templo", "Lutar guerras constantemente"], answer: "Temer a Deus, andar em Seus caminhos, amá-Lo e servi-Lo de todo o coração", reference: "Deuteronômio 10:12" },
+            { question: "Qual a escolha que Moisés apresenta ao povo em Deuteronômio 11?", options: ["Entre dois rios", "Entre a bênção e a maldição", "Entre duas montanhas", "Entre a guerra e a paz"], answer: "Entre a bênção e a maldição", reference: "Deuteronômio 11:26-28" },
+            { question: "Onde as bênçãos e maldições deveriam ser proclamadas?", options: ["No deserto", "Nos montes Gerizim e Ebal", "No Tabernáculo", "Em Jerusalém"], answer: "Nos montes Gerizim e Ebal", reference: "Deuteronômio 11:29" },
+            { question: "O que os israelitas deveriam fazer com os lugares de adoração dos cananeus?", options: ["Usá-los para adorar a Deus", "Destruí-los completamente", "Ignorá-los", "Adaptá-los"], answer: "Destruí-los completamente", reference: "Deuteronômio 12:2-3" },
+            { question: "Qual o lugar que Deus escolheria para fazer habitar o Seu nome?", options: ["Qualquer lugar", "O Tabernáculo", "Um lugar específico em Canaã (futuro Templo em Jerusalém)", "No deserto"], answer: "Um lugar específico em Canaã (futuro Templo em Jerusalém)", reference: "Deuteronômio 12:5, 11" },
+            { question: "Qual a punição para o falso profeta que falasse em nome de outros deuses?", options: ["Exílio", "Morte", "Prisão", "Multa"], answer: "Morte", reference: "Deuteronômio 13:5" },
+            { question: "O que os israelitas deveriam fazer com uma cidade que se desviasse para a idolatria?", options: ["Ignorá-la", "Destruí-la e queimar seus despojos", "Reconstruí-la", "Enviar missionários"], answer: "Destruí-la e queimar seus despojos", reference: "Deuteronômio 13:12-18" },
+            { question: "Qual a proibição em relação a fazer incisões no corpo por causa de um morto?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 14:1" },
+            { question: "Qual a porcentagem do dízimo que deveria ser separada anualmente?", options: ["5%", "10%", "15%", "20%"], answer: "10%", reference: "Deuteronômio 14:22" },
+            { question: "O que deveria ser feito com o dízimo a cada três anos?", options: ["Dado ao sacerdote", "Guardado em casa", "Armazenado nas cidades para o levita, o estrangeiro, o órfão e a viúva", "Vendido"], answer: "Armazenado nas cidades para o levita, o estrangeiro, o órfão e a viúva", reference: "Deuteronômio 14:28-29" },
+            { question: "De quanto em quanto tempo era o ano da remissão (Ano Sabático)?", options: ["A cada ano", "A cada três anos", "A cada sete anos", "A cada dez anos"], answer: "A cada sete anos", reference: "Deuteronômio 15:1" },
+            { question: "O que acontecia com as dívidas no ano da remissão?", options: ["Eram dobradas", "Eram perdoadas", "Eram mantidas", "Eram vendidas"], answer: "Eram perdoadas", reference: "Deuteronômio 15:1-2" },
+            { question: "Qual a lei sobre a libertação de escravos hebreus?", options: ["Nunca seriam libertos", "Seriam libertos após sete anos de serviço", "Seriam libertos após 40 anos", "Seriam libertos apenas se quisessem"], answer: "Seriam libertos após sete anos de serviço", reference: "Deuteronômio 15:12" },
+            { question: "Quais as três festas anuais que todos os homens deveriam celebrar diante do Senhor?", options: ["Páscoa, Pentecostes e Tabernáculos", "Pães Ázimos, Trombetas e Expiação", "Purim, Dedicação e Páscoa", "Ano Novo, Dia da Expiação e Tabernáculos"], answer: "Páscoa, Pentecostes e Tabernáculos", reference: "Deuteronômio 16:16" },
+            { question: "O que os israelitas não deveriam fazer em relação à justiça?", options: ["Aceitar suborno", "Julgar com retidão", "Fazer acepção de pessoas", "Ambos 'Aceitar suborno' e 'Fazer acepção de pessoas'"], answer: "Ambos 'Aceitar suborno' e 'Fazer acepção de pessoas'", reference: "Deuteronômio 16:19" },
+            { question: "Qual a proibição em relação a plantar um poste-ídolo ou erigir estátua?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 16:21-22" },
+            { question: "Qual a punição para quem adorasse outros deuses e fosse comprovado por duas ou três testemunhas?", options: ["Exílio", "Morte por apedrejamento", "Prisão", "Multa"], answer: "Morte por apedrejamento", reference: "Deuteronômio 17:2-7" },
+            { question: "Qual a lei sobre o rei que Israel pediria?", options: ["Deveria ser estrangeiro", "Deveria ser escolhido por Deus, não multiplicar cavalos, mulheres ou prata e ouro", "Deveria ser o mais forte", "Deveria ser o mais rico"], answer: "Deveria ser escolhido por Deus, não multiplicar cavalos, mulheres ou prata e ouro", reference: "Deuteronômio 17:14-17" },
+            { question: "O que o rei deveria fazer com uma cópia da Lei?", options: ["Queimá-la", "Guardá-la em seu tesouro", "Escrevê-la para si e lê-la todos os dias", "Dar aos sacerdotes"], answer: "Escrevê-la para si e lê-la todos os dias", reference: "Deuteronômio 17:18-19" },
+            { question: "Qual a porção dos sacerdotes levitas?", options: ["Não teriam herança de terra", "Teriam a melhor terra", "Teriam a mesma porção das outras tribos", "Teriam o dízimo da terra"], answer: "Não teriam herança de terra", reference: "Deuteronômio 18:1-2" },
+            { question: "O que Deus prometeu levantar para Israel, semelhante a Moisés?", options: ["Um rei", "Um profeta", "Um sacerdote", "Um juiz"], answer: "Um profeta", reference: "Deuteronômio 18:15" },
+            { question: "Como se distinguiria um falso profeta de um verdadeiro?", options: ["Pela riqueza", "Pelo cumprimento de suas palavras e se falava em nome de outros deuses", "Pela sua aparência", "Pelo número de seguidores"], answer: "Pelo cumprimento de suas palavras e se falava em nome de outros deuses", reference: "Deuteronômio 18:21-22" },
+            { question: "Qual a lei sobre as cidades de refúgio?", options: ["Para criminosos se esconderem", "Para quem matasse alguém acidentalmente fugir do vingador do sangue", "Para os pobres morarem", "Para os levitas se esconderem"], answer: "Para quem matasse alguém acidentalmente fugir do vingador do sangue", reference: "Deuteronômio 19:4-5" },
+            { question: "Qual a lei sobre as testemunhas em um julgamento?", options: ["Uma testemunha era suficiente", "Duas ou três testemunhas eram necessárias para condenar alguém", "Nenhuma testemunha era necessária", "Apenas o sacerdote podia testemunhar"], answer: "Duas ou três testemunhas eram necessárias para condenar alguém", reference: "Deuteronômio 19:15" },
+            { question: "Qual a lei sobre o falso testemunho?", options: ["Seria perdoado", "Receberia a mesma punição que a vítima sofreria se fosse condenada", "Seria multado", "Seria preso"], answer: "Receberia a mesma punição que a vítima sofreria se fosse condenada", reference: "Deuteronômio 19:18-19" },
+            { question: "O que o sacerdote deveria dizer ao exército antes de uma batalha?", options: ["Para ter medo", "Para não temer, pois Deus estava com eles", "Para se render", "Para fugir"], answer: "Para não temer, pois Deus estava com eles", reference: "Deuteronômio 20:3-4" },
+            { question: "Quem estava isento de ir para a guerra?", options: ["Homens recém-casados, os que haviam plantado vinha e não a desfrutado, e os que haviam construído casa e não a inaugurado", "Os idosos", "As mulheres", "As crianças"], answer: "Homens recém-casados, os que haviam plantado vinha e não a desfrutado, e os que haviam construído casa e não a inaugurado", reference: "Deuteronômio 20:5-7" },
+            { question: "Qual a lei sobre o tratamento de árvores frutíferas em um cerco?", options: ["Deveriam ser cortadas para construir máquinas de cerco", "Não deveriam ser cortadas, pois delas se comia", "Deveriam ser queimadas", "Deveriam ser vendidas"], answer: "Não deveriam ser cortadas, pois delas se comia", reference: "Deuteronômio 20:19-20" },
+            { question: "Qual a lei sobre a expiação de um homicídio não descoberto?", options: ["A cidade mais próxima deveria oferecer uma novilha e lavar as mãos", "Apenas o sacerdote oraria", "A família da vítima pagaria uma multa", "Não havia expiação"], answer: "A cidade mais próxima deveria oferecer uma novilha e lavar as mãos", reference: "Deuteronômio 21:1-9" },
+            { question: "Qual a lei sobre a mulher cativa de guerra?", options: ["Deveria ser morta", "Poderia ser tomada como esposa após um período de luto e purificação", "Deveria ser escravizada", "Deveria ser libertada imediatamente"], answer: "Poderia ser tomada como esposa após um período de luto e purificação", reference: "Deuteronômio 21:10-14" },
+            { question: "Qual a lei sobre o filho rebelde e contumaz?", options: ["Seria perdoado", "Seria apedrejado até a morte pelos anciãos", "Seria exilado", "Seria preso"], answer: "Seria apedrejado até a morte pelos anciãos", reference: "Deuteronômio 21:18-21" },
+            { question: "Qual a lei sobre o corpo de um enforcado?", options: ["Deveria permanecer na árvore", "Deveria ser enterrado no mesmo dia", "Deveria ser queimado", "Deveria ser deixado para os animais"], answer: "Deveria ser enterrado no mesmo dia", reference: "Deuteronômio 21:22-23" },
+            { question: "Qual a proibição em relação a vestir roupa de homem ou mulher?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:5" },
+            { question: "Qual a lei sobre o ninho de pássaros?", options: ["Deveria ser destruído", "Poderia pegar os ovos ou filhotes, mas deveria deixar a mãe ir", "Poderia pegar a mãe e os filhotes", "Deveria ser ignorado"], answer: "Poderia pegar os ovos ou filhotes, mas deveria deixar a mãe ir", reference: "Deuteronômio 22:6-7" },
+            { question: "Qual a proibição em relação a semear a vinha com duas espécies de sementes?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:9" },
+            { question: "Qual a proibição em relação a arar com boi e jumento juntos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:10" },
+            { question: "Qual a proibição em relação a vestir roupa de lã e linho misturados?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:11" },
+            { question: "Qual a lei sobre o divórcio?", options: ["Era proibido", "O homem poderia dar carta de divórcio à mulher", "Apenas a mulher poderia pedir divórcio", "Era permitido apenas em caso de adultério"], answer: "O homem poderia dar carta de divórcio à mulher", reference: "Deuteronômio 24:1" },
+            { question: "Qual a lei sobre o penhor do moinho ou da mó?", options: ["Poderia ser penhorado", "Não deveria ser penhorado, pois era a vida da pessoa", "Poderia ser penhorado apenas em caso de dívida grande", "Poderia ser vendido"], answer: "Não deveria ser penhorado, pois era a vida da pessoa", reference: "Deuteronômio 24:6" },
+            { question: "O que os israelitas deveriam deixar para o estrangeiro, órfão e viúva na colheita?", options: ["Nada", "As espigas caídas e os cachos da vinha", "Toda a colheita", "Apenas o que sobrava"], answer: "As espigas caídas e os cachos da vinha", reference: "Deuteronômio 24:19-21" },
+            { question: "Qual a lei sobre a justiça com o estrangeiro, órfão e viúva?", options: ["Oprimir", "Não perverter o juízo, nem tomar suas vestes em penhor", "Ignorar", "Explorar"], answer: "Não perverter o juízo, nem tomar suas vestes em penhor", reference: "Deuteronômio 24:17" },
+            { question: "Qual a punição para quem não se apresentasse para o serviço militar quando convocado?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 20:8 (implícito, para os covardes)" },
+            { question: "Qual a lei sobre o casamento levirato (cunhado)?", options: ["Era proibido", "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", "Era opcional", "A viúva deveria se casar com um estrangeiro"], answer: "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", reference: "Deuteronômio 25:5-6" },
+            { question: "O que acontecia se o irmão se recusasse a casar com a cunhada?", options: ["Seria elogiado", "A cunhada deveria descalçá-lo e cuspir no rosto dele", "Seria multado", "Seria exilado"], answer: "A cunhada deveria descalçá-lo e cuspir no rosto dele", reference: "Deuteronômio 25:7-10" },
+            { question: "Qual a proibição em relação a pesos e medidas falsos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 25:13-16" },
+            { question: "O que os israelitas deveriam fazer com os amalequitas?", options: ["Fazer aliança com eles", "Apagar a sua memória de debaixo do céu", "Torná-los escravos", "Ignorá-los"], answer: "Apagar a sua memória de debaixo do céu", reference: "Deuteronômio 25:17-19" },
+            { question: "O que os israelitas deveriam fazer ao entrar na terra e colher os primeiros frutos?", options: ["Vender", "Trazer ao sacerdote e fazer uma confissão de fé", "Comer tudo", "Dar aos pobres"], answer: "Trazer ao sacerdote e fazer uma confissão de fé", reference: "Deuteronômio 26:1-11" },
+            { question: "O que o povo deveria fazer a cada três anos com o dízimo?", options: ["Comer em casa", "Dar aos levitas, estrangeiros, órfãos e viúvas", "Queimar", "Vender"], answer: "Dar aos levitas, estrangeiros, órfãos e viúvas", reference: "Deuteronômio 26:12-15" },
+            { question: "Onde as palavras da Lei deveriam ser escritas em grandes pedras rebocadas com cal?", options: ["No Monte Sinai", "No Monte Gerizim", "No Monte Ebal", "Em Jerusalém"], answer: "No Monte Ebal", reference: "Deuteronômio 27:4" },
+            { question: "Quantas maldições são pronunciadas em Deuteronômio 27?", options: ["6", "8", "10", "12"], answer: "12", reference: "Deuteronômio 27:15-26" },
+            { question: "Quais as bênçãos prometidas pela obediência em Deuteronômio 28?", options: ["Fome e guerra", "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", "Doenças e exílio", "Escravidão e opressão"], answer: "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", reference: "Deuteronômio 28:1-14" },
+            { question: "Quais as maldições prometidas pela desobediência em Deuteronômio 28?", options: ["Paz e segurança", "Doenças, fome, derrota em batalha, exílio, opressão e destruição", "Bênçãos e prosperidade", "Alegria e prosperidade"], answer: "Doenças, fome, derrota em batalha, exílio, opressão e destruição", reference: "Deuteronômio 28:15-68" },
+            { question: "O que Deus prometeu fazer se o povo se arrependesse no exílio?", options: ["Os abandonaria", "Os reuniria de todas as nações e os restauraria à sua terra", "Os destruiria completamente", "Os esqueceria"], answer: "Os reuniria de todas as nações e os restauraria à sua terra", reference: "Deuteronômio 30:1-5" },
+            { question: "Qual a escolha que Moisés apresenta ao povo em Deuteronômio 30?", options: ["Entre dois caminhos", "Entre a vida e a morte, a bênção e a maldição", "Entre dois deuses", "Entre a guerra e a paz"], answer: "Entre a vida e a morte, a bênção e a maldição", reference: "Deuteronômio 30:19" },
+            { question: "O que Moisés disse a Josué antes de sua morte?", options: ["Para ter medo", "Para ser forte e corajoso, pois Deus estaria com ele", "Para não entrar na terra", "Para desistir da liderança"], answer: "Para ser forte e corajoso, pois Deus estaria com ele", reference: "Deuteronômio 31:7-8" },
+            { question: "De quanto em quanto tempo a Lei deveria ser lida publicamente a todo o Israel?", options: ["Anualmente", "A cada três anos", "A cada sete anos (no Ano da Remissão)", "Mensalmente"], answer: "A cada sete anos (no Ano da Remissão)", reference: "Deuteronômio 31:10-11" },
+            { question: "O que Moisés fez com o livro da Lei antes de sua morte?", options: ["Queimou-o", "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", "Enterrou-o", "Deu-o a Josué"], answer: "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", reference: "Deuteronômio 31:26" },
+            { question: "Qual o tema principal do Cântico de Moisés?", options: ["A história da criação", "A fidelidade de Deus e a infidelidade de Israel", "A vida de Moisés", "As bênçãos futuras"], answer: "A fidelidade de Deus e a infidelidade de Israel", reference: "Deuteronômio 32" },
+            { question: "Onde Moisés viu a Terra Prometida antes de morrer?", options: ["No Monte Sinai", "No Monte Hor", "No Monte Nebo", "No Monte Carmelo"], answer: "No Monte Nebo", reference: "Deuteronômio 34:1" },
+            { question: "Quem enterrou Moisés?", options: ["Josué", "Os anjos", "O próprio Deus", "Os levitas"], answer: "O próprio Deus", reference: "Deuteronômio 34:6" },
+            { question: "Qual a idade de Moisés quando morreu?", options: ["100 anos", "110 anos", "120 anos", "130 anos"], answer: "120 anos", reference: "Deuteronômio 34:7" },
+            { question: "Quem sucedeu Moisés como líder de Israel?", options: ["Arão", "Eleazar", "Josué", "Calebe"], answer: "Josué", reference: "Deuteronômio 34:9" },
+            { question: "Qual a principal característica de Josué como líder, mencionada em Deuteronômio 34?", options: ["Sua força física", "Sua sabedoria e o espírito de sabedoria", "Sua riqueza", "Sua eloquência"], answer: "Sua sabedoria e o espírito de sabedoria", reference: "Deuteronômio 34:9" },
+            { question: "Qual a proibição em relação a adorar o exército do céu (sol, lua, estrelas)?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 4:19" },
+            { question: "O que Deus é, além de um Deus zeloso, em Deuteronômio 4?", options: ["Um fogo consumidor", "Uma rocha", "Um pastor", "Um rei"], answer: "Um fogo consumidor", reference: "Deuteronômio 4:24" },
+            { question: "O que os israelitas deveriam ensinar diligentemente a seus filhos?", options: ["Histórias de guerra", "Os mandamentos de Deus", "Como cultivar a terra", "Como construir casas"], answer: "Os mandamentos de Deus", reference: "Deuteronômio 6:7" },
+            { question: "Qual a proibição em relação a fazer aliança com os cananeus?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 7:2" },
+            { question: "O que Deus prometeu enviar diante de Israel para expulsar os cananeus?", options: ["Anjos", "Vespas", "Um exército", "Pragas"], answer: "Vespas", reference: "Deuteronômio 7:20" },
+            { question: "O que os israelitas deveriam fazer com o ouro e a prata dos ídolos cananeus?", options: ["Guardar para si", "Queimar e aborrecer, pois era abominação ao Senhor", "Vender", "Usar para fazer utensílios"], answer: "Queimar e aborrecer, pois era abominação ao Senhor", reference: "Deuteronômio 7:25-26" },
+            { question: "Qual a advertência de Moisés sobre a murmuração no deserto?", options: ["Para se lembrarem de como Deus os humilhou e provou", "Para se esquecerem do passado", "Para reclamarem mais", "Para adorarem outros deuses"], answer: "Para se lembrarem de como Deus os humilhou e provou", reference: "Deuteronômio 8:2-3" },
+            { question: "Qual a punição para quem não ouvisse as palavras do profeta que Deus levantaria?", options: ["Seria perdoado", "Seria requerido por Deus", "Seria multado", "Seria preso"], answer: "Seria requerido por Deus", reference: "Deuteronômio 18:19" },
+            { question: "Qual a lei sobre a remoção de marcos de propriedade?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 19:14" },
+            { question: "Qual a lei sobre o tratamento do inimigo que se rendesse em uma cidade distante?", options: ["Deveria ser morto", "Deveria ser feito tributário e servo", "Deveria ser libertado", "Deveria ser exilado"], answer: "Deveria ser feito tributário e servo", reference: "Deuteronômio 20:10-11" },
+            { question: "Qual a lei sobre o tratamento das cidades das nações que Deus daria como herança?", options: ["Deveriam ser feitas tributárias", "Não deveriam deixar com vida coisa alguma que respire", "Deveriam ser ignoradas", "Deveriam ser queimadas"], answer: "Não deveriam deixar com vida coisa alguma que respire", reference: "Deuteronômio 20:16" },
+            { question: "Qual a proibição em relação a semear com diferentes tipos de sementes?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:9" },
+            { question: "Qual a proibição em relação a arar com boi e jumento juntos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:10" },
+            { question: "Qual a proibição em relação a vestir roupa de lã e linho misturados?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:11" },
+            { question: "Qual a lei sobre o homem que caluniasse sua esposa virgem?", options: ["Seria perdoado", "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", "Seria preso", "Seria exilado"], answer: "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", reference: "Deuteronômio 22:13-19" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem desposada na cidade?", options: ["Multa", "Morte por apedrejamento para ambos", "Prisão", "Exílio"], answer: "Morte por apedrejamento para ambos", reference: "Deuteronômio 22:23-24" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem não desposada?", options: ["Multa", "Morte", "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", "Prisão"], answer: "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", reference: "Deuteronômio 22:28-29" },
+            { question: "Quem não podia entrar na congregação do Senhor?", options: ["Estrangeiros", "Eunucos, bastardos, amonitas e moabitas até a décima geração", "Mulheres", "Crianças"], answer: "Eunucos, bastardos, amonitas e moabitas até a décima geração", reference: "Deuteronômio 23:1-3" },
+            { question: "O que os israelitas deveriam fazer com o dinheiro da prostituição ou do preço de cão?", options: ["Aceitar como oferta", "Não trazer à casa do Senhor", "Dar aos pobres", "Vender"], answer: "Não trazer à casa do Senhor", reference: "Deuteronômio 23:18" },
+            { question: "Qual a lei sobre o empréstimo com juros?", options: ["É permitido cobrar juros de irmãos", "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", "É proibido cobrar juros de todos", "É permitido cobrar juros de todos"], answer: "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", reference: "Deuteronômio 23:19-20" },
+            { question: "Qual a lei sobre o voto ao Senhor?", options: ["Não precisava cumprir", "Deveria cumprir o que saísse de sua boca", "Poderia mudar de ideia", "Apenas o sacerdote podia fazer votos"], answer: "Deveria cumprir o que saísse de sua boca", reference: "Deuteronômio 23:21-23" },
+            { question: "O que o trabalhador podia comer da vinha ou do campo do próximo?", options: ["Tudo", "Apenas o suficiente para saciar a fome, sem levar embora", "Nada", "Apenas o que caísse no chão"], answer: "Apenas o suficiente para saciar a fome, sem levar embora", reference: "Deuteronômio 23:24-25" },
+            { question: "Qual a lei sobre o homem que se casasse e a mulher não agradasse a seus olhos?", options: ["Deveria mantê-la", "Poderia dar-lhe carta de divórcio", "Deveria vendê-la", "Deveria matá-la"], answer: "Poderia dar-lhe carta de divórcio", reference: "Deuteronômio 24:1" },
+            { question: "Qual a proibição em relação a tomar o penhor da vida de alguém?", options: ["É permitido", "É proibido tomar o penhor do moinho ou da mó", "É permitido apenas em caso de dívida grande", "É permitido se a pessoa for rica"], answer: "É proibido tomar o penhor do moinho ou da mó", reference: "Deuteronômio 24:6" },
+            { question: "Qual a lei sobre o sequestro?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 24:7" },
+            { question: "Qual a lei sobre o salário do trabalhador assalariado?", options: ["Poderia ser pago quando quisesse", "Deveria ser pago no mesmo dia, antes do pôr do sol", "Poderia ser pago semanalmente", "Poderia ser pago mensalmente"], answer: "Deveria ser pago no mesmo dia, antes do pôr do sol", reference: "Deuteronômio 24:14-15" },
+            { question: "Qual a lei sobre a punição de filhos por pecados dos pais, e vice-versa?", options: ["Filhos seriam punidos pelos pecados dos pais", "Cada um morreria por seu próprio pecado", "Ninguém seria punido", "Apenas os pais seriam punidos"], answer: "Cada um morreria por seu próprio pecado", reference: "Deuteronômio 24:16" },
+            { question: "O que os israelitas deveriam fazer ao colher a azeitona e a uva?", options: ["Colher tudo", "Não colher tudo, deixando para o estrangeiro, órfão e viúva", "Vender tudo", "Queimar o que sobrava"], answer: "Não colher tudo, deixando para o estrangeiro, órfão e viúva", reference: "Deuteronômio 24:20-21" },
+            { question: "Qual a lei sobre a punição por açoites?", options: ["Não havia limite", "Não deveria exceder quarenta açoites", "Não deveria exceder dez açoites", "Não deveria haver açoites"], answer: "Não deveria exceder quarenta açoites", reference: "Deuteronômio 25:1-3" },
+            { question: "Qual a lei sobre o boi que debulhava?", options: ["Deveria ser amordaçado", "Não deveria ser amordaçado", "Deveria ser morto", "Deveria ser vendido"], answer: "Não deveria ser amordaçado", reference: "Deuteronômio 25:4" },
+            { question: "Qual a proibição em relação a ter pesos e medidas diversos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 25:13-16" },
+            { question: "O que Deus prometeu fazer com o coração do povo para que O amassem e vivessem?", options: ["Endurecê-lo", "Circuncidá-lo", "Ignorá-lo", "Testá-lo"], answer: "Circuncidá-lo", reference: "Deuteronômio 30:6" },
+            { question: "O que Moisés disse que a Lei não era?", options: ["Muito difícil ou distante", "Fácil", "Impossível de cumprir", "Incompreensível"], answer: "Muito difícil ou distante", reference: "Deuteronômio 30:11" },
+            { question: "Onde estava a Lei, segundo Moisés?", options: ["No céu", "Além do mar", "Na boca e no coração do povo", "No Tabernáculo"], answer: "Na boca e no coração do povo", reference: "Deuteronômio 30:14" },
+            { question: "O que os israelitas deveriam escolher para que vivessem?", options: ["A morte", "A maldição", "A vida", "A guerra"], answer: "A vida", reference: "Deuteronômio 30:19" },
+            { question: "Qual a principal razão para Moisés não entrar na Terra Prometida?", options: ["Sua idade avançada", "Por ter desobedecido a Deus em Meribá", "Por ter se rebelado contra Deus", "Por ter medo dos cananeus"], answer: "Por ter desobedecido a Deus em Meribá", reference: "Deuteronômio 3:26-27" },
+            { question: "O que Moisés fez com Josué na presença de todo o Israel?", options: ["O repreendeu", "O encorajou e o investiu de autoridade", "O ignorou", "O enviou para o deserto"], answer: "O encorajou e o investiu de autoridade", reference: "Deuteronômio 31:7-8" },
+            { question: "O que Moisés profetizou que Israel faria após sua morte?", options: ["Seriam fiéis a Deus", "Se corromperiam e se desviariam do caminho de Deus", "Conquistariam a terra facilmente", "Construiriam um grande templo"], answer: "Se corromperiam e se desviariam do caminho de Deus", reference: "Deuteronômio 31:29" },
+            { question: "Qual o tema central do Cântico de Moisés em Deuteronômio 32?", options: ["A criação do mundo", "A fidelidade de Deus e a apostasia de Israel", "A história de Moisés", "A conquista de Canaã"], answer: "A fidelidade de Deus e a apostasia de Israel", reference: "Deuteronômio 32" },
+            { question: "O que Moisés fez antes de morrer, além de ver a Terra Prometida?", options: ["Construiu um altar", "Abençoou as tribos de Israel", "Lutou uma última batalha", "Escreveu um novo livro"], answer: "Abençoou as tribos de Israel", reference: "Deuteronômio 33" },
+            { question: "Qual a montanha de onde Moisés viu a Terra Prometida?", options: ["Monte Sinai", "Monte Hor", "Monte Nebo", "Monte Carmelo"], answer: "Monte Nebo", reference: "Deuteronômio 34:1" },
+            { question: "Onde Moisés foi sepultado?", options: ["Em Canaã", "No vale na terra de Moabe, em frente a Bete-Peor", "No Egito", "No deserto"], answer: "No vale na terra de Moabe, em frente a Bete-Peor", reference: "Deuteronômio 34:6" },
+            { question: "Quanto tempo Israel pranteou Moisés?", options: ["7 dias", "30 dias", "40 dias", "Um ano"], answer: "30 dias", reference: "Deuteronômio 34:8" },
+            { question: "Qual a principal diferença entre Moisés e os profetas que vieram depois dele, segundo Deuteronômio 34?", options: ["Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", "Os outros profetas eram mais poderosos", "Moisés foi o único a fazer milagres", "Moisés foi o único a falar com Deus"], answer: "Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", reference: "Deuteronômio 34:10" },
+            { question: "O que Deus fez por Israel no deserto para os humilhar e provar?", options: ["Os deixou com fome e os alimentou com maná", "Os fez lutar guerras", "Os deixou com sede", "Os fez construir cidades"], answer: "Os deixou com fome e os alimentou com maná", reference: "Deuteronômio 8:2-3" },
+            { question: "Qual a advertência de Moisés sobre a prosperidade na Terra Prometida?", options: ["Para se esquecerem de Deus", "Para não dizerem que foi sua própria força que lhes deu a riqueza", "Para adorarem outros deuses", "Para se tornarem arrogantes"], answer: "Para não dizerem que foi sua própria força que lhes deu a riqueza", reference: "Deuteronômio 8:17-18" },
+            { question: "O que Moisés quebrou ao descer do Monte Sinai pela primeira vez?", options: ["Sua vara", "As tábuas da Lei", "O altar", "O candelabro"], answer: "As tábuas da Lei", reference: "Deuteronômio 9:17" },
+            { question: "O que Deus mandou Moisés fazer novamente para receber a Lei?", options: ["Subir ao monte e esculpir novas tábuas de pedra", "Esperar por novas tábuas", "Enviar Arão", "Escrever em papiro"], answer: "Subir ao monte e esculpir novas tábuas de pedra", reference: "Deuteronômio 10:1-2" },
+            { question: "O que Deus exige de Israel em Deuteronômio 10?", options: ["Sacrifícios caros", "Temer a Deus, andar em Seus caminhos, amá-Lo e servi-Lo de todo o coração", "Construir um grande templo", "Lutar guerras constantemente"], answer: "Temer a Deus, andar em Seus caminhos, amá-Lo e servi-Lo de todo o coração", reference: "Deuteronômio 10:12" },
+            { question: "Qual a escolha que Moisés apresenta ao povo em Deuteronômio 11?", options: ["Entre dois rios", "Entre a bênção e a maldição", "Entre duas montanhas", "Entre a guerra e a paz"], answer: "Entre a bênção e a maldição", reference: "Deuteronômio 11:26-28" },
+            { question: "Onde as bênçãos e maldições deveriam ser proclamadas?", options: ["No deserto", "Nos montes Gerizim e Ebal", "No Tabernáculo", "Em Jerusalém"], answer: "Nos montes Gerizim e Ebal", reference: "Deuteronômio 11:29" },
+            { question: "O que os israelitas deveriam fazer com os lugares de adoração dos cananeus?", options: ["Usá-los para adorar a Deus", "Destruí-los completamente", "Ignorá-los", "Adaptá-los"], answer: "Destruí-los completamente", reference: "Deuteronômio 12:2-3" },
+            { question: "Qual o lugar que Deus escolheria para fazer habitar o Seu nome?", options: ["Qualquer lugar", "O Tabernáculo", "Um lugar específico em Canaã (futuro Templo em Jerusalém)", "No deserto"], answer: "Um lugar específico em Canaã (futuro Templo em Jerusalém)", reference: "Deuteronômio 12:5, 11" },
+            { question: "Qual a punição para o falso profeta que falasse em nome de outros deuses?", options: ["Exílio", "Morte", "Prisão", "Multa"], answer: "Morte", reference: "Deuteronômio 13:5" },
+            { question: "O que os israelitas deveriam fazer com uma cidade que se desviasse para a idolatria?", options: ["Ignorá-la", "Destruí-la e queimar seus despojos", "Reconstruí-la", "Enviar missionários"], answer: "Destruí-la e queimar seus despojos", reference: "Deuteronômio 13:12-18" },
+            { question: "Qual a proibição em relação a fazer incisões no corpo por causa de um morto?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 14:1" },
+            { question: "Qual a porcentagem do dízimo que deveria ser separada anualmente?", options: ["5%", "10%", "15%", "20%"], answer: "10%", reference: "Deuteronômio 14:22" },
+            { question: "O que deveria ser feito com o dízimo a cada três anos?", options: ["Dado ao sacerdote", "Guardado em casa", "Armazenado nas cidades para o levita, o estrangeiro, o órfão e a viúva", "Vendido"], answer: "Armazenado nas cidades para o levita, o estrangeiro, o órfão e a viúva", reference: "Deuteronômio 14:28-29" },
+            { question: "De quanto em quanto tempo era o ano da remissão (Ano Sabático)?", options: ["A cada ano", "A cada três anos", "A cada sete anos", "A cada dez anos"], answer: "A cada sete anos", reference: "Deuteronômio 15:1" },
+            { question: "O que acontecia com as dívidas no ano da remissão?", options: ["Eram dobradas", "Eram perdoadas", "Eram mantidas", "Eram vendidas"], answer: "Eram perdoadas", reference: "Deuteronômio 15:1-2" },
+            { question: "Qual a lei sobre a libertação de escravos hebreus?", options: ["Nunca seriam libertos", "Seriam libertos após sete anos de serviço", "Seriam libertos após 40 anos", "Seriam libertos apenas se quisessem"], answer: "Seriam libertos após sete anos de serviço", reference: "Deuteronômio 15:12" },
+            { question: "Quais as três festas anuais que todos os homens deveriam celebrar diante do Senhor?", options: ["Páscoa, Pentecostes e Tabernáculos", "Pães Ázimos, Trombetas e Expiação", "Purim, Dedicação e Páscoa", "Ano Novo, Dia da Expiação e Tabernáculos"], answer: "Páscoa, Pentecostes e Tabernáculos", reference: "Deuteronômio 16:16" },
+            { question: "O que os israelitas não deveriam fazer em relação à justiça?", options: ["Aceitar suborno", "Julgar com retidão", "Fazer acepção de pessoas", "Ambos 'Aceitar suborno' e 'Fazer acepção de pessoas'"], answer: "Ambos 'Aceitar suborno' e 'Fazer acepção de pessoas'", reference: "Deuteronômio 16:19" },
+            { question: "Qual a proibição em relação a plantar um poste-ídolo ou erigir estátua?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 16:21-22" },
+            { question: "Qual a punição para quem adorasse outros deuses e fosse comprovado por duas ou três testemunhas?", options: ["Exílio", "Morte por apedrejamento", "Prisão", "Multa"], answer: "Morte por apedrejamento", reference: "Deuteronômio 17:2-7" },
+            { question: "Qual a lei sobre o rei que Israel pediria?", options: ["Deveria ser estrangeiro", "Deveria ser escolhido por Deus, não multiplicar cavalos, mulheres ou prata e ouro", "Deveria ser o mais forte", "Deveria ser o mais rico"], answer: "Deveria ser escolhido por Deus, não multiplicar cavalos, mulheres ou prata e ouro", reference: "Deuteronômio 17:14-17" },
+            { question: "O que o rei deveria fazer com uma cópia da Lei?", options: ["Queimá-la", "Guardá-la em seu tesouro", "Escrevê-la para si e lê-la todos os dias", "Dar aos sacerdotes"], answer: "Escrevê-la para si e lê-la todos os dias", reference: "Deuteronômio 17:18-19" },
+            { question: "Qual a porção dos sacerdotes levitas?", options: ["Não teriam herança de terra", "Teriam a melhor terra", "Teriam a mesma porção das outras tribos", "Teriam o dízimo da terra"], answer: "Não teriam herança de terra", reference: "Deuteronômio 18:1-2" },
+            { question: "O que Deus prometeu levantar para Israel, semelhante a Moisés?", options: ["Um rei", "Um profeta", "Um sacerdote", "Um juiz"], answer: "Um profeta", reference: "Deuteronômio 18:15" },
+            { question: "Como se distinguiria um falso profeta de um verdadeiro?", options: ["Pela riqueza", "Pelo cumprimento de suas palavras e se falava em nome de outros deuses", "Pela sua aparência", "Pelo número de seguidores"], answer: "Pelo cumprimento de suas palavras e se falava em nome de outros deuses", reference: "Deuteronômio 18:21-22" },
+            { question: "Qual a lei sobre as cidades de refúgio?", options: ["Para criminosos se esconderem", "Para quem matasse alguém acidentalmente fugir do vingador do sangue", "Para os pobres morarem", "Para os levitas se esconderem"], answer: "Para quem matasse alguém acidentalmente fugir do vingador do sangue", reference: "Deuteronômio 19:4-5" },
+            { question: "Qual a lei sobre as testemunhas em um julgamento?", options: ["Uma testemunha era suficiente", "Duas ou três testemunhas eram necessárias para condenar alguém", "Nenhuma testemunha era necessária", "Apenas o sacerdote podia testemunhar"], answer: "Duas ou três testemunhas eram necessárias para condenar alguém", reference: "Deuteronômio 19:15" },
+            { question: "Qual a lei sobre o falso testemunho?", options: ["Seria perdoado", "Receberia a mesma punição que a vítima sofreria se fosse condenada", "Seria multado", "Seria preso"], answer: "Receberia a mesma punição que a vítima sofreria se fosse condenada", reference: "Deuteronômio 19:18-19" },
+            { question: "O que o sacerdote deveria dizer ao exército antes de uma batalha?", options: ["Para ter medo", "Para não temer, pois Deus estava com eles", "Para se render", "Para fugir"], answer: "Para não temer, pois Deus estava com eles", reference: "Deuteronômio 20:3-4" },
+            { question: "Quem estava isento de ir para a guerra?", options: ["Homens recém-casados, os que haviam plantado vinha e não a desfrutado, e os que haviam construído casa e não a inaugurado", "Os idosos", "As mulheres", "As crianças"], answer: "Homens recém-casados, os que haviam plantado vinha e não a desfrutado, e os que haviam construído casa e não a inaugurado", reference: "Deuteronômio 20:5-7" },
+            { question: "Qual a lei sobre o tratamento de árvores frutíferas em um cerco?", options: ["Deveriam ser cortadas para construir máquinas de cerco", "Não deveriam ser cortadas, pois delas se comia", "Deveriam ser queimadas", "Deveriam ser vendidas"], answer: "Não deveriam ser cortadas, pois delas se comia", reference: "Deuteronômio 20:19-20" },
+            { question: "Qual a lei sobre a expiação de um homicídio não descoberto?", options: ["A cidade mais próxima deveria oferecer uma novilha e lavar as mãos", "Apenas o sacerdote oraria", "A família da vítima pagaria uma multa", "Não havia expiação"], answer: "A cidade mais próxima deveria oferecer uma novilha e lavar as mãos", reference: "Deuteronômio 21:1-9" },
+            { question: "Qual a lei sobre a mulher cativa de guerra?", options: ["Deveria ser morta", "Poderia ser tomada como esposa após um período de luto e purificação", "Deveria ser escravizada", "Deveria ser libertada imediatamente"], answer: "Poderia ser tomada como esposa após um período de luto e purificação", reference: "Deuteronômio 21:10-14" },
+            { question: "Qual a lei sobre o filho rebelde e contumaz?", options: ["Seria perdoado", "Seria apedrejado até a morte pelos anciãos", "Seria exilado", "Seria preso"], answer: "Seria apedrejado até a morte pelos anciãos", reference: "Deuteronômio 21:18-21" },
+            { question: "Qual a lei sobre o corpo de um enforcado?", options: ["Deveria permanecer na árvore", "Deveria ser enterrado no mesmo dia", "Deveria ser queimado", "Deveria ser deixado para os animais"], answer: "Deveria ser enterrado no mesmo dia", reference: "Deuteronômio 21:22-23" },
+            { question: "Qual a proibição em relação a vestir roupa de homem ou mulher?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:5" },
+            { question: "Qual a lei sobre o ninho de pássaros?", options: ["Deveria ser destruído", "Poderia pegar os ovos ou filhotes, mas deveria deixar a mãe ir", "Poderia pegar a mãe e os filhotes", "Deveria ser ignorado"], answer: "Poderia pegar os ovos ou filhotes, mas deveria deixar a mãe ir", reference: "Deuteronômio 22:6-7" },
+            { question: "Qual a proibição em relação a semear a vinha com duas espécies de sementes?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:9" },
+            { question: "Qual a proibição em relação a arar com boi e jumento juntos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:10" },
+            { question: "Qual a proibição em relação a vestir roupa de lã e linho misturados?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:11" },
+            { question: "Qual a lei sobre o homem que caluniasse sua esposa virgem?", options: ["Seria perdoado", "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", "Seria preso", "Seria exilado"], answer: "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", reference: "Deuteronômio 22:13-19" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem desposada na cidade?", options: ["Multa", "Morte por apedrejamento para ambos", "Prisão", "Exílio"], answer: "Morte por apedrejamento para ambos", reference: "Deuteronômio 22:23-24" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem não desposada?", options: ["Multa", "Morte", "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", "Prisão"], answer: "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", reference: "Deuteronômio 22:28-29" },
+            { question: "Quem não podia entrar na congregação do Senhor?", options: ["Estrangeiros", "Eunucos, bastardos, amonitas e moabitas até a décima geração", "Mulheres", "Crianças"], answer: "Eunucos, bastardos, amonitas e moabitas até a décima geração", reference: "Deuteronômio 23:1-3" },
+            { question: "O que os israelitas deveriam fazer com o dinheiro da prostituição ou do preço de cão?", options: ["Aceitar como oferta", "Não trazer à casa do Senhor", "Dar aos pobres", "Vender"], answer: "Não trazer à casa do Senhor", reference: "Deuteronômio 23:18" },
+            { question: "Qual a lei sobre o empréstimo com juros?", options: ["É permitido cobrar juros de irmãos", "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", "É proibido cobrar juros de todos", "É permitido cobrar juros de todos"], answer: "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", reference: "Deuteronômio 23:19-20" },
+            { question: "Qual a lei sobre o voto ao Senhor?", options: ["Não precisava cumprir", "Deveria cumprir o que saísse de sua boca", "Poderia mudar de ideia", "Apenas o sacerdote podia fazer votos"], answer: "Deveria cumprir o que saísse de sua boca", reference: "Deuteronômio 23:21-23" },
+            { question: "O que o trabalhador podia comer da vinha ou do campo do próximo?", options: ["Tudo", "Apenas o suficiente para saciar a fome, sem levar embora", "Nada", "Apenas o que caísse no chão"], answer: "Apenas o suficiente para saciar a fome, sem levar embora", reference: "Deuteronômio 23:24-25" },
+            { question: "Qual a lei sobre o homem que se casasse e a mulher não agradasse a seus olhos?", options: ["Deveria mantê-la", "Poderia dar-lhe carta de divórcio", "Deveria vendê-la", "Deveria matá-la"], answer: "Poderia dar-lhe carta de divórcio", reference: "Deuteronômio 24:1" },
+            { question: "Qual a proibição em relação a tomar o penhor da vida de alguém?", options: ["É permitido", "É proibido tomar o penhor do moinho ou da mó", "É permitido apenas em caso de dívida grande", "É permitido se a pessoa for rica"], answer: "É proibido tomar o penhor do moinho ou da mó", reference: "Deuteronômio 24:6" },
+            { question: "Qual a lei sobre o sequestro?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 24:7" },
+            { question: "Qual a lei sobre o salário do trabalhador assalariado?", options: ["Poderia ser pago quando quisesse", "Deveria ser pago no mesmo dia, antes do pôr do sol", "Poderia ser pago semanalmente", "Poderia ser pago mensalmente"], answer: "Deveria ser pago no mesmo dia, antes do pôr do sol", reference: "Deuteronômio 24:14-15" },
+            { question: "Qual a lei sobre a punição de filhos por pecados dos pais, e vice-versa?", options: ["Filhos seriam punidos pelos pecados dos pais", "Cada um morreria por seu próprio pecado", "Ninguém seria punido", "Apenas os pais seriam punidos"], answer: "Cada um morreria por seu próprio pecado", reference: "Deuteronômio 24:16" },
+            { question: "O que os israelitas deveriam fazer ao colher a azeitona e a uva?", options: ["Colher tudo", "Não colher tudo, deixando para o estrangeiro, órfão e viúva", "Vender tudo", "Queimar o que sobrava"], answer: "Não colher tudo, deixando para o estrangeiro, órfão e viúva", reference: "Deuteronômio 24:20-21" },
+            { question: "Qual a lei sobre a punição por açoites?", options: ["Não havia limite", "Não deveria exceder quarenta açoites", "Não deveria exceder dez açoites", "Não deveria haver açoites"], answer: "Não deveria exceder quarenta açoites", reference: "Deuteronômio 25:1-3" },
+            { question: "Qual a lei sobre o boi que debulhava?", options: ["Deveria ser amordaçado", "Não deveria ser amordaçado", "Deveria ser morto", "Deveria ser vendido"], answer: "Não deveria ser amordaçado", reference: "Deuteronômio 25:4" },
+            { question: "Qual a punição para quem não se apresentasse para o serviço militar quando convocado?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 20:8 (implícito, para os covardes)" },
+            { question: "Qual a lei sobre o casamento levirato (cunhado)?", options: ["Era proibido", "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", "Era opcional", "A viúva deveria se casar com um estrangeiro"], answer: "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", reference: "Deuteronômio 25:5-6" },
+            { question: "O que acontecia se o irmão se recusasse a casar com a cunhada?", options: ["Seria elogiado", "A cunhada deveria descalçá-lo e cuspir no rosto dele", "Seria multado", "Seria exilado"], answer: "A cunhada deveria descalçá-lo e cuspir no rosto dele", reference: "Deuteronômio 25:7-10" },
+            { question: "Qual a proibição em relação a pesos e medidas falsos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 25:13-16" },
+            { question: "O que os israelitas deveriam fazer com os amalequitas?", options: ["Fazer aliança com eles", "Apagar a sua memória de debaixo do céu", "Torná-los escravos", "Ignorá-los"], answer: "Apagar a sua memória de debaixo do céu", reference: "Deuteronômio 25:17-19" },
+            { question: "O que os israelitas deveriam fazer ao entrar na terra e colher os primeiros frutos?", options: ["Vender", "Trazer ao sacerdote e fazer uma confissão de fé", "Comer tudo", "Dar aos pobres"], answer: "Trazer ao sacerdote e fazer uma confissão de fé", reference: "Deuteronômio 26:1-11" },
+            { question: "O que o povo deveria fazer a cada três anos com o dízimo?", options: ["Comer em casa", "Dar aos levitas, estrangeiros, órfãos e viúvas", "Queimar", "Vender"], answer: "Dar aos levitas, estrangeiros, órfãos e viúvas", reference: "Deuteronômio 26:12-15" },
+            { question: "Onde as palavras da Lei deveriam ser escritas em grandes pedras rebocadas com cal?", options: ["No Monte Sinai", "No Monte Gerizim", "No Monte Ebal", "Em Jerusalém"], answer: "No Monte Ebal", reference: "Deuteronômio 27:4" },
+            { question: "Quantas maldições são pronunciadas em Deuteronômio 27?", options: ["6", "8", "10", "12"], answer: "12", reference: "Deuteronômio 27:15-26" },
+            { question: "Quais as bênçãos prometidas pela obediência em Deuteronômio 28?", options: ["Fome e guerra", "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", "Doenças e exílio", "Escravidão e opressão"], answer: "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", reference: "Deuteronômio 28:1-14" },
+            { question: "Quais as maldições prometidas pela desobediência em Deuteronômio 28?", options: ["Paz e segurança", "Doenças, fome, derrota em batalha, exílio, opressão e destruição", "Bênçãos e prosperidade", "Alegria e prosperidade"], answer: "Doenças, fome, derrota em batalha, exílio, opressão e destruição", reference: "Deuteronômio 28:15-68" },
+            { question: "O que Deus prometeu fazer se o povo se arrependesse no exílio?", options: ["Os abandonaria", "Os reuniria de todas as nações e os restauraria à sua terra", "Os destruiria completamente", "Os esqueceria"], answer: "Os reuniria de todas as nações e os restauraria à sua terra", reference: "Deuteronômio 30:1-5" },
+            { question: "Qual a escolha que Moisés apresenta ao povo em Deuteronômio 30?", options: ["Entre dois caminhos", "Entre a vida e a morte, a bênção e a maldição", "Entre dois deuses", "Entre a guerra e a paz"], answer: "Entre a vida e a morte, a bênção e a maldição", reference: "Deuteronômio 30:19" },
+            { question: "O que Moisés disse a Josué antes de sua morte?", options: ["Para ter medo", "Para ser forte e corajoso, pois Deus estaria com ele", "Para não entrar na terra", "Para desistir da liderança"], answer: "Para ser forte e corajoso, pois Deus estaria com ele", reference: "Deuteronômio 31:7-8" },
+            { question: "De quanto em quanto tempo a Lei deveria ser lida publicamente a todo o Israel?", options: ["Anualmente", "A cada três anos", "A cada sete anos (no Ano da Remissão)", "Mensalmente"], answer: "A cada sete anos (no Ano da Remissão)", reference: "Deuteronômio 31:10-11" },
+            { question: "O que Moisés fez com o livro da Lei antes de sua morte?", options: ["Queimou-o", "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", "Enterrou-o", "Deu-o a Josué"], answer: "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", reference: "Deuteronômio 31:26" },
+            { question: "Qual o tema principal do Cântico de Moisés em Deuteronômio 32?", options: ["A história da criação", "A fidelidade de Deus e a infidelidade de Israel", "A vida de Moisés", "As bênçãos futuras"], answer: "A fidelidade de Deus e a infidelidade de Israel", reference: "Deuteronômio 32" },
+            { question: "O que Moisés fez antes de morrer, além de ver a Terra Prometida?", options: ["Construiu um altar", "Abençoou as tribos de Israel", "Lutou uma última batalha", "Escreveu um novo livro"], answer: "Abençoou as tribos de Israel", reference: "Deuteronômio 33" },
+            { question: "Qual a montanha de onde Moisés viu a Terra Prometida?", options: ["Monte Sinai", "Monte Hor", "Monte Nebo", "Monte Carmelo"], answer: "Monte Nebo", reference: "Deuteronômio 34:1" },
+            { question: "Quem enterrou Moisés?", options: ["Josué", "Os anjos", "O próprio Deus", "Os levitas"], answer: "O próprio Deus", reference: "Deuteronômio 34:6" },
+            { question: "Quanto tempo Israel pranteou Moisés?", options: ["7 dias", "30 dias", "40 dias", "Um ano"], answer: "30 dias", reference: "Deuteronômio 34:8" },
+            { question: "Qual a principal diferença entre Moisés e os profetas que vieram depois dele, segundo Deuteronômio 34?", options: ["Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", "Os outros profetas eram mais poderosos", "Moisés foi o único a fazer milagres", "Moisés foi o único a falar com Deus"], answer: "Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", reference: "Deuteronômio 34:10" },
+            { question: "Qual a proibição em relação a adorar o exército do céu (sol, lua, estrelas)?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 4:19" },
+            { question: "O que Deus é, além de um Deus zeloso, em Deuteronômio 4?", options: ["Um fogo consumidor", "Uma rocha", "Um pastor", "Um rei"], answer: "Um fogo consumidor", reference: "Deuteronômio 4:24" },
+            { question: "O que os israelitas deveriam ensinar diligentemente a seus filhos?", options: ["Histórias de guerra", "Os mandamentos de Deus", "Como cultivar a terra", "Como construir casas"], answer: "Os mandamentos de Deus", reference: "Deuteronômio 6:7" },
+            { question: "Qual a proibição em relação a fazer aliança com os cananeus?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 7:2" },
+            { question: "O que Deus prometeu enviar diante de Israel para expulsar os cananeus?", options: ["Anjos", "Vespas", "Um exército", "Pragas"], answer: "Vespas", reference: "Deuteronômio 7:20" },
+            { question: "O que os israelitas deveriam fazer com o ouro e a prata dos ídolos cananeus?", options: ["Guardar para si", "Queimar e aborrecer, pois era abominação ao Senhor", "Vender", "Usar para fazer utensílios"], answer: "Queimar e aborrecer, pois era abominação ao Senhor", reference: "Deuteronômio 7:25-26" },
+            { question: "Qual a advertência de Moisés sobre a murmuração no deserto?", options: ["Para se lembrarem de como Deus os humilhou e provou", "Para se esquecerem do passado", "Para reclamarem mais", "Para adorarem outros deuses"], answer: "Para se lembrarem de como Deus os humilhou e provou", reference: "Deuteronômio 8:2-3" },
+            { question: "Qual a punição para quem não ouvisse as palavras do profeta que Deus levantaria?", options: ["Seria perdoado", "Seria requerido por Deus", "Seria multado", "Seria preso"], answer: "Seria requerido por Deus", reference: "Deuteronômio 18:19" },
+            { question: "Qual a lei sobre a remoção de marcos de propriedade?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 19:14" },
+            { question: "Qual a lei sobre o tratamento do inimigo que se rendesse em uma cidade distante?", options: ["Deveria ser morto", "Deveria ser feito tributário e servo", "Deveria ser libertado", "Deveria ser exilado"], answer: "Deveria ser feito tributário e servo", reference: "Deuteronômio 20:10-11" },
+            { question: "Qual a lei sobre o tratamento das cidades das nações que Deus daria como herança?", options: ["Deveriam ser feitas tributárias", "Não deveriam deixar com vida coisa alguma que respire", "Deveriam ser ignoradas", "Deveriam ser queimadas"], answer: "Não deveriam deixar com vida coisa alguma que respire", reference: "Deuteronômio 20:16" },
+            { question: "Qual a proibição em relação a semear com diferentes tipos de sementes?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:9" },
+            { question: "Qual a proibição em relação a arar com boi e jumento juntos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:10" },
+            { question: "Qual a proibição em relação a vestir roupa de lã e linho misturados?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:11" },
+            { question: "Qual a lei sobre o homem que caluniasse sua esposa virgem?", options: ["Seria perdoado", "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", "Seria preso", "Seria exilado"], answer: "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", reference: "Deuteronômio 22:13-19" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem desposada na cidade?", options: ["Multa", "Morte por apedrejamento para ambos", "Prisão", "Exílio"], answer: "Morte por apedrejamento para ambos", reference: "Deuteronômio 22:23-24" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem não desposada?", options: ["Multa", "Morte", "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", "Prisão"], answer: "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", reference: "Deuteronômio 22:28-29" },
+            { question: "Quem não podia entrar na congregação do Senhor?", options: ["Estrangeiros", "Eunucos, bastardos, amonitas e moabitas até a décima geração", "Mulheres", "Crianças"], answer: "Eunucos, bastardos, amonitas e moabitas até a décima geração", reference: "Deuteronômio 23:1-3" },
+            { question: "O que os israelitas deveriam fazer com o dinheiro da prostituição ou do preço de cão?", options: ["Aceitar como oferta", "Não trazer à casa do Senhor", "Dar aos pobres", "Vender"], answer: "Não trazer à casa do Senhor", reference: "Deuteronômio 23:18" },
+            { question: "Qual a lei sobre o empréstimo com juros?", options: ["É permitido cobrar juros de irmãos", "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", "É proibido cobrar juros de todos", "É permitido cobrar juros de todos"], answer: "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", reference: "Deuteronômio 23:19-20" },
+            { question: "Qual a lei sobre o voto ao Senhor?", options: ["Não precisava cumprir", "Deveria cumprir o que saísse de sua boca", "Poderia mudar de ideia", "Apenas o sacerdote podia fazer votos"], answer: "Deveria cumprir o que saísse de sua boca", reference: "Deuteronômio 23:21-23" },
+            { question: "O que o trabalhador podia comer da vinha ou do campo do próximo?", options: ["Tudo", "Apenas o suficiente para saciar a fome, sem levar embora", "Nada", "Apenas o que caísse no chão"], answer: "Apenas o suficiente para saciar a fome, sem levar embora", reference: "Deuteronômio 23:24-25" },
+            { question: "Qual a lei sobre o homem que se casasse e a mulher não agradasse a seus olhos?", options: ["Deveria mantê-la", "Poderia dar-lhe carta de divórcio", "Deveria vendê-la", "Deveria matá-la"], answer: "Poderia dar-lhe carta de divórcio", reference: "Deuteronômio 24:1" },
+            { question: "Qual a proibição em relação a tomar o penhor da vida de alguém?", options: ["É permitido", "É proibido tomar o penhor do moinho ou da mó", "É permitido apenas em caso de dívida grande", "É permitido se a pessoa for rica"], answer: "É proibido tomar o penhor do moinho ou da mó", reference: "Deuteronômio 24:6" },
+            { question: "Qual a lei sobre o sequestro?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 24:7" },
+            { question: "Qual a lei sobre o salário do trabalhador assalariado?", options: ["Poderia ser pago quando quisesse", "Deveria ser pago no mesmo dia, antes do pôr do sol", "Poderia ser pago semanalmente", "Poderia ser pago mensalmente"], answer: "Deveria ser pago no mesmo dia, antes do pôr do sol", reference: "Deuteronômio 24:14-15" },
+            { question: "Qual a lei sobre a punição de filhos por pecados dos pais, e vice-versa?", options: ["Filhos seriam punidos pelos pecados dos pais", "Cada um morreria por seu próprio pecado", "Ninguém seria punido", "Apenas os pais seriam punidos"], answer: "Cada um morreria por seu próprio pecado", reference: "Deuteronômio 24:16" },
+            { question: "O que os israelitas deveriam fazer ao colher a azeitona e a uva?", options: ["Colher tudo", "Não colher tudo, deixando para o estrangeiro, órfão e viúva", "Vender tudo", "Queimar o que sobrava"], answer: "Não colher tudo, deixando para o estrangeiro, órfão e viúva", reference: "Deuteronômio 24:20-21" },
+            { question: "Qual a lei sobre a punição por açoites?", options: ["Não havia limite", "Não deveria exceder quarenta açoites", "Não deveria exceder dez açoites", "Não deveria haver açoites"], answer: "Não deveria exceder quarenta açoites", reference: "Deuteronômio 25:1-3" },
+            { question: "Qual a lei sobre o boi que debulhava?", options: ["Deveria ser amordaçado", "Não deveria ser amordaçado", "Deveria ser morto", "Deveria ser vendido"], answer: "Não deveria ser amordaçado", reference: "Deuteronômio 25:4" },
+            { question: "Qual a punição para quem não se apresentasse para o serviço militar quando convocado?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 20:8 (implícito, para os covardes)" },
+            { question: "Qual a lei sobre o casamento levirato (cunhado)?", options: ["Era proibido", "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", "Era opcional", "A viúva deveria se casar com um estrangeiro"], answer: "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", reference: "Deuteronômio 25:5-6" },
+            { question: "O que acontecia se o irmão se recusasse a casar com a cunhada?", options: ["Seria elogiado", "A cunhada deveria descalçá-lo e cuspir no rosto dele", "Seria multado", "Seria exilado"], answer: "A cunhada deveria descalçá-lo e cuspir no rosto dele", reference: "Deuteronômio 25:7-10" },
+            { question: "Qual a proibição em relação a pesos e medidas falsos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 25:13-16" },
+            { question: "O que os israelitas deveriam fazer com os amalequitas?", options: ["Fazer aliança com eles", "Apagar a sua memória de debaixo do céu", "Torná-los escravos", "Ignorá-los"], answer: "Apagar a sua memória de debaixo do céu", reference: "Deuteronômio 25:17-19" },
+            { question: "O que os israelitas deveriam fazer ao entrar na terra e colher os primeiros frutos?", options: ["Vender", "Trazer ao sacerdote e fazer uma confissão de fé", "Comer tudo", "Dar aos pobres"], answer: "Trazer ao sacerdote e fazer uma confissão de fé", reference: "Deuteronômio 26:1-11" },
+            { question: "O que o povo deveria fazer a cada três anos com o dízimo?", options: ["Comer em casa", "Dar aos levitas, estrangeiros, órfãos e viúvas", "Queimar", "Vender"], answer: "Dar aos levitas, estrangeiros, órfãos e viúvas", reference: "Deuteronômio 26:12-15" },
+            { question: "Onde as palavras da Lei deveriam ser escritas em grandes pedras rebocadas com cal?", options: ["No Monte Sinai", "No Monte Gerizim", "No Monte Ebal", "Em Jerusalém"], answer: "No Monte Ebal", reference: "Deuteronômio 27:4" },
+            { question: "Quantas maldições são pronunciadas em Deuteronômio 27?", options: ["6", "8", "10", "12"], answer: "12", reference: "Deuteronômio 27:15-26" },
+            { question: "Quais as bênçãos prometidas pela obediência em Deuteronômio 28?", options: ["Fome e guerra", "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", "Doenças e exílio", "Escravidão e opressão"], answer: "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", reference: "Deuteronômio 28:1-14" },
+            { question: "Quais as maldições prometidas pela desobediência em Deuteronômio 28?", options: ["Paz e segurança", "Doenças, fome, derrota em batalha, exílio, opressão e destruição", "Bênçãos e prosperidade", "Alegria e prosperidade"], answer: "Doenças, fome, derrota em batalha, exílio, opressão e destruição", reference: "Deuteronômio 28:15-68" },
+            { question: "O que Deus prometeu fazer se o povo se arrependesse no exílio?", options: ["Os abandonaria", "Os reuniria de todas as nações e os restauraria à sua terra", "Os destruiria completamente", "Os esqueceria"], answer: "Os reuniria de todas as nações e os restauraria à sua terra", reference: "Deuteronômio 30:1-5" },
+            { question: "Qual a escolha que Moisés apresenta ao povo em Deuteronômio 30?", options: ["Entre dois caminhos", "Entre a vida e a morte, a bênção e a maldição", "Entre dois deuses", "Entre a guerra e a paz"], answer: "Entre a vida e a morte, a bênção e a maldição", reference: "Deuteronômio 30:19" },
+            { question: "O que Moisés disse a Josué antes de sua morte?", options: ["Para ter medo", "Para ser forte e corajoso, pois Deus estaria com ele", "Para não entrar na terra", "Para desistir da liderança"], answer: "Para ser forte e corajoso, pois Deus estaria com ele", reference: "Deuteronômio 31:7-8" },
+            { question: "De quanto em quanto tempo a Lei deveria ser lida publicamente a todo o Israel?", options: ["Anualmente", "A cada três anos", "A cada sete anos (no Ano da Remissão)", "Mensalmente"], answer: "A cada sete anos (no Ano da Remissão)", reference: "Deuteronômio 31:10-11" },
+            { question: "O que Moisés fez com o livro da Lei antes de sua morte?", options: ["Queimou-o", "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", "Enterrou-o", "Deu-o a Josué"], answer: "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", reference: "Deuteronômio 31:26" },
+            { question: "Qual o tema principal do Cântico de Moisés em Deuteronômio 32?", options: ["A história da criação", "A fidelidade de Deus e a infidelidade de Israel", "A vida de Moisés", "As bênçãos futuras"], answer: "A fidelidade de Deus e a infidelidade de Israel", reference: "Deuteronômio 32" },
+            { question: "O que Moisés fez antes de morrer, além de ver a Terra Prometida?", options: ["Construiu um altar", "Abençoou as tribos de Israel", "Lutou uma última batalha", "Escreveu um novo livro"], answer: "Abençoou as tribos de Israel", reference: "Deuteronômio 33" },
+            { question: "Qual a montanha de onde Moisés viu a Terra Prometida?", options: ["Monte Sinai", "Monte Hor", "Monte Nebo", "Monte Carmelo"], answer: "Monte Nebo", reference: "Deuteronômio 34:1" },
+            { question: "Quem enterrou Moisés?", options: ["Josué", "Os anjos", "O próprio Deus", "Os levitas"], answer: "O próprio Deus", reference: "Deuteronômio 34:6" },
+            { question: "Quanto tempo Israel pranteou Moisés?", options: ["7 dias", "30 dias", "40 dias", "Um ano"], answer: "30 dias", reference: "Deuteronômio 34:8" },
+            { question: "Qual a principal diferença entre Moisés e os profetas que vieram depois dele, segundo Deuteronômio 34?", options: ["Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", "Os outros profetas eram mais poderosos", "Moisés foi o único a fazer milagres", "Moisés foi o único a falar com Deus"], answer: "Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", reference: "Deuteronômio 34:10" },
+            { question: "Qual a proibição em relação a adorar o exército do céu (sol, lua, estrelas)?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 4:19" },
+            { question: "O que Deus é, além de um Deus zeloso, em Deuteronômio 4?", options: ["Um fogo consumidor", "Uma rocha", "Um pastor", "Um rei"], answer: "Um fogo consumidor", reference: "Deuteronômio 4:24" },
+            { question: "O que os israelitas deveriam ensinar diligentemente a seus filhos?", options: ["Histórias de guerra", "Os mandamentos de Deus", "Como cultivar a terra", "Como construir casas"], answer: "Os mandamentos de Deus", reference: "Deuteronômio 6:7" },
+            { question: "Qual a proibição em relação a fazer aliança com os cananeus?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 7:2" },
+            { question: "O que Deus prometeu enviar diante de Israel para expulsar os cananeus?", options: ["Anjos", "Vespas", "Um exército", "Pragas"], answer: "Vespas", reference: "Deuteronômio 7:20" },
+            { question: "O que os israelitas deveriam fazer com o ouro e a prata dos ídolos cananeus?", options: ["Guardar para si", "Queimar e aborrecer, pois era abominação ao Senhor", "Vender", "Usar para fazer utensílios"], answer: "Queimar e aborrecer, pois era abominação ao Senhor", reference: "Deuteronômio 7:25-26" },
+            { question: "Qual a advertência de Moisés sobre a murmuração no deserto?", options: ["Para se lembrarem de como Deus os humilhou e provou", "Para se esquecerem do passado", "Para reclamarem mais", "Para adorarem outros deuses"], answer: "Para se lembrarem de como Deus os humilhou e provou", reference: "Deuteronômio 8:2-3" },
+            { question: "Qual a punição para quem não ouvisse as palavras do profeta que Deus levantaria?", options: ["Seria perdoado", "Seria requerido por Deus", "Seria multado", "Seria preso"], answer: "Seria requerido por Deus", reference: "Deuteronômio 18:19" },
+            { question: "Qual a lei sobre a remoção de marcos de propriedade?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 19:14" },
+            { question: "Qual a lei sobre o tratamento do inimigo que se rendesse em uma cidade distante?", options: ["Deveria ser morto", "Deveria ser feito tributário e servo", "Deveria ser libertado", "Deveria ser exilado"], answer: "Deveria ser feito tributário e servo", reference: "Deuteronômio 20:10-11" },
+            { question: "Qual a lei sobre o tratamento das cidades das nações que Deus daria como herança?", options: ["Deveriam ser feitas tributárias", "Não deveriam deixar com vida coisa alguma que respire", "Deveriam ser ignoradas", "Deveriam ser queimadas"], answer: "Não deveriam deixar com vida coisa alguma que respire", reference: "Deuteronômio 20:16" },
+            { question: "Qual a proibição em relação a semear com diferentes tipos de sementes?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:9" },
+            { question: "Qual a proibição em relação a arar com boi e jumento juntos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:10" },
+            { question: "Qual a proibição em relação a vestir roupa de lã e linho misturados?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:11" },
+            { question: "Qual a lei sobre o homem que caluniasse sua esposa virgem?", options: ["Seria perdoado", "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", "Seria preso", "Seria exilado"], answer: "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", reference: "Deuteronômio 22:13-19" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem desposada na cidade?", options: ["Multa", "Morte por apedrejamento para ambos", "Prisão", "Exílio"], answer: "Morte por apedrejamento para ambos", reference: "Deuteronômio 22:23-24" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem não desposada?", options: ["Multa", "Morte", "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", "Prisão"], answer: "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", reference: "Deuteronômio 22:28-29" },
+            { question: "Quem não podia entrar na congregação do Senhor?", options: ["Estrangeiros", "Eunucos, bastardos, amonitas e moabitas até a décima geração", "Mulheres", "Crianças"], answer: "Eunucos, bastardos, amonitas e moabitas até a décima geração", reference: "Deuteronômio 23:1-3" },
+            { question: "O que os israelitas deveriam fazer com o dinheiro da prostituição ou do preço de cão?", options: ["Aceitar como oferta", "Não trazer à casa do Senhor", "Dar aos pobres", "Vender"], answer: "Não trazer à casa do Senhor", reference: "Deuteronômio 23:18" },
+            { question: "Qual a lei sobre o empréstimo com juros?", options: ["É permitido cobrar juros de irmãos", "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", "É proibido cobrar juros de todos", "É permitido cobrar juros de todos"], answer: "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", reference: "Deuteronômio 23:19-20" },
+            { question: "Qual a lei sobre o voto ao Senhor?", options: ["Não precisava cumprir", "Deveria cumprir o que saísse de sua boca", "Poderia mudar de ideia", "Apenas o sacerdote podia fazer votos"], answer: "Deveria cumprir o que saísse de sua boca", reference: "Deuteronômio 23:21-23" },
+            { question: "O que o trabalhador podia comer da vinha ou do campo do próximo?", options: ["Tudo", "Apenas o suficiente para saciar a fome, sem levar embora", "Nada", "Apenas o que caísse no chão"], answer: "Apenas o suficiente para saciar a fome, sem levar embora", reference: "Deuteronômio 23:24-25" },
+            { question: "Qual a lei sobre o homem que se casasse e a mulher não agradasse a seus olhos?", options: ["Deveria mantê-la", "Poderia dar-lhe carta de divórcio", "Deveria vendê-la", "Deveria matá-la"], answer: "Poderia dar-lhe carta de divórcio", reference: "Deuteronômio 24:1" },
+            { question: "Qual a proibição em relação a tomar o penhor da vida de alguém?", options: ["É permitido", "É proibido tomar o penhor do moinho ou da mó", "É permitido apenas em caso de dívida grande", "É permitido se a pessoa for rica"], answer: "É proibido tomar o penhor do moinho ou da mó", reference: "Deuteronômio 24:6" },
+            { question: "Qual a lei sobre o sequestro?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 24:7" },
+            { question: "Qual a lei sobre o salário do trabalhador assalariado?", options: ["Poderia ser pago quando quisesse", "Deveria ser pago no mesmo dia, antes do pôr do sol", "Poderia ser pago semanalmente", "Poderia ser pago mensalmente"], answer: "Deveria ser pago no mesmo dia, antes do pôr do sol", reference: "Deuteronômio 24:14-15" },
+            { question: "Qual a lei sobre a punição de filhos por pecados dos pais, e vice-versa?", options: ["Filhos seriam punidos pelos pecados dos pais", "Cada um morreria por seu próprio pecado", "Ninguém seria punido", "Apenas os pais seriam punidos"], answer: "Cada um morreria por seu próprio pecado", reference: "Deuteronômio 24:16" },
+            { question: "O que os israelitas deveriam fazer ao colher a azeitona e a uva?", options: ["Colher tudo", "Não colher tudo, deixando para o estrangeiro, órfão e viúva", "Vender tudo", "Queimar o que sobrava"], answer: "Não colher tudo, deixando para o estrangeiro, órfão e viúva", reference: "Deuteronômio 24:20-21" },
+            { question: "Qual a lei sobre a punição por açoites?", options: ["Não havia limite", "Não deveria exceder quarenta açoites", "Não deveria exceder dez açoites", "Não deveria haver açoites"], answer: "Não deveria exceder quarenta açoites", reference: "Deuteronômio 25:1-3" },
+            { question: "Qual a lei sobre o boi que debulhava?", options: ["Deveria ser amordaçado", "Não deveria ser amordaçado", "Deveria ser morto", "Deveria ser vendido"], answer: "Não deveria ser amordaçado", reference: "Deuteronômio 25:4" },
+            { question: "Qual a punição para quem não se apresentasse para o serviço militar quando convocado?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 20:8 (implícito, para os covardes)" },
+            { question: "Qual a lei sobre o casamento levirato (cunhado)?", options: ["Era proibido", "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", "Era opcional", "A viúva deveria se casar com um estrangeiro"], answer: "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", reference: "Deuteronômio 25:5-6" },
+            { question: "O que acontecia se o irmão se recusasse a casar com a cunhada?", options: ["Seria elogiado", "A cunhada deveria descalçá-lo e cuspir no rosto dele", "Seria multado", "Seria exilado"], answer: "A cunhada deveria descalçá-lo e cuspir no rosto dele", reference: "Deuteronômio 25:7-10" },
+            { question: "Qual a proibição em relação a pesos e medidas falsos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 25:13-16" },
+            { question: "O que os israelitas deveriam fazer com os amalequitas?", options: ["Fazer aliança com eles", "Apagar a sua memória de debaixo do céu", "Torná-los escravos", "Ignorá-los"], answer: "Apagar a sua memória de debaixo do céu", reference: "Deuteronômio 25:17-19" },
+            { question: "O que os israelitas deveriam fazer ao entrar na terra e colher os primeiros frutos?", options: ["Vender", "Trazer ao sacerdote e fazer uma confissão de fé", "Comer tudo", "Dar aos pobres"], answer: "Trazer ao sacerdote e fazer uma confissão de fé", reference: "Deuteronômio 26:1-11" },
+            { question: "O que o povo deveria fazer a cada três anos com o dízimo?", options: ["Comer em casa", "Dar aos levitas, estrangeiros, órfãos e viúvas", "Queimar", "Vender"], answer: "Dar aos levitas, estrangeiros, órfãos e viúvas", reference: "Deuteronômio 26:12-15" },
+            { question: "Onde as palavras da Lei deveriam ser escritas em grandes pedras rebocadas com cal?", options: ["No Monte Sinai", "No Monte Gerizim", "No Monte Ebal", "Em Jerusalém"], answer: "No Monte Ebal", reference: "Deuteronômio 27:4" },
+            { question: "Quantas maldições são pronunciadas em Deuteronômio 27?", options: ["6", "8", "10", "12"], answer: "12", reference: "Deuteronômio 27:15-26" },
+            { question: "Quais as bênçãos prometidas pela obediência em Deuteronômio 28?", options: ["Fome e guerra", "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", "Doenças e exílio", "Escravidão e opressão"], answer: "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", reference: "Deuteronômio 28:1-14" },
+            { question: "Quais as maldições prometidas pela desobediência em Deuteronômio 28?", options: ["Paz e segurança", "Doenças, fome, derrota em batalha, exílio, opressão e destruição", "Bênçãos e prosperidade", "Alegria e prosperidade"], answer: "Doenças, fome, derrota em batalha, exílio, opressão e destruição", reference: "Deuteronômio 28:15-68" },
+            { question: "O que Deus prometeu fazer se o povo se arrependesse no exílio?", options: ["Os abandonaria", "Os reuniria de todas as nações e os restauraria à sua terra", "Os destruiria completamente", "Os esqueceria"], answer: "Os reuniria de todas as nações e os restauraria à sua terra", reference: "Deuteronômio 30:1-5" },
+            { question: "Qual a escolha que Moisés apresenta ao povo em Deuteronômio 30?", options: ["Entre dois caminhos", "Entre a vida e a morte, a bênção e a maldição", "Entre dois deuses", "Entre a guerra e a paz"], answer: "Entre a vida e a morte, a bênção e a maldição", reference: "Deuteronômio 30:19" },
+            { question: "O que Moisés disse a Josué antes de sua morte?", options: ["Para ter medo", "Para ser forte e corajoso, pois Deus estaria com ele", "Para não entrar na terra", "Para desistir da liderança"], answer: "Para ser forte e corajoso, pois Deus estaria com ele", reference: "Deuteronômio 31:7-8" },
+            { question: "De quanto em quanto tempo a Lei deveria ser lida publicamente a todo o Israel?", options: ["Anualmente", "A cada três anos", "A cada sete anos (no Ano da Remissão)", "Mensalmente"], answer: "A cada sete anos (no Ano da Remissão)", reference: "Deuteronômio 31:10-11" },
+            { question: "O que Moisés fez com o livro da Lei antes de sua morte?", options: ["Queimou-o", "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", "Enterrou-o", "Deu-o a Josué"], answer: "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", reference: "Deuteronômio 31:26" },
+            { question: "Qual o tema principal do Cântico de Moisés em Deuteronômio 32?", options: ["A história da criação", "A fidelidade de Deus e a infidelidade de Israel", "A vida de Moisés", "As bênçãos futuras"], answer: "A fidelidade de Deus e a infidelidade de Israel", reference: "Deuteronômio 32" },
+            { question: "O que Moisés fez antes de morrer, além de ver a Terra Prometida?", options: ["Construiu um altar", "Abençoou as tribos de Israel", "Lutou uma última batalha", "Escreveu um novo livro"], answer: "Abençoou as tribos de Israel", reference: "Deuteronômio 33" },
+            { question: "Qual a montanha de onde Moisés viu a Terra Prometida?", options: ["Monte Sinai", "Monte Hor", "Monte Nebo", "Monte Carmelo"], answer: "Monte Nebo", reference: "Deuteronômio 34:1" },
+            { question: "Quem enterrou Moisés?", options: ["Josué", "Os anjos", "O próprio Deus", "Os levitas"], answer: "O próprio Deus", reference: "Deuteronômio 34:6" },
+            { question: "Quanto tempo Israel pranteou Moisés?", options: ["7 dias", "30 dias", "40 dias", "Um ano"], answer: "30 dias", reference: "Deuteronômio 34:8" },
+            { question: "Qual a principal diferença entre Moisés e os profetas que vieram depois dele, segundo Deuteronômio 34?", options: ["Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", "Os outros profetas eram mais poderosos", "Moisés foi o único a fazer milagres", "Moisés foi o único a falar com Deus"], answer: "Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", reference: "Deuteronômio 34:10" },
+            { question: "Qual a proibição em relação a adorar o exército do céu (sol, lua, estrelas)?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 4:19" },
+            { question: "O que Deus é, além de um Deus zeloso, em Deuteronômio 4?", options: ["Um fogo consumidor", "Uma rocha", "Um pastor", "Um rei"], answer: "Um fogo consumidor", reference: "Deuteronômio 4:24" },
+            { question: "O que os israelitas deveriam ensinar diligentemente a seus filhos?", options: ["Histórias de guerra", "Os mandamentos de Deus", "Como cultivar a terra", "Como construir casas"], answer: "Os mandamentos de Deus", reference: "Deuteronômio 6:7" },
+            { question: "Qual a proibição em relação a fazer aliança com os cananeus?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 7:2" },
+            { question: "O que Deus prometeu enviar diante de Israel para expulsar os cananeus?", options: ["Anjos", "Vespas", "Um exército", "Pragas"], answer: "Vespas", reference: "Deuteronômio 7:20" },
+            { question: "O que os israelitas deveriam fazer com o ouro e a prata dos ídolos cananeus?", options: ["Guardar para si", "Queimar e aborrecer, pois era abominação ao Senhor", "Vender", "Usar para fazer utensílios"], answer: "Queimar e aborrecer, pois era abominação ao Senhor", reference: "Deuteronômio 7:25-26" },
+            { question: "Qual a advertência de Moisés sobre a murmuração no deserto?", options: ["Para se lembrarem de como Deus os humilhou e provou", "Para se esquecerem do passado", "Para reclamarem mais", "Para adorarem outros deuses"], answer: "Para se lembrarem de como Deus os humilhou e provou", reference: "Deuteronômio 8:2-3" },
+            { question: "Qual a punição para quem não ouvisse as palavras do profeta que Deus levantaria?", options: ["Seria perdoado", "Seria requerido por Deus", "Seria multado", "Seria preso"], answer: "Seria requerido por Deus", reference: "Deuteronômio 18:19" },
+            { question: "Qual a lei sobre a remoção de marcos de propriedade?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 19:14" },
+            { question: "Qual a lei sobre o tratamento do inimigo que se rendesse em uma cidade distante?", options: ["Deveria ser morto", "Deveria ser feito tributário e servo", "Deveria ser libertado", "Deveria ser exilado"], answer: "Deveria ser feito tributário e servo", reference: "Deuteronômio 20:10-11" },
+            { question: "Qual a lei sobre o tratamento das cidades das nações que Deus daria como herança?", options: ["Deveriam ser feitas tributárias", "Não deveriam deixar com vida coisa alguma que respire", "Deveriam ser ignoradas", "Deveriam ser queimadas"], answer: "Não deveriam deixar com vida coisa alguma que respire", reference: "Deuteronômio 20:16" },
+            { question: "Qual a proibição em relação a semear com diferentes tipos de sementes?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:9" },
+            { question: "Qual a proibição em relação a arar com boi e jumento juntos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:10" },
+            { question: "Qual a proibição em relação a vestir roupa de lã e linho misturados?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:11" },
+            { question: "Qual a lei sobre o homem que caluniasse sua esposa virgem?", options: ["Seria perdoado", "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", "Seria preso", "Seria exilado"], answer: "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", reference: "Deuteronômio 22:13-19" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem desposada na cidade?", options: ["Multa", "Morte por apedrejamento para ambos", "Prisão", "Exílio"], answer: "Morte por apedrejamento para ambos", reference: "Deuteronômio 22:23-24" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem não desposada?", options: ["Multa", "Morte", "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", "Prisão"], answer: "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", reference: "Deuteronômio 22:28-29" },
+            { question: "Quem não podia entrar na congregação do Senhor?", options: ["Estrangeiros", "Eunucos, bastardos, amonitas e moabitas até a décima geração", "Mulheres", "Crianças"], answer: "Eunucos, bastardos, amonitas e moabitas até a décima geração", reference: "Deuteronômio 23:1-3" },
+            { question: "O que os israelitas deveriam fazer com o dinheiro da prostituição ou do preço de cão?", options: ["Aceitar como oferta", "Não trazer à casa do Senhor", "Dar aos pobres", "Vender"], answer: "Não trazer à casa do Senhor", reference: "Deuteronômio 23:18" },
+            { question: "Qual a lei sobre o empréstimo com juros?", options: ["É permitido cobrar juros de irmãos", "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", "É proibido cobrar juros de todos", "É permitido cobrar juros de todos"], answer: "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", reference: "Deuteronômio 23:19-20" },
+            { question: "Qual a lei sobre o voto ao Senhor?", options: ["Não precisava cumprir", "Deveria cumprir o que saísse de sua boca", "Poderia mudar de ideia", "Apenas o sacerdote podia fazer votos"], answer: "Deveria cumprir o que saísse de sua boca", reference: "Deuteronômio 23:21-23" },
+            { question: "O que o trabalhador podia comer da vinha ou do campo do próximo?", options: ["Tudo", "Apenas o suficiente para saciar a fome, sem levar embora", "Nada", "Apenas o que caísse no chão"], answer: "Apenas o suficiente para saciar a fome, sem levar embora", reference: "Deuteronômio 23:24-25" },
+            { question: "Qual a lei sobre o homem que se casasse e a mulher não agradasse a seus olhos?", options: ["Deveria mantê-la", "Poderia dar-lhe carta de divórcio", "Deveria vendê-la", "Deveria matá-la"], answer: "Poderia dar-lhe carta de divórcio", reference: "Deuteronômio 24:1" },
+            { question: "Qual a proibição em relação a tomar o penhor da vida de alguém?", options: ["É permitido", "É proibido tomar o penhor do moinho ou da mó", "É permitido apenas em caso de dívida grande", "É permitido se a pessoa for rica"], answer: "É proibido tomar o penhor do moinho ou da mó", reference: "Deuteronômio 24:6" },
+            { question: "Qual a lei sobre o sequestro?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 24:7" },
+            { question: "Qual a lei sobre o salário do trabalhador assalariado?", options: ["Poderia ser pago quando quisesse", "Deveria ser pago no mesmo dia, antes do pôr do sol", "Poderia ser pago semanalmente", "Poderia ser pago mensalmente"], answer: "Deveria ser pago no mesmo dia, antes do pôr do sol", reference: "Deuteronômio 24:14-15" },
+            { question: "Qual a lei sobre a punição de filhos por pecados dos pais, e vice-versa?", options: ["Filhos seriam punidos pelos pecados dos pais", "Cada um morreria por seu próprio pecado", "Ninguém seria punido", "Apenas os pais seriam punidos"], answer: "Cada um morreria por seu próprio pecado", reference: "Deuteronômio 24:16" },
+            { question: "O que os israelitas deveriam fazer ao colher a azeitona e a uva?", options: ["Colher tudo", "Não colher tudo, deixando para o estrangeiro, órfão e viúva", "Vender tudo", "Queimar o que sobrava"], answer: "Não colher tudo, deixando para o estrangeiro, órfão e viúva", reference: "Deuteronômio 24:20-21" },
+            { question: "Qual a lei sobre a punição por açoites?", options: ["Não havia limite", "Não deveria exceder quarenta açoites", "Não deveria exceder dez açoites", "Não deveria haver açoites"], answer: "Não deveria exceder quarenta açoites", reference: "Deuteronômio 25:1-3" },
+            { question: "Qual a lei sobre o boi que debulhava?", options: ["Deveria ser amordaçado", "Não deveria ser amordaçado", "Deveria ser morto", "Deveria ser vendido"], answer: "Não deveria ser amordaçado", reference: "Deuteronômio 25:4" },
+            { question: "Qual a punição para quem não se apresentasse para o serviço militar quando convocado?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 20:8 (implícito, para os covardes)" },
+            { question: "Qual a lei sobre o casamento levirato (cunhado)?", options: ["Era proibido", "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", "Era opcional", "A viúva deveria se casar com um estrangeiro"], answer: "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", reference: "Deuteronômio 25:5-6" },
+            { question: "O que acontecia se o irmão se recusasse a casar com a cunhada?", options: ["Seria elogiado", "A cunhada deveria descalçá-lo e cuspir no rosto dele", "Seria multado", "Seria exilado"], answer: "A cunhada deveria descalçá-lo e cuspir no rosto dele", reference: "Deuteronômio 25:7-10" },
+            { question: "Qual a proibição em relação a pesos e medidas falsos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 25:13-16" },
+            { question: "O que os israelitas deveriam fazer com os amalequitas?", options: ["Fazer aliança com eles", "Apagar a sua memória de debaixo do céu", "Torná-los escravos", "Ignorá-los"], answer: "Apagar a sua memória de debaixo do céu", reference: "Deuteronômio 25:17-19" },
+            { question: "O que os israelitas deveriam fazer ao entrar na terra e colher os primeiros frutos?", options: ["Vender", "Trazer ao sacerdote e fazer uma confissão de fé", "Comer tudo", "Dar aos pobres"], answer: "Trazer ao sacerdote e fazer uma confissão de fé", reference: "Deuteronômio 26:1-11" },
+            { question: "O que o povo deveria fazer a cada três anos com o dízimo?", options: ["Comer em casa", "Dar aos levitas, estrangeiros, órfãos e viúvas", "Queimar", "Vender"], answer: "Dar aos levitas, estrangeiros, órfãos e viúvas", reference: "Deuteronômio 26:12-15" },
+            { question: "Onde as palavras da Lei deveriam ser escritas em grandes pedras rebocadas com cal?", options: ["No Monte Sinai", "No Monte Gerizim", "No Monte Ebal", "Em Jerusalém"], answer: "No Monte Ebal", reference: "Deuteronômio 27:4" },
+            { question: "Quantas maldições são pronunciadas em Deuteronômio 27?", options: ["6", "8", "10", "12"], answer: "12", reference: "Deuteronômio 27:15-26" },
+            { question: "Quais as bênçãos prometidas pela obediência em Deuteronômio 28?", options: ["Fome e guerra", "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", "Doenças e exílio", "Escravidão e opressão"], answer: "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", reference: "Deuteronômio 28:1-14" },
+            { question: "Quais as maldições prometidas pela desobediência em Deuteronômio 28?", options: ["Paz e segurança", "Doenças, fome, derrota em batalha, exílio, opressão e destruição", "Bênçãos e prosperidade", "Alegria e prosperidade"], answer: "Doenças, fome, derrota em batalha, exílio, opressão e destruição", reference: "Deuteronômio 28:15-68" },
+            { question: "O que Deus prometeu fazer se o povo se arrependesse no exílio?", options: ["Os abandonaria", "Os reuniria de todas as nações e os restauraria à sua terra", "Os destruiria completamente", "Os esqueceria"], answer: "Os reuniria de todas as nações e os restauraria à sua terra", reference: "Deuteronômio 30:1-5" },
+            { question: "Qual a escolha que Moisés apresenta ao povo em Deuteronômio 30?", options: ["Entre dois caminhos", "Entre a vida e a morte, a bênção e a maldição", "Entre dois deuses", "Entre a guerra e a paz"], answer: "Entre a vida e a morte, a bênção e a maldição", reference: "Deuteronômio 30:19" },
+            { question: "O que Moisés disse a Josué antes de sua morte?", options: ["Para ter medo", "Para ser forte e corajoso, pois Deus estaria com ele", "Para não entrar na terra", "Para desistir da liderança"], answer: "Para ser forte e corajoso, pois Deus estaria com ele", reference: "Deuteronômio 31:7-8" },
+            { question: "De quanto em quanto tempo a Lei deveria ser lida publicamente a todo o Israel?", options: ["Anualmente", "A cada três anos", "A cada sete anos (no Ano da Remissão)", "Mensalmente"], answer: "A cada sete anos (no Ano da Remissão)", reference: "Deuteronômio 31:10-11" },
+            { question: "O que Moisés fez com o livro da Lei antes de sua morte?", options: ["Queimou-o", "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", "Enterrou-o", "Deu-o a Josué"], answer: "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", reference: "Deuteronômio 31:26" },
+            { question: "Qual o tema principal do Cântico de Moisés em Deuteronômio 32?", options: ["A história da criação", "A fidelidade de Deus e a infidelidade de Israel", "A vida de Moisés", "As bênçãos futuras"], answer: "A fidelidade de Deus e a infidelidade de Israel", reference: "Deuteronômio 32" },
+            { question: "O que Moisés fez antes de morrer, além de ver a Terra Prometida?", options: ["Construiu um altar", "Abençoou as tribos de Israel", "Lutou uma última batalha", "Escreveu um novo livro"], answer: "Abençoou as tribos de Israel", reference: "Deuteronômio 33" },
+            { question: "Qual a montanha de onde Moisés viu a Terra Prometida?", options: ["Monte Sinai", "Monte Hor", "Monte Nebo", "Monte Carmelo"], answer: "Monte Nebo", reference: "Deuteronômio 34:1" },
+            { question: "Quem enterrou Moisés?", options: ["Josué", "Os anjos", "O próprio Deus", "Os levitas"], answer: "O próprio Deus", reference: "Deuteronômio 34:6" },
+            { question: "Quanto tempo Israel pranteou Moisés?", options: ["7 dias", "30 dias", "40 dias", "Um ano"], answer: "30 dias", reference: "Deuteronômio 34:8" },
+            { question: "Qual a principal diferença entre Moisés e os profetas que vieram depois dele, segundo Deuteronômio 34?", options: ["Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", "Os outros profetas eram mais poderosos", "Moisés foi o único a fazer milagres", "Moisés foi o único a falar com Deus"], answer: "Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", reference: "Deuteronômio 34:10" },
+            { question: "Qual a proibição em relação a adorar o exército do céu (sol, lua, estrelas)?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 4:19" },
+            { question: "O que Deus é, além de um Deus zeloso, em Deuteronômio 4?", options: ["Um fogo consumidor", "Uma rocha", "Um pastor", "Um rei"], answer: "Um fogo consumidor", reference: "Deuteronômio 4:24" },
+            { question: "O que os israelitas deveriam ensinar diligentemente a seus filhos?", options: ["Histórias de guerra", "Os mandamentos de Deus", "Como cultivar a terra", "Como construir casas"], answer: "Os mandamentos de Deus", reference: "Deuteronômio 6:7" },
+            { question: "Qual a proibição em relação a fazer aliança com os cananeus?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 7:2" },
+            { question: "O que Deus prometeu enviar diante de Israel para expulsar os cananeus?", options: ["Anjos", "Vespas", "Um exército", "Pragas"], answer: "Vespas", reference: "Deuteronômio 7:20" },
+            { question: "O que os israelitas deveriam fazer com o ouro e a prata dos ídolos cananeus?", options: ["Guardar para si", "Queimar e aborrecer, pois era abominação ao Senhor", "Vender", "Usar para fazer utensílios"], answer: "Queimar e aborrecer, pois era abominação ao Senhor", reference: "Deuteronômio 7:25-26" },
+            { question: "Qual a advertência de Moisés sobre a murmuração no deserto?", options: ["Para se lembrarem de como Deus os humilhou e provou", "Para se esquecerem do passado", "Para reclamarem mais", "Para adorarem outros deuses"], answer: "Para se lembrarem de como Deus os humilhou e provou", reference: "Deuteronômio 8:2-3" },
+            { question: "Qual a punição para quem não ouvisse as palavras do profeta que Deus levantaria?", options: ["Seria perdoado", "Seria requerido por Deus", "Seria multado", "Seria preso"], answer: "Seria requerido por Deus", reference: "Deuteronômio 18:19" },
+            { question: "Qual a lei sobre a remoção de marcos de propriedade?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 19:14" },
+            { question: "Qual a lei sobre o tratamento do inimigo que se rendesse em uma cidade distante?", options: ["Deveria ser morto", "Deveria ser feito tributário e servo", "Deveria ser libertado", "Deveria ser exilado"], answer: "Deveria ser feito tributário e servo", reference: "Deuteronômio 20:10-11" },
+            { question: "Qual a lei sobre o tratamento das cidades das nações que Deus daria como herança?", options: ["Deveriam ser feitas tributárias", "Não deveriam deixar com vida coisa alguma que respire", "Deveriam ser ignoradas", "Deveriam ser queimadas"], answer: "Não deveriam deixar com vida coisa alguma que respire", reference: "Deuteronômio 20:16" },
+            { question: "Qual a proibição em relação a semear com diferentes tipos de sementes?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:9" },
+            { question: "Qual a proibição em relação a arar com boi e jumento juntos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:10" },
+            { question: "Qual a proibição em relação a vestir roupa de lã e linho misturados?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:11" },
+            { question: "Qual a lei sobre o homem que caluniasse sua esposa virgem?", options: ["Seria perdoado", "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", "Seria preso", "Seria exilado"], answer: "Seria açoitado e pagaria multa ao pai da moça, e não poderia divorciar-se dela", reference: "Deuteronômio 22:13-19" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem desposada na cidade?", options: ["Multa", "Morte por apedrejamento para ambos", "Prisão", "Exílio"], answer: "Morte por apedrejamento para ambos", reference: "Deuteronômio 22:23-24" },
+            { question: "Qual a punição para o homem que deitasse com uma virgem não desposada?", options: ["Multa", "Morte", "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", "Prisão"], answer: "Pagaria 50 siclos de prata ao pai da moça e a tomaria por esposa, sem poder divorciar-se dela", reference: "Deuteronômio 22:28-29" },
+            { question: "Quem não podia entrar na congregação do Senhor?", options: ["Estrangeiros", "Eunucos, bastardos, amonitas e moabitas até a décima geração", "Mulheres", "Crianças"], answer: "Eunucos, bastardos, amonitas e moabitas até a décima geração", reference: "Deuteronômio 23:1-3" },
+            { question: "O que os israelitas deveriam fazer com o dinheiro da prostituição ou do preço de cão?", options: ["Aceitar como oferta", "Não trazer à casa do Senhor", "Dar aos pobres", "Vender"], answer: "Não trazer à casa do Senhor", reference: "Deuteronômio 23:18" },
+            { question: "Qual a lei sobre o empréstimo com juros?", options: ["É permitido cobrar juros de irmãos", "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", "É proibido cobrar juros de todos", "É permitido cobrar juros de todos"], answer: "É proibido cobrar juros de irmãos, mas permitido de estrangeiros", reference: "Deuteronômio 23:19-20" },
+            { question: "Qual a lei sobre o voto ao Senhor?", options: ["Não precisava cumprir", "Deveria cumprir o que saísse de sua boca", "Poderia mudar de ideia", "Apenas o sacerdote podia fazer votos"], answer: "Deveria cumprir o que saísse de sua boca", reference: "Deuteronômio 23:21-23" },
+            { question: "O que o trabalhador podia comer da vinha ou do campo do próximo?", options: ["Tudo", "Apenas o suficiente para saciar a fome, sem levar embora", "Nada", "Apenas o que caísse no chão"], answer: "Apenas o suficiente para saciar a fome, sem levar embora", reference: "Deuteronômio 23:24-25" },
+            { question: "Qual a lei sobre o homem que se casasse e a mulher não agradasse a seus olhos?", options: ["Deveria mantê-la", "Poderia dar-lhe carta de divórcio", "Deveria vendê-la", "Deveria matá-la"], answer: "Poderia dar-lhe carta de divórcio", reference: "Deuteronômio 24:1" },
+            { question: "Qual a proibição em relação a tomar o penhor da vida de alguém?", options: ["É permitido", "É proibido tomar o penhor do moinho ou da mó", "É permitido apenas em caso de dívida grande", "É permitido se a pessoa for rica"], answer: "É proibido tomar o penhor do moinho ou da mó", reference: "Deuteronômio 24:6" },
+            { question: "Qual a lei sobre o sequestro?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 24:7" },
+            { question: "Qual a lei sobre o salário do trabalhador assalariado?", options: ["Poderia ser pago quando quisesse", "Deveria ser pago no mesmo dia, antes do pôr do sol", "Poderia ser pago semanalmente", "Poderia ser pago mensalmente"], answer: "Deveria ser pago no mesmo dia, antes do pôr do sol", reference: "Deuteronômio 24:14-15" },
+            { question: "Qual a lei sobre a punição de filhos por pecados dos pais, e vice-versa?", options: ["Filhos seriam punidos pelos pecados dos pais", "Cada um morreria por seu próprio pecado", "Ninguém seria punido", "Apenas os pais seriam punidos"], answer: "Cada um morreria por seu próprio pecado", reference: "Deuteronômio 24:16" },
+            { question: "O que os israelitas deveriam fazer ao colher a azeitona e a uva?", options: ["Colher tudo", "Não colher tudo, deixando para o estrangeiro, órfão e viúva", "Vender tudo", "Queimar o que sobrava"], answer: "Não colher tudo, deixando para o estrangeiro, órfão e viúva", reference: "Deuteronômio 24:20-21" },
+            { question: "Qual a lei sobre a punição por açoites?", options: ["Não havia limite", "Não deveria exceder quarenta açoites", "Não deveria exceder dez açoites", "Não deveria haver açoites"], answer: "Não deveria exceder quarenta açoites", reference: "Deuteronômio 25:1-3" },
+            { question: "Qual a lei sobre o boi que debulhava?", options: ["Deveria ser amordaçado", "Não deveria ser amordaçado", "Deveria ser morto", "Deveria ser vendido"], answer: "Não deveria ser amordaçado", reference: "Deuteronômio 25:4" },
+            { question: "Qual a punição para quem não se apresentasse para o serviço militar quando convocado?", options: ["Multa", "Morte", "Prisão", "Exílio"], answer: "Morte", reference: "Deuteronômio 20:8 (implícito, para os covardes)" },
+            { question: "Qual a lei sobre o casamento levirato (cunhado)?", options: ["Era proibido", "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", "Era opcional", "A viúva deveria se casar com um estrangeiro"], answer: "O irmão deveria casar-se com a viúva do irmão falecido sem filhos", reference: "Deuteronômio 25:5-6" },
+            { question: "O que acontecia se o irmão se recusasse a casar com a cunhada?", options: ["Seria elogiado", "A cunhada deveria descalçá-lo e cuspir no rosto dele", "Seria multado", "Seria exilado"], answer: "A cunhada deveria descalçá-lo e cuspir no rosto dele", reference: "Deuteronômio 25:7-10" },
+            { question: "Qual a proibição em relação a pesos e medidas falsos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 25:13-16" },
+            { question: "O que os israelitas deveriam fazer com os amalequitas?", options: ["Fazer aliança com eles", "Apagar a sua memória de debaixo do céu", "Torná-los escravos", "Ignorá-los"], answer: "Apagar a sua memória de debaixo do céu", reference: "Deuteronômio 25:17-19" },
+            { question: "O que os israelitas deveriam fazer ao entrar na terra e colher os primeiros frutos?", options: ["Vender", "Trazer ao sacerdote e fazer uma confissão de fé", "Comer tudo", "Dar aos pobres"], answer: "Trazer ao sacerdote e fazer uma confissão de fé", reference: "Deuteronômio 26:1-11" },
+            { question: "O que o povo deveria fazer a cada três anos com o dízimo?", options: ["Comer em casa", "Dar aos levitas, estrangeiros, órfãos e viúvas", "Queimar", "Vender"], answer: "Dar aos levitas, estrangeiros, órfãos e viúvas", reference: "Deuteronômio 26:12-15" },
+            { question: "Onde as palavras da Lei deveriam ser escritas em grandes pedras rebocadas com cal?", options: ["No Monte Sinai", "No Monte Gerizim", "No Monte Ebal", "Em Jerusalém"], answer: "No Monte Ebal", reference: "Deuteronômio 27:4" },
+            { question: "Quantas maldições são pronunciadas em Deuteronômio 27?", options: ["6", "8", "10", "12"], answer: "12", reference: "Deuteronômio 27:15-26" },
+            { question: "Quais as bênçãos prometidas pela obediência em Deuteronômio 28?", options: ["Fome e guerra", "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", "Doenças e exílio", "Escravidão e opressão"], answer: "Prosperidade, fertilidade, vitória sobre inimigos e ser cabeça das nações", reference: "Deuteronômio 28:1-14" },
+            { question: "Quais as maldições prometidas pela desobediência em Deuteronômio 28?", options: ["Paz e segurança", "Doenças, fome, derrota em batalha, exílio, opressão e destruição", "Bênçãos e prosperidade", "Alegria e prosperidade"], answer: "Doenças, fome, derrota em batalha, exílio, opressão e destruição", reference: "Deuteronômio 28:15-68" },
+            { question: "O que Deus prometeu fazer se o povo se arrependesse no exílio?", options: ["Os abandonaria", "Os reuniria de todas as nações e os restauraria à sua terra", "Os destruiria completamente", "Os esqueceria"], answer: "Os reuniria de todas as nações e os restauraria à sua terra", reference: "Deuteronômio 30:1-5" },
+            { question: "Qual a escolha que Moisés apresenta ao povo em Deuteronômio 30?", options: ["Entre dois caminhos", "Entre a vida e a morte, a bênção e a maldição", "Entre dois deuses", "Entre a guerra e a paz"], answer: "Entre a vida e a morte, a bênção e a maldição", reference: "Deuteronômio 30:19" },
+            { question: "O que Moisés disse a Josué antes de sua morte?", options: ["Para ter medo", "Para ser forte e corajoso, pois Deus estaria com ele", "Para não entrar na terra", "Para desistir da liderança"], answer: "Para ser forte e corajoso, pois Deus estaria com ele", reference: "Deuteronômio 31:7-8" },
+            { question: "De quanto em quanto tempo a Lei deveria ser lida publicamente a todo o Israel?", options: ["Anualmente", "A cada três anos", "A cada sete anos (no Ano da Remissão)", "Mensalmente"], answer: "A cada sete anos (no Ano da Remissão)", reference: "Deuteronômio 31:10-11" },
+            { question: "O que Moisés fez com o livro da Lei antes de sua morte?", options: ["Queimou-o", "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", "Enterrou-o", "Deu-o a Josué"], answer: "Entregou-o aos levitas para ser guardado ao lado da Arca da Aliança", reference: "Deuteronômio 31:26" },
+            { question: "Qual o tema principal do Cântico de Moisés em Deuteronômio 32?", options: ["A história da criação", "A fidelidade de Deus e a infidelidade de Israel", "A vida de Moisés", "As bênçãos futuras"], answer: "A fidelidade de Deus e a infidelidade de Israel", reference: "Deuteronômio 32" },
+            { question: "O que Moisés fez antes de morrer, além de ver a Terra Prometida?", options: ["Construiu um altar", "Abençoou as tribos de Israel", "Lutou uma última batalha", "Escreveu um novo livro"], answer: "Abençoou as tribos de Israel", reference: "Deuteronômio 33" },
+            { question: "Qual a montanha de onde Moisés viu a Terra Prometida?", options: ["Monte Sinai", "Monte Hor", "Monte Nebo", "Monte Carmelo"], answer: "Monte Nebo", reference: "Deuteronômio 34:1" },
+            { question: "Quem enterrou Moisés?", options: ["Josué", "Os anjos", "O próprio Deus", "Os levitas"], answer: "O próprio Deus", reference: "Deuteronômio 34:6" },
+            { question: "Quanto tempo Israel pranteou Moisés?", options: ["7 dias", "30 dias", "40 dias", "Um ano"], answer: "30 dias", reference: "Deuteronômio 34:8" },
+            { question: "Qual a principal diferença entre Moisés e os profetas que vieram depois dele, segundo Deuteronômio 34?", options: ["Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", "Os outros profetas eram mais poderosos", "Moisés foi o único a fazer milagres", "Moisés foi o único a falar com Deus"], answer: "Nenhum profeta se levantou em Israel como Moisés, a quem o Senhor conhecia face a face", reference: "Deuteronômio 34:10" },
+            { question: "Qual a proibição em relação a adorar o exército do céu (sol, lua, estrelas)?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 4:19" },
+            { question: "O que Deus é, além de um Deus zeloso, em Deuteronômio 4?", options: ["Um fogo consumidor", "Uma rocha", "Um pastor", "Um rei"], answer: "Um fogo consumidor", reference: "Deuteronômio 4:24" },
+            { question: "O que os israelitas deveriam ensinar diligentemente a seus filhos?", options: ["Histórias de guerra", "Os mandamentos de Deus", "Como cultivar a terra", "Como construir casas"], answer: "Os mandamentos de Deus", reference: "Deuteronômio 6:7" },
+            { question: "Qual a proibição em relação a fazer aliança com os cananeus?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 7:2" },
+            { question: "O que Deus prometeu enviar diante de Israel para expulsar os cananeus?", options: ["Anjos", "Vespas", "Um exército", "Pragas"], answer: "Vespas", reference: "Deuteronômio 7:20" },
+            { question: "O que os israelitas deveriam fazer com o ouro e a prata dos ídolos cananeus?", options: ["Guardar para si", "Queimar e aborrecer, pois era abominação ao Senhor", "Vender", "Usar para fazer utensílios"], answer: "Queimar e aborrecer, pois era abominação ao Senhor", reference: "Deuteronômio 7:25-26" },
+            { question: "Qual a advertência de Moisés sobre a murmuração no deserto?", options: ["Para se lembrarem de como Deus os humilhou e provou", "Para se esquecerem do passado", "Para reclamarem mais", "Para adorarem outros deuses"], answer: "Para se lembrarem de como Deus os humilhou e provou", reference: "Deuteronômio 8:2-3" },
+            { question: "Qual a punição para quem não ouvisse as palavras do profeta que Deus levantaria?", options: ["Seria perdoado", "Seria requerido por Deus", "Seria multado", "Seria preso"], answer: "Seria requerido por Deus", reference: "Deuteronômio 18:19" },
+            { question: "Qual a lei sobre a remoção de marcos de propriedade?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 19:14" },
+            { question: "Qual a lei sobre o tratamento do inimigo que se rendesse em uma cidade distante?", options: ["Deveria ser morto", "Deveria ser feito tributário e servo", "Deveria ser libertado", "Deveria ser exilado"], answer: "Deveria ser feito tributário e servo", reference: "Deuteronômio 20:10-11" },
+            { question: "Qual a lei sobre o tratamento das cidades das nações que Deus daria como herança?", options: ["Deveriam ser feitas tributárias", "Não deveriam deixar com vida coisa alguma que respire", "Deveriam ser ignoradas", "Deveriam ser queimadas"], answer: "Não deveriam deixar com vida coisa alguma que respire", reference: "Deuteronômio 20:16" },
+            { question: "Qual a proibição em relação a semear com diferentes tipos de sementes?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:9" },
+            { question: "Qual a proibição em relação a arar com boi e jumento juntos?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:10" },
+            { question: "Qual a proibição em relação a vestir roupa de lã e linho misturados?", options: ["É permitido", "É proibido", "É permitido em certas ocasiões", "É pecado leve"], answer: "É proibido", reference: "Deuteronômio 22:11" }
+        ];
+
+        let shuffledQuizQuestionsDeuteronomy = [];
+        let currentQuizIndexDeuteronomy = 0;
+        let scoreDeuteronomy = 0;
+        let wrongAnswersDeuteronomy = 0;
+
+        function shuffleQuizQuestionsDeuteronomy() {
+            shuffledQuizQuestionsDeuteronomy = [...allQuizQuestionsDeuteronomy];
+            for (let i = shuffledQuizQuestionsDeuteronomy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledQuizQuestionsDeuteronomy[i], shuffledQuizQuestionsDeuteronomy[j]] = [shuffledQuizQuestionsDeuteronomy[j], shuffledQuizQuestionsDeuteronomy[i]];
+            }
+        }
+
+        function displayQuestionDeuteronomy() {
+            const questionElement = document.getElementById('quizQuestionDeuteronomy');
+            const optionsDiv = document.getElementById('quizOptionsDeuteronomy');
+            const feedbackElement = document.getElementById('quizFeedbackDeuteronomy');
+            const nextButton = document.querySelector('#quizContainerDeuteronomy .quiz-next');
+            const progressElement = document.getElementById('quizProgressDeuteronomy');
+
+            if (currentQuizIndexDeuteronomy < shuffledQuizQuestionsDeuteronomy.length) {
+                const currentQuestion = shuffledQuizQuestionsDeuteronomy[currentQuizIndexDeuteronomy];
+                questionElement.textContent = currentQuestion.question;
+                optionsDiv.innerHTML = '';
+                feedbackElement.textContent = '';
+                nextButton.classList.add('hidden');
+
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerDeuteronomy(option, currentQuestion.answer, currentQuestion.reference);
+                    optionsDiv.appendChild(button);
+                });
+
+                // Atualizar progresso
+                progressElement.textContent = `${currentQuizIndexDeuteronomy + 1}/${shuffledQuizQuestionsDeuteronomy.length}`;
+            } else {
+                // Quiz concluído
+                questionElement.textContent = "Quiz Concluído!";
+                optionsDiv.innerHTML = '';
+                feedbackElement.textContent = `Você acertou ${scoreDeuteronomy} de ${shuffledQuizQuestionsDeuteronomy.length} perguntas.`;
+                nextButton.classList.add('hidden');
+                progressElement.textContent = "Fim";
+            }
+        }
+
+        function checkAnswerDeuteronomy(selectedOption, correctAnswer, reference) {
+            const optionsDiv = document.getElementById('quizOptionsDeuteronomy');
+            const feedbackElement = document.getElementById('quizFeedbackDeuteronomy');
+            const nextButton = document.querySelector('#quizContainerDeuteronomy .quiz-next');
+            const scoreElement = document.getElementById('quizScoreDeuteronomy');
+
+            // Desabilitar botões após a seleção
+            Array.from(optionsDiv.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto!";
+                feedbackElement.classList.remove('text-red-500');
+                feedbackElement.classList.add('text-green-500');
+                scoreDeuteronomy++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}. (Referência: ${reference})`;
+                feedbackElement.classList.remove('text-green-500');
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersDeuteronomy++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreDeuteronomy}, Erros: ${wrongAnswersDeuteronomy}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionDeuteronomy() {
+            currentQuizIndexDeuteronomy++;
+            displayQuestionDeuteronomy();
+        }
+
+        // Gráfico de Temas de Deuteronômio
+        let deuteronomyChartInstance = null; // Para armazenar a instância do Chart.js
+
+        function renderDeuteronomyChart() {
+            const ctx = document.getElementById('deuteronomyChart').getContext('2d');
+
+            if (deuteronomyChartInstance) {
+                deuteronomyChartInstance.destroy(); // Destroi a instância anterior do gráfico, se existir
+            }
+
+            deuteronomyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['A Lei', 'A Aliança', 'Amor a Deus', 'Obediência', 'Memória', 'Terra Prometida', 'Justiça Social', 'Um Deus Único'],
+                    datasets: [{
+                        label: 'Frequência Temática (Estimativa)',
+                        data: [25, 20, 15, 18, 10, 7, 3, 2], // Dados de exemplo para Deuteronômio
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)', // Azul
+                            'rgba(255, 99, 132, 0.7)', // Vermelho
+                            'rgba(75, 192, 192, 0.7)', // Verde-água
+                            'rgba(255, 206, 86, 0.7)', // Amarelo
+                            'rgba(153, 102, 255, 0.7)', // Roxo
+                            'rgba(255, 159, 64, 0.7)', // Laranja
+                            'rgba(201, 203, 207, 0.7)', // Cinza
+                            'rgba(100, 200, 100, 0.7)' // Verde claro
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(201, 203, 207, 1)',
+                            'rgba(100, 200, 100, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor do texto dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: '#4a5568' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor do texto dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: '#4a5568' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição Temática no Livro de Deuteronômio',
+                            color: '#f8fafc' // Cor do título do gráfico
+                        }
+                    }
+                }
+            });
+        }
+
+        // Exibir a seção inicial ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('inicio');
+        });
+    </script>
+</body>
+</html>

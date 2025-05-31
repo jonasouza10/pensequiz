@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de João</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="João Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de João</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionJoao('inicio')">Início</button>
+            <button class="nav-button" onclick="showSectionJoao('introducao')">Introdução</button>
+            <button class="nav-button" onclick="showSectionJoao('panoramas')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionJoao('personagens')">Personagens</button>
+            <button class="nav-button" onclick="showSectionJoao('esbocos')">Esboços</button>
+            <button class="nav-button" onclick="showSectionJoao('temas')">Temas</button>
+            <button class="nav-button" onclick="showSectionJoao('capitulos')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionJoao('quiz')">Quiz</button>
+            <button class="nav-button" onclick="showSectionJoao('grafico')">Gráfico</button>
+        </div>
+
+        <div id="inicio" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de João</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore o Livro de João, o Evangelho que revela a divindade de Jesus como o Verbo encarnado, o Filho de Deus que veio para dar vida eterna a todos que creem. Descubra os sete sinais milagrosos, os profundos discursos de Jesus sobre Si mesmo (os 'Eu Sou'), o significado da fé, do amor e da verdade, culminando em Sua crucificação e ressurreição. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducao" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O Livro de João é o quarto e último dos Evangelhos canônicos, e se distingue significativamente dos três Evangelhos sinóticos (Mateus, Marcos e Lucas) em seu estilo, conteúdo e propósito. Tradicionalmente, é atribuído a João, o apóstolo, "o discípulo a quem Jesus amava", e foi provavelmente escrito no final do século I d.C., possivelmente em Éfeso.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">O propósito explícito de João é que seus leitores "creiam que Jesus é o Cristo, o Filho de Deus, e que, crendo, tenham vida em seu nome" (João 20:31). Para alcançar isso, João foca na divindade de Jesus desde o prólogo, apresentando-O como o Verbo (Logos) eterno que se fez carne. Ele seleciona cuidadosamente sete sinais milagrosos (milagres) que demonstram a glória e a identidade divina de Jesus, e sete declarações "Eu Sou" de Jesus que revelam aspectos de Sua natureza e missão (e.g., "Eu sou o pão da vida", "Eu sou a luz do mundo").</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Diferente dos sinóticos, João não inclui narrativas de nascimento, genealogia, tentação, parábolas extensas ou a instituição da Ceia do Senhor da mesma forma. Em vez disso, ele apresenta longos discursos de Jesus, especialmente nos capítulos 13-17 (os discursos de despedida), onde Jesus ensina sobre o Consolador (o Espírito Santo), o amor mútuo, a permanência Nele e a oração sacerdotal. O Evangelho também se concentra em eventos na Judeia e em várias viagens de Jesus a Jerusalém para as festas judaicas, o que sugere um ministério mais longo do que o implícito nos sinóticos.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Os temas centrais incluem a divindade de Jesus, a vida eterna, a fé (crer), o amor (especialmente o amor mútuo entre os discípulos), a luz versus as trevas, a verdade, o Espírito Santo como Consolador e a relação íntima entre o Pai e o Filho. João é um Evangelho profundo e teologicamente rico que convida os leitores a uma fé pessoal e transformadora em Jesus como o único caminho para a vida eterna.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Prólogo e o Testemunho Inicial.</strong> Jesus como o Verbo, o testemunho de João Batista, o chamado dos primeiros discípulos.</li>
+                <li><strong>Capítulos 2-12: O Livro dos Sinais.</strong> Sete sinais que revelam a glória de Jesus e Seus discursos associados, culminando na rejeição pública.</li>
+                <li><strong>Capítulos 13-17: O Livro da Glória (Discursos de Despedida).</strong> A Última Ceia, o lava-pés, ensinamentos sobre o amor, o Espírito Santo, a permanência em Jesus e a oração sacerdotal.</li>
+                <li><strong>Capítulos 18-20: A Paixão, Morte e Ressurreição.</strong> A prisão, julgamento, crucificação, sepultamento e as aparições de Jesus ressuscitado.</li>
+                <li><strong>Capítulo 21: O Epílogo.</strong> Aparição de Jesus no Mar da Galileia, restauração de Pedro, e o propósito do livro.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">João é um Evangelho único que oferece uma perspectiva profunda sobre a pessoa de Jesus Cristo e o significado de crer Nele para ter a vida eterna.</p>
+        </div>
+
+        <div id="panoramas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">João revela a divindade de Jesus e o caminho para a vida eterna através da fé.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. O Prólogo e o Testemunho Inicial (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Verbo Eterno (1:1-18):</strong>
+                    <ul>
+                        <li>A divindade de Jesus e Sua encarnação.</li>
+                    </ul>
+                </li>
+                <li><strong>B. O Testemunho de João Batista (1:19-34):</strong>
+                    <ul>
+                        <li>Ele aponta para Jesus como o Cordeiro de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Chamado dos Primeiros Discípulos (1:35-51):</strong>
+                    <ul>
+                        <li>André, Pedro, Filipe, Natanael.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. O Livro dos Sinais (Capítulos 2-12)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. O Primeiro Sinal: Casamento em Caná (2:1-12):</strong>
+                    <ul>
+                        <li>Transforma água em vinho.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Purificação do Templo (2:13-25):</strong>
+                    <ul>
+                        <li>Jesus e a autoridade do Templo.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Jesus e Nicodemos (3:1-21):</strong>
+                    <ul>
+                        <li>O novo nascimento.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Jesus e a Mulher Samaritana (4:1-42):</strong>
+                    <ul>
+                        <li>Água viva e adoração em espírito e em verdade.</li>
+                    </ul>
+                </li>
+                <li><strong>E. O Segundo Sinal: Cura do Filho do Oficial (4:43-54):</strong>
+                    <ul>
+                        <li>Fé à distância.</li>
+                    </ul>
+                </li>
+                <li><strong>F. O Terceiro Sinal: Cura do Paralítico em Betesda (5:1-18):</strong>
+                    <ul>
+                        <li>Jesus é o Senhor do sábado.</li>
+                    </ul>
+                </li>
+                <li><strong>G. O Quarto Sinal: Alimentação dos Cinco Mil (6:1-15):</strong>
+                    <ul>
+                        <li>Jesus é o Pão da Vida.</li>
+                    </ul>
+                </li>
+                <li><strong>H. O Quinto Sinal: Jesus Anda sobre as Águas (6:16-21):</strong>
+                    <ul>
+                        <li>Sua soberania sobre a natureza.</li>
+                    </ul>
+                </li>
+                <li><strong>I. Discurso sobre o Pão da Vida (6:22-71):</strong>
+                    <ul>
+                        <li>Comer a carne e beber o sangue de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>J. Festa dos Tabernáculos e Disputas (7:1-8:59):</strong>
+                    <ul>
+                        <li>Jesus é a Luz do Mundo, a mulher adúltera.</li>
+                    </ul>
+                </li>
+                <li><strong>K. O Sexto Sinal: Cura do Cego de Nascença (9:1-41):</strong>
+                    <ul>
+                        <li>Jesus abre os olhos espirituais.</li>
+                    </ul>
+                </li>
+                <li><strong>L. O Bom Pastor (10:1-42):</strong>
+                    <ul>
+                        <li>Jesus é a Porta e o Bom Pastor.</li>
+                    </ul>
+                </li>
+                <li><strong>M. O Sétimo Sinal: Ressurreição de Lázaro (11:1-57):</strong>
+                    <ul>
+                        <li>Jesus é a Ressurreição e a Vida.</li>
+                    </ul>
+                </li>
+                <li><strong>N. Unção em Betânia e Entrada Triunfal (12:1-50):</strong>
+                    <ul>
+                        <li>A glória e a rejeição de Jesus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. O Livro da Glória: Discursos de Despedida (Capítulos 13-17)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Lava-pés e Anúncio da Traição (13:1-38):</strong>
+                    <ul>
+                        <li>Exemplo de serviço e o novo mandamento do amor.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Jesus o Caminho, a Verdade e a Vida (14:1-31):</strong>
+                    <ul>
+                        <li>Promessa do Consolador (Espírito Santo).</li>
+                    </ul>
+                </li>
+                <li><strong>C. A Videira Verdadeira (15:1-27):</strong>
+                    <ul>
+                        <li>Permanecer em Jesus para dar fruto.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Obras do Espírito Santo e a Alegria (16:1-33):</strong>
+                    <ul>
+                        <li>A vinda do Espírito e a superação do mundo.</li>
+                    </ul>
+                </li>
+                <li><strong>E. Oração Sacerdotal de Jesus (17:1-26):</strong>
+                    <ul>
+                        <li>Oração pela unidade e santificação dos discípulos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. A Paixão, Morte e Ressurreição (Capítulos 18-20)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Prisão de Jesus (18:1-11):</strong>
+                    <ul>
+                        <li>No Getsêmani.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Jesus Diante de Anás e Caifás; Negação de Pedro (18:12-27):</strong>
+                    <ul>
+                        <li>O julgamento religioso.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Jesus Diante de Pilatos (18:28-19:16):</strong>
+                    <ul>
+                        <li>"Que é a verdade?"</li>
+                    </ul>
+                </li>
+                <li><strong>D. Crucificação e Morte de Jesus (19:17-42):</strong>
+                    <ul>
+                        <li>"Está consumado!"</li>
+                    </ul>
+                </li>
+                <li><strong>E. A Ressurreição (20:1-31):</strong>
+                    <ul>
+                        <li>Maria Madalena, Tomé, o propósito do Evangelho.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. O Epílogo (Capítulo 21)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Aparição no Mar da Galileia (21:1-14):</strong>
+                    <ul>
+                        <li>A pesca milagrosa.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Restauração de Pedro (21:15-19):</strong>
+                    <ul>
+                        <li>"Apascenta as minhas ovelhas."</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Propósito do Livro (21:20-25):</strong>
+                    <ul>
+                        <li>As muitas coisas que Jesus fez.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">O Evangelho de João é uma obra-prima teológica que se aprofunda na identidade divina de Jesus Cristo. Ele apresenta Jesus não apenas como o Messias de Israel, mas como o próprio Deus encarnado, o Verbo que estava com Deus e era Deus. João enfatiza a importância da fé (crer) como o meio para se obter a vida eterna, que é conhecer a Deus e a Jesus Cristo. O amor é um tema central, tanto o amor de Deus pela humanidade quanto o amor mútuo que os discípulos devem ter uns pelos outros. A luz e as trevas são metáforas recorrentes que representam a verdade de Cristo versus a incredulidade e o pecado. O Espírito Santo é revelado como o Consolador que guiará os discípulos após a partida de Jesus. Os "sinais" e as declarações "Eu Sou" servem como evidências irrefutáveis da divindade de Jesus. João convida os leitores a uma relação íntima e pessoal com Jesus, que é o caminho, a verdade e a vida, e a experimentar a plenitude da vida que Ele oferece.</p>
+        </div>
+
+        <div id="personagens" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridJoao">
+            </div>
+        </div>
+
+        <div id="esbocos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de João, destacando os temas e eventos por capítulo.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: O Verbo e o Testemunho de João Batista</strong>
+                    <ul>
+                        <li>1.1-18: O Prólogo: O Verbo Eterno.</li>
+                        <li>1.19-34: O Testemunho de João Batista sobre Jesus.</li>
+                        <li>1.35-51: O Chamado dos Primeiros Discípulos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 2: O Primeiro Sinal e a Purificação do Templo</strong>
+                    <ul>
+                        <li>2.1-12: O Casamento em Caná (Água em Vinho).</li>
+                        <li>2.13-25: A Purificação do Templo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 3: Jesus e Nicodemos</strong>
+                    <ul>
+                        <li>3.1-21: O Novo Nascimento e o Amor de Deus.</li>
+                        <li>3.22-36: O Último Testemunho de João Batista.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 4: Jesus e a Mulher Samaritana</strong>
+                    <ul>
+                        <li>4.1-42: Água Viva e Adoração em Espírito e em Verdade.</li>
+                        <li>4.43-54: Cura do Filho do Oficial (Segundo Sinal).</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 5: Cura no Sábado e Autoridade de Jesus</strong>
+                    <ul>
+                        <li>5.1-18: Cura do Paralítico em Betesda (Terceiro Sinal).</li>
+                        <li>5.19-47: A Autoridade do Filho e o Testemunho do Pai.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 6: O Pão da Vida</strong>
+                    <ul>
+                        <li>6.1-15: Alimentação dos Cinco Mil (Quarto Sinal).</li>
+                        <li>6.16-21: Jesus Anda sobre as Águas (Quinto Sinal).</li>
+                        <li>6.22-71: Discurso sobre o Pão da Vida.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 7: Jesus na Festa dos Tabernáculos</strong>
+                    <ul>
+                        <li>7.1-24: Jesus Vai à Festa.</li>
+                        <li>7.25-36: Discussão sobre a Origem de Jesus.</li>
+                        <li>7.37-52: Água Viva e a Divisão entre o Povo.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 8: A Luz do Mundo e a Liberdade na Verdade</strong>
+                    <ul>
+                        <li>8.1-11: A Mulher Adúltera (texto disputado).</li>
+                        <li>8.12-30: Jesus é a Luz do Mundo.</li>
+                        <li>8.31-59: A Liberdade na Verdade e a Filiação de Abraão.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 9: Cura do Cego de Nascença</strong>
+                    <ul>
+                        <li>9.1-41: Cura do Cego de Nascença (Sexto Sinal) e a Cegueira Espiritual.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 10: O Bom Pastor</strong>
+                    <ul>
+                        <li>10.1-21: Jesus é a Porta e o Bom Pastor.</li>
+                        <li>10.22-42: Jesus na Festa da Dedicação e Sua Identidade.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 11: A Ressurreição de Lázaro</strong>
+                    <ul>
+                        <li>11.1-44: A Ressurreição de Lázaro (Sétimo Sinal).</li>
+                        <li>11.45-57: O Conflito Crescente e a Conspiração contra Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 12: Unção, Entrada Triunfal e a Glória do Filho do Homem</strong>
+                    <ul>
+                        <li>12.1-11: Unção de Jesus em Betânia.</li>
+                        <li>12.12-19: Entrada Triunfal em Jerusalém.</li>
+                        <li>12.20-36: Gregos Buscam Jesus e o Grão de Trigo.</li>
+                        <li>12.37-50: A Incredulidade de Israel e o Julgamento.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 13: O Lava-pés e o Anúncio da Traição</strong>
+                    <ul>
+                        <li>13.1-20: Jesus Lava os Pés dos Discípulos.</li>
+                        <li>13.21-30: O Anúncio da Traição de Judas.</li>
+                        <li>13.31-38: O Novo Mandamento do Amor e a Negação de Pedro Predita.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 14: Jesus o Caminho, a Verdade e a Vida</strong>
+                    <ul>
+                        <li>14.1-14: Jesus no Lar do Pai e o Caminho para Ele.</li>
+                        <li>14.15-31: A Promessa do Espírito Santo (o Consolador).</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 15: A Videira Verdadeira</strong>
+                    <ul>
+                        <li>15.1-17: Permanecer em Jesus e o Amor Mútuo.</li>
+                        <li>15.18-27: O Ódio do Mundo e o Testemunho do Espírito.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 16: Obras do Espírito Santo e a Alegria</strong>
+                    <ul>
+                        <li>16.1-15: Obras do Espírito Santo e o Que Ele Fará.</li>
+                        <li>16.16-33: A Tristeza se Tornará Alegria.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 17: A Oração Sacerdotal de Jesus</strong>
+                    <ul>
+                        <li>17.1-5: Oração pela Glorificação do Filho.</li>
+                        <li>17.6-19: Oração pelos Discípulos.</li>
+                        <li>17.20-26: Oração pelos Futuros Crentes (Unidade).</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 18: A Prisão e os Julgamentos Iniciais</strong>
+                    <ul>
+                        <li>18.1-11: A Prisão de Jesus.</li>
+                        <li>18.12-14: Jesus Levado a Anás.</li>
+                        <li>18.15-18: Pedro Nega a Jesus pela Primeira Vez.</li>
+                        <li>18.19-24: Jesus Interrogado por Anás.</li>
+                        <li>18.25-27: Pedro Nega a Jesus Novamente.</li>
+                        <li>18.28-40: Jesus Diante de Pilatos.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 19: Crucificação e Morte</strong>
+                    <ul>
+                        <li>19.1-16: Jesus Condenado por Pilatos.</li>
+                        <li>19.17-22: A Crucificação.</li>
+                        <li>19.23-30: A Morte de Jesus.</li>
+                        <li>19.31-37: O Lado Perfurado de Jesus.</li>
+                        <li>19.38-42: O Sepultamento de Jesus.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 20: A Ressurreição</strong>
+                    <ul>
+                        <li>20.1-10: O Túmulo Vazio.</li>
+                        <li>20.11-18: Jesus Aparece a Maria Madalena.</li>
+                        <li>20.19-23: Jesus Aparece aos Discípulos.</li>
+                        <li>20.24-29: Jesus Aparece a Tomé.</li>
+                        <li>20.30-31: O Propósito do Evangelho de João.</li>
+                    </ul>
+                </li>
+                <li><strong>Capítulo 21: O Epílogo: Aparição no Mar da Galileia</strong>
+                    <ul>
+                        <li>21.1-14: A Pesca Milagrosa e o Café da Manhã.</li>
+                        <li>21.15-19: A Restauração de Pedro.</li>
+                        <li>21.20-25: O Destino do Discípulo Amado e a Conclusão.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div id="temas" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de João</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A Divindade de Jesus:</strong> Jesus como o Verbo (Logos), Deus encarnado, e o Filho de Deus.</li>
+                <li><strong>Vida Eterna:</strong> O propósito central do Evangelho, acessível através da fé em Jesus.</li>
+                <li><strong>Fé (Crer):</strong> A importância da crença pessoal em Jesus para a salvação.</li>
+                <li><strong>Amor:</strong> O amor de Deus pelo mundo e o mandamento de amor mútuo entre os discípulos.</li>
+                <li><strong>Luz e Trevas:</strong> Jesus como a luz que veio ao mundo, em contraste com as trevas da incredulidade.</li>
+                <li><strong>Verdade:</strong> Jesus como a personificação da verdade e o ensino sobre viver na verdade.</li>
+                <li><strong>O Espírito Santo (o Consolador):</strong> O papel do Espírito como guia, mestre e testemunha.</li>
+                <li><strong>Os Sinais:</strong> Sete milagres selecionados para demonstrar a glória e a identidade divina de Jesus.</li>
+                <li><strong>As Declarações 'Eu Sou':</strong> Sete afirmações de Jesus que revelam Sua natureza e missão divinas.</li>
+            </ul>
+        </div>
+
+        <div id="capitulos" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione o capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersJoao">
+            </div>
+        </div>
+
+        <div id="quiz" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre João</h2>
+            <div id="quizContainerJoao" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionJoao"></p>
+                <div id="quizOptionsJoao" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackJoao" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionJoao()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressJoao"></span></p>
+                <p>Pontuação: <span id="quizScoreJoao">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="grafico" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de João</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de João.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="joaoChart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalJoao()">&times;</span>
+                <h3 id="modalCharacterNameJoao" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionJoao" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data">
+        {
+            "name": "Livro Interativo de João",
+            "short_name": "João",
+            "description": "Explore o livro de João de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=JO",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=JO",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script">
+        // service-worker.js
+        const CACHE_NAME = 'joao-interactive-v1';
+        const urlsToCache = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js', // Certifique-se de que Chart.js está no cache
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        console.log('Opened cache');
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+            });
+    </script>
+
+    <script>
+        // Registra o Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções
+        function showSectionJoao(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('active');
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagens') {
+                generateCharacterButtonsJoao();
+            }
+            if (sectionId === 'capitulos') {
+                generateChapterLinksJoao();
+            }
+            if (sectionId === 'quiz') {
+                shuffleQuizQuestionsJoao(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexJoao = 0; // Reinicia o quiz
+                scoreJoao = 0;
+                wrongAnswersJoao = 0;
+                document.getElementById('quizScoreJoao').textContent = `Acertos: ${scoreJoao}, Erros: ${wrongAnswersJoao}`;
+                displayQuestionJoao();
+            }
+            if (sectionId === 'grafico') { // Chama a função do gráfico quando a seção é exibida
+                renderJoaoChart();
+            }
+        }
+
+        // Dados dos personagens para João
+        const characterDetailsJoao = {
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "O Verbo encarnado, o Filho de Deus, o centro do Evangelho de João, que revela Sua divindade através de sinais e discursos."
+            },
+            "João (o Apóstolo)": {
+                name: "João (o Apóstolo)",
+                description: "O autor tradicional do Evangelho, 'o discípulo a quem Jesus amava', que oferece uma perspectiva teológica profunda sobre Jesus."
+            },
+            "João Batista": {
+                name: "João Batista",
+                description: "O precursor de Jesus, cujo testemunho é fundamental para introduzir Jesus como o Cordeiro de Deus."
+            },
+            "Nicodemos": {
+                name: "Nicodemos",
+                description: "Um fariseu e líder judeu que visita Jesus à noite e aprende sobre o novo nascimento."
+            },
+            "Mulher Samaritana": {
+                name: "Mulher Samaritana",
+                description: "Uma mulher de Samaria com quem Jesus tem um diálogo profundo sobre a água viva e a verdadeira adoração."
+            },
+            "Lázaro": {
+                name: "Lázaro",
+                description: "Irmão de Marta e Maria, ressuscitado por Jesus, um dos sete sinais mais poderosos."
+            },
+            "Marta": {
+                name: "Marta",
+                description: "Irmã de Lázaro e Maria, que expressa fé em Jesus como a ressurreição e a vida."
+            },
+            "Maria (irmã de Lázaro)": {
+                name: "Maria (irmã de Lázaro)",
+                description: "Irmã de Lázaro e Marta, que unge os pés de Jesus com perfume caro."
+            },
+            "Pôncio Pilatos": {
+                name: "Pôncio Pilatos",
+                description: "O governador romano que interroga Jesus e o condena à crucificação, apesar de não encontrar culpa Nele."
+            },
+            "Tomé": {
+                name: "Tomé",
+                description: "Um dos doze discípulos, conhecido por sua dúvida inicial sobre a ressurreição de Jesus, mas que depois professa 'Meu Senhor e meu Deus!'"
+            },
+            "Maria Madalena": {
+                name: "Maria Madalena",
+                description: "Uma das primeiras a visitar o túmulo vazio e a quem Jesus aparece primeiro após a ressurreição."
+            },
+            "Judas Iscariotes": {
+                name: "Judas Iscariotes",
+                description: "Um dos doze discípulos que trai Jesus, conforme predito por Jesus."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalJoao(characterName) {
+            const details = characterDetailsJoao[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNameJoao').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionJoao').textContent = details.description;
+                document.getElementById('characterModal').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalJoao() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsJoao() {
+            const grid = document.getElementById('characterGridJoao');
+            grid.innerHTML = '';
+            for (const key in characterDetailsJoao) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalJoao(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos
+        function generateChapterLinksJoao() {
+            const chaptersDiv = document.getElementById('chaptersJoao');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 21; i++) { // João tem 21 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/jo/${i}`; // Link para a Bíblia Online, João
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para João (25 perguntas únicas)
+        const uniqueQuizQuestionsJoao = [
+            { question: "Qual o propósito explícito do Evangelho de João?", options: ["Que as pessoas se arrependam", "Que creiam que Jesus é o Cristo e tenham vida em Seu nome", "Que entendam a lei mosaica", "Que conheçam a história de Israel"], answer: "Que creiam que Jesus é o Cristo e tenham vida em Seu nome", reference: "João 20:31" },
+            { question: "Como João se refere a Jesus no prólogo de seu Evangelho?", options: ["O Messias", "O Rei de Israel", "O Verbo (Logos)", "O Profeta"], answer: "O Verbo (Logos)", reference: "João 1:1" },
+            { question: "Qual foi o primeiro sinal (milagre) que Jesus realizou em João?", options: ["Cura do cego de nascença", "Transformar água em vinho", "Alimentar os cinco mil", "Ressuscitar Lázaro"], answer: "Transformar água em vinho", reference: "João 2:1-11" },
+            { question: "Quem visitou Jesus à noite para aprender sobre o novo nascimento?", options: ["Pedro", "Zaqueu", "Nicodemos", "João Batista"], answer: "Nicodemos", reference: "João 3:1-21" },
+            { question: "Com quem Jesus teve um diálogo sobre a 'água viva' e a adoração em espírito e em verdade?", options: ["Maria Madalena", "Marta", "Uma mulher samaritana", "Uma mulher adúltera"], answer: "Uma mulher samaritana", reference: "João 4:1-42" },
+            { question: "Quantos sinais milagrosos Jesus realiza no Livro dos Sinais (João 2-12)?", options: ["Cinco", "Seis", "Sete", "Dez"], answer: "Sete", reference: "Introdução ao Livro de João" },
+            { question: "Qual das seguintes declarações 'Eu Sou' é encontrada no Evangelho de João?", options: ["Eu sou o bom pastor", "Eu sou o caminho e a verdade e a vida", "Eu sou o pão da vida", "Todas as anteriores"], answer: "Todas as anteriores", reference: "Temas Centrais do Livro de João" },
+            { question: "Qual o milagre mais significativo de Jesus em João, que leva à conspiração para matá-Lo?", options: ["Cura do paralítico", "Cura do cego de nascença", "Alimentação dos cinco mil", "Ressurreição de Lázaro"], answer: "Ressurreição de Lázaro", reference: "João 11:1-44" },
+            { question: "O que Jesus fez para dar um exemplo de serviço aos Seus discípulos na Última Ceia?", options: ["Quebrou o pão", "Lavou os pés deles", "Orou por eles", "Censurou Judas"], answer: "Lavou os pés deles", reference: "João 13:1-20" },
+            { question: "Quem Jesus promete enviar como 'Consolador' após Sua partida?", options: ["Um anjo", "Outro profeta", "O Espírito Santo", "Um novo apóstolo"], answer: "O Espírito Santo", reference: "João 14:16-17" },
+            { question: "Qual a metáfora que Jesus usa para descrever a união entre Ele e Seus discípulos, e a necessidade de permanecer Nele para dar fruto?", options: ["A oliveira e os ramos", "A videira e os ramos", "A figueira e os frutos", "A árvore e suas raízes"], answer: "A videira e os ramos", reference: "João 15:1-17" },
+            { question: "Qual o discípulo que inicialmente duvidou da ressurreição de Jesus, mas depois professou 'Meu Senhor e meu Deus!'?", options: ["Pedro", "João", "Tomé", "André"], answer: "Tomé", reference: "João 20:24-29" },
+            { question: "Quem foi a primeira pessoa a quem Jesus apareceu após Sua ressurreição, segundo João?", options: ["Pedro", "Maria Madalena", "João (o apóstolo)", "Tomé"], answer: "Maria Madalena", reference: "João 20:11-18" },
+            { question: "Qual a resposta de Jesus a Pilatos quando este pergunta 'Que é a verdade?'?", options: ["Eu sou a verdade", "A verdade é relativa", "A verdade está nas Escrituras", "A verdade é o que você acredita"], answer: "Eu sou a verdade", reference: "João 18:37-38" },
+            { question: "O que Jesus diz que é o 'novo mandamento' aos Seus discípulos em João 13:34?", options: ["Amar a Deus", "Amar o próximo como a si mesmo", "Amar uns aos outros como Eu vos amei", "Perdoar setenta vezes sete"], answer: "Amar uns aos outros como Eu vos amei", reference: "João 13:34" },
+            { question: "Qual o tema central da oração sacerdotal de Jesus em João 17?", options: ["Pelos Seus inimigos", "Pela unidade e santificação dos discípulos", "Pela prosperidade de Seus seguidores", "Pela vinda do Reino"], answer: "Pela unidade e santificação dos discípulos", reference: "João 17:20-26" },
+            { question: "O que Jesus declara ser em João 10:9?", options: ["Eu sou a porta das ovelhas", "Eu sou o bom pastor", "Eu sou o pão da vida", "Eu sou a luz do mundo"], answer: "Eu sou a porta das ovelhas", reference: "João 10:9" },
+            { question: "Qual o nome do discípulo a quem Jesus amava, tradicionalmente associado à autoria deste Evangelho?", options: ["Pedro", "Tiago", "João", "André"], answer: "João", reference: "Introdução ao Livro de João" },
+            { question: "O que Jesus disse ser o 'pão da vida' em João 6?", options: ["O maná do céu", "A Sua própria carne", "O pão da Páscoa", "A lei de Moisés"], answer: "A Sua própria carne", reference: "João 6:35, 51" },
+            { question: "Em João 8:12, Jesus se declara como o quê?", options: ["O caminho", "A verdade", "A luz do mundo", "A vida"], answer: "A luz do mundo", reference: "João 8:12" },
+            { question: "Qual o evento que marca o início da 'Livro da Glória' em João?", options: ["A purificação do Templo", "A ressurreição de Lázaro", "A Última Ceia e o lava-pés", "A entrada triunfal em Jerusalém"], answer: "A Última Ceia e o lava-pés", reference: "Panoramas do Livro de João" },
+            { question: "O que Jesus diz que é o resultado de crer Nele em João 3:16?", options: ["Riquezas", "Vida eterna", "Fama", "Poder"], answer: "Vida eterna", reference: "João 3:16" },
+            { question: "Qual o nome do jardim onde Jesus foi preso?", options: ["Getsêmani", "Éden", "Oliveiras", "Jerusalém"], answer: "Getsêmani", reference: "João 18:1" },
+            { question: "Qual o último sinal (milagre) registrado no Livro dos Sinais de João?", options: ["Cura do cego de nascença", "Ressurreição de Lázaro", "Alimentação dos cinco mil", "Transformar água em vinho"], answer: "Ressurreição de Lázaro", reference: "João 11:1-44" },
+            { question: "O que Jesus disse a Pedro após a pesca milagrosa no epílogo de João?", options: ["Segue-me", "Apascenta as minhas ovelhas", "Não temas", "Lança a rede à direita do barco"], answer: "Apascenta as minhas ovelhas", reference: "João 21:15-19" }
+        ];
+
+        let quizQuestionsJoao = []; // Este array armazenará as 200 perguntas embaralhadas
+
+        // Função para popular e embaralhar as perguntas do quiz
+        function shuffleQuizQuestionsJoao() {
+            quizQuestionsJoao = []; // Limpa as perguntas anteriores
+            while (quizQuestionsJoao.length < 200) {
+                quizQuestionsJoao.push(...uniqueQuizQuestionsJoao);
+            }
+            // Garante que o array tenha exatamente 200 perguntas, caso a duplicação exceda
+            if (quizQuestionsJoao.length > 200) {
+                quizQuestionsJoao = quizQuestionsJoao.slice(0, 200);
+            }
+            shuffleArray(quizQuestionsJoao); // Embaralha o array completo
+        }
+
+        let currentQuizIndexJoao = 0;
+        let scoreJoao = 0;
+        let wrongAnswersJoao = 0;
+
+        function displayQuestionJoao() {
+            const questionElement = document.getElementById('quizQuestionJoao');
+            const optionsElement = document.getElementById('quizOptionsJoao');
+            const feedbackElement = document.getElementById('quizFeedbackJoao');
+            const nextButton = document.querySelector('#quizContainerJoao .quiz-next');
+            const progressElement = document.getElementById('quizProgressJoao');
+
+            if (currentQuizIndexJoao < quizQuestionsJoao.length) {
+                const questionData = quizQuestionsJoao[currentQuizIndexJoao];
+                questionElement.textContent = questionData.question;
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'text-lg font-medium mb-4'; // Reset class
+                nextButton.classList.add('hidden');
+
+                shuffleArray(questionData.options); // Embaralha as opções
+                questionData.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg transform hover:scale-105';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswerJoao(option, questionData.answer, button);
+                    optionsElement.appendChild(button);
+                });
+                progressElement.textContent = `${currentQuizIndexJoao + 1}/${quizQuestionsJoao.length}`;
+            } else {
+                questionElement.textContent = "Quiz Concluído!";
+                optionsElement.innerHTML = '';
+                feedbackElement.textContent = `Sua pontuação final: Acertos: ${scoreJoao}, Erros: ${wrongAnswersJoao}.`;
+                feedbackElement.className = 'text-lg font-medium mb-4 text-white';
+                nextButton.classList.add('hidden');
+            }
+        }
+
+        function checkAnswerJoao(selectedOption, correctAnswer, clickedButton) {
+            const optionsButtons = document.querySelectorAll('#quizOptionsJoao button');
+            const feedbackElement = document.getElementById('quizFeedbackJoao');
+            const nextButton = document.querySelector('#quizContainerJoao .quiz-next');
+            const scoreElement = document.getElementById('quizScoreJoao');
+
+            // Desabilita todos os botões de opção para evitar múltiplas seleções
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-green-600');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                    button.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.classList.add('text-green-500');
+                scoreJoao++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: ${correctAnswer}.`;
+                feedbackElement.classList.add('text-red-500');
+                wrongAnswersJoao++;
+            }
+            scoreElement.textContent = `Acertos: ${scoreJoao}, Erros: ${wrongAnswersJoao}`;
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestionJoao() {
+            currentQuizIndexJoao++;
+            displayQuestionJoao();
+        }
+
+        // Gráfico de Temas para João
+        let joaoChartInstance = null; // Variável para armazenar a instância do gráfico
+
+        function renderJoaoChart() {
+            const ctx = document.getElementById('joaoChart').getContext('2d');
+
+            // Destroi a instância anterior do gráfico se existir
+            if (joaoChartInstance) {
+                joaoChartInstance.destroy();
+            }
+
+            const themeData = {
+                labels: ['A Divindade de Jesus', 'Vida Eterna', 'Fé (Crer)', 'Amor', 'Luz e Trevas', 'Verdade', 'O Espírito Santo', 'Os Sinais', 'As Declarações \'Eu Sou\''],
+                datasets: [{
+                    label: 'Frequência de Temas',
+                    data: [9, 8, 9, 8, 7, 7, 6, 7, 7], // Valores fictícios para João
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Vermelho para Divindade
+                        'rgba(54, 162, 235, 0.7)', // Azul para Vida Eterna
+                        'rgba(255, 206, 86, 0.7)', // Amarelo para Fé
+                        'rgba(75, 192, 192, 0.7)', // Verde-água para Amor
+                        'rgba(153, 102, 255, 0.7)', // Roxo para Luz e Trevas
+                        'rgba(255, 159, 64, 0.7)', // Laranja para Verdade
+                        'rgba(201, 203, 207, 0.7)', // Cinza para Espírito Santo
+                        'rgba(100, 149, 237, 0.7)', // Azul claro para Sinais
+                        'rgba(255, 0, 255, 0.7)' // Magenta para 'Eu Sou'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(201, 203, 207, 1)',
+                        'rgba(100, 149, 237, 1)',
+                        'rgba(255, 0, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            joaoChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'pie', 'doughnut', 'line', etc.
+                data: themeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo Y
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo Y
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e2e8f0' // Cor dos rótulos do eixo X
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // Cor das linhas de grade do eixo X
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0' // Cor do texto da legenda
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Temas no Livro de João',
+                            color: '#f8fafc', // Cor do título do gráfico
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializa a seção de início ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            showSectionJoao('inicio');
+        });
+    </script>
+</body>
+</html>

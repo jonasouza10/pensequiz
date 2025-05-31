@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Interativo de 1 Pedro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d1226">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="1 Pedro Interativo">
+
+<style>
+    /* Estilos globais para o corpo do documento, usando a fonte Inter e gradiente azul marinho */
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom right, #0d1226, #1a2033); /* Gradiente azul marinho escuro */
+        color: #e2e8f0; /* Texto cinza muito claro */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Esconde a barra de rolagem para o modal, mas permite a rolagem do conteúdo */
+    .modal-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .container {
+        background-color: #1a2033; /* Azul marinho escuro para o container principal */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Sombra mais pronunciada e escura */
+        border-radius: 1rem; /* Cantos mais arredondados */
+        max-width: 960px; /* Aumenta um pouco a largura máxima */
+        width: 100%;
+    }
+
+    .nav-bar {
+        background-color: #2d3748; /* Fundo cinza médio para a barra de navegação */
+        border-radius: 0.75rem; /* Cantos arredondados */
+    }
+
+    /* Estilo base para todos os botões da navegação e quiz */
+    .nav-button, .quiz-options button, .quiz-next {
+        background-color: #34495e; /* Azul acinzentado para botões */
+        color: #ffffff; /* Texto branco */
+        font-weight: 600; /* font-semibold */
+        padding: 0.75rem 1.5rem; /* Padding ajustado */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: all 0.3s ease-in-out; /* Transição suave para efeitos */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+        cursor: pointer;
+        border: none; /* Remove borda padrão */
+    }
+
+    /* Efeitos de hover e active para botões */
+    .nav-button:hover, .quiz-options button:hover, .quiz-next:hover {
+        background-color: #2c3e50; /* Azul acinzentado mais escuro no hover */
+        transform: translateY(-2px) scale(1.02); /* Leve levantamento e aumento */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada no hover */
+    }
+
+    .nav-button:active, .quiz-options button:active, .quiz-next:active {
+        background-color: #1f2a38; /* Azul acinzentado ainda mais escuro no active */
+        transform: translateY(0) scale(1.0); /* Retorna à posição original */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra mais suave no active */
+    }
+
+    .section {
+        background-color: #1a2033; /* Fundo das seções azul marinho escuro */
+        border: 1px solid #2d3748; /* Borda cinza médio */
+        border-radius: 1rem; /* Cantos mais arredondados */
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc; /* Títulos em branco muito claro */
+    }
+
+    .text-gray-200, .text-gray-300, .text-gray-700 { /* Para o texto de parágrafos */
+        color: #cbd5e0; /* Ajustado para cinza azulado claro */
+    }
+    .text-gray-400, .text-gray-600 { /* Para referências e descrições menores */
+        color: #a0aec0; /* Cinza azulado médio */
+    }
+
+    .quiz-question {
+        color: #f8fafc; /* Pergunta do quiz em branco muito claro */
+    }
+
+    /* Estilos para feedback do quiz */
+    .quiz-options button.bg-green-600 {
+        background-color: #10b981; /* Resposta correta em verde */
+        color: #ffffff;
+    }
+    .quiz-options button.bg-red-600 {
+        background-color: #ef4444; /* Resposta errada em vermelho */
+        color: #ffffff;
+    }
+
+    .quiz-feedback.text-green-500 {
+        color: #10b981; /* Feedback correto em verde */
+    }
+    .quiz-feedback.text-red-500 {
+        color: #ef4444; /* Feedback errado em vermelho */
+    }
+
+    .modal-content {
+        background-color: #1a2033; /* Fundo do modal azul marinho escuro */
+        color: #e2e8f0; /* Texto do modal em cinza muito claro */
+        border-radius: 1rem;
+    }
+    .close-btn {
+        color: #a0aec0; /* Botão de fechar em cinza azulado médio */
+    }
+    .close-btn:hover {
+        color: #cbd5e0; /* Hover do botão de fechar em cinza azulado claro */
+    }
+    /* Estilos para o gráfico */
+    canvas {
+        background-color: #2d3748; /* Fundo do gráfico cinza escuro */
+        border-radius: 0.5rem; /* Cantos arredondados */
+    }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto p-6 text-center shadow-xl">
+        <h1 class="text-4xl font-bold text-white mb-6">Livro Interativo de 1 Pedro</h1>
+
+        <div class="nav-bar p-3 rounded-lg mb-6 flex flex-wrap justify-center gap-3">
+            <button class="nav-button" onclick="showSectionPedro1('inicioPedro1')">Início</button>
+            <button class="nav-button" onclick="showSectionPedro1('introducaoPedro1')">Introdução</button>
+            <button class="nav-button" onclick="showSectionPedro1('panoramasPedro1')">Panoramas do Livro</button>
+            <button class="nav-button" onclick="showSectionPedro1('personagensPedro1')">Personagens</button>
+            <button class="nav-button" onclick="showSectionPedro1('esbocosPedro1')">Esboços</button>
+            <button class="nav-button" onclick="showSectionPedro1('temasPedro1')">Temas</button>
+            <button class="nav-button" onclick="showSectionPedro1('capitulosPedro1')">Capítulos</button>
+            <button class="nav-button" onclick="showSectionPedro1('quizPedro1')">Quiz</button>
+            <button class="nav-button" onclick="showSectionPedro1('graficoPedro1')">Gráfico</button>
+        </div>
+
+        <div id="inicioPedro1" class="section p-6 mb-6 text-left shadow-lg active">
+            <h2 class="text-3xl font-semibold text-white mb-4">Bem-vindo ao Livro Interativo de 1 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100">Explore a Primeira Epístola de Pedro, uma carta de esperança e encorajamento para cristãos que enfrentam perseguição e sofrimento. Descubra como Pedro exorta os crentes a viverem uma vida santa, a perseverarem na fé em meio às provações, a demonstrarem amor fraternal e a se submeterem às autoridades. Entenda a importância da esperança viva em Cristo e a glória que será revelada. Teste seus conhecimentos com nosso quiz!</p>
+            <p class="text-base leading-relaxed text-blue-200 mt-4">Toda a aplicação utiliza o texto da <strong>Bíblia João Ferreira de Almeida (JFA)</strong>, uma tradução de domínio público amplamente respeitada, para garantir a autenticidade e a fidelidade ao texto bíblico original.</p>
+        </div>
+
+        <div id="introducaoPedro1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Introdução ao Livro de 1 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A Primeira Epístola de Pedro é uma carta de encorajamento e instrução escrita pelo apóstolo Pedro. Ele se identifica como "Pedro, apóstolo de Jesus Cristo, aos estrangeiros dispersos no Ponto, Galácia, Capadócia, Ásia e Bitínia" (1 Pedro 1:1). Estes eram cristãos que viviam em províncias romanas na Ásia Menor, muitos dos quais eram gentios convertidos, e que estavam enfrentando perseguição e sofrimento por causa de sua fé.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">A carta foi escrita provavelmente entre 62 e 64 d.C., de "Babilônia" (1 Pedro 5:13), que é geralmente interpretada como um código para Roma, onde Pedro teria estado antes de seu martírio. O principal propósito de Pedro é fortalecer a fé dos crentes em meio às provações, lembrando-os de sua identidade em Cristo como "geração eleita, sacerdócio real, nação santa, povo de propriedade exclusiva de Deus" (1 Pedro 2:9). Ele os exorta a viverem vidas santas e a testemunharem a Cristo, mesmo sob adversidade, aguardando a glória futura.</p>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Pedro é um livro de grande relevância para os crentes de todas as épocas, pois aborda temas universais como o sofrimento, a esperança, a santidade, o amor fraternal e a conduta cristã em um mundo hostil. Pedro enfatiza que o sofrimento por causa de Cristo é uma participação nos Seus padecimentos e um caminho para a glória. A carta é rica em teologia da salvação, da santificação e da escatologia, oferecendo uma perspectiva celestial que transcende as dificuldades terrenas.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">Estrutura e Conteúdo Principal:</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1: Saudação, Esperança Viva e Chamado à Santidade.</strong> Pedro saúda os eleitos dispersos, fala da esperança viva em Cristo e exorta à santidade baseada na redenção.</li>
+                <li><strong>Capítulo 2: Identidade em Cristo e Conduta Cristã.</strong> Os crentes como pedras vivas, sacerdócio real, e exortações à submissão (governo, senhores) e ao exemplo de Cristo.</li>
+                <li><strong>Capítulo 3: Relações Familiares e Sofrimento por Justiça.</strong> Instruções para esposas e maridos, a importância de uma boa consciência e o sofrimento de Cristo como exemplo.</li>
+                <li><strong>Capítulo 4: Sofrimento, Mordomia e o Fim dos Tempos.</strong> Viver para a vontade de Deus, a mordomia dos dons espirituais e a proximidade do fim de todas as coisas.</li>
+                <li><strong>Capítulo 5: Exortações aos Presbíteros, Jovens e Encorajamento Final.</strong> Pedro exorta os presbíteros a pastorearem o rebanho, os jovens a se submeterem, e encoraja todos a resistirem ao diabo e a confiarem em Deus.</li>
+            </ul>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Pedro é uma fonte de consolo e força para todos que buscam viver fielmente a Cristo em meio aos desafios da vida.</p>
+        </div>
+
+        <div id="panoramasPedro1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Panoramas do Livro de 1 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">1 Pedro é uma epístola que oferece esperança e diretrizes para viver fielmente em meio ao sofrimento e à perseguição.</p>
+            <h3 class="text-2xl font-semibold text-white mb-3">I. A Esperança da Salvação e o Chamado à Santidade (Capítulo 1)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Saudação (Capítulo 1:1-2):</strong>
+                    <ul>
+                        <li>Pedro, apóstolo de Jesus Cristo, aos estrangeiros dispersos.</li>
+                    </ul>
+                </li>
+                <li><strong>B. A Esperança Viva (Capítulo 1:3-9):</strong>
+                    <ul>
+                        <li>Bendito seja Deus que, segundo a sua grande misericórdia, nos gerou de novo para uma viva esperança.</li>
+                        <li>Uma herança incorruptível, incontaminável e imarcescível, guardada nos céus.</li>
+                        <li>Alegrai-vos nisso, ainda que por um pouco de tempo, se necessário, sejais contristados por várias provações.</li>
+                    </ul>
+                </li>
+                <li><strong>C. O Chamado à Santidade (Capítulo 1:10-25):</strong>
+                    <ul>
+                        <li>Os profetas inquiriram e buscaram diligentemente acerca desta salvação.</li>
+                        <li>Sede santos em toda a vossa maneira de viver, porque Eu sou santo.</li>
+                        <li>Fostes resgatados não com coisas corruptíveis, mas com o precioso sangue de Cristo.</li>
+                        <li>Nascidos de novo, não de semente corruptível, mas da incorruptível, pela palavra de Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">II. Identidade e Conduta Cristã no Mundo (Capítulo 2)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Crescimento Espiritual (Capítulo 2:1-3):</strong>
+                    <ul>
+                        <li>Desejai ardentemente, como meninos recém-nascidos, o leite racional, sem dolo.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Identidade do Crente (Capítulo 2:4-10):</strong>
+                    <ul>
+                        <li>Pedras vivas, edificados casa espiritual e sacerdócio santo.</li>
+                        <li>Geração eleita, sacerdócio real, nação santa, povo de propriedade exclusiva de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Submissão às Autoridades (Capítulo 2:11-17):</strong>
+                    <ul>
+                        <li>Abstende-vos das concupiscências da carne.</li>
+                        <li>Sujeitai-vos a toda ordenação humana por amor do Senhor.</li>
+                        <li>Honrai a todos. Amai a fraternidade. Temei a Deus. Honrai ao rei.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Submissão aos Senhores (Capítulo 2:18-25):</strong>
+                    <ul>
+                        <li>Servos, sede sujeitos com todo o temor aos senhores.</li>
+                        <li>Cristo como exemplo de sofrimento injusto.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">III. Relações e Sofrimento por Justiça (Capítulo 3)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Esposas e Maridos (Capítulo 3:1-7):</strong>
+                    <ul>
+                        <li>Esposas, sede sujeitas a vossos maridos.</li>
+                        <li>Maridos, coabitai com elas com entendimento.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Unidade e Sofrimento (Capítulo 3:8-12):</strong>
+                    <ul>
+                        <li>Sede todos de um mesmo sentimento, compassivos, amando os irmãos, misericordiosos e afáveis.</li>
+                        <li>Não tornando mal por mal, ou injúria por injúria.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Sofrimento por Causa da Justiça (Capítulo 3:13-22):</strong>
+                    <ul>
+                        <li>Se padecerdes por causa da justiça, bem-aventurados sois.</li>
+                        <li>Estai sempre preparados para responder com mansidão e temor.</li>
+                        <li>Cristo padeceu uma vez pelos pecados, o justo pelos injustos.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">IV. Vivendo para a Vontade de Deus e Mordomia (Capítulo 4)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Viver para a Vontade de Deus (Capítulo 4:1-6):</strong>
+                    <ul>
+                        <li>Aquele que padeceu na carne já cessou do pecado.</li>
+                        <li>Não viver mais para as concupiscências dos homens, mas para a vontade de Deus.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Mordomia e Amor Fraternal (Capítulo 4:7-11):</strong>
+                    <ul>
+                        <li>O fim de todas as coisas está próximo.</li>
+                        <li>Sede sóbrios e vigiai em oração.</li>
+                        <li>Tende ardente amor uns para com os outros.</li>
+                        <li>Sede hospitaleiros, sem murmurações.</li>
+                        <li>Cada um administre aos outros o dom que recebeu.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Sofrimento e Glória (Capítulo 4:12-19):</strong>
+                    <ul>
+                        <li>Não estranheis o fogo que surge entre vós para vos provar.</li>
+                        <li>Alegrai-vos na medida em que sois participantes das aflições de Cristo.</li>
+                        <li>Se sois injuriados pelo nome de Cristo, bem-aventurados sois.</li>
+                        <li>É tempo de começar o juízo pela casa de Deus.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">V. Exortações Finais e Encorajamento (Capítulo 5)</h3>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>A. Exortação aos Presbíteros (Capítulo 5:1-4):</strong>
+                    <ul>
+                        <li>Apascentai o rebanho de Deus que está entre vós.</li>
+                        <li>Não por força, mas espontaneamente; nem por torpe ganância, mas de ânimo pronto.</li>
+                    </ul>
+                </li>
+                <li><strong>B. Exortação aos Jovens e a Todos (Capítulo 5:5-7):</strong>
+                    <ul>
+                        <li>Jovens, sede sujeitos aos anciãos.</li>
+                        <li>Humilhai-vos debaixo da potente mão de Deus.</li>
+                        <li>Lançando sobre ele toda a vossa ansiedade.</li>
+                    </ul>
+                </li>
+                <li><strong>C. Advertência Contra o Diabo (Capítulo 5:8-9):</strong>
+                    <ul>
+                        <li>Sede sóbrios, vigiai; porque o diabo, vosso adversário, anda em derredor.</li>
+                        <li>Resisti-lhe firmes na fé.</li>
+                    </ul>
+                </li>
+                <li><strong>D. Bênção e Saudação Final (Capítulo 5:10-14):</strong>
+                    <ul>
+                        <li>O Deus de toda a graça vos aperfeiçoe, confirme, fortifique e estabeleça.</li>
+                        <li>Saudações de Silvano, Marcos e a igreja em Babilônia.</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-white mb-3">Significado Teológico</h3>
+            <p class="text-lg leading-relaxed text-blue-100">A Primeira Epístola de Pedro é um farol de esperança para os crentes que enfrentam adversidades. Ela reafirma a identidade do cristão como um povo eleito e santo, chamado a viver de forma diferente em um mundo caído. Pedro ensina que o sofrimento por causa de Cristo não é um sinal de abandono, mas uma oportunidade para glorificar a Deus e uma preparação para a glória futura. A carta é um poderoso lembrete da soberania de Deus, da eficácia do sangue de Cristo e da importância da perseverança na fé, do amor fraternal e da humildade. É um convite a fixar os olhos na esperança eterna, mesmo quando as circunstâncias presentes são difíceis.</p>
+        </div>
+
+        <div id="personagensPedro1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Personagens Bíblicos</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Clique em um personagem para saber mais!</p>
+            <div class="character-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4" id="characterGridPedro1">
+            </div>
+        </div>
+
+        <div id="esbocosPedro1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Esboços do Livro de 1 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visão detalhada da estrutura do livro de 1 Pedro, capítulo por capítulo, destacando os temas e eventos.</p>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Capítulo 1:</strong> A Esperança da Salvação e o Chamado à Santidade.</li>
+                <li><strong>Capítulo 2:</strong> Identidade e Conduta Cristã no Mundo.</li>
+                <li><strong>Capítulo 3:</strong> Relações Familiares e Sofrimento por Justiça.</li>
+                <li><strong>Capítulo 4:</strong> Vivendo para a Vontade de Deus e Mordomia.</li>
+                <li><strong>Capítulo 5:</strong> Exortações Finais e Encorajamento.</li>
+            </ul>
+        </div>
+
+        <div id="temasPedro1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Temas Centrais do Livro de 1 Pedro</h2>
+            <ul class="list-disc list-inside text-lg leading-relaxed text-blue-100 space-y-2 mb-4">
+                <li><strong>Esperança Viva:</strong> A certeza da salvação e da herança celestial em Cristo.</li>
+                <li><strong>Sofrimento e Glória:</strong> A perspectiva cristã sobre as provações e a participação nos padecimentos de Cristo.</li>
+                <li><strong>Santidade:</strong> O chamado para viver uma vida separada e consagrada a Deus.</li>
+                <li><strong>Identidade em Cristo:</strong> Os crentes como povo eleito, sacerdócio real e nação santa.</li>
+                <li><strong>Submissão:</strong> Às autoridades civis, aos senhores e aos líderes da igreja.</li>
+                <li><strong>Amor Fraternal:</strong> A importância do amor mútuo entre os irmãos.</li>
+                <li><strong>Mordomia dos Dons:</strong> A responsabilidade de usar os dons espirituais para o serviço.</li>
+            </ul>
+        </div>
+
+        <div id="capitulosPedro1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Capítulos do Livro de 1 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Selecione um capítulo para ver o conteúdo (link externo).</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="chaptersPedro1">
+            </div>
+        </div>
+
+        <div id="quizPedro1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Quiz sobre 1 Pedro</h2>
+            <div id="quizContainerPedro1" class="mb-4">
+                <p class="text-xl font-semibold quiz-question mb-4" id="quizQuestionPedro1"></p>
+                <div id="quizOptionsPedro1" class="grid grid-cols-1 gap-3 mb-4">
+                </div>
+                <p id="quizFeedbackPedro1" class="text-lg font-medium mb-4"></p>
+                <button onclick="nextQuestionPedro1()" class="quiz-next hidden">Próxima Pergunta</button>
+            </div>
+            <div class="text-center text-lg font-bold text-white">
+                <p>Progresso: <span id="quizProgressPedro1"></span></p>
+                <p>Pontuação: <span id="quizScorePedro1">Acertos: 0, Erros: 0</span></p>
+            </div>
+        </div>
+
+        <div id="graficoPedro1" class="section p-6 mb-6 text-left shadow-lg hidden">
+            <h2 class="text-3xl font-semibold text-white mb-4">Gráfico de Temas de 1 Pedro</h2>
+            <p class="text-lg leading-relaxed text-blue-100 mb-4">Uma visualização dos principais temas abordados no livro de 1 Pedro.</p>
+            <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="pedro1Chart"></canvas>
+            </div>
+        </div>
+
+        <div id="characterModalPedro1" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
+            <div class="modal-content p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+                <span class="close-btn absolute top-3 right-4 text-2xl font-bold cursor-pointer" onclick="closeCharacterModalPedro1()">&times;</span>
+                <h3 id="modalCharacterNamePedro1" class="text-3xl font-bold text-white mb-4"></h3>
+                <p id="modalCharacterDescriptionPedro1" class="text-lg leading-relaxed text-blue-200"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="application/json" id="manifest-data-pedro1">
+        {
+            "name": "Livro Interativo de 1 Pedro",
+            "short_name": "1 Pedro",
+            "description": "Explore o livro de 1 Pedro de forma interativa e teste seus conhecimentos.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0d1226",
+            "theme_color": "#0d1226",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/0d1226/ffffff?text=1PE",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/0d1226/ffffff?text=1PE",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    </script>
+
+    <script id="service-worker-script-pedro1">
+        // service-worker.js for 1 Pedro
+        const CACHE_NAME_PEDRO1 = 'pedro1-interactive-v1';
+        const urlsToCachePedro1 = [
+            './index.html',
+            './manifest.json',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            // Adicione aqui outros recursos estáticos que você queira cachear
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME_PEDRO1)
+                    .then(cache => {
+                        console.log('Opened cache for 1 Pedro');
+                        return cache.addAll(urlsToCachePedro1);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        // Cache hit - return response
+                        if (response) {
+                            return response;
+                        }
+                        // No cache - fetch from network
+                        return fetch(event.request);
+                    })
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME_PEDRO1];
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                })
+            );
+        });
+    </script>
+
+    <script>
+        // Registra o Service Worker para 1 Pedro
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const serviceWorkerScript = document.getElementById('service-worker-script-pedro1');
+                const serviceWorkerBlob = new Blob([serviceWorkerScript.textContent], { type: 'application/javascript' });
+                const serviceWorkerBlobUrl = URL.createObjectURL(serviceWorkerBlob);
+
+                navigator.serviceWorker.register(serviceWorkerBlobUrl)
+                    .then(registration => {
+                        console.log('Service Worker para 1 Pedro registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker para 1 Pedro:', error);
+                    });
+            });
+        }
+
+        // Função para carregar o manifest.json dinamicamente para 1 Pedro
+        document.addEventListener('DOMContentLoaded', () => {
+            const manifestData = document.getElementById('manifest-data-pedro1').textContent;
+            const blob = new Blob([manifestData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+
+
+        // Funções para controle de seções de 1 Pedro
+        function showSectionPedro1(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('active');
+            } else {
+                console.error(`Seção com ID '${sectionId}' não encontrada.`);
+            }
+
+            // Garante que os botões de personagens e links de capítulos sejam gerados ao entrar nas respectivas seções
+            if (sectionId === 'personagensPedro1') {
+                generateCharacterButtonsPedro1();
+            }
+            if (sectionId === 'capitulosPedro1') {
+                generateChapterLinksPedro1();
+            }
+            if (sectionId === 'quizPedro1') {
+                shuffleQuizQuestionsPedro1(); // Embaralha as perguntas no início do quiz
+                currentQuizIndexPedro1 = 0; // Reinicia o quiz
+                scorePedro1 = 0;
+                wrongAnswersPedro1 = 0;
+                document.getElementById('quizScorePedro1').textContent = `Acertos: ${scorePedro1}, Erros: ${wrongAnswersPedro1}`;
+                displayQuestionPedro1();
+            }
+            if (sectionId === 'graficoPedro1') {
+                renderPedro1Chart();
+            }
+        }
+
+        // Dados dos personagens para 1 Pedro
+        const characterDetailsPedro1 = {
+            "Pedro": {
+                name: "Pedro",
+                description: "O autor da epístola, apóstolo de Jesus Cristo, que escreve para encorajar os crentes em meio ao sofrimento."
+            },
+            "Jesus Cristo": {
+                name: "Jesus Cristo",
+                description: "O centro da esperança cristã, o Cordeiro imaculado, o Sumo Pastor e o exemplo supremo de sofrimento justo."
+            },
+            "Silvano": {
+                name: "Silvano",
+                description: "Colaborador de Pedro, que provavelmente ajudou a escrever e entregar a carta."
+            },
+            "Marcos": {
+                name: "Marcos",
+                description: "Mencionado por Pedro como seu 'filho' (espiritual), provavelmente João Marcos, o autor do Evangelho de Marcos."
+            },
+            "Deus (Pai/Filho/Espírito Santo)": {
+                name: "Deus (Pai/Filho/Espírito Santo)",
+                description: "A Trindade Divina, a fonte de toda graça, esperança e santidade para os crentes."
+            },
+            "Diabo": {
+                name: "Diabo",
+                description: "O adversário dos crentes, que anda em derredor, buscando a quem possa tragar."
+            }
+        };
+
+        // Função para exibir o modal de personagem
+        function displayCharacterModalPedro1(characterName) {
+            const details = characterDetailsPedro1[characterName];
+            if (details) {
+                document.getElementById('modalCharacterNamePedro1').textContent = details.name;
+                document.getElementById('modalCharacterDescriptionPedro1').textContent = details.description;
+                document.getElementById('characterModalPedro1').classList.remove('hidden');
+            }
+        }
+
+        // Função para fechar o modal
+        function closeCharacterModalPedro1() {
+            document.getElementById('characterModalPedro1').classList.add('hidden');
+        }
+
+        // Geração dos botões de personagem
+        function generateCharacterButtonsPedro1() {
+            const grid = document.getElementById('characterGridPedro1');
+            grid.innerHTML = '';
+            for (const key in characterDetailsPedro1) {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-lg text-lg transform hover:scale-105';
+                button.textContent = key;
+                button.onclick = () => displayCharacterModalPedro1(key);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Geração de links de capítulos (1 Pedro tem 5 capítulos)
+        function generateChapterLinksPedro1() {
+            const chaptersDiv = document.getElementById('chaptersPedro1');
+            chaptersDiv.innerHTML = '';
+            for (let i = 1; i <= 5; i++) { // 1 Pedro tem 5 capítulos
+                const link = document.createElement('a');
+                link.href = `https://www.bibliaonline.com.br/acf/1pe/${i}`; // Link para a Bíblia Online, 1 Pedro
+                link.target = "_blank"; // Abre em nova aba
+                link.className = 'bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg flex items-center justify-center transform hover:scale-105';
+                link.textContent = `Capítulo ${i}`;
+                chaptersDiv.appendChild(link);
+            }
+        }
+
+        // Função para embaralhar um array (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dados do quiz para 1 Pedro (perguntas únicas, repetidas para 200)
+        const uniqueQuizQuestionsPedro1 = [
+            { question: "Quem é o autor da Primeira Epístola de Pedro?", options: ["Paulo", "João", "Pedro", "Tiago"], answer: "Pedro", reference: "1 Pedro 1:1" },
+            { question: "A quem a carta de 1 Pedro é endereçada?", options: ["Aos judeus em Jerusalém", "Aos estrangeiros dispersos na Ásia Menor", "A Timóteo", "Aos romanos"], answer: "Aos estrangeiros dispersos na Ásia Menor", reference: "1 Pedro 1:1" },
+            { question: "Para que fomos gerados de novo, segundo 1 Pedro 1:3?", options: ["Para ter riquezas", "Para uma viva esperança", "Para ter poder", "Para viver sem problemas"], answer: "Para uma viva esperança", reference: "1 Pedro 1:3" },
+            { question: "Com o que fomos resgatados, segundo 1 Pedro 1:18-19?", options: ["Com ouro e prata", "Com o precioso sangue de Cristo", "Com boas obras", "Com sacrifícios de animais"], answer: "Com o precioso sangue de Cristo", reference: "1 Pedro 1:18-19" },
+            { question: "O que os crentes são em Cristo, segundo 1 Pedro 2:9?", options: ["Um povo comum", "Geração eleita, sacerdócio real, nação santa", "Apenas ouvintes", "Um grupo secreto"], answer: "Geração eleita, sacerdócio real, nação santa", reference: "1 Pedro 2:9" },
+            { question: "Como os crentes devem se comportar entre os gentios, segundo 1 Pedro 2:12?", options: ["Com maldade", "Com boas obras para que glorifiquem a Deus", "Com indiferença", "Com arrogância"], answer: "Com boas obras para que glorifiquem a Deus", reference: "1 Pedro 2:12" },
+            { question: "A quem os crentes devem se sujeitar por amor do Senhor, segundo 1 Pedro 2:13?", options: ["Aos falsos mestres", "A toda ordenação humana (governo)", "Aos seus próprios desejos", "A ninguém"], answer: "A toda ordenação humana (governo)", reference: "1 Pedro 2:13" },
+            { question: "Quem é o exemplo supremo de sofrimento injusto, segundo 1 Pedro 2:21?", options: ["Jó", "Moisés", "Cristo", "Pedro"], answer: "Cristo", reference: "1 Pedro 2:21" },
+            { question: "Qual o adorno das mulheres crentes que agrada a Deus, segundo 1 Pedro 3:3-4?", options: ["Roupas caras e joias", "Penteados elaborados", "O espírito manso e quieto", "Maquiagem excessiva"], answer: "O espírito manso e quieto", reference: "1 Pedro 3:3-4" },
+            { question: "Se alguém sofre por causa da justiça, o que Pedro diz que ele é?", options: ["Amaldiçoado", "Bem-aventurado", "Esquecido", "Pecador"], answer: "Bem-aventurado", reference: "1 Pedro 3:14" },
+            { question: "Pelo que Cristo padeceu uma vez, segundo 1 Pedro 3:18?", options: ["Por si mesmo", "Pelos pecados, o justo pelos injustos", "Por sua glória", "Para nos dar bens materiais"], answer: "Pelos pecados, o justo pelos injustos", "reference": "1 Pedro 3:18" },
+            { question: "Para que os crentes não devem mais viver, segundo 1 Pedro 4:2?", options: ["Para a vontade de Deus", "Para as concupiscências dos homens", "Para a oração", "Para o amor fraternal"], answer: "Para as concupiscências dos homens", reference: "1 Pedro 4:2" },
+            { question: "O que está próximo, segundo 1 Pedro 4:7?", options: ["Uma grande festa", "O fim de todas as coisas", "Um novo reino terreno", "A vinda de um novo profeta"], answer: "O fim de todas as coisas", reference: "1 Pedro 4:7" },
+            { question: "Qual a atitude que os crentes devem ter uns para com os outros, segundo 1 Pedro 4:8?", options: ["Indiferença", "Ódio", "Ardente amor", "Competição"], answer: "Ardente amor", reference: "1 Pedro 4:8" },
+            { question: "O que os crentes devem fazer com o dom que receberam, segundo 1 Pedro 4:10?", options: ["Escondê-lo", "Administrá-lo uns aos outros", "Usá-lo para benefício próprio", "Ignorá-lo"], answer: "Administrá-lo uns aos outros", reference: "1 Pedro 4:10" },
+            { question: "O que Pedro diz para não estranharmos em 1 Pedro 4:12?", options: ["A alegria", "O fogo que surge para provar", "A paz", "A prosperidade"], answer: "O fogo que surge para provar", reference: "1 Pedro 4:12" },
+            { question: "Quem é o adversário dos crentes, segundo 1 Pedro 5:8?", options: ["O governo", "O diabo", "Os falsos mestres", "Os ricos"], answer: "O diabo", reference: "1 Pedro 5:8" },
+            { question: "Como os crentes devem resistir ao diabo, segundo 1 Pedro 5:9?", options: ["Com medo", "Fugindo", "Firmes na fé", "Com raiva"], answer: "Firmes na fé", reference: "1 Pedro 5:9" },
+            { question: "O que o Deus de toda a graça fará pelos crentes, segundo 1 Pedro 5:10?", options: ["Os deixará sozinhos", "Os aperfeiçoará, confirmará, fortificará e estabelecerá", "Os abandonará", "Os fará ricos"], answer: "Os aperfeiçoará, confirmará, fortificará e estabelecerá", reference: "1 Pedro 5:10" },
+            { question: "Quem é mencionado por Pedro como seu 'filho' (espiritual) no final da carta?", options: ["Timóteo", "Tito", "Marcos", "Silvano"], answer: "Marcos", reference: "1 Pedro 5:13" }
+        ];
+
+        // Duplica as perguntas para atingir 200, se necessário
+        let allQuizQuestionsPedro1 = [];
+        const numCopiesPedro1 = Math.ceil(200 / uniqueQuizQuestionsPedro1.length);
+        for (let i = 0; i < numCopiesPedro1; i++) {
+            allQuizQuestionsPedro1 = allQuizQuestionsPedro1.concat(uniqueQuizQuestionsPedro1);
+        }
+        allQuizQuestionsPedro1 = allQuizQuestionsPedro1.slice(0, 200); // Garante exatamente 200 perguntas
+
+        let shuffledQuizQuestionsPedro1 = [];
+        let currentQuizIndexPedro1 = 0;
+        let scorePedro1 = 0;
+        let wrongAnswersPedro1 = 0;
+        let pedro1ChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Embaralha as perguntas do quiz
+        function shuffleQuizQuestionsPedro1() {
+            shuffledQuizQuestionsPedro1 = [...allQuizQuestionsPedro1]; // Cria uma cópia para não alterar o original
+            shuffleArray(shuffledQuizQuestionsPedro1);
+        }
+
+        // Atualiza o progresso do quiz
+        function updateQuizProgressPedro1() {
+            const progressElement = document.getElementById('quizProgressPedro1');
+            progressElement.textContent = `${currentQuizIndexPedro1 + 1}/${shuffledQuizQuestionsPedro1.length}`;
+        }
+
+        // Exibe a pergunta atual do quiz
+        function displayQuestionPedro1() {
+            if (currentQuizIndexPedro1 >= shuffledQuizQuestionsPedro1.length) {
+                // Fim do quiz
+                document.getElementById('quizQuestionPedro1').textContent = "Quiz Concluído!";
+                document.getElementById('quizOptionsPedro1').innerHTML = `<p class="text-xl text-white">Sua pontuação final: Acertos: ${scorePedro1}, Erros: ${wrongAnswersPedro1}</p>`;
+                document.getElementById('quizFeedbackPedro1').textContent = "";
+                document.querySelector('.quiz-next').classList.add('hidden');
+                return;
+            }
+
+            const currentQuestion = shuffledQuizQuestionsPedro1[currentQuizIndexPedro1];
+            document.getElementById('quizQuestionPedro1').textContent = currentQuestion.question;
+
+            const optionsContainer = document.getElementById('quizOptionsPedro1');
+            optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions); // Embaralha as opções de resposta
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'quiz-options button bg-blue-700 hover:bg-blue-600 active:bg-blue-800 text-white font-semibold py-3 px-5 rounded-md transition duration-200 ease-in-out shadow-md text-lg';
+                button.textContent = option;
+                button.onclick = () => checkAnswerPedro1(option, currentQuestion.answer, currentQuestion.reference);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('quizFeedbackPedro1').textContent = ""; // Limpa feedback anterior
+            document.querySelector('.quiz-next').classList.add('hidden'); // Esconde o botão "Próxima Pergunta"
+            updateQuizProgressPedro1();
+        }
+
+        // Verifica a resposta do quiz
+        function checkAnswerPedro1(selectedOption, correctAnswer, reference) {
+            const feedbackElement = document.getElementById('quizFeedbackPedro1');
+            const optionsButtons = document.querySelectorAll('#quizOptionsPedro1 button');
+
+            // Desabilita todos os botões de opção
+            optionsButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                } else if (button.textContent === selectedOption) {
+                    button.classList.add('bg-red-600');
+                    button.classList.remove('bg-blue-700', 'hover:bg-blue-600', 'active:bg-blue-800');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                feedbackElement.textContent = "Correto! 🎉";
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-green-500';
+                scorePedro1++;
+            } else {
+                feedbackElement.textContent = `Errado. A resposta correta era: "${correctAnswer}". Referência: ${reference}`;
+                feedbackElement.className = 'quiz-feedback text-lg font-medium mb-4 text-red-500';
+                wrongAnswersPedro1++;
+            }
+            document.getElementById('quizScorePedro1').textContent = `Acertos: ${scorePedro1}, Erros: ${wrongAnswersPedro1}`;
+            document.querySelector('.quiz-next').classList.remove('hidden'); // Mostra o botão "Próxima Pergunta"
+        }
+
+        // Avança para a próxima pergunta
+        function nextQuestionPedro1() {
+            currentQuizIndexPedro1++;
+            displayQuestionPedro1();
+        }
+
+        // Dados para o gráfico de temas de 1 Pedro
+        const pedro1ChartData = {
+            labels: ['Esperança Viva', 'Sofrimento e Glória', 'Santidade', 'Identidade em Cristo', 'Submissão', 'Amor Fraternal', 'Mordomia dos Dons'],
+            datasets: [{
+                label: 'Frequência de Temas',
+                data: [25, 20, 18, 15, 12, 10, 8], // Valores fictícios para representar a frequência
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const pedro1ChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0' // Cor da legenda
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Principais Temas do Livro de 1 Pedro',
+                    color: '#f8fafc' // Cor do título do gráfico
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo Y
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo Y
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#a0aec0' // Cor dos rótulos do eixo X
+                    },
+                    grid: {
+                        color: '#2d3748' // Cor das linhas de grade do eixo X
+                    }
+                }
+            }
+        };
+
+        // Renderiza o gráfico de temas
+        function renderPedro1Chart() {
+            const ctx = document.getElementById('pedro1Chart').getContext('2d');
+            if (pedro1ChartInstance) {
+                pedro1ChartInstance.destroy(); // Destroi a instância anterior do gráfico se existir
+            }
+            pedro1ChartInstance = new Chart(ctx, {
+                type: 'bar', // Pode ser 'bar', 'pie', 'line', etc.
+                data: pedro1ChartData,
+                options: pedro1ChartOptions
+            });
+        }
+    </script>
+</body>
+</html>
