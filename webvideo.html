@@ -8,10 +8,11 @@
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <style>
+        /* Estilo personalizado para a fonte Inter */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1a202c, #2d3748);
+            background: linear-gradient(135deg, #1a202c, #2d3748); /* Gradiente de azul escuro para um visual profissional */
             color: #e2e8f0;
             display: flex;
             justify-content: center;
@@ -23,6 +24,7 @@
             overflow-y: auto;
         }
 
+        /* Container principal do player */
         .player-container {
             background-color: #1f2937;
             border-radius: 1.5rem;
@@ -53,63 +55,15 @@
             min-height: 32px;
         }
 
+        /* Container para o iframe do vídeo */
         .video-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio (height / width = 9 / 16 = 0.5625) */
             height: 0;
             border-radius: 0.75rem;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .video-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: linear-gradient(to bottom, #1f2937, transparent);
-            z-index: 10;
-            pointer-events: auto;
-        }
-
-        .video-wrapper::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: transparent;
-            z-index: 15;
-            pointer-events: auto;
-        }
-
-        .video-wrapper .click-blocker {
-            position: absolute;
-            top: 60px;
-            bottom: 60px;
-            left: 0;
-            width: 100%;
-            background: transparent;
-            z-index: 12;
-            pointer-events: auto;
-        }
-
-        .video-wrapper.play-controls-allowed .click-blocker {
-            pointer-events: none;
-        }
-
-        .video-wrapper .ytp-chrome-top,
-        .video-wrapper .ytp-chrome-bottom {
-            display: none !important;
-        }
-
-        .video-wrapper:hover .ytp-chrome-top,
-        .video-wrapper:hover .ytp-chrome-bottom {
-            display: none !important; /* Garante que controles não apareçam ao passar o mouse */
         }
 
         .video-wrapper iframe {
@@ -121,29 +75,40 @@
             border: none;
         }
 
+        /* Máscara de play personalizada */
         .custom-play-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparente para ver o thumbnail */
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            z-index: 20;
+            z-index: 20; /* Acima do iframe */
+            transition: background-color 0.3s ease;
+            color: white; /* Cor do ícone de play */
+            border-radius: 0.75rem; /* Corresponde ao wrapper do vídeo */
+            pointer-events: auto; /* SEMPRE bloqueia cliques */
+        }
+
+        .custom-play-overlay span.play-icon {
+            font-size: 4rem; /* Ícone de play grande */
             transition: opacity 0.3s ease;
-            font-size: 4rem;
-            color: white;
-            border-radius: 0.75rem;
         }
 
-        .custom-play-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
+        .custom-play-overlay.playing {
+            background-color: transparent; /* Transparente quando tocando */
+            cursor: default; /* Não é mais clicável para play/pause, mas ainda bloqueia */
         }
 
+        .custom-play-overlay.playing span.play-icon {
+            opacity: 0; /* Esconde o ícone de play quando tocando */
+        }
+
+        /* Seções de Categorias e Listas */
         .section-header {
             font-size: 1.5rem;
             font-weight: 700;
@@ -190,31 +155,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .refresh-button {
-            background-color: #10b981;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .refresh-button:hover {
-            background-color: #059669;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
-        }
-
-        .refresh-button:active {
-            background-color: #047857;
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
+        /* Modal de Mensagem */
         .message-modal {
             display: none;
             position: fixed;
@@ -272,6 +213,7 @@
             transform: translateY(-2px);
         }
 
+        /* Media queries para responsividade */
         @media (max-width: 640px) {
             .player-container {
                 padding: 25px;
@@ -294,10 +236,6 @@
                 padding: 12px 15px;
                 font-size: 0.9rem;
             }
-            .refresh-button {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
         }
     </style>
 </head>
@@ -306,21 +244,20 @@
         <h1 class="player-title">PenseQuiz Web Vídeo Player</h1>
         <p id="currentVideoDisplay" class="current-video-display">Nenhum vídeo selecionado</p>
 		
-        <div class="categories-grid" id="categoryVideos">
+		<div class="categories-grid" id="categoryVideos">
+		
             <button class="category-button" data-video-category="Mensagens de Fé">Mensagens de Fé</button>
             <button class="category-button" data-video-category="Pregações">Pregações</button>
-            <button class="category-button" data-video-category="Louvor e Adoração">Louvor e Adoração</button>
+			<button class="category-button" data-video-category="Louvor e Adoração">Louvor e Adoração</button>
+            
         </div>
 
         <div class="video-wrapper" id="videoWrapper">
             <div id="player"></div>
             <div id="customPlayOverlay" class="custom-play-overlay">
-                ▶️
+                <span class="play-icon">▶️</span>
             </div>
-            <div class="click-blocker"></div>
         </div>
-
-        <button id="refreshButton" class="refresh-button">Atualizar Página</button>
     </div>
 
     <div id="messageModal" class="message-modal">
@@ -332,7 +269,9 @@
     </div>
 
     <script>
+        // Variáveis globais
         let player;
+        let isPlayerReady = false; // Nova flag para controlar o estado de prontidão do player
         const videoWrapper = document.getElementById('videoWrapper');
         const customPlayOverlay = document.getElementById('customPlayOverlay');
         const currentVideoDisplay = document.getElementById('currentVideoDisplay');
@@ -341,59 +280,67 @@
         const modalMessage = document.getElementById('modalMessage');
         const modalCloseBtn = document.getElementById('modalCloseBtn');
         const categoryVideosContainer = document.getElementById('categoryVideos');
-        const refreshButton = document.getElementById('refreshButton');
         let currentVideoCategory = null;
-        let isPlayerReady = false;
 
+        // IDs dos vídeos do YouTube (substitua pelos seus IDs de vídeo reais!)
         const videoIds = {
-            "Louvor e Adoração": 'ful0qGqtSgQ',
-            "Mensagens de Fé": 'UedYFy5gMxU',
-            "Pregações": '8SAcjqEzbcE',
+            "Louvor e Adoração": 'ful0qGqtSgQ', // Exemplo: Louvor e Adoração
+            "Mensagens de Fé": 'UedYFy5gMxU', // Exemplo: Mensagens de Fé
+            "Pregações": '8SAcjqEzbcE', // Exemplo: Pregações
         };
 
+        // Função chamada quando a API do YouTube está pronta
         function onYouTubeIframeAPIReady() {
             console.log("YouTube IFrame API está pronta.");
             player = new YT.Player('player', {
                 height: '100%',
                 width: '100%',
                 playerVars: {
-                    'controls': 0,
-                    'modestbranding': 1,
-                    'rel': 0,
-                    'iv_load_policy': 3,
-                    'fs': 0,
-                    'disablekb': 1,
-                    'autoplay': 0
+                    'controls': 0,          // Desativa controles padrão
+                    'modestbranding': 1,    // Remove branding do YouTube
+                    'rel': 0,               // Remove vídeos relacionados de outros canais
+                    'showinfo': 0,          // Não exibe informações do vídeo (título, uploader) antes de iniciar
+                    'fs': 0,                // Desativa o botão de tela cheia
+                    'disablekb': 1,         // Desativa controles de teclado
+                    'autoplay': 0           // Desativa autoplay inicial
                 },
                 events: {
                     'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange,
-                    'onError': onPlayerError
+                    'onError': onPlayerError // Adiciona tratamento de erro
                 }
             });
         }
 
+        // Quando o player está pronto
         function onPlayerReady(event) {
             console.log("Player do YouTube está pronto.");
-            isPlayerReady = true;
+            isPlayerReady = true; // Define a flag como true
+            // Carrega um vídeo padrão ao iniciar, se houver categorias
             if (Object.keys(videoIds).length > 0) {
                 const firstCategory = Object.keys(videoIds)[0];
                 loadVideo(firstCategory);
             }
-            videoWrapper.classList.add('play-controls-allowed');
-            customPlayOverlay.classList.remove('hidden');
+            customPlayOverlay.classList.remove('playing'); // Garante que a máscara esteja no estado "não tocando"
         }
 
+        // Detecta mudanças de estado do player
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
-                customPlayOverlay.classList.add('hidden');
-                videoWrapper.classList.add('play-controls-allowed');
-            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
-                customPlayOverlay.classList.remove('hidden');
-                videoWrapper.classList.add('play-controls-allowed');
+                customPlayOverlay.classList.add('playing'); // Esconde o ícone e torna transparente ao reproduzir
+            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
+                customPlayOverlay.classList.remove('playing'); // Mostra o ícone e a cor de fundo ao pausar ou carregar
+            } else if (event.data === YT.PlayerState.ENDED) {
+                // Se o vídeo terminou, reinicia-o automaticamente
+                player.seekTo(0, true); // Volta para o início
+                player.playVideo(); // Inicia a reprodução novamente
+                customPlayOverlay.classList.add('playing'); // Mantém a máscara transparente enquanto reproduz automaticamente
+            } else if (event.data === YT.PlayerState.UNSTARTED) {
+                customPlayOverlay.classList.remove('playing'); // Mostra a máscara se o vídeo ainda não começou
             }
         }
 
+        // Tratamento de erros do player
         function onPlayerError(event) {
             let errorMessage = "Ocorreu um erro desconhecido no player de vídeo.";
             switch(event.data) {
@@ -413,19 +360,25 @@
             }
             showMessageModal('Erro no Vídeo', errorMessage);
             console.error("Erro no player do YouTube:", event.data, errorMessage);
-            customPlayOverlay.classList.remove('hidden');
+            customPlayOverlay.classList.remove('playing'); // Garante que a máscara apareça em caso de erro
             currentVideoDisplay.textContent = "Erro ao carregar vídeo.";
         }
 
+        // --- Funções de Utilidade ---
+
+        // Exibe um modal de mensagem personalizado
         function showMessageModal(title, message) {
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             messageModal.style.display = 'flex';
         }
 
+        // --- Funções de Controle de Vídeo ---
+
+        // Carrega e reproduz um vídeo de uma categoria
         function loadVideo(categoryName) {
-            if (!player || !isPlayerReady) {
-                showMessageModal('Player não pronto', 'O player de vídeo ainda não está pronto. Por favor, aguarde ou atualize a página.');
+            if (!isPlayerReady) { // Usa a nova flag
+                showMessageModal('Player não pronto', 'O player de vídeo ainda não está pronto. Por favor, aguarde um momento.');
                 return;
             }
 
@@ -436,17 +389,22 @@
                     startSeconds: 0,
                     endSeconds: 0
                 });
+                // A máscara será visível para iniciar a reprodução.
                 currentVideoDisplay.textContent = `Tocando: ${categoryName}`;
-                customPlayOverlay.classList.remove('hidden');
+                customPlayOverlay.classList.remove('playing'); // Garante que a máscara esteja visível com o play
             } else {
                 showMessageModal('Erro', `ID de vídeo para "${categoryName}" não encontrado.`);
             }
         }
 
+        // --- Event Listeners ---
+
+        // Fecha o modal de mensagem
         modalCloseBtn.addEventListener('click', () => {
             messageModal.style.display = 'none';
         });
 
+        // Event listener para os botões de categoria de vídeo
         categoryVideosContainer.querySelectorAll('.category-button').forEach(button => {
             button.addEventListener('click', (event) => {
                 const category = event.target.dataset.videoCategory;
@@ -454,22 +412,25 @@
             });
         });
 
+        // Event listener para a máscara de play personalizada (alterna play/pause)
         customPlayOverlay.addEventListener('click', () => {
-            if (player && typeof player.playVideo === 'function' && isPlayerReady) {
+            if (!isPlayerReady) { // Usa a nova flag
+                showMessageModal('Erro', 'O player de vídeo não está pronto. Por favor, tente novamente.');
+                return;
+            }
+            const playerState = player.getPlayerState();
+            if (playerState === YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+            } else if (playerState === YT.PlayerState.PAUSED || playerState === YT.PlayerState.ENDED || playerState === YT.PlayerState.UNSTARTED) {
                 player.playVideo();
-            } else {
-                showMessageModal('Erro', 'O player de vídeo não está pronto. Por favor, tente novamente ou atualize a página.');
             }
         });
 
+        // Garante que o modal de mensagem possa ser fechado clicando fora dele
         messageModal.addEventListener('click', (event) => {
             if (event.target === messageModal) {
                 messageModal.style.display = 'none';
             }
-        });
-
-        refreshButton.addEventListener('click', () => {
-            window.location.reload();
         });
     </script>
 </body>
