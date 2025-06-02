@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenseQuiz Web Vídeo Player</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega a YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <style>
+        /* Estilo personalizado para a fonte Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a202c, #2d3748);
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .player-container {
+            background-color: #1f2937;
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 35px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            border: 1px solid #374151;
+        }
+
+        .player-title {
+            color: #f9fafb;
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .current-video-display {
+            font-size: 1.6rem;
+            color: #9ca3af;
+            font-weight: 500;
+            margin-bottom: 20px;
+            min-height: 32px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            height: 0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Máscara para cobrir o topo (logotipo e informações) */
+        .video-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(to bottom, #1f2937, transparent);
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        /* Máscara transparente para cobrir a parte inferior */
+        .video-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px; /* Ajustado para cobrir a área inferior */
+            background: transparent; /* Completamente transparente */
+            z-index: 15;
+            pointer-events: auto; /* Bloqueia cliques na parte inferior */
+        }
+
+        /* Máscara adicional para bloquear cliques em outras áreas */
+        .video-wrapper .click-blocker {
+            position: absolute;
+            top: 60px;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
+            background: transparent;
+            z-index: 12;
+            pointer-events: auto;
+        }
+
+        /* Permite cliques apenas na área central para play/pause e volume */
+        .video-wrapper.play-controls-allowed .click-blocker {
+            pointer-events: none;
+        }
+
+        /* Oculta elementos indesejados do player do YouTube */
+        .video-wrapper .ytp-chrome-top,
+        .video-wrapper .ytp-chrome-bottom {
+            display: none !important;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f9fafb;
+            margin-bottom: 15px;
+            text-align: left;
+            border-bottom: 2px solid #4b5563;
+            padding-bottom: 8px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .category-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .category-button:hover {
+            background-color: #2563eb;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .category-button:active {
+            background-color: #1d4ed8;
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .message-modal-content {
+            background-color: #1f2937;
+            color: #e2e8f0;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            border: 1px solid #374151;
+            animation: fadeInScale 0.3s ease-out;
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .message-modal-content h3 {
+            margin-top: 0;
+            color: #f9fafb;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .message-modal-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .message-modal-content button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .message-modal-content button:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 640px) {
+            .player-container {
+                padding: 25px;
+                gap: 20px;
+            }
+            .player-title {
+                font-size: 2.25rem;
+            }
+            .current-video-display {
+                font-size: 1.3rem;
+            }
+            .section-header {
+                font-size: 1.3rem;
+            }
+            .categories-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 10px;
+            }
+            .category-button {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <h1 class="player-title">PenseQuiz Web Vídeo Player</h1>
+        <p id="currentVideoDisplay" class="current-video-display">Nenhum vídeo selecionado</p>
+		
+        <div class="categories-grid" id="categoryVideos">
+            <button class="category-button" data-video-category="Mensagens de Fé">Mensagens de Fé</button>
+            <button class="category-button" data-video-category="Pregações">Pregações</button>
+            <button class="category-button" data-video-category="Louvor e Adoração">Louvor e Adoração</button>
+        </div>
+
+        <div class="video-wrapper" id="videoWrapper">
+            <div id="player"></div>
+            <div class="click-blocker"></div>
+        </div>
+    </div>
+
+    <div id="messageModal" class="message-modal">
+        <div class="message-modal-content">
+            <h3 id="modalTitle"></h3>
+            <p id="modalMessage"></p>
+            <button id="modalCloseBtn">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let player;
+        const videoWrapper = document.getElementById('videoWrapper');
+        const currentVideoDisplay = document.getElementById('currentVideoDisplay');
+        const messageModal = document.getElementById('messageModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const categoryVideosContainer = document.getElementById('categoryVideos');
+        let currentVideoCategory = null;
+        let favorites = JSON.parse(localStorage.getItem('favoriteVideos')) || [];
+        let recentlyPlayed = JSON.parse(localStorage.getItem('recentlyPlayedVideos')) || [];
+
+        // IDs dos vídeos do YouTube
+        const videoIds = {
+            "Louvor e Adoração": 'ful0qGqtSgQ',
+            "Mensagens de Fé": 'UedYFy5gMxU',
+            "Pregações": '8SAcjqEzbcE',
+        };
+
+        // Função chamada quando a API do YouTube está pronta
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                playerVars: {
+                    'controls': 0, // Desativa controles padrão
+                    'modestbranding': 1, // Remove branding do YouTube
+                    'rel': 0, // Remove vídeos relacionados
+                    'iv_load_policy': 3, // Desativa anotações
+                    'autoplay': 0 // Desativa autoplay inicial
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // Quando o player está pronto
+        function onPlayerReady(event) {
+            videoWrapper.classList.add('play-controls-allowed');
+        }
+
+        // Detecta mudanças de estado do player
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                videoWrapper.classList.add('play-controls-allowed');
+            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                videoWrapper.classList.add('play-controls-allowed');
+            }
+        }
+
+        // --- Funções de Utilidade ---
+
+        function showMessageModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            messageModal.style.display = 'flex';
+        }
+
+        function saveFavorites() {
+            localStorage.setItem('favoriteVideos', JSON.stringify(favorites));
+        }
+
+        function saveRecentlyPlayed() {
+            localStorage.setItem('recentlyPlayedVideos', JSON.stringify(recentlyPlayed));
+        }
+
+        function addRecentlyPlayed(categoryName) {
+            recentlyPlayed = recentlyPlayed.filter(c => c !== categoryName);
+            recentlyPlayed.unshift(categoryName);
+            if (recentlyPlayed.length > 5) {
+                recentlyPlayed.pop();
+            }
+            saveRecentlyPlayed();
+        }
+
+        // --- Funções de Controle de Vídeo ---
+
+        function loadVideo(categoryName) {
+            if (videoIds[categoryName]) {
+                currentVideoCategory = categoryName;
+                player.loadVideoById({
+                    videoId: videoIds[categoryName],
+                    startSeconds: 0,
+                    endSeconds: 0
+                });
+                player.playVideo();
+                currentVideoDisplay.textContent = `Tocando: ${categoryName}`;
+                addRecentlyPlayed(categoryName);
+                videoWrapper.classList.add('play-controls-allowed');
+            } else {
+                showMessageModal('Erro', `ID de vídeo para "${categoryName}" não encontrado.`);
+            }
+        }
+
+        // --- Event Listeners ---
+
+        modalCloseBtn.addEventListener('click', () => {
+            messageModal.style.display = 'none';
+        });
+
+        categoryVideosContainer.querySelectorAll('.category-button').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const category = event.target.dataset.videoCategory;
+                loadVideo(category);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+        });
+    </script>
+</body>
+</html>
