@@ -85,21 +85,6 @@
             pointer-events: auto;
         }
 
-        .video-wrapper .click-blocker {
-            position: absolute;
-            top: 60px;
-            bottom: 60px;
-            left: 0;
-            width: 100%;
-            background: transparent;
-            z-index: 12;
-            pointer-events: auto;
-        }
-
-        .video-wrapper.play-controls-allowed .click-blocker {
-            pointer-events: none;
-        }
-
         .video-wrapper iframe,
         .video-wrapper video {
             position: absolute;
@@ -116,21 +101,22 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparente para ver o thumbnail */
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             z-index: 20;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, background-color 0.3s ease; /* Transição para opacidade e cor de fundo */
             font-size: 4rem;
             color: white;
             border-radius: 0.75rem;
+            pointer-events: auto; /* SEMPRE bloqueia cliques */
         }
 
-        .custom-play-overlay.hidden {
+        .custom-play-overlay.hidden-overlay { /* Nova classe para ocultar completamente */
             opacity: 0;
-            pointer-events: none;
+            pointer-events: none; /* Permite cliques passarem quando oculto */
         }
 
         .section-header {
@@ -179,7 +165,8 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .refresh-button {
+        /* O botão de refresh foi removido */
+        /* .refresh-button {
             background-color: #10b981;
             color: white;
             padding: 12px 20px;
@@ -202,7 +189,7 @@
             background-color: #047857;
             transform: translateY(0);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+        } */
 
         .message-modal {
             display: none;
@@ -283,10 +270,10 @@
                 padding: 12px 15px;
                 font-size: 0.9rem;
             }
-            .refresh-button {
+            /* .refresh-button {
                 padding: 10px 15px;
                 font-size: 0.9rem;
-            }
+            } */
         }
     </style>
 </head>
@@ -316,8 +303,7 @@
             </div>
             </div>
 
-        <button id="refreshButton" class="refresh-button">Atualizar Página</button>
-    </div>
+        </div>
 
     <div id="messageModal" class="message-modal">
         <div class="message-modal-content">
@@ -342,7 +328,7 @@
         const modalMessage = document.getElementById('modalMessage');
         const modalCloseBtn = document.getElementById('modalCloseBtn');
         const categoryVideosContainer = document.getElementById('categoryVideos');
-        const refreshButton = document.getElementById('refreshButton');
+        // const refreshButton = document.getElementById('refreshButton'); // Removido
         const offlinePlayerElement = document.getElementById('offlinePlayer'); // Referência ao elemento <video>
         const youtubePlayerElement = document.getElementById('youtubePlayer'); // Referência ao elemento <div> para o YouTube player
 
@@ -383,16 +369,16 @@
             offlinePlayer = offlinePlayerElement; // Atribui o elemento <video> ao offlinePlayer
             offlinePlayer.style.display = 'block'; // Mostra o player offline
             isPlayerReady = true; // O player offline está pronto
-            customPlayOverlay.classList.remove('playing'); // Mostra o ícone de play para o modo offline
+            customPlayOverlay.classList.remove('hidden-overlay'); // Mostra o ícone de play para o modo offline
             currentVideoDisplay.textContent = "Nenhum vídeo selecionado (Modo Offline)";
 
             // Adiciona listeners de evento para o player offline
-            offlinePlayer.onplay = () => customPlayOverlay.classList.add('playing');
-            offlinePlayer.onpause = () => customPlayOverlay.classList.remove('playing');
+            offlinePlayer.onplay = () => customPlayOverlay.classList.add('hidden-overlay');
+            offlinePlayer.onpause = () => customPlayOverlay.classList.remove('hidden-overlay');
             offlinePlayer.onended = () => {
                 offlinePlayer.currentTime = 0; // Volta para o início
                 offlinePlayer.play(); // Reproduz automaticamente
-                customPlayOverlay.classList.add('playing'); // Mantém a máscara transparente enquanto reproduz
+                customPlayOverlay.classList.add('hidden-overlay'); // Mantém a máscara transparente enquanto reproduz
             };
 
             // Carrega o primeiro vídeo offline se houver categorias
@@ -474,7 +460,7 @@
                 const firstCategory = Object.keys(videoIds)[0];
                 loadVideo(firstCategory);
             }
-            customPlayOverlay.classList.remove('playing'); // Garante que a máscara esteja visível para iniciar o play
+            customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara esteja visível para iniciar o play
         }
 
         /**
@@ -483,18 +469,18 @@
          */
         function onYouTubePlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
-                customPlayOverlay.classList.add('playing'); // Esconde o ícone e torna transparente ao reproduzir
+                customPlayOverlay.classList.add('hidden-overlay'); // Oculta a máscara quando o vídeo está tocando
             } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
-                customPlayOverlay.classList.remove('playing'); // Mostra o ícone e a cor de fundo ao pausar ou carregar
+                customPlayOverlay.classList.remove('hidden-overlay'); // Mostra a máscara ao pausar ou carregar
             } else if (event.data === YT.PlayerState.ENDED) {
                 // Se o vídeo terminou, reinicia-o automaticamente
                 if (currentVideoCategory && youtubePlayer) { // Verifica se há uma categoria e o player YouTube está ativo
                     youtubePlayer.seekTo(0, true); // Volta para o início
                     youtubePlayer.playVideo(); // Inicia a reprodução novamente
-                    customPlayOverlay.classList.add('playing'); // Mantém a máscara transparente enquanto reproduz automaticamente
+                    customPlayOverlay.classList.add('hidden-overlay'); // Mantém a máscara oculta enquanto reproduz automaticamente
                 }
             } else if (event.data === YT.PlayerState.UNSTARTED) {
-                customPlayOverlay.classList.remove('playing'); // Mostra a máscara se o vídeo ainda não começou
+                customPlayOverlay.classList.remove('hidden-overlay'); // Mostra a máscara se o vídeo ainda não começou
             }
         }
 
@@ -521,7 +507,7 @@
             }
             showMessageModal('Erro no Vídeo', errorMessage);
             console.error("Erro no player do YouTube:", event.data, errorMessage);
-            customPlayOverlay.classList.remove('playing'); // Garante que a máscara apareça em caso de erro
+            customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara apareça em caso de erro
             currentVideoDisplay.textContent = "Erro ao carregar vídeo.";
             // Tenta alternar para o modo offline se o erro for persistente ou relacionado à incorporação
             if (event.data === 101 || event.data === 150) {
@@ -554,7 +540,7 @@
 
             currentVideoCategory = categoryName;
             currentVideoDisplay.textContent = `Tocando: ${categoryName}`;
-            customPlayOverlay.classList.remove('playing'); // Garante que a máscara esteja visível com o ícone de play
+            customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara esteja visível com o ícone de play
 
             if (isOnline() && youtubePlayer) {
                 // Esconde o player offline e mostra o do YouTube
@@ -644,10 +630,10 @@
             }
         });
 
-        // Botão de atualização da página
-        refreshButton.addEventListener('click', () => {
-            window.location.reload();
-        });
+        // Botão de atualização da página foi removido, então este listener não é mais necessário.
+        // refreshButton.addEventListener('click', () => {
+        //     window.location.reload();
+        // });
 
         // Listeners para mudanças de conectividade
         window.addEventListener('online', initializePlayer);
