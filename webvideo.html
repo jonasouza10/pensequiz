@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PenseQuiz Web Vídeo Player</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carrega a YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <style>
-        /* Estilo personalizado para a fonte Inter */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body {
             font-family: 'Inter', sans-serif;
@@ -65,7 +63,6 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* Máscara para cobrir o topo (logotipo e informações) */
         .video-wrapper::before {
             content: '';
             position: absolute;
@@ -78,20 +75,18 @@
             pointer-events: auto;
         }
 
-        /* Máscara transparente para cobrir a parte inferior */
         .video-wrapper::after {
             content: '';
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 60px; /* Ajustado para cobrir a área inferior */
-            background: transparent; /* Completamente transparente */
+            height: 60px;
+            background: transparent;
             z-index: 15;
-            pointer-events: auto; /* Bloqueia cliques na parte inferior */
+            pointer-events: auto;
         }
 
-        /* Máscara adicional para bloquear cliques em outras áreas */
         .video-wrapper .click-blocker {
             position: absolute;
             top: 60px;
@@ -103,12 +98,10 @@
             pointer-events: auto;
         }
 
-        /* Permite cliques apenas na área central para play/pause e volume */
         .video-wrapper.play-controls-allowed .click-blocker {
             pointer-events: none;
         }
 
-        /* Oculta elementos indesejados do player do YouTube */
         .video-wrapper .ytp-chrome-top,
         .video-wrapper .ytp-chrome-bottom {
             display: none !important;
@@ -121,6 +114,29 @@
             width: 100%;
             height: 100%;
             border: none;
+        }
+
+        .custom-play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: opacity 0.3s ease;
+            font-size: 4rem;
+            color: white;
+            border-radius: 0.75rem;
+        }
+
+        .custom-play-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .section-header {
@@ -165,6 +181,31 @@
 
         .category-button:active {
             background-color: #1d4ed8;
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .refresh-button {
+            background-color: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .refresh-button:hover {
+            background-color: #059669;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .refresh-button:active {
+            background-color: #047857;
             transform: translateY(0);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
@@ -248,6 +289,10 @@
                 padding: 12px 15px;
                 font-size: 0.9rem;
             }
+            .refresh-button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -264,8 +309,13 @@
 
         <div class="video-wrapper" id="videoWrapper">
             <div id="player"></div>
+            <div id="customPlayOverlay" class="custom-play-overlay">
+                ▶️
+            </div>
             <div class="click-blocker"></div>
         </div>
+
+        <button id="refreshButton" class="refresh-button">Atualizar Página</button>
     </div>
 
     <div id="messageModal" class="message-modal">
@@ -280,15 +330,16 @@
         // Variáveis globais
         let player;
         const videoWrapper = document.getElementById('videoWrapper');
+        const customPlayOverlay = document.getElementById('customPlayOverlay');
         const currentVideoDisplay = document.getElementById('currentVideoDisplay');
         const messageModal = document.getElementById('messageModal');
         const modalTitle = document.getElementById('modalTitle');
         const modalMessage = document.getElementById('modalMessage');
         const modalCloseBtn = document.getElementById('modalCloseBtn');
         const categoryVideosContainer = document.getElementById('categoryVideos');
+        const refreshButton = document.getElementById('refreshButton');
         let currentVideoCategory = null;
-        let favorites = JSON.parse(localStorage.getItem('favoriteVideos')) || [];
-        let recentlyPlayed = JSON.parse(localStorage.getItem('recentlyPlayedVideos')) || [];
+        let isPlayerReady = false;
 
         // IDs dos vídeos do YouTube
         const videoIds = {
@@ -299,35 +350,72 @@
 
         // Função chamada quando a API do YouTube está pronta
         function onYouTubeIframeAPIReady() {
+            console.log("YouTube IFrame API está pronta.");
             player = new YT.Player('player', {
                 height: '100%',
                 width: '100%',
                 playerVars: {
-                    'controls': 0, // Desativa controles padrão
-                    'modestbranding': 1, // Remove branding do YouTube
-                    'rel': 0, // Remove vídeos relacionados
-                    'iv_load_policy': 3, // Desativa anotações
-                    'autoplay': 0 // Desativa autoplay inicial
+                    'controls': 0,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'iv_load_policy': 3,
+                    'fs': 0,
+                    'disablekb': 1,
+                    'autoplay': 0
                 },
                 events: {
                     'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
                 }
             });
         }
 
         // Quando o player está pronto
         function onPlayerReady(event) {
+            console.log("Player do YouTube está pronto.");
+            isPlayerReady = true;
+            if (Object.keys(videoIds).length > 0) {
+                const firstCategory = Object.keys(videoIds)[0];
+                loadVideo(firstCategory);
+            }
             videoWrapper.classList.add('play-controls-allowed');
+            customPlayOverlay.classList.remove('hidden');
         }
 
         // Detecta mudanças de estado do player
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
+                customPlayOverlay.classList.add('hidden');
                 videoWrapper.classList.add('play-controls-allowed');
             } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                customPlayOverlay.classList.remove('hidden');
                 videoWrapper.classList.add('play-controls-allowed');
             }
+        }
+
+        // Tratamento de erros do player
+        function onPlayerError(event) {
+            let errorMessage = "Ocorreu um erro desconhecido no player de vídeo.";
+            switch(event.data) {
+                case 2:
+                    errorMessage = "O ID do vídeo não é válido ou o vídeo não existe.";
+                    break;
+                case 5:
+                    errorMessage = "Ocorreu um erro ao reproduzir o HTML5 Player.";
+                    break;
+                case 100:
+                    errorMessage = "O vídeo não foi encontrado. Pode ter sido removido ou é privado.";
+                    break;
+                case 101:
+                case 150:
+                    errorMessage = "O proprietário do vídeo não permite a reprodução em players incorporados.";
+                    break;
+            }
+            showMessageModal('Erro no Vídeo', errorMessage);
+            console.error("Erro no player do YouTube:", event.data, errorMessage);
+            customPlayOverlay.classList.remove('hidden');
+            currentVideoDisplay.textContent = "Erro ao carregar vídeo.";
         }
 
         // --- Funções de Utilidade ---
@@ -338,26 +426,14 @@
             messageModal.style.display = 'flex';
         }
 
-        function saveFavorites() {
-            localStorage.setItem('favoriteVideos', JSON.stringify(favorites));
-        }
-
-        function saveRecentlyPlayed() {
-            localStorage.setItem('recentlyPlayedVideos', JSON.stringify(recentlyPlayed));
-        }
-
-        function addRecentlyPlayed(categoryName) {
-            recentlyPlayed = recentlyPlayed.filter(c => c !== categoryName);
-            recentlyPlayed.unshift(categoryName);
-            if (recentlyPlayed.length > 5) {
-                recentlyPlayed.pop();
-            }
-            saveRecentlyPlayed();
-        }
-
         // --- Funções de Controle de Vídeo ---
 
         function loadVideo(categoryName) {
+            if (!player || !isPlayerReady) {
+                showMessageModal('Player não pronto', 'O player de vídeo ainda não está pronto. Por favor, aguarde um momento ou atualize a página.');
+                return;
+            }
+
             if (videoIds[categoryName]) {
                 currentVideoCategory = categoryName;
                 player.loadVideoById({
@@ -365,10 +441,8 @@
                     startSeconds: 0,
                     endSeconds: 0
                 });
-                player.playVideo();
                 currentVideoDisplay.textContent = `Tocando: ${categoryName}`;
-                addRecentlyPlayed(categoryName);
-                videoWrapper.classList.add('play-controls-allowed');
+                customPlayOverlay.classList.remove('hidden');
             } else {
                 showMessageModal('Erro', `ID de vídeo para "${categoryName}" não encontrado.`);
             }
@@ -387,7 +461,23 @@
             });
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
+        customPlayOverlay.addEventListener('click', () => {
+            if (player && typeof player.playVideo === 'function' && isPlayerReady) {
+                player.playVideo();
+            } else {
+                showMessageModal('Erro', 'O player de vídeo não está pronto. Por favor, tente novamente ou atualize a página.');
+            }
+        });
+
+        messageModal.addEventListener('click', (event) => {
+            if (event.target === messageModal) {
+                messageModal.style.display = 'none';
+            }
+        });
+
+        // Botão de atualizar página
+        refreshButton.addEventListener('click', () => {
+            window.location.reload();
         });
     </script>
 </body>
