@@ -51,6 +51,7 @@
             min-height: 32px;
         }
 
+        /* Base video wrapper styles */
         .video-wrapper {
             position: relative;
             width: 100%;
@@ -59,6 +60,7 @@
             border-radius: 0.75rem;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease-in-out; /* Smooth transition for fullscreen */
         }
 
         .video-wrapper::before {
@@ -93,6 +95,7 @@
             width: 100%;
             height: 100%;
             border: none;
+            transition: transform 0.3s ease-in-out; /* Smooth rotation */
         }
 
         .custom-play-overlay {
@@ -354,6 +357,61 @@
             background-color: #374151;
         }
 
+        /* Fullscreen styles applied directly to video-wrapper */
+        .video-wrapper.is-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            padding-bottom: 0; /* Remove padding-bottom in fullscreen */
+            border-radius: 0;
+            z-index: 1000; /* High z-index */
+            background-color: black; /* Ensure black background */
+            display: flex; /* Use flex to center video */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Ensure video elements fill the fullscreen wrapper */
+        .video-wrapper.is-fullscreen iframe,
+        .video-wrapper.is-fullscreen video {
+            position: static; /* Remove absolute positioning in fullscreen */
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Keep aspect ratio */
+        }
+
+        .fullscreen-controls {
+            position: fixed; /* Fixed position relative to viewport */
+            top: 10px;
+            right: 10px;
+            display: none; /* Hidden by default */
+            gap: 10px;
+            z-index: 1001; /* Above the fullscreen video wrapper */
+        }
+
+        .fullscreen-controls button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .fullscreen-controls button:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Rotation classes applied directly to iframe/video */
+        .rotate-90 { transform: rotate(90deg); }
+        .rotate-180 { transform: rotate(180deg); }
+        .rotate-270 { transform: rotate(270deg); }
+
+
         @media (max-width: 640px) {
             .player-container {
                 padding: 25px;
@@ -413,7 +471,7 @@
                 </button>
                 <div id="movieDropdown" class="dropdown-menu hidden">
                     <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="movie-menu-button" tabindex="-1">
-                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -425,6 +483,20 @@
             </video>
             <div id="customPlayOverlay" class="custom-play-overlay">
                 <span class="play-icon">▶️</span>
+            </div>
+            <div id="fullscreenControls" class="fullscreen-controls">
+                <button id="rotateButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                        <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.908-1.908a.75.75 0 0 0-1.06-1.06L15.39 5.053A8.962 8.962 0 0 0 12 3.75c-4.184 0-7.67 3.12-8.224 7.107a.75.75 0 0 0 .984.852ZM19.245 13.941a7.5 7.5 0 0 1-12.548 3.364l-1.908 1.908a.75.75 0 0 0 1.06 1.06l2.025-2.025a9.002 9.002 0 0 0 3.75-.892c4.184 0 7.67-3.12 8.224-7.107a.75.75 0 0 0-.984-.852Z" clip-rule="evenodd" />
+                    </svg>
+                    Rotacionar
+                </button>
+                <button id="exitFullscreenButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                        <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                    </svg>
+                    Fechar
+                </button>
             </div>
         </div>
 
@@ -442,6 +514,12 @@
             </button>
             <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer range-lg">
         </div>
+        <button id="fullscreenButton" class="category-button mt-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                <path d="M7.5 3.75A1.5 1.5 0 0 0 6 5.25v13.5A1.5 1.5 0 0 0 7.5 20.25h9A1.5 1.5 0 0 0 18 18.75V5.25A1.5 1.5 0 0 0 16.5 3.75h-9ZM16.5 5.25v13.5h-9V5.25h9ZM12 9.75a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V10.5a.75.75 0 0 1 .75-.75Z" />
+            </svg>
+            Tela Cheia
+        </button>
     </div>
 
     <div id="messageModal" class="message-modal">
@@ -458,6 +536,7 @@
         let offlinePlayer; // Instância do player de vídeo HTML5
         let isPlayerReady = false; // Flag para indicar se o player ativo (YouTube ou offline) está pronto
         let isYouTubeApiLoaded = false; // Flag para indicar se o script da API do YouTube foi carregado
+        let currentRotation = 0; // 0, 90, 180, 270 degrees
 
         const videoWrapper = document.getElementById('videoWrapper');
         const customPlayOverlay = document.getElementById('customPlayOverlay');
@@ -471,6 +550,10 @@
         const youtubePlayerElement = document.getElementById('youtubePlayer'); // Referência ao elemento <div> para o YouTube player
         const movieDropdownButton = document.getElementById('movieDropdownButton');
         const movieDropdown = document.getElementById('movieDropdown');
+        const fullscreenButton = document.getElementById('fullscreenButton');
+        const fullscreenControls = document.getElementById('fullscreenControls'); // Referência aos controles de tela cheia
+        const exitFullscreenButton = document.getElementById('exitFullscreenButton');
+        const rotateButton = document.getElementById('rotateButton');
 
         // Volume control elements
         const volumeSlider = document.getElementById('volumeSlider');
@@ -479,6 +562,7 @@
         const volumeMuteIcon = document.getElementById('volumeMuteIcon');
 
         let lastVolume = 1; // Para armazenar o volume antes de mutar
+        let currentVideoName = null; // Armazena o nome do vídeo atualmente carregado
 
         // Objeto centralizado para todos os vídeos (categorias e filmes)
         const allVideos = {
@@ -494,12 +578,15 @@
             // Exemplos:
             // - Para "https://www.youtube.com/watch?v=dQw4w9WgXcQ", o ID é "dQw4w9WgXcQ"
             // - Para "https://youtu.be/Dy7xghRm0U4", o ID é "Dy7xghRm0U4"
-            "Deus não está morto": { id: 'Dy7xghRm0U4', type: 'youtube' }, // Filme anterior
-			"Um Lugar para Recomeçar": { id: 'SpODjPk4IIw', type: 'youtube' }, // Filme anterior
-            "Uma Prova de Fé 2 ": { id: 'OxIB3ddJBbA', type: 'youtube' }, // Novo filme adicionado
-            "Setenta Vezes Sete": { id: '_tAA7hWJUbw', type: 'youtube' }, // Exemplo de outro filme
-            "Escolhidos Por Amor": { id: 'u_gR3kCz-_U', type: 'youtube' }, // Mais um exemplo
-			"Um Amor Para Recordar": { id: 'bZxqBWPXbOA', type: 'youtube' }, // Novo filme adicionado
+            "Deus não está morto": { id: 'Dy7xghRm0U4', type: 'youtube' },
+            "Um Lugar para Recomeçar": { id: 'SpODjPk4IIw', type: 'youtube' },
+            "Uma Prova de Fé 2": { id: 'OxIB3ddJBbA', type: 'youtube' },
+            "Setenta Vezes Sete": { id: '_tAA7hWJUbw', type: 'youtube' },
+            "Escolhidos Por Amor": { id: 'u_gR3kCz-_U', type: 'youtube' },
+            "Um Amor Para Recordar": { id: 'bZxqBWPXbOA', type: 'youtube' },
+            // Novos filmes solicitados:
+            "Filme Novo A": { id: 'xP4GesmwsEI', type: 'youtube' },
+            "Filme Novo B": { id: 'x8t2BcNLxOA', type: 'youtube' },
         };
 
         /**
@@ -613,7 +700,7 @@
             console.log("Player (YouTube) está pronto.");
             isPlayerReady = true; // Define a flag como true
             // Carrega um vídeo padrão ao iniciar, se houver vídeos e nenhum vídeo estiver selecionado
-            if (Object.keys(allVideos).length > 0) {
+            if (!currentVideoName && Object.keys(allVideos).length > 0) {
                 const firstVideoName = Object.keys(allVideos)[0];
                 loadVideo(firstVideoName);
             }
@@ -633,7 +720,6 @@
                 customPlayOverlay.classList.remove('hidden-overlay'); // Mostra a máscara ao pausar ou carregar
             } else if (event.data === YT.PlayerState.ENDED) {
                 // Se o vídeo terminou, reinicia-o automaticamente
-                const currentVideoName = currentVideoDisplay.textContent.replace('Tocando: ', '');
                 const videoInfo = allVideos[currentVideoName];
                 if (videoInfo && videoInfo.type === 'youtube' && youtubePlayer) { // Verifica se é um vídeo do YouTube
                     youtubePlayer.seekTo(0, true); // Volta para o início
@@ -706,6 +792,7 @@
                 return;
             }
 
+            currentVideoName = videoName; // Atualiza o vídeo atualmente carregado
             currentVideoDisplay.textContent = `Tocando: ${videoName}`;
             customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara esteja visível com o ícone de play
 
@@ -771,6 +858,89 @@
             }
         }
 
+        /**
+         * Entra no modo de tela cheia.
+         */
+        function enterFullScreen() {
+            if (!currentVideoName) {
+                showMessageModal('Nenhum Vídeo', 'Por favor, selecione um vídeo para assistir em tela cheia.');
+                return;
+            }
+
+            // Pausa o vídeo no player principal antes de ir para tela cheia
+            if (isOnline() && youtubePlayer && typeof youtubePlayer.pauseVideo === 'function') {
+                youtubePlayer.pauseVideo();
+            } else if (offlinePlayer && typeof offlinePlayer.pause === 'function') {
+                offlinePlayer.pause();
+            }
+
+            // Adiciona a classe de tela cheia ao video-wrapper
+            videoWrapper.classList.add('is-fullscreen');
+            // Mostra os controles de tela cheia
+            fullscreenControls.style.display = 'flex';
+
+            // Garante que o player ativo esteja visível e comece a reproduzir
+            if (isOnline() && youtubePlayerElement) {
+                youtubePlayerElement.style.display = 'block';
+                if (youtubePlayer && typeof youtubePlayer.playVideo === 'function') {
+                    youtubePlayer.playVideo();
+                }
+            } else if (offlinePlayerElement) {
+                offlinePlayerElement.style.display = 'block';
+                if (offlinePlayer && typeof offlinePlayer.play === 'function') {
+                    offlinePlayer.play();
+                }
+            }
+            // Oculta a overlay de play/pause no modo tela cheia
+            customPlayOverlay.classList.add('hidden-overlay');
+        }
+
+        /**
+         * Sai do modo de tela cheia.
+         */
+        function exitFullScreen() {
+            // Remove a classe de tela cheia do video-wrapper
+            videoWrapper.classList.remove('is-fullscreen');
+            // Oculta os controles de tela cheia
+            fullscreenControls.style.display = 'none';
+
+            // Pausa o vídeo ao sair da tela cheia
+            if (isOnline() && youtubePlayer && typeof youtubePlayer.pauseVideo === 'function') {
+                youtubePlayer.pauseVideo();
+            } else if (offlinePlayer && typeof offlinePlayer.pause === 'function') {
+                offlinePlayer.pause();
+            }
+
+            // Reseta a rotação ao sair da tela cheia
+            if (isOnline() && youtubePlayerElement) {
+                youtubePlayerElement.style.transform = 'rotate(0deg)';
+            } else if (offlinePlayerElement) {
+                offlinePlayerElement.style.transform = 'rotate(0deg)';
+            }
+            currentRotation = 0;
+            // Mostra a overlay de play/pause novamente
+            customPlayOverlay.classList.remove('hidden-overlay');
+        }
+
+        /**
+         * Rotaciona o vídeo em tela cheia.
+         */
+        function toggleRotation() {
+            currentRotation = (currentRotation + 90) % 360;
+            let playerToRotate = null;
+
+            if (isOnline() && youtubePlayerElement) {
+                playerToRotate = youtubePlayerElement;
+            } else if (offlinePlayerElement) {
+                playerToRotate = offlinePlayerElement;
+            }
+
+            if (playerToRotate) {
+                playerToRotate.style.transform = `rotate(${currentRotation}deg)`;
+            }
+        }
+
+
         // --- Event Listeners ---
 
         // Fecha o modal de mensagem
@@ -780,8 +950,8 @@
 
         // Event listener para os botões de categoria de vídeo
         categoryVideosContainer.querySelectorAll('.category-button').forEach(button => {
-            // Garante que o botão "Filmes" não seja afetado por este listener genérico
-            if (button.id !== 'movieDropdownButton') {
+            // Garante que o botão "Filmes" e "Tela Cheia" não sejam afetados por este listener genérico
+            if (button.id !== 'movieDropdownButton' && button.id !== 'fullscreenButton') {
                 button.addEventListener('click', (event) => {
                     const videoName = event.target.dataset.videoName;
                     loadVideo(videoName);
@@ -802,7 +972,8 @@
 
             for (const videoName in allVideos) {
                 const videoInfo = allVideos[videoName];
-                if (videoInfo.type === 'youtube' && !videoInfo.offlineSrc) { // Considera filmes como YouTube sem offlineSrc
+                // Considera filmes como YouTube sem offlineSrc (ou se for um filme, mesmo com offlineSrc, mas queremos listar apenas os "filmes" aqui)
+                if (videoInfo.type === 'youtube' && !['Louvor e Adoração', 'Mensagens de Fé', 'Pregações'].includes(videoName)) {
                     const movieButton = document.createElement('button');
                     movieButton.textContent = videoName;
                     movieButton.setAttribute('role', 'menuitem');
@@ -882,6 +1053,15 @@
             }
             updateMuteIcon(); // Atualiza o ícone
         });
+
+        // Event listener para o botão de tela cheia
+        fullscreenButton.addEventListener('click', enterFullScreen);
+
+        // Event listener para o botão de sair da tela cheia
+        exitFullscreenButton.addEventListener('click', exitFullScreen);
+
+        // Event listener para o botão de rotação
+        rotateButton.addEventListener('click', toggleRotation);
 
         // Inicializa o player e popula o dropdown de filmes ao carregar a página
         window.onload = function() {
