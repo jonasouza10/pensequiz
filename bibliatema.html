@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bíblia por Temas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a fonte Inter para todo o corpo do documento */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh; /* Garante que o corpo ocupe toda a altura da viewport */
+            display: flex;
+            background-color: #f0f4f8; /* Cor de fundo suave (modo claro) */
+            transition: background-color 0.3s ease; /* Transição suave para mudança de tema */
+            overflow-x: hidden; /* Evita rolagem horizontal indesejada */
+        }
+
+        /* Estilos para o modo escuro */
+        body.dark-mode {
+            background-color: #1a202c; /* Cor de fundo escura */
+            color: #e2e8f0; /* Texto claro */
+        }
+
+        body.dark-mode .container {
+            background-color: #2d3748; /* Fundo mais escuro para o contêiner principal */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        }
+
+        body.dark-mode .container h1 {
+            color: #f7fafc; /* Título claro */
+        }
+
+        body.dark-mode .verse-text {
+            color: #cbd5e1; /* Texto do versículo mais claro */
+        }
+
+        body.dark-mode .verse-reference {
+            color: #a0aec0; /* Referência mais clara */
+        }
+
+        body.dark-mode .nav-button {
+            background-color: #4299e1; /* Azul mais vibrante para botões de navegação */
+        }
+
+        body.dark-mode .nav-button:hover {
+            background-color: #3182ce;
+        }
+
+        body.dark-mode #sidebar {
+            background-color: #2d3748; /* Fundo da sidebar no modo escuro */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        }
+
+        body.dark-mode .theme-button {
+            background-color: #4a5568; /* Botões de tema na sidebar no modo escuro */
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .theme-button:hover {
+            background-color: #2d3748;
+            color: #f7fafc;
+        }
+
+        body.dark-mode .theme-button.active {
+            background-color: #3182ce; /* Tema ativo no modo escuro */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode .sidebar-toggle-button,
+        body.dark-mode .theme-toggle-button {
+            background-color: #4a5568; /* Botões de controle mais escuros */
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .sidebar-toggle-button:hover,
+        body.dark-mode .theme-toggle-button:hover {
+            background-color: #2d3748;
+        }
+
+        body.dark-mode .footer {
+            color: #a0aec0; /* Rodapé claro */
+        }
+
+        /* Layout principal da aplicação */
+        #app-layout {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar de navegação de temas */
+        #sidebar {
+            width: 250px; /* Largura fixa da sidebar */
+            background-color: #ffffff; /* Fundo branco */
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1); /* Sombra para destacar */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Espaçamento entre os botões de tema */
+            overflow-y: auto; /* Rolagem se muitos temas */
+            position: fixed; /* Fixa a sidebar na tela */
+            left: 0;
+            top: 0;
+            height: 100%;
+            transition: transform 0.3s ease-in-out; /* Transição para deslizar */
+            z-index: 30; /* Acima do conteúdo principal e overlay */
+        }
+
+        /* Oculta a sidebar por padrão em telas pequenas */
+        #sidebar.hidden-mobile {
+            transform: translateX(-100%);
+        }
+
+        /* Estilo para os botões de tema dentro da sidebar */
+        .theme-button {
+            background-color: #e2e8f0; /* gray-200 */
+            color: #475569; /* gray-700 */
+            padding: 0.75rem 1rem; /* Aumenta o padding para melhor toque */
+            border-radius: 0.75rem; /* Cantos arredondados */
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: none;
+            width: 100%; /* Ocupa toda a largura da sidebar */
+            text-align: center; /* Centraliza o texto */
+            font-size: 1.1rem; /* Aumenta a fonte dos nomes dos temas */
+        }
+
+        .theme-button:hover {
+            background-color: #bfdbfe; /* blue-100 */
+            color: #1d4ed8; /* blue-700 */
+        }
+
+        .theme-button.active {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Conteúdo principal da aplicação */
+        #main-content {
+            flex-grow: 1; /* Ocupa o espaço restante */
+            margin-left: 250px; /* Espaço para a sidebar fixa */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: margin-left 0.3s ease-in-out; /* Transição para ajuste de margem */
+            position: relative; /* Para o botão de toggle no mobile */
+        }
+
+        /* Estilo do contêiner do versículo */
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            width: 100%;
+            padding: 2.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            animation: subtle-glow 8s infinite alternate;
+        }
+
+        /* Animação de fundo sutil para um efeito visual */
+        @keyframes subtle-glow {
+            0% { box-shadow: 0 0 10px rgba(100, 116, 139, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(100, 116, 139, 0.4); }
+            100% { box-shadow: 0 0 10px rgba(100, 116, 139, 0.2); }
+        }
+
+        /* Animação para o texto do versículo (fade in/out) */
+        .verse-text.fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        .verse-text.fade-out {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* Estilo para os botões de navegação */
+        .nav-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .nav-button:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .nav-button:active {
+            transform: translateY(0);
+        }
+
+        /* Estilo para o botão de alternar tema (claro/escuro) */
+        .theme-toggle-button {
+            position: absolute; /* Posição absoluta para o canto superior direito */
+            top: 20px;
+            right: 20px;
+            background-color: #cbd5e1;
+            color: #475569;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: none;
+            z-index: 20; /* Garante que esteja acima de outros elementos */
+            display: flex; /* Para alinhar o ícone e o texto se houver */
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Espaço entre o ícone e o texto */
+        }
+
+        .theme-toggle-button:hover {
+            background-color: #a0aec0;
+        }
+
+        body.dark-mode .theme-toggle-button {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .theme-toggle-button:hover {
+            background-color: #2d3748;
+        }
+
+        /* Aumentar a fonte do versículo para desktop */
+        .verse-text {
+            font-size: 1.5rem; /* 24px */
+        }
+
+        /* Estilo para a referência do versículo */
+        .verse-reference {
+            font-size: 1rem; /* 16px */
+            font-weight: 600;
+            color: #64748b; /* gray-500 */
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Botão para abrir/fechar a sidebar no mobile */
+        .sidebar-toggle-button {
+            display: none; /* Oculto por padrão em desktop */
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #e2e8f0;
+            color: #475569;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: none;
+            z-index: 20; /* Acima do conteúdo principal */
+        }
+
+        /* Overlay para quando a sidebar estiver aberta no mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 25; /* Entre a sidebar e o conteúdo principal */
+        }
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* Indicador de tema selecionado */
+        #selected-theme-display {
+            font-size: 1.25rem; /* Tamanho da fonte */
+            font-weight: 700; /* Negrito */
+            color: #3b82f6; /* Cor azul do Tailwind */
+            margin-bottom: 1rem; /* Espaçamento abaixo */
+            text-align: center;
+        }
+
+        body.dark-mode #selected-theme-display {
+            color: #93c5fd; /* Azul mais claro no modo escuro */
+        }
+
+
+        /* Media Queries para Mobile (telas menores que 768px) */
+        @media (max-width: 767px) {
+            #sidebar {
+                width: 70%; /* Ocupa 70% da largura da tela no mobile */
+                max-width: 300px; /* Limita a largura máxima no mobile */
+                transform: translateX(-100%); /* Escondido por padrão */
+                box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3); /* Sombra mais forte */
+            }
+
+            #sidebar.open {
+                transform: translateX(0); /* Visível quando aberto */
+            }
+
+            #main-content {
+                margin-left: 0; /* Remove a margem para o sidebar */
+                padding: 1.5rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            .text-4xl {
+                font-size: 2.25rem;
+            }
+
+            .verse-text {
+                font-size: 1.375rem; /* Aumentado para 22px em telas pequenas */
+            }
+
+            .nav-button {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .sidebar-toggle-button {
+                display: block; /* Mostra o botão de toggle no mobile */
+            }
+
+            .theme-button {
+                font-size: 1.25rem; /* Aumenta a fonte dos botões do dropdown no celular */
+                padding: 1rem 1rem; /* Aumenta o padding para melhor toque */
+            }
+
+            .theme-toggle-button {
+                top: 15px; /* Ajusta a posição no mobile */
+                right: 15px;
+                padding: 0.4rem 0.8rem; /* Reduz o padding para mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-layout">
+        <nav id="sidebar" class="hidden-mobile">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 dark:text-gray-100">Temas</h2>
+            <div id="theme-buttons-container" class="flex flex-col gap-2 w-full">
+                </div>
+        </nav>
+
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+        <main id="main-content">
+            <button id="sidebar-toggle-button" class="sidebar-toggle-button">
+                ☰ Temas
+            </button>
+
+            <button id="theme-toggle-button" class="theme-toggle-button">
+                <span id="theme-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></svg>
+                </span>
+            </button>
+
+            <div class="container">
+                <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Bíblia por Temas</h1>
+                <div id="selected-theme-display" class="mb-6">Tema: Fé</div>
+
+                <div id="verse-display" class="verse-text text-xl text-gray-700 leading-relaxed mb-8 min-h-[150px] flex items-center justify-center flex-col">
+                    Carregando versículo...
+                </div>
+
+                <div class="flex justify-center space-x-4">
+                    <button id="prev-button" class="nav-button">Anterior</button>
+                    <button id="next-button" class="nav-button">Próximo</button>
+                </div>
+
+                <div class="footer">
+				<br>
+                    <p>&copy;PenseQuiz. Todos os direitos reservados.</p>
+                    <p>Desenvolvido para estudo e interação.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Objeto contendo os versículos da Bíblia organizados por temas
+        const themedVerses = {
+            "fé": [
+                { text: "Porque pela graça sois salvos, por meio da fé; e isto não vem de vós, é dom de Deus.", reference: "Efésios 2:8" },
+                { text: "Ora, a fé é a certeza daquilo que esperamos e a prova das coisas que não vemos.", reference: "Hebreus 11:1" },
+                { text: "Sem fé é impossível agradar a Deus, pois quem dele se aproxima precisa crer que ele existe e que recompensa aqueles que o buscam.", reference: "Hebrebus 11:6" },
+                { text: "Se tiverem fé como um grão de mostarda, poderão dizer a este monte: 'Mova-se daqui para lá', e ele se moverá. Nada lhes será impossível.", reference: "Mateus 17:20" },
+                { text: "Porque tudo o que é nascido de Deus vence o mundo; e esta é a vitória que vence o mundo: a nossa fé.", reference: "1 João 5:4" },
+                { text: "O justo viverá pela fé.", reference: "Romanos 1:17" },
+                { text: "Combati o bom combate, terminei a corrida, guardei a fé.", reference: "2 Timóteo 4:7" },
+                { text: "Porque andamos por fé, e não por vista.", reference: "2 Coríntios 5:7" },
+                { text: "A fé vem por ouvir a mensagem, e a mensagem é ouvida mediante a palavra de Cristo.", reference: "Romanos 10:17" },
+                { text: "A fé sem obras é morta.", reference: "Tiago 2:26" },
+                { text: "Tudo é possível àquele que crê.", reference: "Marcos 9:23" },
+                { text: "Visto que a fé é a substância das coisas que se esperam, a prova das coisas que não se veem.", reference: "Hebreus 11:1" },
+                { text: "A fé, se não tiver obras, é morta em si mesma.", reference: "Tiago 2:17" },
+                { text: "E Jesus lhes disse: Por causa da vossa incredulidade; porque em verdade vos digo que, se tiverdes fé como um grão de mostarda, direis a este monte: Passa daqui para acolá, e há de passar; e nada vos será impossível.", reference: "Mateus 17:20" },
+                { text: "A fé é o firme fundamento das coisas que se esperam, e a prova das coisas que se não veem.", reference: "Hebreus 11:1" },
+                { text: "Pela fé, entendemos que os mundos foram criados pela palavra de Deus; de modo que aquilo que se vê não foi feito do que é aparente.", reference: "Hebreus 11:3" },
+                { text: "Mas o meu justo viverá pela fé; e, se ele recuar, a minha alma não tem prazer nele.", reference: "Hebreus 10:38" },
+                { text: "E, sem fé, é impossível agradar a Deus; porque é necessário que aquele que se aproxima de Deus creia que ele existe e que é galardoador dos que o buscam.", reference: "Hebreus 11:6" },
+                { text: "Porque pela graça sois salvos, por meio da fé; e isto não vem de vós, é dom de Deus.", reference: "Efésios 2:8" },
+                { text: "Tudo é possível ao que crê.", reference: "Marcos 9:23" },
+                { text: "Porque andamos por fé, e não por vista.", reference: "2 Coríntios 5:7" },
+                { text: "A fé vem pelo ouvir, e o ouvir pela palavra de Deus.", reference: "Romanos 10:17" },
+                { text: "O Senhor é a minha força e o meu escudo; nele o meu coração confia, e dele recebo ajuda; pelo que o meu coração salta de prazer, e com o meu canto o louvarei.", reference: "Salmos 28:7" },
+                { text: "Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.", reference: "Provérbios 3:5" },
+                { text: "Entrega o teu caminho ao Senhor; confia nele, e ele o fará.", reference: "Salmos 37:5" },
+                { text: "Mas o Senhor é fiel, e ele os fortalecerá e os guardará do maligno.", reference: "2 Tessalonicenses 3:3" },
+                { text: "Porque para Deus nada será impossível.", reference: "Lucas 1:37" },
+                { text: "Não se turbe o vosso coração; credes em Deus, crede também em mim.", reference: "João 14:1" },
+                { text: "E Jesus, respondendo, disse-lhes: Tende fé em Deus.", reference: "Marcos 11:22" },
+                { text: "Porque a fé é a certeza do que se espera e a convicção do que não se vê.", reference: "Hebreus 11:1" }
+            ],
+            "amor": [
+                { text: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna.", reference: "João 3:16" },
+                { text: "O amor é paciente, o amor é bondoso. Não inveja, não se vangloria, não se orgulha.", reference: "1 Coríntios 13:4" },
+                { text: "Acima de tudo, porém, revistam-se do amor, que é o elo perfeito da unidade.", reference: "Colossenses 3:14" },
+                { text: "Amados, amemo-nos uns aos outros, pois o amor procede de Deus. Aquele que ama é nascido de Deus e o conhece.", reference: "1 João 4:7" },
+                { text: "Nisto consiste o amor: não em que nós tenhamos amado a Deus, mas em que ele nos amou e enviou seu Filho como propiciação pelos nossos pecados.", reference: "1 João 4:10" },
+                { text: "O amor cobre uma multidão de pecados.", reference: "1 Pedro 4:8" },
+                { text: "Não devam nada a ninguém, a não ser o amor de uns pelos outros, pois aquele que ama seu próximo tem cumprido a lei.", reference: "Romanos 13:8" },
+                { text: "O amor de Cristo nos constrange.", reference: "2 Coríntios 5:14" },
+                { text: "Que a vossa caridade seja sem hipocrisia; aborrecei o mal e apegai-vos ao bem.", reference: "Romanos 12:9" },
+                { text: "Não há temor no amor; antes, o perfeito amor lança fora o temor.", reference: "1 João 4:18" },
+                { text: "O amor jamais acaba.", reference: "1 Coríntios 13:8" },
+                { text: "Amarás o teu próximo como a ti mesmo.", reference: "Mateus 22:39" },
+                { text: "Nisto conhecemos o amor: que Cristo deu a sua vida por nós; e devemos dar a nossa vida pelos irmãos.", reference: "1 João 3:16" },
+                { text: "O amor de Deus foi derramado em nossos corações pelo Espírito Santo que nos foi dado.", reference: "Romanos 5:5" },
+                { text: "O amor é o cumprimento da lei.", reference: "Romanos 13:10" },
+                { text: "Amemo-nos uns aos outros, porque o amor é de Deus.", reference: "1 João 4:7" },
+                { text: "Deus é amor.", reference: "1 João 4:8" },
+                { text: "O amor é a maior de todas as virtudes.", reference: "1 Coríntios 13:13" },
+                { text: "O amor não faz mal ao próximo.", reference: "Romanos 13:10" },
+                { text: "Nisto está o amor: não em que nós tenhamos amado a Deus, mas em que ele nos amou.", reference: "1 João 4:10" },
+                { text: "Seja o amor fraternal contínuo.", reference: "Hebreus 13:1" },
+                { text: "Porque o amor é de Deus; e todo aquele que ama é nascido de Deus e conhece a Deus.", reference: "1 João 4:7" },
+                { text: "Aquele que não ama não conhece a Deus, porque Deus é amor.", reference: "1 João 4:8" },
+                { text: "Nisto se manifestou o amor de Deus em nós: em que Deus enviou seu Filho unigênito ao mundo, para que por ele vivamos.", reference: "1 João 4:9" },
+                { text: "Nisto está o amor: não em que nós tenhamos amado a Deus, mas em que ele nos amou e enviou seu Filho como propiciação pelos nossos pecados.", reference: "1 João 4:10" },
+                { text: "Amados, se Deus assim nos amou, também nós devemos amar uns aos outros.", reference: "1 João 4:11" },
+                { text: "Ninguém jamais viu a Deus; se nos amarmos uns aos outros, Deus permanece em nós, e o seu amor é aperfeiçoado em nós.", reference: "1 João 4:12" },
+                { text: "E nós conhecemos e cremos no amor que Deus tem por nós. Deus é amor, e quem permanece no amor permanece em Deus, e Deus nele.", reference: "1 João 4:16" },
+                { text: "No amor não há temor; antes, o perfeito amor lança fora o temor; porque o temor tem consigo a pena, e o que teme não é perfeito em amor.", reference: "1 João 4:18" },
+                { text: "Nós o amamos a ele porque ele nos amou primeiro.", reference: "1 João 4:19" }
+            ],
+            "esperança": [
+                { text: "Que o Deus da esperança os encha de toda alegria e paz, por sua confiança nele, para que vocês transbordem de esperança, pelo poder do Espírito Santo.", reference: "Romanos 15:13" },
+                { text: "Mas os que esperam no Senhor renovarão as suas forças. Subirão com asas como águias; correrão e não se cansarão; caminharão e não se fatigarão.", reference: "Isaías 40:31" },
+                { text: "Pois eu sei os planos que tenho para vocês', diz o Senhor. 'Planos de fazê-los prosperar e não de lhes causar dano, planos de dar-lhes esperança e um futuro.'", reference: "Jeremias 29:11" },
+                { text: "A esperança que se adia faz adoecer o coração, mas o desejo cumprido é árvore de vida.", reference: "Provérbios 13:12" },
+                { text: "Bendito seja o Deus e Pai de nosso Senhor Jesus Cristo, que, segundo a sua grande misericórdia, nos gerou de novo para uma viva esperança, pela ressurreição de Jesus Cristo dentre os mortos.", reference: "1 Pedro 1:3" },
+                { text: "Porquanto, na esperança fomos salvos. Ora, a esperança que se vê não é esperança; pois o que alguém vê, como o espera?", reference: "Romanos 8:24" },
+                { text: "Mas se esperamos o que não vemos, com paciência o aguardamos.", reference: "Romanos 8:25" },
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "Que o Senhor dirija o coração de vocês para o amor de Deus e para a perseverança de Cristo.", reference: "2 Tessalonicenses 3:5" },
+                { text: "Pela esperança fomos salvos.", reference: "Romanos 8:24" },
+                { text: "Aguardando a bem-aventurada esperança e o aparecimento da glória do grande Deus e nosso Salvador Jesus Cristo.", reference: "Tito 2:13" },
+                { text: "A esperança não nos decepciona, porque o amor de Deus foi derramado em nossos corações pelo Espírito Santo que nos foi dado.", reference: "Romanos 5:5" },
+                { text: "E a esperança não nos decepciona.", reference: "Romanos 5:5" },
+                { text: "O Senhor é bom para com aqueles que esperam por ele, para com aqueles que o buscam.", reference: "Lamentações 3:25" },
+                { text: "Que a esperança de vocês esteja firmada no Senhor.", reference: "Salmos 33:22" },
+                { text: "Pois a esperança que se vê não é esperança.", reference: "Romanos 8:24" },
+                { text: "Mas os que esperam no Senhor renovarão as suas forças.", reference: "Isaías 40:31" },
+                { text: "A esperança é a âncora da alma, firme e segura.", reference: "Hebreus 6:19" },
+                { text: "Alegrai-vos na esperança.", reference: "Romanos 12:12" },
+                { text: "Pela esperança fomos salvos.", reference: "Romanos 8:24" },
+                { text: "Ora, o Deus de esperança vos encha de todo o gozo e paz em crença, para que abundeis em esperança pela virtude do Espírito Santo.", reference: "Romanos 15:13" },
+                { text: "Mas, se esperamos o que não vemos, com paciência o esperamos.", reference: "Romanos 8:25" },
+                { text: "Porque tudo o que dantes foi escrito, para nosso ensino foi escrito, para que pela paciência e consolação das Escrituras tenhamos esperança.", reference: "Romanos 15:4" },
+                { text: "Retenhamos firme a confissão da nossa esperança; porque fiel é o que prometeu.", reference: "Hebreus 10:23" },
+                { text: "Para que, por duas coisas imutáveis, nas quais é impossível que Deus minta, tenhamos forte consolação, nós, os que pomos o nosso refúgio em reter a esperança proposta.", reference: "Hebreus 6:18" },
+                { text: "A qual temos como âncora da alma, segura e firme, e que penetra até ao interior do véu.", reference: "Hebreus 6:19" },
+                { text: "O Senhor é bom para com os que esperam por ele, para com a alma que o busca.", reference: "Lamentações 3:25" },
+                { text: "Por que estás abatida, ó minha alma, e por que te perturbas dentro de mim? Espera em Deus, pois ainda o louvarei pela salvação da sua face.", reference: "Salmos 42:5" },
+                { text: "E a esperança não nos decepciona, porque o amor de Deus foi derramado em nossos corações pelo Espírito Santo que nos foi dado.", reference: "Romanos 5:5" },
+                { text: "Mas, se esperamos o que não vemos, com paciência o esperamos.", reference: "Romanos 8:25" }
+            ],
+            "perseverança": [
+                { text: "E não nos cansemos de fazer o bem, pois a seu tempo ceifaremos, se não desfalecermos.", reference: "Gálatas 6:9" },
+                { text: "Mas aquele que perseverar até o fim será salvo.", reference: "Mateus 24:13" },
+                { text: "Bem-aventurado o homem que suporta a provação; porque, depois de aprovado, receberá a coroa da vida, que o Senhor prometeu aos que o amam.", reference: "Tiago 1:12" },
+                { text: "Não vos sobreveio tentação que não fosse comum aos homens; mas Deus é fiel e não permitirá que sejais tentados além das vossas forças; pelo contrário, juntamente com a tentação, vos proverá livramento, de sorte que a podereis suportar.", reference: "1 Coríntios 10:13" },
+                { text: "Corramos com perseverança a corrida que nos é proposta, olhando firmemente para Jesus, o Autor e Consumador da nossa fé.", reference: "Hebreus 12:1-2" },
+                { text: "A tribulação produz perseverança; a perseverança, caráter aprovado; e o caráter aprovado, esperança.", reference: "Romanos 5:3-4" },
+                { text: "Sede fortes e corajosos, não temais, nem vos assusteis por causa deles, porque o Senhor, vosso Deus, é quem vai convosco; não vos deixará, nem vos desamparará.", reference: "Deuteronômio 31:6" },
+                { text: "O Senhor é a minha força e o meu escudo; nele o meu coração confia, e dele recebo ajuda.", reference: "Salmos 28:7" },
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "Seja a vossa vida sem avareza. Contentai-vos com o que tendes; porque ele mesmo disse: Não te deixarei, nem te desampararei.", reference: "Hebreus 13:5" },
+                { text: "Pela vossa perseverança ganhareis as vossas almas.", reference: "Lucas 21:19" },
+                { text: "Mas o que persevera até o fim, esse será salvo.", reference: "Mateus 10:22" },
+                { text: "Sabemos que todas as coisas cooperam para o bem daqueles que amam a Deus, daqueles que são chamados segundo o seu propósito.", reference: "Romanos 8:28" },
+                { text: "Não vos canseis de fazer o bem.", reference: "2 Tessalonicenses 3:13" },
+                { text: "Considerem motivo de grande alegria o fato de passarem por diversas provações, pois vocês sabem que a prova da sua fé produz perseverança.", reference: "Tiago 1:2-3" },
+                { text: "A perseverança deve ter a sua obra perfeita, para que sejais perfeitos e completos, não faltando em coisa alguma.", reference: "Tiago 1:4" },
+                { text: "Sede, pois, irmãos, pacientes até à vinda do Senhor.", reference: "Tiago 5:7" },
+                { text: "Aquele que começou boa obra em vós a aperfeiçoará até ao dia de Cristo Jesus.", reference: "Filipenses 1:6" },
+                { text: "Por isso, irmãos, tanto mais procurai fazer firme a vossa vocação e eleição; porque, fazendo isto, nunca jamais tropeçareis.", reference: "2 Pedro 1:10" },
+                { text: "Permanecei em mim, e eu permanecerei em vós.", reference: "João 15:4" },
+                { text: "E não nos cansemos de fazer o bem, porque a seu tempo ceifaremos, se não desfalecermos.", reference: "Gálatas 6:9" },
+                { text: "Mas aquele que perseverar até o fim será salvo.", reference: "Mateus 24:13" },
+                { text: "Porque a tribulação produz a paciência, e a paciência a experiência, e a experiência a esperança.", reference: "Romanos 5:3-4" },
+                { text: "Para que não vos torneis indolentes, mas sejais imitadores daqueles que, pela fé e pela paciência, herdam as promessas.", reference: "Hebreus 6:12" },
+                { text: "Sede, pois, irmãos, pacientes até à vinda do Senhor. Eis que o lavrador espera o precioso fruto da terra, aguardando-o com paciência, até que receba a chuva temporã e serôdia.", reference: "Tiago 5:7" },
+                { text: "E vós sereis aborrecidos de todos por causa do meu nome; mas aquele que perseverar até ao fim será salvo.", reference: "Marcos 13:13" },
+                { text: "Bem-aventurado o homem que suporta a tentação; porque, quando for provado, receberá a coroa da vida, a qual o Senhor prometeu aos que o amam.", reference: "Tiago 1:12" },
+                { text: "Sede fortes e corajosos; não temais, nem vos atemorizeis diante deles; porque o Senhor, vosso Deus, é quem vai convosco; não vos deixará, nem vos desamparará.", reference: "Deuteronômio 31:6" },
+                { text: "Mas os que esperam no Senhor renovarão as suas forças, subirão com asas como águias; correrão e não se cansarão; caminharão e não se fatigarão.", reference: "Isaías 40:31" },
+                { text: "Porque necessitais de paciência, para que, depois de haverdes feito a vontade de Deus, possais alcançar a promessa.", reference: "Hebreus 10:36" }
+            ],
+            "salvação": [
+                { text: "Quem crer e for batizado será salvo, mas quem não crer será condenado.", reference: "Marcos 16:16" },
+                { text: "Porque o salário do pecado é a morte, mas o dom gratuito de Deus é a vida eterna em Cristo Jesus nosso Senhor.", reference: "Romanos 6:23" },
+                { text: "Não há salvação em nenhum outro, pois debaixo do céu não há nenhum outro nome dado aos homens pelo qual devamos ser salvos.", reference: "Atos 4:12" },
+                { text: "Porque pela graça sois salvos, por meio da fé; e isto não vem de vós, é dom de Deus.", reference: "Efésios 2:8" },
+                { text: "E em nenhum outro há salvação, porque também debaixo do céu nenhum outro nome há, dado entre os homens, pelo qual devamos ser salvos.", reference: "Atos 4:12" },
+                { text: "Se com a tua boca confessares a Jesus como Senhor, e em teu coração creres que Deus o ressuscitou dentre os mortos, serás salvo.", reference: "Romanos 10:9" },
+                { text: "Porque o Senhor é o nosso juiz, o Senhor é o nosso legislador, o Senhor é o nosso rei; ele nos salvará.", reference: "Isaías 33:22" },
+                { text: "O Senhor é a minha rocha, a minha fortaleza e o meu libertador; o meu Deus é o meu rochedo, em quem me refugio. Ele é o meu escudo e o poder que me salva, a minha torre alta.", reference: "Salmos 18:2" },
+                { text: "Porque o Filho do Homem veio buscar e salvar o que se havia perdido.", reference: "Lucas 19:10" },
+                { text: "A salvação pertence ao Senhor.", reference: "Jonas 2:9" },
+                { text: "Deus não nos destinou para a ira, mas para recebermos a salvação por meio de nosso Senhor Jesus Cristo.", reference: "1 Tessalonicenses 5:9" },
+                { text: "Porque o Senhor é a minha salvação.", reference: "Isaías 12:2" },
+                { text: "A salvação é do Senhor.", reference: "Salmos 3:8" },
+                { text: "E a salvação dos justos vem do Senhor; ele é a sua fortaleza no tempo da angústia.", reference: "Salmos 37:39" },
+                { text: "E haverá salvação em Sião e em Jerusalém, como o Senhor disse, e entre os sobreviventes que o Senhor chamar.", reference: "Joel 2:32" },
+                { text: "Porque o Filho do Homem veio salvar o que se havia perdido.", reference: "Mateus 18:11" },
+                { text: "E em nenhum outro há salvação.", reference: "Atos 4:12" },
+                { text: "A salvação é do Senhor.", reference: "Salmos 3:8" },
+                { text: "Porque pela graça sois salvos, por meio da fé.", reference: "Efésios 2:8" },
+                { text: "O Senhor é a minha rocha, a minha fortaleza e o meu libertador.", reference: "Salmos 18:2" },
+                { text: "Porque Deus não nos destinou para a ira, mas para a aquisição da salvação, por nosso Senhor Jesus Cristo.", reference: "1 Tessalonicenses 5:9" },
+                { text: "Porque o Senhor é a minha rocha, e a minha fortaleza, e o meu libertador; o meu Deus, a minha fortaleza, em quem confio; o meu escudo, e a força da minha salvação, e o meu alto refúgio.", reference: "Salmos 18:2" },
+                { text: "E será que todo aquele que invocar o nome do Senhor será salvo.", reference: "Atos 2:21" },
+                { text: "E disse-lhes: Ide por todo o mundo, pregai o evangelho a toda criatura. Quem crer e for batizado será salvo; mas quem não crer será condenado.", reference: "Marcos 16:15-16" },
+                { text: "Porque a Escritura diz: Todo aquele que nele crer não será confundido.", reference: "Romanos 10:11" },
+                { text: "Porque o coração crê para a justiça, e a boca confessa para a salvação.", reference: "Romanos 10:10" },
+                { text: "Como escaparemos nós, se não atentarmos para uma tão grande salvação?", reference: "Hebreus 2:3" },
+                { text: "E, estando ele em agonia, orava mais intensamente. E o seu suor tornou-se em grandes gotas de sangue, que corriam até ao chão.", reference: "Lucas 22:44" },
+                { text: "Porque o Filho do Homem veio buscar e salvar o que se havia perdido.", reference: "Lucas 19:10" },
+                { text: "Mas a salvação dos justos vem do Senhor; ele é a sua fortaleza no tempo da angústia.", reference: "Salmos 37:39" }
+            ],
+            "amizade": [
+                { text: "O amigo ama em todo o tempo, e para a angústia nasce o irmão.", reference: "Provérbios 17:17" },
+                { text: "Ninguém tem maior amor do que este: de dar alguém a sua vida pelos seus amigos.", reference: "João 15:13" },
+                { text: "Feridas de amigo são leais, mas os beijos de um inimigo são enganosos.", reference: "Provérbios 27:6" },
+                { text: "Assim como o ferro afia o ferro, assim o homem afia o seu amigo.", reference: "Provérbios 27:17" },
+                { text: "Não abandone o seu amigo nem o amigo de seu pai; nem vá à casa de seu irmão quando você estiver em dificuldades. Mais vale um vizinho perto do que um irmão longe.", reference: "Provérbios 27:10" },
+                { text: "Há amigos que são mais apegados que um irmão.", reference: "Provérbios 18:24" },
+                { text: "Melhor é serem dois do que um, porque têm melhor paga do seu trabalho.", reference: "Eclesiastes 4:9" },
+                { text: "Se um cair, o outro o levanta. Mas pobre do homem que cai e não tem quem o levante!", reference: "Eclesiastes 4:10" },
+                { text: "Não se deixem enganar: 'As más companhias corrompem os bons costumes'.", reference: "1 Coríntios 15:33" },
+                { text: "Aquele que anda com os sábios será sábio, mas o companheiro dos tolos será afligido.", reference: "Provérbios 13:20" },
+                { text: "O homem que tem muitos amigos pode vir a ruínas, mas há amigo mais chegado do que um irmão.", reference: "Provérbios 18:24" },
+                { text: "Não andeis em jugo desigual com os incrédulos.", reference: "2 Coríntios 6:14" },
+                { text: "Um amigo fiel é uma poderosa defesa: quem o encontrou, descobriu um tesouro.", reference: "Eclesiástico 6:14" },
+                { text: "Não sejas companheiro dos que se irritam facilmente, nem amigo dos que se dão à ira.", reference: "Provérbios 22:24" },
+                { text: "Em todo tempo ama o amigo e na angústia se faz irmão.", reference: "Provérbios 17:17" },
+                { text: "Aquele que tem amigos, deve mostrar-se amigo.", reference: "Provérbios 18:24" },
+                { text: "O perfume e o incenso alegram o coração; assim o faz a doçura do amigo pelo conselho cordial.", reference: "Provérbios 27:9" },
+                { text: "Não abandone o seu amigo nem o amigo de seu pai.", reference: "Provérbios 27:10" },
+                { text: "Melhor é a repreensão franca do que o amor encoberto.", reference: "Provérbios 27:5" },
+                { text: "O óleo e o perfume alegram o coração, e a doçura do amigo, o conselho da alma.", reference: "Provérbios 27:9" },
+                { text: "O amigo ama em todo o tempo, e na angústia nasce o irmão.", reference: "Provérbios 17:17" },
+                { text: "Ninguém tem maior amor do que este: de dar alguém a sua vida pelos seus amigos.", reference: "João 15:13" },
+                { text: "Feridas de amigo são leais, mas os beijos de um inimigo são enganosos.", reference: "Provérbios 27:6" },
+                { text: "Assim como o ferro afia o ferro, assim o homem afia o seu amigo.", reference: "Provérbios 27:17" },
+                { text: "Não abandones o teu amigo, nem o amigo de teu pai; nem entres na casa de teu irmão no dia da tua adversidade; melhor é o vizinho perto do que o irmão longe.", reference: "Provérbios 27:10" },
+                { text: "Há amigos que são mais chegados do que um irmão.", reference: "Provérbios 18:24" },
+                { text: "Melhor é serem dois do que um, porque têm melhor paga do seu trabalho.", reference: "Eclesiastes 4:9" },
+                { text: "Porque se um cair, o outro levanta o seu companheiro; mas ai do que estiver só; pois, caindo, não haverá outro que o levante.", reference: "Eclesiastes 4:10" },
+                { text: "Não vos enganeis: as más conversações corrompem os bons costumes.", reference: "1 Coríntios 15:33" },
+                { text: "O que anda com os sábios será sábio, mas o companheiro dos tolos será afligido.", reference: "Provérbios 13:20" }
+            ],
+            "paz": [
+                { text: "Deixo-vos a paz, a minha paz vos dou; não vo-la dou como o mundo a dá. Não se turbe o vosso coração, nem se atemorize.", reference: "João 14:27" },
+                { text: "E a paz de Deus, que excede todo o entendimento, guardará os vossos corações e os vossos sentimentos em Cristo Jesus.", reference: "Filipenses 4:7" },
+                { text: "Bem-aventurados os pacificadores, porque eles serão chamados filhos de Deus.", reference: "Mateus 5:9" },
+                { text: "Em paz me deito e logo durmo, porque só tu, Senhor, me fazes viver em segurança.", reference: "Salmos 4:8" },
+                { text: "Grande paz têm os que amam a tua lei; para eles não há tropeço.", reference: "Salmos 119:165" },
+                { text: "O efeito da justiça será paz, e o fruto da justiça, repouso e segurança para sempre.", reference: "Isaías 32:17" },
+                { text: "Buscai a paz e segui-a.", reference: "Salmos 34:14" },
+                { text: "Se possível, quanto depender de vós, tende paz com todos os homens.", reference: "Romanos 12:18" },
+                { text: "O Deus de paz esmagará em breve Satanás debaixo dos vossos pés.", reference: "Romanos 16:20" },
+                { text: "Que a paz de Cristo seja o árbitro em seus corações, visto que vocês foram chamados para viver em paz, como membros de um só corpo. E sejam agradecidos.", reference: "Colossenses 3:15" },
+                { text: "Aquele que confia no Senhor, a misericórdia o cercará.", reference: "Salmos 32:10" },
+                { text: "Que o próprio Senhor da paz lhes dê a paz em todo o tempo e de todas as formas. O Senhor esteja com todos vocês.", reference: "2 Tessalonicenses 3:16" },
+                { text: "Aquele que anda em integridade, anda seguro, mas o que perverte os seus caminhos, será descoberto.", reference: "Provérbios 10:9" },
+                { text: "O Senhor dará força ao seu povo; o Senhor abençoará o seu povo com paz.", reference: "Salmos 29:11" },
+                { text: "A paz seja convosco.", reference: "João 20:19" },
+                { text: "Porque um menino nos nasceu, um filho se nos deu; e o principado está sobre os seus ombros; e o seu nome será Maravilhoso Conselheiro, Deus Forte, Pai da Eternidade, Príncipe da Paz.", reference: "Isaías 9:6" },
+                { text: "A paz de Deus, que excede todo o entendimento, guardará os vossos corações e os vossos sentimentos em Cristo Jesus.", reference: "Filipenses 4:7" },
+                { text: "Em paz me deito e logo durmo, porque só tu, Senhor, me fazes viver em segurança.", reference: "Salmos 4:8" },
+                { text: "Buscai a paz e segui-a.", reference: "Salmos 34:14" },
+                { text: "Se possível, quanto depender de vós, tende paz com todos os homens.", reference: "Romanos 12:18" },
+                { text: "E a paz de Deus, que excede todo o entendimento, guardará os vossos corações e os vossos sentimentos em Cristo Jesus.", reference: "Filipenses 4:7" },
+                { text: "Bem-aventurados os pacificadores, porque eles serão chamados filhos de Deus.", reference: "Mateus 5:9" },
+                { text: "Em paz me deito e logo durmo, porque só tu, Senhor, me fazes habitar em segurança.", reference: "Salmos 4:8" },
+                { text: "Grande paz têm os que amam a tua lei, e para eles não há tropeço.", reference: "Salmos 119:165" },
+                { text: "O efeito da justiça será paz, e a operação da justiça, repouso e segurança para sempre.", reference: "Isaías 32:17" },
+                { text: "Aparta-te do mal, e faze o bem; busca a paz, e segue-a.", reference: "Salmos 34:14" },
+                { text: "Se for possível, quanto estiver em vós, tende paz com todos os homens.", reference: "Romanos 12:18" },
+                { text: "E o Deus de paz esmagará em breve Satanás debaixo dos vossos pés. A graça de nosso Senhor Jesus Cristo seja convosco. Amém.", reference: "Romanos 16:20" },
+                { text: "E a paz de Deus, para a qual também fostes chamados em um corpo, domine em vossos corações; e sede agradecidos.", reference: "Colossenses 3:15" },
+                { text: "Que o próprio Senhor da paz lhes dê a paz em todo o tempo e de todas as formas. O Senhor esteja com todos vocês.", reference: "2 Tessalonicenses 3:16" }
+            ],
+            "pecado": [
+                { text: "Se confessarmos os nossos pecados, ele é fiel e justo para nos perdoar os pecados e nos purificar de toda injustiça.", reference: "1 João 1:9" },
+                { text: "Porque todos pecaram e destituídos estão da glória de Deus.", reference: "Romanos 3:23" },
+                { text: "Pois o salário do pecado é a morte, mas o dom gratuito de Deus é a vida eterna em Cristo Jesus nosso Senhor.", reference: "Romanos 6:23" },
+                { text: "Se dissermos que não temos pecado, enganamo-nos a nós mesmos, e a verdade não está em nós.", reference: "1 João 1:8" },
+                { text: "Quem comete o pecado é do diabo, porque o diabo peca desde o princípio. Para isto o Filho de Deus se manifestou: para desfazer as obras do diabo.", reference: "1 João 3:8" },
+                { text: "Bem-aventurado aquele cuja transgressão é perdoada, e cujo pecado é coberto.", reference: "Salmos 32:1" },
+                { text: "Não reine, portanto, o pecado em vosso corpo mortal, para lhe obedecerdes em suas concupiscências.", reference: "Romanos 6:12" },
+                { text: "Fugi da prostituição. Todo pecado que o homem comete é fora do corpo; mas o que se prostitui peca contra o seu próprio corpo.", reference: "1 Coríntios 6:18" },
+                { text: "Arrependei-vos, pois, e convertei-vos, para que sejam apagados os vossos pecados.", reference: "Atos 3:19" },
+                { text: "Se o teu olho direito te faz pecar, arranca-o e atira-o para longe de ti; pois te é melhor que se perca um dos teus membros do que todo o teu corpo seja lançado no inferno.", reference: "Mateus 5:29" },
+                { text: "O pecado é a transgressão da lei.", reference: "1 João 3:4" },
+                { text: "Não há justo, nem um sequer.", reference: "Romanos 3:10" },
+                { text: "O que encobre as suas transgressões nunca prosperará, mas o que as confessa e as abandona, alcançará misericórdia.", reference: "Provérbios 28:13" },
+                { text: "Vigiai e orai, para que não entreis em tentação; na verdade, o espírito está pronto, mas a carne é fraca.", reference: "Mateus 26:41" },
+                { text: "Todo aquele que pratica o pecado também transgride a lei; o pecado é a transgressão da lei.", reference: "1 João 3:4" },
+                { text: "E o pecado, para que se mostrasse pecado, operou em mim a morte por meio daquilo que é bom.", reference: "Romanos 7:13" },
+                { text: "Porque todos pecaram e destituídos estão da glória de Deus.", reference: "Romanos 3:23" },
+                { text: "Mas Deus prova o seu amor para conosco, em que Cristo morreu por nós, sendo nós ainda pecadores.", reference: "Romanos 5:8" },
+                { text: "Aquele que não conheceu pecado, ele o fez pecado por nós; para que, nele, fôssemos feitos justiça de Deus.", reference: "2 Coríntios 5:21" },
+                { text: "Se dissermos que não temos pecado, enganamo-nos a nós mesmos, e a verdade não está em nós.", reference: "1 João 1:8" },
+                { text: "Porque o salário do pecado é a morte, mas o dom gratuito de Deus é a vida eterna em Cristo Jesus nosso Senhor.", reference: "Romanos 6:23" },
+                { text: "Se confessarmos os nossos pecados, ele é fiel e justo para nos perdoar os pecados e nos purificar de toda injustiça.", reference: "1 João 1:9" },
+                { text: "Bem-aventurado aquele cuja transgressão é perdoada, e cujo pecado é coberto.", reference: "Salmos 32:1" },
+                { text: "Não reine, portanto, o pecado em vosso corpo mortal, para lhe obedecerdes em suas concupiscências.", reference: "Romanos 6:12" },
+                { text: "Fugi da prostituição. Todo pecado que o homem comete é fora do corpo; mas o que se prostitui peca contra o seu próprio corpo.", reference: "1 Coríntios 6:18" },
+                { text: "Arrependei-vos, pois, e convertei-vos, para que sejam apagados os vossos pecados.", reference: "Atos 3:19" },
+                { text: "Se o teu olho direito te faz pecar, arranca-o e atira-o para longe de ti; pois te é melhor que se perca um dos teus membros do que todo o teu corpo seja lançado no inferno.", reference: "Mateus 5:29" },
+                { text: "O pecado é a transgressão da lei.", reference: "1 João 3:4" },
+                { text: "Não há justo, nem um sequer.", reference: "Romanos 3:10" }
+            ],
+            "temor": [
+                { text: "O temor do Senhor é o princípio do conhecimento; os loucos desprezam a sabedoria e a instrução.", reference: "Provérbios 1:7" },
+                { text: "O temor do Senhor conduz à vida; quem o tem, repousa satisfeito, e nenhum mal o visitará.", reference: "Provérbios 19:23" },
+                { text: "Não tenha medo, pois estou com você; não desanime, pois sou o seu Deus. Eu o fortalecerei e o ajudarei; eu o segurarei com a minha mão direita vitoriosa.", reference: "Isaías 41:10" },
+                { text: "O temor do Senhor é o princípio da sabedoria; bom senso têm todos os que praticam os seus preceitos. O seu louvor permanece para sempre!", reference: "Salmos 111:10" },
+                { text: "Não temais os que matam o corpo e não podem matar a alma; temei, antes, aquele que pode fazer perecer no inferno tanto a alma como o corpo.", reference: "Mateus 10:28" },
+                { text: "O temor do Senhor é aborrecer o mal; a soberba e a arrogância, o mau caminho e a boca perversa, eu os aborreço.", reference: "Provérbios 8:13" },
+                { text: "Em Deus ponho a minha confiança e nada temerei. Que me pode fazer o homem?", reference: "Salmos 56:11" },
+                { text: "O temor do Senhor é fonte de vida, para desviar dos laços da morte.", reference: "Provérbios 14:27" },
+                { text: "Não temais, ó pequeno rebanho, porque a vosso Pai agradou dar-vos o Reino.", reference: "Lucas 12:32" },
+                { text: "O temor do Senhor prolonga os dias, mas os anos dos ímpios serão abreviados.", reference: "Provérbios 10:27" },
+                { text: "O temor do Senhor é a instrução da sabedoria.", reference: "Provérbios 15:33" },
+                { text: "Aquele que teme ao Senhor tem forte segurança.", reference: "Provérbios 14:26" },
+                { text: "O temor do Senhor é puro e dura para sempre.", reference: "Salmos 19:9" },
+                { text: "Não vos assusteis, nem vos amedronteis.", reference: "Deuteronômio 31:6" },
+                { text: "O temor do Senhor é o princípio da sabedoria.", reference: "Provérbios 9:10" },
+                { text: "O temor do Senhor é o princípio da sabedoria; bom senso têm todos os que praticam os seus preceitos; o seu louvor permanece para sempre.", reference: "Salmos 111:10" },
+                { text: "O temor do Senhor é o princípio do conhecimento; os loucos desprezam a sabedoria e a instrução.", reference: "Provérbios 1:7" },
+                { text: "O temor do Senhor conduz à vida; quem o tem, repousa satisfeito, e nenhum mal o visitará.", reference: "Provérbios 19:23" },
+                { text: "Não temas, porque eu sou contigo; não te assombres, porque eu sou o teu Deus; eu te fortaleço, e te ajudo, e te sustento com a destra da minha justiça.", reference: "Isaías 41:10" },
+                { text: "O temor do Senhor é aborrecer o mal; a soberba e a arrogância, o mau caminho e a boca perversa, eu os aborreço.", reference: "Provérbios 8:13" },
+                { text: "Em Deus ponho a minha confiança e nada temerei. Que me pode fazer o homem?", reference: "Salmos 56:11" },
+                { text: "O temor do Senhor é fonte de vida, para desviar dos laços da morte.", reference: "Provérbios 14:27" },
+                { text: "Não temais, ó pequeno rebanho, porque a vosso Pai agradou dar-vos o Reino.", reference: "Lucas 12:32" },
+                { text: "O temor do Senhor prolonga os dias, mas os anos dos ímpios serão abreviados.", reference: "Provérbios 10:27" },
+                { text: "O temor do Senhor é a instrução da sabedoria.", reference: "Provérbios 15:33" }
+            ],
+            "familia": [
+                { text: "Honra teu pai e tua mãe, a fim de que tenhas vida longa na terra que o Senhor teu Deus te dá.", reference: "Êxodo 20:12" },
+                { text: "Mas, se alguém não tem cuidado dos seus, e principalmente dos da sua família, negou a fé, e é pior do que o infiel.", reference: "1 Timóteo 5:8" },
+                { text: "Ensina a criança no caminho em que deve andar, e, ainda quando for velho, não se desviará dele.", reference: "Provérbios 22:6" },
+                { text: "Eu e minha casa serviremos ao Senhor.", reference: "Josué 24:15" },
+                { text: "Os filhos são herança do Senhor, uma recompensa que ele dá.", reference: "Salmos 127:3" },
+                { text: "Maridos, amai vossas mulheres, como também Cristo amou a igreja e a si mesmo se entregou por ela.", reference: "Efésios 5:25" },
+                { text: "Mulheres, sujeitem-se a seus maridos, como ao Senhor.", reference: "Efésios 5:22" },
+                { text: "Filhos, obedecei a vossos pais no Senhor, porque isto é justo.", reference: "Efésios 6:1" },
+                { text: "Pais, não irriteis a vossos filhos, mas criai-os na disciplina e na admoestação do Senhor.", reference: "Efésios 6:4" },
+                { text: "Vede que ninguém retribua a outrem mal por mal; antes, segui sempre o bem, tanto uns para com os outros como para com todos.", reference: "1 Tessalonicenses 5:15" },
+                { text: "Aquele que perturba a sua casa herdará o vento.", reference: "Provérbios 11:29" },
+                { text: "O homem que tem uma boa esposa é feliz.", reference: "Provérbios 18:22" },
+                { text: "Melhor é um bocado seco com paz do que a casa cheia de iguarias com contenda.", reference: "Provérbios 17:1" },
+                { text: "A mulher virtuosa é a coroa do seu marido.", reference: "Provérbios 12:4" },
+                { text: "O homem que teme ao Senhor, seus filhos serão abençoados.", reference: "Salmos 112:2" },
+                { text: "Honra teu pai e tua mãe, para que se prolonguem os teus dias na terra que o Senhor teu Deus te dá.", reference: "Êxodo 20:12" },
+                { text: "Mas, se alguém não tem cuidado dos seus, e principalmente dos da sua família, negou a fé, e é pior do que o infiel.", reference: "1 Timóteo 5:8" },
+                { text: "Ensina a criança no caminho em que deve andar, e, ainda quando for velho, não se desviará dele.", reference: "Provérbios 22:6" },
+                { text: "Eu e a minha casa serviremos ao Senhor.", reference: "Josué 24:15" },
+                { text: "Herança do Senhor são os filhos; o fruto do ventre, o seu galardão.", reference: "Salmos 127:3" },
+                { text: "Vós, maridos, amai vossas mulheres, como também Cristo amou a igreja e a si mesmo se entregou por ela.", reference: "Efésios 5:25" },
+                { text: "Vós, mulheres, sujeitai-vos a vossos maridos, como ao Senhor.", reference: "Efésios 5:22" },
+                { text: "Vós, filhos, obedecei em tudo a vossos pais, porque isso é agradável ao Senhor.", reference: "Colossenses 3:20" },
+                { text: "Vós, pais, não irriteis a vossos filhos, para que não desanimem.", reference: "Colossenses 3:21" },
+                { text: "Vede que ninguém retribua a outrem mal por mal; antes, segui sempre o bem, tanto uns para com os outros como para com todos.", reference: "1 Tessalonicenses 5:15" }
+            ],
+            "união": [
+                { text: "Como é bom e agradável quando os irmãos vivem em união!", reference: "Salmos 133:1" },
+                { text: "Suportem-se uns aos outros e perdoem as queixas que tiverem uns contra os outros. Perdoem como o Senhor lhes perdoou.", reference: "Colossenses 3:13" },
+                { text: "Façam todo o esforço para manter a unidade do Espírito pelo vínculo da paz.", reference: "Efésios 4:3" },
+                { text: "Sejam um só em mente e propósito.", reference: "Filipenses 2:2" },
+                { text: "Não haja entre vós divisões.", reference: "1 Coríntios 1:10" },
+                { text: "Um só corpo e um só Espírito, como também fostes chamados em uma só esperança da vossa vocação.", reference: "Efésios 4:4" },
+                { text: "Completai a minha alegria, tendo o mesmo modo de pensar, o mesmo amor, um só espírito e uma só atitude.", reference: "Filipenses 2:2" },
+                { text: "Sejam todos um, para que o mundo creia.", reference: "João 17:21" },
+                { text: "Melhor é serem dois do que um.", reference: "Eclesiastes 4:9" },
+                { text: "Se um cair, o outro o levanta. Mas pobre do homem que cai e não tem quem o levante!", reference: "Eclesiastes 4:10" },
+                { text: "Que a unidade do Espírito seja mantida pelo vínculo da paz.", reference: "Efésios 4:3" },
+                { text: "Para que todos sejam um, como tu, ó Pai, o és em mim, e eu em ti.", reference: "João 17:21" },
+                { text: "Não haja contendas entre vós.", reference: "1 Coríntios 1:10" },
+                { text: "Assim como o corpo é um, e tem muitos membros, e todos os membros, sendo muitos, são um só corpo, assim é Cristo também.", reference: "1 Coríntios 12:12" },
+                { text: "Porque todos nós fomos batizados em um Espírito, formando um corpo.", reference: "1 Coríntios 12:13" },
+                { text: "Rogo-vos, irmãos, que noteis os que promovem dissensões e escândalos contra a doutrina que aprendestes; desviai-vos deles.", reference: "Romanos 16:17" },
+                { text: "Ora, o Deus de paciência e consolação vos conceda o mesmo sentimento uns para com os outros, segundo Cristo Jesus.", reference: "Romanos 15:5" },
+                { text: "Para que, concordes, e a uma boca, glorifiqueis ao Deus e Pai de nosso Senhor Jesus Cristo.", reference: "Romanos 15:6" },
+                { text: "Sede unânimes entre vós; não ambicioneis coisas altas, mas acomodai-vos às humildes; não sejais sábios em vós mesmos.", reference: "Romanos 12:16" },
+                { text: "Ora, o Deus de paciência e consolação vos conceda o mesmo sentimento uns para com os outros, segundo Cristo Jesus.", reference: "Romanos 15:5" },
+                { text: "Para que, concordes, e a uma boca, glorifiqueis ao Deus e Pai de nosso Senhor Jesus Cristo.", reference: "Romanos 15:6" },
+                { text: "Sede unânimes entre vós; não ambicioneis coisas altas, mas acomodai-vos às humildes; não sejais sábios em vós mesmos.", reference: "Romanos 12:16" },
+                { text: "Rogo-vos, irmãos, que noteis os que promovem dissensões e escândalos contra a doutrina que aprendestes; desviai-vos deles.", reference: "Romanos 16:17" },
+                { text: "Como é bom e agradável quando os irmãos vivem em união!", reference: "Salmos 133:1" },
+                { text: "Suportem-se uns aos outros e perdoem as queixas que tiverem uns contra os outros. Perdoem como o Senhor lhes perdoou.", reference: "Colossenses 3:13" },
+                { text: "Façam todo o esforço para manter a unidade do Espírito pelo vínculo da paz.", reference: "Efésios 4:3" },
+                { text: "Sejam um só em mente e propósito.", reference: "Filipenses 2:2" },
+                { text: "Não haja entre vós divisões.", reference: "1 Coríntios 1:10" }
+            ],
+            "humildade": [
+                { text: "Quando vem o orgulho, chega a desgraça, mas a sabedoria está com os humildes.", reference: "Provérbios 11:2" },
+                { text: "Humilhai-vos, pois, debaixo da potente mão de Deus, para que, a seu tempo, vos exalte.", reference: "1 Pedro 5:6" },
+                { text: "O temor do Senhor é a instrução da sabedoria, e a humildade precede a honra.", reference: "Provérbios 15:33" },
+                { text: "Bem-aventurados os humildes de espírito, porque deles é o reino dos céus.", reference: "Mateus 5:3" },
+                { text: "Nada façam por ambição egoísta ou por vaidade, mas humildemente considerem os outros superiores a vocês mesmos.", reference: "Filipenses 2:3" },
+                { text: "Porque todo o que se exalta será humilhado, e o que se humilha será exaltado.", reference: "Lucas 14:11" },
+                { text: "Antes da ruína, o coração do homem se ensoberbece; e, antes da honra, vai a humildade.", reference: "Provérbios 18:12" },
+                { text: "A soberba do homem o abaterá, mas a humildade de espírito o honrará.", reference: "Provérbios 29:23" },
+                { text: "Vistam-se todos de humildade uns para com os outros, porque Deus resiste aos soberbos, mas dá graça aos humildes.", reference: "1 Pedro 5:5" },
+                { text: "A humildade e o temor do Senhor trazem riqueza, honra e vida.", reference: "Provérbios 22:4" },
+                { text: "Andai em humildade, uns para com os outros.", reference: "Efésios 4:2" },
+                { text: "Tomai sobre vós o meu jugo, e aprendei de mim, que sou manso e humilde de coração; e achareis descanso para as vossas almas.", reference: "Mateus 11:29" },
+                { text: "Porque Deus resiste aos soberbos, mas dá graça aos humildes.", reference: "Tiago 4:6" },
+                { text: "Aquele que se humilha será exaltado.", reference: "Mateus 23:12" },
+                { text: "A humildade precede a honra.", reference: "Provérbios 15:33" },
+                { text: "Quando vem o orgulho, então vem a desonra; mas com os humildes está a sabedoria.", reference: "Provérbios 11:2" },
+                { text: "Humilhai-vos, pois, debaixo da potente mão de Deus, para que a seu tempo vos exalte.", reference: "1 Pedro 5:6" },
+                { text: "O temor do Senhor é a instrução da sabedoria, e a humildade precede a honra.", reference: "Provérbios 15:33" },
+                { text: "Bem-aventurados os humildes de espírito, porque deles é o reino dos céus.", reference: "Mateus 5:3" },
+                { text: "Nada façais por contenda ou por vanglória, mas por humildade, cada um considere os outros superiores a si mesmo.", reference: "Filipenses 2:3" },
+                { text: "Porque qualquer que a si mesmo se exaltar será humilhado, e qualquer que a si mesmo se humilhar será exaltado.", reference: "Lucas 14:11" },
+                { text: "Antes da ruína, o coração do homem se ensoberbece; e, antes da honra, vai a humildade.", reference: "Provérbios 18:12" },
+                { text: "A soberba do homem o abaterá, mas a humildade de espírito o honrará.", reference: "Provérbios 29:23" },
+                { text: "Vistam-se todos de humildade uns para com os outros, porque Deus resiste aos soberbos, mas dá graça aos humildes.", reference: "1 Pedro 5:5" },
+                { text: "A humildade e o temor do Senhor trazem riqueza, honra e vida.", reference: "Provérbios 22:4" }
+            ],
+            "coragem": [
+                { text: "Seja forte e corajoso. Não se apavore nem desanime, pois o Senhor, o seu Deus, estará com você por onde você andar.", reference: "Josué 1:9" },
+                { text: "No mundo tereis aflições, mas tende bom ânimo; eu venci o mundo.", reference: "João 16:33" },
+                { text: "O Senhor é a minha luz e a minha salvação; a quem temerei? O Senhor é a força da minha vida; de quem me recearei?", reference: "Salmos 27:1" },
+                { text: "Não vos assusteis, nem vos amedronteis diante deles, porque o Senhor, vosso Deus, é quem vai convosco; não vos deixará, nem vos desamparará.", reference: "Deuteronômio 31:6" },
+                { text: "Esforçai-vos, e ele fortalecerá o vosso coração, vós todos os que esperais no Senhor.", reference: "Salmos 31:24" },
+                { text: "Sede fortes e corajosos, não temais, nem vos assusteis por causa deles, porque o Senhor, vosso Deus, é quem vai convosco; não vos deixará, nem vos desamparará.", reference: "Deuteronômio 31:6" },
+                { text: "Não vos atemorizeis, nem vos espanteis por causa desta grande multidão, porque a peleja não é vossa, mas de Deus.", reference: "2 Crônicas 20:15" },
+                { text: "Espera no Senhor, anima-te, e ele fortalecerá o teu coração; espera, pois, no Senhor.", reference: "Salmos 27:14" },
+                { text: "O ímpio foge, embora ninguém o persiga, mas o justo é corajoso como o leão.", reference: "Provérbios 28:1" },
+                { text: "Tudo posso naquele que me fortalece.", reference: "Filipenses 4:13" },
+                { text: "Não se turbe o vosso coração; credes em Deus, crede também em mim.", reference: "João 14:1" },
+                { text: "Sede fortes e corajosos.", reference: "Deuteronômio 31:6" },
+                { text: "O Senhor é a minha força e o meu escudo.", reference: "Salmos 28:7" },
+                { text: "Não temas, porque eu sou contigo.", reference: "Isaías 41:10" },
+                { text: "Sede corajosos e fortes.", reference: "Josué 1:7" },
+                { text: "Sede fortes e corajosos; não temais, nem vos atemorizeis diante deles; porque o Senhor, vosso Deus, é quem vai convosco; não vos deixará, nem vos desamparará.", reference: "Deuteronômio 31:6" },
+                { text: "No mundo tereis aflições, mas tende bom ânimo; eu venci o mundo.", reference: "João 16:33" },
+                { text: "O Senhor é a minha luz e a minha salvação; a quem temerei? O Senhor é a força da minha vida; de quem me recearei?", reference: "Salmos 27:1" },
+                { text: "Não vos assusteis, nem vos amedronteis diante deles, porque o Senhor, vosso Deus, é quem vai convosco; não vos deixará, nem vos desamparará.", reference: "Deuteronômio 31:6" },
+                { text: "Esforçai-vos, e ele fortalecerá o vosso coração, vós todos os que esperais no Senhor.", reference: "Salmos 31:24" },
+                { text: "Não vos atemorizeis, nem vos espanteis por causa desta grande multidão, porque a peleja não é vossa, mas de Deus.", reference: "2 Crônicas 20:15" },
+                { text: "Espera no Senhor, anima-te, e ele fortalecerá o teu coração; espera, pois, no Senhor.", reference: "Salmos 27:14" },
+                { text: "O ímpio foge, embora ninguém o persiga, mas o justo é corajoso como o leão.", reference: "Provérbios 28:1" },
+                { text: "Tudo posso naquele que me fortalece.", reference: "Filipenses 4:13" },
+                { text: "Não se turbe o vosso coração; credes em Deus, crede também em mim.", reference: "João 14:1" }
+            ],
+            "profecia": [
+                { text: "Acima de tudo, saibam que nenhuma profecia da Escritura provém de interpretação particular, pois jamais a profecia teve origem na vontade humana, mas homens falaram da parte de Deus, impelidos pelo Espírito Santo.", reference: "2 Pedro 1:20-21" },
+                { text: "Não apaguem o Espírito. Não desprezem as profecias.", reference: "1 Tessalonicenses 5:19-20" },
+                { text: "Certamente o Senhor Deus não fará coisa alguma, sem ter revelado o seu segredo aos seus servos, os profetas.", reference: "Amós 3:7" },
+                { text: "E acontecerá, depois, que derramarei o meu Espírito sobre toda a carne; vossos filhos e vossas filhas profetizarão, vossos velhos sonharão, e vossos jovens terão visões.", reference: "Joel 2:28" },
+                { text: "Pois o testemunho de Jesus é o espírito da profecia.", reference: "Apocalipse 19:10" },
+                { text: "Mas o que profetiza fala aos homens, para edificação, exortação e consolação.", reference: "1 Coríntios 14:3" },
+                { text: "Segui o amor e procurai com zelo os dons espirituais, mas principalmente o de profetizar.", reference: "1 Coríntios 14:1" },
+                { text: "Mas se todos profetizarem, e entrar algum incrédulo ou indouto, por todos é convencido, por todos é julgado.", reference: "1 Coríntios 14:24" },
+                { text: "Não vos deixeis enganar por falsos profetas.", reference: "Mateus 7:15" },
+                { text: "E muitos falsos profetas se levantarão e enganarão a muitos.", reference: "Mateus 24:11" },
+                { text: "Porque o Senhor Deus não fará coisa alguma, sem ter revelado o seu segredo aos seus servos, os profetas.", reference: "Amós 3:7" },
+                { text: "E, se alguém tirar quaisquer palavras do livro desta profecia, Deus tirará a sua parte do livro da vida.", reference: "Apocalipse 22:19" },
+                { text: "Não apaguem o Espírito.", reference: "1 Tessalonicenses 5:19" },
+                { text: "Não desprezem as profecias.", reference: "1 Tessalonicenses 5:20" },
+                { text: "E o testemunho de Jesus é o espírito da profecia.", reference: "Apocalipse 19:10" },
+                { text: "E, se alguém tirar quaisquer palavras do livro desta profecia, Deus tirará a sua parte do livro da vida, e da cidade santa, e das coisas que estão escritas neste livro.", reference: "Apocalipse 22:19" },
+                { text: "Porque a profecia nunca foi produzida por vontade de homem algum, mas os homens santos de Deus falaram inspirados pelo Espírito Santo.", reference: "2 Pedro 1:21" },
+                { text: "Não apaguem o Espírito. Não desprezem as profecias, mas ponham à prova todas as coisas e apeguem-se ao que é bom.", reference: "1 Tessalonicenses 5:19-21" },
+                { text: "Certamente o Senhor Deus não fará coisa alguma, sem ter revelado o seu segredo aos seus servos, os profetas.", reference: "Amós 3:7" },
+                { text: "E acontecerá, depois, que derramarei o meu Espírito sobre toda a carne; vossos filhos e vossas filhas profetizarão, vossos velhos sonharão, e vossos jovens terão visões.", reference: "Joel 2:28" }
+            ],
+            "servir": [
+                { text: "Sirvam uns aos outros com amor.", reference: "Gálatas 5:13" },
+                { text: "Quem quiser tornar-se grande entre vós, será este o que vos sirva.", reference: "Mateus 20:26" },
+                { text: "Não servindo à vista, como para agradar a homens, mas como servos de Cristo, fazendo de coração a vontade de Deus.", reference: "Efésios 6:6" },
+                { text: "Cada um sirva aos outros o dom que recebeu, como bons despenseiros da multiforme graça de Deus.", reference: "1 Pedro 4:10" },
+                { text: "Porque, quanto ao Senhor, seus olhos passam por toda a terra, para mostrar-se forte para com aqueles cujo coração é totalmente dele.", reference: "2 Crônicas 16:9" },
+                { text: "Mas eu e a minha casa serviremos ao Senhor.", reference: "Josué 24:15" },
+                { text: "Servi ao Senhor com alegria, apresentai-vos a ele com cântico.", reference: "Salmos 100:2" },
+                { text: "Se alguém me serve, siga-me; e onde eu estiver, ali estará também o meu servo; e, se alguém me servir, meu Pai o honrará.", reference: "João 12:26" },
+                { text: "Mas agora, libertados do pecado e feitos servos de Deus, tendes o vosso fruto para santificação, e por fim a vida eterna.", reference: "Romanos 6:22" },
+                { text: "Não vos conformeis com este século, mas transformai-vos pela renovação da vossa mente, para que experimenteis qual seja a boa, agradável e perfeita vontade de Deus.", reference: "Romanos 12:2" },
+                { text: "Servi ao Senhor com alegria.", reference: "Salmos 100:2" },
+                { text: "Porque o Filho do Homem não veio para ser servido, mas para servir.", reference: "Marcos 10:45" },
+                { text: "Quem me serve, siga-me.", reference: "João 12:26" },
+                { text: "Servi uns aos outros com amor.", reference: "Gálatas 5:13" },
+                { text: "Qualquer que entre vós quiser ser o primeiro, será servo de todos.", reference: "Marcos 10:44" },
+                { text: "Tudo o que fizerdes, fazei-o de todo o coração, como ao Senhor, e não aos homens.", reference: "Colossenses 3:23" },
+                { text: "Porque nós somos cooperadores de Deus; vós sois lavoura de Deus e edifício de Deus.", reference: "1 Coríntios 3:9" },
+                { text: "Porque o Filho do Homem também não veio para ser servido, mas para servir e dar a sua vida em resgate por muitos.", reference: "Marcos 10:45" },
+                { text: "Quem me serve, siga-me; e onde eu estiver, ali estará também o meu servo; e, se alguém me servir, meu Pai o honrará.", reference: "João 12:26" },
+                { text: "Porque vós, irmãos, fostes chamados à liberdade. Não useis, porém, da liberdade para dar ocasião à carne, mas servi-vos uns aos outros pelo amor.", reference: "Gálatas 5:13" }
+            ],
+            "honrar": [
+                { text: "Honra teu pai e tua mãe, a fim de que tenhas vida longa na terra que o Senhor teu Deus te dá.", reference: "Êxodo 20:12" },
+                { text: "Honra ao Senhor com os teus bens e com as primícias de toda a tua renda.", reference: "Provérbios 3:9" },
+                { text: "Dai a cada um o que lhe é devido: a quem imposto, imposto; a quem tributo, tributo; a quem respeito, respeito; a quem honra, honra.", reference: "Romanos 13:7" },
+                { text: "Os anciãos que governam bem sejam considerados dignos de dobrados honorários, principalmente os que trabalham na palavra e na doutrina.", reference: "1 Timóteo 5:17" },
+                { text: "Filhos, obedecei em tudo a vossos pais, pois isso agrada ao Senhor.", reference: "Colossenses 3:20" },
+                { text: "Honra ao Senhor com os teus bens, e com as primícias de toda a tua renda.", reference: "Provérbios 3:9" },
+                { text: "Honrai a todos. Amai a fraternidade. Temei a Deus. Honrai ao rei.", reference: "1 Pedro 2:17" },
+                { text: "Aquele que me serve, meu Pai o honrará.", reference: "João 12:26" },
+                { text: "O que me honra, eu o honrarei.", reference: "1 Samuel 2:30" },
+                { text: "Os que são dignos de honra, honra.", reference: "Romanos 13:7" },
+                { text: "Honra ao Senhor com os teus bens.", reference: "Provérbios 3:9" },
+                { text: "Honra teu pai e tua mãe.", reference: "Êxodo 20:12" },
+                { text: "Honrai a todos.", reference: "1 Pedro 2:17" },
+                { text: "Aquele que me honra, eu o honrarei.", reference: "1 Samuel 2:30" },
+                { text: "Dai, pois, a César o que é de César e a Deus o que é de Deus.", reference: "Mateus 22:21" },
+                { text: "Honra ao Senhor com os teus bens, e com as primícias de toda a tua renda.", reference: "Provérbios 3:9" },
+                { text: "Dai, pois, a César o que é de César, e a Deus o que é de Deus.", reference: "Mateus 22:21" },
+                { text: "Honrai a todos. Amai a fraternidade. Temei a Deus. Honrai ao rei.", reference: "1 Pedro 2:17" },
+                { text: "O que me honra, eu o honrarei; mas os que me desprezam serão envilecidos.", reference: "1 Samuel 2:30" },
+                { text: "Filhos, obedecei a vossos pais no Senhor, porque isto é justo.", reference: "Efésios 6:1" }
+            ],
+            "oração": [
+                { text: "Orai sem cessar.", reference: "1 Tessalonicenses 5:17" },
+                { text: "Não andeis ansiosos por coisa alguma; antes em tudo, pela oração e súplicas, com ações de graças, sejam os vossos pedidos conhecidos diante de Deus.", reference: "Filipenses 4:6" },
+                { text: "A oração feita por um justo pode muito em seus efeitos.", reference: "Tiago 5:16" },
+                { text: "Pedi, e dar-se-vos-á; buscai, e achareis; batei, e abrir-se-vos-á.", reference: "Mateus 7:7" },
+                { text: "E tudo o que pedirdes em oração, crendo, o recebereis.", reference: "Mateus 21:22" },
+                { text: "Vigiai e orai, para que não entreis em tentação; na verdade, o espírito está pronto, mas a carne é fraca.", reference: "Mateus 26:41" },
+                { text: "E tudo o que pedirdes em meu nome, eu o farei, para que o Pai seja glorificado no Filho.", reference: "João 14:13" },
+                { text: "Se vós estiverdes em mim, e as minhas palavras estiverem em vós, pedireis tudo o que quiserdes, e vos será feito.", reference: "João 15:7" },
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "Perseverai na oração, velando nela com ação de graças.", reference: "Colossenses 4:2" },
+                { text: "Quando orardes, entrai no vosso aposento e, fechando a vossa porta, orai a vosso Pai que está em secreto; e vosso Pai, que vê em secreto, vos recompensará.", reference: "Mateus 6:6" },
+                { text: "Mas, quando orardes, não useis de vãs repetições, como os gentios.", reference: "Mateus 6:7" },
+                { text: "E tudo o que pedirdes na oração, crendo, o recebereis.", reference: "Mateus 21:22" },
+                { text: "A oração de um justo é poderosa e eficaz.", reference: "Tiago 5:16" },
+                { text: "Orai uns pelos outros para serdes curados.", reference: "Tiago 5:16" },
+                { text: "E tudo o que pedirdes em oração, crendo, o recebereis.", reference: "Mateus 21:22" },
+                { text: "Pedi, e dar-se-vos-á; buscai, e achareis; batei, e abrir-se-vos-á.", reference: "Mateus 7:7" },
+                { text: "Orai sem cessar.", reference: "1 Tessalonicenses 5:17" },
+                { text: "Não andeis ansiosos por coisa alguma; antes em tudo, pela oração e súplicas, com ações de graças, sejam os vossos pedidos conhecidos diante de Deus.", reference: "Filipenses 4:6" },
+                { text: "A oração feita por um justo pode muito em seus efeitos.", reference: "Tiago 5:16" },
+                { text: "Vigiai e orai, para que não entreis em tentação; na verdade, o espírito está pronto, mas a carne é fraca.", reference: "Mateus 26:41" },
+                { text: "E tudo o que pedirdes em meu nome, eu o farei, para que o Pai seja glorificado no Filho.", reference: "João 14:13" },
+                { text: "Se vós estiverdes em mim, e as minhas palavras estiverem em vós, pedireis tudo o que quiserdes, e vos será feito.", reference: "João 15:7" },
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "Perseverai na oração, velando nela com ação de graças.", reference: "Colossenses 4:2" }
+            ],
+            "clamor": [
+                { text: "Clama a mim, e responder-te-ei, e anunciar-te-ei coisas grandes e firmes que não sabes.", reference: "Jeremias 33:3" },
+                { text: "O Senhor está perto de todos os que o invocam, de todos os que o invocam com sinceridade.", reference: "Salmos 145:18" },
+                { text: "Na minha angústia clamei ao Senhor; gritei por socorro ao meu Deus. Do seu templo ele ouviu a minha voz; o meu clamor chegou aos seus ouvidos.", reference: "Salmos 18:6" },
+                { text: "Então vocês me invocarão, virão orar a mim, e eu os ouvirei.", reference: "Jeremias 29:12" },
+                { text: "O Senhor ouve o clamor dos justos e os livra de todas as suas tribulações.", reference: "Salmos 34:17" },
+                { text: "Os justos clamam, e o Senhor os ouve; e os livra de todas as suas angústias.", reference: "Salmos 34:17" },
+                { text: "Desde o fim da terra clamo a ti, com o coração abatido; leva-me para a rocha que é mais alta do que eu.", reference: "Salmos 61:2" },
+                { text: "Clama a mim, e eu te responderei.", reference: "Jeremias 33:3" },
+                { text: "O Senhor está perto dos que têm o coração quebrantado e salva os de espírito oprimido.", reference: "Salmos 34:18" },
+                { text: "Eles clamaram ao Senhor na sua angústia, e ele os livrou das suas aflições.", reference: "Salmos 107:6" },
+                { text: "Quando clamares, ele te ouvirá.", reference: "Jó 22:27" },
+                { text: "Clamei ao Senhor na minha angústia, e ele me respondeu.", reference: "Salmos 120:1" },
+                { text: "O Senhor está perto de todos os que o invocam.", reference: "Salmos 145:18" },
+                { text: "E o Senhor ouviu o clamor dos filhos de Israel.", reference: "Êxodo 3:7" },
+                { text: "Mas o Senhor ouviu o clamor dos pobres.", reference: "Salmos 9:12" },
+                { text: "Clama a mim, e responder-te-ei, e anunciar-te-ei coisas grandes e firmes que não sabes.", reference: "Jeremias 33:3" },
+                { text: "O Senhor está perto de todos os que o invocam, de todos os que o invocam com sinceridade.", reference: "Salmos 145:18" },
+                { text: "Na minha angústia clamei ao Senhor; gritei por socorro ao meu Deus. Do seu templo ele ouviu a minha voz; o meu clamor chegou aos seus ouvidos.", reference: "Salmos 18:6" },
+                { text: "Então vocês me invocarão, virão orar a mim, e eu os ouvirei.", reference: "Jeremias 29:12" },
+                { text: "O Senhor ouve o clamor dos justos e os livra de todas as suas tribulações.", reference: "Salmos 34:17" }
+            ],
+            "jejum": [
+                { text: "Mas tu, quando jejuares, unge a tua cabeça e lava o teu rosto, para não pareceres aos homens que jejuas, mas a teu Pai, que está em secreto; e teu Pai, que vê em secreto, te recompensará.", reference: "Mateus 6:17-18" },
+                { text: "Esta casta de demônios não se expulsa senão à força de oração e de jejum.", reference: "Mateus 17:21" },
+                { text: "Então apregoei ali um jejum junto ao rio Aava, para nos humilharmos diante do nosso Deus, para lhe pedirmos caminho seguro para nós, para nossos filhos e para todos os nossos bens.", reference: "Esdras 8:21" },
+                { text: "E, tendo jejuado quarenta dias e quarenta noites, depois teve fome.", reference: "Mateus 4:2" },
+                { text: "Não sejas como os hipócritas, de semblante triste.", reference: "Mateus 6:16" },
+                { text: "Mas vós, quando jejuardes, ungi a vossa cabeça e lavai o vosso rosto.", reference: "Mateus 6:17" },
+                { text: "E, quando jejuardes, não vos mostreis contristados como os hipócritas; porque desfiguram os seus rostos, para que aos homens pareça que jejuam. Em verdade vos digo que já receberam o seu galardão.", reference: "Mateus 6:16" },
+                { text: "Então Jesus lhes disse: Poderão porventura os filhos das bodas jejuar, enquanto o esposo está com eles? Enquanto têm consigo o esposo, não podem jejuar.", reference: "Marcos 2:19" },
+                { text: "Mas dias virão em que lhes será tirado o esposo, e então jejuarão naqueles dias.", reference: "Marcos 2:20" },
+                { text: "Mas nós jejuaremos e oraremos ao nosso Deus, e ele nos atenderá.", reference: "Esdras 8:23" },
+                { text: "Jejuai e orai para que não entreis em tentação.", reference: "Mateus 26:41" },
+                { text: "Quando jejuardes, não vos mostreis contristados.", reference: "Mateus 6:16" },
+                { text: "Este tipo de demônio só pode ser expulso por oração e jejum.", reference: "Mateus 17:21" },
+                { text: "Então o Senhor disse: 'Jejuem e orem a mim'.", reference: "Joel 2:12" },
+                { text: "Eles jejuaram e oraram, e o Senhor os ouviu.", reference: "Esdras 8:23" },
+                { text: "Mas tu, quando jejuares, unge a tua cabeça e lava o teu rosto, para não pareceres aos homens que jejuas, mas a teu Pai, que está em secreto; e teu Pai, que vê em secreto, te recompensará.", reference: "Mateus 6:17-18" },
+                { text: "E disse-lhes: Esta casta não pode sair com coisa alguma, a não ser com oração e jejum.", reference: "Marcos 9:29" },
+                { text: "Então apregoei ali um jejum junto ao rio Aava, para nos humilharmos diante do nosso Deus, para lhe pedirmos caminho seguro para nós, para nossos filhos e para todos os nossos bens.", reference: "Esdras 8:21" },
+                { text: "E, tendo jejuado quarenta dias e quarenta noites, depois teve fome.", reference: "Mateus 4:2" },
+                { text: "Não sejas como os hipócritas, de semblante triste.", reference: "Mateus 6:16" }
+            ],
+            "sacrifício": [
+                { text: "Rogo-vos, pois, irmãos, pela compaixão de Deus, que apresenteis os vossos corpos em sacrifício vivo, santo e agradável a Deus, que é o vosso culto racional.", reference: "Romanos 12:1" },
+                { text: "Porque Cristo, nossa Páscoa, foi sacrificado por nós.", reference: "1 Coríntios 5:7" },
+                { text: "O sacrifício aceitável a Deus é o espírito quebrantado; ao coração quebrantado e contrito não desprezarás, ó Deus.", reference: "Salmos 51:17" },
+                { text: "Porque com uma só oferta aperfeiçoou para sempre os que estão sendo santificados.", reference: "Hebreus 10:14" },
+                { text: "E andai em amor, como também Cristo vos amou e se entregou a si mesmo por nós, como oferta e sacrifício a Deus, em cheiro suave.", reference: "Efésios 5:2" },
+                { text: "Porquanto, sem derramamento de sangue não há remissão.", reference: "Hebreus 9:22" },
+                { text: "Mas ele foi ferido por causa das nossas transgressões, e moído por causa das nossas iniquidades; o castigo que nos traz a paz estava sobre ele, e pelas suas pisaduras fomos sarados.", reference: "Isaías 53:5" },
+                { text: "Pois é impossível que o sangue de touros e de bodes tire pecados.", reference: "Hebreus 10:4" },
+                { text: "Portanto, ofereçamos sempre por ele a Deus sacrifício de louvor, isto é, o fruto dos nossos lábios, que confessam o seu nome.", reference: "Hebreus 13:15" },
+                { text: "Não vos esqueçais da beneficência e comunicação, porque com tais sacrifícios Deus se agrada.", reference: "Hebreus 13:16" },
+                { text: "O sacrifício do ímpio é abominação ao Senhor.", reference: "Provérbios 15:8" },
+                { text: "Porque eu quero a misericórdia, e não o sacrifício.", reference: "Oséias 6:6" },
+                { text: "Apresenteis os vossos corpos em sacrifício vivo.", reference: "Romanos 12:1" },
+                { text: "Pelo que, entrando no mundo, diz: Sacrifício e oferta não quiseste.", reference: "Hebreus 10:5" },
+                { text: "Mas um corpo me preparaste.", reference: "Hebreus 10:5" },
+                { text: "Rogo-vos, pois, irmãos, pela compaixão de Deus, que apresenteis os vossos corpos em sacrifício vivo, santo e agradável a Deus, que é o vosso culto racional.", reference: "Romanos 12:1" },
+                { text: "Porque Cristo, nossa Páscoa, foi sacrificado por nós.", reference: "1 Coríntios 5:7" },
+                { text: "Os sacrifícios para Deus são o espírito quebrantado; um coração contrito e quebrantado, ó Deus, não desprezarás.", reference: "Salmos 51:17" },
+                { text: "Porque com uma só oferta aperfeiçoou para sempre os que estão sendo santificados.", reference: "Hebreus 10:14" },
+                { text: "E andai em amor, como também Cristo vos amou e se entregou a si mesmo por nós, como oferta e sacrifício a Deus, em cheiro suave.", reference: "Efésios 5:2" }
+            ],
+            "aliança": [
+                { text: "E farei a minha aliança entre mim e ti e a tua descendência depois de ti em suas gerações, por aliança perpétua, para te ser a ti por Deus e à tua descendência depois de ti.", reference: "Gênesis 17:7" },
+                { text: "Eis que faço uma aliança; farei diante de todo o teu povo maravilhas que nunca foram feitas em toda a terra, nem em nação alguma; de maneira que todo este povo, no meio do qual tu estás, verá a obra do Senhor; porque coisa terrível é o que farei contigo.", reference: "Êxodo 34:10" },
+                { text: "Mas agora alcançou ele ministério tanto mais excelente, quanto é mediador de uma melhor aliança, que está confirmada em melhores promessas.", reference: "Hebreus 8:6" },
+                { text: "Este cálice é a nova aliança no meu sangue, que é derramado por vós.", reference: "Lucas 22:20" },
+                { text: "Porque esta é a aliança que farei com a casa de Israel, depois daqueles dias, diz o Senhor: Porei as minhas leis no seu entendimento, e em seu coração as escreverei; e eu lhes serei por Deus, e eles me serão por povo.", reference: "Hebreus 8:10" },
+                { text: "Lembra-te da tua aliança, porque os lugares escuros da terra estão cheios de moradas de crueldade.", reference: "Salmos 74:20" },
+                { text: "E farei com eles uma aliança de paz; e haverá um pacto eterno com eles; e os estabelecerei, e os multiplicarei, e porei o meu santuário no meio deles para sempre.", reference: "Ezequiel 37:26" },
+                { text: "Mas agora ele obteve um ministério tanto mais excelente, quanto é mediador de uma melhor aliança, que está confirmada em melhores promessas.", reference: "Hebreus 8:6" },
+                { text: "Porque esta é a aliança que farei com a casa de Israel, depois daqueles dias, diz o Senhor: Porei as minhas leis em sua mente, e as escreverei em seu coração; e eu serei o seu Deus, e eles serão o meu povo.", reference: "Hebreus 8:10" },
+                { text: "E ele é a cabeça do corpo, da igreja; é o princípio e o primogênito dentre os mortos, para que em tudo tenha a preeminência.", reference: "Colossenses 1:18" },
+                { text: "E a aliança que fiz com vossos pais.", reference: "Deuteronômio 4:13" },
+                { text: "E ele é o mediador de uma nova aliança.", reference: "Hebreus 9:15" },
+                { text: "Esta é a minha aliança com eles, diz o Senhor: o meu Espírito, que está sobre ti, e as minhas palavras, que pus na tua boca, não se desviarão da tua boca.", reference: "Isaías 59:21" },
+                { text: "E farei com eles uma aliança eterna.", reference: "Jeremias 32:40" },
+                { text: "E ele vos anunciou a sua aliança, que vos ordenou cumprir, os dez mandamentos, e os escreveu em duas tábuas de pedra.", reference: "Deuteronômio 4:13" },
+                { text: "E farei a minha aliança entre mim e ti e a tua descendência depois de ti em suas gerações, por aliança perpétua, para te ser a ti por Deus e à tua descendência depois de ti.", reference: "Gênesis 17:7" },
+                { text: "Eis que faço uma aliança; farei diante de todo o teu povo maravilhas que nunca foram feitas em toda a terra, nem em nação alguma; de maneira que todo este povo, no meio do qual tu estás, verá a obra do Senhor; porque coisa terrível é o que farei contigo.", reference: "Êxodo 34:10" },
+                { text: "Mas agora alcançou ele ministério tanto mais excelente, quanto é mediador de uma melhor aliança, que está confirmada em melhores promessas.", reference: "Hebreus 8:6" },
+                { text: "Este cálice é a nova aliança no meu sangue, que é derramado por vós.", reference: "Lucas 22:20" },
+                { text: "Porque esta é a aliança que farei com a casa de Israel, depois daqueles dias, diz o Senhor: Porei as minhas leis no seu entendimento, e em seu coração as escreverei; e eu lhes serei por Deus, e eles me serão por povo.", reference: "Hebreus 8:10" }
+            ],
+            "promessas": [
+                { text: "O Senhor é fiel em todas as suas promessas e é bondoso em tudo o que faz.", reference: "Salmos 145:13" },
+                { text: "Porque todas quantas promessas há de Deus, são nele sim, e por ele o Amém, para glória de Deus por nós.", reference: "2 Coríntios 1:20" },
+                { text: "Pois as promessas de Deus são 'sim' em Cristo. E por meio dele o 'Amém' é pronunciado por nós para a glória de Deus.", reference: "2 Coríntios 1:20" },
+                { text: "Pois a promessa é para vocês, para os seus filhos e para todos os que estão longe, para todos quantos o Senhor, nosso Deus, chamar.", reference: "Atos 2:39" },
+                { text: "Pelas quais ele nos tem dado grandíssimas e preciosas promessas, para que por elas fiqueis participantes da natureza divina, havendo escapado da corrupção, que pela concupiscência há no mundo.", reference: "2 Pedro 1:4" },
+                { text: "O Senhor cumprirá o seu propósito para comigo; a tua benignidade, ó Senhor, dura para sempre; não desampares as obras das tuas mãos.", reference: "Salmos 138:8" },
+                { text: "Deus não é homem para que minta, nem filho de homem para que se arrependa. Porventura, tendo ele dito, não o fará? Ou, havendo falado, não o cumprirá?", reference: "Números 23:19" },
+                { text: "O Senhor não retarda a sua promessa, ainda que alguns a têm por tardia; mas é longânimo para convosco, não querendo que alguns se percam, senão que todos venham a arrepender-se.", reference: "2 Pedro 3:9" },
+                { text: "Ora, a fé é a certeza daquilo que esperamos e a prova das coisas que não vemos.", reference: "Hebreus 11:1" },
+                { text: "E assim, esperando com paciência, alcançou a promessa.", reference: "Hebreus 6:15" },
+                { text: "As promessas de Deus são fiéis e verdadeiras.", reference: "Tito 1:2" },
+                { text: "Porque todas as promessas de Deus são 'sim' em Cristo.", reference: "2 Coríntios 1:20" },
+                { text: "O Senhor é fiel em todas as suas palavras e santo em todas as suas obras.", reference: "Salmos 145:13" },
+                { text: "Aquele que prometeu é fiel.", reference: "Hebreus 10:23" },
+                { text: "A promessa é para vós e para vossos filhos.", reference: "Atos 2:39" },
+                { text: "O Senhor é fiel em todas as suas promessas e é bondoso em tudo o que faz.", reference: "Salmos 145:13" },
+                { text: "Porque todas quantas promessas há de Deus, são nele sim, e por ele o Amém, para glória de Deus por nós.", reference: "2 Coríntios 1:20" },
+                { text: "Pois a promessa é para vocês, para os seus filhos e para todos os que estão longe, para todos quantos o Senhor, nosso Deus, chamar.", reference: "Atos 2:39" },
+                { text: "Pelas quais ele nos tem dado grandíssimas e preciosas promessas, para que por elas fiqueis participantes da natureza divina, havendo escapado da corrupção, que pela concupiscência há no mundo.", reference: "2 Pedro 1:4" },
+                { text: "O Senhor cumprirá o seu propósito para comigo; a tua benignidade, ó Senhor, dura para sempre; não desampares as obras das tuas mãos.", reference: "Salmos 138:8" }
+            ],
+            "palavra": [
+                { text: "Lâmpada para os meus pés é a tua palavra, e luz para o meu caminho.", reference: "Salmos 119:105" },
+                { text: "Porque a palavra de Deus é viva e eficaz, e mais penetrante do que espada alguma de dois gumes, e penetra até à divisão da alma e do espírito, e das juntas e medulas, e é apta para discernir os pensamentos e intenções do coração.", reference: "Hebreus 4:12" },
+                { text: "Toda a Escritura é divinamente inspirada e proveitosa para ensinar, para repreender, para corrigir, para instruir em justiça.", reference: "2 Timóteo 3:16" },
+                { text: "No princípio era o Verbo, e o Verbo estava com Deus, e o Verbo era Deus.", reference: "João 1:1" },
+                { text: "Santifica-os na verdade; a tua palavra é a verdade.", reference: "João 17:17" },
+                { text: "A tua palavra é a verdade.", reference: "João 17:17" },
+                { text: "Mas a palavra do Senhor permanece para sempre. E esta é a palavra que vos foi evangelizada.", reference: "1 Pedro 1:25" },
+                { text: "Aquele que ouve a minha palavra e crê naquele que me enviou tem a vida eterna.", reference: "João 5:24" },
+                { text: "Porque a palavra de Deus é viva e eficaz.", reference: "Hebreus 4:12" },
+                { text: "A fé vem pelo ouvir, e o ouvir pela palavra de Deus.", reference: "Romanos 10:17" },
+                { text: "Guardo no coração as tuas palavras para não pecar contra ti.", reference: "Salmos 119:11" },
+                { text: "A palavra de Cristo habite em vós abundantemente.", reference: "Colossenses 3:16" },
+                { text: "Bem-aventurados os que ouvem a palavra de Deus e a guardam.", reference: "Lucas 11:28" },
+                { text: "Porque não é a palavra de Deus que falha.", reference: "Romanos 9:6" },
+                { text: "A palavra do Senhor é pura.", reference: "Salmos 12:6" },
+                { text: "Lâmpada para os meus pés é a tua palavra, e luz para o meu caminho.", reference: "Salmos 119:105" },
+                { text: "Porque a palavra de Deus é viva e eficaz, e mais penetrante do que espada alguma de dois gumes, e penetra até à divisão da alma e do espírito, e das juntas e medulas, e é apta para discernir os pensamentos e intenções do coração.", reference: "Hebreus 4:12" },
+                { text: "Toda a Escritura é divinamente inspirada e proveitosa para ensinar, para repreender, para corrigir, para instruir em justiça.", reference: "2 Timóteo 3:16" },
+                { text: "No princípio era o Verbo, e o Verbo estava com Deus, e o Verbo era Deus.", reference: "João 1:1" },
+                { text: "Santifica-os na verdade; a tua palavra é a verdade.", reference: "João 17:17" }
+            ],
+            "louvor": [
+                { text: "Tudo o que tem fôlego louve ao Senhor. Aleluia!", reference: "Salmos 150:6" },
+                { text: "Entrai pelas portas dele com gratidão e em seus átrios com louvor; rendei-lhe graças e bendizei o seu nome.", reference: "Salmos 100:4" },
+                { text: "Ofereçamos sempre a Deus, por meio de Jesus, um sacrifício de louvor, que é o fruto dos lábios que confessam o seu nome.", reference: "Hebreus 13:15" },
+                { text: "Cantarei ao Senhor enquanto eu viver; cantarei louvores ao meu Deus enquanto eu tiver existência.", reference: "Salmos 104:33" },
+                { text: "O Senhor é a minha força e o meu escudo; nele o meu coração confia, e dele recebo ajuda. Meu coração exulta de alegria, e com o meu cântico eu o louvarei.", reference: "Salmos 28:7" },
+                { text: "Alegrai-vos no Senhor, e exultai, justos; e cantai de alegria, todos vós que sois retos de coração.", reference: "Salmos 32:11" },
+                { text: "Exaltarei o Senhor em todo o tempo; o seu louvor estará continuamente na minha boca.", reference: "Salmos 34:1" },
+                { text: "Vinde, cantemos ao Senhor; jubilemos à rocha da nossa salvação.", reference: "Salmos 95:1" },
+                { text: "A minha alma engrandece ao Senhor, e o meu espírito se alegra em Deus, meu Salvador.", reference: "Lucas 1:46-47" },
+                { text: "Para que o louvor da sua glória seja para nós, os que primeiro esperamos em Cristo.", reference: "Efésios 1:12" },
+                { text: "Louvai ao Senhor, todas as nações; louvai-o, todos os povos.", reference: "Salmos 117:1" },
+                { text: "Porque a sua benignidade é grande para conosco, e a fidelidade do Senhor dura para sempre. Louvai ao Senhor!", reference: "Salmos 117:2" },
+                { text: "Ofereçamos a Deus sacrifício de louvor.", reference: "Hebreus 13:15" },
+                { text: "O louvor é agradável ao Senhor.", reference: "Salmos 69:30-31" },
+                { text: "Cantai ao Senhor um cântico novo.", reference: "Salmos 96:1" },
+                { text: "Tudo o que tem fôlego louve ao Senhor. Louvai ao Senhor!", reference: "Salmos 150:6" },
+                { text: "Entrai pelas portas dele com gratidão e em seus átrios com louvor; rendei-lhe graças e bendizei o seu nome.", reference: "Salmos 100:4" },
+                { text: "Ofereçamos sempre a Deus, por meio de Jesus, um sacrifício de louvor, isto é, o fruto dos lábios que confessam o seu nome.", reference: "Hebreus 13:15" },
+                { text: "Cantarei ao Senhor enquanto eu viver; cantarei louvores ao meu Deus enquanto eu tiver existência.", reference: "Salmos 104:33" },
+                { text: "O Senhor é a minha força e o meu escudo; nele o meu coração confia, e dele recebo ajuda. Pelo que o meu coração salta de prazer, e com o meu canto o louvarei.", reference: "Salmos 28:7" }
+            ],
+            "batalha": [
+                { text: "Porque a nossa luta não é contra carne e sangue, mas contra os principados e potestades, contra os dominadores deste mundo tenebroso, contra as forças espirituais do mal nas regiões celestes.", reference: "Efésios 6:12" },
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "O Senhor é um guerreiro; o Senhor é o seu nome.", reference: "Êxodo 15:3" },
+                { text: "Não se amedrontem; não se assustem; não se apavorem diante deles. Pois o Senhor, o seu Deus, os acompanhará e lutará por vocês contra os seus inimigos, para lhes dar a vitória.", reference: "Deuteronômio 20:3-4" },
+                { text: "As armas com as quais lutamos não são humanas; ao contrário, são poderosas em Deus para destruir fortalezas.", reference: "2 Coríntios 10:4" },
+                { text: "Não vos vingueis a vós mesmos, amados, mas dai lugar à ira; porque está escrito: Minha é a vingança; eu recompensarei, diz o Senhor.", reference: "Romanos 12:19" },
+                { text: "O Senhor pelejará por vós, e vós vos calareis.", reference: "Êxodo 14:14" },
+                { text: "Combati o bom combate, terminei a corrida, guardei a fé.", reference: "2 Timóteo 4:7" },
+                { text: "Sede sóbrios, vigiai. O vosso adversário, o diabo, anda em derredor, rugindo como leão, buscando a quem possa tragar.", reference: "1 Pedro 5:8" },
+                { text: "Revesti-vos de toda a armadura de Deus, para que possais estar firmes contra as astutas ciladas do diabo.", reference: "Efésios 6:11" },
+                { text: "A batalha é do Senhor.", reference: "1 Samuel 17:47" },
+                { text: "O Senhor é a minha força e o meu escudo.", reference: "Salmos 28:7" },
+                { text: "Não temais, nem vos assusteis por causa deles.", reference: "Deuteronômio 31:6" },
+                { text: "O Senhor é contigo, homem valente.", reference: "Juízes 6:12" },
+                { text: "Alegrai-vos no Senhor, e regozijai-vos, justos.", reference: "Salmos 32:11" },
+                { text: "Porque a nossa luta não é contra carne e sangue, mas contra os principados e potestades, contra os dominadores deste mundo tenebroso, contra as forças espirituais do mal nas regiões celestes.", reference: "Efésios 6:12" },
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "O Senhor é um guerreiro; o Senhor é o seu nome.", reference: "Êxodo 15:3" },
+                { text: "Não se amedrontem; não se assustem; não se apavorem diante deles. Pois o Senhor, o seu Deus, os acompanhará e lutará por vocês contra os seus inimigos, para lhes dar a vitória.", reference: "Deuteronômio 20:3-4" },
+                { text: "As armas com as quais lutamos não são humanas; ao contrário, são poderosas em Deus para destruir fortalezas.", reference: "2 Coríntios 10:4" }
+            ],
+            "milagres": [
+                { text: "Jesus respondeu: 'Eu sou o caminho, a verdade e a vida. Ninguém vem ao Pai, a não ser por mim'.", reference: "João 14:6" },
+                { text: "Jesus, porém, olhando para eles, disse: 'Aos homens é impossível, mas não a Deus; porque para Deus tudo é possível'.", reference: "Marcos 10:27" },
+                { text: "E muitos outros sinais fez Jesus na presença dos seus discípulos, os quais não estão escritos neste livro. Estes, porém, foram escritos para que creiais que Jesus é o Cristo, o Filho de Deus, e para que, crendo, tenhais vida em seu nome.", reference: "João 20:30-31" },
+                { text: "Porque para Deus nada será impossível.", reference: "Lucas 1:37" },
+                { text: "E, operando Deus milagres extraordinários por meio de Paulo, de sorte que até lenços e aventais eram levados do seu corpo aos enfermos, e as enfermidades fugiam deles, e os espíritos malignos saíam.", reference: "Atos 19:11-12" },
+                { text: "E Jesus, chamando os seus doze discípulos, deu-lhes poder sobre os espíritos imundos, para os expulsarem, e para curarem toda sorte de enfermidade e todo mal.", reference: "Mateus 10:1" },
+                { text: "E ele disse: 'Se você crer, verá a glória de Deus'.", reference: "João 11:40" },
+                { text: "E, levantando-se Jesus, repreendeu o vento e disse ao mar: Cala-te, aquieta-te. E o vento se aquietou, e houve grande bonança.", reference: "Marcos 4:39" },
+                { text: "E, tendo chegado à casa, os cegos aproximaram-se dele; e Jesus lhes perguntou: Credes vós que eu posso fazer isto? Disseram-lhe eles: Sim, Senhor.", reference: "Mateus 9:28" },
+                { text: "Então lhes tocou os olhos, dizendo: Seja-vos feito segundo a vossa fé.", reference: "Mateus 9:29" },
+                { text: "E muitos sinais e prodígios eram feitos entre o povo pelas mãos dos apóstolos.", reference: "Atos 5:12" },
+                { text: "Jesus fez muitos outros milagres que não estão escritos neste livro.", reference: "João 20:30" },
+                { text: "Porque para Deus nada é impossível.", reference: "Lucas 1:37" },
+                { text: "E os que creem, estes sinais os seguirão.", reference: "Marcos 16:17" },
+                { text: "Milagres e maravilhas.", reference: "Atos 2:22" },
+                { text: "Jesus respondeu: 'Eu sou o caminho, a verdade e a vida. Ninguém vem ao Pai, a não ser por mim'.", reference: "João 14:6" },
+                { text: "Jesus, porém, olhando para eles, disse: 'Aos homens é impossível, mas não a Deus; porque para Deus tudo é possível'.", reference: "Marcos 10:27" },
+                { text: "E muitos outros sinais fez Jesus na presença dos seus discípulos, os quais não estão escritos neste livro. Estes, porém, foram escritos para que creiais que Jesus é o Cristo, o Filho de Deus, e para que, crendo, tenhais vida em seu nome.", reference: "João 20:30-31" },
+                { text: "Porque para Deus nada será impossível.", reference: "Lucas 1:37" },
+                { text: "E, operando Deus milagres extraordinários por meio de Paulo, de sorte que até lenços e aventais eram levados do seu corpo aos enfermos, e as enfermidades fugiam deles, e os espíritos malignos saíam.", reference: "Atos 19:11-12" }
+            ],
+            "curas": [
+                { text: "Ele é que perdoa todas as tuas iniquidades, que sara todas as tuas enfermidades.", reference: "Salmos 103:3" },
+                { text: "Pelas suas feridas fomos sarados.", reference: "Isaías 53:5" },
+                { text: "Curai os enfermos, limpai os leprosos, ressuscitai os mortos, expulsai os demônios; de graça recebestes, de graça dai.", reference: "Mateus 10:8" },
+                { text: "E a oração da fé salvará o doente, e o Senhor o levantará; e, se houver cometido pecados, ser-lhe-ão perdoados.", reference: "Tiago 5:15" },
+                { text: "Ele enviou a sua palavra, e os curou; e os livrou da sua destruição.", reference: "Salmos 107:20" },
+                { text: "E, chegando-se a ele a multidão, trazia consigo coxos, cegos, mudos, aleijados, e muitos outros, e os puseram aos pés de Jesus; e ele os curou.", reference: "Mateus 15:30" },
+                { text: "E disse-lhe Jesus: Vai, a tua fé te salvou. E no mesmo instante viu, e seguia a Jesus pelo caminho.", reference: "Marcos 10:52" },
+                { text: "E, entrando Jesus em Cafarnaum, chegou junto dele um centurião, rogando-lhe, e dizendo: Senhor, o meu criado jaz em casa, paralítico, e gravemente atormentado.", reference: "Mateus 8:5-6" },
+                { text: "E Jesus lhe disse: Eu irei, e o curarei.", reference: "Mateus 8:7" },
+                { text: "Mas o centurião, respondendo, disse: Senhor, não sou digno de que entres debaixo do meu telhado, mas dize somente uma palavra, e o meu criado sarará.", reference: "Mateus 8:8" },
+                { text: "Pelas suas feridas fomos curados.", reference: "1 Pedro 2:24" },
+                { text: "E Jesus, estendendo a mão, tocou-lhe, dizendo: Quero; sê limpo. E logo a lepra desapareceu dele.", reference: "Mateus 8:3" },
+                { text: "E a oração da fé salvará o doente.", reference: "Tiago 5:15" },
+                { text: "Ele os curou a todos.", reference: "Lucas 6:19" },
+                { text: "O Senhor é o que sara todas as tuas enfermidades.", reference: "Salmos 103:3" },
+                { text: "Ele é que perdoa todas as tuas iniquidades, que sara todas as tuas enfermidades.", reference: "Salmos 103:3" },
+                { text: "Pelas suas feridas fomos sarados.", reference: "Isaías 53:5" },
+                { text: "Curai os enfermos, limpai os leprosos, ressuscitai os mortos, expulsai os demônios; de graça recebestes, de graça dai.", reference: "Mateus 10:8" },
+                { text: "E a oração da fé salvará o doente, e o Senhor o levantará; e, se houver cometido pecados, ser-lhe-ão perdoados.", reference: "Tiago 5:15" },
+                { text: "Ele enviou a sua palavra, e os curou; e os livrou da sua destruição.", reference: "Salmos 107:20" }
+            ],
+            "bênçãos": [
+                { text: "O Senhor te abençoe e te guarde; o Senhor faça resplandecer o seu rosto sobre ti e te conceda graça; o Senhor volte para ti o seu rosto e te dê paz.", reference: "Números 6:24-26" },
+                { text: "Bem-aventurado o homem que não anda segundo o conselho dos ímpios, nem se detém no caminho dos pecadores, nem se assenta na roda dos escarnecedores.", reference: "Salmos 1:1" },
+                { text: "E o meu Deus, segundo as suas riquezas, suprirá todas as vossas necessidades em glória, por Cristo Jesus.", reference: "Filipenses 4:19" },
+                { text: "Bem-aventurados os que choram, porque eles serão consolados.", reference: "Mateus 5:4" },
+                { text: "O Senhor te abrirá o seu bom tesouro, o céu, para dar chuva à tua terra no seu tempo, e para abençoar toda a obra das tuas mãos.", reference: "Deuteronômio 28:12" },
+                { text: "Bem-aventurados os que têm fome e sede de justiça, porque eles serão fartos.", reference: "Mateus 5:6" },
+                { text: "Bem-aventurados os misericordiosos, porque eles alcançarão misericórdia.", reference: "Mateus 5:7" },
+                { text: "Bem-aventurados os limpos de coração, porque eles verão a Deus.", reference: "Mateus 5:8" },
+                { text: "Bem-aventurados os que são perseguidos por causa da justiça, porque deles é o reino dos céus.", reference: "Mateus 5:10" },
+                { text: "O Senhor te abençoe desde Sião, para que vejas o bem de Jerusalém em todos os dias da tua vida.", reference: "Salmos 128:5" },
+                { text: "A bênção do Senhor enriquece, e não traz consigo dores.", reference: "Provérbios 10:22" },
+                { text: "Bem-aventurado o homem que põe no Senhor a sua confiança.", reference: "Salmos 40:4" },
+                { text: "Bem-aventurados os que ouvem a palavra de Deus e a guardam.", reference: "Lucas 11:28" },
+                { text: "O Senhor te abençoe e te guarde.", reference: "Números 6:24" },
+                { text: "Bem-aventurado o homem que não anda segundo o conselho dos ímpios.", reference: "Salmos 1:1" },
+                { text: "O Senhor te abençoe e te guarde; o Senhor faça resplandecer o seu rosto sobre ti e te conceda graça; o Senhor volte para ti o seu rosto e te dê paz.", reference: "Números 6:24-26" },
+                { text: "Bem-aventurado o homem que não anda segundo o conselho dos ímpios, nem se detém no caminho dos pecadores, nem se assenta na roda dos escarnecedores.", reference: "Salmos 1:1" },
+                { text: "E o meu Deus, segundo as suas riquezas, suprirá todas as vossas necessidades em glória, por Cristo Jesus.", reference: "Filipenses 4:19" },
+                { text: "Bem-aventurados os que choram, porque eles serão consolados.", reference: "Mateus 5:4" },
+                { text: "O Senhor te abrirá o seu bom tesouro, o céu, para dar chuva à tua terra no seu tempo, e para abençoar toda a obra das tuas mãos.", reference: "Deuteronômio 28:12" }
+            ],
+            "paciencia": [
+                { text: "Sede, pois, irmãos, pacientes até à vinda do Senhor. Eis que o lavrador espera o precioso fruto da terra, aguardando-o com paciência, até que receba a chuva temporã e serôdia.", reference: "Tiago 5:7" },
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "Mas a perseverança deve ter a sua obra perfeita, para que sejais perfeitos e completos, não faltando em coisa alguma.", reference: "Tiago 1:4" },
+                { text: "Com toda a humildade e mansidão, com longanimidade, suportando-vos uns aos outros em amor.", reference: "Efésios 4:2" },
+                { text: "O Senhor é bom para com aqueles que esperam por ele, para com aqueles que o buscam.", reference: "Lamentações 3:25" },
+                { text: "Melhor é o fim das coisas do que o princípio delas; e o paciente de espírito é melhor do que o altivo de espírito.", reference: "Eclesiastes 7:8" },
+                { text: "A longanimidade é melhor do que o poder, e o que domina o seu espírito do que o que toma uma cidade.", reference: "Provérbios 16:32" },
+                { text: "Porém, se esperamos o que não vemos, com paciência o aguardamos.", reference: "Romanos 8:25" },
+                { text: "Com paciência, corramos a carreira que nos está proposta.", reference: "Hebreus 12:1" },
+                { text: "A paciência é uma virtude.", reference: "Tiago 1:4" },
+                { text: "Sede, pois, irmãos, pacientes até à vinda do Senhor. Eis que o lavrador espera o precioso fruto da terra, aguardando-o com paciência, até que receba a chuva temporã e serôdia.", reference: "Tiago 5:7" },
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "Mas a perseverança deve ter a sua obra perfeita, para que sejais perfeitos e completos, não faltando em coisa alguma.", reference: "Tiago 1:4" },
+                { text: "Com toda a humildade e mansidão, com longanimidade, suportando-vos uns aos outros em amor.", reference: "Efésios 4:2" },
+                { text: "O Senhor é bom para com aqueles que esperam por ele, para com aqueles que o buscam.", reference: "Lamentações 3:25" }
+            ],
+            "riqueza": [
+                { text: "A bênção do Senhor enriquece, e não traz consigo dores.", reference: "Provérbios 10:22" },
+                { text: "Melhor é o pouco com justiça do que grandes rendas com injustiça.", reference: "Provérbios 16:8" },
+                { text: "Não vos amontoeis tesouros na terra, onde a traça e a ferrugem tudo consomem, e onde os ladrões minam e roubam. Mas ajuntai para vós tesouros no céu.", reference: "Mateus 6:19-20" },
+                { text: "Porque onde estiver o vosso tesouro, aí estará também o vosso coração.", reference: "Mateus 6:21" },
+                { text: "Porque o amor ao dinheiro é a raiz de todos os males; e alguns, por cobiçá-lo, se desviaram da fé e se traspassaram a si mesmos com muitas dores.", reference: "1 Timóteo 6:10" },
+                { text: "A riqueza que é ganha por fraude diminuirá, mas quem a ajunta com o próprio trabalho a aumentará.", reference: "Provérbios 13:11" },
+                { text: "O rico domina sobre os pobres, e o que toma emprestado é servo do que empresta.", reference: "Provérbios 22:7" },
+                { text: "Aquele que ama o dinheiro nunca terá o suficiente; quem ama as riquezas nunca ficará satisfeito com os seus ganhos. Isso também é vaidade.", reference: "Eclesiastes 5:10" },
+                { text: "Não vos preocupeis com o dia de amanhã.", reference: "Mateus 6:34" },
+                { text: "O Senhor empobrece e enriquece; abaixa e também exalta.", reference: "1 Samuel 2:7" },
+                { text: "A bênção do Senhor enriquece, e não traz consigo dores.", reference: "Provérbios 10:22" },
+                { text: "Melhor é o pouco com justiça do que grandes rendas com injustiça.", reference: "Provérbios 16:8" },
+                { text: "Não vos amontoeis tesouros na terra, onde a traça e a ferrugem tudo consomem, e onde os ladrões minam e roubam. Mas ajuntai para vós tesouros no céu.", reference: "Mateus 6:19-20" },
+                { text: "Porque onde estiver o vosso tesouro, aí estará também o vosso coração.", reference: "Mateus 6:21" },
+                { text: "Porque o amor ao dinheiro é a raiz de todos os males; e alguns, por cobiçá-lo, se desviaram da fé e se traspassaram a si mesmos com muitas dores.", reference: "1 Timóteo 6:10" }
+            ],
+            "coração": [
+                { text: "Sobre tudo o que se deve guardar, guarda o teu coração, porque dele procedem as fontes da vida.", reference: "Provérbios 4:23" },
+                { text: "Bem-aventurados os limpos de coração, porque eles verão a Deus.", reference: "Mateus 5:8" },
+                { text: "O coração alegre aformoseia o rosto, mas pela dor do coração o espírito se abate.", reference: "Provérbios 15:13" },
+                { text: "Enganoso é o coração, mais do que todas as coisas, e perverso; quem o conhecerá?", reference: "Jeremias 17:9" },
+                { text: "Criai em mim, ó Deus, um coração puro, e renova em mim um espírito reto.", reference: "Salmos 51:10" },
+                { text: "Porque onde estiver o vosso tesouro, aí estará também o vosso coração.", reference: "Mateus 6:21" },
+                { text: "De todo o coração te busquei; não me deixes desviar dos teus mandamentos.", reference: "Salmos 119:10" },
+                { text: "O coração do homem planeja o seu caminho, mas o Senhor dirige os seus passos.", reference: "Provérbios 16:9" },
+                { text: "E o coração que se alegra é um banquete contínuo.", reference: "Provérbios 15:15" },
+                { text: "Amarás o Senhor teu Deus de todo o teu coração, de toda a tua alma e de todo o teu entendimento.", reference: "Mateus 22:37" },
+                { text: "Sobre tudo o que se deve guardar, guarda o teu coração, porque dele procedem as fontes da vida.", reference: "Provérbios 4:23" },
+                { text: "Bem-aventurados os limpos de coração, porque eles verão a Deus.", reference: "Mateus 5:8" },
+                { text: "O coração alegre aformoseia o rosto, mas pela dor do coração o espírito se abate.", reference: "Provérbios 15:13" },
+                { text: "Enganoso é o coração, mais do que todas as coisas, e perverso; quem o conhecerá?", reference: "Jeremias 17:9" },
+                { text: "Criai em mim, ó Deus, um coração puro, e renova em mim um espírito reto.", reference: "Salmos 51:10" }
+            ],
+            "arrependimento": [
+                { text: "Arrependei-vos, pois, e convertei-vos, para que sejam apagados os vossos pecados, e venham assim os tempos de refrigério pela presença do Senhor.", reference: "Atos 3:19" },
+                { text: "Desde então, começou Jesus a pregar e a dizer: Arrependei-vos, porque é chegado o Reino dos céus.", reference: "Mateus 4:17" },
+                { text: "O Senhor não retarda a sua promessa, ainda que alguns a têm por tardia; mas é longânimo para convosco, não querendo que alguns se percam, senão que todos venham a arrepender-se.", reference: "2 Pedro 3:9" },
+                { text: "Produzi, pois, frutos dignos de arrependimento.", reference: "Mateus 3:8" },
+                { text: "Porque a tristeza segundo Deus opera arrependimento para a salvação, da qual ninguém se arrepende; mas a tristeza do mundo opera a morte.", reference: "2 Coríntios 7:10" },
+                { text: "O que encobre as suas transgressões nunca prosperará, mas o que as confessa e as abandona, alcançará misericórdia.", reference: "Provérbios 28:13" },
+                { text: "Vinde, e argui-me, diz o Senhor; ainda que os vossos pecados sejam como a escarlata, eles se tornarão brancos como a neve; ainda que sejam vermelhos como o carmesim, se tornarão como a branca lã.", reference: "Isaías 1:18" },
+                { text: "Se o meu povo, que se chama pelo meu nome, se humilhar, e orar, e buscar a minha face, e se converter dos seus maus caminhos, então eu ouvirei dos céus, e perdoarei os seus pecados, e sararei a sua terra.", reference: "2 Crônicas 7:14" },
+                { text: "O Senhor é misericordioso e compassivo, longânimo e assaz benigno.", reference: "Salmos 103:8" },
+                { text: "Há alegria no céu por um pecador que se arrepende.", reference: "Lucas 15:7" },
+                { text: "Arrependei-vos, pois, e convertei-vos, para que sejam apagados os vossos pecados, e venham assim os tempos de refrigério pela presença do Senhor.", reference: "Atos 3:19" },
+                { text: "Desde então, começou Jesus a pregar e a dizer: Arrependei-vos, porque é chegado o Reino dos céus.", reference: "Mateus 4:17" },
+                { text: "O Senhor não retarda a sua promessa, ainda que alguns a têm por tardia; mas é longânimo para convosco, não querendo que alguns se percam, senão que todos venham a arrepender-se.", reference: "2 Pedro 3:9" },
+                { text: "Produzi, pois, frutos dignos de arrependimento.", reference: "Mateus 3:8" },
+                { text: "Porque a tristeza segundo Deus opera arrependimento para a salvação, da qual ninguém se arrepende; mas a tristeza do mundo opera a morte.", reference: "2 Coríntios 7:10" }
+            ],
+            "sofrimento": [
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "Porque as aflições deste tempo presente não são para comparar com a glória que em nós há de ser revelada.", reference: "Romanos 8:18" },
+                { text: "O Senhor está perto dos que têm o coração quebrantado e salva os de espírito oprimido.", reference: "Salmos 34:18" },
+                { text: "Em tudo somos atribulados, mas não angustiados; perplexos, mas não desanimados; perseguidos, mas não desamparados; abatidos, mas não destruídos.", reference: "2 Coríntios 4:8-9" },
+                { text: "E sabemos que todas as coisas cooperam para o bem daqueles que amam a Deus, daqueles que são chamados segundo o seu propósito.", reference: "Romanos 8:28" },
+                { text: "Porque, assim como os sofrimentos de Cristo transbordam sobre nós, também por meio de Cristo transborda a nossa consolação.", reference: "2 Coríntios 1:5" },
+                { text: "Em vossas aflições, sede pacientes.", reference: "Romanos 12:12" },
+                { text: "Bem-aventurados os que choram, porque eles serão consolados.", reference: "Mateus 5:4" },
+                { text: "O choro pode durar uma noite, mas a alegria vem pela manhã.", reference: "Salmos 30:5" },
+                { text: "Lançando sobre ele toda a vossa ansiedade, porque ele tem cuidado de vós.", reference: "1 Pedro 5:7" },
+                { text: "Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", reference: "Romanos 12:12" },
+                { text: "Porque as aflições deste tempo presente não são para comparar com a glória que em nós há de ser revelada.", reference: "Romanos 8:18" },
+                { text: "O Senhor está perto dos que têm o coração quebrantado e salva os de espírito oprimido.", reference: "Salmos 34:18" },
+                { text: "Em tudo somos atribulados, mas não angustiados; perplexos, mas não desanimados; perseguidos, mas não desamparados; abatidos, mas não destruídos.", reference: "2 Coríntios 4:8-9" },
+                { text: "E sabemos que todas as coisas cooperam para o bem daqueles que amam a Deus, daqueles que são chamados segundo o seu propósito.", reference: "Romanos 8:28" }
+            ],
+            "morte": [
+                { text: "Porque o salário do pecado é a morte, mas o dom gratuito de Deus é a vida eterna em Cristo Jesus nosso Senhor.", reference: "Romanos 6:23" },
+                { text: "Eu sou a ressurreição e a vida; quem crê em mim, ainda que esteja morto, viverá.", reference: "João 11:25" },
+                { text: "Onde está, ó morte, o teu aguilhão? Onde está, ó inferno, a tua vitória?", reference: "1 Coríntios 15:55" },
+                { text: "Porque para mim o viver é Cristo, e o morrer é ganho.", reference: "Filipenses 1:21" },
+                { text: "Preciosa é à vista do Senhor a morte dos seus santos.", reference: "Salmos 116:15" },
+                { text: "E, como aos homens está ordenado morrerem uma vez, vindo depois disso o juízo.", reference: "Hebreus 9:27" },
+                { text: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna.", reference: "João 3:16" },
+                { text: "E lhes enxugará dos olhos toda lágrima, e não haverá mais morte, nem pranto, nem clamor, nem dor; porque já as primeiras coisas são passadas.", reference: "Apocalipse 21:4" },
+                { text: "A morte foi tragada pela vitória.", reference: "1 Coríntios 15:54" },
+                { text: "Aquele que me segue não andará em trevas, mas terá a luz da vida.", reference: "João 8:12" },
+                { text: "Porque o salário do pecado é a morte, mas o dom gratuito de Deus é a vida eterna em Cristo Jesus nosso Senhor.", reference: "Romanos 6:23" },
+                { text: "Eu sou a ressurreição e a vida; quem crê em mim, ainda que esteja morto, viverá.", reference: "João 11:25" },
+                { text: "Onde está, ó morte, o teu aguilhão? Onde está, ó inferno, a tua vitória?", reference: "1 Coríntios 15:55" },
+                { text: "Porque para mim o viver é Cristo, e o morrer é ganho.", reference: "Filipenses 1:21" },
+                { text: "Preciosa é à vista do Senhor a morte dos seus santos.", reference: "Salmos 116:15" }
+            ],
+            "doenças": [
+                { text: "Ele é que perdoa todas as tuas iniquidades, que sara todas as tuas enfermidades.", reference: "Salmos 103:3" },
+                { text: "Pelas suas feridas fomos sarados.", reference: "Isaías 53:5" },
+                { text: "Curai os enfermos, limpai os leprosos, ressuscitai os mortos, expulsai os demônios; de graça recebestes, de graça dai.", reference: "Mateus 10:8" },
+                { text: "E a oração da fé salvará o doente, e o Senhor o levantará; e, se houver cometido pecados, ser-lhe-ão perdoados.", reference: "Tiago 5:15" },
+                { text: "Ele enviou a sua palavra, e os curou; e os livrou da sua destruição.", reference: "Salmos 107:20" },
+                { text: "E, chegando-se a ele a multidão, trazia consigo coxos, cegos, mudos, aleijados, e muitos outros, e os puseram aos pés de Jesus; e ele os curou.", reference: "Mateus 15:30" },
+                { text: "E disse-lhe Jesus: Vai, a tua fé te salvou. E no mesmo instante viu, e seguia a Jesus pelo caminho.", reference: "Marcos 10:52" },
+                { text: "E, entrando Jesus em Cafarnaum, chegou junto dele um centurião, rogando-lhe, e dizendo: Senhor, o meu criado jaz em casa, paralítico, e gravemente atormentado.", reference: "Mateus 8:5-6" },
+                { text: "E Jesus lhe disse: Eu irei, e o curarei.", reference: "Mateus 8:7" },
+                { text: "Mas o centurião, respondendo, disse: Senhor, não sou digno de que entres debaixo do meu telhado, mas dize somente uma palavra, e o meu criado sarará.", reference: "Mateus 8:8" },
+                { text: "Pelas suas feridas fomos curados.", reference: "1 Pedro 2:24" },
+                { text: "E Jesus, estendendo a mão, tocou-lhe, dizendo: Quero; sê limpo. E logo a lepra desapareceu dele.", reference: "Mateus 8:3" },
+                { text: "E a oração da fé salvará o doente.", reference: "Tiago 5:15" },
+                { text: "Ele os curou a todos.", reference: "Lucas 6:19" },
+                { text: "O Senhor é o que sara todas as tuas enfermidades.", reference: "Salmos 103:3" },
+                { text: "Ele é que perdoa todas as tuas iniquidades, que sara todas as tuas enfermidades.", reference: "Salmos 103:3" },
+                { text: "Pelas suas feridas fomos sarados.", reference: "Isaías 53:5" },
+                { text: "Curai os enfermos, limpai os leprosos, ressuscitai os mortos, expulsai os demônios; de graça recebestes, de graça dai.", reference: "Mateus 10:8" },
+                { text: "E a oração da fé salvará o doente, e o Senhor o levantará; e, se houver cometido pecados, ser-lhe-ão perdoados.", reference: "Tiago 5:15" },
+                { text: "Ele enviou a sua palavra, e os curou; e os livrou da sua destruição.", reference: "Salmos 107:20" }
+            ],
+            "purificação": [
+                { text: "Se confessarmos os nossos pecados, ele é fiel e justo para nos perdoar os pecados e nos purificar de toda injustiça.", reference: "1 João 1:9" },
+                { text: "Lavai-vos, purificai-vos, tirai a maldade de vossos atos de diante dos meus olhos; cessai de fazer o mal.", reference: "Isaías 1:16" },
+                { text: "Purifica-me com hissopo, e ficarei puro; lava-me, e ficarei mais branco do que a neve.", reference: "Salmos 51:7" },
+                { text: "Mas, se andarmos na luz, como ele na luz está, temos comunhão uns com os outros, e o sangue de Jesus Cristo, seu Filho, nos purifica de todo pecado.", reference: "1 João 1:7" },
+                { text: "Como purificará o jovem o seu caminho? Observando-o conforme a tua palavra.", reference: "Salmos 119:9" },
+                { text: "E ele mesmo nos purificou dos nossos pecados pelo seu sangue.", reference: "Hebreus 9:14" },
+                { text: "Criai em mim, ó Deus, um coração puro, e renova em mim um espírito reto.", reference: "Salmos 51:10" },
+                { text: "Bem-aventurados os limpos de coração, porque eles verão a Deus.", reference: "Mateus 5:8" },
+                { text: "Purificai as vossas mãos, pecadores; e, vós de duplo ânimo, purificai os corações.", reference: "Tiago 4:8" },
+                { text: "Porque, se o sangue de bodes e de touros e a cinza de uma novilha, aspergidos sobre os imundos, os santificam, quanto à purificação da carne, muito mais o sangue de Cristo.", reference: "Hebreus 9:13-14" },
+                { text: "Se confessarmos os nossos pecados, ele é fiel e justo para nos perdoar os pecados e nos purificar de toda injustiça.", reference: "1 João 1:9" },
+                { text: "Lavai-vos, purificai-vos, tirai a maldade de vossos atos de diante dos meus olhos; cessai de fazer o mal.", reference: "Isaías 1:16" },
+                { text: "Purifica-me com hissopo, e ficarei puro; lava-me, e ficarei mais branco do que a neve.", reference: "Salmos 51:7" },
+                { text: "Mas, se andarmos na luz, como ele na luz está, temos comunhão uns com os outros, e o sangue de Jesus Cristo, seu Filho, nos purifica de todo pecado.", reference: "1 João 1:7" },
+                { text: "Como purificará o jovem o seu caminho? Observando-o conforme a tua palavra.", reference: "Salmos 119:9" }
+            ],
+            "guerra": [
+                { text: "O Senhor é um guerreiro; o Senhor é o seu nome.", reference: "Êxodo 15:3" },
+                { text: "Não vos vingueis a vós mesmos, amados, mas dai lugar à ira; porque está escrito: Minha é a vingança; eu recompensarei, diz o Senhor.", reference: "Romanos 12:19" },
+                { text: "Porque a nossa luta não é contra carne e sangue, mas contra os principados e potestades, contra os dominadores deste mundo tenebroso, contra as forças espirituais do mal nas regiões celestes.", reference: "Efésios 6:12" },
+                { text: "Não se amedrontem; não se assustem; não se apavorem diante deles. Pois o Senhor, o seu Deus, os acompanhará e lutará por vocês contra os seus inimigos, para lhes dar a vitória.", reference: "Deuteronômio 20:3-4" },
+                { text: "As armas com as quais lutamos não são humanas; ao contrário, são poderosas em Deus para destruir fortalezas.", reference: "2 Coríntios 10:4" },
+                { text: "O Senhor pelejará por vós, e vós vos calareis.", reference: "Êxodo 14:14" },
+                { text: "Combati o bom combate, terminei a corrida, guardei a fé.", reference: "2 Timóteo 4:7" },
+                { text: "Sede sóbrios, vigiai. O vosso adversário, o diabo, anda em derredor, rugindo como leão, buscando a quem possa tragar.", reference: "1 Pedro 5:8" },
+                { text: "Revesti-vos de toda a armadura de Deus, para que possais estar firmes contra as astutas ciladas do diabo.", reference: "Efésios 6:11" },
+                { text: "A batalha é do Senhor.", reference: "1 Samuel 17:47" },
+                { text: "O Senhor é um guerreiro; o Senhor é o seu nome.", reference: "Êxodo 15:3" },
+                { text: "Não vos vingueis a vós mesmos, amados, mas dai lugar à ira; porque está escrito: Minha é a vingança; eu recompensarei, diz o Senhor.", reference: "Romanos 12:19" },
+                { text: "Porque a nossa luta não é contra carne e sangue, mas contra os principados e potestades, contra os dominadores deste mundo tenebroso, contra as forças espirituais do mal nas regiões celestes.", reference: "Efésios 6:12" },
+                { text: "Não se amedrontem; não se assustem; não se apavorem diante deles. Pois o Senhor, o seu Deus, os acompanhará e lutará por vocês contra os seus inimigos, para lhes dar a vitória.", reference: "Deuteronômio 20:3-4" },
+                { text: "As armas com as quais lutamos não são humanas; ao contrário, são poderosas em Deus para destruir fortalezas.", reference: "2 Coríntios 10:4" }
+            ],
+            "força": [
+                { text: "Tudo posso naquele que me fortalece.", reference: "Filipenses 4:13" },
+                { text: "O Senhor é a minha força e o meu escudo; nele o meu coração confia, e dele recebo ajuda.", reference: "Salmos 28:7" },
+                { text: "Mas os que esperam no Senhor renovarão as suas forças. Subirão com asas como águias; correrão e não se cansarão; caminharão e não se fatigarão.", reference: "Isaías 40:31" },
+                { text: "Não temas, porque eu sou contigo; não te assombres, porque eu sou o teu Deus; eu te fortaleço, e te ajudo, e te sustento com a destra da minha justiça.", reference: "Isaías 41:10" },
+                { text: "O Senhor é a minha força e o meu cântico; ele se tornou a minha salvação. Ele é o meu Deus, e eu o louvarei; é o Deus de meu pai, e eu o exaltarei.", reference: "Êxodo 15:2" },
+                { text: "Sede fortes e corajosos.", reference: "Deuteronômio 31:6" },
+                { text: "O Senhor é a minha rocha, a minha fortaleza e o meu libertador.", reference: "Salmos 18:2" },
+                { text: "Alegrai-vos no Senhor, e regozijai-vos, justos; e cantai de alegria, todos vós que sois retos de coração.", reference: "Salmos 32:11" },
+                { text: "Alegrai-vos sempre no Senhor; outra vez digo, alegrai-vos.", reference: "Filipenses 4:4" },
+                { text: "O Senhor dá força ao seu povo; o Senhor abençoa o seu povo com paz.", reference: "Salmos 29:11" },
+                { text: "Tudo posso naquele que me fortalece.", reference: "Filipenses 4:13" },
+                { text: "O Senhor é a minha força e o meu escudo; nele o meu coração confia, e dele recebo ajuda.", reference: "Salmos 28:7" },
+                { text: "Mas os que esperam no Senhor renovarão as suas forças. Subirão com asas como águias; correrão e não se cansarão; caminharão e não se fatigarão.", reference: "Isaías 40:31" },
+                { text: "Não temas, porque eu sou contigo; não te assombres, porque eu sou o teu Deus; eu te fortaleço, e te ajudo, e te sustento com a destra da minha justiça.", reference: "Isaías 41:10" },
+                { text: "O Senhor é a minha força e o meu cântico; ele se tornou a minha salvação. Ele é o meu Deus, e eu o louvarei; é o Deus de meu pai, e eu o exaltarei.", reference: "Êxodo 15:2" }
+            ],
+            "conselhos": [
+                { text: "Onde não há conselho, o povo cai; mas na multidão de conselhos há segurança.", reference: "Provérbios 11:14" },
+                { text: "Ouve o conselho e recebe a instrução, para que sejas sábio nos teus últimos dias.", reference: "Provérbios 19:20" },
+                { text: "Sem conselhos os planos fracassam, mas com muitos conselheiros eles são bem-sucedidos.", reference: "Provérbios 15:22" },
+                { text: "O caminho do tolo é reto aos seus próprios olhos, mas o que dá ouvidos ao conselho é sábio.", reference: "Provérbios 12:15" },
+                { text: "Aconselha-te com os sábios e serás sábio.", reference: "Provérbios 13:20" },
+                { text: "O temor do Senhor é o princípio do conhecimento.", reference: "Provérbios 1:7" },
+                { text: "Os planos do diligente tendem à abundância, mas os de todo o apressado, à pobreza.", reference: "Provérbios 21:5" },
+                { text: "O homem que tem muitos amigos pode vir a ruínas, mas há amigo mais chegado do que um irmão.", reference: "Provérbios 18:24" },
+                { text: "O conselho do Senhor permanece para sempre; os intentos do seu coração, de geração em geração.", reference: "Salmos 33:11" },
+                { text: "Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.", reference: "Provérbios 3:5" },
+                { text: "Onde não há conselho, o povo cai; mas na multidão de conselhos há segurança.", reference: "Provérbios 11:14" },
+                { text: "Ouve o conselho e recebe a instrução, para que sejas sábio nos teus últimos dias.", reference: "Provérbios 19:20" },
+                { text: "Sem conselhos os planos fracassam, mas com muitos conselheiros eles são bem-sucedidos.", reference: "Provérbios 15:22" },
+                { text: "O caminho do tolo é reto aos seus próprios olhos, mas o que dá ouvidos ao conselho é sábio.", reference: "Provérbios 12:15" },
+                { text: "Aconselha-te com os sábios e serás sábio.", reference: "Provérbios 13:20" }
+            ],
+            "ajuda": [
+                { text: "O meu socorro vem do Senhor, que fez o céu e a terra.", reference: "Salmos 121:2" },
+                { text: "Deus é o nosso refúgio e fortaleza, socorro bem presente na angústia.", reference: "Salmos 46:1" },
+                { text: "Lançando sobre ele toda a vossa ansiedade, porque ele tem cuidado de vós.", reference: "1 Pedro 5:7" },
+                { text: "Não temas, porque eu sou contigo; não te assombres, porque eu sou o teu Deus; eu te fortaleço, e te ajudo, e te sustento com a destra da minha justiça.", reference: "Isaías 41:10" },
+                { text: "O Senhor é o meu pastor; nada me faltará.", reference: "Salmos 23:1" },
+                { text: "O meu socorro vem do Senhor.", reference: "Salmos 121:2" },
+                { text: "Deus é o nosso refúgio e fortaleza.", reference: "Salmos 46:1" },
+                { text: "O Senhor é o que me ajuda, pelo que não serei confundido.", reference: "Isaías 50:7" },
+                { text: "Porque eu, o Senhor teu Deus, te tomo pela tua mão direita, e te digo: Não temas, eu te ajudo.", reference: "Isaías 41:13" },
+                { text: "O Senhor é o meu auxílio.", reference: "Hebreus 13:6" },
+                { text: "O meu socorro vem do Senhor, que fez o céu e a terra.", reference: "Salmos 121:2" },
+                { text: "Deus é o nosso refúgio e fortaleza, socorro bem presente na angústia.", reference: "Salmos 46:1" },
+                { text: "Lançando sobre ele toda a vossa ansiedade, porque ele tem cuidado de vós.", reference: "1 Pedro 5:7" },
+                { text: "Não temas, porque eu sou contigo; não te assombres, porque eu sou o teu Deus; eu te fortaleço, e te ajudo, e te sustento com a destra da minha justiça.", reference: "Isaías 41:10" },
+                { text: "O Senhor é o meu pastor; nada me faltará.", reference: "Salmos 23:1" }
+            ],
+            "ofertas": [
+                { text: "Honra ao Senhor com os teus bens e com as primícias de toda a tua renda.", reference: "Provérbios 3:9" },
+                { text: "Cada um dê conforme propôs no seu coração, não com tristeza ou por necessidade; porque Deus ama ao que dá com alegria.", reference: "2 Coríntios 9:7" },
+                { text: "E, se alguém der mesmo que seja apenas um copo de água fria a um destes pequeninos, por ser meu discípulo, em verdade vos digo que de modo nenhum perderá a sua recompensa.", reference: "Mateus 10:42" },
+                { text: "Trazei todos os dízimos à casa do tesouro, para que haja mantimento na minha casa, e depois fazei prova de mim, diz o Senhor dos Exércitos, se eu não vos abrir as janelas do céu e não derramar sobre vós uma bênção tal, que dela vos advenha a maior abastança.", reference: "Malaquias 3:10" },
+                { text: "Porque, onde estiver o vosso tesouro, aí estará também o vosso coração.", reference: "Mateus 6:21" },
+                { text: "O que dá liberalmente, com alegria.", reference: "Romanos 12:8" },
+                { text: "O que dá aos pobres não terá falta, mas o que esconde os seus olhos terá muitas maldições.", reference: "Provérbios 28:27" },
+                { text: "Dai, e ser-vos-á dado; boa medida, recalcada, sacudida e transbordando, vos deitarão no vosso regaço; porque com a mesma medida com que medirdes, vos medirão a vós.", reference: "Lucas 6:38" },
+                { text: "Porque Deus ama ao que dá com alegria.", reference: "2 Coríntios 9:7" },
+                { text: "E Jesus, assentando-se defronte da arca do tesouro, observava como a multidão lançava ali o dinheiro; e muitos ricos deitavam muito.", reference: "Marcos 12:41" },
+                { text: "Honra ao Senhor com os teus bens e com as primícias de toda a tua renda.", reference: "Provérbios 3:9" },
+                { text: "Cada um dê conforme propôs no seu coração, não com tristeza ou por necessidade; porque Deus ama ao que dá com alegria.", reference: "2 Coríntios 9:7" },
+                { text: "E, se alguém der mesmo que seja apenas um copo de água fria a um destes pequeninos, por ser meu discípulo, em verdade vos digo que de modo nenhum perderá a sua recompensa.", reference: "Mateus 10:42" },
+                { text: "Trazei todos os dízimos à casa do tesouro, para que haja mantimento na minha casa, e depois fazei prova de mim, diz o Senhor dos Exércitos, se eu não vos abrir as janelas do céu e não derramar sobre vós uma bênção tal, que dela vos advenha a maior abastança.", reference: "Malaquias 3:10" },
+                { text: "Porque, onde estiver o vosso tesouro, aí estará também o vosso coração.", reference: "Mateus 6:21" }
+            ],
+            "dúvidas": [
+                { text: "Mas peça-a com fé, não duvidando; porque o que duvida é semelhante à onda do mar, que é levada pelo vento e lançada de uma para outra parte.", reference: "Tiago 1:6" },
+                { text: "Tudo é possível àquele que crê.", reference: "Marcos 9:23" },
+                { text: "Por que duvidaste?", reference: "Mateus 14:31" },
+                { text: "Se tiverdes fé como um grão de mostarda, direis a este monte: Passa daqui para acolá, e há de passar; e nada vos será impossível.", reference: "Mateus 17:20" },
+                { text: "E Jesus, respondendo, disse-lhes: Tende fé em Deus.", reference: "Marcos 11:22" },
+                { text: "A fé vem pelo ouvir a mensagem, e a mensagem é ouvida mediante a palavra de Cristo.", reference: "Romanos 10:17" },
+                { text: "Sem fé é impossível agradar a Deus.", reference: "Hebreus 11:6" },
+                { text: "Porque tudo o que não provém de fé é pecado.", reference: "Romanos 14:23" },
+                { text: "Não duvideis, mas crede.", reference: "Marcos 11:23" },
+                { text: "O Senhor é a minha luz e a minha salvação; a quem temerei?", reference: "Salmos 27:1" },
+                { text: "Mas peça-a com fé, não duvidando; porque o que duvida é semelhante à onda do mar, que é levada pelo vento e lançada de uma para outra parte.", reference: "Tiago 1:6" },
+                { text: "Tudo é possível àquele que crê.", reference: "Marcos 9:23" },
+                { text: "Por que duvidaste?", reference: "Mateus 14:31" },
+                { text: "Se tiverdes fé como um grão de mostarda, direis a este monte: Passa daqui para acolá, e há de passar; e nada vos será impossível.", reference: "Mateus 17:20" },
+                { text: "E Jesus, respondendo, disse-lhes: Tende fé em Deus.", reference: "Marcos 11:22" }
+            ]
+        };
+
+        // Define o tema inicial como o primeiro da lista de temas
+        let currentTheme = Object.keys(themedVerses)[0];
+        let currentVerseIndex = 0; // Índice do versículo atual dentro do tema selecionado
+        let isDarkMode = false; // Estado inicial do tema: claro
+
+        // Seleciona os elementos HTML
+        const verseDisplay = document.getElementById('verse-display');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const sidebar = document.getElementById('sidebar');
+        const themeButtonsContainer = document.getElementById('theme-buttons-container');
+        const selectedThemeDisplay = document.getElementById('selected-theme-display'); // Novo elemento para exibir o tema selecionado
+        const themeToggleButton = document.getElementById('theme-toggle-button');
+        const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const mainContent = document.getElementById('main-content');
+        const themeIcon = document.getElementById('theme-icon');
+
+        /**
+         * Função para criar e adicionar os botões de tema dinamicamente dentro da sidebar.
+         */
+        function createThemeButtons() {
+            themeButtonsContainer.innerHTML = ''; // Limpa os botões existentes antes de recriar
+            // Itera sobre cada tema no objeto themedVerses
+            Object.keys(themedVerses).forEach(theme => {
+                const button = document.createElement('button');
+                // Capitaliza a primeira letra do tema para exibição no botão
+                button.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+                // Adiciona classes Tailwind para estilização base dos botões de tema
+                button.classList.add('theme-button');
+
+                // Adiciona um event listener para cada botão de tema
+                button.addEventListener('click', () => {
+                    currentTheme = theme; // Atualiza o tema atual
+                    currentVerseIndex = 0; // Reinicia o índice do versículo ao mudar de tema
+                    displayVerse(); // Exibe o primeiro versículo do novo tema
+                    updateThemeButtonStyles(); // Atualiza os estilos dos botões para marcar o ativo
+                    // Fecha a sidebar no mobile após a seleção
+                    if (window.innerWidth <= 767) {
+                        sidebar.classList.remove('open');
+                        sidebarOverlay.classList.remove('show');
+                    }
+                    selectedThemeDisplay.textContent = `Tema: ${theme.charAt(0).toUpperCase() + theme.slice(1)}`; // Atualiza o nome do tema exibido
+                });
+                themeButtonsContainer.appendChild(button); // Adiciona o botão ao contêiner de botões de tema
+            });
+        }
+
+        /**
+         * Função para atualizar os estilos dos botões de tema, marcando o tema ativo.
+         */
+        function updateThemeButtonStyles() {
+            document.querySelectorAll('.theme-button').forEach(button => {
+                // Verifica se o texto do botão (em minúsculas) corresponde ao tema atual
+                if (button.textContent.toLowerCase() === currentTheme) {
+                    // Adiciona classes para o estado ativo
+                    button.classList.add('active');
+                } else {
+                    // Remove classes do estado ativo
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        /**
+         * Função para exibir o versículo atual com uma animação de fade.
+         * @param {boolean} animate - Se deve aplicar a animação de fade.
+         */
+        function displayVerse(animate = true) {
+            // Obtém os versículos para o tema atualmente selecionado
+            const versesForCurrentTheme = themedVerses[currentTheme];
+
+            // Verifica se há versículos para o tema atual
+            if (!versesForCurrentTheme || versesForCurrentTheme.length === 0) {
+                verseDisplay.innerHTML = `<p>Nenhum versículo encontrado para o tema: <span class="font-bold">${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}</span>.</p>`;
+                return; // Sai da função se não houver versículos
+            }
+
+            if (animate) {
+                // Adiciona a classe 'fade-out' para iniciar a animação de saída
+                verseDisplay.classList.add('fade-out');
+                // Remove a classe 'fade-in' se estiver presente
+                verseDisplay.classList.remove('fade-in');
+
+                // Espera a animação de fade-out terminar antes de mudar o conteúdo e fade-in
+                setTimeout(() => {
+                    const verse = versesForCurrentTheme[currentVerseIndex];
+                    // Modifica a estrutura para colocar a referência acima do texto do versículo
+                    verseDisplay.innerHTML = `
+                        <span class="verse-reference">${verse.reference}</span>
+                        <p>${verse.text}</p>
+                    `;
+                    // Remove a classe 'fade-out' e adiciona 'fade-in' para a nova animação de entrada
+                    verseDisplay.classList.remove('fade-out');
+                    verseDisplay.classList.add('fade-in');
+                }, 300); // Duração da animação de fade-out
+            } else {
+                // Exibe o versículo sem animação (para a carga inicial)
+                const verse = versesForCurrentTheme[currentVerseIndex];
+                // Modifica a estrutura para colocar a referência acima do texto do versículo
+                verseDisplay.innerHTML = `
+                    <span class="verse-reference">${verse.reference}</span>
+                    <p>${verse.text}</p>
+                `;
+            }
+        }
+
+        /**
+         * Função para alternar entre o modo claro e escuro.
+         */
+        function toggleTheme() {
+            isDarkMode = !isDarkMode; // Inverte o estado do tema
+            document.body.classList.toggle('dark-mode', isDarkMode); // Adiciona/remove a classe 'dark-mode' no body
+            // Atualiza o ícone do botão
+            if (isDarkMode) {
+                themeIcon.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                `;
+            } else {
+                themeIcon.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></svg>
+                `;
+            }
+        }
+
+        /**
+         * Função para ajustar o layout da sidebar com base no tamanho da tela.
+         */
+        function adjustSidebarLayout() {
+            if (window.innerWidth <= 767) { // Mobile
+                sidebar.classList.add('hidden-mobile');
+                mainContent.style.marginLeft = '0';
+            } else { // Desktop
+                sidebar.classList.remove('hidden-mobile');
+                sidebar.classList.remove('open'); // Garante que não fique com a classe 'open' no desktop
+                sidebarOverlay.classList.remove('show'); // Garante que o overlay não apareça no desktop
+                mainContent.style.marginLeft = '250px'; /* Largura da sidebar */
+            }
+        }
+
+        // Event listener para o botão "Próximo"
+        nextButton.addEventListener('click', () => {
+            const versesForCurrentTheme = themedVerses[currentTheme];
+            if (versesForCurrentTheme && versesForCurrentTheme.length > 0) {
+                // Avança para o próximo versículo, volta ao início se for o último
+                currentVerseIndex = (currentVerseIndex + 1) % versesForCurrentTheme.length;
+                displayVerse(); // Exibe o novo versículo com animação
+            }
+        });
+
+        // Event listener para o botão "Anterior"
+        prevButton.addEventListener('click', () => {
+            const versesForCurrentTheme = themedVerses[currentTheme];
+            if (versesForCurrentTheme && versesForCurrentTheme.length > 0) {
+                // Volta para o versículo anterior, vai para o final se for o primeiro
+                currentVerseIndex = (currentVerseIndex - 1 + versesForCurrentTheme.length) % versesForCurrentTheme.length;
+                displayVerse(); // Exibe o novo versículo com animação
+            }
+        });
+
+        // Event listener para o botão de alternar tema (claro/escuro)
+        themeToggleButton.addEventListener('click', toggleTheme);
+
+        // Event listener para o botão de toggle da sidebar (mobile)
+        sidebarToggleButton.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('show');
+        });
+
+        // Event listener para fechar a sidebar ao clicar no overlay
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Executa quando a página é totalmente carregada
+        document.addEventListener('DOMContentLoaded', () => {
+            createThemeButtons(); // Cria os botões de tema dentro da sidebar
+            displayVerse(false); // Exibe o primeiro versículo do tema inicial sem animação
+            updateThemeButtonStyles(); // Define o estilo do botão de tema ativo inicialmente
+            adjustSidebarLayout(); // Ajusta o layout inicial da sidebar
+            selectedThemeDisplay.textContent = `Tema: ${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}`; // Define o nome do tema inicial
+        });
+
+        // Ajusta o layout da sidebar ao redimensionar a janela
+        window.addEventListener('resize', adjustSidebarLayout);
+    </script>
+</body>
+</html>
