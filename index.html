@@ -2,1071 +2,218 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="iconepq.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PenseQuiz MultCanais</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1a202c, #2d3748); /* Gradiente de azul escuro para um visual profissional */
-            color: #e2e8f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
+    <title>PensQuiz - Jogo de Perguntas e Respostas</title>
+    <meta name="description" content="Desafie seus conhecimentos com o PensQuiz.com - Jogo de Perguntas e Respostas sobre a Bíblia, AutoEscola, Concursos, Passaatempo muito mais!">
+    <meta name="keywords" content="quiz, perguntas, respostas">
+    <meta name="author" content="Seu Nome">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
 
-        .player-container {
-            background-color: #1f2937;
-            border-radius: 1.5rem;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
-            padding: 35px;
-            text-align: center;
-            max-width: 900px; /* Aumentado para uma tela maior */
-            width: 100%;
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Raleway', sans-serif;
+            background-color: #f4f4f9;
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            border: 1px solid #374151;
-        }
-
-        .player-title {
-            color: #f9fafb;
-            font-size: 2.75rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .current-video-display {
-            font-size: 1.6rem;
-            color: #9ca3af;
-            font-weight: 500;
-            margin-bottom: 20px;
-            min-height: 32px;
-        }
-
-        /* Base video wrapper styles */
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%; /* Mantém a proporção 16:9 */
-            height: 0;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease-in-out; /* Smooth transition for fullscreen */
-        }
-
-        .video-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: linear-gradient(to bottom, #1f2937, transparent);
-            z-index: 10;
-            pointer-events: auto;
-        }
-
-        .video-wrapper::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: transparent;
-            z-index: 15;
-            pointer-events: auto;
-        }
-
-        .video-wrapper iframe,
-        .video-wrapper video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            transition: transform 0.3s ease-in-out; /* Smooth rotation */
-        }
-
-        .custom-play-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparente para ver o thumbnail */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 20;
-            transition: opacity 0.3s ease, background-color 0.3s ease; /* Transição para opacidade e cor de fundo */
-            font-size: 4rem;
-            color: white;
-            border-radius: 0.75rem;
-            pointer-events: auto; /* SEMPRE bloqueia cliques */
-        }
-
-        .custom-play-overlay.hidden-overlay { /* Nova classe para ocultar completamente */
-            opacity: 0;
-            pointer-events: none; /* Permite cliques passarem quando oculto */
-        }
-
-        .section-header {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #f9fafb;
-            margin-bottom: 15px;
-            text-align: left;
-            border-bottom: 2px solid #4b5563;
-            padding-bottom: 8px;
-        }
-
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-
-        .category-button {
-            background-color: #3b82f6;
-            color: white;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            position: relative; /* Necessário para o dropdown */
+            min-height: 100vh;
+            color: #333;
+            position: relative; /* Necessário para posicionar o botão de música */
         }
-
-        .category-button:hover {
-            background-color: #2563eb;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
-        }
-
-        .category-button:active {
-            background-color: #1d4ed8;
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .message-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(5px);
-        }
-        .message-modal-content {
-            background-color: #1f2937;
-            color: #e2e8f0;
-            padding: 30px;
-            border-radius: 1rem;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 450px;
+        .container {
             text-align: center;
-            border: 1px solid #374151;
-            animation: fadeInScale 0.3s ease-out;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
         }
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .message-modal-content h3 {
-            margin-top: 0;
-            color: #f9fafb;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-        .message-modal-content p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        .message-modal-content button {
-            background-color: #3b82f6;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        .message-modal-content button:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-        }
-
-        /* Estilos aprimorados para a barra de volume */
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent; /* Remove o fundo padrão */
-            width: 100%;
-            height: 8px; /* Altura da trilha */
-            cursor: pointer;
-            outline: none; /* Remove o outline ao focar */
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        /* Estilos para o "thumb" (o controle deslizante) */
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px; /* Tamanho maior */
-            height: 24px; /* Tamanho maior */
-            border-radius: 50%;
-            background: #4CAF50; /* Cor verde vibrante */
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            margin-top: -8px; /* Ajusta a posição vertical do thumb */
-            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-            border: 2px solid #fff; /* Borda branca para destaque */
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #4CAF50; /* Cor verde vibrante */
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-            border: 2px solid #fff; /* Borda branca para destaque */
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            background: #66BB6A; /* Cor mais clara no hover */
-            transform: scale(1.05);
-        }
-        input[type="range"]::-moz-range-thumb:hover {
-            background: #66BB6A;
-            transform: scale(1.05);
-        }
-
-        input[type="range"]::-webkit-slider-thumb:active,
-        input[type="range"]::-moz-range-thumb:active {
-            transform: scale(1.1);
-            cursor: grabbing;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-        }
-
-        /* Estilos para a "track" (a trilha da barra) */
-        input[type="range"]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px;
-            background: linear-gradient(to right, #4CAF50, #2196F3); /* Gradiente de verde para azul */
-            border-radius: 5px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
-        }
-
-        input[type="range"]::-moz-range-track {
-            width: 100%;
-            height: 8px;
-            background: linear-gradient(to right, #4CAF50, #2196F3); /* Gradiente de verde para azul */
-            border-radius: 5px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
-        }
-
-        /* Estilos aprimorados para o botão de mudo */
-        #muteButton {
-            background: linear-gradient(145deg, #4299e1, #3182ce); /* Gradiente de azul */
-            border: 2px solid #63b3ed; /* Borda mais clara */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            font-size: 0; /* Oculta qualquer texto, apenas os ícones */
+        .logo-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px; /* Aumenta o padding para um botão maior */
-            width: 48px; /* Garante tamanho fixo */
-            height: 48px; /* Garante tamanho fixo */
+            gap: 15px;
+            margin-bottom: 20px;
         }
-
-        #muteButton:hover {
-            background: linear-gradient(145deg, #3182ce, #2c5282);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        .logo-container img {
+            width: 300px;
+            height: auto;
         }
-
-        #muteButton:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-
-        #muteButton svg {
-            width: 24px; /* Tamanho dos ícones */
-            height: 24px; /* Tamanho dos ícones */
-            color: white; /* Cor dos ícones */
-        }
-
-        /* Estilos para o dropdown de filmes */
-        .dropdown-menu {
-            position: absolute;
-            background-color: #1f2937;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 30; /* Aumentado para aparecer por cima da máscara */
-            border-radius: 0.75rem;
-            overflow: hidden;
-            border: 1px solid #374151;
-            max-height: 200px; /* Limita a altura do dropdown */
-            overflow-y: auto; /* Adiciona scroll se houver muitos filmes */
-            top: 100%; /* Posiciona abaixo do botão */
-            left: 0;
-            margin-top: 5px; /* Espaçamento entre o botão e o dropdown */
-        }
-
-        .dropdown-menu button {
-            color: #e2e8f0;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            width: 100%;
-            text-align: left;
-            background-color: transparent;
+        .button {
+            background-color: #0066cc;
+            color: #ffffff;
+            padding: 15px 25px;
             border: none;
-            transition: background-color 0.2s ease;
-        }
-
-        .dropdown-menu button:hover {
-            background-color: #374151;
-        }
-
-        /* Fullscreen styles applied directly to video-wrapper */
-        .video-wrapper.is-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            padding-bottom: 0; /* Remove padding-bottom in fullscreen */
-            border-radius: 0;
-            z-index: 1000; /* High z-index */
-            background-color: black; /* Ensure black background */
-            display: flex; /* Use flex to center video */
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Ensure video elements fill the fullscreen wrapper */
-        .video-wrapper.is-fullscreen iframe,
-        .video-wrapper.is-fullscreen video {
-            position: static; /* Remove absolute positioning in fullscreen */
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Keep aspect ratio */
-        }
-
-        .fullscreen-controls {
-            position: fixed; /* Fixed position relative to viewport */
-            top: 10px;
-            right: 10px;
-            display: none; /* Hidden by default */
-            gap: 10px;
-            z-index: 1001; /* Above the fullscreen video wrapper */
-        }
-
-        .fullscreen-controls button {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 0.5rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s, transform 0.2s;
+            text-decoration: none;
         }
-
-        .fullscreen-controls button:hover {
-            background-color: rgba(255, 255, 255, 0.4);
+        .button:hover {
+            background-color: #004da3;
+            transform: scale(1.05);
         }
-
-        /* Rotation classes applied directly to iframe/video */
-        .rotate-90 { transform: rotate(90deg); }
-        .rotate-180 { transform: rotate(180deg); }
-        .rotate-270 { transform: rotate(270deg); }
-
-
-        @media (max-width: 640px) {
-            .player-container {
-                padding: 25px;
-                gap: 20px;
-            }
-            .player-title {
-                font-size: 2.25rem;
-            }
-            .current-video-display {
-                font-size: 1.3rem;
-            }
-            .section-header {
-                font-size: 1.3rem;
-            }
-            .categories-grid {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                gap: 10px;
-            }
-            .category-button {
-                padding: 12px 15px;
-                font-size: 0.9rem;
-            }
-            #muteButton {
-                padding: 10px;
-                width: 40px;
-                height: 40px;
-            }
-            #muteButton svg {
-                width: 20px;
-                height: 20px;
-            }
-            input[type="range"]::-webkit-slider-thumb,
-            input[type="range"]::-moz-range-thumb {
-                width: 20px;
-                height: 20px;
-                margin-top: -6px;
-            }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+        /* Estilos para o contêiner do botão de música e texto */
+        .music-control {
+            position: absolute;
+            top: 10px; /* Ajustado para dar espaço ao texto */
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
+        /* Estilos para o botão de música */
+        .music-button {
+            background-color: #28a745; /* Cor verde para destaque */
+            color: #ffffff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 50%; /* Torna o botão redondo */
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px; /* Largura e altura para um botão redondo */
+            height: 50px;
+            margin-bottom: 5px; /* Espaço entre o botão e o texto */
+        }
+        .music-button:hover {
+            background-color: #218838;
+            transform: scale(1.1);
+        }
+        /* Estilos para o ícone dentro do botão */
+        .music-button i {
+            margin: 0;
+        }
+        /* Estilos para o texto "Louvor" */
+        .music-label {
+            color: #555;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="player-container">
-        <h1 class="player-title">PenseQuiz MultCanais</h1>
-        <p id="currentVideoDisplay" class="current-video-display">Nenhum vídeo selecionado</p>
-        
-        <div class="categories-grid" id="categoryVideos">
-            <!-- Botões de categoria e dropdowns serão gerados aqui pelo JavaScript -->
-        </div>
-
-        <div class="video-wrapper" id="videoWrapper">
-            <div id="youtubePlayer" style="display: none;"></div>
-            <video id="offlinePlayer" controls muted playsinline style="display: none;">
-                Seu navegador não suporta a tag de vídeo.
-            </video>
-            <div id="customPlayOverlay" class="custom-play-overlay">
-                <span class="play-icon">▶️</span>
-            </div>
-            <div id="fullscreenControls" class="fullscreen-controls">
-                <button id="rotateButton">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                        <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.908-1.908a.75.75 0 0 0-1.06-1.06L15.39 5.053A8.962 8.962 0 0 0 12 3.75c-4.184 0-7.67 3.12-8.224 7.107a.75.75 0 0 0 .984.852ZM19.245 13.941a7.5 7.5 0 0 1-12.548 3.364l-1.908 1.908a.75.75 0 0 0 1.06 1.06l2.025-2.025a9.002 9.002 0 0 0 3.75-.892c4.184 0 7.67-3.12 8.224-7.107a.75.75 0 0 0-.984-.852Z" clip-rule="evenodd" />
-                    </svg>
-                    Rotacionar
-                </button>
-                <button id="exitFullscreenButton">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                        <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                    </svg>
-                    Fechar
-                </button>
-            </div>
-        </div>
-
-        <div class="volume-controls mt-4 flex items-center justify-center gap-4">
-            <button id="muteButton" class="p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition duration-300">
-                <svg id="volumeHighIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                    <path d="M11.5 7.06c0-1.336-1.618-2.006-2.518-1.06L3.74 9H1.375c-1.036 0-1.875.84-1.875 1.875v8.25c0 1.035.84 1.875 1.875 1.875h2.365l5.247 4.968c.9.945 2.518.275 2.518-1.06V7.06Z" />
-                    <path fill-rule="evenodd" d="M16.045 10.558A4.5 4.5 0 0 1 18.25 13a4.5 4.5 0 0 1-2.205 2.442c.82.008 1.633.113 2.438.324a6 6 0 0 0 0-5.532c-.805.211-1.618.316-2.438.324ZM20.318 6.477a9 9 0 0 1 0 13.046c-.953-.027-1.897-.162-2.798-.406a10.433 10.433 0 0 0 0-12.234c.901-.244 1.845-.379 2.798-.406Z" clip-rule="evenodd" />
-                </svg>
-                <svg id="volumeMuteIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 hidden">
-                    <path d="M11.5 7.06c0-1.336-1.618-2.006-2.518-1.06L3.74 9H1.375c-1.036 0-1.875.84-1.875 1.875v8.25c0 1.035.84 1.875 1.875 1.875h2.365l5.247 4.968c.9.945 2.518.275 2.518-1.06V7.06ZM16.045 10.558A4.5 4.5 0 0 1 18.25 13a4.5 4.5 0 0 1-2.205 2.442c.82.008 1.633.113 2.438.324a6 6 0 0 0 0-5.532c-.805.211-1.618.316-2.438.324Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25 9.75 9.75" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25 9.75 9.75" />
-                </svg>
-            </button>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer range-lg">
-        </div>
-        <button id="fullscreenButton" class="category-button mt-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                <path d="M7.5 3.75A1.5 1.5 0 0 0 6 5.25v13.5A1.5 1.5 0 0 0 7.5 20.25h9A1.5 1.5 0 0 0 18 18.75V5.25A1.5 1.5 0 0 0 16.5 3.75h-9ZM16.5 5.25v13.5h-9V5.25h9ZM12 9.75a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V10.5a.75.75 0 0 1 .75-.75Z" />
-            </svg>
-            Tela Cheia
-        </button>
+    <div class="music-control">
+        <button id="musicToggleButton" class="music-button">
+            <i class="fas fa-play"></i> </button>
+        <span class="music-label">Web Rádio<br> PenseQuiz</span>
     </div>
 
-    <div id="messageModal" class="message-modal">
-        <div class="message-modal-content">
-            <h3 id="modalTitle"></h3>
-            <p id="modalMessage"></p>
-            <button id="modalCloseBtn">OK</button>
+    <audio id="praiseAudio" src="https://stream-179.zeno.fm/yddrdqrimfruv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJ5ZGRyZHFyaW1mcnV2IiwiaG9zdCI6InN0cmVhbS0xNzkuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6Im9hci1kdUhoVGF1WXFGbjYxMzE4NnciLCJpYXQiOjE3NDg3NDI1MTQsImV4cCI6MTc0ODc0MjU3NH0._h54Ng0Devc33mrJoyvnjIctP5HKJmOkKBPo-hMAedE" preload="auto"></audio>
+
+    <div class="container">
+        <div class="logo-container">
+            <img src="logopq.png" alt="Logo">
         </div>
+        <div class="buttons">
+			<a href="webvideo.html" class="button">PenseQuiz - Fé MultCanais</a>
+            <a href="menuInterativo.html" class="button">PenseQuiz - Bíblia Interativa</a>
+			<a href="bibliatema.html" class="button">PenseQuiz - Bíblia por Temas</a>
+            <a href="quizbiblia.html" class="button">PenseQuiz - QuizBíblia</a>
+            <a href="menujornada.html" class="button">PenseQuiz - Jornada da Fé</a>
+			<a href="teologia.html" class="button">PenseQuiz - Teologia</a>
+			<p><<----------------------------->></p>
+            <a href="quizenigmas.html" class="button">PenseQuiz - Enigmas</a>
+            <a href="passatempoquiz.html" class="button">PenseQuiz - Passatempo</a>
+			<p><<----------------------------->></p>
+            <a href="quizenem.html" class="button">PenseQuiz - ENEM</a>
+			<a href="quizmedbio.html" class="button">PenseQuiz - Ciências da Saúde</a>
+            <a href="quizconcurso.html" class="button">PenseQuiz - Concursos</a>
+			<p><<----------------------------->></p>
+            <a href="quizautoescola.html" class="button">PenseQuiz - AutoEscola</a>
+            <a href="pensequizeletrica.html" class="button">PenseQuiz - Eletricidade</a>
+            <a href="quizeletronica.html" class="button">PenseQuiz - Eletrônica</a>
+            <a href="quizcarro.html" class="button">PenseQuiz - Mec. de Carros</a>
+            <a href="quizmoto.html" class="button">PenseQuiz - Mec. de Motocicletas</a>
+            
+
+            <div align=center><p>Visitante Nº</p> <a href='https://contador.s12.com.br'><img src='https://contador.s12.com.br/img-AYA9003By5Ydz8Z8-92.gif' border='0' alt='contador'></a>
+            <script type='text/javascript' src='https://contador.s12.com.br/ad.js?id=AYA9003By5Ydz8Z8'></script></div>
+
+        </div>
+
+        <div class="footer">
+            <p>©PenseQuiz.com Todos Direitos Reservados </p>
+            <p>Contato: <a href="mailto:contato@pense.com">juniosilvasouza@yahoo.com.br</a></p>
+            <p>Telefone: <a href="tel:+5592988562216">(92) 98856-2216</a></p>
+        </div>
+
     </div>
 
     <script>
-        // Variáveis globais
-        let youtubePlayer; // Instância do player do YouTube
-        let offlinePlayer; // Instância do player de vídeo HTML5
-        let isPlayerReady = false; // Flag para indicar se o player ativo (YouTube ou offline) está pronto
-        let isYouTubeApiLoaded = false; // Flag para indicar se o script da API do YouTube foi carregado
-        let currentRotation = 0; // 0, 90, 180, 270 degrees
+        document.addEventListener('DOMContentLoaded', function() {
+            const audio = document.getElementById('praiseAudio');
+            const musicToggleButton = document.getElementById('musicToggleButton');
+            const musicIcon = musicToggleButton.querySelector('i');
 
-        const videoWrapper = document.getElementById('videoWrapper');
-        const customPlayOverlay = document.getElementById('customPlayOverlay');
-        const currentVideoDisplay = document.getElementById('currentVideoDisplay');
-        const messageModal = document.getElementById('messageModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalMessage = document.getElementById('modalMessage');
-        const modalCloseBtn = document.getElementById('modalCloseBtn');
-        const categoryVideosContainer = document.getElementById('categoryVideos');
-        const offlinePlayerElement = document.getElementById('offlinePlayer'); // Referência ao elemento <video>
-        const youtubePlayerElement = document.getElementById('youtubePlayer'); // Referência ao elemento <div> para o YouTube player
-        const fullscreenButton = document.getElementById('fullscreenButton');
-        const fullscreenControls = document.getElementById('fullscreenControls'); // Referência aos controles de tela cheia
-        const exitFullscreenButton = document.getElementById('exitFullscreenButton');
-        const rotateButton = document.getElementById('rotateButton');
-
-        // Volume control elements
-        const volumeSlider = document.getElementById('volumeSlider');
-        const muteButton = document.getElementById('muteButton');
-        const volumeHighIcon = document.getElementById('volumeHighIcon');
-        const volumeMuteIcon = document.getElementById('volumeMuteIcon');
-
-        let lastVolume = 1; // Para armazenar o volume antes de mutar
-        let currentVideoInfo = null; // Armazena o objeto de vídeo atualmente carregado
-
-        // Objeto centralizado para todos os vídeos (categorias e filmes)
-        const allVideos = {
-            // --- CATEGORIAS DE VÍDEOS (YouTube com fontes offline de exemplo) ---
-            "Mensagens de Fé": [
-                { name: "Mensagem de Fé 1 (YouTube)", id: 'UedYFy5gMxU', type: 'youtube', offlineSrc: "videos/mensagens_de_fe.mp4" },
-                { name: "Mensagem de Fé 2 (YouTube)", id: 'g_s57sZ-F6k', type: 'youtube' },
-                { name: "Mensagem de Fé 3 (YouTube)", id: 'j-y-s5k_T_M', type: 'youtube' }
-            ],
-            "Pregações": [
-                { name: "Pregação 1 (YouTube)", id: '8SAcjqEzbcE', type: 'youtube', offlineSrc: "videos/pregacoes.webm" },
-                { name: "Pregação 2 (YouTube)", id: 'X5lU-a01g4I', type: 'youtube' },
-                { name: "Pregação 3 (YouTube)", id: 'q2Cj10QcWjE', type: 'youtube' }
-            ],
-            "Louvor e Adoração": [
-                { name: "Louvor 1 (YouTube)", id: 'ful0qGqtSgQ', type: 'youtube', offlineSrc: "videos/louvor_e_adoracao.mp4" },
-                { name: "Louvor 2 (YouTube)", id: 'YQJ0f8K2n1M', type: 'youtube' },
-                { name: "Louvor 3 (YouTube)", id: 'k2Cj10QcWjE', type: 'youtube' }
-            ],
-            // --- FILMES (YouTube apenas, adicione mais aqui!) ---
-            "Filmes Gospel": [
-                { name: "Deus não está morto", id: 'Dy7xghRm0U4', type: 'youtube' },
-                { name: "Um Lugar para Recomeçar", id: 'SpODjPk4IIw', type: 'youtube' },
-                { name: "Uma Prova de Fé 2", id: 'OxIB3ddJBbA', type: 'youtube' },
-                { name: "Setenta Vezes Sete", id: '_tAA7hWJUbw', type: 'youtube' },
-                { name: "Escolhidos Por Amor", id: 'u_gR3kCz-_U', type: 'youtube' },
-                { name: "Um Amor Para Recordar", id: 'bZxqBWPXbOA', type: 'youtube' },
-                { name: "Desafiando Gigantes", id: 'xP4GesmwsEI', type: 'youtube' },
-                { name: "A Forja O Poder Da Transformação", id: 'x8t2BcNLxOA', type: 'youtube' },
-            ]
-        };
-
-        /**
-         * Verifica se o navegador está online.
-         * @returns {boolean} True se online, false caso contrário.
-         */
-        function isOnline() {
-            return navigator.onLine;
-        }
-
-        /**
-         * Alterna o player para o modo offline, usando o elemento <video> nativo.
-         */
-        function switchToOfflineMode() {
-            console.log("Alternando para modo offline.");
-            if (youtubePlayer) {
-                youtubePlayer.destroy(); // Destroi o player do YouTube se ele existir
-                youtubePlayer = null;
-            }
-            youtubePlayerElement.style.display = 'none'; // Esconde o container do YouTube player
-            offlinePlayer = offlinePlayerElement; // Atribui o elemento <video> ao offlinePlayer
-            offlinePlayer.style.display = 'block'; // Mostra o player offline
-            isPlayerReady = true; // O player offline está pronto
-            customPlayOverlay.classList.remove('hidden-overlay'); // Mostra o ícone de play para o modo offline
-            currentVideoDisplay.textContent = "Nenhum vídeo selecionado (Modo Offline)";
-
-            // Adiciona listeners de evento para o player offline
-            offlinePlayer.onplay = () => customPlayOverlay.classList.add('hidden-overlay');
-            offlinePlayer.onpause = () => customPlayOverlay.classList.remove('hidden-overlay');
-            offlinePlayer.onended = () => {
-                offlinePlayer.currentTime = 0; // Volta para o início
-                offlinePlayer.play(); // Reproduz automaticamente
-                customPlayOverlay.classList.add('hidden-overlay'); // Mantém a máscara transparente enquanto reproduz
-            };
-
-            // Carrega o primeiro vídeo offline disponível (apenas categorias com offlineSrc)
-            const firstOfflineCategory = Object.keys(allVideos).find(category => 
-                allVideos[category].some(video => video.offlineSrc)
-            );
-            if (firstOfflineCategory) {
-                const firstOfflineVideo = allVideos[firstOfflineCategory].find(video => video.offlineSrc);
-                if (firstOfflineVideo) {
-                    loadVideo(firstOfflineVideo);
-                }
-            } else {
-                showMessageModal('Aviso', 'Nenhum vídeo offline disponível para reprodução.');
-            }
-            updateMuteIcon(); // Atualiza o ícone de mudo para o player offline
-        }
-
-        /**
-         * Função de callback chamada quando a API do YouTube IFrame está pronta.
-         */
-        window.onYouTubeIframeAPIReady = function() {
-            console.log("YouTube IFrame API está pronta.");
-            isYouTubeApiLoaded = true;
-            offlinePlayerElement.style.display = 'none'; // Esconde o player offline
-            youtubePlayerElement.style.display = 'block'; // Mostra o container do YouTube player
-
-            youtubePlayer = new YT.Player('youtubePlayer', { // Aponta para a div correta
-                height: '100%',
-                width: '100%',
-                playerVars: {
-                    'controls': 0,          // Desativa controles padrão
-                    'modestbranding': 1,    // Remove branding do YouTube
-                    'rel': 0,               // Remove vídeos relacionados de outros canais
-                    'showinfo': 0,          // Não exibe informações do vídeo (título, uploader) antes de iniciar
-                    'fs': 0,                // Desativa o botão de tela cheia
-                    'disablekb': 1,         // Desativa controles de teclado
-                    'autoplay': 0           // Desativa autoplay inicial
-                },
-                events: {
-                    'onReady': onYouTubePlayerReady,
-                    'onStateChange': onYouTubePlayerStateChange,
-                    'onError': onYouTubePlayerError // Adiciona tratamento de erro
+            // Função para alternar play/pause
+            musicToggleButton.addEventListener('click', function() {
+                if (audio.paused) {
+                    audio.play()
+                        .then(() => {
+                            musicIcon.classList.remove('fa-play');
+                            musicIcon.classList.add('fa-pause');
+                        })
+                        .catch(error => {
+                            console.error("Erro ao tentar reproduzir o áudio:", error);
+                            // Exibir uma mensagem amigável ao usuário, se necessário
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro de reprodução',
+                                text: 'Não foi possível reproduzir o áudio. O navegador pode ter bloqueado a reprodução automática.',
+                            });
+                        });
+                } else {
+                    audio.pause();
+                    musicIcon.classList.remove('fa-pause');
+                    musicIcon.classList.add('fa-play');
                 }
             });
-        };
 
-        /**
-         * Inicializa o player com base na conectividade.
-         */
-        function initializePlayer() {
-            if (isOnline()) {
-                // Se estiver online e a API do YouTube ainda não foi carregada, carrega o script
-                if (!isYouTubeApiLoaded) {
-                    const script = document.createElement('script');
-                    script.id = 'youtube-api-script';
-                    script.src = "https://www.youtube.com/iframe_api"; // URL oficial da API do YouTube
-                    script.onerror = function() {
-                        console.error("Falha ao carregar a API do YouTube. Alternando para modo offline.");
-                        showMessageModal('Erro de Conexão', 'Não foi possível carregar a API do YouTube. Tentando modo offline.');
-                        switchToOfflineMode();
-                    };
-                    document.body.appendChild(script);
-                } else {
-                    // Se a API já foi carregada, mas o player não está pronto (ex: erro transitório)
-                    // Tenta re-inicializar ou carregar o vídeo padrão
-                    if (window.YT && window.YT.Player && !youtubePlayer) { // Verifica se YT está disponível mas o player não foi criado
-                        window.onYouTubeIframeAPIReady(); // Chama a função de inicialização da API
-                    } else if (youtubePlayer && !isPlayerReady) {
-                        onYouTubePlayerReady(); // Chama a lógica de onYouTubePlayerReady
-                    }
-                }
-            } else {
-                // Se estiver offline, muda para o modo offline
-                switchToOfflineMode();
-            }
-        }
-
-        /**
-         * Função de callback chamada quando o player do YouTube está pronto.
-         * @param {Object} event - O objeto do evento.
-         */
-        function onYouTubePlayerReady(event) {
-            console.log("Player (YouTube) está pronto.");
-            isPlayerReady = true; // Define a flag como true
-            // Carrega um vídeo padrão ao iniciar, se houver vídeos e nenhum vídeo estiver selecionado
-            if (!currentVideoInfo && Object.keys(allVideos).length > 0) {
-                const firstCategory = Object.keys(allVideos)[0];
-                if (allVideos[firstCategory] && allVideos[firstCategory].length > 0) {
-                    loadVideo(allVideos[firstCategory][0]); // Carrega o primeiro vídeo da primeira categoria
-                }
-            }
-            customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara esteja visível para iniciar o play
-            youtubePlayer.setVolume(volumeSlider.value * 100); // Define o volume inicial
-            updateMuteIcon(); // Atualiza o ícone ao carregar o player
-        }
-
-        /**
-         * Função de callback chamada quando o estado do player do YouTube muda.
-         * @param {Object} event - O objeto do evento.
-         */
-        function onYouTubePlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING) {
-                customPlayOverlay.classList.add('hidden-overlay'); // Oculta a máscara quando o vídeo está tocando
-            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
-                customPlayOverlay.classList.remove('hidden-overlay'); // Mostra a máscara ao pausar ou carregar
-            } else if (event.data === YT.PlayerState.ENDED) {
-                // Se o vídeo terminou, reinicia-o automaticamente
-                if (currentVideoInfo && currentVideoInfo.type === 'youtube') {
-                    youtubePlayer.seekTo(0); // Volta para o início
-                    youtubePlayer.playVideo(); // Reproduz automaticamente
-                    customPlayOverlay.classList.add('hidden-overlay'); // Mantém a máscara transparente enquanto reproduz
-                }
-            }
-        }
-
-        /**
-         * Função de callback chamada quando ocorre um erro no player do YouTube.
-         * @param {Object} event - O objeto do evento de erro.
-         */
-        function onYouTubePlayerError(event) {
-            console.error("Erro no player do YouTube:", event.data);
-            let errorMessage = "Ocorreu um erro desconhecido no player do YouTube.";
-            switch (event.data) {
-                case 2:
-                    errorMessage = "O ID do vídeo não é válido ou o vídeo não existe.";
-                    break;
-                case 100:
-                    errorMessage = "O vídeo não foi encontrado.";
-                    break;
-                case 101:
-                case 150:
-                    errorMessage = "O proprietário do vídeo não permite a reprodução em players incorporados.";
-                    break;
-            }
-            showMessageModal('Erro de Reprodução', errorMessage + ' Por favor, tente outro vídeo.');
-            // Tenta carregar um vídeo offline se disponível
-            if (currentVideoInfo && currentVideoInfo.offlineSrc) {
-                loadVideo({ ...currentVideoInfo, type: 'offline' });
-            } else {
-                // Se não houver offlineSrc, tenta carregar o primeiro vídeo da lista
-                const firstCategory = Object.keys(allVideos)[0];
-                if (allVideos[firstCategory] && allVideos[firstCategory].length > 0) {
-                    loadVideo(allVideos[firstCategory][0]);
-                }
-            }
-        }
-
-        /**
-         * Exibe um modal de mensagem.
-         * @param {string} title - O título do modal.
-         * @param {string} message - A mensagem a ser exibida.
-         */
-        function showMessageModal(title, message) {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            messageModal.style.display = 'flex';
-        }
-
-        /**
-         * Carrega e reproduz um vídeo.
-         * @param {Object} video - O objeto de vídeo contendo name, id, type e opcionalmente offlineSrc.
-         */
-        function loadVideo(video) {
-            if (!video) {
-                showMessageModal('Erro', 'Informações do vídeo não encontradas.');
-                return;
-            }
-
-            currentVideoInfo = video;
-            currentVideoDisplay.textContent = `Reproduzindo: ${video.name}`;
-            customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara esteja visível
-
-            if (video.type === 'youtube' && isOnline() && isYouTubeApiLoaded && youtubePlayer) {
-                offlinePlayerElement.style.display = 'none';
-                youtubePlayerElement.style.display = 'block';
-                youtubePlayer.loadVideoById(video.id);
-                youtubePlayer.setVolume(volumeSlider.value * 100); // Aplica o volume atual
-                updateMuteIcon();
-            } else if (video.type === 'offline' && video.offlineSrc) {
-                if (youtubePlayer) {
-                    youtubePlayer.destroy();
-                    youtubePlayer = null;
-                }
-                youtubePlayerElement.style.display = 'none';
-                offlinePlayerElement.style.display = 'block';
-                offlinePlayer.src = video.offlineSrc;
-                offlinePlayer.load();
-                offlinePlayer.volume = volumeSlider.value; // Aplica o volume atual
-                updateMuteIcon();
-                showMessageModal('Modo Offline', `Reproduzindo "${video.name}" do armazenamento local.`);
-            } else {
-                showMessageModal('Erro', 'Não foi possível carregar o vídeo. Verifique sua conexão ou tente outro vídeo.');
-                // Tenta alternar para o modo offline se o YouTube falhar e houver uma fonte offline
-                if (video.type === 'youtube' && video.offlineSrc) {
-                    loadVideo({ ...video, type: 'offline' });
-                } else if (!isOnline()) {
-                    showMessageModal('Sem Conexão', 'Você está offline. Por favor, conecte-se à internet para acessar vídeos do YouTube.');
-                }
-            }
-        }
-
-        /**
-         * Alterna a visibilidade de um dropdown.
-         * @param {HTMLElement} dropdownElement - O elemento dropdown a ser alternado.
-         */
-        function toggleDropdown(dropdownElement) {
-            const isHidden = dropdownElement.classList.contains('hidden');
-            // Fecha todos os dropdowns abertos primeiro
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.add('hidden');
+            // Atualiza o ícone se o áudio terminar de tocar
+            audio.addEventListener('ended', function() {
+                musicIcon.classList.remove('fa-pause');
+                musicIcon.classList.add('fa-play');
             });
-            // Abre ou fecha o dropdown clicado
-            if (isHidden) {
-                dropdownElement.classList.remove('hidden');
-            } else {
-                dropdownElement.classList.add('hidden');
-            }
-        }
 
-        /**
-         * Gera e renderiza os botões de categoria com dropdowns.
-         */
-        function renderCategoryButtons() {
-            categoryVideosContainer.innerHTML = ''; // Limpa os botões existentes
-
-            for (const categoryName in allVideos) {
-                const categoryVideos = allVideos[categoryName];
-
-                const dropdownWrapper = document.createElement('div');
-                dropdownWrapper.className = 'relative inline-block text-left';
-
-                const categoryButton = document.createElement('button');
-                categoryButton.className = 'category-button';
-                categoryButton.setAttribute('data-category', categoryName);
-                categoryButton.innerHTML = `
-                    ${categoryName}
-                    <svg class="-mr-1 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                    </svg>
-                `;
-                dropdownWrapper.appendChild(categoryButton);
-
-                const dropdownMenu = document.createElement('div');
-                dropdownMenu.className = 'dropdown-menu hidden';
-                dropdownMenu.setAttribute('data-category-menu', categoryName);
-                const dropdownContent = document.createElement('div');
-                dropdownContent.className = 'py-1';
-                dropdownContent.setAttribute('role', 'menu');
-                dropdownContent.setAttribute('aria-orientation', 'vertical');
-                dropdownContent.setAttribute('aria-labelledby', `${categoryName}-menu-button`);
-                dropdownContent.setAttribute('tabindex', '-1');
-
-                categoryVideos.forEach(video => {
-                    const videoButton = document.createElement('button');
-                    videoButton.className = 'block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left rounded-md';
-                    videoButton.setAttribute('role', 'menuitem');
-                    videoButton.setAttribute('tabindex', '-1');
-                    videoButton.setAttribute('data-video-name', video.name); // Armazena o nome do vídeo
-                    videoButton.textContent = video.name;
-                    dropdownContent.appendChild(videoButton);
-                });
-
-                dropdownMenu.appendChild(dropdownContent);
-                dropdownWrapper.appendChild(dropdownMenu);
-                categoryVideosContainer.appendChild(dropdownWrapper);
-            }
-        }
-
-        // --- Event Listeners ---
-
-        // Listener para os botões de categoria e itens de dropdown
-        categoryVideosContainer.addEventListener('click', (event) => {
-            const targetButton = event.target.closest('.category-button');
-            const targetVideoItem = event.target.closest('.dropdown-menu button');
-
-            if (targetButton) {
-                const categoryName = targetButton.getAttribute('data-category');
-                const dropdownMenu = document.querySelector(`.dropdown-menu[data-category-menu="${categoryName}"]`);
-                if (dropdownMenu) {
-                    toggleDropdown(dropdownMenu);
+            // Atualiza o ícone se o áudio for pausado por outros meios (ex: usuário mudou de aba)
+            audio.addEventListener('pause', function() {
+                if (!audio.ended) { // Só muda se não for o fim da música
+                    musicIcon.classList.remove('fa-pause');
+                    musicIcon.classList.add('fa-play');
                 }
-            } else if (targetVideoItem) {
-                const videoName = targetVideoItem.getAttribute('data-video-name');
-                const categoryMenu = targetVideoItem.closest('.dropdown-menu');
-                const categoryName = categoryMenu.getAttribute('data-category-menu');
-                
-                const videoToLoad = allVideos[categoryName].find(video => video.name === videoName);
-                if (videoToLoad) {
-                    loadVideo(videoToLoad);
-                    toggleDropdown(categoryMenu); // Fecha o dropdown após selecionar o vídeo
-                }
-            }
-        });
+            });
 
-        // Fecha os dropdowns se clicar fora deles
-        document.addEventListener('click', (event) => {
-            if (!event.target.closest('.categories-grid')) {
-                document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                    menu.classList.add('hidden');
-                });
-            }
-        });
-
-        // Event listener para o overlay de play/pause
-        customPlayOverlay.addEventListener('click', () => {
-            if (!isPlayerReady) {
-                showMessageModal('Aguarde', 'O player ainda não está pronto. Por favor, aguarde.');
-                return;
-            }
-
-            if (currentVideoInfo) {
-                if (currentVideoInfo.type === 'youtube' && youtubePlayer) {
-                    const playerState = youtubePlayer.getPlayerState();
-                    if (playerState === YT.PlayerState.PLAYING) {
-                        youtubePlayer.pauseVideo();
-                    } else {
-                        youtubePlayer.playVideo();
-                    }
-                } else if (currentVideoInfo.type === 'offline' && offlinePlayer) {
-                    if (offlinePlayer.paused) {
-                        offlinePlayer.play();
-                    } else {
-                        offlinePlayer.pause();
-                    }
-                }
-            } else {
-                showMessageModal('Nenhum Vídeo', 'Por favor, selecione um vídeo para começar.');
-            }
-        });
-
-        // Event listener para o slider de volume
-        volumeSlider.addEventListener('input', () => {
-            const volume = parseFloat(volumeSlider.value);
-            if (youtubePlayer && youtubePlayer.setVolume) {
-                youtubePlayer.setVolume(volume * 100);
-            } else if (offlinePlayer) {
-                offlinePlayer.volume = volume;
-            }
-            lastVolume = volume; // Atualiza o último volume conhecido
-            updateMuteIcon();
-        });
-
-        // Event listener para o botão de mudo
-        muteButton.addEventListener('click', () => {
-            if (youtubePlayer && youtubePlayer.isMuted) {
-                if (youtubePlayer.isMuted()) {
-                    youtubePlayer.unMute();
-                    youtubePlayer.setVolume(lastVolume * 100); // Restaura o último volume
-                    volumeSlider.value = lastVolume;
-                } else {
-                    youtubePlayer.mute();
-                    volumeSlider.value = 0;
-                }
-            } else if (offlinePlayer) {
-                if (offlinePlayer.muted) {
-                    offlinePlayer.muted = false;
-                    offlinePlayer.volume = lastVolume; // Restaura o último volume
-                    volumeSlider.value = lastVolume;
-                } else {
-                    offlinePlayer.muted = true;
-                    volumeSlider.value = 0;
-                }
-            }
-            updateMuteIcon();
-        });
-
-        /**
-         * Atualiza o ícone do botão de mudo com base no estado atual do volume.
-         */
-        function updateMuteIcon() {
-            let isMuted = false;
-            let currentVolume = 0;
-
-            if (youtubePlayer && youtubePlayer.isMuted) {
-                isMuted = youtubePlayer.isMuted();
-                currentVolume = youtubePlayer.getVolume() / 100;
-            } else if (offlinePlayer) {
-                isMuted = offlinePlayer.muted;
-                currentVolume = offlinePlayer.volume;
-            }
-
-            if (isMuted || currentVolume === 0) {
-                volumeHighIcon.classList.add('hidden');
-                volumeMuteIcon.classList.remove('hidden');
-            } else {
-                volumeHighIcon.classList.remove('hidden');
-                volumeMuteIcon.classList.add('hidden');
-            }
-        }
-
-        // Fullscreen functionality
-        fullscreenButton.addEventListener('click', () => {
-            if (videoWrapper.requestFullscreen) {
-                videoWrapper.requestFullscreen();
-            } else if (videoWrapper.mozRequestFullScreen) { /* Firefox */
-                videoWrapper.mozRequestFullScreen();
-            } else if (videoWrapper.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
-                videoWrapper.webkitRequestFullscreen();
-            } else if (videoWrapper.msRequestFullscreen) { /* IE/Edge */
-                videoWrapper.msRequestFullscreen();
-            }
-        });
-
-        exitFullscreenButton.addEventListener('click', () => {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.mozCancelFullScreen) { /* Firefox */
-                document.mozCancelFullScreen();
-            } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) { /* IE/Edge */
-                document.msExitFullscreen();
-            }
-        });
-
-        rotateButton.addEventListener('click', () => {
-            currentRotation = (currentRotation + 90) % 360;
-            const activePlayer = youtubePlayerElement.style.display === 'block' ? youtubePlayerElement.querySelector('iframe') : offlinePlayerElement;
-            
-            // Remove previous rotation classes
-            activePlayer.classList.remove('rotate-90', 'rotate-180', 'rotate-270');
-            
-            // Add new rotation class
-            if (currentRotation === 90) {
-                activePlayer.classList.add('rotate-90');
-            } else if (currentRotation === 180) {
-                activePlayer.classList.add('rotate-180');
-            } else if (currentRotation === 270) {
-                activePlayer.classList.add('rotate-270');
-            }
-        });
-
-        document.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                videoWrapper.classList.add('is-fullscreen');
-                fullscreenControls.style.display = 'flex';
-            } else {
-                videoWrapper.classList.remove('is-fullscreen');
-                fullscreenControls.style.display = 'none';
-                // Reset rotation when exiting fullscreen
-                const activePlayer = youtubePlayerElement.style.display === 'block' ? youtubePlayerElement.querySelector('iframe') : offlinePlayerElement;
-                if (activePlayer) { // Check if activePlayer exists
-                    activePlayer.classList.remove('rotate-90', 'rotate-180', 'rotate-270');
-                    currentRotation = 0; // Reset rotation state
-                }
-            }
-        });
-
-
-        // --- Inicialização ---
-        renderCategoryButtons(); // Renderiza os botões de categoria e dropdowns
-        initializePlayer(); // Inicia o processo de carregamento do player
-        modalCloseBtn.addEventListener('click', () => {
-            messageModal.style.display = 'none';
+            // Atualiza o ícone se o áudio começar a tocar por outros meios
+            audio.addEventListener('play', function() {
+                musicIcon.classList.remove('fa-play');
+                musicIcon.classList.add('fa-pause');
+            });
         });
     </script>
 </body>
