@@ -70,7 +70,8 @@
             left: 0;
             width: 100%;
             height: 60px;
-            background: linear-gradient(to bottom, #1f2937, transparent);
+            /* Alterado para ser mais transparente */
+            background: linear-gradient(to bottom, rgba(31, 41, 55, 0.05), transparent);
             z-index: 10;
             pointer-events: auto;
         }
@@ -133,8 +134,10 @@
         }
 
         .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            /* Alterado para centralizar e organizar os botões */
+            display: flex;
+            flex-wrap: wrap; /* Permite que os botões quebrem a linha */
+            justify-content: center; /* Centraliza os botões horizontalmente */
             gap: 12px;
             margin-bottom: 25px;
         }
@@ -154,6 +157,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            position: relative; /* Necessário para o dropdown */
         }
 
         .category-button:hover {
@@ -331,7 +335,8 @@
         .dropdown-menu {
             position: absolute;
             background-color: #1f2937;
-            min-width: 160px;
+            /* Alterado para ter a mesma largura do botão */
+            width: 100%;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 30; /* Aumentado para aparecer por cima da máscara */
             border-radius: 0.75rem;
@@ -339,6 +344,9 @@
             border: 1px solid #374151;
             max-height: 200px; /* Limita a altura do dropdown */
             overflow-y: auto; /* Adiciona scroll se houver muitos filmes */
+            top: 100%; /* Posiciona abaixo do botão */
+            left: 0;
+            margin-top: 5px; /* Espaçamento entre o botão e o dropdown */
         }
 
         .dropdown-menu button {
@@ -454,26 +462,11 @@
 </head>
 <body>
     <div class="player-container">
-        <h1 class="player-title">PenseQuiz MultCanais</h1>
+        <h1 class="player-title">PenseQuiz Fé MultCanais</h1>
         <p id="currentVideoDisplay" class="current-video-display">Nenhum vídeo selecionado</p>
         
         <div class="categories-grid" id="categoryVideos">
-            <button class="category-button" data-video-name="Mensagens de Fé">Mensagens de Fé</button>
-            <button class="category-button" data-video-name="Pregações">Pregações</button>
-            <button class="category-button" data-video-name="Louvor e Adoração">Louvor e Adoração</button>
-            
-            <div class="relative inline-block text-left">
-                <button id="movieDropdownButton" class="category-button">
-                    Filmes Gospel
-                    <svg class="-mr-1 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-                <div id="movieDropdown" class="dropdown-menu hidden">
-                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="movie-menu-button" tabindex="-1">
-                    </div>
-                </div>
-            </div>
+            <!-- Botões de categoria e dropdowns serão gerados aqui pelo JavaScript -->
         </div>
 
         <div class="video-wrapper" id="videoWrapper">
@@ -548,8 +541,6 @@
         const categoryVideosContainer = document.getElementById('categoryVideos');
         const offlinePlayerElement = document.getElementById('offlinePlayer'); // Referência ao elemento <video>
         const youtubePlayerElement = document.getElementById('youtubePlayer'); // Referência ao elemento <div> para o YouTube player
-        const movieDropdownButton = document.getElementById('movieDropdownButton');
-        const movieDropdown = document.getElementById('movieDropdown');
         const fullscreenButton = document.getElementById('fullscreenButton');
         const fullscreenControls = document.getElementById('fullscreenControls'); // Referência aos controles de tela cheia
         const exitFullscreenButton = document.getElementById('exitFullscreenButton');
@@ -562,31 +553,56 @@
         const volumeMuteIcon = document.getElementById('volumeMuteIcon');
 
         let lastVolume = 1; // Para armazenar o volume antes de mutar
-        let currentVideoName = null; // Armazena o nome do vídeo atualmente carregado
+        let currentVideoInfo = null; // Armazena o objeto de vídeo atualmente carregado
 
         // Objeto centralizado para todos os vídeos (categorias e filmes)
         const allVideos = {
             // --- CATEGORIAS DE VÍDEOS (YouTube com fontes offline de exemplo) ---
-            "Louvor e Adoração": { id: 'ful0qGqtSgQ', type: 'youtube', offlineSrc: "videos/louvor_e_adoracao.mp4" },
-            "Mensagens de Fé": { id: 'UedYFy5gMxU', type: 'youtube', offlineSrc: "videos/mensagens_de_fe.mp4" },
-            "Pregações": { id: '8SAcjqEzbcE', type: 'youtube', offlineSrc: "videos/pregacoes.webm" },
-            
+            "Mensagens de Fé": [
+                { name: "INRI Motivação", id: 'UedYFy5gMxU', type: 'youtube', offlineSrc: "videos/mensagens_de_fe.mp4" },
+                { name: "Pr. Cláudio Duarte", id: '8SAcjqEzbcE', type: 'youtube', offlineSrc: "videos/pregacoes.webm" },
+				
+				{ name: "Pr. Júnior Trovão", id: 'h5eS2ESkpjA', type: 'youtube' },
+                { name: "Pr. Osiel Gomes", id: 'u6FAqDrkask', type: 'youtube' },
+				{ name: "Pr.Ezequias Silva", id: 'P7zmU2g9SkE', type: 'youtube', offlineSrc: "videos/pregacoes.webm" },
+				
+            ],
+            "Canais/Igrejas": [
+                { name: "Igreja IEADPE", id: 'M6yMcv2dsIg', type: 'youtube', offlineSrc: "videos/pregacoes.webm" },
+                { name: "Igreja Presbiteriana", id: 'XdMSFByD85Q', type: 'youtube' },
+				{ name: "Igreja Deus é Amor", id: 'Gyld3uxzGAo', type: 'youtube' },
+				{ name: "Igreja Universal", id: 'h92wl7nZrKw', type: 'youtube' },
+				{ name: "Igreja Maranata", id: 'E11tGyX91KE', type: 'youtube' },
+				{ name: "Igreja Lagoinha", id: 'WGmu7vQM5Jc', type: 'youtube', offlineSrc: "videos/pregacoes.webm" },
+				{ name: "Igreja Adventista ", id: '5T-YfW4N6HI', type: 'youtube' },
+				{ name: "Igreja Graça e Paz", id: 'eSU3SOqibqY', type: 'youtube' },
+				{ name: "Igreja AD em Camboríu.", id: '_iPGWSw9Xdc', type: 'youtube' },
+				{ name: "Congregação Cristã Ap.", id: 'zII7lRPSGf8', type: 'youtube' },
+				{ name: "Igreja AD em Cuiabá.", id: 'xuve3_QKyTA', type: 'youtube' },
+				{ name: "Igreja Revayah ", id: 'm2Tvk4toEBE', type: 'youtube' },
+            ],
+            "Louvor e Adoração": [
+				{ name: "Louvor Nossa Harpa", id: 'dBqsADe1he0', type: 'youtube' },	
+                { name: "Louvor que Alimenta", id: '2WbnG0-k9Eo', type: 'youtube', offlineSrc: "videos/louvor_e_adoracao.mp4" },
+				{ name: "Louvor Bereia Music", id: 'nCqQNc6-UG8', type: 'youtube', offlineSrc: "videos/louvor_e_adoracao.mp4" },
+				{ name: "Louvores de Adoração", id: 'OTYSN6CAn88', type: 'youtube' },
+				{ name: "Louvor Morada", id: 'N-1lD8ZR5vU', type: 'youtube' },
+				{ name: "Louvor Caminho", id: 'epgrtKplRcw', type: 'youtube' },
+				{ name: "Louvor Antigos", id: '2bCajjjG7Ig', type: 'youtube' },
+				{ name: "Louvores Diário", id: 'D374OxVkkqY', type: 'youtube' },
+				{ name: "Louvor Gospel", id: '0djvvl8JKZI', type: 'youtube' },
+               
+            ],
             // --- FILMES (YouTube apenas, adicione mais aqui!) ---
-            // ONDE COLOCAR O LINK E NOME DO FILME:
-            // Adicione mais filmes aqui no formato: "Nome do Filme": { id: "ID_DO_VIDEO_YOUTUBE", type: "youtube" },
-            // Você pode encontrar o ID do vídeo na URL do YouTube. É a parte depois de "v=" ou "watch?v="
-            // Exemplos:
-            // - Para "https://www.youtube.com/watch?v=dQw4w9WgXcQ", o ID é "dQw4w9WgXcQ"
-            // - Para "https://youtu.be/Dy7xghRm0U4", o ID é "Dy7xghRm0U4"
-            "Deus não está morto": { id: 'Dy7xghRm0U4', type: 'youtube' },
-            "Um Lugar para Recomeçar": { id: 'SpODjPk4IIw', type: 'youtube' },
-            "Uma Prova de Fé 2": { id: 'OxIB3ddJBbA', type: 'youtube' },
-            "Setenta Vezes Sete": { id: '_tAA7hWJUbw', type: 'youtube' },
-            "Escolhidos Por Amor": { id: 'u_gR3kCz-_U', type: 'youtube' },
-            "Um Amor Para Recordar": { id: 'bZxqBWPXbOA', type: 'youtube' },
-            // Novos filmes solicitados:
-            "Desafiando Gigantes": { id: 'xP4GesmwsEI', type: 'youtube' },
-            "A Forja O Poder Da Transformação": { id: 'x8t2BcNLxOA', type: 'youtube' },
+            "Filmes Gospel": [
+                { name: "Um Lugar para Recomeçar", id: 'SpODjPk4IIw', type: 'youtube' },
+                { name: "Uma Prova de Fé 2", id: 'OxIB3ddJBbA', type: 'youtube' },
+                { name: "Setenta Vezes Sete", id: '_tAA7hWJUbw', type: 'youtube' },
+                { name: "Escolhidos Por Amor", id: 'u_gR3kCz-_U', type: 'youtube' },
+                { name: "Um Amor Para Recordar", id: 'bZxqBWPXbOA', type: 'youtube' },
+                { name: "Desafiando Gigantes", id: 'xP4GesmwsEI', type: 'youtube' },
+               
+            ]
         };
 
         /**
@@ -623,9 +639,14 @@
             };
 
             // Carrega o primeiro vídeo offline disponível (apenas categorias com offlineSrc)
-            const firstOfflineVideoName = Object.keys(allVideos).find(name => allVideos[name].offlineSrc);
-            if (firstOfflineVideoName) {
-                loadVideo(firstOfflineVideoName);
+            const firstOfflineCategory = Object.keys(allVideos).find(category => 
+                allVideos[category].some(video => video.offlineSrc)
+            );
+            if (firstOfflineCategory) {
+                const firstOfflineVideo = allVideos[firstOfflineCategory].find(video => video.offlineSrc);
+                if (firstOfflineVideo) {
+                    loadVideo(firstOfflineVideo);
+                }
             } else {
                 showMessageModal('Aviso', 'Nenhum vídeo offline disponível para reprodução.');
             }
@@ -700,9 +721,11 @@
             console.log("Player (YouTube) está pronto.");
             isPlayerReady = true; // Define a flag como true
             // Carrega um vídeo padrão ao iniciar, se houver vídeos e nenhum vídeo estiver selecionado
-            if (!currentVideoName && Object.keys(allVideos).length > 0) {
-                const firstVideoName = Object.keys(allVideos)[0];
-                loadVideo(firstVideoName);
+            if (!currentVideoInfo && Object.keys(allVideos).length > 0) {
+                const firstCategory = Object.keys(allVideos)[0];
+                if (allVideos[firstCategory] && allVideos[firstCategory].length > 0) {
+                    loadVideo(allVideos[firstCategory][0]); // Carrega o primeiro vídeo da primeira categoria
+                }
             }
             customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara esteja visível para iniciar o play
             youtubePlayer.setVolume(volumeSlider.value * 100); // Define o volume inicial
@@ -720,52 +743,48 @@
                 customPlayOverlay.classList.remove('hidden-overlay'); // Mostra a máscara ao pausar ou carregar
             } else if (event.data === YT.PlayerState.ENDED) {
                 // Se o vídeo terminou, reinicia-o automaticamente
-                const videoInfo = allVideos[currentVideoName];
-                if (videoInfo && videoInfo.type === 'youtube' && youtubePlayer) { // Verifica se é um vídeo do YouTube
-                    youtubePlayer.seekTo(0, true); // Volta para o início
-                    youtubePlayer.playVideo(); // Inicia a reprodução novamente
-                    customPlayOverlay.classList.add('hidden-overlay'); // Mantém a máscara oculta enquanto reproduz automaticamente
+                if (currentVideoInfo && currentVideoInfo.type === 'youtube') {
+                    youtubePlayer.seekTo(0); // Volta para o início
+                    youtubePlayer.playVideo(); // Reproduz automaticamente
+                    customPlayOverlay.classList.add('hidden-overlay'); // Mantém a máscara transparente enquanto reproduz
                 }
-            } else if (event.data === YT.PlayerState.UNSTARTED) {
-                customPlayOverlay.classList.remove('hidden-overlay'); // Mostra a máscara se o vídeo ainda não começou
             }
-            updateMuteIcon(); // Atualiza o ícone de mudo sempre que o estado do player muda
         }
 
         /**
-         * Tratamento de erros do player do YouTube.
+         * Função de callback chamada quando ocorre um erro no player do YouTube.
          * @param {Object} event - O objeto do evento de erro.
          */
         function onYouTubePlayerError(event) {
-            let errorMessage = "Ocorreu um erro desconhecido no player de vídeo.";
-            switch(event.data) {
+            console.error("Erro no player do YouTube:", event.data);
+            let errorMessage = "Ocorreu um erro desconhecido no player do YouTube.";
+            switch (event.data) {
                 case 2:
                     errorMessage = "O ID do vídeo não é válido ou o vídeo não existe.";
                     break;
-                case 5:
-                    errorMessage = "Ocorreu um erro ao reproduzir o HTML5 Player.";
-                    break;
                 case 100:
-                    errorMessage = "O vídeo não foi encontrado. Pode ter sido removido ou é privado.";
+                    errorMessage = "O vídeo não foi encontrado.";
                     break;
                 case 101:
                 case 150:
                     errorMessage = "O proprietário do vídeo não permite a reprodução em players incorporados.";
                     break;
             }
-            showMessageModal('Erro no Vídeo', errorMessage);
-            console.error("Erro no player do YouTube:", event.data, errorMessage);
-            customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara apareça em caso de erro
-            currentVideoDisplay.textContent = "Erro ao carregar vídeo.";
-            // Tenta alternar para o modo offline se o erro for persistente ou relacionado à incorporação
-            if ((event.data === 101 || event.data === 150) && !offlinePlayer) { // Só tenta alternar se não estiver já no modo offline
-                showMessageModal('Erro de Incorporação', 'Este vídeo não pode ser reproduzido aqui. Tentando modo offline...');
-                switchToOfflineMode();
+            showMessageModal('Erro de Reprodução', errorMessage + ' Por favor, tente outro vídeo.');
+            // Tenta carregar um vídeo offline se disponível
+            if (currentVideoInfo && currentVideoInfo.offlineSrc) {
+                loadVideo({ ...currentVideoInfo, type: 'offline' });
+            } else {
+                // Se não houver offlineSrc, tenta carregar o primeiro vídeo da lista
+                const firstCategory = Object.keys(allVideos)[0];
+                if (allVideos[firstCategory] && allVideos[firstCategory].length > 0) {
+                    loadVideo(allVideos[firstCategory][0]);
+                }
             }
         }
 
         /**
-         * Exibe um modal de mensagem personalizado.
+         * Exibe um modal de mensagem.
          * @param {string} title - O título do modal.
          * @param {string} message - A mensagem a ser exibida.
          */
@@ -776,79 +795,230 @@
         }
 
         /**
-         * Carrega e tenta reproduzir um vídeo pelo seu nome.
-         * @param {string} videoName - O nome do vídeo a ser carregado (chave no objeto allVideos).
+         * Carrega e reproduz um vídeo.
+         * @param {Object} video - O objeto de vídeo contendo name, id, type e opcionalmente offlineSrc.
          */
-        function loadVideo(videoName) {
-            const videoInfo = allVideos[videoName];
-
-            if (!videoInfo) {
-                showMessageModal('Erro', `Vídeo "${videoName}" não encontrado.`);
+        function loadVideo(video) {
+            if (!video) {
+                showMessageModal('Erro', 'Informações do vídeo não encontradas.');
                 return;
             }
 
-            if (!isPlayerReady) {
-                showMessageModal('Player não pronto', 'O player de vídeo ainda não está pronto. Por favor, aguarde um momento.');
-                return;
-            }
+            currentVideoInfo = video;
+            currentVideoDisplay.textContent = `Reproduzindo: ${video.name}`;
+            customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara esteja visível
 
-            currentVideoName = videoName; // Atualiza o vídeo atualmente carregado
-            currentVideoDisplay.textContent = `Tocando: ${videoName}`;
-            customPlayOverlay.classList.remove('hidden-overlay'); // Garante que a máscara esteja visível com o ícone de play
-
-            if (isOnline() && videoInfo.type === 'youtube' && youtubePlayer) {
-                // Esconde o player offline e mostra o do YouTube
+            if (video.type === 'youtube' && isOnline() && isYouTubeApiLoaded && youtubePlayer) {
                 offlinePlayerElement.style.display = 'none';
                 youtubePlayerElement.style.display = 'block';
-                youtubePlayer.loadVideoById({
-                    videoId: videoInfo.id,
-                    startSeconds: 0
-                });
-            } else if (!isOnline() && videoInfo.offlineSrc && offlinePlayer) {
-                // Esconde o player do YouTube e mostra o offline
+                youtubePlayer.loadVideoById(video.id);
+                youtubePlayer.setVolume(volumeSlider.value * 100); // Aplica o volume atual
+                updateMuteIcon();
+            } else if (video.type === 'offline' && video.offlineSrc) {
+                if (youtubePlayer) {
+                    youtubePlayer.destroy();
+                    youtubePlayer = null;
+                }
                 youtubePlayerElement.style.display = 'none';
                 offlinePlayerElement.style.display = 'block';
-
-                // Limpa as fontes existentes e adiciona a nova
-                while (offlinePlayer.firstChild) {
-                    offlinePlayer.removeChild(offlinePlayer.firstChild);
-                }
-                const newSource = document.createElement('source');
-                newSource.src = videoInfo.offlineSrc;
-                // Determina dinamicamente o tipo com base na extensão
-                newSource.type = videoInfo.offlineSrc.endsWith('.webm') ? 'video/webm' : 'video/mp4';
-                offlinePlayer.appendChild(newSource);
+                offlinePlayer.src = video.offlineSrc;
                 offlinePlayer.load();
-                offlinePlayer.pause(); // Pausa inicialmente, deixa a overlay lidar com o play
-            } else if (!isOnline() && videoInfo.type === 'youtube' && !videoInfo.offlineSrc) {
-                // Se estiver offline e o vídeo é do YouTube sem fonte offline
-                showMessageModal('Offline', `O vídeo "${videoName}" só está disponível online. Por favor, conecte-se à internet.`);
-                currentVideoDisplay.textContent = "Nenhum vídeo selecionado (Modo Offline)"; // Reset display
-                return;
+                offlinePlayer.volume = volumeSlider.value; // Aplica o volume atual
+                updateMuteIcon();
+                showMessageModal('Modo Offline', `Reproduzindo "${video.name}" do armazenamento local.`);
             } else {
-                showMessageModal('Erro', 'Nenhum player disponível ou vídeo não pode ser carregado.');
+                showMessageModal('Erro', 'Não foi possível carregar o vídeo. Verifique sua conexão ou tente outro vídeo.');
+                // Tenta alternar para o modo offline se o YouTube falhar e houver uma fonte offline
+                if (video.type === 'youtube' && video.offlineSrc) {
+                    loadVideo({ ...video, type: 'offline' });
+                } else if (!isOnline()) {
+                    showMessageModal('Sem Conexão', 'Você está offline. Por favor, conecte-se à internet para acessar vídeos do YouTube.');
+                }
             }
         }
 
         /**
-         * Atualiza o estado do ícone de mudo/volume.
+         * Alterna a visibilidade de um dropdown.
+         * @param {HTMLElement} dropdownElement - O elemento dropdown a ser alternado.
+         */
+        function toggleDropdown(dropdownElement) {
+            const isHidden = dropdownElement.classList.contains('hidden');
+            // Fecha todos os dropdowns abertos primeiro
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+            // Abre ou fecha o dropdown clicado
+            if (isHidden) {
+                dropdownElement.classList.remove('hidden');
+            } else {
+                dropdownElement.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Gera e renderiza os botões de categoria com dropdowns.
+         */
+        function renderCategoryButtons() {
+            categoryVideosContainer.innerHTML = ''; // Limpa os botões existentes
+
+            for (const categoryName in allVideos) {
+                const categoryVideos = allVideos[categoryName];
+
+                const dropdownWrapper = document.createElement('div');
+                // Adicionado 'flex-grow' para que o wrapper ocupe o espaço disponível e 'min-w-0' para flexibilidade
+                dropdownWrapper.className = 'relative inline-block text-left flex-grow min-w-0';
+
+                const categoryButton = document.createElement('button');
+                // Adicionado 'w-full' para que o botão preencha a largura do seu wrapper
+                categoryButton.className = 'category-button w-full';
+                categoryButton.setAttribute('data-category', categoryName);
+                categoryButton.innerHTML = `
+                    ${categoryName}
+                    <svg class="-mr-1 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                    </svg>
+                `;
+                dropdownWrapper.appendChild(categoryButton);
+
+                const dropdownMenu = document.createElement('div');
+                dropdownMenu.className = 'dropdown-menu hidden';
+                dropdownMenu.setAttribute('data-category-menu', categoryName);
+                const dropdownContent = document.createElement('div');
+                dropdownContent.className = 'py-1';
+                dropdownContent.setAttribute('role', 'menu');
+                dropdownContent.setAttribute('aria-orientation', 'vertical');
+                dropdownContent.setAttribute('aria-labelledby', `${categoryName}-menu-button`);
+                dropdownContent.setAttribute('tabindex', '-1');
+
+                categoryVideos.forEach(video => {
+                    const videoButton = document.createElement('button');
+                    videoButton.className = 'block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left rounded-md';
+                    videoButton.setAttribute('role', 'menuitem');
+                    videoButton.setAttribute('tabindex', '-1');
+                    videoButton.setAttribute('data-video-name', video.name); // Armazena o nome do vídeo
+                    videoButton.textContent = video.name;
+                    dropdownContent.appendChild(videoButton);
+                });
+
+                dropdownMenu.appendChild(dropdownContent);
+                dropdownWrapper.appendChild(dropdownMenu);
+                categoryVideosContainer.appendChild(dropdownWrapper);
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Listener para os botões de categoria e itens de dropdown
+        categoryVideosContainer.addEventListener('click', (event) => {
+            const targetButton = event.target.closest('.category-button');
+            const targetVideoItem = event.target.closest('.dropdown-menu button');
+
+            if (targetButton) {
+                const categoryName = targetButton.getAttribute('data-category');
+                const dropdownMenu = document.querySelector(`.dropdown-menu[data-category-menu="${categoryName}"]`);
+                if (dropdownMenu) {
+                    toggleDropdown(dropdownMenu);
+                }
+            } else if (targetVideoItem) {
+                const videoName = targetVideoItem.getAttribute('data-video-name');
+                const categoryMenu = targetVideoItem.closest('.dropdown-menu');
+                const categoryName = categoryMenu.getAttribute('data-category-menu');
+                
+                const videoToLoad = allVideos[categoryName].find(video => video.name === videoName);
+                if (videoToLoad) {
+                    loadVideo(videoToLoad);
+                    toggleDropdown(categoryMenu); // Fecha o dropdown após selecionar o vídeo
+                }
+            }
+        });
+
+        // Fecha os dropdowns se clicar fora deles
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.categories-grid')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
+        // Event listener para o overlay de play/pause
+        customPlayOverlay.addEventListener('click', () => {
+            if (!isPlayerReady) {
+                showMessageModal('Aguarde', 'O player ainda não está pronto. Por favor, aguarde.');
+                return;
+            }
+
+            if (currentVideoInfo) {
+                if (currentVideoInfo.type === 'youtube' && youtubePlayer) {
+                    const playerState = youtubePlayer.getPlayerState();
+                    if (playerState === YT.PlayerState.PLAYING) {
+                        youtubePlayer.pauseVideo();
+                    } else {
+                        youtubePlayer.playVideo();
+                    }
+                } else if (currentVideoInfo.type === 'offline' && offlinePlayer) {
+                    if (offlinePlayer.paused) {
+                        offlinePlayer.play();
+                    } else {
+                        offlinePlayer.pause();
+                    }
+                }
+            } else {
+                showMessageModal('Nenhum Vídeo', 'Por favor, selecione um vídeo para começar.');
+            }
+        });
+
+        // Event listener para o slider de volume
+        volumeSlider.addEventListener('input', () => {
+            const volume = parseFloat(volumeSlider.value);
+            if (youtubePlayer && youtubePlayer.setVolume) {
+                youtubePlayer.setVolume(volume * 100);
+            } else if (offlinePlayer) {
+                offlinePlayer.volume = volume;
+            }
+            lastVolume = volume; // Atualiza o último volume conhecido
+            updateMuteIcon();
+        });
+
+        // Event listener para o botão de mudo
+        muteButton.addEventListener('click', () => {
+            if (youtubePlayer && youtubePlayer.isMuted) {
+                if (youtubePlayer.isMuted()) {
+                    youtubePlayer.unMute();
+                    youtubePlayer.setVolume(lastVolume * 100); // Restaura o último volume
+                    volumeSlider.value = lastVolume;
+                } else {
+                    youtubePlayer.mute();
+                    volumeSlider.value = 0;
+                }
+            } else if (offlinePlayer) {
+                if (offlinePlayer.muted) {
+                    offlinePlayer.muted = false;
+                    offlinePlayer.volume = lastVolume; // Restaura o último volume
+                    volumeSlider.value = lastVolume;
+                } else {
+                    offlinePlayer.muted = true;
+                    volumeSlider.value = 0;
+                }
+            }
+            updateMuteIcon();
+        });
+
+        /**
+         * Atualiza o ícone do botão de mudo com base no estado atual do volume.
          */
         function updateMuteIcon() {
             let isMuted = false;
             let currentVolume = 0;
 
-            if (isOnline() && youtubePlayer) {
-                // Verifica se o player do YouTube está pronto antes de chamar seus métodos
-                if (typeof youtubePlayer.isMuted === 'function') {
-                    isMuted = youtubePlayer.isMuted();
-                    currentVolume = youtubePlayer.getVolume() / 100; // YouTube API retorna 0-100
-                }
+            if (youtubePlayer && youtubePlayer.isMuted) {
+                isMuted = youtubePlayer.isMuted();
+                currentVolume = youtubePlayer.getVolume() / 100;
             } else if (offlinePlayer) {
                 isMuted = offlinePlayer.muted;
                 currentVolume = offlinePlayer.volume;
             }
 
-            // Se estiver mutado ou o volume for zero, mostra o ícone de mudo
             if (isMuted || currentVolume === 0) {
                 volumeHighIcon.classList.add('hidden');
                 volumeMuteIcon.classList.remove('hidden');
@@ -858,216 +1028,71 @@
             }
         }
 
-        /**
-         * Entra no modo de tela cheia.
-         */
-        function enterFullScreen() {
-            if (!currentVideoName) {
-                showMessageModal('Nenhum Vídeo', 'Por favor, selecione um vídeo para assistir em tela cheia.');
-                return;
+        // Fullscreen functionality
+        fullscreenButton.addEventListener('click', () => {
+            if (videoWrapper.requestFullscreen) {
+                videoWrapper.requestFullscreen();
+            } else if (videoWrapper.mozRequestFullScreen) { /* Firefox */
+                videoWrapper.mozRequestFullScreen();
+            } else if (videoWrapper.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                videoWrapper.webkitRequestFullscreen();
+            } else if (videoWrapper.msRequestFullscreen) { /* IE/Edge */
+                videoWrapper.msRequestFullscreen();
             }
+        });
 
-            // Pausa o vídeo no player principal antes de ir para tela cheia
-            if (isOnline() && youtubePlayer && typeof youtubePlayer.pauseVideo === 'function') {
-                youtubePlayer.pauseVideo();
-            } else if (offlinePlayer && typeof offlinePlayer.pause === 'function') {
-                offlinePlayer.pause();
+        exitFullscreenButton.addEventListener('click', () => {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) { /* Firefox */
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE/Edge */
+                document.msExitFullscreen();
             }
+        });
 
-            // Adiciona a classe de tela cheia ao video-wrapper
-            videoWrapper.classList.add('is-fullscreen');
-            // Mostra os controles de tela cheia
-            fullscreenControls.style.display = 'flex';
-
-            // Garante que o player ativo esteja visível e comece a reproduzir
-            if (isOnline() && youtubePlayerElement) {
-                youtubePlayerElement.style.display = 'block';
-                if (youtubePlayer && typeof youtubePlayer.playVideo === 'function') {
-                    youtubePlayer.playVideo();
-                }
-            } else if (offlinePlayerElement) {
-                offlinePlayerElement.style.display = 'block';
-                if (offlinePlayer && typeof offlinePlayer.play === 'function') {
-                    offlinePlayer.play();
-                }
-            }
-            // Oculta a overlay de play/pause no modo tela cheia
-            customPlayOverlay.classList.add('hidden-overlay');
-        }
-
-        /**
-         * Sai do modo de tela cheia.
-         */
-        function exitFullScreen() {
-            // Remove a classe de tela cheia do video-wrapper
-            videoWrapper.classList.remove('is-fullscreen');
-            // Oculta os controles de tela cheia
-            fullscreenControls.style.display = 'none';
-
-            // Pausa o vídeo ao sair da tela cheia
-            if (isOnline() && youtubePlayer && typeof youtubePlayer.pauseVideo === 'function') {
-                youtubePlayer.pauseVideo();
-            } else if (offlinePlayer && typeof offlinePlayer.pause === 'function') {
-                offlinePlayer.pause();
-            }
-
-            // Reseta a rotação ao sair da tela cheia
-            if (isOnline() && youtubePlayerElement) {
-                youtubePlayerElement.style.transform = 'rotate(0deg)';
-            } else if (offlinePlayerElement) {
-                offlinePlayerElement.style.transform = 'rotate(0deg)';
-            }
-            currentRotation = 0;
-            // Mostra a overlay de play/pause novamente
-            customPlayOverlay.classList.remove('hidden-overlay');
-        }
-
-        /**
-         * Rotaciona o vídeo em tela cheia.
-         */
-        function toggleRotation() {
+        rotateButton.addEventListener('click', () => {
             currentRotation = (currentRotation + 90) % 360;
-            let playerToRotate = null;
-
-            if (isOnline() && youtubePlayerElement) {
-                playerToRotate = youtubePlayerElement;
-            } else if (offlinePlayerElement) {
-                playerToRotate = offlinePlayerElement;
+            const activePlayer = youtubePlayerElement.style.display === 'block' ? youtubePlayerElement.querySelector('iframe') : offlinePlayerElement;
+            
+            // Remove previous rotation classes
+            activePlayer.classList.remove('rotate-90', 'rotate-180', 'rotate-270');
+            
+            // Add new rotation class
+            if (currentRotation === 90) {
+                activePlayer.classList.add('rotate-90');
+            } else if (currentRotation === 180) {
+                activePlayer.classList.add('rotate-180');
+            } else if (currentRotation === 270) {
+                activePlayer.classList.add('rotate-270');
             }
+        });
 
-            if (playerToRotate) {
-                playerToRotate.style.transform = `rotate(${currentRotation}deg)`;
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                videoWrapper.classList.add('is-fullscreen');
+                fullscreenControls.style.display = 'flex';
+            } else {
+                videoWrapper.classList.remove('is-fullscreen');
+                fullscreenControls.style.display = 'none';
+                // Reset rotation when exiting fullscreen
+                const activePlayer = youtubePlayerElement.style.display === 'block' ? youtubePlayerElement.querySelector('iframe') : offlinePlayerElement;
+                if (activePlayer) { // Check if activePlayer exists
+                    activePlayer.classList.remove('rotate-90', 'rotate-180', 'rotate-270');
+                    currentRotation = 0; // Reset rotation state
+                }
             }
-        }
+        });
 
 
-        // --- Event Listeners ---
-
-        // Fecha o modal de mensagem
+        // --- Inicialização ---
+        renderCategoryButtons(); // Renderiza os botões de categoria e dropdowns
+        initializePlayer(); // Inicia o processo de carregamento do player
         modalCloseBtn.addEventListener('click', () => {
             messageModal.style.display = 'none';
         });
-
-        // Event listener para os botões de categoria de vídeo
-        categoryVideosContainer.querySelectorAll('.category-button').forEach(button => {
-            // Garante que o botão "Filmes" e "Tela Cheia" não sejam afetados por este listener genérico
-            if (button.id !== 'movieDropdownButton' && button.id !== 'fullscreenButton') {
-                button.addEventListener('click', (event) => {
-                    const videoName = event.target.dataset.videoName;
-                    loadVideo(videoName);
-                    movieDropdown.classList.add('hidden'); // Esconde o dropdown se outra categoria for clicada
-                });
-            }
-        });
-
-        // Event listener para o botão de Filmes (toggle do dropdown)
-        movieDropdownButton.addEventListener('click', () => {
-            movieDropdown.classList.toggle('hidden');
-        });
-
-        // Preenche o dropdown de filmes dinamicamente
-        function populateMovieDropdown() {
-            const dropdownContent = movieDropdown.querySelector('.py-1');
-            dropdownContent.innerHTML = ''; // Limpa conteúdo existente
-
-            for (const videoName in allVideos) {
-                const videoInfo = allVideos[videoName];
-                // Considera filmes como YouTube sem offlineSrc (ou se for um filme, mesmo com offlineSrc, mas queremos listar apenas os "filmes" aqui)
-                if (videoInfo.type === 'youtube' && !['Louvor e Adoração', 'Mensagens de Fé', 'Pregações'].includes(videoName)) {
-                    const movieButton = document.createElement('button');
-                    movieButton.textContent = videoName;
-                    movieButton.setAttribute('role', 'menuitem');
-                    movieButton.classList.add('block', 'px-4', 'py-2', 'text-sm', 'text-gray-200', 'hover:bg-gray-700', 'w-full', 'text-left');
-                    movieButton.addEventListener('click', () => {
-                        loadVideo(videoName);
-                        movieDropdown.classList.add('hidden'); // Esconde o dropdown após a seleção
-                    });
-                    dropdownContent.appendChild(movieButton);
-                }
-            }
-        }
-
-        // Esconde o dropdown se o usuário clicar fora dele
-        window.addEventListener('click', (event) => {
-            if (!movieDropdownButton.contains(event.target) && !movieDropdown.contains(event.target)) {
-                movieDropdown.classList.add('hidden');
-            }
-        });
-
-        // Event listener para o overlay de play/pause
-        customPlayOverlay.addEventListener('click', () => {
-            if (!isPlayerReady) {
-                showMessageModal('Player não pronto', 'O player de vídeo ainda não está pronto. Por favor, aguarde um momento.');
-                return;
-            }
-
-            // Determine qual player está ativo e controle-o
-            if (isOnline() && youtubePlayer && youtubePlayer.getPlayerState) {
-                const playerState = youtubePlayer.getPlayerState();
-                if (playerState === YT.PlayerState.PLAYING) {
-                    youtubePlayer.pauseVideo();
-                } else if (playerState === YT.PlayerState.PAUSED || playerState === YT.PlayerState.BUFFERING || playerState === YT.PlayerState.ENDED || playerState === YT.PlayerState.UNSTARTED) {
-                    youtubePlayer.playVideo();
-                }
-            } else if (offlinePlayer) {
-                if (offlinePlayer.paused) {
-                    offlinePlayer.play();
-                } else {
-                    offlinePlayer.pause();
-                }
-            }
-        });
-
-        // Event listener para o slider de volume
-        volumeSlider.addEventListener('input', (event) => {
-            const volume = parseFloat(event.target.value);
-            if (isOnline() && youtubePlayer && typeof youtubePlayer.setVolume === 'function') {
-                youtubePlayer.setVolume(volume * 100); // YouTube API espera 0-100
-            } else if (offlinePlayer) {
-                offlinePlayer.volume = volume;
-            }
-            lastVolume = volume; // Atualiza o último volume
-            updateMuteIcon(); // Atualiza o ícone ao ajustar o volume
-        });
-
-        // Event listener para o botão de mudo
-        muteButton.addEventListener('click', () => {
-            if (isOnline() && youtubePlayer && typeof youtubePlayer.isMuted === 'function') {
-                if (youtubePlayer.isMuted()) {
-                    youtubePlayer.unMute();
-                    youtubePlayer.setVolume(lastVolume * 100); // Restaura o último volume
-                    volumeSlider.value = lastVolume;
-                } else {
-                    youtubePlayer.mute();
-                    volumeSlider.value = 0; // Move o slider para zero
-                }
-            } else if (offlinePlayer) {
-                if (offlinePlayer.muted) {
-                    offlinePlayer.muted = false;
-                    offlinePlayer.volume = lastVolume; // Restaura o último volume
-                    volumeSlider.value = lastVolume;
-                } else {
-                    offlinePlayer.muted = true;
-                    volumeSlider.value = 0; // Move o slider para zero
-                }
-            }
-            updateMuteIcon(); // Atualiza o ícone
-        });
-
-        // Event listener para o botão de tela cheia
-        fullscreenButton.addEventListener('click', enterFullScreen);
-
-        // Event listener para o botão de sair da tela cheia
-        exitFullscreenButton.addEventListener('click', exitFullScreen);
-
-        // Event listener para o botão de rotação
-        rotateButton.addEventListener('click', toggleRotation);
-
-        // Inicializa o player e popula o dropdown de filmes ao carregar a página
-        window.onload = function() {
-            initializePlayer();
-            populateMovieDropdown();
-        };
     </script>
 </body>
 </html>
