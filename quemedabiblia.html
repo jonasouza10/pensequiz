@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quem É da Bíblia?</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(to bottom, #1a1a1a, #2c3e50);
+            color: #00ff00;
+            font-family: monospace;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centraliza o conteúdo horizontalmente */
+            justify-content: center; /* Centraliza o conteúdo verticalmente */
+        }
+        #terminal-container {
+            width: 90%;
+            max-width: 600px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #terminal {
+            height: 400px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 15px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-sizing: border-box; /* Garante que padding e border sejam incluídos na largura */
+        }
+        #buttonArea {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            background: #00ff00;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            font-family: monospace;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        button:hover:not(:disabled) {
+            background: #00cc00;
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        button:focus {
+            outline: 2px solid #00ff00;
+        }
+        footer {
+            font-size: 0.8em;
+            color: #008800;
+            text-align: center;
+            margin-top: auto; /* Empurra o rodapé para a parte inferior */
+            padding-top: 20px;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: #1a1a1a;
+            border: 2px solid #00ff00;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            color: #00ff00;
+        }
+        .modal-content button {
+            margin: 10px 5px 0 5px; /* Adicionado margem para espaçar botões */
+        }
+        /* Responsividade básica */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            #terminal {
+                height: 300px;
+                padding: 10px;
+            }
+            #buttonArea {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal-container">
+        <div id="terminal" role="log" aria-live="polite" aria-label="Terminal de diagnóstico"></div>
+        <div id="buttonArea">
+            <button id="simBtn" aria-label="Responder Sim" disabled>Sim</button>
+            <button id="naoBtn" aria-label="Responder Não" disabled>Não</button>
+        </div>
+    </div>
+    <footer>© 2025 PenseQuiz.com ☁️</footer>
+
+    <div id="start-modal" class="modal active" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-description">
+        <div class="modal-content">
+            <h2 id="modal-title">Quem É da Bíblia?</h2>
+            <p id="modal-description">Pense em um personagem bíblico. Responda a 10 perguntas com "Sim" ou "Não" para eu adivinhar! 😇</p>
+            <button id="startGameBtn" aria-label="Iniciar jogo">Iniciar Jornada</button>
+        </div>
+    </div>
+
+    <div id="result-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="result-modal-title" aria-describedby="result-modal-description">
+        <div class="modal-content">
+            <h2 id="result-modal-title">Diagnóstico Concluído!</h2>
+            <p id="result-modal-description"></p>
+            <button id="restartGameBtn" aria-label="Reiniciar jogo">Reiniciar</button>
+        </div>
+    </div>
+
+    <script>
+        // Array de perguntas para o jogo
+        const perguntas = [
+            "É do Antigo Testamento?",
+            "É um homem?",
+            "Foi rei?",
+            "Fez milagres?",
+            "Esteve com Jesus?",
+            "Foi profeta?",
+            "Enfrentou um exército ou grandes adversidades?",
+            "Libertou o povo de Deus ou desempenhou um papel crucial em sua libertação?",
+            "Foi discípulo direto de Jesus (apóstolo ou seguidor próximo)?",
+            "É conhecido por sua sabedoria ou grande discernimento?",
+            "Escreveu um livro da Bíblia (ou uma grande parte)?",
+            "Era sacerdote ou levita?",
+            "Foi juiz de Israel ou líder militar?",
+            "Viveu antes do dilúvio?",
+            "Era da linhagem de Davi ou relacionado à realeza judaica?",
+            "Foi um grande construtor (templo, arca, cidades)?",
+            "Sofreu grande perseguição por sua fé?",
+            "É conhecido por sua fé inabalável, mesmo em provações?",
+            "Viajou extensivamente para espalhar a mensagem de Deus?",
+            "Teve um chamado divino ou uma revelação especial?",
+            "É conhecido por sua humildade?",
+            "Foi pastor de ovelhas (literalmente ou de forma simbólica)?",
+            "Teve múltiplos nomes ao longo de sua vida bíblica?",
+            "É uma figura proeminente no livro de Gênesis?",
+            "Sua morte é descrita como violenta ou incomum na Bíblia?",
+            // Novas 50 perguntas adicionadas
+            "Foi escravizado ou exilado em terra estrangeira?",
+            "Foi enganado ou traído por um parente próximo?",
+            "Teve visões ou sonhos proféticos?",
+            "Casou-se múltiplas vezes?",
+            "Foi um líder militar vitorioso?",
+            "Morreu em batalha?",
+            "É conhecido por sua força física excepcional?",
+            "Foi o primogênito de seus pais?",
+            "Tinha irmãos notáveis na Bíblia?",
+            "Foi salvo da morte ainda criança?",
+            "Teve um filho que se tornou uma figura importante?",
+            "Seu nome foi mudado por Deus ou um anjo?",
+            "Era uma mulher profetisa ou juíza?",
+            "Foi chamado enquanto cuidava de rebanhos?",
+            "Seu ministério envolveu jejum prolongado?",
+            "Foi confrontado diretamente por um anjo?",
+            "Foi levado ao céu sem experimentar a morte?",
+            "Sua vida envolveu uma grande jornada ou migração?",
+            "Foi desobediente a Deus em algum momento crítico?",
+            "É um dos doze filhos de Jacó?",
+            "Foi vendido como escravo por seus irmãos?",
+            "Interpretou sonhos?",
+            "Foi governador de uma nação estrangeira?",
+            "Teve um relacionamento próximo com um rei?",
+            "Foi sepultado em um local específico e conhecido?",
+            "É associado a um período de grande seca ou fome?",
+            "Enfrentou um adversário gigante?",
+            "Foi curado de uma doença grave por intervenção divina?",
+            "Foi tentado diretamente pelo diabo?",
+            "Pregou o arrependimento no deserto?",
+            "Foi o último juiz de Israel?",
+            "Ungiu reis?",
+            "Sua história envolve um sacrifício quase-fatal de um filho?",
+            "Foi pai de muitas nações?",
+            "Sua história envolve um dilúvio?",
+            "Foi alvo de um plano de assassinato por um rei?",
+            "Sua vida é marcada por um pacto direto com Deus?",
+            "É conhecido por sua paciência em meio ao sofrimento?",
+            "Foi um escriba ou estudioso da lei?",
+            "Sua vida é tema de um livro profético menor?",
+            "Foi enviado para pregar em uma cidade estrangeira que era inimiga de Israel?",
+            "Seu nome significa \"risada\" ou \"ele ri\"?",
+            "Foi o pai de um profeta famoso?",
+            "Teve um irmão que cometeu um assassinato?",
+            "Foi um construtor de um altar significativo?",
+            "Sua fé foi testada com a exigência de deixar sua terra natal?",
+            "É uma figura central na história do Êxodo?",
+            "Morreu em idade avançada e foi sepultado em paz?",
+            "Sua história termina com ele sendo levado ao céu?",
+            "É reverenciado por judeus, cristãos e muçulmanos?",
+        ];
+
+        // Array de personagens suspeitos com seus perfis de resposta para cada pergunta
+        const suspeitas = [
+            { nome: "Moisés", perfil: [true, true, false, true, false, true, true, true, false, false, true, false, false, false, false, true, false, true, false, true, true, false, false, false, false, true, false, true, false, true, false, false, false, true, true, false, false, false, true, true, true, false, true, true, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, false, true, true, false, true] },
+            { nome: "Davi", perfil: [true, true, true, false, false, false, true, false, false, true, true, false, false, false, true, false, true, true, false, true, true, true, false, false, false, true, true, false, true, true, false, true, false, true, false, true, false, false, true, true, true, false, true, true, false, false, false, false, true, true, true, true, false, true, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, false, true, false, true] },
+            { nome: "Ester", perfil: [true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false] },
+            { nome: "Pedro", perfil: [false, true, false, true, true, false, false, false, true, false, true, false, false, false, false, false, true, true, true, true, true, true, false, false, true, true, false, true, false, false, false, false, true, true, false, false, true, false, true, true, true, false, true, true, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, true, false, false, false, true] },
+            { nome: "Salomão", perfil: [true, true, true, false, false, false, false, false, false, true, true, false, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, true, false, false, true, false, true] },
+            { nome: "Paulo", perfil: [false, true, false, true, true, true, false, false, true, true, true, false, false, false, false, false, true, true, true, true, true, false, true, false, true, true, false, true, false, false, false, false, false, false, false, false, true, false, false, true, true, false, true, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, true, true, true, true, false, true, false, false, false, false, true, false, false, false, true] },
+            { nome: "Jesus", perfil: [false, true, false, true, true, true, true, true, true, true, false, true, false, false, true, false, true, true, true, true, true, true, false, false, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, false, false, false, true, true] },
+            { nome: "Abraão", perfil: [true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, true, true, true, true, true, true, false, false, false, true, true, true, false, false, true, true, false, true, true, false, true, false, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, true, true, false, false, true, true, false, false, false, false, true, false, true, true, false, true, false, true] },
+            { nome: "Isaías", perfil: [true, true, false, false, false, true, false, false, false, true, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, true, false, true] },
+            { nome: "Maria (mãe de Jesus)", perfil: [false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, true, true, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, true, true, false, false, false, false, true, false, false, true, false, true, false, true] },
+            { nome: "João Batista", perfil: [true, true, false, false, true, true, false, false, false, false, false, true, false, false, true, false, true, true, false, true, true, false, false, false, true, false, false, true, false, false, false, false, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, true, true, true, false, false, false, false, true, false, false, false, false, false, false, true] },
+            { nome: "Josué", perfil: [true, true, false, false, false, false, true, true, false, false, true, false, true, false, false, false, false, true, true, true, true, false, false, false, false, true, false, true, false, true, false, false, false, false, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, true] },
+            { nome: "Elias", perfil: [true, true, false, true, false, true, true, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, false, false, false, false, false, true, false, true, false, false, false, true, false, true, false, false, false, true, true, false, false, false, false, false, true, false, true, true, false, false, true, true] },
+            { nome: "Rute", perfil: [true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, true, false, false, true, false, false, false, false, true, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, false] },
+            { nome: "Daniel", perfil: [true, true, false, false, false, true, false, false, false, true, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, true, false, false, true, false, false, true, true, false, true, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, true, false, false, false, false, true, false, true, false, true] },
+            { nome: "Noé", perfil: [true, true, false, false, false, false, false, true, false, false, false, false, false, true, false, true, false, true, false, true, true, true, false, true, false, false, true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, true, true, false, false, false, false, false, false, true, false, false, true, false, true] },
+            { nome: "Mateus", perfil: [false, true, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, false, true] },
+            { nome: "Jeremias", perfil: [true, true, false, false, false, true, false, false, false, false, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, false, false, false, false, true] },
+            { nome: "Sara", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, true, false, true, false, true] },
+            { nome: "Sansão", perfil: [true, true, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, true, true, true, false, false, true, true, true, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "José (filho de Jacó)", perfil: [true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, false, true, true, false, false, true, false, true, true, true, false, false, false, false, false, true, true, true, true, false, true, false, false, false, true, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, true] },
+            { nome: "Raquel", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, true, false, true, false, false, true, false, true, false, true, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false] },
+            { nome: "Jonas", perfil: [true, true, false, true, false, true, false, false, false, false, true, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, false, false, true] },
+            { nome: "Tiago (irmão de Jesus/apóstolo)", perfil: [false, true, false, false, true, false, false, false, true, false, true, false, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false] },
+            { nome: "Débora", perfil: [true, false, false, false, false, true, true, false, false, false, false, false, true, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false] },
+            { nome: "Samuel", perfil: [true, true, false, false, false, true, false, false, false, false, false, true, true, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, true, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, true, false, false, true, false, true] },
+            { nome: "Arão", perfil: [true, true, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, true, false, false, false, false, true, true, false, true, true, false, false, false, false, false, true, true, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, true, false, true] },
+            { nome: "Lia", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, true, true, false, true, false, false, true, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, false] },
+            { nome: "Zacarias (pai de João Batista)", perfil: [true, true, false, false, true, true, false, false, false, false, true, true, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, false, false, false, true, false, false] },
+            { nome: "Gideão", perfil: [true, true, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, true, true, false, false, false, true, false, true, true, false, false, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, true, false, false] },
+            { nome: "Jacó", perfil: [true, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, true, true, true, true, true, true, true, true, false, true, true, true, true, false, false, false, true, true, false, true, true, false, true, false, true, false, true, true, false, false, false, false, true, true, true, false, true, false, false, false, false, false, true, false, false, true, true, false, false, false, false, true, true, true, true, false, true, false, true] },
+            { nome: "João (Apóstolo)", perfil: [false, true, false, true, true, true, false, false, true, false, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, true, false, true, false, false, false, false, true, true, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, true, false, false, false, false, true, false, true, false, true] },
+            { nome: "Ló", perfil: [true, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, false, true, false, true, true, false, true, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, false] }
+        ];
+
+        let respostas = []; // Armazena as respostas do usuário
+        let index = 0; // Índice da pergunta atual
+        let perguntasSelecionadas = []; // As 10 perguntas aleatoriamente selecionadas
+        let candidatosAtuais = []; // Lista de candidatos que ainda correspondem às respostas
+
+        /**
+         * Embaralha um array.
+         * @param {Array} array O array a ser embaralhado.
+         * @returns {Array} O array embaralhado.
+         */
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        /**
+         * Seleciona 10 perguntas aleatórias do array 'perguntas'
+         * e atualiza os perfis dos suspeitos para corresponder a essas perguntas.
+         */
+        function selecionarPerguntas() {
+            const indices = shuffle([...Array(perguntas.length).keys()]);
+            perguntasSelecionadas = indices.slice(0, 10).map(i => perguntas[i]);
+
+            // Mapeia os perfis dos suspeitos para corresponder às perguntas selecionadas
+            suspeitas.forEach(suspeito => {
+                suspeito.perfilSelecionado = indices.slice(0, 10).map(i => suspeito.perfil[i]);
+            });
+            candidatosAtuais = [...suspeitas]; // Inicializa os candidatos com todos os suspeitos
+        }
+
+        /**
+         * Imprime texto no terminal e rola a barra de rolagem para o final.
+         * @param {string} text O texto a ser impresso.
+         */
+        function print(text) {
+            const line = document.createElement("div");
+            line.innerHTML = text; // Usar innerHTML para permitir formatação (ex: negrito)
+            document.getElementById("terminal").appendChild(line);
+            document.getElementById("terminal").scrollTop = document.getElementById("terminal").scrollHeight;
+        }
+
+        /**
+         * Processa a resposta do usuário (Sim/Não).
+         * Filtra os candidatos restantes e avança para a próxima pergunta ou chama o diagnóstico final.
+         * @param {boolean} resposta True para "Sim", False para "Não".
+         */
+        function processarResposta(resposta) {
+            // Impede cliques se os botões estiverem desabilitados
+            if (document.getElementById("simBtn").disabled) return;
+
+            print(`>> ${resposta ? "SIM" : "NÃO"}`);
+            respostas.push(resposta);
+
+            // Filtra os candidatos que ainda correspondem à resposta atual
+            candidatosAtuais = candidatosAtuais.filter(candidato =>
+                candidato.perfilSelecionado[index] === resposta
+            );
+
+            index++; // Avança para a próxima pergunta
+
+            // Se ainda houver perguntas, exibe a próxima; caso contrário, chama o diagnóstico
+            if (index < perguntasSelecionadas.length) {
+                print(`\nPergunta ${index + 1}/${perguntasSelecionadas.length}: ${perguntasSelecionadas[index]}`);
+                document.getElementById("simBtn").focus(); // Foca no botão "Sim" para acessibilidade
+            } else {
+                diagnosticar();
+            }
+        }
+
+        /**
+         * Realiza o diagnóstico final baseado nas respostas do usuário.
+         * Calcula a pontuação e exibe o personagem mais provável.
+         */
+        function diagnosticar() {
+            print("\nProcessando respostas...");
+            // Desabilita os botões de resposta
+            document.getElementById("simBtn").disabled = true;
+            document.getElementById("naoBtn").disabled = true;
+
+            setTimeout(() => {
+                let melhorCandidato = null;
+                let maxPontos = -1;
+                let empates = [];
+
+                // Se houver candidatos restantes após a filtragem inicial, busca entre eles
+                if (candidatosAtuais.length > 0) {
+                    candidatosAtuais.forEach(suspeito => {
+                        let pontos = 0;
+                        for (let i = 0; i < respostas.length; i++) {
+                            if (suspeito.perfilSelecionado[i] === respostas[i]) {
+                                pontos++;
+                            }
+                        }
+                        if (pontos > maxPontos) {
+                            maxPontos = pontos;
+                            melhorCandidato = suspeito.nome;
+                            empates = [suspeito];
+                        } else if (pontos === maxPontos) {
+                            empates.push(suspeito);
+                        }
+                    });
+                } else {
+                    // Se nenhum candidato correspondeu perfeitamente, encontra o mais próximo de todos os suspeitos
+                    // Isso acontece se as respostas levaram a um "beco sem saída" na filtragem
+                    suspeitas.forEach(suspeito => {
+                        let pontos = 0;
+                        for (let i = 0; i < respostas.length; i++) {
+                            if (suspeito.perfilSelecionado[i] === respostas[i]) {
+                                pontos++;
+                            }
+                        }
+                        if (pontos > maxPontos) {
+                            maxPontos = pontos;
+                            melhorCandidato = suspeito.nome;
+                            empates = [suspeito];
+                        } else if (pontos === maxPontos) {
+                            empates.push(suspeito);
+                        }
+                    });
+                }
+
+                // Se houver empate entre os melhores candidatos, escolhe um aleatoriamente
+                if (empates.length > 1) {
+                    melhorCandidato = empates[Math.floor(Math.random() * empates.length)].nome;
+                }
+
+                const resultModalDescription = document.getElementById("result-modal-description");
+                if (melhorCandidato) {
+                    // Exibe o resultado do diagnóstico
+                    resultModalDescription.innerHTML = `O personagem é **${melhorCandidato}**?<br><br>
+                                                       ${maxPontos}/${perguntasSelecionadas.length} respostas coincidiram com ${melhorCandidato}.<br><br>
+                                                       Correto? Glória! 🙌 Senão, clique em 'Reiniciar' para tentar novamente.`;
+                } else {
+                    // Mensagem se nenhum personagem for identificado
+                    resultModalDescription.innerHTML = `Não consegui identificar um personagem com base nas suas respostas. 😔<br><br>
+                                                       Tente novamente com um personagem diferente ou respostas mais específicas.`;
+                }
+                document.getElementById("result-modal").classList.add("active"); // Ativa o modal de resultado
+            }, 1000); // Pequeno atraso para simular "processamento"
+        }
+
+        /**
+         * Inicia (ou reinicia) o jogo.
+         * Reseta o estado do jogo e exibe a primeira pergunta.
+         */
+        function startGame() {
+            // Esconde os modais de início e resultado
+            document.getElementById("start-modal").classList.remove("active");
+            document.getElementById("result-modal").classList.remove("active");
+            
+            // Reseta variáveis do jogo
+            respostas = [];
+            index = 0;
+            document.getElementById("terminal").innerHTML = ""; // Limpa o terminal
+            
+            // Habilita os botões de resposta
+            document.getElementById("simBtn").disabled = false;
+            document.getElementById("naoBtn").disabled = false;
+            
+            selecionarPerguntas(); // Seleciona novas perguntas aleatórias para a nova rodada
+            
+            // Exibe as mensagens iniciais no terminal
+            print("Quem É da Bíblia?");
+            print("\nPense em um personagem bíblico...");
+            print(`\nPergunta 1/${perguntasSelecionadas.length}: ${perguntasSelecionadas[0]}`);
+            
+            document.getElementById("simBtn").focus(); // Foca no botão "Sim"
+        }
+
+        // Garante que o script só seja executado após o DOM estar completamente carregado
+        document.addEventListener("DOMContentLoaded", () => {
+            // Obtém referências aos elementos DOM
+            const simBtn = document.getElementById("simBtn");
+            const naoBtn = document.getElementById("naoBtn");
+            const startGameBtn = document.getElementById("startGameBtn");
+            const restartGameBtn = document.getElementById("restartGameBtn"); // Novo botão de reiniciar
+
+            // Verifica se todos os elementos essenciais foram encontrados
+            if (!simBtn || !naoBtn || !startGameBtn || !restartGameBtn) {
+                console.error("Um ou mais elementos DOM essenciais não foram encontrados. Verifique os IDs.");
+                return; // Aborta se algum elemento crucial estiver faltando
+            }
+
+            // Adiciona event listeners aos botões
+            startGameBtn.addEventListener("click", startGame);
+            restartGameBtn.addEventListener("click", startGame); // O botão "Reiniciar" também chama startGame
+
+            simBtn.addEventListener("click", () => processarResposta(true));
+            naoBtn.addEventListener("click", () => processarResposta(false));
+
+            // Suporte a teclas 'S' para Sim e 'N' para Não
+            document.addEventListener("keypress", (e) => {
+                if (e.key.toLowerCase() === "s" && !simBtn.disabled) {
+                    processarResposta(true);
+                } else if (e.key.toLowerCase() === "n" && !naoBtn.disabled) {
+                    processarResposta(false);
+                }
+            });
+
+            // Registro do Service Worker para PWA (Progressive Web App)
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("/service-worker.js")
+                    .then(reg => console.log("Service Worker registrado com sucesso:", reg.scope))
+                    .catch(err => console.error("Erro ao registrar Service Worker:", err));
+            }
+        });
+    </script>
+</body>
+</html>
