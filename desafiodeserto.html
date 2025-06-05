@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio do Deserto - Terminal Retro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'VT323', monospace; /* Fonte retro */
+            background-color: #000; /* Fundo preto */
+            color: #00FF00; /* Texto verde neon */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            font-size: 1.1rem; /* Aumentado para melhor legibilidade */
+        }
+        .game-container {
+            background-color: #001100; /* Fundo mais escuro para o container */
+            border: 2px solid #00FF00; /* Borda verde neon */
+            border-radius: 0; /* Sem cantos arredondados */
+            box-shadow: none; /* Sem sombra */
+            padding: 30px;
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        h1 {
+            color: #00FF00;
+            text-shadow: 0 0 5px #00FF00; /* Efeito de brilho */
+            font-size: 3.5rem; /* Aumentado para mais destaque */
+        }
+        .question-area {
+            background-color: #002200; /* Fundo da área de pergunta */
+            border: 1px dashed #00FF00; /* Borda tracejada */
+            border-radius: 0;
+            padding: 20px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4rem; /* Aumentado para melhor leitura */
+            line-height: 1.8; /* Aumentado para mais espaçamento entre linhas */
+            color: #00FF00;
+            text-align: left;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #00FF00;
+        }
+        .verse-text {
+            font-style: italic;
+            color: #00EE00; /* Um verde um pouco diferente para o versículo */
+            margin-top: 10px;
+            font-size: 1.2rem; /* Aumentado para melhor leitura */
+        }
+        .feedback-text {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 1.3rem; /* Aumentado para mais impacto */
+        }
+        .correct {
+            color: #00FF00; /* Mantém verde neon para correto */
+            text-shadow: 0 0 3px #00FF00; /* Brilho de sucesso */
+        }
+        .wrong {
+            color: #FF0000; /* Vermelho para errado */
+            text-shadow: 0 0 3px #FF0000; /* Brilho de erro */
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px; /* Aumentado o espaçamento entre botões */
+        }
+        @media (min-width: 640px) {
+            .button-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .game-button {
+            background-color: #003300; /* Fundo do botão */
+            color: #00FF00; /* Texto do botão */
+            padding: 15px 25px; /* Aumentado o padding para botões maiores */
+            border: 1px solid #00FF00; /* Borda verde */
+            border-radius: 0;
+            font-size: 1.2rem; /* Aumentado para melhor leitura */
+            cursor: pointer;
+            transition: background-color 0.1s ease, color 0.1s ease; /* Transição simples */
+            box-shadow: none; /* Sem sombra */
+        }
+        .game-button:hover {
+            background-color: #005500; /* Efeito de hover mais claro */
+            color: #FFF; /* Texto branco no hover */
+            text-shadow: 0 0 2px #FFF;
+        }
+        .game-button:active {
+            background-color: #007700;
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #001100;
+            padding: 15px 25px; /* Aumentado o padding */
+            border: 1px solid #00FF00;
+            border-radius: 0;
+            font-weight: bold;
+            color: #00FF00;
+            font-size: 1.2rem; /* Aumentado */
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); /* Fundo mais escuro para modals */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s ease;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: #001100;
+            padding: 40px;
+            border-radius: 0;
+            border: 2px solid #00FF00;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 15px #00FF00; /* Brilho de terminal */
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            color: #00FF00;
+        }
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-content h2 {
+            color: #00FF00;
+            font-size: 2.5em; /* Aumentado */
+            margin-bottom: 25px; /* Aumentado */
+            text-shadow: 0 0 5px #00FF00;
+        }
+        .modal-content p {
+            color: #00FF00;
+            margin-bottom: 30px; /* Aumentado */
+            font-size: 1.3em; /* Aumentado */
+            line-height: 1.6; /* Aumentado */
+        }
+        .modal-content button {
+            background-color: #005500; /* Botão de ação do modal */
+            color: #00FF00;
+            padding: 15px 30px; /* Aumentado */
+            border: 1px solid #00FF00;
+            border-radius: 0;
+            font-size: 1.2rem; /* Aumentado */
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            text-shadow: 0 0 3px #00FF00;
+        }
+        .modal-content button:hover {
+            background-color: #00AA00;
+            color: #FFF;
+            text-shadow: 0 0 5px #FFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="text-3xl font-bold">PENSEQUIZ!!! DESAFIO DO DESERTO ✨</h1>
+
+        <div class="game-info">
+            <span>PASSO: <span id="current-step">1</span> / <span id="total-steps"></span></span>
+            <span>FÉ: <span id="faith-count">3</span></span>
+        </div>
+
+        <div class="question-area">
+            <p id="question-text" class="question-text">CARREGANDO...</p>
+            <p id="feedback-text" class="feedback-text"></p>
+            <p id="verse-text" class="verse-text"></p>
+        </div>
+
+        <div id="buttons-container" class="button-grid">
+            <!-- OS BOTÕES SERÃO RENDERIZADOS AQUI PELO JAVASCRIPT -->
+        </div>
+    </div>
+
+    <!-- MODAL DE INÍCIO -->
+    <div id="start-modal" class="modal active">
+        <div class="modal-content">
+            <h2>BEM-VINDO AO DESAFIO DO DESERTO!</h2>
+            <p>SUA JORNADA DE FÉ ESTÁ PRESTES A COMEÇAR. VOCÊ SERÁ TESTADO COM SITUAÇÕES DO DESERTO E PRECISARÁ TOMAR DECISÕES SÁBIAS PARA MANTER SUA FÉ INTACTA.</p>
+            <p>SUA **FÉ** É O SEU RECURSO VITAL. RESPOSTAS ERRADAS A DIMINUIRÃO.</p>
+            <p>SEJA GUIADO PELA PALAVRA!</p>
+            <button id="startGameBtn">INICIAR JORNADA</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE FIM DE JOGO -->
+    <div id="game-over-modal" class="modal">
+        <div class="modal-content">
+            <h2>FIM DE JOGO! 😔</h2>
+            <p id="game-over-message"></p>
+            <button id="gameOverResetBtn">TENTAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE VITÓRIA -->
+    <div id="win-modal" class="modal">
+        <div class="modal-content">
+            <h2>JORNADA CONCLUÍDA! 🎉</h2>
+            <p id="win-message"></p>
+            <button id="winResetBtn">JOGAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <script>
+        // ARRAY DE OBJETOS DE PERGUNTAS, CADA UM COM SITUAÇÃO, RESPOSTA CORRETA, ALTERNATIVAS E VERSÍCULO
+        // LIMITADO A 10 PERGUNTAS CONFORME SOLICITADO
+        const questions = [
+           {
+                situacao: "1) Moisés nasce em um período de grande opressão para Israel. Qual foi a ordem do Faraó em relação aos bebês israelitas do sexo masculino?",
+                correta: "Que fossem lançados no rio Nilo",
+                alternativas: [
+                    "Que fossem escravizados desde o nascimento",
+                    "Que fossem entregues a sacerdotes egípcios",
+                    "Que fossem lançados no rio Nilo",
+                    "Que fossem criados por amas de leite egípcias"
+                ],
+                versiculo: "Êxodo 1:22 - Então Faraó deu ordem a todo o seu povo, dizendo: A todo o filho que nascer, lançá-lo-eis no rio, mas a toda a filha guardareis com vida."
+            },
+            {
+                situacao: "2) Moisés é encontrado nas águas do Nilo. Quem o encontra e o adota?",
+                correta: "A filha de Faraó",
+                alternativas: [
+                    "Uma mulher israelita da corte",
+                    "A rainha do Egito",
+                    "A filha de Faraó",
+                    "Uma sacerdotisa egípcia"
+                ],
+                versiculo: "Êxodo 2:5-6 - E a filha de Faraó desceu a lavar-se no rio, e as suas moças andavam pela margem do rio; e ela viu a arca no meio dos juncos, e enviou a sua criada, que a tomou. E abrindo-a, viu ao menino, e eis que chorava; e moveu-se de compaixão dele, e disse: Dos meninos dos hebreus é este."
+            },
+            {
+                situacao: "3) Moisés, já adulto, vê um egípcio maltratando um hebreu. O que ele faz?",
+                correta: "Mata o egípcio e o esconde na areia",
+                alternativas: [
+                    "Intercede pelo hebreu diante do egípcio",
+                    "Reporta a situação ao Faraó",
+                    "Mata o egípcio e o esconde na areia",
+                    "Foge imediatamente do Egito"
+                ],
+                versiculo: "Êxodo 2:11-12 - E aconteceu naqueles dias que, sendo Moisés já grande, saiu a seus irmãos, e atentou para as suas cargas; e viu um egípcio que feria a um hebreu, um de seus irmãos. E olhou de uma e de outra banda, e vendo que ninguém havia ali, feriu ao egípcio, e escondeu-o na areia."
+            },
+            {
+                situacao: "4) Moisés foge para Midiã. Onde ele encontra seu futuro sogro e esposa?",
+                correta: "Perto de um poço, ajudando as filhas de Jetro",
+                alternativas: [
+                    "Numa cidade mercado",
+                    "Numa caravana de viajantes",
+                    "Perto de um poço, ajudando as filhas de Jetro",
+                    "Num acampamento de beduínos"
+                ],
+                versiculo: "Êxodo 2:15-18 - E Moisés fugiu de diante de Faraó, e deteve-se na terra de Midiã, e assentou-se junto a um poço... Chegaram as filhas do sacerdote de Midiã, e tiraram água, e encheram os bebedouros para dar de beber ao rebanho de seu pai."
+            },
+            {
+                situacao: "5) Deus chama Moisés em uma sarça ardente. Qual é o primeiro grande argumento de Moisés para não ir?",
+                correta: "Que ele não tem facilidade para falar",
+                alternativas: [
+                    "Que ele é velho demais",
+                    "Que o povo não o ouvirá",
+                    "Que ele não tem facilidade para falar",
+                    "Que ele teme o Faraó"
+                ],
+                versiculo: "Êxodo 4:10 - Então disse Moisés ao Senhor: Ah, Senhor! eu não sou homem eloquente, nem de ontem nem de anteontem, nem ainda desde que falaste ao teu servo; porque sou pesado de boca e pesado de língua."
+            },
+            {
+                situacao: "6) Os israelitas estão escravizados no Egito e clamam por libertação. Qual é o plano de Deus?",
+                correta: "Enviar Moisés para libertá-los com pragas",
+                alternativas: [
+                    "Fazer com que o Faraó os libere por conta própria",
+                    "Aguardar que o povo egípcio se rebele",
+                    "Enviar Moisés para libertá-los com pragas",
+                    "Enviá-los para outra terra em segredo"
+                ],
+                versiculo: "Êxodo 3:10 - Vai, pois, agora, e eu te enviarei a Faraó, para que tires o meu povo, os filhos de Israel, do Egito."
+            },
+            {
+                situacao: "7) O Faraó se recusa a libertar o povo, endurecendo seu coração. Qual é a reação de Deus?",
+                correta: "Envia uma série de pragas sobre o Egito",
+                alternativas: [
+                    "Dá mais tempo ao Faraó para mudar de ideia",
+                    "Abre um caminho secreto para o povo fugir",
+                    "Envia uma série de pragas sobre o Egito",
+                    "Manda o povo de Israel lutar contra o Egito"
+                ],
+                versiculo: "Êxodo 7:3-5 - Mas eu endurecerei o coração de Faraó, e multiplicarei na terra do Egito os meus sinais e as minhas maravilhas. Faraó, pois, não vos ouvirá; e eu porei a minha mão sobre o Egito, e tirarei os meus exércitos, meu povo, os filhos de Israel, da terra do Egito, com grandes juízos."
+            },
+            {
+                situacao: "8) Após a última praga, o Faraó permite a saída. Qual é o último passo antes de partir?",
+                correta: "Celebrar a Páscoa com um cordeiro e pães asmos",
+                alternativas: [
+                    "Reunir todos os bens que puderem carregar",
+                    "Fazer uma oferenda aos deuses egípcios",
+                    "Celebrar a Páscoa com um cordeiro e pães asmos",
+                    "Escolher um novo líder para a jornada"
+                ],
+                versiculo: "Êxodo 12:27 - Então direis: É o sacrifício da páscoa do Senhor, que passou por cima das casas dos filhos de Israel no Egito, quando feriu aos egípcios, e livrou as nossas casas. Então o povo inclinou-se e adorou."
+            },
+            {
+                situacao: "9) O exército do Faraó se aproxima, e o Mar Vermelho está à sua frente. Qual é a sua atitude?",
+                correta: "Clama a Deus e segue Suas instruções para atravessar o mar",
+                alternativas: [
+                    "Entra em pânico e tenta negociar com o Faraó",
+                    "Tenta construir uma ponte sobre o mar",
+                    "Clama a Deus e segue Suas instruções para atravessar o mar",
+                    "Manda o povo voltar a lutar contra o exército"
+                ],
+                versiculo: "Êxodo 14:14 - O Senhor pelejará por vós, e vós vos calareis."
+            },
+            {
+                situacao: "10) Após o milagre do Mar Vermelho, qual é a primeira canção de louvor entoada por Moisés e os israelitas?",
+                correta: "A canção do Mar, celebrando a vitória de Deus",
+                alternativas: [
+                    "Um hino de gratidão pela libertação",
+                    "Uma profecia sobre a Terra Prometida",
+                    "A canção do Mar, celebrando a vitória de Deus",
+                    "Uma oração pedindo por provisão no deserto"
+                ],
+                versiculo: "Êxodo 15:1 - Então cantou Moisés e os filhos de Israel este cântico ao Senhor, e falaram, dizendo: Cantarei ao Senhor, porque gloriosamente triunfou; lançou no mar o cavalo e o seu cavaleiro."
+            },
+			
+			
+			
+    {
+        "situacao": "11) Qual foi o primeiro sinal que Deus deu a Moisés para provar seu chamado diante dos israelitas?",
+        "correta": "Seu cajado se transformar em serpente",
+        "alternativas": [
+            "Seu braço ficar leproso e depois curado",
+            "A sarça ardente que não se consumia",
+            "Seu cajado se transformar em serpente",
+            "A voz de Deus do céu"
+        ],
+        "versiculo": "Êxodo 4:2-3 - E o Senhor lhe disse: Que é isso na tua mão? E ele disse: Uma vara. E disse ele: Lança-a na terra. E ele a lançou na terra, e tornou-se em serpente; e Moisés fugia dela."
+    },
+    {
+        "situacao": "12) Qual praga não atingiu os israelitas, distinguindo-os dos egípcios?",
+        "correta": "Praga das moscas (e outras)",
+        "alternativas": [
+            "Praga do Nilo transformado em sangue",
+            "Praga das rãs",
+            "Praga das moscas (e outras)",
+            "Praga das úlceras"
+        ],
+        "versiculo": "Êxodo 8:22-23 - E naquele dia separarei a terra de Gósen, em que o meu povo habita, para que nela não haja enxames de moscas, a fim de que saibas que eu sou o Senhor no meio da terra. E farei distinção entre o meu povo e o teu povo; amanhã se fará este sinal."
+    },
+    {
+        "situacao": "13) Qual foi a instrução para o povo de Israel antes da praga da morte dos primogênitos?",
+        "correta": "Marcar os umbrais das portas com sangue de cordeiro",
+        "alternativas": [
+            "Esconder seus primogênitos em um lugar seguro",
+            "Fazer uma grande oferenda aos deuses egípcios",
+            "Marcar os umbrais das portas com sangue de cordeiro",
+            "Fugir do Egito antes da meia-noite"
+        ],
+        "versiculo": "Êxodo 12:7 - E tomarão do sangue, e o porão em ambas as ombreiras, e na verga da porta, nas casas em que o comerem."
+    },
+    {
+        "situacao": "14) Durante a travessia do Mar Vermelho, o que a nuvem de Deus fez?",
+        "correta": "Iluminou Israel e obscureceu o Egito",
+        "alternativas": [
+            "Protegeu Israel de granizo",
+            "Guiou o exército egípcio para a armadilha",
+            "Iluminou Israel e obscureceu o Egito",
+            "Fez chover maná para o povo"
+        ],
+        "versiculo": "Êxodo 14:20 - E a coluna de nuvem se retirou de diante deles, e pôs-se detrás deles; e a coluna de nuvem lhes serviu de escuridão e de luz; e não se aproximou um do outro toda a noite."
+    },
+    {
+        "situacao": "15) Qual é a base do pacto que Deus estabelece com Israel no Monte Sinai?",
+        "correta": "Os Dez Mandamentos",
+        "alternativas": [
+            "Um juramento de lealdade de sangue",
+            "A construção de um altar grandioso",
+            "Os Dez Mandamentos",
+            "A promessa de uma vida de prosperidade sem desafios"
+        ],
+        "versiculo": "Êxodo 20:1-17 - E falou Deus todas estas palavras, dizendo: Eu sou o Senhor teu Deus... (seguem os mandamentos)"
+    },
+    {
+        "situacao": "16) Quem foi o principal artífice e construtor do Tabernáculo, cheio do Espírito de Deus?",
+        "correta": "Bezalel",
+        "alternativas": [
+            "Arão",
+            "Hur",
+            "Bezalel",
+            "Eliabe"
+        ],
+        "versiculo": "Êxodo 31:2-3 - Vê, chamei pelo nome a Bezalel, filho de Uri, filho de Hur, da tribo de Judá; e o enchi do Espírito de Deus, de sabedoria, e de entendimento, e de ciência em todo o artifício."
+    },
+    {
+        "situacao": "17) Qual a principal função do Sumo Sacerdote no Tabernáculo?",
+        "correta": "Oferecer sacrifícios e interceder pelo povo no Santo dos Santos uma vez ao ano",
+        "alternativas": [
+            "Organizar a logística do arraial",
+            "Julgar todas as disputas entre o povo",
+            "Oferecer sacrifícios e interceder pelo povo no Santo dos Santos uma vez ao ano",
+            "Ensinar todas as crianças sobre a Lei"
+        ],
+        "versiculo": "Levítico 16:34 - E isto vos será por estatuto perpétuo, para fazer expiação uma vez no ano pelos filhos de Israel, por todos os seus pecados. E fez Arão como o Senhor ordenara a Moisés."
+    },
+    {
+        "situacao": "18) Qual é o propósito do Censo de Israel, conforme descrito em Números?",
+        "correta": "Contar os homens de vinte anos para cima, aptos para a guerra",
+        "alternativas": [
+            "Avaliar a riqueza de cada família",
+            "Determinar a quantidade de maná necessária",
+            "Contar os homens de vinte anos para cima, aptos para a guerra",
+            "Identificar os membros de cada tribo para distribuição de água"
+        ],
+        "versiculo": "Números 1:2-3 - Tomai a soma de toda a congregação dos filhos de Israel, segundo as suas famílias, segundo a casa de seus pais, conforme o número dos nomes de todo o homem, cabeça por cabeça, da idade de vinte anos para cima, todos os que podem sair à guerra em Israel; a estes contareis segundo os seus exércitos, tu e Arão."
+    },
+    {
+        "situacao": "19) Como os israelitas eram guiados em suas jornadas pelo deserto?",
+        "correta": "Pela nuvem de dia e coluna de fogo à noite",
+        "alternativas": [
+            "Por um mapa detalhado dado por Deus",
+            "Por espiões que iam à frente para encontrar o caminho",
+            "Pela nuvem de dia e coluna de fogo à noite",
+            "Pela orientação de Moisés e seus anciãos"
+        ],
+        "versiculo": "Números 9:15-16 - Ora, no dia em que o tabernáculo foi levantado, a nuvem cobriu o tabernáculo da tenda do testemunho; e à tarde estava sobre o tabernáculo como uma aparência de fogo, até à manhã. Assim era de contínuo: a nuvem o cobria, e de noite havia aparência de fogo."
+    },
+    {
+        "situacao": "20) O que acontece quando os espiões retornam de Canaã com um relatório negativo?",
+        "correta": "O povo murmura, chora e deseja voltar ao Egito",
+        "alternativas": [
+            "O povo se arrepende e pede perdão",
+            "Os espiões são elogiados por sua coragem",
+            "O povo murmura, chora e deseja voltar ao Egito",
+            "Deus os encoraja a atacar Canaã imediatamente"
+        ],
+        "versiculo": "Números 14:1-2 - Então toda a congregação levantou a sua voz, e gritou; e o povo chorou aquela noite. E todos os filhos de Israel murmuraram contra Moisés e contra Arão; e toda a congregação lhes disse: Ah! Se morrêssemos na terra do Egito! ou, antes, se morrêssemos neste deserto!"
+    },
+    {
+        "situacao": "21) A vara de Arão floresce e produz amêndoas. Para que serve este sinal?",
+        "correta": "Confirmar que Arão e a tribo de Levi foram escolhidos por Deus para o sacerdócio",
+        "alternativas": [
+            "Mostrar que Deus pode trazer vida do deserto",
+            "Indicar que a terra é fértil e pronta para ser habitada",
+            "Confirmar que Arão e a tribo de Levi foram escolhidos por Deus para o sacerdócio",
+            "Ser um alimento milagroso para o povo"
+        ],
+        "versiculo": "Números 17:8 - E sucedeu que no dia seguinte Moisés entrou na tenda do testemunho, e eis que a vara de Arão, pela casa de Levi, florescia, e produzira botoes, e brotara flores, e dera amêndoas."
+    },
+    {
+        "situacao": "22) Por que Moisés não pôde entrar na Terra Prometida?",
+        "correta": "Por ter ferido a rocha em Meribá em vez de falar com ela",
+        "alternativas": [
+            "Por ter se recusado a guiar o povo em um momento",
+            "Por ter duvidado da existência de Deus",
+            "Por ter ferido a rocha em Meribá em vez de falar com ela",
+            "Por ter se casado com uma mulher estrangeira"
+        ],
+        "versiculo": "Números 20:12 - Então o Senhor disse a Moisés e a Arão: Porquanto não crestes em mim, para me santificardes diante dos filhos de Israel, por isso não conduzireis esta congregação à terra que lhes tenho dado."
+    },
+    {
+        "situacao": "23) Quais animais eram permitidos para consumo segundo a Lei de Moisés?",
+        "correta": "Animais com casco fendido e que ruminam",
+        "alternativas": [
+            "Todos os animais que vivem na terra",
+            "Apenas animais que voam e vivem na água",
+            "Animais com casco fendido e que ruminam",
+            "Qualquer animal, desde que cozido adequadamente"
+        ],
+        "versiculo": "Levítico 11:3 - Tudo o que tem casco fendido, e a fenda do casco se divide em duas, e remói, entre os animais, isso comereis."
+    },
+    {
+        "situacao": "24) Qual é o propósito do Dia da Expiação (Yom Kippur)?",
+        "correta": "Fazer expiação pelos pecados de todo o povo de Israel",
+        "alternativas": [
+            "Comemorar a saída do Egito",
+            "Agradecer a Deus pela colheita",
+            "Fazer expiação pelos pecados de todo o povo de Israel",
+            "Celebrar a eleição de um novo líder"
+        ],
+        "versiculo": "Levítico 16:30 - Porque naquele dia se fará expiação por vós, para purificar-vos; de todos os vossos pecados sereis purificados perante o Senhor."
+    },
+    {
+        "situacao": "25) A quem era proibido comer a gordura de qualquer sacrifício ao Senhor?",
+        "correta": "A qualquer israelita",
+        "alternativas": [
+            "Somente aos sacerdotes",
+            "Somente aos levitas",
+            "A qualquer israelita",
+            "Apenas aos estrangeiros no meio do povo"
+        ],
+        "versiculo": "Levítico 7:23 - Não comereis nenhuma gordura de boi, ou de carneiro, ou de cabra."
+    },
+    {
+        "situacao": "26) Qual o propósito dos mandamentos que Deus deu a Israel?",
+        "correta": "Ensinar o povo a viver em santidade e em comunhão com Deus",
+        "alternativas": [
+            "Tornar a vida do povo mais difícil e cheia de regras",
+            "Mostrar o poder de Moisés sobre o povo",
+            "Ensinar o povo a viver em santidade e em comunhão com Deus",
+            "Dar a Israel vantagem sobre as outras nações"
+        ],
+        "versiculo": "Deuteronômio 6:24 - E o Senhor nos mandou que fizéssemos todos estes estatutos, para temermos ao Senhor nosso Deus, para o nosso bem em todos os dias, para nos guardar em vida, como no dia de hoje."
+    },
+    {
+        "situacao": "27) Qual é a principal advertência de Moisés ao povo em Deuteronômio sobre a Terra Prometida?",
+        "correta": "Não se esquecer de Deus e não adorar outros deuses quando prosperarem",
+        "alternativas": [
+            "Preparar-se para muitas guerras contínuas",
+            "Construir cidades maiores e mais fortes",
+            "Não se esquecer de Deus e não adorar outros deuses quando prosperarem",
+            "Buscar alianças com as nações vizinhas"
+        ],
+        "versiculo": "Deuteronômio 8:11-14 - Guarda-te que não te esqueças do Senhor teu Deus, não guardando os seus mandamentos, e os seus juízos, e os seus estatutos, que hoje te ordeno; para que não aconteça que, comendo e fartando-te, e edificando boas casas, e nelas habitando, e se multiplicando os teus gados e o teu rebanho, e aumentando a prata e o ouro, e multiplicando-se tudo quanto tens, se eleve o teu coração e te esqueças do Senhor teu Deus, que te tirou da terra do Egito, da casa da servidão."
+    },
+    {
+        "situacao": "28) Qual é a maior tribo de Israel no final da peregrinação pelo deserto, de acordo com o segundo censo (aptos para a guerra)?",
+        "correta": "Judá",
+        "alternativas": [
+            "Manassés",
+            "Benjamim",
+            "Judá",
+            "Levi"
+        ],
+        "versiculo": "Números 26:22 - Estas são as famílias de Judá, segundo os que foram contados deles, setenta e seis mil e quinhentos."
+    },
+    {
+        "situacao": "29) Quais foram os únicos dois homens da geração do Êxodo, maiores de 20 anos, que entraram na Terra Prometida?",
+        "correta": "Josué e Calebe",
+        "alternativas": [
+            "Moisés e Arão",
+            "Eleazar e Fineias",
+            "Josué e Calebe",
+            "Hur e Bezalel"
+        ],
+        "versiculo": "Números 26:65 - Porque o Senhor tinha dito deles: Certamente morrerão no deserto. E nenhum deles ficou senão Calebe, filho de Jefoné, e Josué, filho de Num."
+    },
+    {
+        "situacao": "30) Qual foi o sinal da aliança entre Deus e Noé, após o dilúvio?",
+        "correta": "O arco-íris",
+        "alternativas": [
+            "Uma pomba com um ramo de oliveira",
+            "Um altar de pedras",
+            "O arco-íris",
+            "Um pilar de fogo"
+        ],
+        "versiculo": "Gênesis 9:13 - O meu arco tenho posto nas nuvens; este será por sinal da aliança entre mim e a terra."
+    },
+    {
+        "situacao": "31) Quem foi o pai de Abraão?",
+        "correta": "Terá",
+        "alternativas": [
+            "Noé",
+            "Sem",
+            "Terá",
+            "Lameque"
+        ],
+        "versiculo": "Gênesis 11:27 - Estas, porém, são as gerações de Terá: Terá gerou a Abrão, a Naor, e a Harã; e Harã gerou a Ló."
+    },
+    {
+        "situacao": "32) Qual foi o teste de fé que Deus pediu a Abraão, referente a Isaque?",
+        "correta": "Oferecê-lo como sacrifício",
+        "alternativas": [
+            "Deixar a sua terra natal",
+            "Abandonar todos os seus bens",
+            "Oferecê-lo como sacrifício",
+            "Mudar seu nome"
+        ],
+        "versiculo": "Gênesis 22:2 - Então disse: Toma agora teu filho, o teu único filho, Isaque, a quem amas, e vai-te à terra de Moriá; e oferece-o ali em holocausto sobre uma das montanhas, que eu te direi."
+    },
+    {
+        "situacao": "33) Quem foi o pai de Jacó e Esaú?",
+        "correta": "Isaque",
+        "alternativas": [
+            "Abraão",
+            "Ló",
+            "Isaque",
+            "José"
+        ],
+        "versiculo": "Gênesis 25:19 - E estas são as gerações de Isaque, filho de Abraão: Abraão gerou a Isaque."
+    },
+    {
+        "situacao": "34) Pelo que Jacó lutou com Deus em Peniel?",
+        "correta": "Por uma bênção",
+        "alternativas": [
+            "Por sua vida contra Esaú",
+            "Por riquezas",
+            "Por uma bênção",
+            "Pelo direito de primogenitura"
+        ],
+        "versiculo": "Gênesis 32:26 - E disse: Deixa-me ir, porque já rompeu o dia. Porém ele disse: Não te deixarei ir, se me não abençoares."
+    },
+    {
+        "situacao": "35) Qual foi o sonho do Faraó que José interpretou, levando-o à sua ascensão?",
+        "correta": "Sete vacas gordas e sete vacas magras; sete espigas cheias e sete murchas",
+        "alternativas": [
+            "Sete estrelas brilhantes e sete apagadas",
+            "Uma grande pirâmide sendo construída",
+            "Sete vacas gordas e sete vacas magras; sete espigas cheias e sete murchas",
+            "Um rio Nilo seco e um rio Nilo transbordando"
+        ],
+        "versiculo": "Gênesis 41:17-21 - Então Faraó disse a José: Em meu sonho eu estava na margem do Nilo... e sete vacas gordas e sete magras..."
+    },
+    {
+        "situacao": "36) O que o povo de Israel precisava para fazer o Tabernáculo no deserto?",
+        "correta": "Ofertas voluntárias de materiais diversos",
+        "alternativas": [
+            "Ouro e prata confiscados do Egito",
+            "Trabalho forçado de escravos",
+            "Ofertas voluntárias de materiais diversos",
+            "Um empréstimo de nações vizinhas"
+        ],
+        "versiculo": "Êxodo 35:5 - Tomai do vosso entre vós uma oferta para o Senhor; cada um cujo coração é voluntário a trará por oferta alçada ao Senhor: ouro, prata, e bronze."
+    },
+    {
+        "situacao": "37) Qual era a finalidade da Arca da Aliança?",
+        "correta": "Conter as tábuas da Lei, a vara de Arão e o pote de maná",
+        "alternativas": [
+            "Ser um trono para Moisés",
+            "Um local de armazenamento de riquezas",
+            "Conter as tábuas da Lei, a vara de Arão e o pote de maná",
+            "Um símbolo de guerra para intimidar inimigos"
+        ],
+        "versiculo": "Êxodo 25:16 - E porás na arca o testemunho que eu te darei."
+    },
+    {
+        "situacao": "38) Qual foi a primeira ordem de Deus a Moisés e Arão para a celebração da Páscoa?",
+        "correta": "Cada família deveria separar um cordeiro sem defeito",
+        "alternativas": [
+            "Construir um altar em cada casa",
+            "Jejuar por três dias",
+            "Cada família deveria separar um cordeiro sem defeito",
+            "Preparar uma grande quantidade de pão levedado"
+        ],
+        "versiculo": "Êxodo 12:3 - Falai a toda a congregação de Israel, dizendo: Aos dez deste mês tome cada um para si um cordeiro, segundo as casas dos pais, um cordeiro para cada casa."
+    },
+    {
+        "situacao": "39) Qual era o propósito do maná, além de alimentar o povo?",
+        "correta": "Ensinar dependência de Deus e obediência aos Seus mandamentos",
+        "alternativas": [
+            "Testar a paciência do povo",
+            "Provocar os egípcios",
+            "Ensinar dependência de Deus e obediência aos Seus mandamentos",
+            "Ser uma alternativa permanente ao pão"
+        ],
+        "versiculo": "Deuteronômio 8:3 - E te humilhou, e te deixou ter fome, e te sustentou com o maná, que tu não conheceste, nem teus pais o conheceram; para te dar a entender que o homem não viverá só de pão, mas de tudo o que sai da boca do Senhor viverá o homem."
+    },
+    {
+        "situacao": "40) O que acontecia com as vestes dos sacerdotes se houvesse alguma mancha de sangue de sacrifício?",
+        "correta": "Deveriam ser lavadas no lugar santo",
+        "alternativas": [
+            "Deveriam ser queimadas completamente",
+            "Deveriam ser descartadas no deserto",
+            "Deveriam ser lavadas no lugar santo",
+            "Deveriam ser usadas novamente sem limpeza"
+        ],
+        "versiculo": "Levítico 6:27 - Todo aquele que tocar a sua carne será santo; e havendo salpicado do seu sangue alguma veste, lavarás aquilo em que salpicou, no lugar santo."
+    },
+    {
+        "situacao": "41) Qual era a idade mínima para os levitas iniciarem o serviço no Tabernáculo?",
+        "correta": "Vinte e cinco anos",
+        "alternativas": [
+            "Vinte anos",
+            "Trinta anos",
+            "Vinte e cinco anos",
+            "Dezoito anos"
+        ],
+        "versiculo": "Números 8:24 - Isto é o que pertence aos levitas: Da idade de vinte e cinco anos para cima, entrarão a servir no serviço da tenda da congregação."
+    },
+    {
+        "situacao": "42) Qual era a punição para aqueles que comiam carne com sangue, de acordo com a Lei?",
+        "correta": "Seriam eliminados do meio do povo",
+        "alternativas": [
+            "Perderiam parte de sua fé",
+            "Teriam que oferecer um sacrifício adicional",
+            "Seriam eliminados do meio do povo",
+            "Teriam que jejuar por três dias"
+        ],
+        "versiculo": "Levítico 17:10 - E qualquer homem da casa de Israel, ou dos estrangeiros que peregrinam entre vós, que comer algum sangue, contra aquela alma porei a minha face, e a eliminarei do meio do seu povo."
+    },
+    {
+        "situacao": "43) Qual era a função das cidades de refúgio?",
+        "correta": "Proteger aqueles que mataram alguém acidentalmente de serem vingados",
+        "alternativas": [
+            "Servir como centros comerciais no deserto",
+            "Serem fortalezas militares para as tribos",
+            "Proteger aqueles que mataram alguém acidentalmente de serem vingados",
+            "Locais de adoração para todas as tribos"
+        ],
+        "versiculo": "Números 35:11-12 - então vos escolhereis cidades que vos sirvam de cidades de refúgio, para que ali se acolha o homicida que matar alguém por engano. Assim vos servirão as cidades de refúgio, para que o homicida não morra, antes que esteja perante a congregação para julgamento."
+    },
+    {
+        "situacao": "44) Em Deuteronômio, Moisés lembra o povo sobre a importância de amar a Deus. Qual a principal expressão desse amor?",
+        "correta": "Com todo o coração, alma e forças, e guardar Seus mandamentos",
+        "alternativas": [
+            "Oferecer grandes sacrifícios continuamente",
+            "Construir belos santuários em cada tribo",
+            "Com todo o coração, alma e forças, e guardar Seus mandamentos",
+            "Batalhar e conquistar todas as nações vizinhas"
+        ],
+        "versiculo": "Deuteronômio 6:5 - Amarás, pois, o Senhor teu Deus de todo o teu coração, e de toda a tua alma, e de todas as tuas forças."
+    },
+    {
+        "situacao": "45) Qual é a advertência de Deus sobre se casar com pessoas das nações de Canaã?",
+        "correta": "Eles desviarão o coração dos israelitas para outros deuses",
+        "alternativas": [
+            "Eles roubarão suas terras e bens",
+            "Eles se tornarão inimigos de Israel em batalha",
+            "Eles desviarão o coração dos israelitas para outros deuses",
+            "Eles tentarão retornar ao Egito"
+        ],
+        "versiculo": "Deuteronômio 7:3-4 - Nem te aparentarás com elas; não darás tuas filhas a seus filhos, e seus filhos não tomarão as tuas filhas; pois desviariam teus filhos de mim, para que servissem a outros deuses; e a ira do Senhor se acenderia contra vós, e depressa vos destruiria."
+    },
+    {
+        "situacao": "46) O que Deus prometeu a Israel se eles fossem fiéis à Sua aliança?",
+        "correta": "Bênçãos na cidade e no campo, vitória sobre inimigos e prosperidade",
+        "alternativas": [
+            "Riquezas ilimitadas e ausência total de desafios",
+            "Poder para governar todas as nações do mundo",
+            "Bênçãos na cidade e no campo, vitória sobre inimigos e prosperidade",
+            "Uma vida longa e sem doenças para sempre"
+        ],
+        "versiculo": "Deuteronômio 28:1-8 - E será que, se ouvires a voz do Senhor teu Deus, tendo cuidado de guardar todos os seus mandamentos que eu hoje te ordeno, o Senhor teu Deus te exaltará sobre todas as nações da terra; e todas estas bênçãos virão sobre ti e te alcançarão, quando ouvires a voz do Senhor teu Deus..."
+    },
+    {
+        "situacao": "47) Qual é a principal responsabilidade dos pais israelitas em relação à Lei de Deus?",
+        "correta": "Ensinar diligentemente a seus filhos sobre a Lei e o amor a Deus",
+        "alternativas": [
+            "Deixar que os sacerdotes ensinem tudo",
+            "Apenas levar os filhos ao Tabernáculo uma vez ao ano",
+            "Ensinar diligentemente a seus filhos sobre a Lei e o amor a Deus",
+            "Permitir que seus filhos descubram a fé por conta própria"
+        ],
+        "versiculo": "Deuteronômio 6:6-7 - E estas palavras, que hoje te ordeno, estarão no teu coração; e as ensinarás a teus filhos e delas falarás assentado em tua casa, e andando pelo caminho, e deitando-te, e levantando-te."
+    },
+    {
+        "situacao": "48) Qual foi o propósito dos rituais de sacrifício no Tabernáculo?",
+        "correta": "Prover expiação pelos pecados e permitir a comunhão com Deus",
+        "alternativas": [
+            "Apenas para alimentar os sacerdotes e levitas",
+            "Mostrar a riqueza do povo de Israel",
+            "Prover expiação pelos pecados e permitir a comunhão com Deus",
+            "Ser uma forma de divertimento para o povo"
+        ],
+        "versiculo": "Levítico 4:20 - E fará com o bezerro o que fez com o bezerro da oferta pelo pecado; assim lhes fará; e o sacerdote fará expiação por eles, e lhes será perdoado."
+    },
+    {
+        "situacao": "49) Qual era o significado da coluna de nuvem e de fogo que guiava Israel?",
+        "correta": "A presença e a direção de Deus no meio do povo",
+        "alternativas": [
+            "Um fenômeno natural do deserto",
+            "Um meio para se orientarem geograficamente",
+            "A presença e a direção de Deus no meio do povo",
+            "Um aviso para os inimigos se afastarem"
+        ],
+        "versiculo": "Êxodo 13:21-22 - E o Senhor ia adiante deles de dia numa coluna de nuvem, para os guiar pelo caminho, e de noite numa coluna de fogo, para os alumiar, a fim de que caminhassem de dia e de noite. Nunca tirou de diante do povo a coluna de nuvem de dia, nem a coluna de fogo de noite."
+    },
+    {
+        "situacao": "50) O que era estritamente proibido fazer com o maná no deserto?",
+        "correta": "Guardar para o dia seguinte, exceto no sexto dia para o sábado",
+        "alternativas": [
+            "Cozinhar ou assar",
+            "Comer cru diretamente do chão",
+            "Guardar para o dia seguinte, exceto no sexto dia para o sábado",
+            "Dividir com as outras tribos"
+        ],
+        "versiculo": "Êxodo 16:19-20 - Moisés disse-lhes: Ninguém deixe dele para amanhã. Eles, porém, não deram ouvidos a Moisés; antes alguns deles deixaram dele para o dia seguinte, e criou bichos, e cheirava mal; por isso Moisés se indignou contra eles."
+    },
+    {
+        "situacao": "51) Quem foi o primeiro Sumo Sacerdote de Israel?",
+        "correta": "Arão",
+        "alternativas": [
+            "Moisés",
+            "Josué",
+            "Arão",
+            "Fineias"
+        ],
+        "versiculo": "Êxodo 28:1 - Farás chegar a ti teu irmão Arão, e seus filhos com ele, do meio dos filhos de Israel, para me administrarem o sacerdócio; Arão e Nadabe, e Abiú, Eleazar, e Itamar, os filhos de Arão."
+    },
+    {
+        "situacao": "52) Qual foi a finalidade do véu no Tabernáculo?",
+        "correta": "Separar o Lugar Santo do Lugar Santíssimo",
+        "alternativas": [
+            "Proteger o Tabernáculo do vento e da areia",
+            "Servir de cortina para as entradas",
+            "Separar o Lugar Santo do Lugar Santíssimo",
+            "Decorar o interior do Tabernáculo"
+        ],
+        "versiculo": "Êxodo 26:33 - Pendurarás o véu debaixo dos colchetes, e porás ali dentro do véu a arca do testemunho; e o véu vos fará separação entre o lugar santo e o santíssimo."
+    },
+    {
+        "situacao": "53) Em Deuteronômio, Moisés reitera a ordem de 'escuta, ó Israel'. Qual a principal verdade a ser lembrada?",
+        "correta": "O Senhor é o único Deus",
+        "alternativas": [
+            "Que Moisés é o seu líder escolhido",
+            "Que eles são o povo mais forte da terra",
+            "O Senhor é o único Deus",
+            "Que a Terra Prometida é a mais fértil de todas"
+        ],
+        "versiculo": "Deuteronômio 6:4 - Ouve, Israel, o Senhor nosso Deus é o único Senhor."
+    },
+    {
+        "situacao": "54) Qual foi o julgamento de Deus para o povo que incitou a rebelião de Corá, além do próprio Corá?",
+        "correta": "A terra se abriu e os engoliu vivos",
+        "alternativas": [
+            "Foram atacados por uma praga",
+            "Foram expulsos do acampamento para sempre",
+            "A terra se abriu e os engoliu vivos",
+            "Seus gados morreram subitamente"
+        ],
+        "versiculo": "Números 16:32-33 - E a terra abriu a sua boca, e os tragou com as suas casas, como também a todos os homens que pertenciam a Corá, e a todos os seus bens. E eles e tudo o que tinham desceram vivos ao abismo; e a terra os cobriu, e pereceram do meio da congregação."
+    },
+    {
+        "situacao": "55) Qual a duração da peregrinação de Israel no deserto, por causa de sua incredulidade?",
+        "correta": "Quarenta anos",
+        "alternativas": [
+            "Sete anos",
+            "Vinte anos",
+            "Quarenta anos",
+            "Cem anos"
+        ],
+        "versiculo": "Números 14:33 - E vossos filhos pastorearão no deserto quarenta anos, e levarão sobre si as vossas infidelidades, até que os vossos cadáveres se consumam no deserto."
+    },
+    {
+        "situacao": "56) Qual era a finalidade dos holocaustos na Lei mosaica?",
+        "correta": "Expiação geral por pecados e um ato de dedicação total a Deus",
+        "alternativas": [
+            "Apenas para alimentar os sacerdotes",
+            "Uma forma de agradecimento exclusivo por vitórias na guerra",
+            "Expiação geral por pecados e um ato de dedicação total a Deus",
+            "Um ritual de purificação para doenças de pele"
+        ],
+        "versiculo": "Levítico 1:4 - E porá a sua mão sobre a cabeça do holocausto, para que seja aceito a seu favor, para fazer expiação por ele."
+    },
+    {
+        "situacao": "57) Qual era a importância das ofertas de grãos (ofertas de manjares)?",
+        "correta": "Reconhecer a provisão e a bondade de Deus, sem derramamento de sangue",
+        "alternativas": [
+            "Servir como pagamento para os sacerdotes",
+            "Purificar o povo de impurezas rituais",
+            "Reconhecer a provisão e a bondade de Deus, sem derramamento de sangue",
+            "Garantir a fertilidade da terra"
+        ],
+        "versiculo": "Levítico 2:1 - E quando alguma alma oferecer oferta de manjares ao Senhor, a sua oferta será de flor de farinha; e sobre ela deitará azeite, e porá sobre ela incenso."
+    },
+    {
+        "situacao": "58) Qual evento marcou o fim da provisão diária do maná para Israel?",
+        "correta": "Quando o povo comeu do fruto da terra de Canaã",
+        "alternativas": [
+            "Quando Moisés morreu",
+            "Quando eles cruzaram o rio Jordão",
+            "Quando o povo comeu do fruto da terra de Canaã",
+            "Quando eles construíram o Tabernáculo"
+        ],
+        "versiculo": "Josué 5:12 - E o maná cessou no dia seguinte, depois que comeram do fruto da terra; e os filhos de Israel não tiveram mais maná; porém, naquele ano comeram dos frutos da terra de Canaã."
+    },
+    {
+        "situacao": "59) Quem foi o sucessor de Moisés na liderança de Israel?",
+        "correta": "Josué",
+        "alternativas": [
+            "Arão",
+            "Calebe",
+            "Josué",
+            "Fineias"
+        ],
+        "versiculo": "Números 27:18-20 - Então disse o Senhor a Moisés: Toma a Josué, filho de Num, homem em quem há o espírito, e põe a tua mão sobre ele. E o porás diante de Eleazar, o sacerdote, e diante de toda a congregação, e dar-lhe-ás uma parte da tua glória, para que toda a congregação dos filhos de Israel lhe obedeça."
+    },
+    {
+        "situacao": "60) Em seu discurso final, Josué convoca o povo a renovar a aliança com Deus e o que ele profere?",
+        "correta": "A bênção sobre o povo e a maldição sobre os desobedientes",
+        "alternativas": [
+            "Uma profecia sobre o próximo líder de Israel",
+            "Um plano para a construção de um grande templo",
+            "A bênção sobre o povo e a maldição sobre os desobedientes",
+            "Uma lista das cidades que ainda deveriam ser conquistadas"
+        ],
+        "versiculo": "Josué 24:25-27 - Assim fez Josué aliança com o povo naquele dia, e lhes deu estatutos e juízos em Siquém. E Josué escreveu estas palavras no livro da lei de Deus; e tomou uma grande pedra, e a ergueu ali debaixo do carvalho que estava no santuário do Senhor. E disse Josué a todo o povo: Eis que esta pedra nos servirá de testemunho, porque ela ouviu todas as palavras que o Senhor nos falou; por isso vos servirá de testemunho, para que não mintais contra o vosso Deus."
+    },
+    {
+        "situacao": "61) Após a Páscoa e a saída do Egito, qual é a primeira queixa dos israelitas no deserto?",
+        "correta": "Falta de água potável em Mara",
+        "alternativas": [
+            "Falta de comida",
+            "Saudades das cebolas do Egito",
+            "Falta de água potável em Mara",
+            "Dificuldade em seguir a nuvem"
+        ],
+        "versiculo": "Êxodo 15:23 - E chegaram a Mara, mas não puderam beber as águas de Mara, porque eram amargas; por isso chamou o nome dela Mara."
+    },
+    {
+        "situacao": "62) Qual é a reação de Deus à murmuração do povo por pão no deserto?",
+        "correta": "Envia maná e codornizes",
+        "alternativas": [
+            "Os pune com uma praga",
+            "Manda que Moisés resolva o problema sozinho",
+            "Envia maná e codornizes",
+            "Ignora a queixa e continua a jornada"
+        ],
+        "versiculo": "Êxodo 16:4 - Então disse o Senhor a Moisés: Eis que vos farei chover pão do céu, e o povo sairá, e colherá cada dia a porção para o seu dia, para que eu o prove se anda na minha lei ou não."
+    },
+    {
+        "situacao": "63) Qual foi o nome dado ao lugar onde Moisés feriu a rocha e a água brotou pela primeira vez?",
+        "correta": "Massá e Meribá",
+        "alternativas": [
+            "Refidim",
+            "Elim",
+            "Massá e Meribá",
+            "Sinai"
+        ],
+        "versiculo": "Êxodo 17:7 - E chamou o nome daquele lugar Massá e Meribá, por causa da contenda dos filhos de Israel, e porque tentaram ao Senhor, dizendo: Está o Senhor no meio de nós, ou não?"
+    },
+    {
+        "situacao": "64) Quem ajudou Moisés a segurar suas mãos levantadas durante a batalha contra Amaleque?",
+        "correta": "Arão e Hur",
+        "alternativas": [
+            "Josué e Calebe",
+            "Miriam e Zípora",
+            "Arão e Hur",
+            "Eldade e Medade"
+        ],
+        "versiculo": "Êxodo 17:12 - Mas as mãos de Moisés eram pesadas; por isso tomaram uma pedra, e a puseram debaixo dele, para que se assentasse; e Arão e Hur sustentaram as suas mãos, um de um lado e o outro do outro; assim ficaram as suas mãos firmes até ao pôr do sol."
+    },
+    {
+        "situacao": "65) Qual foi a primeira coisa que Moisés fez após descer do Monte Sinai e ver o bezerro de ouro?",
+        "correta": "Quebrou as tábuas da Lei",
+        "alternativas": [
+            "Começou a orar por eles",
+            "Destruiu o bezerro de ouro imediatamente",
+            "Quebrou as tábuas da Lei",
+            "Confrontou Arão sobre o que havia acontecido"
+        ],
+        "versiculo": "Êxodo 32:19 - E aconteceu que, chegando ele ao arraial, e vendo o bezerro e as danças, acendeu-se-lhe o furor, e arremessou as tábuas das suas mãos, e as quebrou ao pé do monte."
+    },
+    {
+        "situacao": "66) Qual foi o propósito das vestes sacerdotais detalhadas por Deus para Arão?",
+        "correta": "Para dignidade e ornamento",
+        "alternativas": [
+            "Para distingui-los dos levitas",
+            "Para protegê-los do calor do deserto",
+            "Para dignidade e ornamento",
+            "Para facilitar o movimento no Tabernáculo"
+        ],
+        "versiculo": "Êxodo 28:2 - E farás vestes santas para Arão, teu irmão, para glória e ornamento."
+    },
+    {
+        "situacao": "67) Qual tribo foi encarregada de transportar o Tabernáculo e seus utensílios?",
+        "correta": "Levi",
+        "alternativas": [
+            "Judá",
+            "Rúben",
+            "Levi",
+            "Manassés"
+        ],
+        "versiculo": "Números 1:50-51 - Mas os levitas não contarás entre os filhos de Israel, nem contarás o seu número, mas porás os levitas sobre o tabernáculo do testemunho, e sobre todos os seus utensílios, e sobre tudo o que pertence a ele. Eles levarão o tabernáculo e todos os seus utensílios, e o servirão, e acampar-se-ão ao redor do tabernáculo."
+    },
+    {
+        "situacao": "68) O que aconteceu com Nadabe e Abiú, filhos de Arão, por oferecerem 'fogo estranho' ao Senhor?",
+        "correta": "Foram consumidos por fogo da parte do Senhor",
+        "alternativas": [
+            "Foram expulsos do sacerdócio",
+            "Ficaram doentes por causa de seu pecado",
+            "Foram consumidos por fogo da parte do Senhor",
+            "Foram perdoados após arrependimento"
+        ],
+        "versiculo": "Levítico 10:1-2 - E os filhos de Arão, Nadabe e Abiú, tomaram cada um o seu incensário, e puseram neles fogo, e puseram incenso sobre ele, e ofereceram fogo estranho perante o Senhor, o que lhes não ordenara. Então saiu fogo de diante do Senhor e os consumiu; e morreram perante o Senhor."
+    },
+    {
+        "situacao": "69) Qual era o propósito principal do Livro de Levítico?",
+        "correta": "Instruir sobre a santidade, adoração e leis para uma vida em comunhão com Deus",
+        "alternativas": [
+            "Narrar a história da peregrinação no deserto",
+            "Listar todas as cidades conquistadas por Israel",
+            "Instruir sobre a santidade, adoração e leis para uma vida em comunhão com Deus",
+            "Registrar os censos do povo de Israel"
+        ],
+        "versiculo": "Levítico 19:2 - Fala a toda a congregação dos filhos de Israel, e dize-lhes: Santos sereis, porque eu, o Senhor vosso Deus, sou santo."
+    },
+    {
+        "situacao": "70) Em Números, qual foi o incidente onde a serpente de bronze foi levantada?",
+        "correta": "Quando o povo foi picado por serpentes venenosas por causa de sua murmuração",
+        "alternativas": [
+            "Para curar doenças gerais",
+            "Como um símbolo de vitória contra os inimigos",
+            "Quando o povo foi picado por serpentes venenosas por causa de sua murmuração",
+            "Para invocar a presença de Deus"
+        ],
+        "versiculo": "Números 21:8-9 - E o Senhor disse a Moisés: Faze uma serpente ardente, e põe-na sobre uma haste; e será que todo aquele que, sendo mordido, olhar para ela, viverá. E Moisés fez uma serpente de bronze, e a pôs sobre uma haste; e era que, mordendo alguma serpente a alguém, e olhando ele para a serpente de bronze, vivia."
+    },
+    {
+        "situacao": "71) Qual foi a consequência imediata da incredulidade do povo em Cades-Barnéia, após o relatório dos espias?",
+        "correta": "Deus jurou que a geração incrédula não entraria na Terra Prometida",
+        "alternativas": [
+            "Uma grande seca atingiu o deserto",
+            "Foram forçados a lutar contra um exército inimigo imediatamente",
+            "Deus jurou que a geração incrédula não entraria na Terra Prometida",
+            "Moisés foi removido da liderança"
+        ],
+        "versiculo": "Números 14:28-30 - Dize-lhes: Pela minha vida, diz o Senhor, que, como falastes aos meus ouvidos, assim farei a vós. Neste deserto cairão os vossos cadáveres; e todos os que de vós foram contados, de vinte anos para cima, os que dentre vós murmuraram contra mim, não entrareis na terra, pela qual levantei a minha mão que vos faria habitar nela; salvo Calebe, filho de Jefoné, e Josué, filho de Num."
+    },
+    {
+        "situacao": "72) Qual a tribo que, devido ao seu serviço ao Senhor, não recebeu herança de terra como as outras?",
+        "correta": "Levi",
+        "alternativas": [
+            "Benjamim",
+            "Judá",
+            "Levi",
+            "Zebulom"
+        ],
+        "versiculo": "Números 18:20 - E disse o Senhor a Arão: Nenhuma herança terás na sua terra, nem parte alguma terás no meio deles; eu sou a tua parte e a tua herança no meio dos filhos de Israel."
+    },
+    {
+        "situacao": "73) Qual foi o teste de Deus para Moisés em relação à água em Meribá, onde ele pecou?",
+        "correta": "Falar com a rocha para que dela saísse água",
+        "alternativas": [
+            "Bater na rocha uma vez",
+            "Cavar um poço profundo",
+            "Falar com a rocha para que dela saísse água",
+            "Fazer chover do céu"
+        ],
+        "versiculo": "Números 20:8 - Toma a vara, e ajunta a congregação, tu e Arão teu irmão, e falai à rocha na sua presença, para que dê a sua água; assim lhes tirarás água da rocha, e darás a beber à congregação e aos seus animais."
+    },
+    {
+        "situacao": "74) Qual foi o último ato significativo de Moisés antes de morrer no Monte Nebo?",
+        "correta": "Abençoar as tribos de Israel",
+        "alternativas": [
+            "Escrever o restante do Pentateuco",
+            "Construir um monumento",
+            "Abençoar as tribos de Israel",
+            "Nomear os juízes de Israel"
+        ],
+        "versiculo": "Deuteronômio 33:1 - E esta é a bênção com que Moisés, homem de Deus, abençoou os filhos de Israel antes da sua morte."
+    },
+    {
+        "situacao": "75) Após a morte de Moisés, qual é o principal conselho que Deus dá a Josué sobre a Lei?",
+        "correta": "Meditar nela dia e noite para prosperar",
+        "alternativas": [
+            "Escrevê-la em pedras grandes",
+            "Apenas lê-la uma vez por semana",
+            "Meditar nela dia e noite para prosperar",
+            "Ensina-la apenas aos sacerdotes"
+        ],
+        "versiculo": "Josué 1:8 - Não se aparte da tua boca o livro desta lei; antes medita nele dia e noite, para que tenhas cuidado de fazer conforme a tudo quanto nele está escrito; porque então farás prosperar o teu caminho, e então prudentemente te conduzirás."
+    },
+    {
+        "situacao": "76) Qual é o sinal que Raabe, a prostituta, usa para ser salva durante a queda de Jericó?",
+        "correta": "Um cordão de escarlate pendurado na janela",
+        "alternativas": [
+            "Um pano branco no portão",
+            "Uma lanterna acesa à noite",
+            "Um cordão de escarlate pendurado na janela",
+            "Um desenho de um peixe na parede"
+        ],
+        "versiculo": "Josué 2:18 - Eis que, quando entrarmos na terra, atarás este cordão de fio de escarlate à janela por onde nos fizeste descer; e recolherás contigo em casa a teu pai, e a tua mãe, e a teus irmãos, e a toda a família de teu pai."
+    },
+    {
+        "situacao": "77) Quantas vezes os israelitas marcharam ao redor de Jericó no último dia?",
+        "correta": "Sete vezes",
+        "alternativas": [
+            "Uma vez",
+            "Três vezes",
+            "Sete vezes",
+            "Doze vezes"
+        ],
+        "versiculo": "Josué 6:15 - E sucedeu que, ao sétimo dia, levantaram-se muito de madrugada, e da mesma maneira giraram a cidade sete vezes; somente naquele dia giraram a cidade sete vezes."
+    },
+    {
+        "situacao": "78) O que Acã pegou dos despojos de Jericó que causou a derrota em Ai?",
+        "correta": "Uma capa babilônica, duzentos siclos de prata e uma barra de ouro",
+        "alternativas": [
+            "Armas inimigas",
+            "Comida e bebida",
+            "Uma capa babilônica, duzentos siclos de prata e uma barra de ouro",
+            "Idolos pagãos"
+        ],
+        "versiculo": "Josué 7:21 - Quando vi entre os despojos uma boa capa babilônica, e duzentos siclos de prata, e uma cunha de ouro, do peso de cinquenta siclos, cobicei-os e tomei-os; e eis que estão escondidos na terra, no meio da minha tenda, e a prata debaixo dela."
+    },
+    {
+        "situacao": "79) Para onde foi o povo de Israel após a derrota em Ai, antes de uma nova estratégia?",
+        "correta": "Para o vale de Acor, para chorar diante de Deus",
+        "alternativas": [
+            "Voltaram para Jericó",
+            "Se espalharam pelo deserto",
+            "Para o vale de Acor, para chorar diante de Deus",
+            "Acamparam perto de Ai"
+        ],
+        "versiculo": "Josué 7:26 - E levantaram sobre ele um grande montão de pedras, que permanece até ao dia de hoje; assim o Senhor se tornou do furor da sua ira; pelo que se chamou aquele lugar o Vale de Acor, até ao dia de hoje."
+    },
+    {
+        "situacao": "80) Qual era a exigência para o exército de Israel durante a marcha em volta de Jericó?",
+        "correta": "Permanecer em silêncio até o comando de Josué",
+        "alternativas": [
+            "Cantar louvores em voz alta",
+            "Gritar durante toda a marcha",
+            "Permanecer em silêncio até o comando de Josué",
+            "Tocar trombetas continuamente"
+        ],
+        "versiculo": "Josué 6:10 - Porém ao povo ordenara Josué, dizendo: Não gritareis, nem fareis ouvir a vossa voz, nem sairá palavra alguma da vossa boca, até ao dia em que eu vos diga: Gritai! Então gritareis."
+    },
+    {
+        "situacao": "81) Qual foi a principal diferença entre a estratégia de Josué para conquistar Jericó e Ai?",
+        "correta": "Em Ai, usou uma emboscada; em Jericó, seguiu instruções divinas de marchar e gritar",
+        "alternativas": [
+            "Em Jericó usou aríetes; em Ai, sitiá-la",
+            "Em Ai, Josué não consultou a Deus; em Jericó, sim",
+            "Em Ai, usou uma emboscada; em Jericó, seguiu instruções divinas de marchar e gritar",
+            "Em Jericó atacou de noite; em Ai, de dia"
+        ],
+        "versiculo": "Josué 6:20 (Jericó) e Josué 8:4 (Ai) - Ver versículos anteriores para contexto."
+    },
+    {
+        "situacao": "82) Qual era o principal objetivo das cidades de refúgio estabelecidas em Canaã?",
+        "correta": "Proteger assassinos involuntários da vingança de sangue",
+        "alternativas": [
+            "Servir como prisões para criminosos",
+            "Serem centros de comércio",
+            "Proteger assassinos involuntários da vingança de sangue",
+            "Local de treinamento militar"
+        ],
+        "versiculo": "Josué 20:2-3 - Fala aos filhos de Israel, dizendo: Assinalai para vós as cidades de refúgio, de que vos falei por Moisés; para que fuja para ali o homicida que matar alguém por engano, e sem intenção; e vos sirvam de refúgio do vingador do sangue."
+    },
+    {
+        "situacao": "83) O que Josué fez em Ebal e Gerizim, para reafirmar a aliança com Deus?",
+        "correta": "Construiu um altar e leu a Lei diante de todo o povo",
+        "alternativas": [
+            "Dividiu a terra entre as tribos",
+            "Realizou um grande festival de colheita",
+            "Construiu um altar e leu a Lei diante de todo o povo",
+            "Consultou o Urim e Tumim"
+        ],
+        "versiculo": "Josué 8:30-34 - Então Josué edificou um altar ao Senhor Deus de Israel no monte Ebal... E depois leu todas as palavras da lei, a bênção e a maldição, conforme tudo o que está escrito no livro da lei."
+    },
+    {
+        "situacao": "84) Qual tribo recebeu a herança mais ao sul de Canaã, incluindo Hebrom?",
+        "correta": "Judá",
+        "alternativas": [
+            "Benjamim",
+            "Efraim",
+            "Judá",
+            "Gade"
+        ],
+        "versiculo": "Josué 15:1 - E foi a herança da tribo dos filhos de Judá, segundo as suas famílias, até ao termo de Edom, o deserto de Zim, para o sul, ao extremo do sul."
+    },
+    {
+        "situacao": "85) Após a divisão da terra, as tribos de Rúben, Gade e Manassés Oriental retornam para suas terras. O que elas fizeram ao chegar ao Jordão?",
+        "correta": "Edificaram um grande altar",
+        "alternativas": [
+            "Fizeram um pacto com os cananeus restantes",
+            "Construíram uma ponte sobre o rio",
+            "Edificaram um grande altar",
+            "Ofereceram sacrifícios imediatamente"
+        ],
+        "versiculo": "Josué 22:10 - Chegando eles aos termos do Jordão, que está na terra de Canaã, ali edificaram os filhos de Rúben e os filhos de Gade e a meia tribo de Manassés um altar junto ao Jordão, um altar de grande aspecto."
+    },
+    {
+        "situacao": "86) Qual a acusação inicial das outras tribos contra Rúben, Gade e Manassés Oriental por construir o altar?",
+        "correta": "Rebelião contra o Senhor e desobediência à Lei",
+        "alternativas": [
+            "Tentativa de usurpar a liderança de Josué",
+            "Mal uso dos materiais de guerra",
+            "Rebelião contra o Senhor e desobediência à Lei",
+            "Construção de um altar pagão"
+        ],
+        "versiculo": "Josué 22:16 - Assim diz toda a congregação do Senhor: Que transgressão é esta que cometestes contra o Deus de Israel, deixando hoje de seguir ao Senhor, edificando para vós um altar, para vos rebelardes hoje contra o Senhor?"
+    },
+    {
+        "situacao": "87) Qual foi a resposta de Josué ao povo, em seu discurso final, sobre o compromisso com Deus?",
+        "correta": "Escolham a quem servirão; quanto a mim e à minha casa, serviremos ao Senhor",
+        "alternativas": [
+            "Deus vos fará prosperar, independentemente de suas escolhas",
+            "Sigam os costumes das nações vizinhas para viver em paz",
+            "Escolham a quem servirão; quanto a mim e à minha casa, serviremos ao Senhor",
+            "Não há necessidade de fazer uma escolha, Deus entenderá"
+        ],
+        "versiculo": "Josué 24:15 - Porém, se vos parece mal servir ao Senhor, escolhei hoje a quem sirvais; se aos deuses a quem serviram vossos pais, que estavam além do rio, ou aos deuses dos amorreus, em cuja terra habitais; porém eu e a minha casa serviremos ao Senhor."
+    },
+    {
+        "situacao": "88) Qual foi a idade de Josué quando ele morreu?",
+        "correta": "Cento e dez anos",
+        "alternativas": [
+            "Noventa anos",
+            "Cem anos",
+            "Cento e dez anos",
+            "Cento e vinte anos"
+        ],
+        "versiculo": "Josué 24:29 - E sucedeu, depois destas coisas, que Josué, filho de Num, servo do Senhor, morreu, com a idade de cento e dez anos."
+    },
+    {
+        "situacao": "89) Onde os ossos de José, trazidos do Egito, foram finalmente sepultados em Canaã?",
+        "correta": "Em Siquém",
+        "alternativas": [
+            "Em Hebrom",
+            "Em Jerusalém",
+            "Em Siquém",
+            "Em Belém"
+        ],
+        "versiculo": "Josué 24:32 - E os ossos de José, que os filhos de Israel trouxeram do Egito, enterraram-nos em Siquém, na parte do campo que Jacó comprara aos filhos de Hemor, pai de Siquém, por cem peças de prata; e foi por herança aos filhos de José."
+    },
+    {
+        "situacao": "90) Qual foi o aviso de Deus a Josué no início de seu ministério sobre a Terra Prometida?",
+        "correta": "Todo lugar onde a planta do seu pé pisar será dado a você",
+        "alternativas": [
+            "Você terá que lutar por cada pedaço de terra",
+            "A terra será dada sem nenhum esforço da sua parte",
+            "Todo lugar onde a planta do seu pé pisar será dado a você",
+            "Apenas uma parte da terra será sua"
+        ],
+        "versiculo": "Josué 1:3 - Todo o lugar que pisar a planta do vosso pé, vo-lo tenho dado, como eu disse a Moisés."
+    },
+    {
+        "situacao": "91) Qual foi o papel de Finéias, filho de Eleazar, na interrupção da praga em Peor?",
+        "correta": "Ele apaziguou a ira de Deus matando um israelita e uma midianita juntos",
+        "alternativas": [
+            "Ele orou fervorosamente por todos os israelitas",
+            "Ele convocou o povo ao arrependimento",
+            "Ele apaziguou a ira de Deus matando um israelita e uma midianita juntos",
+            "Ele ofereceu um sacrifício especial"
+        ],
+        "versiculo": "Números 25:7-8 - Vendo isso Finéias, filho de Eleazar, filho de Arão, o sacerdote, levantou-se do meio da congregação, e tomou uma lança na sua mão; e foi após o homem israelita até a tenda, e o atravessou, como também à mulher, pelo ventre; assim cessou a praga de sobre os filhos de Israel."
+    },
+    {
+        "situacao": "92) Qual o nome do monte onde Moisés foi ver a Terra Prometida e depois morreu?",
+        "correta": "Monte Nebo",
+        "alternativas": [
+            "Monte Sinai",
+            "Monte Horebe",
+            "Monte Nebo",
+            "Monte Ebal"
+        ],
+        "versiculo": "Deuteronômio 34:1 - E subiu Moisés das campinas de Moabe ao monte Nebo, ao cume de Pisga, que está defronte de Jericó; e o Senhor lhe mostrou toda a terra de Gileade até Dã."
+    },
+    {
+        "situacao": "93) Que tipo de árvore Moisés lançou nas águas de Mara para torná-las doces?",
+        "correta": "Uma árvore não identificada, mas mostrada por Deus",
+        "alternativas": [
+            "Figueira",
+            "Palmeira",
+            "Uma árvore não identificada, mas mostrada por Deus",
+            "Oliveira"
+        ],
+        "versiculo": "Êxodo 15:25 - E ele clamou ao Senhor, e o Senhor lhe mostrou uma árvore; e Moisés a lançou nas águas, e as águas se tornaram doces."
+    },
+    {
+        "situacao": "94) Qual foi o material principal usado para fazer a serpente de bronze que curava as mordidas?",
+        "correta": "Bronze",
+        "alternativas": [
+            "Ouro",
+            "Cobre",
+            "Bronze",
+            "Madeira"
+        ],
+        "versiculo": "Números 21:9 - E Moisés fez uma serpente de bronze, e a pôs sobre uma haste; e era que, mordendo alguma serpente a alguém, e olhando ele para a serpente de bronze, vivia."
+    },
+    {
+        "situacao": "95) Em Êxodo, por quanto tempo os israelitas comeram maná no deserto?",
+        "correta": "Quarenta anos",
+        "alternativas": [
+            "Um ano",
+            "Vinte anos",
+            "Quarenta anos",
+            "Até entrarem em Canaã"
+        ],
+        "versiculo": "Êxodo 16:35 - Assim comeram os filhos de Israel maná quarenta anos, até que entraram em terra habitada; comeram maná até que chegaram aos termos da terra de Canaã."
+    },
+    {
+        "situacao": "96) Qual foi a finalidade do altar de incenso no Tabernáculo?",
+        "correta": "Queimar incenso aromático diante do Senhor continuamente",
+        "alternativas": [
+            "Oferecer sacrifícios de animais",
+            "Armazenar o maná",
+            "Queimar incenso aromático diante do Senhor continuamente",
+            "Como um lugar para o povo orar"
+        ],
+        "versiculo": "Êxodo 30:7-8 - E Arão queimará sobre ele incenso aromático; cada manhã, quando puser em ordem as lâmpadas, o queimará. E, acendendo Arão as lâmpadas à tarde, o queimará em incenso perpétuo perante o Senhor pelas vossas gerações."
+    },
+    {
+        "situacao": "97) Quais foram os dois chefes de tribo que acompanharam Calebe e Josué, mas trouxeram um relatório negativo dos espias?",
+        "correta": "Nenhum, todos os outros dez trouxeram relatório negativo",
+        "alternativas": [
+            "Elizur e Natanael",
+            "Setur e Gediel",
+            "Nenhum, todos os outros dez trouxeram relatório negativo",
+            "Igal e Palti"
+        ],
+        "versiculo": "Números 13:30-33 - Então Calebe fez calar o povo diante de Moisés, e disse: Certamente subiremos, e a possuiremos, porque poderosamente a poderemos. Porém os homens que com ele subiram disseram: Não poderemos subir contra aquele povo, porque é mais forte do que nós. E infamaram a terra que tinham espiado, dizendo aos filhos de Israel: A terra pela qual passamos para espiá-la é terra que consome os seus moradores; e todo o povo que vimos nela são homens de grande estatura. Também vimos ali gigantes, filhos de Anaque, que são da raça dos gigantes; e éramos aos nossos próprios olhos como gafanhotos, e assim também éramos aos seus olhos."
+    },
+    {
+        "situacao": "98) Qual foi a principal mensagem do livro de Deuteronômio?",
+        "correta": "Relembrar e renovar a aliança de Deus com Israel, exortando à obediência",
+        "alternativas": [
+            "Contar a história das conquistas militares de Israel",
+            "Detalhar as leis de pureza e sacrifícios apenas",
+            "Relembrar e renovar a aliança de Deus com Israel, exortando à obediência",
+            "Descrever as cerimônias de coroação dos reis"
+        ],
+        "versiculo": "Deuteronômio 6:1-3 - Estes, pois, são os mandamentos, os estatutos e os juízos que mandou o Senhor vosso Deus que vos ensinasse, para que os fizésseis na terra a que passais a possuir; para que temas ao Senhor teu Deus, e guardes todos os seus estatutos e mandamentos, que eu te ordeno, tu, e teu filho, e o filho de teu filho, todos os dias da tua vida, e para que se prolonguem os teus dias. Ouve, pois, ó Israel, e atenta em os guardares, para que bem te suceda, e muito te multipliques, na terra que mana leite e mel, como te prometeu o Senhor Deus de teus pais."
+    },
+    {
+        "situacao": "99) Onde Moisés deixou as duas tábuas da Lei, após a segunda vez que as recebeu?",
+        "correta": "Dentro da Arca da Aliança",
+        "alternativas": [
+            "Em um altar no Monte Sinai",
+            "Em uma tenda especial fora do arraial",
+            "Dentro da Arca da Aliança",
+            "Nas mãos de Arão"
+        ],
+        "versiculo": "Deuteronômio 10:5 - E voltei-me e desci do monte, e pus as tábuas na arca que fizera; e ali estão, como o Senhor me ordenou."
+    },
+    {
+        "situacao": "100) Qual o evento que marcou o início da conquista da Terra Prometida sob Josué?",
+        "correta": "A travessia do rio Jordão em cheia",
+        "alternativas": [
+            "A batalha contra os amalequitas",
+            "A construção do Tabernáculo",
+            "A travessia do rio Jordão em cheia",
+            "A circuncisão em Gilgal"
+        ],
+        "versiculo": "Josué 3:14-17 - E sucedeu que, partindo o povo das suas tendas para passar o Jordão, e os sacerdotes, que levavam a arca da aliança, adiante do povo; e, entrando os que levavam a arca nas águas do Jordão, e molhando-se os pés dos sacerdotes na beira das águas (porque o Jordão transbordava sobre todas as suas margens, todos os dias da ceifa), as águas, que vinham de cima, pararam."
+    },
+    {
+        "situacao": "101) Após a derrota em Ai e a punição de Acã, qual foi a estratégia de Josué para a segunda tentativa de conquista de Ai?",
+        "correta": "Emboscada e fingimento de fuga",
+        "alternativas": [
+            "Ataque frontal com força total",
+            "Negociação com os habitantes de Ai",
+            "Emboscada e fingimento de fuga",
+            "Cercar a cidade por muitos dias"
+        ],
+        "versiculo": "Josué 8:4-7 - E ordenou-lhes, dizendo: Olhai, poreis uma emboscada à cidade por detrás dela; não vos alongueis muito da cidade, mas estai todos preparados. E vós, e todo o povo que está convosco, vos volteis para a cidade, e fareis como eu vos disser. E Josué fez assim com todo o povo que o acompanhava, e pôs a emboscada entre Betel e Ai, ao ocidente de Ai; e Josué foi aquela noite para o meio do vale."
+    },
+    {
+        "situacao": "102) Qual foi a razão dos gibeonitas para enganar Josué e os líderes de Israel?",
+        "correta": "Temor da destruição por parte de Israel, como aconteceu com Jericó e Ai",
+        "alternativas": [
+            "Desejo de se aliar a Israel para conquistar outras terras",
+            "Obter riquezas e bens dos israelitas",
+            "Temor da destruição por parte de Israel, como aconteceu com Jericó e Ai",
+            "Simplesmente queriam causar problemas"
+        ],
+        "versiculo": "Josué 9:24 - E responderam a Josué, e disseram: Porque foi noticiado aos teus servos que o Senhor teu Deus ordenou a Moisés, seu servo, que vos desse toda esta terra, e destruísse todos os moradores da terra diante de vós; por isso tememos muito pelas nossas vidas por causa de vós, e fizemos isto."
+    },
+    {
+        "situacao": "103) Durante a batalha de Gibeão, qual foi a maior intervenção milagrosa de Deus, além do granizo?",
+        "correta": "O sol e a lua pararem no céu",
+        "alternativas": [
+            "Um terremoto que destruiu as muralhas inimigas",
+            "Fogo do céu que consumiu os exércitos",
+            "O sol e a lua pararem no céu",
+            "Uma nuvem que cegou os inimigos"
+        ],
+        "versiculo": "Josué 10:12-13 - Então Josué falou ao Senhor, no dia em que o Senhor entregou os amorreus na mão dos filhos de Israel, e disse na presença dos israelitas: Sol, detém-te em Gibeão, e tu, lua, no vale de Aijalom. E o sol se deteve, e a lua parou, até que o povo se vingou de seus inimigos."
+    },
+    {
+        "situacao": "104) Como os levitas eram sustentados, já que não receberam herança de terra?",
+        "correta": "Por dízimos e ofertas do povo, além de cidades levíticas com pastagens",
+        "alternativas": [
+            "Pela colheita de suas próprias terras",
+            "Por saques de guerra",
+            "Por dízimos e ofertas do povo, além de cidades levíticas com pastagens",
+            "Pelo trabalho manual e comércio"
+        ],
+        "versiculo": "Números 18:21 - E eis que aos filhos de Levi tenho dado todos os dízimos em Israel por herança, pelo seu serviço que fazem, o serviço da tenda da congregação."
+    },
+    {
+        "situacao": "105) Quantas cidades de refúgio foram designadas em Israel?",
+        "correta": "Seis",
+        "alternativas": [
+            "Três",
+            "Cinco",
+            "Seis",
+            "Doze"
+        ],
+        "versiculo": "Números 35:13-14 - E destas cidades que derdes, seis cidades de refúgio serão. Três cidades dareis aquém do Jordão, e três cidades dareis na terra de Canaã; cidades de refúgio serão."
+    },
+    {
+        "situacao": "106) Qual foi a finalidade do Jubileu, celebrado a cada cinquenta anos?",
+        "correta": "Libertar escravos, restaurar terras à família original e perdoar dívidas",
+        "alternativas": [
+            "Uma festa de sete dias para todo o povo",
+            "Apenas um ano de descanso para a terra",
+            "Libertar escravos, restaurar terras à família original e perdoar dívidas",
+            "Realizar um censo de toda a população"
+        ],
+        "versiculo": "Levítico 25:10 - E santificareis o ano quinquagésimo, e apregoareis liberdade em toda a terra a todos os seus moradores; ano de jubileu vos será, e tornareis cada um à sua possessão, e cada um à sua família."
+    },
+    {
+        "situacao": "107) Em Deuteronômio, qual é a ênfase principal para o rei que Israel deveria escolher?",
+        "correta": "Não ter muitos cavalos, esposas ou prata e ouro, e escrever para si uma cópia da Lei",
+        "alternativas": [
+            "Ter o maior exército e as maiores riquezas",
+            "Ser escolhido pelo povo sem consulta a Deus",
+            "Não ter muitos cavalos, esposas ou prata e ouro, e escrever para si uma cópia da Lei",
+            "Construir um grande palácio e morar em Jerusalém"
+        ],
+        "versiculo": "Deuteronômio 17:16-18 - Somente que não multiplique para si cavalos, nem faça voltar o povo ao Egito, para multiplicar cavalos... Também para que se não multipliquem muito para ele mulheres, nem se desvie o seu coração; nem se multiplique muito para si prata e ouro... E será que, quando se assentar sobre o trono do seu reino, escreverá para si um traslado desta lei num livro, do original que está diante dos levitas sacerdotes."
+    },
+    {
+        "situacao": "108) Qual a punição para o falso profeta em Israel, de acordo com Deuteronômio?",
+        "correta": "Ser morto",
+        "alternativas": [
+            "Ser exilado por dez anos",
+            "Ter suas terras confiscadas",
+            "Ser morto",
+            "Ser humilhado publicamente"
+        ],
+        "versiculo": "Deuteronômio 18:20 - Porém o profeta que presumir de falar alguma palavra em meu nome, que eu lhe não tenha mandado falar, ou o que falar em nome de outros deuses, esse profeta morrerá."
+    },
+    {
+        "situacao": "109) Qual foi a promessa de Deus a Josué que lhe daria sucesso na guerra?",
+        "correta": "Ninguém te poderá resistir todos os dias da tua vida",
+        "alternativas": [
+            "Você terá a ajuda de todos os exércitos vizinhos",
+            "Sua sabedoria superará a de todos os reis",
+            "Ninguém te poderá resistir todos os dias da tua vida",
+            "Todos os inimigos se renderão sem luta"
+        ],
+        "versiculo": "Josué 1:5 - Ninguém te poderá resistir todos os dias da tua vida; como fui com Moisés, assim serei contigo; não te deixarei nem te desampararei."
+    },
+    {
+        "situacao": "110) Após a travessia do Jordão, onde o povo de Israel acampou e celebrou a Páscoa novamente?",
+        "correta": "Em Gilgal",
+        "alternativas": [
+            "Em Jericó",
+            "Em Siquém",
+            "Em Gilgal",
+            "No Monte Nebo"
+        ],
+        "versiculo": "Josué 5:10 - E os filhos de Israel acamparam em Gilgal; e celebraram a páscoa no dia catorze do mês, à tarde, nas campinas de Jericó."
+    },
+    {
+        "situacao": "111) Qual foi a atitude do povo de Israel após o pecado de Acã ser descoberto e punido?",
+        "correta": "A ira do Senhor se apartou deles",
+        "alternativas": [
+            "Ficaram ainda mais amedrontados",
+            "Começaram a murmurar novamente",
+            "A ira do Senhor se apartou deles",
+            "Se revoltaram contra Josué"
+        ],
+        "versiculo": "Josué 7:26 - E levantaram sobre ele um grande montão de pedras, que permanece até ao dia de hoje; assim o Senhor se tornou do furor da sua ira; pelo que se chamou aquele lugar o Vale de Acor, até ao dia de hoje."
+    },
+    {
+        "situacao": "112) Qual era o propósito das tábuas da Lei no Tabernáculo?",
+        "correta": "Servir como testemunho da aliança de Deus com Israel",
+        "alternativas": [
+            "Para serem guardadas como um tesouro",
+            "Para serem lidas publicamente todos os dias",
+            "Servir como testemunho da aliança de Deus com Israel",
+            "Para serem um guia de construção do Tabernáculo"
+        ],
+        "versiculo": "Êxodo 25:21 - E porás o propiciatório em cima da arca, e dentro da arca porás o testemunho que eu te darei."
+    },
+    {
+        "situacao": "113) Qual é a principal função do propiciatório na Arca da Aliança?",
+        "correta": "O local de encontro entre Deus e Moisés para expiação dos pecados",
+        "alternativas": [
+            "Onde as ofertas de grãos eram colocadas",
+            "O lugar onde as orações eram feitas",
+            "O local de encontro entre Deus e Moisés para expiação dos pecados",
+            "Onde os mandamentos eram gravados"
+        ],
+        "versiculo": "Êxodo 25:22 - E ali virei a ti, e falarei contigo de cima do propiciatório, do meio entre os dois querubins, que estão sobre a arca do testemunho, tudo o que eu te ordenar para os filhos de Israel."
+    },
+    {
+        "situacao": "114) Qual foi o pecado principal que levou à destruição dos povos de Canaã?",
+        "correta": "Idolatria e práticas abomináveis, como sacrifício de crianças",
+        "alternativas": [
+            "Eles eram muito ricos e poderosos",
+            "Eles eram inimigos de Israel há muito tempo",
+            "Idolatria e práticas abomináveis, como sacrifício de crianças",
+            "Eles se recusaram a fazer acordos de paz com Israel"
+        ],
+        "versiculo": "Deuteronômio 18:9-12 - Quando entrares na terra que o Senhor teu Deus te der, não aprenderás a fazer conforme as abominações daquelas nações. Entre ti não se achará quem faça passar pelo fogo o seu filho ou a sua filha, nem adivinhador, nem prognosticador, nem agoureiro, nem feiticeiro; nem encantador, nem quem consulte a um espírito adivinhador, nem mágico, nem quem consulte os mortos; pois todo aquele que faz estas coisas é abominação ao Senhor; e por estas abominações o Senhor teu Deus os lança fora de diante de ti."
+    },
+    {
+        "situacao": "115) Qual foi a herança de terra dada à tribo de Efraim e Manassés (filhos de José)?",
+        "correta": "A porção central de Canaã",
+        "alternativas": [
+            "A porção mais ao norte",
+            "A porção mais ao sul",
+            "A porção central de Canaã",
+            "A porção leste do Jordão"
+        ],
+        "versiculo": "Josué 16:1-4 (Efraim) e Josué 17:1-6 (Manassés) - Detalha a fronteira de Efraim e Manassés na região central da terra."
+    },
+    {
+        "situacao": "116) Qual era o propósito do Sábado no deserto, além de descanso?",
+        "correta": "Ensinar o povo a confiar na provisão diária de Deus e obedecer",
+        "alternativas": [
+            "Um dia para realizar sacrifícios adicionais",
+            "Um dia para planejar a próxima jornada",
+            "Ensinar o povo a confiar na provisão diária de Deus e obedecer",
+            "Um dia de jejum obrigatório"
+        ],
+        "versiculo": "Êxodo 16:23-26 - E ele lhes disse: Isto é o que o Senhor tem dito: Amanhã é o sábado, o santo sábado do Senhor; o que haveis de cozer no forno, cozei-o, e o que haveis de cozer em água, cozei-o; e tudo o que sobejar, guardai-o para amanhã. E guardaram-no até pela manhã, como Moisés tinha ordenado; e não cheirou mal, nem nele houve bichos. Então disse Moisés: Comei-o hoje, porquanto hoje é o sábado do Senhor; hoje não o achareis no campo. Seis dias o colhereis, mas no sétimo dia é o sábado; nele não haverá."
+    },
+    {
+        "situacao": "117) Qual foi o julgamento sobre a geração que foi tirada do Egito (exceto Josué e Calebe)?",
+        "correta": "Morrer no deserto antes de entrar na Terra Prometida",
+        "alternativas": [
+            "Ter que servir a Deus em cativeiro novamente",
+            "Perder todas as suas posses",
+            "Morrer no deserto antes de entrar na Terra Prometida",
+            "Ser atacada por animais selvagens"
+        ],
+        "versiculo": "Números 14:33 - E vossos filhos pastorearão no deserto quarenta anos, e levarão sobre si as vossas infidelidades, até que os vossos cadáveres se consumam no deserto."
+    },
+    {
+        "situacao": "118) Qual a importância de ouvir e obedecer a voz de Deus, conforme Moisés ensina em Deuteronômio?",
+        "correta": "Para que possam viver e se multiplicar na Terra Prometida",
+        "alternativas": [
+            "Para se tornarem a nação mais rica do mundo",
+            "Para agradar a Moisés e Josué",
+            "Para que possam viver e se multiplicar na Terra Prometida",
+            "Para evitar todo tipo de dificuldade"
+        ],
+        "versiculo": "Deuteronômio 30:19-20 - Os céus e a terra tomo hoje por testemunhas contra vós, de que te tenho proposto a vida e a morte, a bênção e a maldição; escolhe pois a vida, para que vivas, tu e a tua descendência, amando ao Senhor teu Deus, dando ouvidos à sua voz, e apegando-te a ele; pois ele é a tua vida, e o prolongamento dos teus dias."
+    },
+    {
+        "situacao": "119) Qual foi a finalidade das trombetas de prata feitas no deserto?",
+        "correta": "Convocar a congregação, dar o sinal para a jornada e para a guerra",
+        "alternativas": [
+            "Instrumentos musicais para louvor",
+            "Para anunciar a chegada de Moisés",
+            "Convocar a congregação, dar o sinal para a jornada e para a guerra",
+            "Espantar os animais selvagens"
+        ],
+        "versiculo": "Números 10:2 - Faze para ti duas trombetas de prata; de prata batida as farás; e elas te servirão para convocar a congregação, e para fazer partir os arraiais."
+    },
+    {
+        "situacao": "120) O que a Lei de Moisés ensinava sobre tratar o estrangeiro residente em Israel?",
+        "correta": "Amar o estrangeiro como a si mesmo, pois também foram estrangeiros no Egito",
+        "alternativas": [
+            "Explorar o estrangeiro com trabalho pesado",
+            "Excluir o estrangeiro da comunidade",
+            "Amar o estrangeiro como a si mesmo, pois também foram estrangeiros no Egito",
+            "Permitir que o estrangeiro adorasse qualquer deus"
+        ],
+        "versiculo": "Levítico 19:34 - Como o natural, entre vós, será o estrangeiro que peregrina convosco; amá-lo-eis como a vós mesmos, pois estrangeiros fostes na terra do Egito. Eu sou o Senhor vosso Deus."
+    },
+    {
+        "situacao": "121) Qual é a importância da Festa das Semanas (Pentecostes)?",
+        "correta": "Celebrar a colheita das primícias do trigo e a entrega da Lei no Sinai",
+        "alternativas": [
+            "Lembrar a travessia do Mar Vermelho",
+            "Celebrar o fim da escravidão no Egito",
+            "Celebrar a colheita das primícias do trigo e a entrega da Lei no Sinai",
+            "Comemorar a vitória sobre Amaleque"
+        ],
+        "versiculo": "Levítico 23:15-17 - Sete semanas contarás; desde o dia em que começares a mover a foice na seara, contarás sete semanas; depois oferecereis nova oferta de manjares ao Senhor. Das vossas habitações trareis dois pães de movimento, que serão de duas dízimas de efa; de flor de farinha serão, levedados se cozerão; primícias são para o Senhor."
+    },
+    {
+        "situacao": "122) Qual foi a ordem de Deus a Moisés em relação ao casamento após o incidente de Peor, para as filhas de Zelofeade?",
+        "correta": "Elas podiam casar com quem quisessem, contanto que fosse da tribo de seus pais para manter a herança",
+        "alternativas": [
+            "Não deveriam casar para manter a herança da família",
+            "Deveriam casar com estrangeiros para formar novas alianças",
+            "Elas podiam casar com quem quisessem, contanto que fosse da tribo de seus pais para manter a herança",
+            "Somente o líder da tribo poderia escolher seus maridos"
+        ],
+        "versiculo": "Números 36:6 - Esta é a palavra que o Senhor ordenou acerca das filhas de Zelofeade, dizendo: Casem-se com quem bem lhes parecer, contanto que casem com a família da tribo de seu pai."
+    },
+    {
+        "situacao": "123) Qual o principal tema do cântico de Moisés em Deuteronômio 32?",
+        "correta": "A fidelidade de Deus e a infidelidade de Israel",
+        "alternativas": [
+            "A grandeza das conquistas de Israel",
+            "A beleza da Terra Prometida",
+            "A fidelidade de Deus e a infidelidade de Israel",
+            "Os ensinamentos sobre os sacrifícios"
+        ],
+        "versiculo": "Deuteronômio 32:4-5 - Ele é a Rocha, cuja obra é perfeita, porque todos os seus caminhos juízo são; Deus é a verdade, e não há nele injustiça; justo e reto é. Corromperam-se contra ele; não são seus filhos, mas a sua mancha; geração perversa e distorcida."
+    },
+    {
+        "situacao": "124) Qual foi o mandamento de Josué ao povo antes de marchar para Jericó no sétimo dia?",
+        "correta": "Gritarem quando ouvissem o som das buzinas",
+        "alternativas": [
+            "Fazerem um grande silêncio absoluto",
+            "Atacarem os muros com força total",
+            "Gritarem quando ouvissem o som das buzinas",
+            "Subirem nas muralhas da cidade"
+        ],
+        "versiculo": "Josué 6:16 - E sucedeu que, na sétima vez, quando os sacerdotes tocaram as buzinas, disse Josué ao povo: Gritai, porque o Senhor vos deu a cidade."
+    },
+    {
+        "situacao": "125) O que aconteceu com a família de Raabe durante a destruição de Jericó?",
+        "correta": "Foram poupados e viveram entre Israel",
+        "alternativas": [
+            "Foram mortos junto com o restante da cidade",
+            "Foram levados como escravos para Israel",
+            "Foram poupados e viveram entre Israel",
+            "Foram exilados para outra terra"
+        ],
+        "versiculo": "Josué 6:25 - Assim Josué salvou a prostituta Raabe, e a família de seu pai, e tudo quanto tinha; e habitou ela no meio de Israel até ao dia de hoje; porquanto escondera os mensageiros que Josué enviara a espiar a Jericó."
+    },
+    {
+        "situacao": "126) Qual o propósito do 'memorial de pedras' tiradas do Jordão após a travessia?",
+        "correta": "Servir como um sinal para as futuras gerações do poder de Deus",
+        "alternativas": [
+            "Um lugar para oferecer sacrifícios",
+            "Marcar a fronteira da terra",
+            "Servir como um sinal para as futuras gerações do poder de Deus",
+            "Um lugar para se refugiar em caso de ataque"
+        ],
+        "versiculo": "Josué 4:6-7 - Para que isto seja um sinal entre vós, para que, quando vossos filhos no futuro perguntarem, dizendo: Que significam estas pedras para vós? Então lhes direis que as águas do Jordão se dividiram diante da arca da aliança do Senhor; quando ela passou o Jordão, as águas do Jordão se dividiram; assim estas pedras serão por memorial aos filhos de Israel para sempre."
+    },
+    {
+        "situacao": "127) Quem foi o líder militar que Josué instruiu para liderar a batalha contra Amaleque no deserto?",
+        "correta": "Josué (ele mesmo)",
+        "alternativas": [
+            "Calebe",
+            "Arão",
+            "Josué (ele mesmo)",
+            "Hur"
+        ],
+        "versiculo": "Êxodo 17:9 - Pelo que disse Moisés a Josué: Escolhe-nos homens, e sai, e peleja contra Amaleque; amanhã eu estarei sobre o cume do outeiro, e a vara de Deus estará na minha mão."
+    },
+    {
+        "situacao": "128) Qual foi a primeira ordem de Deus para Moisés após o incidente do bezerro de ouro, mostrando sua ira?",
+        "correta": "Apartar-se do meio do povo",
+        "alternativas": [
+            "Destruir completamente o povo",
+            "Construir um novo Tabernáculo",
+            "Apartar-se do meio do povo",
+            "Nomear um novo líder para o povo"
+        ],
+        "versiculo": "Êxodo 33:1-3 - Então disse o Senhor a Moisés: Vai, sobe daqui, tu e o povo que fizeste subir da terra do Egito, à terra que jurei a Abraão, a Isaque e a Jacó, dizendo: À tua descendência a darei; e enviarei um anjo diante de ti, e lançarei fora os cananeus, e os amorreus, e os heteus, e os perizeus, e os heveus, e os jebuseus; a uma terra que mana leite e mel; porém eu não subirei no meio de ti, porquanto és povo de dura cerviz, para que te não consuma no caminho."
+    },
+    {
+        "situacao": "129) Qual foi a principal característica da voz de Deus ao falar com Moisés no monte Sinai?",
+        "correta": "Trovoando e em chamas",
+        "alternativas": [
+            "Um sussurro suave",
+            "Uma voz de melodia agradável",
+            "Trovoando e em chamas",
+            "Silenciosa e apenas perceptível no coração"
+        ],
+        "versiculo": "Êxodo 19:16-18 - E aconteceu ao terceiro dia, ao amanhecer, que houve trovões e relâmpagos sobre o monte, e uma espessa nuvem, e um som de buzina mui forte; de maneira que estremeceu todo o povo que estava no arraial... E todo o monte Sinai fumegava, porque o Senhor descera sobre ele em fogo."
+    },
+    {
+        "situacao": "130) Qual foi o propósito das pragas no Egito?",
+        "correta": "Mostrar o poder de Deus e julgar os deuses do Egito",
+        "alternativas": [
+            "Apenas para punir o Faraó",
+            "Para demonstrar o poder de Moisés",
+            "Mostrar o poder de Deus e julgar os deuses do Egito",
+            "Forçar os israelitas a crer em Deus"
+        ],
+        "versiculo": "Êxodo 12:12 - Porque eu passarei naquela noite pela terra do Egito, e ferirei a todo o primogênito na terra do Egito, desde os homens até aos animais; e sobre todos os deuses do Egito farei juízos. Eu sou o Senhor."
+    },
+    {
+        "situacao": "131) Qual foi o principal milagre no deserto que confirmou a Moisés como líder após a rebelião de Corá?",
+        "correta": "A vara de Arão que floresceu",
+        "alternativas": [
+            "A terra que se abriu e engoliu os rebeldes",
+            "A provisão de mais maná",
+            "A vara de Arão que floresceu",
+            "A cura das serpentes de bronze"
+        ],
+        "versiculo": "Números 17:8 - E sucedeu que no dia seguinte Moisés entrou na tenda do testemunho, e eis que a vara de Arão, pela casa de Levi, florescia, e produzira botoes, e brotara flores, e dera amêndoas."
+    },
+    {
+        "situacao": "132) Qual a importância da Festa dos Tabernáculos (Sucot)?",
+        "correta": "Lembrar a vida de Israel em tendas no deserto e a provisão de Deus",
+        "alternativas": [
+            "Celebrar a colheita da uva",
+            "Comemorar a entrega da Lei",
+            "Lembrar a vida de Israel em tendas no deserto e a provisão de Deus",
+            "Celebrar a eleição dos juízes"
+        ],
+        "versiculo": "Levítico 23:42-43 - Sete dias habitareis em tendas; todos os naturais em Israel habitarão em tendas; para que saibam as vossas gerações que eu fiz habitar os filhos de Israel em tendas, quando os tirei da terra do Egito. Eu sou o Senhor vosso Deus."
+    },
+    {
+        "situacao": "133) Quais tribos de Israel receberam suas heranças do lado leste do Jordão, antes de cruzarem para Canaã?",
+        "correta": "Rúben, Gade e a meia tribo de Manassés",
+        "alternativas": [
+            "Judá, Benjamim e Simeão",
+            "Efraim, Manassés e Issacar",
+            "Rúben, Gade e a meia tribo de Manassés",
+            "Dã, Aser e Naftali"
+        ],
+        "versiculo": "Números 32:33 - Assim Moisés deu a eles, aos filhos de Gade, e aos filhos de Rúben, e à meia tribo de Manassés, filho de José, o reino de Siom, rei dos amorreus, e o reino de Ogue, rei de Basã; a terra com as suas cidades, e com os termos das cidades em redor."
+    },
+    {
+        "situacao": "134) Qual a lei que impedia que as terras de uma tribo fossem transferidas para outra por casamento?",
+        "correta": "A lei que proibia filhas herdeiras de casar fora de sua tribo",
+        "alternativas": [
+            "A lei do Jubileu",
+            "A lei do resgate",
+            "A lei que proibia filhas herdeiras de casar fora de sua tribo",
+            "A lei das ofertas de paz"
+        ],
+        "versiculo": "Números 36:7-9 - Assim a herança dos filhos de Israel não passará de tribo em tribo; porquanto os filhos de Israel se chegarão cada um à herança da tribo de seus pais. E toda a filha que possuir herança em alguma tribo dos filhos de Israel, casar-se-á com alguém da família da tribo de seu pai, para que os filhos de Israel possuam cada um a herança de seus pais. Assim nenhuma herança passará de uma tribo a outra tribo; porque cada um dos filhos de Israel se chegará à herança da sua tribo."
+    },
+    {
+        "situacao": "135) Qual a importância do sumo sacerdote tocar os sinos em suas vestes ao entrar no Santo dos Santos?",
+        "correta": "Para que seu som fosse ouvido e ele não morresse, indicando sua presença",
+        "alternativas": [
+            "Para anunciar a chegada de Deus",
+            "Para chamar a atenção do povo para a adoração",
+            "Para que seu som fosse ouvido e ele não morresse, indicando sua presença",
+            "Para espantar os espíritos malignos"
+        ],
+        "versiculo": "Êxodo 28:35 - E Arão o trará sobre si, para servir; e o seu som se ouvirá, quando entrar no santuário diante do Senhor, e quando sair, para que não morra."
+    },
+    {
+        "situacao": "136) Qual a principal característica da Lei mosaica que a diferenciava das leis das outras nações?",
+        "correta": "Sua origem divina e foco na santidade e relacionamento com um único Deus",
+        "alternativas": [
+            "Era a lei mais antiga do mundo",
+            "Era a lei mais fácil de seguir",
+            "Sua origem divina e foco na santidade e relacionamento com um único Deus",
+            "Seu foco exclusivo em punições severas"
+        ],
+        "versiculo": "Deuteronômio 4:5-8 - Vedes aqui, vos ensinei estatutos e juízos, como me mandou o Senhor meu Deus, para que assim façais na terra a qual ides a possuir. Guardai-os pois, e cumpri-os, porque esta será a vossa sabedoria e o vosso entendimento perante os olhos dos povos, que ouvirão todos estes estatutos, e dirão: Certamente este grande povo é gente sábia e entendida. Porque, que nação há tão grande, que tenha deuses tão chegados a si como o Senhor nosso Deus, todas as vezes que o invocamos? E que nação há tão grande, que tenha estatutos e juízos tão justos como toda esta lei que hoje vos proponho?"
+    },
+    {
+        "situacao": "137) O que significava a oferta queimada (holocausto) na Lei de Moisés?",
+        "correta": "Expiação pelo pecado e dedicação total a Deus, consumida inteiramente no altar",
+        "alternativas": [
+            "Um sacrifício para compartilhar uma refeição com Deus",
+            "Uma oferta para pedir chuva",
+            "Expiação pelo pecado e dedicação total a Deus, consumida inteiramente no altar",
+            "Um presente para os sacerdotes"
+        ],
+        "versiculo": "Levítico 1:9 - Mas a sua entranha e as suas pernas lavará com água; e o sacerdote tudo isso queimará no altar, holocausto é, oferta queimada, de cheiro suave ao Senhor."
+    },
+    {
+        "situacao": "138) Qual a função do Urim e Tumim, utilizados pelo Sumo Sacerdote?",
+        "correta": "Consultar a vontade de Deus em questões importantes",
+        "alternativas": [
+            "Servir como amuletos de proteção",
+            "Indicadores de tempo",
+            "Consultar a vontade de Deus em questões importantes",
+            "Decidir a ordem das tribos no acampamento"
+        ],
+        "versiculo": "Êxodo 28:30 - Também porás no peitoral do juízo o Urim e o Tumim, para que estejam sobre o coração de Arão, quando entrar perante o Senhor; assim Arão levará continuamente o juízo dos filhos de Israel sobre o seu coração perante o Senhor."
+    },
+    {
+        "situacao": "139) Qual foi a consequência para Moisés e Arão por não santificarem a Deus em Meribá?",
+        "correta": "Não puderam entrar na Terra Prometida",
+        "alternativas": [
+            "Foram punidos com uma doença",
+            "Perderam seus cajados",
+            "Não puderam entrar na Terra Prometida",
+            "Tiveram suas posições de liderança retiradas"
+        ],
+        "versiculo": "Números 20:12 - Então o Senhor disse a Moisés e a Arão: Porquanto não crestes em mim, para me santificardes diante dos filhos de Israel, por isso não conduzireis esta congregação à terra que lhes tenho dado."
+    },
+    {
+        "situacao": "140) O que Deus advertiu Israel para não fazer ao entrar em Canaã, em relação às nações que lá viviam?",
+        "correta": "Não fazer aliança com elas nem adorar seus deuses",
+        "alternativas": [
+            "Não construir cidades grandes",
+            "Não plantar vinhas",
+            "Não fazer aliança com elas nem adorar seus deuses",
+            "Não aprender suas línguas"
+        ],
+        "versiculo": "Deuteronômio 7:2 - E, quando o Senhor teu Deus as tiver entregado diante de ti, e as tiveres ferido, totalmente as destruirás; não farás com elas aliança, nem terás piedade delas."
+    },
+    {
+        "situacao": "141) Qual o nome do vale onde Josué e o povo de Israel apedrejaram e queimaram Acã?",
+        "correta": "Vale de Acor",
+        "alternativas": [
+            "Vale de Sidim",
+            "Vale de Elá",
+            "Vale de Acor",
+            "Vale do Sal"
+        ],
+        "versiculo": "Josué 7:26 - E levantaram sobre ele um grande montão de pedras, que permanece até ao dia de hoje; assim o Senhor se tornou do furor da sua ira; pelo que se chamou aquele lugar o Vale de Acor, até ao dia de hoje."
+    },
+    {
+        "situacao": "142) Quem foi o pai de Moisés e Arão?",
+        "correta": "Anrão",
+        "alternativas": [
+            "Jetro",
+            "Levi",
+            "Anrão",
+            "Corá"
+        ],
+        "versiculo": "Êxodo 6:20 - E Anrão tomou por mulher a Joquebede, sua tia, e ela lhe deu à luz Arão e Moisés; e os anos da vida de Anrão foram cento e trinta e sete anos."
+    },
+    {
+        "situacao": "143) Qual foi o material principal usado na construção do Tabernáculo, que era leve e fácil de transportar?",
+        "correta": "Madeira de acácia",
+        "alternativas": [
+            "Pedra de granito",
+            "Cobre",
+            "Madeira de acácia",
+            "Ouro"
+        ],
+        "versiculo": "Êxodo 25:5 - E peles de carneiro tintas de vermelho, e peles de texugos, e madeira de acácia."
+    },
+    {
+        "situacao": "144) Em Deuteronômio, o que Moisés descreve como o 'primeiro e grande mandamento'?",
+        "correta": "Amar a Deus de todo o coração, alma e forças",
+        "alternativas": [
+            "Honrar pai e mãe",
+            "Não terás outros deuses",
+            "Amar a Deus de todo o coração, alma e forças",
+            "Não cobiçarás"
+        ],
+        "versiculo": "Deuteronômio 6:5 - Amarás, pois, o Senhor teu Deus de todo o teu coração, e de toda a tua alma, e de todas as tuas forças."
+    },
+    {
+        "situacao": "145) Qual a importância de Josué ter sido escolhido como sucessor de Moisés?",
+        "correta": "Era um líder comprovado, cheio do Espírito e preparado por Moisés",
+        "alternativas": [
+            "Era o filho mais velho de Moisés",
+            "Era o mais forte e corajoso do exército",
+            "Era um líder comprovado, cheio do Espírito e preparado por Moisés",
+            "Foi escolhido por sorteio entre as tribos"
+        ],
+        "versiculo": "Números 27:18-20 - Então disse o Senhor a Moisés: Toma a Josué, filho de Num, homem em quem há o espírito, e põe a tua mão sobre ele. E o porás diante de Eleazar, o sacerdote, e diante de toda a congregação, e dar-lhe-ás uma parte da tua glória, para que toda a congregação dos filhos de Israel lhe obedeça."
+    },
+    {
+        "situacao": "146) Qual foi a finalidade do altar de bronze no pátio do Tabernáculo?",
+        "correta": "Para os holocaustos e sacrifícios de animais",
+        "alternativas": [
+            "Queimar incenso",
+            "Para colocar as ofertas de grãos",
+            "Para os holocaustos e sacrifícios de animais",
+            "Como um lugar de oração"
+        ],
+        "versiculo": "Êxodo 27:1 - Farás também o altar de madeira de acácia, de cinco côvados o comprimento, e de cinco côvados a largura (o altar será quadrado), e de três côvados a sua altura."
+    },
+    {
+        "situacao": "147) O que aconteceu com a tenda da congregação quando a glória do Senhor a cobriu?",
+        "correta": "Moisés não podia entrar nela",
+        "alternativas": [
+            "O povo podia entrar livremente",
+            "Ela se moveu para outro lugar",
+            "Moisés não podia entrar nela",
+            "Um fogo desceu do céu"
+        ],
+        "versiculo": "Êxodo 40:35 - De maneira que Moisés não podia entrar na tenda da congregação, porque a nuvem repousava sobre ela, e a glória do Senhor enchia o tabernáculo."
+    },
+    {
+        "situacao": "148) Qual a instrução de Deus sobre o que fazer com os reis cananeus após a vitória?",
+        "correta": "Destruir todos eles e não deixar nenhum vivo",
+        "alternativas": [
+            "Transformá-los em escravos",
+            "Fazer alianças de paz com eles",
+            "Destruir todos eles e não deixar nenhum vivo",
+            "Deixá-los viver em seus próprios territórios"
+        ],
+        "versiculo": "Deuteronômio 7:1-2 - Quando o Senhor teu Deus te houver introduzido na terra a que vais a possuir, e tiver lançado muitas nações de diante de ti, os heteus, e os girgaseus, e os amorreus, e os cananeus, e os perizeus, e os heveus, e os jebuseus, sete nações mais numerosas e mais poderosas do que tu; e o Senhor teu Deus as tiver entregado diante de ti, e as tiveres ferido, totalmente as destruirás; não farás com elas aliança, nem terás piedade delas."
+    },
+    {
+        "situacao": "149) Qual o nome do rio que Israel atravessou para entrar na Terra Prometida?",
+        "correta": "Rio Jordão",
+        "alternativas": [
+            "Rio Nilo",
+            "Rio Eufrates",
+            "Rio Jordão",
+            "Rio Quisom"
+        ],
+        "versiculo": "Josué 3:1 - E levantou-se Josué de madrugada, e partiram de Sitim, e chegaram ao Jordão, ele e todos os filhos de Israel; e pousaram ali, antes que passassem."
+    },
+    {
+        "situacao": "150) Qual foi o grande feito de Josué em relação ao sol e à lua?",
+        "correta": "Fê-los deter-se no céu durante a batalha",
+        "alternativas": [
+            "Fê-los brilhar mais intensamente",
+            "Fê-los desaparecer do céu",
+            "Fê-los deter-se no céu durante a batalha",
+            "Mudou o curso dos dias"
+        ],
+        "versiculo": "Josué 10:12-13 - Então Josué falou ao Senhor, no dia em que o Senhor entregou os amorreus na mão dos filhos de Israel, e disse na presença dos israelitas: Sol, detém-te em Gibeão, e tu, lua, no vale de Aijalom. E o sol se deteve, e a lua parou, até que o povo se vingou de seus inimigos."
+    },
+	
+	
+	
+	
+	
+	
+	
+
+    
+
+        ];
+
+        let currentStep = 0; // O índice da pergunta atual no array 'questions'
+        let playerFaith = 15; // A fé inicial do jogador
+        const initialFaith = 15; // Manter a fé inicial para reinícios
+
+        // Referências aos elementos HTML
+        const telaDiv = document.getElementById("question-text");
+        const feedbackDiv = document.getElementById("feedback-text");
+        const verseDiv = document.getElementById("verse-text");
+        const buttonsContainer = document.getElementById("buttons-container");
+        const faithCountSpan = document.getElementById("faith-count");
+        const currentStepSpan = document.getElementById("current-step");
+        const totalStepsSpan = document.getElementById("total-steps");
+
+        const startModal = document.getElementById("start-modal");
+        const gameOverModal = document.getElementById("game-over-modal");
+        const winModal = document.getElementById("win-modal");
+        const gameOverMessage = document.getElementById("game-over-message");
+        const winMessage = document.getElementById("win-message");
+
+        // Define o número total de passos no início do jogo
+        totalStepsSpan.textContent = questions.length;
+
+        /**
+         * Atualiza a exibição da pergunta e dos botões na tela.
+         * Se todas as perguntas foram respondidas, termina o jogo com vitória.
+         */
+        function updateDisplay() {
+            if (currentStep >= questions.length) {
+                endGame(true); // O jogo foi vencido
+                return;
+            }
+
+            const question = questions[currentStep];
+            telaDiv.textContent = question.situacao;
+            feedbackDiv.textContent = ""; // Limpa a mensagem de feedback
+            verseDiv.textContent = ""; // Limpa o texto do versículo
+
+            faithCountSpan.textContent = playerFaith;
+            currentStepSpan.textContent = currentStep + 1;
+
+            buttonsContainer.innerHTML = ""; // Limpa os botões existentes
+
+            // Embaralha as alternativas para que a ordem mude a cada jogo
+            const shuffledAlternatives = [...question.alternativas].sort(() => Math.random() - 0.5);
+            shuffledAlternatives.forEach(alt => {
+                const btn = document.createElement("button");
+                btn.className = "game-button";
+                btn.innerText = alt;
+                // Atribui a função evaluateAnswer ao clique do botão
+                // É CRUCIAL que essa função exista quando o botão é clicado.
+                btn.onclick = () => evaluateAnswer(alt);
+                buttonsContainer.appendChild(btn);
+            });
+        }
+
+        /**
+         * Avalia a resposta do jogador.
+         * @param {string} answer - A alternativa escolhida pelo jogador.
+         */
+        function evaluateAnswer(answer) {
+            const question = questions[currentStep];
+            // Desabilita todos os botões após uma resposta para evitar múltiplos cliques
+            buttonsContainer.querySelectorAll('.game-button').forEach(btn => btn.disabled = true);
+
+            if (answer === question.correta) {
+                feedbackDiv.textContent = "RESPOSTA CORRETA! ✅";
+                feedbackDiv.className = "feedback-text correct"; // Adiciona classe para cor verde
+                verseDiv.textContent = question.versiculo; // Exibe o versículo correto
+            } else {
+                playerFaith--; // Diminui a fé em caso de resposta errada
+                faithCountSpan.textContent = playerFaith; // Atualiza a contagem de fé imediatamente
+                feedbackDiv.textContent = "RESPOSTA ERRADA! VOCÊ PERDEU FÉ... ❌";
+                feedbackDiv.className = "feedback-text wrong"; // Adiciona classe para cor vermelha
+                verseDiv.textContent = `O versículo correto seria: ${question.versiculo}`; // Exibe o versículo correto
+
+                if (playerFaith <= 0) {
+                    // Se a fé acabar, termina o jogo como derrota após um pequeno atraso
+                    setTimeout(() => endGame(false), 2000);
+                    return;
+                }
+            }
+            currentStep++; // Avança para a próxima pergunta
+            // Aguarda um pouco antes de mostrar a próxima pergunta para dar tempo ao jogador de ler o feedback
+            setTimeout(updateDisplay, 2500);
+        }
+
+        /**
+         * Inicia o jogo, fechando o modal de início e reiniciando o estado do jogo.
+         */
+        function startGame() {
+            startModal.classList.remove("active");
+            resetGame(); // Garante que o estado do jogo seja reiniciado
+        }
+
+        /**
+         * Finaliza o jogo, exibindo o modal de vitória ou derrota.
+         * @param {boolean} won - Verdadeiro se o jogador venceu, falso caso contrário.
+         */
+        function endGame(won) {
+            buttonsContainer.innerHTML = ""; // Limpa os botões da tela principal
+            if (won) {
+                winMessage.textContent = `PARABÉNS! VOCÊ GUIOU O POVO PELO DESERTO COM SABEDORIA, MANTENDO ${playerFaith} DE FÉ.`;
+                winModal.classList.add("active"); // Exibe o modal de vitória
+            } else {
+                gameOverMessage.textContent = "VOCÊ PERDEU TODA SUA FÉ E NÃO CONSEGUIU COMPLETAR A JORNADA NO DESERTO.";
+                gameOverModal.classList.add("active"); // Exibe o modal de fim de jogo
+            }
+        }
+
+        /**
+         * Reinicia o jogo para um novo começo.
+         */
+        function resetGame() {
+            currentStep = 0;
+            playerFaith = initialFaith;
+            gameOverModal.classList.remove("active"); // Esconde o modal de fim de jogo
+            winModal.classList.remove("active"); // Esconde o modal de vitória
+            updateDisplay(); // Atualiza a exibição para a primeira pergunta
+        }
+
+        // Anexa os event listeners aos botões após o carregamento da janela
+        // Garante que as funções estejam definidas antes que os eventos sejam anexados
+        window.onload = function() {
+            document.getElementById('startGameBtn').addEventListener('click', startGame);
+            document.getElementById('gameOverResetBtn').addEventListener('click', resetGame);
+            document.getElementById('winResetBtn').addEventListener('click', resetGame);
+        };
+    </script>
+</body>
+</html>
