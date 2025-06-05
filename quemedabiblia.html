@@ -17,7 +17,15 @@
             display: flex;
             flex-direction: column;
             align-items: center; /* Centraliza o conteúdo horizontalmente */
-            justify-content: center; /* Centraliza o conteúdo verticalmente */
+            justify-content: space-between; /* Distribui espaço entre título, jogo e rodapé */
+            font-size: 1.2em; /* Texto maior para melhor legibilidade */
+            box-sizing: border-box; /* Garante que padding seja incluído no min-height */
+        }
+        h1 {
+            color: #00ff00;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-align: center;
         }
         #terminal-container {
             width: 90%;
@@ -26,9 +34,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            flex-grow: 1; /* Permite que o container do jogo ocupe espaço disponível */
+            justify-content: center; /* Centraliza o jogo dentro do seu container */
         }
         #terminal {
-            height: 400px;
+            height: 400px; /* Altura padrão para o terminal */
             width: 100%;
             background: rgba(0, 0, 0, 0.9);
             border: 2px solid #00ff00;
@@ -38,6 +48,9 @@
             margin-bottom: 10px;
             border-radius: 5px;
             box-sizing: border-box; /* Garante que padding e border sejam incluídos na largura */
+            font-size: 1em; /* Tamanho do texto dentro do terminal, relativo ao body */
+            min-height: 250px; /* Altura mínima para telas menores */
+            max-height: 60vh; /* Altura máxima baseada na viewport para evitar sobrecarga */
         }
         #buttonArea {
             display: flex;
@@ -48,9 +61,9 @@
             background: #00ff00;
             color: #1a1a1a;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px; /* Padding ligeiramente maior para botões maiores */
             font-family: monospace;
-            font-size: 1.1em;
+            font-size: 1.3em; /* Botões com texto maior */
             cursor: pointer;
             border-radius: 5px;
             transition: background 0.3s;
@@ -69,8 +82,8 @@
             font-size: 0.8em;
             color: #008800;
             text-align: center;
-            margin-top: auto; /* Empurra o rodapé para a parte inferior */
             padding-top: 20px;
+            margin-top: 20px; /* Espaçamento acima do rodapé */
         }
         .modal {
             position: fixed;
@@ -100,29 +113,48 @@
             max-width: 400px;
             width: 90%;
             color: #00ff00;
+            font-size: 1.1em; /* Texto do modal ligeiramente maior */
         }
         .modal-content button {
             margin: 10px 5px 0 5px; /* Adicionado margem para espaçar botões */
         }
-        /* Responsividade básica */
+        /* Responsividade para telas menores */
         @media (max-width: 600px) {
             body {
                 padding: 10px;
+                font-size: 1.1em; /* Ajusta o tamanho da fonte base para telas menores */
+            }
+            h1 {
+                font-size: 2em; /* Tamanho do título menor em telas pequenas */
+                margin-bottom: 15px;
             }
             #terminal {
                 height: 300px;
                 padding: 10px;
+                max-height: 50vh; /* Ajusta altura máxima para telas menores */
             }
             #buttonArea {
-                flex-direction: column;
+                flex-direction: row; /* Garante que os botões fiquem lado a lado */
+                justify-content: center; /* Centraliza os botões */
+                width: 100%;
+                flex-wrap: wrap; /* Permite que os botões quebrem a linha se necessário */
             }
             button {
-                width: 100%;
+                flex-grow: 1; /* Permite que os botões cresçam para preencher o espaço */
+                max-width: 48%; /* Limita a largura para que fiquem lado a lado com um gap */
+                padding: 10px 20px;
+                font-size: 1.1em;
+            }
+            .modal-content {
+                padding: 15px;
+                font-size: 1em;
             }
         }
     </style>
 </head>
 <body>
+    <h1>Pensequiz - Quem É da Bíblia?</h1>
+
     <div id="terminal-container">
         <div id="terminal" role="log" aria-live="polite" aria-label="Terminal de diagnóstico"></div>
         <div id="buttonArea">
@@ -130,11 +162,11 @@
             <button id="naoBtn" aria-label="Responder Não" disabled>Não</button>
         </div>
     </div>
-    <footer>© 2025 PenseQuiz.com ☁️</footer>
+    <footer>© 2025 Pensequiz.com☁️</footer>
 
     <div id="start-modal" class="modal active" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-description">
         <div class="modal-content">
-            <h2 id="modal-title">Quem É da Bíblia?</h2>
+            <h2 id="modal-title">Pensequiz - Quem É da Bíblia?</h2>
             <p id="modal-description">Pense em um personagem bíblico. Responda a 10 perguntas com "Sim" ou "Não" para eu adivinhar! 😇</p>
             <button id="startGameBtn" aria-label="Iniciar jogo">Iniciar Jornada</button>
         </div>
@@ -149,121 +181,246 @@
     </div>
 
     <script>
-        // Array de perguntas para o jogo
+        // Array de perguntas para o jogo (total de 175 perguntas agora)
         const perguntas = [
-            "É do Antigo Testamento?",
-            "É um homem?",
-            "Foi rei?",
-            "Fez milagres?",
-            "Esteve com Jesus?",
-            "Foi profeta?",
-            "Enfrentou um exército ou grandes adversidades?",
-            "Libertou o povo de Deus ou desempenhou um papel crucial em sua libertação?",
-            "Foi discípulo direto de Jesus (apóstolo ou seguidor próximo)?",
-            "É conhecido por sua sabedoria ou grande discernimento?",
-            "Escreveu um livro da Bíblia (ou uma grande parte)?",
-            "Era sacerdote ou levita?",
-            "Foi juiz de Israel ou líder militar?",
-            "Viveu antes do dilúvio?",
-            "Era da linhagem de Davi ou relacionado à realeza judaica?",
-            "Foi um grande construtor (templo, arca, cidades)?",
-            "Sofreu grande perseguição por sua fé?",
-            "É conhecido por sua fé inabalável, mesmo em provações?",
-            "Viajou extensivamente para espalhar a mensagem de Deus?",
-            "Teve um chamado divino ou uma revelação especial?",
-            "É conhecido por sua humildade?",
-            "Foi pastor de ovelhas (literalmente ou de forma simbólica)?",
-            "Teve múltiplos nomes ao longo de sua vida bíblica?",
-            "É uma figura proeminente no livro de Gênesis?",
-            "Sua morte é descrita como violenta ou incomum na Bíblia?",
-            // Novas 50 perguntas adicionadas
-            "Foi escravizado ou exilado em terra estrangeira?",
-            "Foi enganado ou traído por um parente próximo?",
-            "Teve visões ou sonhos proféticos?",
-            "Casou-se múltiplas vezes?",
-            "Foi um líder militar vitorioso?",
-            "Morreu em batalha?",
-            "É conhecido por sua força física excepcional?",
-            "Foi o primogênito de seus pais?",
-            "Tinha irmãos notáveis na Bíblia?",
-            "Foi salvo da morte ainda criança?",
-            "Teve um filho que se tornou uma figura importante?",
-            "Seu nome foi mudado por Deus ou um anjo?",
-            "Era uma mulher profetisa ou juíza?",
-            "Foi chamado enquanto cuidava de rebanhos?",
-            "Seu ministério envolveu jejum prolongado?",
-            "Foi confrontado diretamente por um anjo?",
-            "Foi levado ao céu sem experimentar a morte?",
-            "Sua vida envolveu uma grande jornada ou migração?",
-            "Foi desobediente a Deus em algum momento crítico?",
-            "É um dos doze filhos de Jacó?",
-            "Foi vendido como escravo por seus irmãos?",
-            "Interpretou sonhos?",
-            "Foi governador de uma nação estrangeira?",
-            "Teve um relacionamento próximo com um rei?",
-            "Foi sepultado em um local específico e conhecido?",
-            "É associado a um período de grande seca ou fome?",
-            "Enfrentou um adversário gigante?",
-            "Foi curado de uma doença grave por intervenção divina?",
-            "Foi tentado diretamente pelo diabo?",
-            "Pregou o arrependimento no deserto?",
-            "Foi o último juiz de Israel?",
-            "Ungiu reis?",
-            "Sua história envolve um sacrifício quase-fatal de um filho?",
-            "Foi pai de muitas nações?",
-            "Sua história envolve um dilúvio?",
-            "Foi alvo de um plano de assassinato por um rei?",
-            "Sua vida é marcada por um pacto direto com Deus?",
-            "É conhecido por sua paciência em meio ao sofrimento?",
-            "Foi um escriba ou estudioso da lei?",
-            "Sua vida é tema de um livro profético menor?",
-            "Foi enviado para pregar em uma cidade estrangeira que era inimiga de Israel?",
-            "Seu nome significa \"risada\" ou \"ele ri\"?",
-            "Foi o pai de um profeta famoso?",
-            "Teve um irmão que cometeu um assassinato?",
-            "Foi um construtor de um altar significativo?",
-            "Sua fé foi testada com a exigência de deixar sua terra natal?",
-            "É uma figura central na história do Êxodo?",
-            "Morreu em idade avançada e foi sepultado em paz?",
-            "Sua história termina com ele sendo levado ao céu?",
-            "É reverenciado por judeus, cristãos e muçulmanos?",
+            "É do Antigo Testamento?", // 0
+            "É um homem?", // 1
+            "Foi rei?", // 2
+            "Fez milagres?", // 3
+            "Esteve com Jesus?", // 4
+            "Foi profeta?", // 5
+            "Enfrentou um exército ou grandes adversidades?", // 6
+            "Libertou o povo de Deus ou desempenhou um papel crucial em sua libertação?", // 7
+            "Foi discípulo direto de Jesus (apóstolo ou seguidor próximo)?", // 8
+            "É conhecido por sua sabedoria ou grande discernimento?", // 9
+            "Escreveu um livro da Bíblia (ou uma grande parte)?", // 10
+            "Era sacerdote ou levita?", // 11
+            "Foi juiz de Israel ou líder militar?", // 12
+            "Viveu antes do dilúvio?", // 13
+            "Era da linhagem de Davi ou relacionado à realeza judaica?", // 14
+            "Foi um grande construtor (templo, arca, cidades)?", // 15
+            "Sofreu grande perseguição por sua fé?", // 16
+            "É conhecido por sua fé inabalável, mesmo em provações?", // 17
+            "Viajou extensivamente para espalhar a mensagem de Deus?", // 18
+            "Teve um chamado divino ou uma revelação especial?", // 19
+            "É conhecido por sua humildade?", // 20
+            "Foi pastor de ovelhas (literalmente ou de forma simbólica)?", // 21
+            "Teve múltiplos nomes ao longo de sua vida bíblica?", // 22
+            "É uma figura proeminente no livro de Gênesis?", // 23
+            "Sua morte é descrita como violenta ou incomum na Bíblia?", // 24
+            // 25 a 74 (50 perguntas anteriores)
+            "Foi escravizado ou exilado em terra estrangeira?", // 25
+            "Foi enganado ou traído por um parente próximo?", // 26
+            "Teve visões ou sonhos proféticos?", // 27
+            "Casou-se múltiplas vezes?", // 28
+            "Foi um líder militar vitorioso?", // 29
+            "Morreu em batalha?", // 30
+            "É conhecido por sua força física excepcional?", // 31
+            "Foi o primogênito de seus pais?", // 32
+            "Tinha irmãos notáveis na Bíblia?", // 33
+            "Foi salvo da morte ainda criança?", // 34
+            "Teve um filho que se tornou uma figura importante?", // 35
+            "Seu nome foi mudado por Deus ou um anjo?", // 36
+            "Era uma mulher profetisa ou juíza?", // 37
+            "Foi chamado enquanto cuidava de rebanhos?", // 38
+            "Seu ministério envolveu jejum prolongado?", // 39
+            "Foi confrontado diretamente por um anjo?", // 40
+            "Foi levado ao céu sem experimentar a morte?", // 41
+            "Sua vida envolveu uma grande jornada ou migração?", // 42
+            "Foi desobediente a Deus em algum momento crítico?", // 43
+            "É um dos doze filhos de Jacó?", // 44
+            "Foi vendido como escravo por seus irmãos?", // 45
+            "Interpretou sonhos?", // 46
+            "Foi governador de uma nação estrangeira?", // 47
+            "Teve um relacionamento próximo com um rei?", // 48
+            "Foi sepultado em um local específico e conhecido?", // 49
+            "É associado a um período de grande seca ou fome?", // 50
+            "Enfrentou um adversário gigante?", // 51
+            "Foi curado de uma doença grave por intervenção divina?", // 52
+            "Foi tentado diretamente pelo diabo?", // 53
+            "Pregou o arrependimento no deserto?", // 54
+            "Foi o último juiz de Israel?", // 55
+            "Ungiu reis?", // 56
+            "Sua história envolve um sacrifício quase-fatal de um filho?", // 57
+            "Foi pai de muitas nações?", // 58
+            "Sua história envolve um dilúvio?", // 59
+            "Foi alvo de um plano de assassinato por um rei?", // 60
+            "Sua vida é marcada por um pacto direto com Deus?", // 61
+            "É conhecido por sua paciência em meio ao sofrimento?", // 62
+            "Foi um escriba ou estudioso da lei?", // 63
+            "Sua vida é tema de um livro profético menor?", // 64
+            "Foi enviado para pregar em uma cidade estrangeira que era inimiga de Israel?", // 65
+            "Seu nome significa \"risada\" ou \"ele ri\"?", // 66
+            "Foi o pai de um profeta famoso?", // 67
+            "Teve um irmão que cometeu um assassinato?", // 68
+            "Foi um construtor de um altar significativo?", // 69
+            "Sua fé foi testada com a exigência de deixar sua terra natal?", // 70
+            "É uma figura central na história do Êxodo?", // 71
+            "Morreu em idade avançada e foi sepultado em paz?", // 72
+            "Sua história termina com ele sendo levado ao céu?", // 73
+            "É reverenciado por judeus, cristãos e muçulmanos?", // 74
+            // Novas 50 perguntas (75 a 124, índice baseado em 0)
+            "Sua história está ligada a um evento de destruição de cidade(s)?", // 75
+            "É conhecido por ter uma grande família?", // 76
+            "Foi um cobrador de impostos?", // 77
+            "Foi um pescador?", // 78
+            "Teve um encontro com um anjo que trouxe uma mensagem importante?", // 79
+            "Foi testemunha ocular da ressurreição de Jesus?", // 80
+            "Viajou com outros apóstolos em missões?", // 81
+            "Sua história envolve um barco ou tempestade no mar?", // 82
+            "Foi um prisioneiro por sua fé?", // 83
+            "É associado a um deserto ou lugar árido?", // 84
+            "Seu nome foi dado por Deus antes do nascimento?", // 85
+            "Foi um rei ímpio?", // 86
+            "Ofereceu sacrifícios ou holocaustos?", // 87
+            "Sua vida foi prolongada milagrosamente?", // 88
+            "Foi um pastor de nações ou um guia espiritual?", // 89
+            "Sua história envolve a queda de muros ou fortalezas?", // 90
+            "É mencionado em mais de um Testamento?", // 91
+            "Foi um guerreiro destemido?", // 92
+            "Sua história é contada nos livros dos Profetas Maiores?", // 93
+            "Morreu fora da terra prometida?", // 94
+            "Foi sepultado em um túmulo especial?", // 95
+            "Sua vida foi marcada por um voto ou juramento?", // 96
+            "Teve problemas com a bebida?", // 97
+            "Foi um dos profetas menores?", // 98
+            "Foi um escravo ou serva que se tornou importante?", // 99
+            "Sua história envolve uma serpente (literal ou simbólica)?", // 100
+            "Foi enviado para uma missão com um companheiro?", // 101
+            "Sua vida envolveu um longo período de espera ou provação?", // 102
+            "Foi um líder antes da monarquia em Israel?", // 103
+            "Foi um dos \"pais da fé\"?", // 104
+            "Sua história envolve um julgamento público?", // 105
+            "Sua história envolve a construção de um grande projeto?", // 106
+            "Foi um mensageiro de boas novas?", // 107
+            "Sua história está ligada à formação das 12 tribos de Israel?", // 108
+            "Sua história envolve um dilúvio universal?", // 109
+            "Foi um homem justo em uma geração perversa?", // 110
+            "Sua vida foi salva por uma mulher?", // 111
+            "É um exemplo de intercessão?", // 112
+            "Foi transformado radicalmente após um encontro divino?", // 113
+            "Sua história é mencionada nos Salmos?", // 114
+            "Sua vida envolveu perseguição por líderes religiosos?", // 115
+            "Foi um herói para seu povo?", // 116
+            "Sua história é contada em grande detalhe na Bíblia?", // 117
+            "Foi um dos mais jovens a ser chamado por Deus?", // 118
+            "Teve um relacionamento tumultuado com um governante?", // 119
+            "É conhecido por sua paciência em meio a grandes perdas?", // 120
+            "Foi o fundador de uma nação ou linhagem importante?", // 121
+            "Sua história termina com um grande evento cósmico?", // 122
+            "Foi um mestre ou ensinador da lei?", // 123
+            "É uma figura central na narrativa do Novo Testamento?", // 124
+            // Novas 50 perguntas (125 a 174)
+            "Teve um papel significativo na fundação da igreja cristã primitiva?", // 125
+            "Sua história envolve a queda de uma cidade pelo poder de Deus?", // 126
+            "É conhecido por ter sido um dos primeiros profetas?", // 127
+            "Sua história envolve a construção de um grande altar?", // 128
+            "Foi alvo de conspirações ou traições por seus irmãos?", // 129
+            "Teve um chamado divino ainda jovem?", // 130
+            "É mencionado em um livro com seu próprio nome?", // 131
+            "Sua vida é um exemplo de redenção ou restauração?", // 132
+            "Foi uma pessoa de grande fé, mesmo sem ter visto Jesus fisicamente?", // 133
+            "Sua história envolve uma visão ou sonho incomum?", // 134
+            "Foi um líder militar que teve vitórias sobrenaturais?", // 135
+            "Teve um encontro direto com Deus ou um anjo?", // 136
+            "É associado a uma grande praga ou desastre natural?", // 137
+            "Foi o pai ou mãe de um grande líder ou nação?", // 138
+            "Sua história é contada em um dos Evangelhos?", // 139
+            "Foi um dos primeiros a pregar sobre Jesus?", // 140
+            "Seu nome significa 'príncipe de Deus'?", // 141
+            "Foi um grande sacerdote ou líder religioso?", // 142
+            "É conhecido por sua beleza física?", // 143
+            "Sua história envolve a oferta de um sacrifício aceitável a Deus?", // 144
+            "Foi um instrumento de cura ou ressurreição?", // 145
+            "Sua história envolve um período de servidão ou cativeiro?", // 146
+            "É conhecido por sua sabedoria em julgamentos?", // 147
+            "Sua história envolve um evento de travessia de águas?", // 148
+            "Foi um grande profeta que ouviu a voz de Deus claramente?", // 149
+            "Sua história é um exemplo de obediência radical?", // 150
+            "Morreu por causa de sua fé?", // 151
+            "Foi um rei que desviou o povo de Deus?", // 152
+            "Sua história envolve a construção de algo grandioso?", // 153
+            "É conhecido por seu relacionamento próximo com animais selvagens?", // 154
+            "Foi um homem de grande riqueza e influência?", // 155
+            "Sua história envolve uma figura feminina forte?", // 156
+            "Teve um papel crucial na libertação do povo de Israel?", // 157
+            "Sua história envolve a provisão de alimento ou água de forma milagrosa?", // 158
+            "Foi um líder que enfrentou oposição de seu próprio povo?", // 159
+            "Sua história é contada no livro de Atos?", // 160
+            "Foi um mensageiro enviado para uma tarefa específica?", // 161
+            "Sua vida é um testemunho de superação de grandes desafios?", // 162
+            "É conhecido por ter sido um dos primeiros missionários?", // 163
+            "Sua história envolve a ascensão ao trono ou a uma posição de poder?", // 164
+            "Foi um homem de profunda oração?", // 165
+            "Sua história é um exemplo de arrependimento e perdão?", // 166
+            "Foi um dos primeiros a reconhecer Jesus como o Messias?", // 167
+            "Sua história envolve um jardim ou um pomar?", // 168
+            "Foi um personagem que se arrependeu de seus erros?", // 169
+            "Sua história envolve uma transformação física ou espiritual?", // 170
+            "É uma figura central na história da redenção?", // 171
+            "Sua vida foi um modelo de fé para as gerações futuras?", // 172
+            "Sua história é contada em grande detalhe em mais de um livro bíblico?", // 173
+            "Foi um personagem que teve um papel importante na genealogia de Jesus?", // 174
         ];
 
-        // Array de personagens suspeitos com seus perfis de resposta para cada pergunta
+        // Array de personagens suspeitos com seus perfis de resposta para cada pergunta (total de 175 respostas por personagem)
         const suspeitas = [
-            { nome: "Moisés", perfil: [true, true, false, true, false, true, true, true, false, false, true, false, false, false, false, true, false, true, false, true, true, false, false, false, false, true, false, true, false, true, false, false, false, true, true, false, false, false, true, true, true, false, true, true, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, false, true, true, false, true] },
-            { nome: "Davi", perfil: [true, true, true, false, false, false, true, false, false, true, true, false, false, false, true, false, true, true, false, true, true, true, false, false, false, true, true, false, true, true, false, true, false, true, false, true, false, false, true, true, true, false, true, true, false, false, false, false, true, true, true, true, false, true, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, false, true, false, true] },
-            { nome: "Ester", perfil: [true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false] },
-            { nome: "Pedro", perfil: [false, true, false, true, true, false, false, false, true, false, true, false, false, false, false, false, true, true, true, true, true, true, false, false, true, true, false, true, false, false, false, false, true, true, false, false, true, false, true, true, true, false, true, true, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, true, false, false, false, true] },
-            { nome: "Salomão", perfil: [true, true, true, false, false, false, false, false, false, true, true, false, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, true, false, false, true, false, true] },
-            { nome: "Paulo", perfil: [false, true, false, true, true, true, false, false, true, true, true, false, false, false, false, false, true, true, true, true, true, false, true, false, true, true, false, true, false, false, false, false, false, false, false, false, true, false, false, true, true, false, true, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, true, true, true, true, false, true, false, false, false, false, true, false, false, false, true] },
-            { nome: "Jesus", perfil: [false, true, false, true, true, true, true, true, true, true, false, true, false, false, true, false, true, true, true, true, true, true, false, false, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, false, false, false, true, true] },
-            { nome: "Abraão", perfil: [true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, true, true, true, true, true, true, false, false, false, true, true, true, false, false, true, true, false, true, true, false, true, false, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, true, true, false, false, true, true, false, false, false, false, true, false, true, true, false, true, false, true] },
-            { nome: "Isaías", perfil: [true, true, false, false, false, true, false, false, false, true, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, true, false, true] },
-            { nome: "Maria (mãe de Jesus)", perfil: [false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, true, true, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, true, true, false, false, false, false, true, false, false, true, false, true, false, true] },
-            { nome: "João Batista", perfil: [true, true, false, false, true, true, false, false, false, false, false, true, false, false, true, false, true, true, false, true, true, false, false, false, true, false, false, true, false, false, false, false, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, true, true, true, false, false, false, false, true, false, false, false, false, false, false, true] },
-            { nome: "Josué", perfil: [true, true, false, false, false, false, true, true, false, false, true, false, true, false, false, false, false, true, true, true, true, false, false, false, false, true, false, true, false, true, false, false, false, false, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, true] },
-            { nome: "Elias", perfil: [true, true, false, true, false, true, true, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, false, false, false, false, false, true, false, true, false, false, false, true, false, true, false, false, false, true, true, false, false, false, false, false, true, false, true, true, false, false, true, true] },
-            { nome: "Rute", perfil: [true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, true, false, false, true, false, false, false, false, true, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, false] },
-            { nome: "Daniel", perfil: [true, true, false, false, false, true, false, false, false, true, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, true, false, false, true, false, false, true, true, false, true, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, true, false, false, false, false, true, false, true, false, true] },
-            { nome: "Noé", perfil: [true, true, false, false, false, false, false, true, false, false, false, false, false, true, false, true, false, true, false, true, true, true, false, true, false, false, true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, true, true, false, false, false, false, false, false, true, false, false, true, false, true] },
-            { nome: "Mateus", perfil: [false, true, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, false, true] },
-            { nome: "Jeremias", perfil: [true, true, false, false, false, true, false, false, false, false, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, false, false, false, false, true] },
-            { nome: "Sara", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, true, false, true, false, true] },
-            { nome: "Sansão", perfil: [true, true, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, true, true, true, false, false, true, true, true, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false] },
-            { nome: "José (filho de Jacó)", perfil: [true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, false, true, true, false, false, true, false, true, true, true, false, false, false, false, false, true, true, true, true, false, true, false, false, false, true, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, true] },
-            { nome: "Raquel", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, true, false, true, false, false, true, false, true, false, true, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false] },
-            { nome: "Jonas", perfil: [true, true, false, true, false, true, false, false, false, false, true, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, false, false, true] },
-            { nome: "Tiago (irmão de Jesus/apóstolo)", perfil: [false, true, false, false, true, false, false, false, true, false, true, false, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false] },
-            { nome: "Débora", perfil: [true, false, false, false, false, true, true, false, false, false, false, false, true, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false] },
-            { nome: "Samuel", perfil: [true, true, false, false, false, true, false, false, false, false, false, true, true, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, true, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, true, false, false, true, false, true] },
-            { nome: "Arão", perfil: [true, true, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, true, false, false, false, false, true, true, false, true, true, false, false, false, false, false, true, true, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, true, false, true] },
-            { nome: "Lia", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, true, true, false, true, false, false, true, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, false] },
-            { nome: "Zacarias (pai de João Batista)", perfil: [true, true, false, false, true, true, false, false, false, false, true, true, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, false, false, false, true, false, false] },
-            { nome: "Gideão", perfil: [true, true, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, true, true, false, false, false, true, false, true, true, false, false, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, true, false, false] },
-            { nome: "Jacó", perfil: [true, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, true, true, true, true, true, true, true, true, false, true, true, true, true, false, false, false, true, true, false, true, true, false, true, false, true, false, true, true, false, false, false, false, true, true, true, false, true, false, false, false, false, false, true, false, false, true, true, false, false, false, false, true, true, true, true, false, true, false, true] },
-            { nome: "João (Apóstolo)", perfil: [false, true, false, true, true, true, false, false, true, false, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, true, false, true, false, false, false, false, true, true, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, true, false, false, false, false, true, false, true, false, true] },
-            { nome: "Ló", perfil: [true, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, false, true, false, true, true, false, true, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, false] }
+            { nome: "Moisés", perfil: [true, true, false, true, false, true, true, true, false, false, true, false, false, false, false, true, false, true, false, true, true, false, false, false, false, true, false, true, false, true, false, false, false, true, true, false, false, false, true, true, true, false, true, true, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, false, true, true, false, true, false, false, false, false, true, false, false, true, true, true, false, false, true, false, false, false, true, true, false, true, true, false, false, false, false, false, false, true, false, true, true, true, false, true, false, true, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, true] },
+            { nome: "Davi", perfil: [true, true, true, false, false, false, true, false, false, true, true, false, false, false, true, false, true, true, false, true, true, true, false, false, false, true, true, false, true, true, false, true, false, true, false, true, false, false, true, true, true, false, true, true, false, false, false, false, true, true, true, true, false, true, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, false, true, false, true, false, true, false, false, true, false, false, false, false, false, false, true, false, false, false, true, true, true, true, false, false, true, false, false, false, false, false, true, false, false, false, true, true, true, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true] },
+            { nome: "Ester", perfil: [true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Pedro", perfil: [false, true, false, true, true, false, false, false, true, false, true, false, false, false, false, false, true, true, true, true, true, true, false, false, true, true, false, true, false, false, false, false, true, true, false, false, true, false, true, true, true, false, true, true, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, true, false, false, false, true, false, true, false, true, true, false, true, true, true, true, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, true, true, true, false, true, false, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, true, false, true, true, false, false, false, true, true, false, false, false, true] },
+            { nome: "Salomão", perfil: [true, true, true, false, false, false, false, false, false, true, true, false, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, true, false, false, true, false, true, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Paulo", perfil: [false, true, false, true, true, true, false, false, true, true, true, false, false, false, false, false, true, true, true, true, true, false, true, false, true, true, false, true, false, false, false, false, false, false, false, false, true, false, false, true, true, false, true, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, true, true, true, true, false, true, false, false, false, false, true, false, false, false, true, false, true, true, true, true, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, true, false, true, true, false, false, false, true, false, false, false, true, false, false, false, true, true, false, false, false, true, false, false, true, false, true] },
+            { nome: "Jesus", perfil: [false, true, false, true, true, true, true, true, true, true, false, true, false, false, true, false, true, true, true, true, true, true, false, false, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, false, false, false, true, true, false, true, false, false, true, false, true, true, true, true, false, true, false, false, false, true, true, true, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, false, true, true, true, false, false, false, false, false, true, true, true] },
+            { nome: "Abraão", perfil: [true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, true, true, true, true, true, true, false, false, false, true, true, true, false, false, true, true, false, false, true, false, true, false, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, true, true, false, false, true, true, false, false, false, false, true, false, true, true, false, true, false, true, true, true, false, false, true, false, false, true, false, false, true, false, true, false, true, false, false, true, true, false, false, false, false, false, false, true, false, false, false, false, true, true, false, true, false, false, false, true, false, false, true, false, false, true, false, false, false, false, false, true] },
+            { nome: "Isaías", perfil: [true, true, false, false, false, true, false, false, false, true, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Maria (mãe de Jesus)", perfil: [false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, true, true, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, true, true, false, false, false, false, true, false, false, true, false, true, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, true, false, false, false, true, false, false, false, false, true] },
+            { nome: "João Batista", perfil: [true, true, false, false, true, true, false, false, false, false, false, true, false, false, true, false, true, true, false, true, true, false, false, false, true, false, false, true, false, false, false, false, true, false, false, true, true, false, false, true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, true, true, true, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, true, false, false, true, true, true, false, false, true, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, true, false, false, false, true, false, false, false, false, true, false, false, true, false, true] },
+            { nome: "Josué", perfil: [true, true, false, false, false, false, true, true, false, false, true, false, true, false, false, false, false, true, true, true, true, false, false, false, false, true, false, true, false, true, false, false, false, false, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, true, true, true, false, false, true, false, false, true, true, true, false, false, true, false, false, false, true, true, true, true, false, false, false, false, false, false, false, false, false, false, true, true, false, false, true, false, false, true, false, false, false, false, false, false, true, true, false, false, false, true, true, false, false, false, true] },
+            { nome: "Elias", perfil: [true, true, false, true, false, true, true, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, false, false, false, false, false, true, false, true, false, false, false, true, false, true, false, false, false, true, true, false, false, false, false, false, true, false, true, true, false, false, true, true, false, false, true, false, true, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, false, false, false, false, false, true, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Rute", perfil: [true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, true, false, false, true, false, false, false, false, true, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Daniel", perfil: [true, true, false, false, false, true, false, false, false, true, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, true, false, false, true, false, false, true, true, false, true, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, true, false, false, false, false, true, false, true, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Noé", perfil: [true, true, false, false, false, false, false, true, false, false, false, false, false, true, false, true, false, true, false, true, true, true, false, true, false, false, true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, true, true, false, false, false, false, false, false, true, false, false, true, false, true, true, true, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true] },
+            { nome: "Mateus", perfil: [false, true, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, false, true, false, false, true, true, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Jeremias", perfil: [true, true, false, false, false, true, false, false, false, false, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Sara", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, true, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, true, false, true, false, true, false, true, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false] },
+            { nome: "Sansão", perfil: [true, true, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, true, true, true, false, false, true, true, true, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "José (filho de Jacó)", perfil: [true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, false, true, true, false, false, true, false, true, true, true, false, false, false, false, false, true, true, true, true, false, true, false, false, false, true, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Raquel", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, true, false, true, false, false, true, false, true, false, true, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Jonas", perfil: [true, true, false, true, false, true, false, false, false, false, true, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Tiago (irmão de Jesus/apóstolo)", perfil: [false, true, false, false, true, false, false, false, true, false, true, false, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true] },
+            { nome: "Débora", perfil: [true, false, false, false, false, true, true, false, false, false, false, false, true, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Samuel", perfil: [true, true, false, false, false, true, false, false, false, false, false, true, true, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, true, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, true, false, false, true, false, true, false, false, false, false, true, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Arão", perfil: [true, true, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, true, false, false, false, false, true, true, false, true, true, false, false, false, false, false, true, true, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, true, false, true, false, false, false, false, true, false, false, false, false, false, false, true, true, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Lia", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, true, true, false, true, false, false, true, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Zacarias (pai de João Batista)", perfil: [true, true, false, false, true, true, false, false, false, false, true, true, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Gideão", perfil: [true, true, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, true, true, false, false, false, true, false, true, true, false, false, false, true, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, true, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Jacó", perfil: [true, true, false, false, false, false, false, true, false, true, false, false, false, false, false, false, true, true, true, true, true, true, true, true, false, true, true, true, true, false, false, false, true, true, false, true, true, false, true, false, true, false, true, true, false, false, false, false, true, true, true, false, true, false, false, false, false, false, true, false, false, true, true, false, false, false, false, true, true, true, true, false, true, false, true, false, true, false, false, true, false, false, true, true, true, true, true, true, false, false, false, false, false, true, false, false, false, false, false, false, true, true, false, false, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false] },
+            { nome: "João (Apóstolo)", perfil: [false, true, false, true, true, true, false, false, true, false, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, true, false, true, false, false, false, false, true, true, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, true, false, false, false, false, true, false, true, false, true, false, true, true, true, true, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, true, false, false, true, false, true, true, true, false, false, false, false, false, true, false, true] },
+            { nome: "Ló", perfil: [true, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, false, true, false, true, true, false, true, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, true, false, true, false, false, true, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            // Novos Personagens (com 175 respostas booleanas)
+            { nome: "Isaque", perfil: [true, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, true, true, true, false, true, false, false, false, true, true, false, false, false, false, true, true, true, false, false, true, false, true, false, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, true, false, false, true, true, false, false, false, true, true, false, true, true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, true] },
+            { nome: "Rebeca", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, true, false, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, true, false, true, true, true, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true] },
+            { nome: "José (o carpinteiro, pai de Jesus)", perfil: [false, true, false, false, true, false, false, false, false, false, false, false, false, false, true, true, false, true, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, true, false, false, true, false, false, false, false, true] },
+            { nome: "Maria Madalena", perfil: [false, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, true, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, true, false, false, false, false, false, false, false, false, true] },
+            { nome: "Caim", perfil: [true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, true, false, true, false, false, false, false, false, true, true, false, true, false, false, true, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, true, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, true, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Abel", perfil: [true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, true, true, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, true, false, false, false, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Golias", perfil: [true, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Isaque", perfil: [true, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, true, true, true, false, true, false, false, false, true, true, false, false, false, false, true, true, true, false, false, true, false, true, false, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, true, false, false, true, true, false, false, false, true, true, false, true, true, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true] },
+            { nome: "Rebeca", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, true, false, false, false, false, true, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, true, true, false, false, false, false, true, false, true, true, true, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true] },
+            { nome: "José (o carpinteiro, pai de Jesus)", perfil: [false, true, false, false, true, false, false, false, false, false, false, false, false, false, true, true, false, true, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, true, true, false, false, true, false, false, false, false, true] },
+            { nome: "Maria Madalena", perfil: [false, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, true, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, true, true, false, false, false, true, false, false, false, false, true, false, false, false, false, true] },
+            { nome: "Caim", perfil: [true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, true, false, true, true, false, true, false, false, false, false, false, true, true, false, true, false, false, true, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, true, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Abel", perfil: [true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, true, true, false, true, true, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, true, false, false, false, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Golias", perfil: [true, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Miriam", perfil: [true, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, false, true, false, true, false, false, false, false, false, true, true, false, true, true, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, true, true, false, false, true, false, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, true, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, true] },
+            { nome: "Calebe", perfil: [true, true, false, false, false, false, true, true, false, false, false, false, true, false, false, false, false, true, false, true, true, false, false, false, false, true, false, true, false, true, false, false, false, true, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, true, true, true, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true] },
+            { nome: "Eliseu", perfil: [true, true, false, true, false, true, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, true, false, true, false, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, true, false, false, false, true, false, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, true, true, false, false, false, true, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Jezabel", perfil: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false] },
+            { nome: "Marta", perfil: [false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, false, false, true] },
+            { nome: "Maria (irmã de Marta)", perfil: [false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, false, false, true] },
+            { nome: "Lázaro", perfil: [false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, true, false, false, false, false, false] },
+            { nome: "Nicodemos", perfil: [false, true, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false, true, false, true] }
         ];
 
         let respostas = []; // Armazena as respostas do usuário
@@ -290,11 +447,16 @@
          */
         function selecionarPerguntas() {
             const indices = shuffle([...Array(perguntas.length).keys()]);
-            perguntasSelecionadas = indices.slice(0, 10).map(i => perguntas[i]);
+            // Garante que o número de perguntas selecionadas não exceda o tamanho real do array de perguntas
+            const numPerguntas = Math.min(10, perguntas.length);
+            perguntasSelecionadas = indices.slice(0, numPerguntas).map(i => perguntas[i]);
 
             // Mapeia os perfis dos suspeitos para corresponder às perguntas selecionadas
             suspeitas.forEach(suspeito => {
-                suspeito.perfilSelecionado = indices.slice(0, 10).map(i => suspeito.perfil[i]);
+                suspeito.perfilSelecionado = indices.slice(0, numPerguntas).map(i => {
+                    // Garante que o índice exista no perfil do suspeito
+                    return (i < suspeito.perfil.length) ? suspeito.perfil[i] : false; // Valor padrão se não houver correspondência
+                });
             });
             candidatosAtuais = [...suspeitas]; // Inicializa os candidatos com todos os suspeitos
         }
@@ -304,10 +466,11 @@
          * @param {string} text O texto a ser impresso.
          */
         function print(text) {
+            const terminalDiv = document.getElementById("terminal");
             const line = document.createElement("div");
             line.innerHTML = text; // Usar innerHTML para permitir formatação (ex: negrito)
-            document.getElementById("terminal").appendChild(line);
-            document.getElementById("terminal").scrollTop = document.getElementById("terminal").scrollHeight;
+            terminalDiv.appendChild(line);
+            terminalDiv.scrollTop = terminalDiv.scrollHeight;
         }
 
         /**
@@ -317,7 +480,8 @@
          */
         function processarResposta(resposta) {
             // Impede cliques se os botões estiverem desabilitados
-            if (document.getElementById("simBtn").disabled) return;
+            const simBtn = document.getElementById("simBtn");
+            if (simBtn.disabled) return;
 
             print(`>> ${resposta ? "SIM" : "NÃO"}`);
             respostas.push(resposta);
@@ -332,7 +496,7 @@
             // Se ainda houver perguntas, exibe a próxima; caso contrário, chama o diagnóstico
             if (index < perguntasSelecionadas.length) {
                 print(`\nPergunta ${index + 1}/${perguntasSelecionadas.length}: ${perguntasSelecionadas[index]}`);
-                document.getElementById("simBtn").focus(); // Foca no botão "Sim" para acessibilidade
+                simBtn.focus(); // Foca no botão "Sim" para acessibilidade
             } else {
                 diagnosticar();
             }
@@ -353,42 +517,25 @@
                 let maxPontos = -1;
                 let empates = [];
 
-                // Se houver candidatos restantes após a filtragem inicial, busca entre eles
-                if (candidatosAtuais.length > 0) {
-                    candidatosAtuais.forEach(suspeito => {
-                        let pontos = 0;
-                        for (let i = 0; i < respostas.length; i++) {
-                            if (suspeito.perfilSelecionado[i] === respostas[i]) {
-                                pontos++;
-                            }
+                // Prioriza os candidatos que sobreviveram à filtragem
+                let listaParaAnalise = candidatosAtuais.length > 0 ? candidatosAtuais : suspeitas;
+
+                listaParaAnalise.forEach(suspeito => {
+                    let pontos = 0;
+                    for (let i = 0; i < respostas.length; i++) {
+                        // Verifica se o índice da resposta está dentro dos limites do perfil selecionado do suspeito
+                        if (suspeito.perfilSelecionado && i < suspeito.perfilSelecionado.length && suspeito.perfilSelecionado[i] === respostas[i]) {
+                            points++;
                         }
-                        if (pontos > maxPontos) {
-                            maxPontos = pontos;
-                            melhorCandidato = suspeito.nome;
-                            empates = [suspeito];
-                        } else if (pontos === maxPontos) {
-                            empates.push(suspeito);
-                        }
-                    });
-                } else {
-                    // Se nenhum candidato correspondeu perfeitamente, encontra o mais próximo de todos os suspeitos
-                    // Isso acontece se as respostas levaram a um "beco sem saída" na filtragem
-                    suspeitas.forEach(suspeito => {
-                        let pontos = 0;
-                        for (let i = 0; i < respostas.length; i++) {
-                            if (suspeito.perfilSelecionado[i] === respostas[i]) {
-                                pontos++;
-                            }
-                        }
-                        if (pontos > maxPontos) {
-                            maxPontos = pontos;
-                            melhorCandidato = suspeito.nome;
-                            empates = [suspeito];
-                        } else if (pontos === maxPontos) {
-                            empates.push(suspeito);
-                        }
-                    });
-                }
+                    }
+                    if (pontos > maxPontos) {
+                        maxPontos = pontos;
+                        melhorCandidato = suspeito.nome;
+                        empates = [suspeito];
+                    } else if (pontos === maxPontos) {
+                        empates.push(suspeito);
+                    }
+                });
 
                 // Se houver empate entre os melhores candidatos, escolhe um aleatoriamente
                 if (empates.length > 1) {
@@ -431,7 +578,7 @@
             selecionarPerguntas(); // Seleciona novas perguntas aleatórias para a nova rodada
             
             // Exibe as mensagens iniciais no terminal
-            print("Quem É da Bíblia?");
+            print("Pensequiz - Quem É da Bíblia? | Terminal Celestial");
             print("\nPense em um personagem bíblico...");
             print(`\nPergunta 1/${perguntasSelecionadas.length}: ${perguntasSelecionadas[0]}`);
             
