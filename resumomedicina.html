@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon com placeholder URL -->
+    <link rel="icon" type="image/png" href="https://placehold.co/32x32/008080/FFFFFF?text=PM">
+    <title>PenseQuiz Med - Ciclo Básico PRo</title>
+    <!-- Link para o arquivo manifest.json (para PWA) -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Estilos CSS embutidos -->
+    <style>
+        /* Define o estilo base para o corpo da página */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center; /* Centraliza o conteúdo horizontalmente */
+            align-items: center;    /* Centraliza o conteúdo verticalmente */
+            min-height: 100vh;      /* Garante que o corpo ocupe toda a altura da viewport */
+            background-color: #1a202c; /* Fundo azul-marinho escuro */
+            font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada para efeito terminal */
+            color: #E0E0E0; /* Cor de texto padrão (branco suave) */
+            overflow: hidden; /* Previne barras de rolagem indesejadas no corpo */
+        }
+
+        /* Estilo para o contêiner principal do terminal */
+        .main-content {
+            display: none; /* Esconde o conteúdo principal inicialmente */
+            width: 95%; /* Largura relativa para responsividade */
+            max-width: 1200px; /* Largura máxima para evitar que fique muito grande em telas amplas */
+            height: 90vh; /* Altura relativa para responsividade, ocupando mais da tela */
+            background-color: #0d1117; /* Fundo do terminal quase preto */
+            border: 2px solid #00A9A5; /* Borda azul-petróleo */
+            box-shadow: 0 0 20px rgba(0, 169, 165, 0.5); /* Sombra azul-petróleo */
+            flex-direction: column; /* Organiza os elementos verticalmente */
+            position: relative;
+            overflow: hidden; /* Esconde qualquer conteúdo que transborde */
+            border-radius: 8px; /* Cantos arredondados para um visual mais suave */
+        }
+
+        /* Estilo para o cabeçalho do terminal */
+        .terminal-header {
+            background-color: #00A9A5; /* Fundo azul-petróleo para o cabeçalho */
+            color: #0d1117; /* Texto escuro no cabeçalho */
+            padding: 8px 15px;
+            display: flex;
+            justify-content: center; /* CENTRALIZA o conteúdo horizontalmente */
+            align-items: center;
+            font-weight: bold;
+            border-bottom: 2px solid #007A75; /* Borda inferior mais escura */
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+
+        /* Estilo para o título do terminal */
+        .terminal-title {
+            font-size: 1.1em;
+        }
+
+        /* Novo contêiner para o corpo do terminal (menu + output) */
+        .terminal-body {
+            display: flex;
+            flex-grow: 1; /* Permite que ocupe o espaço restante */
+            overflow: hidden; /* Garante que os painéis internos lidem com seu próprio overflow */
+        }
+
+        /* Painel do Menu Fixo (coluna esquerda) */
+        .menu-panel {
+            flex: 0 0 30%; /* Não cresce, não encolhe, base de 30% da largura do contêiner */
+            padding: 15px;
+            background-color: #0d1117; /* Fundo do terminal */
+            border-right: 1px solid #00A9A5; /* Separador */
+            overflow-y: auto; /* Barra de rolagem se o menu for longo */
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            scrollbar-width: thin;
+            scrollbar-color: #00A9A5 #1a1a1a;
+        }
+        .menu-panel::-webkit-scrollbar { width: 8px; }
+        .menu-panel::-webkit-scrollbar-track { background: #1a1a1a; }
+        .menu-panel::-webkit-scrollbar-thumb { background-color: #00A9A5; border-radius: 10px; border: 2px solid #1a1a1a; }
+
+
+        /* Área de saída do terminal onde as mensagens são exibidas (coluna direita) */
+        .terminal-output {
+            flex-grow: 1; /* Ocupa o espaço restante horizontalmente */
+            padding: 15px;
+            overflow-y: auto; /* Adiciona barra de rolagem vertical se o conteúdo for grande */
+            white-space: pre-wrap; /* Mantém a formatação do texto (quebras de linha, espaços) */
+            word-wrap: break-word; /* Quebra palavras longas para caber na linha */
+            scrollbar-width: thin; /* Estilo de barra de rolagem fina (Firefox) */
+            scrollbar-color: #00A9A5 #1a1a1a; /* Cores da barra de rolagem */
+            transition: color 0.5s ease-in-out; /* Transição suave para a mudança de cor */
+        }
+        
+        strong {
+            color: #FFFFFF;
+            font-weight: bold;
+        }
+
+        /* Estilo da barra de rolagem para navegadores WebKit (Chrome, Safari) */
+        .terminal-output::-webkit-scrollbar { width: 8px; }
+        .terminal-output::-webkit-scrollbar-track { background: #1a1a1a; }
+        .terminal-output::-webkit-scrollbar-thumb { background-color: #00A9A5; border-radius: 10px; border: 2px solid #1a1a1a; }
+
+        /* Linha de entrada do usuário */
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-top: 2px solid #00A9A5;
+            background-color: #1a202c;
+        }
+
+        /* Estilo para o prompt (símbolo >) */
+        .prompt { color: #00A9A5; margin-right: 8px; font-size: 1.2em; }
+
+        /* Campo de entrada de texto */
+        #terminalInput {
+            flex-grow: 1; background-color: transparent; border: none; outline: none;
+            color: #E0E0E0; font-family: 'Courier New', Courier, monospace;
+            font-size: 1em; caret-color: #00A9A5;
+        }
+
+        #terminalInput::placeholder { color: #007A75; opacity: 0.7; }
+
+        /* Barra separadora entre o input e os botões */
+        .separator-bar { height: 2px; background-color: #00A9A5; margin: 0; border-top: 2px solid #007A75; }
+
+        /* Contêiner para os botões de controle */
+        .terminal-controls {
+            padding: 10px 15px; display: flex; justify-content: center;
+            gap: 10px; background-color: #1a202c; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px;
+        }
+
+        /* Estilo para os botões */
+        .control-button {
+            background-color: transparent; color: #00A9A5; border: 1px solid #00A9A5;
+            padding: 5px 10px; border-radius: 5px; font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em; cursor: pointer; transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 5px rgba(0, 169, 165, 0.5);
+        }
+
+        .control-button:hover {
+            background-color: #00A9A5; color: #0d1117;
+            box-shadow: 0 0 10px rgba(0, 169, 165, 0.8);
+        }
+        
+        .control-button:disabled {
+            opacity: 0.5; cursor: not-allowed; background-color: transparent;
+            color: #007A75; box-shadow: none;
+        }
+
+        /* Estilo para a cor das entradas do usuário */
+        .user-line { color: #90CAF9; }
+        
+        /* Cores específicas para cada nova categoria */
+        .terminal-output.biologia-color, .menu-panel.biologia-color { color: #8BC34A; } /* Verde Lima para Biologia Geral */
+        .terminal-output.citologia-color, .menu-panel.citologia-color { color: #64B5F6; }      /* Azul */
+        .terminal-output.histologia-color, .menu-panel.histologia-color { color: #BA68C8; }        /* Roxo */
+        .terminal-output.genetica-color, .menu-panel.genetica-color { color: #4DB6AC; }        /* Teal */
+        .terminal-output.microbiologia-color, .menu-panel.microbiologia-color { color: #228B22; } /* Verde-floresta para Microbiologia */
+        .terminal-output.patologia-color, .menu-panel.patologia-color { color: #FF8A65; }        /* Laranja */
+        .terminal-output.analise_clinica-color, .menu-panel.analise_clinica-color { color: #4FC3F7; }  /* Azul Claro para Análises Clínicas */
+        .terminal-output.atencao_primaria_saude-color, .menu-panel.atencao_primaria_saude-color { color: #FFEB3B; } /* Amarelo Vibrante para APS */
+        .terminal-output.termos_tecnicos_medicina-color, .menu-panel.termos_tecnicos_medicina-color { color: #A1887F; } /* Marrom Claro para Termos Técnicos */
+        .terminal-output.anatomia-color, .menu-panel.anatomia-color { color: #FFA07A; } /* Laranja Claro para Anatomia */
+        .terminal-output.biofisica-color, .menu-panel.biofisica-color { color: #9FA8DA; } /* Indigo Claro para Biofísica */
+        .terminal-output.bioquimica-color, .menu-panel.bioquimica-color { color: #FFD54F; } /* Amarelo (mantido da subcategoria) */
+        .terminal-output.casos_clinicos-color, .menu-panel.casos_clinicos-color { color: #8D6E63; } /* Marrom Suave para Casos Clínicos */
+        .terminal-output.clinica_medica-color, .menu-panel.clinica_medica-color { color: #4A90E2; } /* Azul Vibrante para Clínica Médica */
+        .terminal-output.ecg_eletrocardiograma-color, .menu-panel.ecg_eletrocardiograma-color { color: '#FF6F61'; } /* Vermelho Alaranjado para ECG */
+        .terminal-output.embriologia-color, .menu-panel.embriologia-color { color: '#F06292'; }   /* Rosa para Embriologia */
+        .terminal-output.farmacologia-color, .menu-panel.farmacologia-color { color: '#D35400'; } /* Laranja escuro para Farmacologia */
+        .terminal-output.fisiologia-color, .menu-panel.fisiologia-color { color: '#E57373'; }   /* Vermelho para Fisiologia */
+        .terminal-output.imunologia-color, .menu-panel.imunologia-color { color: '#3CB371'; }   /* Verde-mar para Imunologia */
+        .terminal-output.infectologia-color, .menu-panel.infectologia-color { color: '#DC143C'; }   /* Vermelho-carmim para Infectologia */
+        .terminal-output.parasitologia-color, .menu-panel.parasitologia-color { color: '#6B8E23'; }   /* Verde-oliva escura para Parasitologia */
+        .terminal-output.suporte_basico_vida-color, .menu-panel.suporte_basico_vida-color { color: '#E91E63'; } /* Rosa Vibrante para Suporte Básico à Vida */
+        .terminal-output.sus_sistema_unico_saude-color, .menu-panel.sus_sistema_unico_saude-color { color: '#2196F3'; } /* Azul para SUS */
+
+
+        /* Estilo para a tela de splash */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0d1117; /* Fundo escuro similar ao terminal */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: #00A9A5; /* Cor do texto do splash */
+            text-align: center;
+            opacity: 0; /* Começa invisível */
+            animation: fadeIn 2s forwards, fadeOut 1s forwards 3s; /* Fade in, espera 1s, fade out */
+            z-index: 1000; /* Garante que esteja acima de outros elementos */
+        }
+
+        /* Animações da tela de splash */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Splash -->
+    <div class="splash-screen" id="splashScreen">
+        Iniciando o Sistema de Resumos!!!<br>PenseQuiz Medicina Ciclo Básico Pro
+    </div>
+
+    <!-- Conteúdo principal do terminal (inicialmente oculto) -->
+    <div class="main-content" id="mainContent">
+        <div class="terminal-header">
+            <span class="terminal-title">PenseQuiz Med - Ciclo Basico Pro</span>
+        </div>
+        <div class="terminal-body">
+            <!-- Painel do Menu Fixo -->
+            <div class="menu-panel" id="menuPanel">
+                <!-- O menu principal será carregado aqui -->
+            </div>
+            <!-- Área de saída do terminal (conteúdo dinâmico) -->
+            <div class="terminal-output" id="terminalOutput">
+                <!-- Conteúdo dinâmico será injetado aqui via JavaScript -->
+            </div>
+        </div>
+        <div class="terminal-input-line">
+            <span class="prompt">></span>
+            <input type="text" id="terminalInput" placeholder="Digite 'menu' para começar" autofocus>
+        </div>
+        <div class="separator-bar"></div>
+        <div class="terminal-controls">
+            <button id="sendButton" class="control-button">Enviar</button>
+            <button id="referencesButton" class="control-button">Referências</button>
+            <button id="restartButton" class="control-button">Reiniciar</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const terminalOutput = document.getElementById('terminalOutput');
+            const menuPanel = document.getElementById('menuPanel'); // Novo elemento para o menu
+            const terminalInput = document.getElementById('terminalInput');
+            const restartButton = document.getElementById('restartButton');
+            const sendButton = document.getElementById('sendButton');
+            const referencesButton = document.getElementById('referencesButton');
+            const splashScreen = document.getElementById('splashScreen');
+            const mainContent = document.getElementById('mainContent');
+
+            let commandHistory = [];
+            let historyIndex = -1;
+            let currentMainCategory = null;
+            let currentSubCategory = null;
+            let typingTimeout;
+
+            const contentDataMap = {
+                'biologia_geral': {
+                    display: 'Biologia Geral',
+                    colorClass: 'biologia-color',
+                    subCategories: {
+                        'citologia': {
+                            display: 'Citologia e Biologia Molecular',
+                            colorClass: 'citologia-color',
+                            topics: [
+                                { topic: "membrana_e_transportes", summary: "A membrana plasmática é uma bicamada lipídica (mosaico fluido) com proteínas e carboidratos, que controla seletivamente o que entra e sai da célula. O transporte passivo (difusão simples, difusão facilitada, osmose) não gasta ATP, seguindo gradientes. O transporte ativo (bombas iônicas como Na+/K+ ATPase) gasta ATP para mover substâncias contra gradientes. Endocitose (fagocitose, pinocitose, mediada por receptor) e exocitose são mecanismos para transporte de grandes partículas." },
+                                { topic: "mitocondria_e_respiracao", summary: "A mitocôndria é a organela responsável pela respiração celular aeróbica, principal produtora de ATP. Possui dupla membrana: a externa lisa e a interna com invaginações (cristas). A matriz mitocondrial contém enzimas do Ciclo de Krebs e o DNA mitocondrial. A disfunção mitocondrial está associada a doenças metabólicas, neurodegenerativas e envelhecimento." },
+                                { topic: "reticulo_endoplasmatico_e_golgi", summary: "O Retículo Endoplasmatico Rugoso (RER), com ribossomos, sintetiza proteínas para exportação, inserção em membranas ou organelas do sistema de endomembranas. O Retículo Endoplasmatico Liso (REL) sintetiza lipídios, esteroides, armazena cálcio e detoxifica. O Complexo de Golgi processa, modifica, empacota e direciona as proteínas e lipídios recebidos do RE, sendo fundamental para o tráfego intracelular e secreção." },
+                                { topic: "lisossomos_e_peroxissomos", summary: "Lisossomos são organelas que contêm enzimas hidrolíticas ácidas, responsáveis pela digestão intracelular de macromoléculas, organelas velhas (autofagia) e partículas externas (fagocitose). Peroxissomos são organelas que contêm enzimas oxidativas (ex: catalase), envolvidas na detoxificação e metabolismo de ácidos graxos, gerando peróxido de hidrogênio e convertendo-lo em água e oxigênio." },
+                                { topic: "citoesqueleto_e_movimento", summary: "O citoesqueleto é uma rede dinâmica de filamentos proteicos (microtúbulos, filamentos de actina e filamentos intermediários) que confere forma, suporte mecânico, organização interna e capacidade de movimento à célula. Participa da divisão celular (fuso mitótico, anel contrátil), transporte intracelular de organelas e vesículas, contração muscular, movimento ciliar e flagelar, e migração celular." },
+                                { topic: "nucleo_e_ciclo_celular", summary: "O núcleo abriga o material genético (DNA), organizado em cromatina e cromossomos, e controla as atividades celulares. O ciclo celular é a sequência de eventos (Interfase: G1, S, G2; e Fase M: Mitose/Meiose e Citocinese) que leva à divisão celular. É rigorosamente regulado por proteínas (ciclinas e CDKs) e pontos de checagem (checkpoints) para garantir a replicação e segregação correta do DNA. A desregulação do ciclo celular é uma característica do câncer." },
+                                { topic: "sintese_proteica_e_dna", summary: "A síntese proteica (expressão gênica) envolve a transcrição (DNA para mRNA no núcleo) e a tradução (mRNA para proteína nos ribossomos). A replicação do DNA é semiconservativa, garantindo a cópia fiel do material genético antes da divisão celular. Esses processos são fundamentais para a herança e o funcionamento celular." }
+                            ]
+                        },
+                    }
+                },
+                'fisiologia': { // Fisiologia elevada para nível superior
+                    display: 'Fisiologia Humana',
+                    colorClass: 'fisiologia-color',
+                    topics: [
+                        { topic: "homeostase_e_sistemas_de_controle", summary: "Homeostase é a capacidade do corpo de manter um ambiente interno estável e relativamente constante, apesar das flutuações externas. É essencial para a sobrevivência das células e do organismo. Os sistemas de controle homeostático (geralmente via feedback negativo) envolvem sensores, centros de integração e efetores, trabalhando continuamente para regular variáveis como temperatura, pH, glicemia e pressão arterial. A falha na homeostase leva a doenças." },
+                        { topic: "sistema_nervoso_divisao_e_funcoes", summary: "O Sistema Nervoso (SN) é o centro de controle e comunicação do corpo. Divide-se em: 1) SN Central (SNC): encéfalo (cérebro, cerebelo, tronco encefálico) e medula espinhal, responsável pelo processamento de informações e comandos. 2) SN Periférico (SNP): nervos que conectam o SNC ao resto do corpo, subdividido em SN Somático (controle voluntário, músculos esqueléticos) e SN Autônomo (controle involuntário, órgãos internos), com suas divisões Simpática (luta ou fuga) e Parassimpática (repouso e digestão). Neurônios transmitem impulsos elétricos (potenciais de ação) via sinapses, usando neurotransmissores para comunicação." },
+                        { topic: "sistema_endocrino_e_hormonios", summary: "O Sistema Endócrino atua na regulação de longo prazo das funções corporais através da produção e secreção de hormônios. Glândulas endócrinas (hipófise, tireoide, pâncreas, adrenais, ovários, testículos) liberam hormônios diretamente na corrente sanguínea. Os hormônios são mensageiros químicos que atuam em células-alvo específicas, regulando metabolismo, crescimento, desenvolvimento, reprodução, resposta ao estresse e balanço hidroeletrolítico. A regulação hormonal é complexa, envolvendo eixos hormonais e feedback negativo." },
+                        { topic: "sistema_cardiovascular", summary: "O Sistema Cardiovascular é responsável pelo transporte de sangue por todo o corpo. É composto pelo coração (bomba muscular), vasos sanguíneos (artérias, veias, capilares) e sangue. Sua principal função é entregar oxigênio e nutrientes às células, remover dióxido de carbono e resíduos metabólicos, transportar hormônios e células do sistema imune, e regular a temperatura corporal. A circulação divide-se em pulmonar (coração-pulmão-coração) e sistêmica (coração-corpo-coração). A pressão arterial é a força do sangue contra as paredes dos vasos, regulada por mecanismos neurais e hormonais." },
+                        { topic: "sistema_respiratorio", summary: "O Sistema Respiratório é responsável pela troca gasosa entre o corpo e o ambiente externo. Inclui vias aéreas (nariz, faringe, laringe, traqueia, brônquios) e os pulmões. O processo de respiração (ventilação) envolve a inspiração (entrada de ar) e expiração (saída de ar). A troca de gases (oxigênio e dióxido de carbono) ocorre por difusão nos alvéolos pulmonares e nos tecidos. A frequência e profundidade da respiração são controladas pelo centro respiratório no tronco encefálico, sensível aos níveis de $\\text{CO}_2$ e ${O}_2$ no sangue." },
+                        { topic: "sistema_digestorio", summary: "O Sistema Digestório é responsável pela digestão e absorção de nutrientes, e pela eliminação de resíduos. Inclui o trato gastrointestinal (boca, faringe, esôfago, estômago, intestino delgado, intestino grosso, reto e ânus) e órgãos acessórios (dentes, língua, glândulas salivares, fígado, vesícula biliar, pâncreas). A digestão é mecânica e química. A absorção ocorre principalmente no intestino delgado. As funções são reguladas por hormônios e pelo sistema nervoso entérico." },
+                        { topic: "sistema_urinario_e_nefron", summary: "O Sistema Urinário é essencial para a homeostase, filtrando o sangue para remover excretas nitrogenadas (ureia, creatinina), regulando o equilíbrio de água, eletrólitos, pH e pressão arterial. É composto pelos rins, ureteres, bexiga e uretra. O néfron é a unidade funcional do rim, onde ocorrem: 1) Filtração glomerular: formação do filtrado primário. 2) Reabsorção tubular: retorno de água e substâncias úteis ao sangue. 3) Secreção tubular: remoção ativa de substâncias indesejáveis. O produto final é a urina." },
+                        { topic: "sistema_imune_inato_adaptativo", summary: "O Sistema Imune defende o corpo contra patógenos e células alteradas. Divide-se em: 1) Imunidade Inata (não específica): primeira linha de defesa, rápida, sem memória. Inclui barreiras físicas (pele, mucosas), células fagocíticas (macrófagos, neutrófilos), células NK e a resposta inflamatória. 2) Imunidade Adaptativa (específica): mais lenta, mas altamente específica e com memória imunológica. Envolve linfócitos B (produzem anticorpos) e linfócitos T (citotóxicos e auxiliares), sendo a base da vacinação. Ambas as imunidades trabalham de forma integrada." }
+                    ]
+                },
+                'bioquimica': { // Bioquímica agora como categoria de nível superior
+                    display: 'Bioquímica',
+                    colorClass: 'bioquimica-color',
+                    topics: [
+                        { topic: "aminoacidos_e_proteinas", summary: "Aminoácidos são os monômeros das proteínas, unidos por ligações peptídicas. Sua sequência linear (estrutura primária) dita a forma tridimensional complexa (secundária: alfa-hélice, beta-pregueada; terciária: dobramento 3D; quaternária: múltiplas subunidades), que é crucial para a função biológica (enzimática, estrutural, transporte, sinalização, defesa). A desnaturação, causada por calor ou pH extremos, é a perda da função por alteração irreversível da estrutura 3D, mantendo a primária." },
+                        { topic: "enzimas_e_cinetica", summary: "Enzimas são catalisadores biológicos (maioria proteínas) que aumentam a velocidade das reações químicas, diminuindo a energia de ativação sem serem consumidas. Possuem um sítio ativo específico para seus substratos. A cinética enzimática (modelo de Michaelis-Menten) descreve a relação entre a velocidade da reação e a concentração do substrato. Inibidores (competitivos, não-competitivos, acompetitivos) regulam sua atividade e são alvos importantes para fármados. Fatores como pH e temperatura influenciam fortemente a atividade enzimática." },
+                        { topic: "carboidratos_e_glicolise", summary: "Carboidratos (glicídios) são a principal fonte de energia imediata e componentes estruturais. Podem ser monossacarídeos (glicose), dissacarídeos (sacarose), ou polissacarídeos (amido, glicogênio, celulose). A glicólise, via metabólica anaeróbica universal no citosol, quebra uma molécula de glicose em duas de piruvato, gerando um saldo líquido de 2 ATP e 2 NADH. É o ponto de partida para a respiração celular e fermentação." },
+                        { topic: "ciclo_de_krebs", summary: "Também conhecido como ciclo do ácido cítrico ou ciclo dos ácidos tricarboxílicos, ocorre na matriz mitocondrial. É a via central do metabolismo aeróbico, oxidando completamente o Acetil-CoA (derivado da glicólise, beta-oxidação de ácidos graxos e degradação de aminoacídos) para gerar moléculas de alta energia (3 NADH, 1 FADH2, 1 ATP/GTP por volta) e liberando CO2. Suas intermediários são precursores para biossínteses." },
+                        { topic: "fosforilacao_oxidativa", summary: "A Fosforilação Oxidativa, a principal via de produção de ATP, ocorre nas cristas mitocondriais. Envolve a cadeia transportadora de elétrons (complexos proteicos) que utiliza a energia dos elétrons transportados por NADH e FADH2 para bombear prótons (${H}^{+}$) para o espaço intermembrana, criando um gradiente eletroquímico. O fluxo de prótons de volta para a matriz através da ATP sintase (quimiosmose) gera grandes quantidades de ATP. O oxigênio é o aceptor final de elétrons, formando água." },
+                        { topic: "lipideos_e_beta_oxidacao", summary: "Lipídios são moléculas apolares diversas, cruciais para armazenamento de energia (triglicerídeos), estrutura de membranas (fosfolipídios, colesterol), sinalização (hormônios esteroides) e isolamento térmico. A $\\beta$-oxidação é o processo de quebra sequencial de ácidos graxos na mitocôndria, produzindo Acetil-CoA, NADH e FADH2. O Acetil-CoA pode então entrar no Ciclo de Krebs para gerar ATP, tornando os lipídios uma fonte de energia altamente eficiente." },
+                        { topic: "nucleotideos_e_acidos_nucleicos", summary: "Nucleotídeos são as unidades monoméricas dos ácidos nucleicos (DNA e RNA). Cada nucleotídeo consiste em uma base nitrogenada (adenina, guanina, citosina, timina no DNA; uracila no RNA), um açúcar (desoxirribose no DNA; ribose no RNA) e um ou mais grupos fosfato. O DNA armazena e transmite informação genética, enquanto o RNA está envolvido na expressão gênica (mRNA, tRNA, rRNA)." }
+                    ]
+                },
+                'analise_clinica': { // Categoria de nível superior
+                    display: 'Análises Clínicas',
+                    colorClass: 'analise_clinica-color',
+                    topics: [ // Tem tópicos diretamente
+                        { topic: "coleta_e_processamento_de_amostras", summary: "A fase pré-analítica é crucial para a validade dos resultados. Inclui a correta coleta de amostras (sangue, urina, fezes, líquidos corporais) utilizando tubos e anticoagulantes apropriados, identificação, transporte e armazenamento (temperatura, tempo). Erros nesta fase são a principal causa de resultados incorretos. O processamento envolve centrifugação, aliquotagem e preparação para análise." },
+                        { topic: "bioquimica_clinica", summary: "Estuda os componentes químicos no sangue e outros fluidos para diagnóstico e monitoramento de doenças. Envolve a dosagem de glicose (diabetes), perfil lipídico (colesterol, triglicerídeos), eletrólitos (sódio, potássio, cálcio), enzimas hepáticas (ALT, AST), função renal (creatinina, ureia), proteínas (albumina), e marcadores cardíacos. Os resultados são interpretados em conjunto com a clínica do paciente." },
+                        { topic: "hematologia_clinica", summary: "Avalia os componentes celulares do sangue. Inclui o hemograma completo (eritrograma, leucograma, plaquetograma), que fornece informações sobre anemia, infecções, leucemias e distúrbios de coagulação. A morfologia celular ao microscópio é essencial para identificar anomalias." },
+                        { topic: "urinálise", summary: "Análise físico-química e microscópica da urina. A avaliação física inclui cor, turbidez e densidade. A química (tira reativa) detecta glicose, proteínas, cetonas, nitritos, leucócitos, sangue e pH. A análise microscópica identifica células (hemácias, leucócitos, células epiteliais), cilindros, cristais e microrganismos, auxiliando no diagnóstico de doenças renais e urinárias." },
+                        { topic: "microbiologia_clinica", summary: "Identifica e caracteriza microrganismos (bactérias, fungos, vírus, parasitas) causadores de infecções. Métodos incluem cultura (em meios seletivos e diferenciais), coloração de Gram, testes bioquímicos, testes de sensibilidade a antimicrobianos (antibiograma) e métodos moleculares (PCR). É fundamental para o diagnóstico e tratamento eficaz de infecções." },
+                        { topic: "imunologia_clinica", summary: "Estuda a resposta imune em relação a doenças. Envolve a detecção de anticorpos (diagnóstico de infecções, doenças autoimunes, alergias), antígenos, e marcadores de inflamação. Técnicas comuns incluem ELISA, imunofluorescência e citometria de fluxo. Essencial para o diagnóstico de HIV, hepatites, lúpus, artrite reumatoide e imunodeficiências." },
+                        { topic: "parasitologia_clinica", summary: "Diagnóstico laboratorial de infecções parasitárias. Inclui a análise de amostras de fezes para ovos e parasitas (OPP), pesquisa de protozoários em amostras de sangue (ex: malária), e testes sorológicos para detecção de anticorpos ou antígenos parasitários. Fundamental em regiões endêmicas e para controle de doenças como giardíase, amebíase, esquistossomose e doenças transmitidas por vetores." }
+                    ]
+                },
+                'atencao_primaria_saude': { // Nova categoria de nível superior
+                    display: 'Atenção Primária da Saúde',
+                    colorClass: 'atencao_primaria_saude-color',
+                    topics: [
+                        { topic: "conceitos_e_principios_aps", summary: "A Atenção Primária à Saúde (APS) é o primeiro nível de contato dos indivíduos, da família e da comunidade com o sistema nacional de saúde. É essencial para a promoção da saúde, prevenção de doenças, tratamento e reabilitação. Seus princípios incluem acesso universal, integralidade, longitudinalidade, coordenação do cuidado, foco na família e comunidade, e orientação para a população." },
+                        { topic: "organizacao_e_modelos_de_atencao_aps", summary: "A organização da APS varia, mas frequentemente envolve Unidades Básicas de Saúde (UBS) como porta de entrada. A Estratégia Saúde da Família (ESF) é um modelo prioritário no Brasil, baseado em equipes multiprofissionais que atuam em territórios definidos, buscando a integralidade do cuidado e o vínculo com a comunidade. Outros modelos podem ser por demanda espontânea ou clínicas gerais." },
+                        { topic: "equipes_de_saude_na_aps", summary: "As equipes de saúde na APS são multiprofissionais e essenciais para a abordagem integral do paciente e da comunidade. Uma equipe de saúde da família típica inclui médico(a) de família e comunidade, enfermeiro(a), técnico(a) de enfermagem e agente(s) comunitário(s) de saúde (ACS). Pode haver também dentista, técnico de saúde bucal e outros profissionais de apoio (Nutricionista, Psicólogo, Fisioterapeuta)." },
+                        { topic: "acoes_de_saude_na_aps", summary: "As ações da APS são abrangentes e vão além do tratamento de doenças. Incluem: **Promoção da Saúde** (educação em saúde, hábitos saudáveis), **Prevenção de Doenças** (vacinação, rastreamentos, controle de vetores), **Tratamento** de condições agudas e crônicas comuns, **Reabilitação** (acompanhamento de sequelas) e **Paliativos**. O foco é no cuidado contínuo e na coordenação com outros níveis de atenção." },
+                        { topic: "cuidado_continuo_e_longitudinal_na_aps", summary: "A longitudinalidade do cuidado é um atributo fundamental da APS, referindo-se ao estabelecimento de um vínculo terapêutico e acompanhamento da saúde do indivíduo e da família ao longo do tempo. Isso permite um conhecimento aprofundado do paciente, seus históricos e contextos, facilitando a identificação precoce de problemas, a adesão ao tratamento e a coordenação da atenção em diferentes níveis da rede de saúde." },
+                        { topic: "territorializacao_e_adscricao_aps", summary: "A territorialização na APS envolve a delimitação de áreas geográficas de atuação para as equipes de saúde, permitindo um conhecimento aprofundado do perfil epidemiológico e social da população local. A adscrição da clientela é o vínculo dessa população a uma equipe e a uma UBS, garantindo que cada indivíduo tenha uma equipe de referência para seu cuidado, fortalecendo a longitudinalidade e o acesso equitativo." },
+                        { topic: "sistema_de_informacao_em_aps", summary: "Os sistemas de informação em APS (ex: e-SUS APS, prontuário eletrônico do cidadão - PEC) são ferramentas cruciais para o registro, acompanhamento e gestão do cuidado. Eles permitem a organização do histórico do paciente, o monitoramento de indicadores de saúde da população adscrita, o planejamento de ações e a avaliação da qualidade dos serviços. Contribuem para a continuidade do cuidado e para a vigilância em saúde." }
+                    ]
+                },
+                'termos_tecnicos_medicina': { // Nova categoria de nível superior
+                    display: 'Termos Técnicos em Medicina',
+                    colorClass: 'termos_tecnicos_medicina-color',
+                    topics: [
+                        { topic: "anatomia_topografia", summary: "Termos anatômicos de posição: **Anterior** (ventral, frente), **Posterior** (dorsal, costas), **Superior** (cranial, cefálico), **Inferior** (caudal), **Medial** (próximo à linha média), **Lateral** (afastado da linha média), **Proximal** (próximo à origem/tronco), **Distal** (afastado da origem/tronco), **Superficial** (próximo à superfície), **Profundo** (afastado da superfície). Planos: **Sagital** (divide em direita/esquerda), **Coronal** (divide em anterior/posterior), **Transversal/Axial** (divide em superior/inferior)." },
+                        { topic: "sufixos_comuns", summary: "**-algia** (dor, ex: mialgia - dor muscular), **-ite** (inflamação, ex: apendicite - inflamação do apêndice), **-oma** (tumor, ex: lipoma - tumor benigno de gordura), **-ectomia** (remoção cirúrgica, ex: apendicectomia - remoção do apêndice), **-ostomia** (abertura cirúrgica, ex: colostomia - abertura no cólon para o exterior), **-scopia** (visualização, ex: endoscopia - visualização interna), **-patia** (doença, ex: cardiopatia - doença do coração), **-emia** (condição do sangue, ex: anemia - falta de sangue)." },
+                        { topic: "sinais_sintomas", summary: "**Sinal**: Manifestação objetiva de doença, observável ou mensurável (ex: febre, pressão alta, rash cutâneo). **Sintoma**: Manifestação subjetiva de doença, relatada pelo paciente (ex: dor, náusea, fadiga). **Síndrome**: Conjunto de sinais e sintomas que ocorrem juntos e caracterizam uma condição ou doença. **Etiologia**: Causa da doença. **Patogenia**: Mecanismo de desenvolvimento da doença. **Prognóstico**: Previsão do curso e desfecho da doença." },
+                        { topic: "diagnostico_e_tratamento", summary: "**Anamnese**: Coleta de informações sobre o histórico de saúde do paciente. **Exame Físico**: Avaliação do corpo do paciente para sinais de doença. **Exames Complementares**: Testes laboratoriais, de imagem (radiografia, tomografia, ressonância) ou funcionais. **Diagnóstico Diferencial**: Lista de possíveis doenças que explicam os sinais/sintomas. **Terapêutica**: Plano de tratamento, que pode incluir farmacologia (medicamentos), cirurgia, fisioterapia, etc. **Prognóstico**: Previsão do curso e desfecho da doença." },
+                        { topic: "especialidades_medicas", summary: "**Cardiologia**: Estudo e tratamento de doenças do coração e vasos. **Dermatologia**: Doenças da pele, cabelos e unhas. **Endocrinologia**: Distúrbios hormonais e metabólicos. **Gastroenterologia**: Doenças do sistema digestório. **Ginecologia/Obstetrícia**: Saúde da mulher e gravidez/parto. **Neurologia**: Doenças do sistema nervoso. **Oftalmologia**: Doenças dos olhos. **Ortopedia**: Doenças do sistema musculoesquelético. **Pediatria**: Saúde de crianças e adolescentes. **Psiquiatria**: Transtornos mentais. **Urologia**: Doenças do trato urinário e sistema reprodutor masculino." },
+                        { topic: "farmacologia_basica", summary: "**Farmacocinética**: O que o corpo faz com o medicamento (absorção, distribuição, metabolismo, excreção - ADME). **Farmacodinâmica**: O que o medicamento faz no corpo (mecanismo de ação, efeitos). **Indicação**: Para que o medicamento é usado. **Contraindicação**: Quando o medicamento não deve ser usado. **Posologia**: Dose e frequência de administração. **Efeito Adverso**: Reação indesejada. **Interação Medicamentosa**: Efeito da combinação de medicamentos." },
+                        { topic: "etilista", summary: "**Etilista**: Indivíduo que tem o hábito de consumir bebidas alcoólicas, geralmente em excesso, o que pode levar ao alcoolismo ou dependência de álcool. O termo também pode ser usado para descrever o consumo crônico de álcool que impacta a saúde. **Sinônimo**: Alcoólatra (embora com conotação mais pejorativa, etilista é mais técnico/descritivo)." },
+                        { topic: "abscesso", summary: "**Abscesso**: Coleção localizada de pus (líquido espesso e amarelado composto por leucócitos mortos, restos celulares e bactérias), formada em um tecido ou órgão devido a uma infecção bacteriana. Apresenta-se com dor, calor, rubor (vermelhidão), inchaço e, por vezes, febre. O tratamento geralmente envolve drenagem cirúrgica e antibioticoterapia." },
+                        { topic: "aerofagia", summary: "**Aerofagia**: Deglutição excessiva de ar, que pode levar a sintomas como distensão abdominal, eructação (arrotos) frequente e flatulência. Geralmente ocorre ao comer ou beber muito rápido, falar enquanto come, mascar chiclete, ou por ansiedade. Pode ser um sintoma de condições gastrointestinais subjacentes, mas muitas vezes é funcional." },
+                        { topic: "anorexia", summary: "**Anorexia**: 1. Perda ou diminuição do apetite. 2. No contexto de transtorno alimentar (Anorexia Nervosa), é uma recusa em manter um peso corporal saudável, associada a um medo intenso de ganhar peso e uma percepção distorcida da imagem corporal. **Não confundir com Anorexia Nervosa**." },
+                        { topic: "apneia", summary: "**Apneia**: Parada temporária da respiração. Pode ocorrer durante o sono (apneia do sono), em mergulhos, ou ser sintoma de condições médicas graves. Um episódio de apneia é considerado clinicamente significativo se durar mais de 10 segundos em adultos." },
+                        { topic: "cianose", summary: "**Cianose**: Coloração azulada ou arroxeada da pele e/ou mucosas, causada pela presença de hemoglobina não oxigenada (desoxi-hemoglobina) no sangue. Indica oxigenação insuficiente dos tecidos. Pode ser central (ex: doenças cardíacas/pulmonares) ou periférica (ex: exposição ao frio, má circulação local)." },
+                        { topic: "disfagia", summary: "**Disfagia**: Dificuldade ou desconforto para engolir alimentos líquidos ou sólidos. Pode ser orofaríngea (dificuldade de iniciar o engolir) ou esofágica (sensação de alimento preso no esôfago). É um sintoma que pode indicar diversas condições, desde neurológicas a obstrutivas." },
+                        { topic: "dispepsia", summary: "**Dispepsia**: Sensação de desconforto ou dor na região superior do abdome (epigástrio), frequentemente acompanhada de sintomas como plenitude pós-prandial (sensação de estômago cheio após comer), saciedade precoce, náuseas, vômitos, inchaço e queimação. Conhecida popularmente como 'má digestão' ou 'indigestão'." },
+                        { topic: "disuria", summary: "**Disúria**: Dor, queimação ou desconforto ao urinar. É um sintoma comum de infecções do trato urinário (ITU), mas também pode ser causada por inflamação, irritação ou outras condições no sistema urinário ou genital." },
+                        { topic: "edema", summary: "**Edema**: Acúmulo excessivo de líquido no espaço intersticial (espaço entre as células), causando inchaço visível nos tecidos. Pode ser localizado (ex: após lesão) ou generalizado (ex: insuficiência cardíaca, renal ou hepática)." },
+                        { topic: "emese", summary: "**Emeses**: O ato de vomitar; vômitos. É a expulsão forçada do conteúdo do estômago pela boca. Pode ser um sintoma de diversas condições, desde infecções gastrointestinais a problemas neurológicos ou efeitos colaterais de medicamentos. **Sinônimo**: Vômito." },
+                        { topic: "epistaxe", summary: "**Epistaxe**: Sangramento do nariz. É um sangramento da mucosa nasal, comum e geralmente benigno, mas pode ser intenso e recorrente. Pode ser causado por trauma, ressecamento da mucosa, hipertensão arterial, ou distúrbios de coagulação." },
+                        { topic: "eructacao", summary: "**Eructação**: Expulsão de gás (ar) do estômago ou esôfago pela boca, acompanhada de um som característico. Popularmente conhecido como 'arroto'. Geralmente ocorre após a ingestão de alimentos ou bebidas gaseificadas, ou como sintoma de aerofagia." },
+                        { topic: "febre", summary: "**Febre**: Elevação da temperatura corporal acima da faixa normal (geralmente > 37.8°C ou 38°C). É uma resposta fisiológica a infecções, inflamações ou outras condições patológicas. É um sinal de que o sistema imune está ativo." },
+                        { topic: "hematemese", summary: "**Hematêmese**: Vômito com sangue. Indica sangramento no trato gastrointestinal superior (esôfago, estômago, duodeno). O sangue pode ser vermelho vivo (sangramento ativo) ou ter aspecto de 'borra de café' (sangramento digerido). É uma emergência médica." },
+                        { topic: "hemoptise", summary: "**Hemoptise**: Tosse com sangue, proveniente das vias aéreas inferiores (brônquios, pulmões). O sangue é geralmente vermelho vivo e espumoso, misturado com escarro. Pode ser um sinal de condições pulmonares pulmonares graves como pneumonia, tuberculose, câncer de pulmão ou embolia pulmonar." },
+                        { topic: "hepatomegalia", summary: "**Hepatomegalia**: Aumento do tamanho do fígado. Pode ser causada por diversas condições, como infecções (hepatites), doenças do coração (insuficiência cardíaca), acúmulo de gordura (esteatose hepática), tumores ou outras doenças hepáticas. É detectada por exame físico ou imagem." },
+                        { topic: "hiperemia", summary: "**Hiperemia**: Aumento do fluxo sanguíneo em uma determinada área do corpo, resultando em vermelhidão e aumento da temperatura local. É um dos sinais cardinais da inflamação (rubor e calor) e pode ser fisiológica (ex: exercício) ou patológica (ex: inflamação, infecção)." },
+                        { topic: "ictericia", summary: "**Icterícia**: Coloração amarelada da pele, mucosas e esclerótica (parte branca dos olhos) devido ao acúmulo de bilirrubina (pigmento biliar) no sangue. Indica problemas no fígado, vias biliares ou excessiva destruição de glóbulos vermelhos (hemólise)." },
+                        { topic: "leucocitose", summary: "**Leucocitose**: Aumento anormal do número de leucócitos (glóbulos brancos) no sangue periférico, acima dos valores de referência. Geralmente indica uma resposta do organismo a infecções, inflamações, estresse, ou pode ser um sinal de doenças hematológicas (leucemias)." },
+                        { topic: "lipotimia", summary: "**Lipotimia**: Sensação de desmaio iminente, tontura, fraqueza, visão turva e suores frios, sem perda total da consciência. Geralmente é causada por uma diminuição temporária do fluxo sanguíneo para o cérebro. Se o paciente perder a consciência, é considerado síncope." },
+                        { topic: "melena", summary: "**Melena**: Fezes escuras, pegajosas, com odor fétido, devido à presença de sangue digerido. Indica sangramento no trato gastrointestinal superior (esôfago, estômago, duodeno) que foi metabolizado pelas bactérias intestinais. É uma emergência médica." },
+                        { topic: "mialgia", summary: "**Mialgia**: Dor muscular. Pode ser localizada ou generalizada, aguda ou crônica. É um sintoma comum de infecções virais (gripe, dengue), inflamações, lesões musculares, uso excessivo ou certas doenças sistêmicas." },
+                        { topic: "odor_fetido", summary: "**Odor Fétido**: Cheiro forte, desagradável e repugnante. Em contextos médicos, pode indicar a presença de infecções (ex: feridas infectadas, abscessos), necrose tecidual, ou processos metabólicos alterados (ex: hálito cetônico no diabetes descompensado)." },
+                        { topic: "oliguria", summary: "**Oligúria**: Diminuição da produção de urina, geralmente definida como menos de 400-500 mL em 24 horas em adultos. Pode ser um sinal de desidratação, insuficiência renal aguda, choque, ou obstrução urinária. **Não confundir com Anúria** (ausência de urina)." },
+                        { topic: "polaciuria", summary: "**Polaciúria**: Aumento da frequência urinária, com necessidade de urinar muitas vezes em pequenos volumes, sem necessariamente haver aumento no volume total de urina produzido. É um sintoma comum de infecções do trato urinário, bexiga hiperativa, ou irritação da bexiga." },
+                        { topic: "polidipsia", summary: "**Polidipsia**: Sede excessiva e persistente. É um dos sintomas clássicos do diabetes mellitus, onde o corpo tenta compensar a perda de líquidos e o aumento da osmolaridade sanguínea devido à glicose elevada. Também pode ser causada por desidratação ou outras condições." },
+                        { topic: "polifagia", summary: "**Polifagia**: Aumento excessivo do apetite e ingestão de alimentos. É um dos sintomas clássicos do diabetes mellitus (especialmente tipo 1), onde as células não conseguem utilizar a glicose e o corpo sente fome mesmo após comer. Também pode ser associada a hipertireoidismo ou ansiedade." },
+                        { topic: "poliuria", summary: "**Poliúria**: Aumento excessivo do volume de urina produzido, geralmente mais de 2,5-3 litros em 24 horas em adultos. É um sintoma comum de diabetes mellitus (devido à diurese osmótica), diabetes insipidus, uso de diuréticos ou consumo excessivo de líquidos." },
+                        { topic: "sudorese", summary: "**Sudorese**: Produção e secreção de suor pelas glândulas sudoríparas. É um mecanismo fisiológico de regulação da temperatura corporal. A sudorese excessiva (hiperidrose) ou ausência de sudorese (anidrose) podem ser sintomas de diversas condições médicas." },
+                        { topic: "taquicardia", summary: "**Taquicardia**: Frequência cardíaca (pulsação) acelerada, geralmente acima de 100 batimentos por minuto em adultos em repouso. Pode ser fisiológica (exercício, estresse) ou patológica (arritmias cardíacas, febre, anemia, ansiedade, choque). Existem diferentes tipos de taquicardias com causas e tratamentos específicos." },
+                        { topic: "taquipneia", summary: "**Taquipneia**: Frequência respiratória acelerada, geralmente acima de 20-25 incursões respiratórias por minuto em adultos em repouso. É um sinal de que o corpo está trabalhando mais para obter oxigênio ou eliminar dióxido de carbono, podendo indicar condições como pneumonia, asma, ansiedade, acidose metabólica ou insuficiência cardíaca." },
+                        { topic: "trombose", summary: "**Trombose**: Formação de um trombo (coágulo sanguíneo) dentro de um vaso sanguíneo (artéria ou veia), que obstrui o fluxo sanguíneo. A **Trombose Venosa Profunda (TVP)** ocorre em veias profundas (geralmente nas pernas). As complicações incluem embolia pulmonar (se o trombo se desprende e vai para o pulmão) e síndrome pós-trombótica. Fatores de risco: imobilidade, cirurgia, câncer, distúrbios de coagulação." }
+                    ]
+                },
+                'anatomia': { // Nova categoria de nível superior
+                    display: 'Anatomia',
+                    colorClass: 'anatomia-color',
+                    topics: [
+                        { topic: "niveis_organizacao_anatomica", summary: "A anatomia estuda a estrutura do corpo. Os níveis de organização incluem: **químico** (átomos, moléculas), **celular** (células como unidade básica), **tecidual** (grupos de células com função similar), **orgânico** (órgãos formados por diferentes tecidos), **sistêmico** (grupos de órgãos trabalhando juntos) e **organismal** (o corpo como um todo)." },
+                        { topic: "sistemas_esquelético_articular", summary: "O **sistema esquelético** é formado por ossos e cartilagens, fornecendo suporte, proteção, movimento, produção de células sanguíneas e armazenamento de minerais. O **sistema articular** inclui as articulações, que permitem o movimento entre os ossos, classificadas em fibrosas (imóveis), cartilaginosas (semi-móveis) e sinoviais (livremente móveis)." },
+                        { topic: "sistema_muscular", summary: "Composto por músculos que permitem movimento, postura e produção de calor. Principais tipos: **Músculo esquelético** (voluntário, estriado), **Músculo cardíaco** (involuntário, estriado, no coração) e **Músculo liso** (involuntário, não estriado, em órgãos ocos). A contração muscular é mediada pela interação de actina e miosina." },
+                        { topic: "sistema_nervoso_anatomia", summary: "Anatomicamente, o sistema nervoso divide-se em **Sistema Nervoso Central (SNC)**: encéfalo (cérebro, cerebelo, tronco encefálico) e medula espinhal; e **Sistema Nervoso Periférico (SNP)**: nervos (cranianos e espinhais) e gânglios. Responsável por receber, processar e enviar informações, controlando funções corporais e mentais." },
+                        { topic: "sistema_cardiovascular_anatomia", summary: "Compreende o **coração** (bomba muscular tetracavitária), **vasos sanguíneos** (artérias, veias, capilares) e **sangue. O coração tem quatro câmaras (átrios e ventrículos) e valvas que direcionam o fluxo sanguíneo. A circulação é dividida em **pulmonar** (coração-pulmão-coração) e **sistêmica** (coração-corpo-coração)." },
+                        { topic: "sistema_respiratorio_anatomia", summary: "Inclui **vias aéreas superiores** (nariz, faringe, laringe) e **inferiores** (traqueia, brônquios, bronquíolos, alvéolos). Os **pulmões** são órgãos pares onde ocorrem as trocas gasosas (hematose) nos alvéolos. A respiração é assistida por músculos como o diafragma." },
+                        { topic: "sistema_digestorio_anatomia", summary: "Formado pelo **trato gastrointestinal** (boca, faringe, esôfago, estômago, intestino delgado, intestino grosso, reto, ânus) e **órgãos acessórios** (glândulas salivares, fígado, vesícula biliar, pâncreas). Responsável pela ingestão, digestão, absorção de nutrientes e eliminação de resíduos." },
+                        { topic: "sistema_urinario_anatomia", summary: "Composto por **rins** (filtram o sangue, produzem urina), **ureteres** (tubos que levam a urina dos rins para a bexiga), **bexiga urinária** (armazena urina) e **uretra** (tubo que transporta a urina para fora do corpo). Essencial para a homeostase de fluidos, eletrólitos e pH." },
+                        { topic: "sistema_endocrino_anatomia", summary: "Consiste em **glândulas endócrinas** (hipófise, tireoide, paratireoides, suprarrenais, pâncreas, ovários/testículos) que secretam hormônios diretamente na corrente sanguínea. Os hormônios atuam como mensageiros químicos, regulando diversas funções corporais." },
+                        { topic: "sistema_linfatico_imune_anatomia", summary: "O **sistema linfático** inclui vasos linfáticos, linfonodos, timo, baço e tonsilas. Transporta linfa, filtra patógenos e desempenha papel crucial na imunidade. O **sistema imune** envolve estruturas e células (leucócitos, macrófagos) que defendem o corpo contra agentes externos e células anormais." },
+                        { topic: "tegumento_anatomia", summary: "Compreende a **pele** (epiderme, derme, hipoderme), **pelos**, **unhas** e **glândulas** (sudoríparas, sebáceas). Atua na proteção, regulação térmica, percepção sensorial, e síntese de vitamina D." }
+                    ]
+                },
+                'biofisica': { // Nova categoria de nível superior: Biofísica
+                    display: 'Biofísica',
+                    colorClass: 'biofisica-color',
+                    topics: [
+                        { topic: "biofisica_da_membrana", summary: "A biofisica da membrana estuda as propriedades físicas das membranas biológicas, focando em potenciais de membrana (potencial de repouso, potencial de ação), canais iônicos (proteínas que regulam o fluxo de íons), bombas iônicas (ex: Na+/K+ ATPase), e transporte através da membrana. É fundamental para a compreensão da excitabilidade celular em neurônios e músculos." },
+                        { topic: "biofisica_do_musculo", summary: "A biofisica do músculo explora os princípios físicos da contração muscular. Envolve o estudo da interação actina-miosina (teoria do filamento deslizante), o papel do cálcio, a geração de força, e os tipos de contração (isotônica: encurtamento; isométrica: sem encurtamento). Aplica conceitos de mecânica e termodinâmica para entender o desempenho muscular." },
+                        { topic: "biofisica_cardiovascular", summary: "A biofisica cardiovascular aplica a física ao sistema circulatório. Abrange a hemodinâmica (fluxo sanguíneo, resistência vascular, pressão arterial), as propriedades mecânicas do coração (contratilidade, complacência), e o funcionamento dos vasos sanguíneos (elasticidade, pulsatilidade). Compreender esses princípios é vital para diagnosticar e tratar doenças cardiovasculares." },
+                        { topic: "biofisica_da_visao", summary: "A biofisica da visão estuda como a luz é percebida pelo olho e convertida em sinais neurais. Inclui a óptica do olho (formação da imagem na retina), a fototransdução (processo molecular nos fotorreceptores), e a adaptação à luz e escuridão. Aborda fenômenos como acuidade visual, percepção de cor e erros de refração." },
+                        { topic: "biofisica_da_audicao", summary: "A biofisica da audição investiga a transdução do som em sinais elétricos no ouvido. Analisa as propriedades físicas do som (frequência, intensidade), a mecânica do ouvido (condução das ondas sonoras), e o processo de conversão mecânica-elétrica nas células ciliadas da cóclea. Essencial para entender a audição e distúrbios auditivos." },
+                        { topic: "biofisica_da_radiacao", summary: "A biofisica da radiação estuda a interação da radiação ionizante (raios-X, gama) e não-ionizante (UV, laser) com sistemas biológicos. Examina os mecanismos de dano celular (ao DNA, proteínas), os efeitos biológicos (câncer, mutações), e as aplicações médicas (radiodiagnóstico, radioterapia). Inclui princípios de proteção radiológica." },
+                        { topic: "termodinamica_biologica", summary: "A termodinâmica biológica aplica as leis da termodinâmica aos sistemas vivos. Foca na energia (ATP como moeda energética), na entropia (desordem), e nas reações que ocorrem nas células (metabolismo). Explica como os organismos obtêm e utilizam energia para manter a homeostase, crescer e se reproduzir, respeitando as leis da conservação de energia e aumento da entropia." }
+                    ]
+                },
+                'casos_clinicos': { // Nova categoria de nível superior: Casos Clínicos
+                    display: 'Casos Clínicos',
+                    colorClass: 'casos_clinicos-color',
+                    topics: [
+                        { topic: "dor_toracica_aguda", summary: "Paciente relata dor torácica retroesternal intensa, irradiando para o braço esquerdo, acompanhada de sudorese e náuseas. ECG mostra supradesnivelamento do segmento ST. Suspeita: Infarto Agudo do Miocárdio. Conduta: ABCDE, Oxigênio, AAS, Nitrato, Morfina (se dor persistente), Clopidogrel, monitorização cardíaca, e preparo para angioplastia primária." },
+                        { topic: "dispneia_subita", summary: "Paciente com histórico de trombose venosa profunda (TVP) apresenta dispneia súbita, dor torácica pleurítica e taquicardia. D-dímero elevado, hipoxemia na gasometria. Suspeita: Tromboembolismo Pulmonar (TEP). Conduta: Anticoagulação imediata (heparina), oxigenoterapia, e avaliação para trombólise em casos graves." },
+                        { topic: "cefaleia_intensa_e_febre", summary: "Paciente com cefaleia holocraniana intensa, febre alta, rigidez de nuca, fotofobia e vômitos em jato. Suspeita: Meningite (bacteriana ou viral). Conduta: Coleta de líquor para análise (punção lombar), início empírico de antibióticos (se suspeita bacteriana), isolamento respiratório, e manejo sintomático." },
+                        { topic: "dor_abdominal_aguda_quadrante_inferior_direito", summary: "Paciente jovem com dor periumbilical que migrou para o quadrante inferior direito, acompanhada de náuseas, vômitos e febre baixa. Sinal de Blumberg positivo. Suspeita: Apendicite Aguda. Conduta: Jejum, hidratação venosa, analgésicos, antibióticos e preparo para apendicectomia (cirurgia)." },
+                        { topic: "polidipsia_poliuria_polifagia", summary: "Criança apresentando aumento da sede (polidipsia), aumento da micção (poliúria), aumento do apetite (polifagia) e perda de peso, com histórico familiar de diabetes. Glicemia capilar elevada e cetonúria. Suspeita: Diabetes Mellitus Tipo 1 (DM1). Conduta: Hidratação, insulinoterapia, monitorização rigorosa da glicemia e educação do paciente e família." },
+                        { topic: "perda_subita_forca_um_lado_corpo", summary: "Paciente idoso, hipertenso, acorda com dificuldade para mover o braço e a perna do lado esquerdo, desvio de rima labial e fala arrastada. Suspeita: Acidente Vascular Encefálico (AVE) isquêmico ou hemorrágico. Conduta: Ativação do protocolo de AVE, TC de crânio urgente para diferenciar isquêmico de hemorrágico, controle da pressão arterial, e avaliação para trombólise (se AVE isquêmico dentro da janela terapêutica)." },
+                        { topic: "convulsoes_febris", summary: "Lactente com febre alta e convulsão tônico-clônica generalizada de curta duração, sem história prévia. Exame neurológico normal após o evento. Suspeita: Convulsão Febril Simples. Conduta: Controle da temperatura (antipiréticos, compressas), monitorização, e investigação da causa da febre. Não requer medicação anticonvulsivante contínua." },
+                        { topic: "crise_asma_grave", summary: "Adolescente com asma relata piora súbita de dispneia, tosse, sibilância intensa e dificuldade para falar. FR > 30 irpm, FC > 120 bpm, dessaturação. Suspeita: Crise Grave de Asma. Conduta: Oxigenoterapia, broncodilatadores inalatórios de curta ação (salbutamol), corticoide sistêmico (prednisolona/metilprednisolona), e avaliação para suporte ventilatório se necessário." },
+                        { topic: "insuficiencia_cardiaca_descompensada", summary: "Idoso com histórico de IC apresenta dispneia progressiva, ortopneia, edema de membros inferiores e crepitações pulmonares à ausculta. BNP elevado. Suspeita: Insuficiência Cardíaca Descompensada. Conduta: Diuréticos (furosemida) para reduzir congestão, vasodilatadores (nitroglicerina), oxigenoterapia, e ajuste de medicações crônicas." },
+                        { topic: "infeccao_urinaria_complicada", summary: "Mulher com disúria, polaciúria, dor lombar e febre alta com calafrios. Urocultura positiva para *E. coli*. Suspeita: Pielonefrite Aguda (ITU complicada). Conduta: Antibioticoterapia empírica intravenosa (ex: ceftriaxona ou ciprofloxacino) ajustada após antibiograma, hidratação, e controle da febre. Considerar imagem para descartar obstrução." },
+                        { topic: "intoxicacao_exogena_acidental", summary: "Criança encontrada sonolenta e com embalagem de medicamento (ex: benzodiazepínico) vazia ao lado. Pupilas mióticas, bradicardia, depressão respiratória. Suspeita: Intoxicação por depressor do SNC. Conduta: ABCDE (priorizar via aérea e respiração), descontaminação (carvão ativado se indicado), e administração de antídoto específico se disponível (ex: flumazenil para benzodiazepínicos)." },
+                        { topic: "choque_anafilatico", summary: "Após picada de inseto, paciente apresenta urticária generalizada, angioedema de lábios e pálpebras, dispneia, sibilância, hipotensão e taquicardia. Suspeita: Choque Anafilático. Conduta: **ADRENALINA IM IMEDIATA** (primeira linha), oxigenoterapia, anti-histamínicos (difenhidramina), corticoides (metilprednisolona), volume IV (soro fisiológico) para hipotensão, e monitorização rigorosa." }
+                    ]
+                },
+                'clinica_medica': { // Nova categoria de nível superior: Clínica Médica
+                    display: 'Clínica Médica',
+                    colorClass: 'clinica_medica-color',
+                    topics: [
+                        { topic: "insuficiencia_cardiaca", summary: "Síndrome clínica complexa resultante de comprometimento estrutural ou funcional do enchimento ventricular ou ejeção de sangue. Classificada por fração de ejeção (reduzida ou preservada). Sintomas incluem dispneia, fadiga, edema. Diagnóstico: clínica, ecocardiograma, BNP. Tratamento: IECA/BRA, betabloqueadores, diuréticos, antagonistas de mineralocorticoides. Em casos avançados, transplante cardíaco ou dispositivos." },
+                        { topic: "hipertensao_arterial_sistemica", summary: "Elevação persistente da pressão arterial ($\geq 140/90 \\text{ mmHg}$). Fatores de risco: idade, obesidade, sedentarismo, dieta. Classificação: estágio 1, 2 ou 3. Complicações: AVE, infarto, insuficiência renal, retinopatia. Tratamento: mudanças de estilo de vida (dieta, exercício), e fármacos (diuréticos, IECA/BRA, BCC, betabloqueadores). Foco no controle a longo prazo e prevenção de danos a órgãos-alvo." },
+                        { topic: "diabetes_mellitus_tipo_2", summary: "Doença metabólica crônica caracterizada por hiperglicemia devido à resistência à insulina e/ou deficiência relativa na secreção de insulina. Fatores de risco: obesidade, sedentarismo, histórico familiar. Sintomas: polidipsia, poliúria, polifagia, perda de peso. Diagnóstico: glicemia de jejum, TTOG, HbA1c. Tratamento: dieta, exercício, metformina (primeira linha), sulfonilureias, iSGLT2, agonistas de GLP-1, insulina. Prevenção de complicações micro e macrovasculares." },
+                        { topic: "doenca_pulmonar_obstrutiva_cronica", summary: "Condição comum e prevenível, caracterizada por limitação persistente do fluxo aéreo, geralmente progressiva e associada a uma resposta inflamatória crônica das vias aéreas e pulmões a partículas ou gases nocivos (principalmente fumo). Inclui enfisema e bronquite crônica. Diagnóstico: espirometria. Sintomas: dispneia, tosse crônica, expectoração. Tratamento: cessação do tabagismo (mais importante), broncodilatadores (beta-2 agonistas, anticolinérgicos), corticoides inalatórios, reabilitação pulmonar, oxigenoterapia." },
+                        { topic: "doenca_renal_cronica", summary: "Perda progressiva e irreversível da função renal, definida por anormalidades estruturais ou funcionais do rim por mais de 3 meses. Classificada por estágios (G1 a G5) com base na TFG. Causas comuns: diabetes, hipertensão. Complicações: anemia, distúrbios ósseos e minerais, sobrecarga de volume, acidose metabólica. Tratamento: controle da causa base, dieta, manejo de complicações, e terapia de substituição renal (diálise, transplante) em estágios avançados." },
+                        { topic: "artrite_reumatoide", summary: "Doença autoimune crônica e inflamatória que afeta principalmente as articulações (poliartrite simétrica, pequenas articulações), levando a dor, inchaço, rigidez matinal e, se não tratada, deformidades e destruição articular. Pode afetar outros órgãos. Diagnóstico: critérios clínicos, sorologia (FR, anti-CCP), exames de imagem. Tratamento: AINEs, glicocorticoides, DMARDs (metotrexato, sulfassalazina), biológicos. O objetivo é remissão ou baixa atividade da doença para prevenir danos e melhorar a qualidade de vida." },
+                        { topic: "sepse_e_choque_septico", summary: "Sepse é uma disfunção orgânica com risco de vida causada por uma resposta desregulada do hospedeiro a uma infecção. Choque séptico é um subconjunto da sepse com disfunções circulatórias e metabólicas profundas que aumentam ainda mais o risco de mortalidade. Caracterizado por hipotensão persistente necessitando de vasopressores e lactato sérico elevado. Conduta: Reconhecimento precoce, \"bundle da sepse\" (culturas, antibióticos de amplo espectro, fluidos, vasopressores), controle do foco infeccioso e suporte orgânico." },
+                        { topic: "anemia_ferropriva", summary: "Tipo mais comum de anemia, causada pela deficiência de ferro, essencial para a síntese de hemoglobina. Causas: perda sanguínea crônica (menstruação, TGI), ingestão inadequada, má absorção. Sintomas: fadiga, palidez, dispneia, unhas quebradiças (coiloníquia). Diagnóstico: hemograma (VCM baixo, HCM baixo), ferritina sérica baixa, ferro sérico baixo, TIBC elevado. Tratamento: suplementação de ferro oral (sulfato ferroso), tratamento da causa subjacente." },
+                        { topic: "acidente_vascular_encefalico_ave", summary: "Interrupção súbita do fluxo sanguíneo cerebral (AVE isquêmico - 85%) ou sangramento dentro do cérebro (AVE hemorrágico - 15%). Sintomas: fraqueza/paralisia unilateral, assimetria facial, dificuldade de fala (disartria/afasia), alteração visual súbita. Diagnóstico: TC de crânio urgente. Tratamento isquêmico: trombólise IV (se janela) ou trombectomia mecânica. Tratamento hemorrágico: controle de PA, reversão de coagulopatia, neurocirurgia. Reabilitação é crucial." },
+                        { topic: "pneumonia_adquirida_na_comunidade_pac", summary: "Infecção aguda do parênquima pulmonar adquirida fora do ambiente hospitalar. Causada por bactérias (Streptococcus pneumoniae, Mycoplasma pneumoniae, Chlamydophila pneumoniae) ou vírus. Sintomas: febre, tosse com expectoração, dispneia, dor torácica. Diagnóstico: clínica, exame físico, radiografia de tórax. Tratamento: antibioticoterapia empírica (amoxicilina, macrolídeos) ajustada se necessário, oxigenoterapia, suporte geral." }
+                    ]
+                },
+                'ecg_eletrocardiograma': { // Nova categoria de nível superior: ECG Eletrocardiograma
+                    display: 'ECG Eletrocardiograma',
+                    colorClass: 'ecg_eletrocardiograma-color',
+                    topics: [
+                        { topic: "fundamentos_e_ondas", summary: "O ECG registra a atividade elétrica do coração. A **onda P** representa a despolarização atrial. O **complexo QRS** (onda Q, R, S) representa a despolarização ventricular. A **onda T** representa a repolarização ventricular. O **intervalo PR** mede a condução AV. O **segmento ST** é o período isoelétrico após a despolarização ventricular. O **intervalo QT** representa a despolarização e repolarização ventricular total." },
+                        { topic: "eixos_e_desvios", summary: "O **eixo elétrico do coração** reflete a direção média da despolarização ventricular no plano frontal. É calculado a partir das derivações D1 e aVF. O eixo normal está entre -30° e +90°. **Desvio do Eixo para a Esquerda (DED)**: ocorre em condições como bloqueio de ramo esquerdo, hipertrofia ventricular esquerda. **Desvio do Eixo para a Direita (DED)**: pode ser visto em bloqueio de ramo direito, hipertrofia ventricular direita ou embolia pulmonar." },
+                        { topic: "arritmias_basicas", summary: "Arritmias são alterações no ritmo cardíaco. Exemplos: **Taquicardia Sinusal**: FC > 100 bpm, ritmo sinusal normal. **Bradicardia Sinusal**: FC < 60 bpm, ritmo sinusal normal. **Fibrilação Atrial (FA)**: ritmo atrial caótico e irregular, sem onda P definida, com complexos QRS irregulares. **Extrassístoles Ventriculares (EV)**: batimentos prematuros originados nos ventrículos, com QRS largo e bizarro, sem onda P prévia. **Taquicardia Ventricular (TV)**: três ou mais EVs consecutivos, ritmo rápido e regular de QRS largo. **Fibrilação Ventricular (FV)**: ritmo caótico e irregular, sem QRS definidos, causa mais comum de morte súbita cardíaca." },
+                        { topic: "bloqueios_atrioventriculares", summary: "Bloqueios AV são distúrbios na condução do impulso do átrio para o ventrículo. **Bloqueio AV de 1º Grau**: Prolongamento do intervalo PR (> 0.20s) sem QRS perdidos. **Bloqueio AV de 2º Grau Tipo Mobitz I (Wenckebach)**: Prolongamento progressivo do PR até que uma onda P não seja conduzida (QRS perdido). **Bloqueio AV de 2º Grau Tipo Mobitz II**: PR constante com QRS perdidos intermitentemente. **Bloqueio AV Total (3º Grau)**: Dissociação AV completa, átrios e ventrículos batem independentemente (ritmo de escape)." },
+                        { topic: "sinais_isquemia_e_infarto", summary: "O ECG é crucial no diagnóstico de isquemia e infarto. **Isquemia**: pode se manifestar com inversão da onda T ou depressão do segmento ST. **Lesão**: caracterizada por supradesnivelamento (IAM com ST) ou infradesnivelamento (IAM sem ST) do segmento ST. **Necrose/Infarto Antigo**: presença de onda Q patológica (larga e profunda), indicando área de miocárdio infartada." },
+                        { topic: "sobrecargas_e_hipertrofias", summary: "Sobrecargas e hipertrofias podem ser identificadas no ECG. **Sobrecarga Atrial Esquerda**: onda P bífida e alargada (P mitrale) em D2, V1. **Sobrecarga Atrial Direita**: onda P pontiaguda e alta (P pulmonale) em D2, D3, aVF. **Hipertrofia Ventricular Esquerda (HVE)**: aumento da amplitude de S em V1/V2 + R em V5/V6 (> 35mm - critério de Sokolow-Lyon), desvio do eixo para esquerda, alteração de repolarização. **Hipertrofia Ventricular Direita (HVD)**: desvio do eixo para direita, R dominante em V1, T invertida em V1-V3." },
+                        { topic: "marcapasso_e_dispositivos", summary: "O ECG de pacientes com marcapasso mostra artefatos (espículas) antes do complexo P (marcapasso atrial), QRS (marcapasso ventricular) ou ambos (marcapasso AV). A análise do ECG pode ajudar a verificar a captura (se o estímulo gerou uma resposta) e a detecção (se o marcapasso está detectando a atividade cardíaca intrínseca). Disfunções do marcapasso incluem falha de captura ou falha de detecção." },
+                        { topic: "alteracoes_eletroliticas", summary: "Distúrbios eletrolíticos podem ter manifestações no ECG. **Hipercalemia (Potássio elevado)**: ondas T apiculadas e estreitas (\"T tenda\"), prolongamento do PR, alargamento do QRS, ausência de onda P, e em casos graves, FV. **Hipocalemia (Potássio baixo)**: achatamento da onda T, presença de onda U, prolongamento do QT, depressão do segmento ST. **Hipercalcemia (Cálcio elevado)**: encurtamento do intervalo QT. **Hipocalcemia (Cálcio baixo)**: prolongamento do intervalo QT." }
+                    ]
+                },
+                'embriologia': { // Embriologia elevada para nível superior
+                    display: 'Embriologia',
+                    colorClass: 'embriologia-color',
+                    topics: [
+                        { topic: "gametogenese_e_fecundacao", summary: "Gametogênese é o processo de formação de gametas maduros (espermatozoides e óvulos) por meiose nos ovários e testículos, reduzindo o número de cromossomos pela metade. A espermatogênese produz quatro espermatozoides viáveis, e a ovogênese produz um óvulo e corpúsculos polares. A fecundação é a fusão de um espermatozoide com um óvulo, que ocorre geralmente na tuba uterina, restaurando o número diploide de cromossomos e formando o zigoto, o início de um novo indivíduo." },
+                        { topic: "clivagem_e_blastulacao", summary: "Clivagem (ou segmentação) são as rápidas e sucessivas divisões mitóticas do zigoto, que aumentam o número de células (blastômeros) sem aumentar o volume total. Esse processo leva à formação da mórula (uma massa compacta de células) e, posteriormente, da blástula (ou blastocisto em mamíferos), uma esfera oca de células com uma cavidade interna (blastocele) e uma massa celular interna (embrioblasto) que dará origem ao embrião." },
+                        { topic: "formacao_anexos_embrionarios", summary: "Anexos embrionários são estruturas que se desenvolvem a partir dos folhetos germinativos, mas que não se tornam parte do embrião propriamente dito; são essenciais para seu desenvolvimento. Em humanos, incluem: 1) Saco Vitelínico: nutrição inicial e formação de células sanguíneas. 2) Âmnio: forma a cavidade amniótica, que protege o embrião de choques mecânicos e desidratação. 3) Alantoide: participa da formação do cordão umbilical e bexiga. 4) Córion: forma a parte fetal da placenta, responsável pelas trocas materno-fetais." },
+                        { topic: "gastrulacao_e_folhetos_germinativos", summary: "Gastrulação é um processo fundamental de intensa movimentação e reorganização celular que transforma a blástula em gástrula. Durante a gastrulação, as células se rearranjam para formar as três camadas germinativas (folhetos): 1) Ectoderme: camada mais externa, origina pele, sistema nervoso central e periférico. 2) Mesoderme: camada intermediária, origina músculos, ossos, sistema circulatório, urinário e reprodutor. 3) Endoderme: camada mais interna, origina o revestimento dos sistemas digestório e respiratório, e glândulas associadas. Esses folhetos darão origem a todos os tecidos e órgãos do corpo." },
+                        { topic: "neurulacao_e_organogenese", summary: "Neurulação é o processo de formação do tubo neural a partir da ectoderme, que se invagina e fecha para dar origem ao sistema nervoso central (encéfalo e medula espinhal). Este é um evento precoce e crucial da organogenese. A organogenese é o período subsequente da embriogenese onde os três folhetos germinativos se diferenciam, interagem e se dobram para formar os diversos tecidos, órgãos e sistemas do corpo. É um processo complexo de diferenciação e morfogênese que continua até o final do período embrionário (8ª semana)." }
+                    ]
+                },
+                'farmacologia': { // Nova categoria de nível superior: Farmacologia
+                    display: 'Farmacologia',
+                    colorClass: 'farmacologia-color',
+                    topics: [
+                        { topic: "principios_farmacocinetica", summary: "A Farmacocinética estuda o que o corpo faz com o medicamento. Inclui a **Absorção** (entrada na corrente sanguínea), **Distribuição** (espalhamento pelos tecidos e órgãos), **Metabolismo** (transformação química, principalmente no fígado via enzimas do citocromo P450), e **Excreção** (eliminação do corpo, principalmente pelos rins). Estes processos determinam a concentração do fármaco no local de ação e a duração de seu efeito. Vias de administração, ligação a proteínas plasmáticas e função renal/hepática são fatores cruciais." },
+                        { topic: "principios_farmacodinamica", summary: "A Farmacodinâmica estuda o que o medicamento faz no corpo. Envolve a interação do fármaco com alvos biológicos (geralmente proteínas): **Receptores** (macromoléculas que se ligam ao fármaco, desencadeando uma resposta), **Enzimas**, **Canais Iônicos** e **Moléculas Transportadoras**. Um **Agonista** se liga ao receptor e o ativa. Um **Antagonista** se liga ao receptor, mas não o ativa, bloqueando a ação do agonista natural ou de outro fármaco. A **Potência** (dose necessária para produzir efeito) e a **Eficácia** (efeito máximo que o fármaco pode produzir) são conceitos-chave." },
+                        { topic: "classificacao_medicamentos", summary: "Os medicamentos podem ser classificados de diversas formas: por **mecanismo de ação** (ex: inibidores enzimáticos), por **grupo químico** (ex: betalactâmicos), por **uso terapêutico** (ex: anti-hipertensivos, antibióticos, analgésicos). Entender a classificação ajuda a prever efeitos, interações e indicações. Exemplos incluem fármacos cardiovasculares, neurológicos, endócrinos, antimicrobianos, oncológicos, entre outros." },
+                        { topic: "vias_de_administracao", summary: "As vias de administração influenciam a velocidade e a extensão da absorção do fármaco. **Via Oral**: mais comum, conveniente, mas sujeita a primeiro metabolismo hepático. **Via Intravenosa**: rápida, 100% de biodisponibilidade, ideal para emergências. **Via Intramuscular/Subcutânea**: absorção moderada, útil para volumes maiores ou formulações de liberação prolongada. **Via Inalatória**: rápida absorção pulmonar (asma). **Via Tópica**: ação local (cremes). **Via Retal/Sublingual**: evita parcialmente o primeiro metabolismo hepático." },
+                        { topic: "efeitos_adversos_e_toxicidade", summary: "Efeitos adversos são respostas indesejadas a um medicamento. Podem ser **dose-dependentes** (exagerados ou tóxicos), **alérgicos** (imunológicos), ou **idiossincráticos** (genéticos). A **Toxicidade** ocorre quando os efeitos adversos são graves, potencialmente danosos aos órgãos ou à vida. É crucial monitorar os pacientes para efeitos adversos e ajustar as doses conforme necessário. Farmacovigilância é a monitorização contínua desses efeitos após a comercialização." },
+                        { topic: "interacoes_medicamentosas", summary: "Interações medicamentosas ocorrem quando o efeito de um fármaco é alterado pela presença de outro fármaco, alimento, ou substância. Podem ser **Farmacocinéticas** (alteram ADME, ex: indução/inibição enzimática no metabolismo) ou **Farmacodinâmicas** (alteram o efeito no local de ação, ex: sinergismo, antagonismo). As interações podem aumentar ou diminuir a eficácia, ou aumentar a toxicidade. É vital revisar a lista de medicamentos do paciente para prevenir interações perigosas." },
+                        { topic: "farmacos_sistema_nervoso_autonomo", summary: "Fármacos que atuam nos sistemas simpático (luta ou fuga) e parassimpático (repouso e digestão). **Simpaticomiméticos** (agonistas adrenérgicos) mimetizam a adrenalina (ex: salbutamol para asma). **Simpatolíticos** (antagonistas adrenérgicos) bloqueiam a ação da adrenalina (ex: betabloqueadores para hipertensão). **Parassimpatomiméticos** (colinomiméticos) mimetizam a acetilcolina. **Parassimpatolíticos** (anticolinérgicos) bloqueiam a acetilcolina (ex: atropina)." },
+                        { topic: "farmacos_cardiovasculares", summary: "Ampla classe para tratar doenças cardíacas e vasculares. Incluem: **Anti-hipertensivos** (IECA/BRA, BCC, diuréticos, betabloqueadores), **Antiarrítmicos** (regulam o ritmo cardíaco), **Antianginosos** (nitratos), **Hipolipemiantes** (estatinas), **Anticoagulantes/Antiplaquetários** (previnem trombos), e **Fármacos para Insuficiência Cardíaca** (diuréticos, digoxina). Cada classe atua em mecanismos específicos para otimizar a função cardiovascular." },
+                        { topic: "antibioticos_classificacao_mecanismos", summary: "Antibióticos são fármacos que combatem infecções bacterianas. Classificados por **mecanismo de ação**: **Inibidores da Síntese da Parede Celular** (ex: penicilinas, cefalosporinas - betalactâmicos, glicopeptídeos), **Inibidores da Síntese Proteica** (ex: aminoglicosídeos, macrolídeos, tetraciclinas), **Inibidores da Síntese de Ácidos Nucleicos** (ex: quinolonas, rifampicina), e **Inibidores Metabólicos** (ex: sulfametoxazol-trimetoprim). A escolha depende do agente infeccioso e do perfil de resistência." },
+                        { topic: "anti_inflamatorios_analgesicos", summary: "Medicamentos que aliviam dor e inflamação. **AINEs (Anti-inflamatórios Não Esteroidais)**: inibem a ciclooxigenase (COX-1 e/ou COX-2), reduzindo prostaglandinas (ex: ibuprofeno, diclofenaco). Têm efeitos analgésicos, anti-inflamatórios e antipiréticos, mas podem causar danos GI e renais. **Opioides**: analgésicos potentes que atuam em receptores opioides no SNC, aliviando dor severa (ex: morfina, codeína). Podem causar depressão respiratória e dependência. **Paracetamol (Acetaminofeno)**: analgésico e antipirético, com pouca ação anti-inflamatória, menor risco GI." },
+                        { topic: "farmacos_endocrinos", summary: "Fármacos que regulam o sistema endócrino e o metabolismo. Incluem: **Insulinas** e **Hipoglicemiantes Orais** (para diabetes mellitus), **Hormônios Tireoidianos** (levotiroxina para hipotireoidismo) e **Antitireoidianos** (para hipertireoidismo), **Corticoides** (glicocorticoides como prednisona, com ação anti-inflamatória e imunossupressora), e **Fármacos que afetam o metabolismo ósseo** (bifosfonatos para osteoporose). Agem substituindo hormônios deficientes ou modulando a produção/ação hormonal." },
+                        { topic: "farmacogenomica_e_farmacogenetica", summary: "Estudo de como a variação genética de um indivíduo influencia sua resposta aos fármacos. A **Farmacogenética** foca em genes únicos que afetam a resposta. A **Farmacogenômica** considera o genoma completo. Objetivo: personalizar a terapia medicamentosa para maximizar a eficácia e minimizar efeitos adversos, prevendo a resposta do paciente com base em seu perfil genético (ex: CYP2D6 e metabolização de antidepressivos, genotipagem do HLA-B*5701 para abacavir)." }
+                    ]
+                },
+                'genetica': { // Nova categoria de nível superior: Genética
+                    display: 'Genética',
+                    colorClass: 'genetica-color',
+                    topics: [
+                        { topic: "introducao_genetica_e_dna", summary: "A genética é o estudo da hereditariedade e da variação biológica. O **DNA** (ácido desoxirribonucleico) é a molécula portadora da informação genética, organizada como uma dupla hélice. Cada fita é um polímero de nucleotídeos (base nitrogenada - A, T, C, G; desoxirribose; fosfato). As bases pareiam de forma complementar (A-T, C-G) através de ligações de hidrogênio. O **RNA** (ácido ribonucleico) é uma fita simples (bases A, U, C, G; ribose; fosfato), essencial para a expressão do gene. Um **gene** é um segmento de DNA que codifica uma proteína ou molécula de RNA funcional. Os genes estão localizados em **cromossomos**, que são estruturas altamente condensadas de DNA e proteínas." },
+                        { topic: "divisao_celular_mitose_e_meiose", summary: "A **Mitose** é o processo de divisão celular que ocorre em células somáticas, resultando em duas células-filhas geneticamente idênticas à célula-mãe. É essencial para crescimento, reparo de tecidos e reposição celular. Suas fases são prófase, metáfase, anáfase e telófase, seguidas de citocinese. A **Meiose** é um tipo especial de divisão celular que ocorre em células germinativas, produzindo quatro células-filhas (gametas) com metade do número de cromossomos da célula original (haploides) e geneticamente diferentes devido ao crossing-over e segregação independente. É crucial para a reprodução sexual e a manutenção da variabilidade genética." },
+                        { topic: "mendelismo_e_hereditariedade_basica", summary: "As **Leis de Mendel** são os fundamentos da genética. A **1ª Lei (Lei da Segregação dos Fatores)** afirma que cada indivíduo possui dois alelos para uma característica, que se separam durante a formação dos gametas, de modo que cada gamete recebe apenas um alelo (ex: um indivíduo Aa produz gametas com A ou com a). A **2ª Lei (Lei da Segregação Independente)** descreve a herança de duas ou mais características, afirmando que os alelos para genes diferentes segregam-se independentemente uns dos outros durante a formação dos gametas. **Alelos** são formas alternativas de um gene (dominante se expressa mesmo em heterozigose; recessivo só em homozigose). **Genótipo** é a constituição genética; **Fenótipo** é a expressão observável. **Homozigoto** possui dois alelos idênticos (AA, aa); **Heterozigoto** possui alelos diferentes (Aa). **Heredogramas** são diagramas que representam padrões de herança em famílias." },
+                        { topic: "expressao_genica_transcricao_e_traducao", summary: "O **Dogma Central da Biologia Molecular** descreve o fluxo da informação genética: DNA -> RNA -> Proteína. A **Transcrição** é a síntese de uma molécula de RNA (mensageiro, transportador ou ribossomal) a partir de um molde de DNA, catalisada pela RNA polimerase, ocorrendo no núcleo (e mitocôndria). O **processamento do RNA** inclui o splicing (remoção de íntrons e união de éxons), adição de cap 5' e cauda poli-A. A **Tradução** é a síntese de uma proteína a partir de um mRNA, realizada pelos ribossomos no citoplasma. O **código genético** é a correspondência entre sequências de três nucleotídeos (códons) no mRNA e aminoácidos específicos, sendo universal e degenerado (múltiplos códons para o mesmo aminoácido)." },
+                        { topic: "mutacoes_e_variacao_genetica", summary: "As **mutações** são alterações na sequência de DNA ou na estrutura/número de cromossomos, sendo a fonte primária de variação genética. **Mutações Gênicas** afetam um ou poucos nucleotídeos (ex: mutação de ponto, inserção, deleção), podendo ser silenciosas (sem alteração de aminoácido), de sentido trocado (missense - altera aminoácido), sem sentido (nonsense - introduz stop codon) ou frameshift (altera a \"leitura\" do código). **Mutações Cromossômicas** envolvem grandes segmentos de cromossomos ou o número total de cromossomos (ex: **aneuploidias** como a trissomia do 21 - Síndrome de Down; **translocações**; **deleções**). Podem ter efeitos que variam de neutros a letais." },
+                        { topic: "genetica_humana_e_doencas_geneticas", summary: "A genética humana estuda a variação genética e sua relação com a saúde e doença. **Doenças genéticas** são causadas por anomalias no genoma. Os **padrões de herança** incluem: **Autossômica Dominante** (afeta todas as gerações, 50% de chance de filhos afetados se um genitor é afetado, ex: Doença de Huntington), **Autossômica Recessiva** (afeta gerações esporádicas, portadores assintomáticos, 25% de chance se ambos portadores, ex: Fibrose Cística), **Ligada ao X** (mais comum em homens, ex: Hemofilia), **Mitocondrial** (herança materna), e **Multifatorial** (interação de múltiplos genes e fatores ambientais, ex: diabetes tipo 2). O **aconselhamento genético** oferece suporte e informações a famílias com risco de doenças genéticas. **Testes genéticos** detectam variações no DNA para diagnóstico, rastreamento ou previsão de risco." },
+                        { topic: "engenharia_genetica_e_biotecnologia", summary: "A **Engenharia Genética** manipula o DNA de organismos para fins específicos. Técnicas chave incluem: uso de **enzimas de restrição** para cortar DNA em locais específicos, **vetores de clonagem** (plasmídeos, vírus) para transportar genes, e a **reação em cadeia da polimerase (PCR)** para amplificar segmentos de DNA. As **aplicações na medicina** incluem: **terapia gênica** (correção de genes defeituosos), produção de **proteínas recombinantes** (insulina, hormônio do crescimento), desenvolvimento de **vacinas** e **diagnóstico molecular**. Na área forense, o **DNA fingerprinting** é usado para identificação. O campo levanta **considerações éticas** importantes, como segurança e privacidade." },
+                        { topic: "epigenetica", summary: "A **Epigenética** é o estudo das alterações na expressão gênica que não envolvem modificações na sequência de DNA, mas que podem ser herdadas. Esses mecanismos regulam a acessibilidade do DNA e a ativação/desativação de genes. Os principais mecanismos epigenéticos são: **metilação do DNA** (adição de grupos metil a bases citosina, geralmente reprimindo a transcrição), **modificações de histonas** (adição ou remoção de grupos químicos nas histonas, alterando a compactação da cromatina), e a ação de **RNAs não codificadores** (que podem silenciar genes). Fatores ambientais (dieta, estresse, toxinas) podem influenciar as marcas epigenéticas, com implicações para o desenvolvimento, saúde e doenças, além da potencial herança transgeracional de certas características ou predisposições." }
+                    ]
+                },
+                'histologia': { // Histologia elevada para nível superior
+                    display: 'Histologia',
+                    colorClass: 'histologia-color',
+                    topics: [
+                        { topic: "tecido_epitelial", summary: "O tecido epitelial reveste superfícies (pele, trato digestório, respiratório) e forma glândulas. É caracterizado por células justapostas, com pouca matriz extracelular, e pela presença de uma lâmina basal. Suas funções incluem proteção, absorção, secreção, excreção e percepção sensorial. É classificado pela quantidade de camadas (simples, estratificado, pseudoestratificado) e pela forma das células (pavimentoso, cúbico, prismático)." },
+                        { topic: "tecido_conjuntivo", summary: "O tecido conjuntivo é o mais abundante e diversificado, caracterizado por células (fibroblastos, adipócitos, macrófagos, mastócitos) imersas em abundante matriz extracelular (fibras colágenas, elásticas, reticulares + substância fundamental amorfa). Ele fornece suporte estrutural, preenchimento, transporte, defesa imunológica e armazenamento. Subdivide-se em: propriamente dito (frouxo, denso), adiposo, cartilaginoso, ósseo e sangue." },
+                        { topic: "tecido_muscular", summary: "O tecido muscular é especializado na contração, responsável pelos movimentos do corpo e de órgãos internos. Existem três tipos: 1) Estriado Esquelético: voluntário, contração rápida e forte, forma os músculos associados ao esqueleto. 2) Estriado Cardíaco: involuntário, presente apenas no coração, com células ramificadas e discos intercalares. 3) Liso: involuntário, contração lenta e prolongada, presente nas paredes de órgãos ocos (intestino, vasos sanguíneos)." },
+                        { topic: "tecido_nervoso", summary: "O tecido nervoso é responsável pela recepção, transmissão e processamento de informações. É composto por duas classes de células: 1) Neurônios: células excitáveis que geram e conduzem impulsos nervosos. 2) Células da Glia (neuroglia): fornecem suporte estrutural e metabólico, proteção e modulam a atividade neuronal. Forma o cérebro, medula espinhal, gânglios e nervos, sendo a base da comunicação e controle de todas as funções corporais." },
+                        { topic: "sangue_e_hematopoiese", summary: "O sangue é um tecido conjuntivo líquido composto por plasma e elementos figurados (eritrócitos, leucócitos, plaquetas), responsável pelo transporte de gases, nutrientes, hormônios e produtos de excreção, além da defesa e regulação térmica. A hematopoiese é o processo de formação das células sanguíneas, que ocorre principalmente na medula óssea vermelha a partir de células-tronco hematopoéticas." },
+                        { topic: "tecido_osseo_e_cartilaginoso", summary: "O tecido ósseo é um tecido conjuntivo mineralizado que forma o esqueleto, fornecendo suporte, proteção, alavanca para músculos e armazenamento de minerais. Possui osteócitos, osteoblastos e osteoclastos. O tecido cartilaginoso é um tecido conjuntivo flexível e avascular, importante para suporte, revestimento articular e crescimento ósseo, formado por condrócitos imersos em matriz rica em glicosaminoglicanos." }
+                    ]
+                },
+                'imunologia': { // Nova categoria de nível superior: Imunologia
+                    display: 'Imunologia',
+                    colorClass: 'imunologia-color',
+                    topics: [
+                        { topic: "celulas_e_orgaos_do_sistema_imune", summary: "O Sistema Imune é composto por células (linfócitos T, linfócitos B, macrófagos, neutrófilos, células dendríticas, mastócitos, etc.) e órgãos linfoides. Os **órgãos linfoides primários** (medula óssea e timo) são onde os linfócitos amadurecem. Os **órgãos linfoides secundários** (linfonodos, baço, MALT – Tecido Linfoide Associado à Mucosa) são onde as respostas imunes são iniciadas e desenvolvidas. Cada tipo celular possui funções específicas na detecção e eliminação de patógenos." },
+                        { topic: "imunidade_inata", summary: "A **Imunidade Inata** é a primeira linha de defesa do organismo, atuando de forma rápida e não específica. Seus componentes incluem **barreiras físicas** (pele, mucosas), **células fagocíticas** (macrófagos e neutrófilos), **células Natural Killer (NK)**, e **moléculas solúveis** como o sistema complemento e citocinas inflamatórias. Ela reconhece padrões moleculares associados a patógenos (PAMPs) e danos (DAMPs) através de Receptores de Reconhecimento de Padrão (PRRs), mas não possui memória imunológica." },
+                        { topic: "imunidade_adaptativa_celular_e_humoral", summary: "A **Imunidade Adaptativa** (ou adquirida) é altamente específica, desenvolvendo-se em resposta a um patógeno e gerando memória. Divide-se em: 1) **Imunidade Humoral**: mediada por linfócitos B, que se diferenciam em plasmócitos e produzem **anticorpos** (imunoglobulinas). Anticorpos neutralizam toxinas, opsonizam patógenos para fagocitose e ativam o complemento. 2) **Imunidade Celular**: mediada por linfócitos T. Linfócitos T CD4+ (auxiliares) coordenam a resposta imune. Linfócitos T CD8+ (citotóxicos) matam células infectadas ou cancerosas. Essa imunidade gera células de memória, permitindo uma resposta mais rápida e eficaz em reexposições." },
+                        { topic: "resposta_inflamatoria", summary: "A **Resposta Inflamatória** é uma reação protetora do organismo a lesões teciduais ou infecções. Caracteriza-se por **calor, rubor, dor, inchaço e perda de função**. Envolve a liberação de mediadores químicos (histamina, prostaglandinas, citocinas) que promovem vasodilatação e aumento da permeabilidade vascular, facilitando a migração de células imunes (neutrófilos, macrófagos) para o local da lesão, a fim de eliminar o agente agressor e iniciar o reparo. Pode ser aguda (curta duração) ou crônica (longa duração, associada a danos teciduais)." },
+                        { topic: "complexo_maior_de_histocompatibilidade_mhc", summary: "O **Complexo Maior de Histocompatibilidade (MHC)** é um grupo de genes que codificam proteínas de superfície celular, cruciais para a apresentação de antígenos aos linfócitos T. Existem duas classes principais: **MHC Classe I**: presente em quase todas as células nucleadas, apresenta antígenos endógenos (peptídeos derivados de proteínas citosólicas, ex: vírus) aos linfócitos T CD8+ (citotóxicos). **MHC Classe II**: presente em células apresentadoras de antígenos (APCs – macrófagos, células dendríticas, linfócitos B), apresenta antígenos exógenos (peptídeos de proteínas fagocitadas) aos linfócitos T CD4+ (auxiliares). O MHC é fundamental para a auto e não-auto discriminação e para a coordenação da resposta imune adaptativa." },
+                        { topic: "vacinas_e_imunizacao", summary: "A **vacinação** é um método preventivo que induz imunidade adaptativa sem causar a doença. Administra-se um antígeno (patógeno atenuado, inativado, subunidades, toxoides) que estimula a produção de anticorpos e células de memória. Isso prepara o sistema imune para uma resposta rápida e eficaz em caso de exposição real ao patógeno. A **imunização ativa** refere-se à vacinação, enquanto a **imunização passiva** envolve a transferência de anticorpos pré-formados (ex: soros, anticorpos monoclonais) para proteção temporária. As vacinas são um dos maiores avanços da saúde pública, erradicando e controlando diversas doenças infecciosas." },
+                        { topic: "hipersensibilidade", summary: "As **Hipersensibilidades** são respostas imunes exageradas e prejudiciais ao hospedeiro, classificadas em quatro tipos: **Tipo I (Imediata/Alérgica)**: mediada por IgE, mastócitos e basófilos, reação rápida (urticária, anafilaxia). **Tipo II (Citotóxica)**: mediada por anticorpos (IgG/IgM) que se ligam à superfície celular e induzem lise ou disfunção (ex: reações transfusionais, eritroblastose fetal). **Tipo III (Complexos Imunes)**: formação de imunocomplexos solúveis que se depositam em tecidos, ativando complemento e inflamação (ex: lúpus, doença do soro). **Tipo IV (Tardia/Mediadas por Células)**: mediada por linfócitos T e macrófagos, reação que leva horas ou dias (ex: dermatite de contato, tuberculose, rejeição de transplantes)."},
+                        { topic: "autoimunidade_e_imunodeficiencias", summary: "**Autoimunidade** ocorre quando o sistema imune ataca os próprios tecidos do corpo, perdendo a tolerância imunológica. Pode ser específica de órgão (ex: Diabetes tipo 1, Tireoidite de Hashimoto) ou sistêmica (ex: Lúpus Eritematoso Sistêmico, Artrite Reumatoide). As **Imunodeficiências** são condições em que o sistema imune está comprometido, tornando o indivíduo mais suscetível a infecções. Podem ser **primárias** (congênitas, genéticas) ou **secundárias** (adquiridas, ex: HIV/AIDS, quimioterapia, desnutrição). Ambas representam desafios significativos na medicina e são alvos de diversas abordagens terapêuticas." },
+                        { topic: "tolerancia_imunologica", summary: "A **Tolerância Imunológica** é a capacidade do sistema imune de não reagir contra os autoantígenos (componentes próprios do corpo). Isso é crucial para prevenir doenças autoimunes. A tolerância pode ser **central** (ocorre durante o amadurecimento dos linfócitos nos órgãos linfoides primários, eliminando ou inativando linfócitos autorreativos) ou **periférica** (ocorre em tecidos periféricos, suprimindo ou eliminando linfócitos autorreativos que escaparam da tolerância central). Mecanismos incluem anergia, deleção clonal e supressão por células T reguladoras." },
+                        { topic: "regulacao_da_resposta_imune", summary: "A **Regulação da Resposta Imune** é o conjunto de mecanismos que controlam a intensidade e a duração das respostas imunes para garantir que sejam eficazes contra patógenos, mas evitem danos excessivos aos tecidos do hospedeiro. Envolve citocinas (pró-inflamatórias e anti-inflamatórias), células T reguladoras (Tregs), receptores inibitórios (ex: PD-1, CTLA-4), e feedback negativo. A desregulação desses mecanismos pode levar a doenças autoimunes, inflamação crônica ou imunodeficiências." },
+                        { topic: "imunologia_dos_transplantes", summary: "A **Imunologia dos Transplantes** estuda as respostas imunes que ocorrem quando tecidos ou órgãos são transferidos de um indivíduo para outro. A **rejeição de transplantes** é uma resposta imune mediada principalmente por linfócitos T (reação de hipersensibilidade Tipo IV), que reconhecem o MHC do doador como \"não próprio\". Para prevenir a rejeição, são realizados testes de **compatibilidade HLA** (MHC humano) e o paciente recebe **imunossupressores** (ex: ciclosporina, tacrolimus, corticoides) que suprimem a resposta imune. Diferentes tipos de rejeição incluem hiperaguda, aguda e crônica." },
+                        { topic: "imunologia_tumoral", summary: "A **Imunologia Tumoral** estuda a interação entre o sistema imune e as células cancerosas. O sistema imune pode reconhecer e eliminar células tumorais (imunovigilância), mas os tumores desenvolvem mecanismos para escapar dessa vigilância (ex: expressão de PD-L1). A **imunoterapia contra o câncer** visa reativar o sistema imune do paciente para combater o tumor, usando estratégias como inibidores de checkpoints (ex: anti-PD-1, anti-CTLA-4), vacinas terapêuticas e terapias com células CAR-T. Este campo é uma área de grande avanço na oncologia." },
+                        { topic: "imunidade_e_doencas_infecciosas", summary: "A interação entre o sistema imune e os patógenos é a base das doenças infecciosas. A **resposta imune eficaz** é crucial para o controle e eliminação de vírus, bactérias, fungos e parasitas. No entanto, alguns patógenos desenvolveram estratégias de **escape imune** (ex: variação antigênica, supressão da resposta imune). A compreensão desses mecanismos é vital para o desenvolvimento de novas vacinas, terapias antimicrobianas e para o manejo de infecções crônicas e emergentes. Exemplos incluem a resposta imune contra HIV, tuberculose, malária e influenza." }
+                    ]
+                },
+                'infectologia': { // Nova categoria de nível superior: Infectologia
+                    display: 'Infectologia',
+                    colorClass: 'infectologia-color',
+                    topics: [
+                        { topic: "principios_de_doencas_infecciosas", summary: "A Infectologia estuda as doenças causadas por microrganismos (bactérias, vírus, fungos, parasitas). Os **principios** envolvem a compreensão da cadeia de transmissão (agente, reservatório, porta de saída, modo de transmissão, porta de entrada, hospedeiro suscetível), patogenia (mecanismos de doença), manifestações clínicas, diagnóstico laboratorial e tratamento antimicrobiano. A prevenção (vacinação, saneamento, higiene) é fundamental para o controle de doenças infecciosas." },
+                        { topic: "agentes_infecciosos_bacterias", summary: "As **bactérias** são microrganismos procariotos que causam diversas infecções. Classificadas por forma (cocos, bacilos, espirilos), coloração de Gram (Gram-positivas: parede espessa; Gram-negativas: parede fina com LPS), e metabolismo (aeróbias, anaeróbias, facultativas). Exemplos incluem *Staphylococcus aureus* (infecções de pele, sepse), *Streptococcus pneumoniae* (pneumonia, meningite), *Escherichia coli* (ITU, infecções GI), *Mycobacterium tuberculosis* (tuberculose). O tratamento é com antibióticos, mas a **resistência bacteriana** é um desafio crescente." },
+                        { topic: "agentes_infecciosos_virus", summary: "Os **vírus** são agentes infecciosos intracelulares obrigatórios, compostos por material genético (DNA ou RNA, fita simples ou dupla), uma **cápside proteica** (capsômeros) que protege o genoma, e, em alguns, um **envelope lipídico** (derivado da membrana da célula hospedeira). A **replicação viral** envolve etapas: 1. **Adsorção**: ligação à célula hospedeira. 2. **Penetração**: entrada na célula. 3. **Decapsidação**: liberação do genoma viral. 4. **Biossíntese**: replicação do genoma e síntese de proteínas virais. 5. **Montagem**: formação de novas partículas virais. 6. **Liberação**: saída da célula, por lise ou brotamento (para vírus envelopados). Os antivirais agem em etapas específicas." },
+                        { topic: "agentes_infecciosos_fungos", summary: "Os **fungos** são microrganismos eucariotos (leveduras ou filamentosos) que podem causar infecções chamadas micoses. As micoses podem ser superficiais (pele, unhas, ex: *Candida albicans*), subcutâneas, ou sistêmicas (pulmões, sangue, ex: *Histoplasma capsulatum*, *Cryptococcus neoformans*), especialmente em imunocomprometidos. O diagnóstico é por cultura, histopatologia e sorologia. O tratamento é com antifúngicos, como azóis e equinocandinas." },
+                        { topic: "agentes_infecciosos_parasitas", summary: "Os **parasitas** são organismos (protozoários ou helmintos) que vivem em ou sobre um hospedeiro, obtendo nutrientes às suas custas. **Protozoários** (unicelulares) causam doenças como malária (*Plasmodium* spp.), amebíase (*Entamoeba histolytica*) e giardíase (*Giardia lamblia*). **Helmintos** (vermes multicelulares) incluem nematódeos (lombriga), cestódeos (tênia) e trematódeos (esquistossomose). A transmissão varia (água, alimentos contaminados, vetores). O tratamento é com antiparasitários específicos." },
+                        { topic: "diagnostico_laboratorial_infecciosas", summary: "O **diagnostico laboratorial** é essencial na infectologia. Métodos incluem: **Cultura** (bacteriana, fúngica, viral) para isolamento e identificação do agente; **Microscopia** (coloração de Gram, Ziehl-Neelsen, pesquisa de parasitas) para visualização direta; **Testes Imunológicos** (ELISA, imunofluorescência, testes rápidos) para detectar anticorpos ou antígenos; e **Métodos Moleculares** (PCR, sequenciamento) para detectar o material genético do patógeno, oferecendo alta sensibilidade e especificidade. O **antibiograma** avalia a sensibilidade a antimicrobianos." },
+                        { topic: "terapeutica_antimicrobiana", summary: "A **terapeutica antimicrobiana** envolve o uso de antibióticos (bactérias), antivirais (vírus), antifúngicos (fungos) e antiparasitários (parasitas). A escolha do fármaco depende do agente etiológico, sensibilidade, local da infecção, função renal/hepática do paciente, interações medicamentosas e custo. O uso racional de antimicrobianos é crucial para combater a **resistência microbiana**, um grave problema de saúde global. Esquemas de tratamento podem ser empíricos (baseados em suspeita) ou direcionados (baseados em cultura e antibiograma)." },
+                        { topic: "doencas_respiratorias_infecciosas", summary: "As **doenças respiratorias infecciosas** são comuns e variam de leves a graves. Exemplos incluem: **Resfriado comum** (rinovírus), **Gripe** (vírus influenza), **Pneumonia** (bacteriana - *Streptococcus pneumoniae*; viral - influenza, SARS-CoV-2), **Tuberculose** (*Mycobacterium tuberculosis*). A transmissão é principalmente por gotículas respiratórias. O diagnóstico é clínico, radiológico e laboratorial. O tratamento varia (sintomáticos, antibióticos, antivirais). A vacinação (gripe, COVID-19) e medidas de higiene são importantes na prevenção." },
+                        { topic: "infeccoes_trato_urinario_itu", summary: "As **Infecções do Trato Urinário (ITU)** são comuns, mais frequentes em mulheres. Causadas principalmente por bactérias Gram-negativas entéricas (ex: *Escherichia coli*). Podem ser: **Cistite** (infecção da bexiga, sintomas: disúria, polaciúria, urgência); ou **Pielonefrite** (infecção dos rins, sintomas: febre, dor lombar, calafrios). O diagnóstico é por urinálise e urocultura. O tratamento é com antibióticos. Prevenção inclui boa higiene e ingestão de líquidos." },
+                        { topic: "infeccoes_do_sistema_nervoso_central_snc", summary: "As **infecções do SNC** são graves e incluem: **Meningite** (inflamação das meninges, as membranas que envolvem cérebro e medula, causada por bactérias - *Neisseria meningitidis*, *Streptococcus pneumoniae*; ou vírus), **Encefalite** (inflamação do parênquima cerebral, geralmente viral, ex: HSV), e **Abscesso cerebral**. Sintomas incluem febre, cefaleia intensa, rigidez de nuca, alteração do nível de consciência. O diagnóstico é por punção lombar (análise do líquor) e imagem. O tratamento é urgente com antibióticos ou antivirais." },
+                        { topic: "doencas_sexualmente_transmissiveis_dst", summary: "As **Doenças Sexualmente Transmissiveis (DSTs)**, ou Infecções Sexualmente Transmissiveis (ISTs), são causadas por bactérias, vírus, fungos ou parasitas transmitidos principalmente por contato sexual. Exemplos: **Sífilis** (*Treponema pallidum*), **Gonorreia** (*Neisseria gonorrhoeae*), **Clamídia** (*Chlamydia trachomatis*), **Herpes Genital** (HSV), **HPV** (papilomavírus humano), **HIV/AIDS**. O diagnóstico e tratamento precoces são cruciais para prevenir complicações e interrupções na transmissão. A prevenção inclui uso de preservativos, testagem regular e vacinação (HPV, Hepatite B)." },
+                        { topic: "infeccoes_oportunistas_e_imunocomprometidos", summary: "As **infecções oportunistas** ocorrem em indivíduos com sistema imune comprometido (imunocomprometidos), que não conseguiriam causar doença em pessoas imunocompetentes. Podem ser causadas por microrganismos comuns do ambiente ou da microbiota normal do corpo. Exemplos incluem: **Pneumocistose** (*Pneumocystis jirovecii*) em pacientes com HIV, **Citomegalovírus (CMV)** em transplantados, **Criptococose** (*Cryptococcus neoformans*). O manejo envolve tratamento da infecção e, quando possível, recuperação da imunidade. A profilaxia é frequentemente indicada." },
+                        { topic: "vigilancia_epidemiologica_e_controle", summary: "A **Vigilancia Epidemiologica** monitora a ocorrência e distribuição de doenças, incluindo as infecciosas, para planejar e avaliar medidas de controle e prevenção. Envolve a coleta, análise, interpretação e disseminação de dados. O **controle de infecções** visa interromper a cadeia de transmissão em hospitais (controle de infecção hospitalar) e na comunidade. Medidas incluem: higiene das mãos, uso de equipamentos de proteção individual (EPI), isolamento de pacientes, vacinação em massa, saneamento básico e educação em saúde pública. É fundamental para a saúde coletiva." }
+                    ]
+                },
+                'parasitologia': { // Nova categoria de nível superior: Parasitologia
+                    display: 'Parasitologia',
+                    colorClass: 'parasitologia-color',
+                    topics: [
+                        { topic: "principios_parasitologia", summary: "A **Parasitologia** é a ciência que estuda os parasitas, seus hospedeiros e a relação entre eles, incluindo as doenças que causam (parasitoses). Aborda a biologia, ecologia, ciclos de vida, patogenia, diagnóstico, tratamento e controle. A **relação parasita-hospedeiro** é complexa, podendo ser comensalismo, mutualismo ou parasitismo verdadeiro, onde o parasita se beneficia e o hospedeiro é prejudicado. A **epidemiologia** das parasitoses é crucial para entender sua distribuição, incidência e prevalência, influenciada por fatores socioeconômicos, ambientais e comportamentais." },
+                        { topic: "protozoarios_intestinais", summary: "São parasitas unicelulares que habitam o trato gastrointestinal humano. Os principais incluem: 1. ***Giardia lamblia***: causa a **giardíase**, transmitida por cistos na água/alimentos contaminados. Sintomas: diarreia crônica, dor abdominal, má absorção. 2. ***Entamoeba histolytica***: causa a **amebíase**, também por cistos. Pode ser assintomática ou causar disenteria amebiana (diarreia com sangue e muco) e abscessos hepáticos. 3. ***Cryptosporidium parvum***: causa a **criptosporidiose**, uma diarreia aquosa, grave em imunocomprometidos. O diagnóstico é feito por exame parasitológico de fezes (EPF)." },
+                        { topic: "protozoarios_sanguineos_e_teciduais", summary: "Parasitas unicelulares que invadem o sangue e/ou tecidos do hospedeiro, geralmente transmitidos por vetores. Exemplos: 1. ***Plasmodium*** spp.: agentes da **malária**, transmitida por mosquitos *Anopheles*. Causa febre intermitente, calafrios, anemia, esplenomegalia, podendo ser grave. 2. ***Trypanosoma cruzi***: causa a **doença de Chagas**, transmitida pelo 'barbeiro'. Apresenta fase aguda (chagoma, febre) e crônica (cardiomegalia, megacólon, megaesôfago). 3. ***Leishmania*** spp.: agentes das **leishmanioses**, transmitidas pelo flebotomíneo ('mosquito-palha'). Podem ser cutâneas (lesões na pele) ou viscerais (fevre, esplenomegalia, anemia, ex: calazar). 4. ***Toxoplasma gondii***: causa a **toxoplasmose**, adquirida por carne malcozida ou fezes de gato. Geralmente assintomática, mas grave em gestantes (congênita) e imunocomprometidos." },
+                        { topic: "helmintos_nematodeos_intestinais", summary: "São vermes cilíndricos (vermes redondos) que parasitam o intestino. Exemplos: 1. ***Ascaris lumbricoides***: causa a **ascaridíase** ('lombriga'). Transmissão fecal-oral. Migração pulmonar (síndrome de Loeffler) e obstrução intestinal são complicações. 2. ***Ancylostoma duodenale*** e ***Necator americanus***: causam a **ancilostomíase** ('amarelão'). Penetração cutânea da larva. Causa anemia ferropriva. 3. ***Enterobius vermicularis***: causa a **enterobíase** ('oxiuríase'). Transmissão fecal-oral, com prurido anal noturno. 4. ***Strongyloides stercoralis***: causa a **estrongiloidíase**. Penetração cutânea. Autoinfecção e hiperinfecção em imunocomprometidos são graves. Diagnóstico principal por EPF." },
+                        { topic: "helmintos_cestodeos_intestinais", summary: "São vermes achatados e segmentados (vermes chatos, tênias), que se aderem à parede intestinal. Exemplos: 1. ***Taenia solium*** (tênia do porco) e ***Taenia saginata*** (tênia do boi): causam a **teníase** (infestação intestinal pelo verme adulto), adquirida pela ingestão de carne crua/malcozida. A ingestão de ovos de *T. solium* causa **cisticercose** (larvas em tecidos, inclusive SNC – neurocisticercose). 2. ***Hymenolepis nana***: a 'tênia anã', mais comum em crianças, pode causar autoinfecção interna. O diagnóstico é por EPF, e para cisticercose, por imagem e sorologia." },
+                        { topic: "helmintos_trematodeos", summary: "São vermes achatados não segmentados (fascíolas ou esquistossomos). O principal de interesse médico é: ***Schistosoma mansoni***: causa a **esquistossomose** ('barriga d'água'). Transmissão por contato com água contaminada por larvas (cercárias) liberadas por caramujos. A fase aguda tem dermatite, febre. A fase crônica leva a fibrose hepática, esplenomegalia e hipertensão portal. Diagnóstico por EPF, método de Kato-Katz, ou biópsia retal. Controle por tratamento em massa, saneamento e controle de caramujos." },
+                        { topic: "artropodes_e_vetores", summary: "Artrópodes são invertebrados com exoesqueleto que podem ser parasitas diretos ou vetores de doenças. **Vetores** são organismos que transmitem patógenos entre hospedeiros. Exemplos: 1. **Mosquitos** (*Aedes*, *Anopheles*, *Culex*): vetores de doenças como dengue, zika, chikungunya, malária, febre amarela, filariose. 2. **Carrapatos**: vetores de febre maculosa, doença de Lyme, babesiose. 3. **Pulgas**: vetores da peste bubônica, tifo murino. 4. **Piolhos** (*Pediculus humanus*): causam pediculose. 5. **Ácaros** (*Sarcoptes scabiei*): causam sarna (escabiose). O controle de vetores e a higiene pessoal são cruciais na prevenção." },
+                        { topic: "diagnostico_laboratorial_em_parasitologia", summary: "O **diagnostico parasitológico** envolve a identificação do parasita ou de seus estágios (ovos, larvas, cistos, trofozoítos) em amostras clínicas. Métodos incluem: 1. **Exame Parasitológico de Fezes (EPF)**: métodos diretos (salina, lugol) e de concentração (Hoffman, Faust, Ritchie) para ovos e cistos. 2. **Esfregaços sanguíneos** (fino e gota espessa): para parasitas sanguíneos como *Plasmodium* (malária) e *Trypanosoma* (doença de Chagas). 3. **Sorologia**: detecção de anticorpos (IgG, IgM) contra o parasita, útil para diagnóstico de toxoplasmose, doença de Chagas, leishmanioses. 4. **Métodos Moleculares** (PCR): detecção do DNA/RNA do parasita, de alta sensibilidade. 5. **Biópsias** (pele, músculo, fígado): para parasitas teciduais ou cistos." },
+                        { topic: "profilaxia_e_controle_de_parasitoses", summary: "A **profilaxia** e o **controle** das parasitoses visam interromper a cadeia de transmissão e reduzir a incidência. Medidas incluem: 1. **Saneamento Básico**: tratamento de água e esgoto, descarte adequado de lixo (reduz transmissão fecal-oral). 2. **Educação em Saúde**: higiene pessoal (lavar as mãos), preparo adequado de alimentos, consumo de água tratada/filtrada. 3. **Controle de Vetores**: uso de inseticidas, eliminação de criadouros de mosquitos, uso de repelentes e telas. 4. **Tratamento em Massa**: administração de antiparasitários em populações de risco para reduzir a carga parasitária. 5. **Vacinação**: quando disponível (ex: algumas vacinas em desenvolvimento para malária, leishmaniose). A combinação de estratégias é mais eficaz." },
+                        { topic: "principais_antiparasitarios", summary: "Os **antiparasitários** são fármacos usados para tratar infecções parasitárias. A escolha depende do parasita e da apresentação clínica. Exemplos: 1. **Metronidazol**: protozoaricida, eficaz contra *Giardia*, *Entamoeba histolytica* e *Trichomonas*. 2. **Albendazol** e **Mebendazol**: anti-helmínticos de largo espectro, usados para *Ascaris*, ancilostomíase, *Enterobius* e *Taenia*. 3. **Praziquantel**: eficaz contra trematódeos (*Schistosoma*) e cestódeos (*Taenia*). 4. **Cloroquina** e **Artemisininas**: antimaláricos principais para tratamento da malária. 5. **Miltefosina** ou **Anfotericina B**: para leishmanioses. O uso correto e a adesão ao tratamento são essenciais para a cura e prevenção da resistência." }
+                    ]
+                },
+                'microbiologia': { // Nova categoria de nível superior: Microbiologia
+                    display: 'Microbiologia',
+                    colorClass: 'microbiologia-color',
+                    topics: [
+                        { topic: "principios_da_microbiologia", summary: "A **Microbiologia** é o estudo dos microrganismos (bactérias, vírus, fungos, protozoários, algas microscópicas) e suas interações com o ambiente e hospedeiros. Abrange taxonomia, morfologia, fisiologia, genética, ecologia e patogenia. É fundamental para a compreensão das doenças infecciosas, desenvolvimento de antibióticos e vacinas, biotecnologia (produção de alimentos, fármacos) e ciclos biogeoquímicos. O conhecimento de microrganismos é vital para a saúde pública e indústrias." },
+                        { topic: "estrutura_e_funcao_bacterias", summary: "As **bactérias** são procariotos unicelulares. Sua estrutura básica inclui: **parede celular** (peptidoglicano, gram-positivas com camada espessa, gram-negativas com camada fina e membrana externa - LPS), **membrana plasmática**, **citoplasma** (ribossomos, nucleoide - DNA circular), e **flagelos** (motilidade), **fímbrias/pili** (aderência) e **cápsula** (virulência). O metabolismo bacteriano é diversificado (aeróbias, anaeróbias, facultativas), permitindo a colonização de diversos nichos e a produção de energia por vias como fermentação e respiração celular. A replicação ocorre por fissão binária." },
+                        { topic: "patogenese_bacteriana", summary: "A **patogênese bacteriana** é o processo pelo qual as bactérias causam doenças. Envolve a **virulência**, que é a capacidade do microrganismo de causar dano ao hospedeiro, mediada por **fatores de virulência**: **adesinas** (ligação a tecidos), **invasinas** (penetração em células/tecidos), **toxinas** (exotoxinas - proteínas secretadas que causam danos específicos; endotoxinas - LPS de Gram-negativas, liberadas na lise celular, causam febre, choque séptico), **enzimas degradadoras** (hialuronidase, colagenase), e **cápsula** (evasão da fagocitose). A resposta imune do hospedeiro e a microbiota normal influenciam a patogênese." },
+                        { topic: "principais_bacterias_patogenicas", summary: "Alguns exemplos de bactérias clinicamente relevantes: 1. ***Staphylococcus aureus***: cocos Gram-positivos, causam infecções de pele, endocardite, sepse, toxinfecções alimentares. Inclui cepas MRSA (resistentes à meticilina). 2. ***Streptococcus pneumoniae***: cocos Gram-positivos, principal causa de pneumonia bacteriana, otite, meningite. 3. ***Escherichia coli***: bacilo Gram-negativo, principal causa de ITU, gastroenterites (cepas patogênicas), sepse. 4. ***Mycobacterium tuberculosis***: bacilo álcool-ácido resistente, agente da tuberculose (pulmonar e extrapulmonar). 5. ***Salmonella typhi/Paratyphi***: bacilos Gram-negativos, causam febre tifoide/paratifoide. 6. ***Clostridium difficile***: bacilo Gram-positivo anaeróbio, causa colite pseudomembranosa (associada a antibióticos)." },
+                        { topic: "estrutura_e_replicação_viral", summary: "Os **vírus** são parasitas intracelulares obrigatórios. Consistem em: **material genético** (DNA ou RNA, fita simples ou dupla), uma **cápside proteica** (capsômeros) que protege o genoma, e, em alguns, um **envelope lipídico** (derivado da membrana da célula hospedeira). A **replicação viral** envolve etapas: 1. **Adsorção**: ligação à célula hospedeira. 2. **Penetração**: entrada na célula. 3. **Decapsidação**: liberação do genoma viral. 4. **Biossíntese**: replicação do genoma e síntese de proteínas virais. 5. **Montagem**: formação de novas partículas virais. 6. **Liberação**: saída da célula, por lise ou brotamento (para vírus envelopados). Os antivirais agem em etapas específicas." },
+                        { topic: "principais_virus_patogenicos", summary: "Alguns exemplos de vírus de importância médica: 1. **HIV (Vírus da Imunodeficiência Humana)**: retrovírus que causa AIDS, ataca linfócitos T CD4+. 2. **Influenza vírus**: causa gripe, com alta variabilidade antigênica. 3. **SARS-CoV-2**: coronavírus que causa COVID-19, infecção respiratória grave. 4. **Vírus da Hepatite (A, B, C, D, E)**: causam inflamação hepática. 5. **Herpes Simples Vírus (HSV)**: causa lesões orais e genitais. 6. **Vírus Varicela-Zoster (VVZ)**: causa catapora e herpes-zóster. 7. **Rotavírus** e **Norovírus**: principais causas de gastroenterite viral. 8. **Dengue, Zika, Chikungunya, Febre Amarela**: arbovírus transmitidos por mosquitos." },
+                        { topic: "fundamentos_de_micologia", summary: "A **micologia** estuda os fungos, organismos eucariotos que podem ser unicelulares (leveduras) ou multicelulares (filamentosos/bolores). A **parede celular fúngica** é composta principalmente de quitina, e a membrana plasmática contém ergosterol (alvo de antifúngicos). As **micoses** são infecções fúngicas, classificadas em: **superficiais** (pele, unhas, cabelo, ex: *Candida albicans*, *Tinea* spp.), **subcutâneas** (pós-trauma, ex: esporotricose), e **sistêmicas** (pulmonares ou disseminadas, graves em imunocomprometidos, ex: histoplasmose, criptococose, aspergilose). O diagnóstico envolve cultura, microscopia (KOH) e sorologia." },
+                        { topic: "farmacologia_antimicrobiana_e_resistencia", summary: "A **farmacologia antimicrobiana** estuda o mecanismo de ação de antibióticos, antivirais, antifúngicos e antiparasitários. A **resistência antimicrobiana** é a capacidade de um microrganismo de resistir aos efeitos de um fármaco que antes era eficaz. Mecanismos incluem: **produção de enzimas** (ex: beta-lactamases), **alteração do sítio-alvo**, **bombas de efluxo**, **redução da permeabilidade da membrana**, e **formação de biofilmes**. A resistência é um grave problema de saúde global, impulsionado pelo uso indiscriminado de antimicrobianos. O **antibiograma** é vital para guiar a terapia e evitar o surgimento de mais resistência." },
+                        { topic: "controle_microbiano_esterilizacao_desinfeccao", summary: "O **controle microbiano** visa reduzir ou eliminar microrganismos para prevenir infecções. **Esterilização**: processo que elimina *todos* os microrganismos (incluindo esporos) de um material ou superfície, usando calor (autoclave), filtração, radiação ou agentes químicos. **Desinfecção**: processo que elimina a *maioria* dos microrganismos patogênicos de superfícies inanimadas, mas não esporos, usando desinfetantes (álcool, hipoclorito). **Antissepsia**: redução de microrganismos em tecidos vivos (pele) usando antissépticos. Essas práticas são fundamentais na saúde, indústria e laboratório." },
+                        { topic: "diagnostico_laboratorial_em_microbiologia", summary: "O **diagnostico laboratorial microbiológico** é crucial para identificar o agente infeccioso e guiar o tratamento. Métodos incluem: 1. **Culturas**: crescimento de microrganismos em meios específicos (ágar sangue, ágar McConkey), seguido de identificação por testes bioquímicos ou espectrometria de massa (MALDI-TOF). 2. **Microscopia**: visualização direta (coloração de Gram para bactérias, tinta da China para fungos, Ziehl-Neelsen para micobactérias). 3. **Testes Imunológicos (Sorologia)**: detecção de anticorpos (IgM para infecção aguda, IgG para infecção prévia/crônica) ou antígenos (testes rápidos). 4. **Métodos Moleculares**: detecção do material genético (DNA/RNA) do patógeno por PCR, sequenciamento, etc., oferecendo alta sensibilidade e rapidez (ex: para vírus, bactérias atípicas)." },
+                        { topic: "interacao_microbiota_hospedeiro", summary: "A **microbiota humana** é a comunidade de microrganismos (bactérias, fungos, vírus, protozoários) que habita o corpo humano (pele, TGI, geniturinário) sem causar doença e, frequentemente, com benefícios mútuos (comensalismo, mutualismo). Exemplos: produção de vitaminas (vit. K por bactérias intestinais), auxílio na digestão, e exclusão competitiva de patógenos. O **desequilíbrio da microbiota (disbiose)** pode levar a doenças (ex: *Clostridium difficile* após antibióticos). A **relação hospedeiro-microrganismo** é dinâmica; a microbiota normal pode se tornar oportunista em imunocomprometidos." }
+                    ]
+                },
+                'patologia': { // Nova categoria de nível superior: Patologia
+                    display: 'Patologia',
+                    colorClass: 'patologia-color',
+                    topics: [
+                        { topic: "adaptacoes_celulares", summary: "As **adaptações celulares** são respostas reversíveis a estímulos fisiológicos ou patológicos que alteram o tamanho, número, fenótipo, atividade metabólica ou função das células, visando manter a homeostase. Incluem: **Hipertrofia** (aumento do tamanho celular, ex: músculo cardíaco em hipertensão), **Hiperplasia** (aumento do número de células, ex: endométrio na gravidez), **Atrofia** (redução do tamanho e número de células, ex: desuso muscular), e **Metaplasia** (substituição de um tipo celular diferenciado por outro, ex: epitélio brônquico em fumantes). A persistência do estímulo ou sua intensidade excessiva pode levar à lesão celular." },
+                        { topic: "lesao_celular_reversivel_e_irreversivel", summary: "A **lesão celular** ocorre quando a célula é submetida a estresse tão grave que não consegue mais se adaptar ou quando exposta a agentes nocivos. A **lesão irreversível** leva à morte celular por **necrose** (morte celular acidental, associada à inflamação, com perda da integridade da membrana e extravasamento de conteúdo celular, ex: infarto) ou **apoptose** (morte celular programada, sem inflamação, importante no desenvolvimento e na eliminação de células danificadas ou indesejadas, ex: remoção de tecidos embrionários, células com DNA danificado)." },
+                        { topic: "inflamacao_aguda", summary: "A **inflamação aguda** é uma resposta rápida e de curta duração (minutos a dias) a um agente lesivo ou infecção, caracterizada por **rubor (vermelhidão), calor, inchaço (edema) e dor**, e perda de função. Envolve principalmente neutrófilos e alterações vasculares (vasodilatação, aumento da permeabilidade vascular) que levam à exsudação de plasma e migração de leucócitos para o local da lesão, a fim de eliminar o agente agressor e iniciar o reparo. É mediada por aminas vasoativas, eicosanoides e citocinas." },
+                        { topic: "inflamacao_cronica", summary: "A **inflamação crônica** é uma resposta de duração prolongada (semanas a meses), caracterizada pela presença de linfócitos, plasmócitos e macrófagos, proliferação de vasos sanguíneos e tecido conjuntivo, e reparo tecidual concomitante à inflamação. Pode surgir da persistência da inflamação aguda, exposição prolongada a agentes tóxicos (ex: sílica), ou doenças autoimunes. Leva à destruição tecidual e fibrose, com formação de granulomas em alguns casos (ex: tuberculose, sarcoidose)." },
+                        { topic: "reparos_regeneracao_e_fibrose", summary: "O **reparo tecidual** é a forma pela qual o corpo restaura a integridade após uma lesão. Pode ocorrer por: 1. **Regeneração**: substituição das células lesadas por células idênticas e funcionais, restaurando a arquitetura original (ocorre em tecidos com alta capacidade proliferativa, ex: pele, epitélio intestinal). 2. **Formação de Cicatriz (Fibrose)**: substituição do tecido lesado por tecido conjuntivo fibroso (colágeno), resultando em perda da função e distorção da arquitetura (ocorre em lesões mais graves, em tecidos com baixa capacidade regenerativa, ex: miocárdio após infarto; ou em inflamação crônica). Fatores de crescimento e a matriz extracelular são cruciais no processo." },
+                        { topic: "disturbios_hemodinamicos", summary: "Os **disturbios hemodinamicos** afetam o fluxo sanguíneo e a homeostase de fluidos. Incluem: **Edema** (acúmulo de líquido no interstício), **Hiperemia** (aumento ativo do fluxo sanguíneo) e **Congestão** (acúmulo passivo de sangue), **Hemorragia** (extravasamento de sangue dos vasos), **Trombose** (formação de coágulo intravascular em um local intacto), **Embolia** (migração de um êmbolo - trombo, gordura, ar - que obstrui um vaso), e **Choque** (hipoperfusão sistêmica e hipóxia celular, podendo levar à morte). Esses distúrbios são causas importantes de doenças e morbidade." },
+                        { topic: "neoplasias_conceitos_e_classificacao", summary: "**Neoplasia** (tumor) é uma nova formação de tecido resultante da proliferação anormal, descontrolada e autônoma de células, que persiste mesmo após a remoção do estímulo que a iniciou. Classificam-se em: 1. **Benignas**: crescimento lento e localizado, não invadem tecidos adjacentes nem metastatizam, geralmente curáveis (ex: lipoma). 2. **Malignas** (câncer): crescimento rápido, invasivas, capacidade de metastatizar (espalhar para outros locais), potencialmente letais. Nomenclatura varia por origem tecidual (carcinoma - epitelial; sarcoma - mesenquimal; leucemia/linfoma - hematopoético). A diferenciação celular e a anaplasia são características importantes para o prognóstico." },
+                        { topic: "etiologia_e_patogenese_do_cancer", summary: "A **etiologia do câncer** é multifatorial, envolvendo a interação de fatores genéticos e ambientais (carcinógenos químicos, físicos - radiação, biológicos - vírus/bactérias). A **patogenese** é um processo de múltiplas etapas, onde células normais acumulam mutações em genes críticos: **proto-oncogenes** (promovem crescimento, se mutados viram oncogenes e causam ganho de função), **genes supressores de tumor** (inibem crescimento, se mutados causam perda de função, ex: p53), e **genes reparadores de DNA**. Essa acumulação de mutações leva às **características do câncer** (Hallmarks of Cancer): proliferação autônoma, evasão da supressão do crescimento, resistência à morte celular, imortalidade replicativa, angiogênese, invasão/metástase, instabilidade genômica e desregulação metabólica." },
+                        { topic: "doencas_geneticas", summary: "Doenças genéticas são condições causadas por alterações no material genético (DNA). Podem ser: 1. **Monogênicas**: causadas por mutação em um único gene (ex: Fibrose Cística, Doença de Huntington, Anemia Falciforme). 2. **Cromossômicas**: alterações no número ou estrutura dos cromossomos (ex: Síndrome de Down - trissomia do 21). 3. **Multifatoriais**: resultado da interação de múltiplos genes e fatores ambientais (ex: diabetes tipo 2, hipertensão, doenças cardíacas). A patologia estuda as manifestações morfológicas e funcionais dessas doenças e como as alterações genéticas levam ao quadro clínico." },
+                        { topic: "doencas_ambientais_e_nutricionais", summary: "A patologia também estuda doenças causadas por fatores ambientais e nutricionais. **Ambientais**: exposição a toxinas (poluição do ar, metais pesados, pesticidas), tabagismo (doença pulmonar obstrutiva crônica, câncer), consumo de álcool (hepatopatia alcoólica), agentes físicos (radiação ionizante, calor, frio). **Nutricionais**: **Desnutrição** (deficiência calórico-proteica, deficiências vitamínicas - ex: raquitismo, escorbuto), **Obesidade** (excesso de energia, associada a diabetes tipo 2, doenças cardiovasculares, câncer), e distúrbios específicos de vitaminas e minerais. O impacto desses fatores na saúde e na doença é significativo e complexo." },
+                        { topic: "patologia_dos_sistemas", summary: "A Patologia dos Sistemas estuda as doenças específicas de cada sistema orgânico do corpo. Exemplos incluem: **Patologia Cardiovascular** (aterosclerose, infarto do miocárdio, hipertensão), **Patologia Respiratória** (pneumonia, asma, DPOC, câncer de pulmão), **Patologia Gastrointestinal** (gastrite, úlceras, doença inflamatória intestinal, câncer colorretal), **Patologia Renal** (glomerulopatias, insuficiência renal), **Patologia Endócrina** (diabetes mellitus, doenças da tireoide), **Patologia Nervosa** (AVE, Alzheimer, Parkinson, tumores cerebrais), e **Patologia Óssea e Articular** (osteoporose, artrite). Cada sistema tem suas próprias causas, mecanismos e manifestações morfológicas das doenças." },
+                        { topic: "diagnostico_patologico", summary: "O **diagnostico patologico** é fundamental na medicina e envolve a análise macroscópica e microscópica de tecidos e células para identificar doenças. Métodos incluem: 1. **Biópsia**: remoção de uma pequena amostra de tecido para exame histopatológico (ao microscópio) após fixação e coloração (H&E). 2. **Citopatologia**: exame de células esfoliadas ou aspiradas (ex: Papanicolaou para câncer de colo uterino, PAAF para nódulos). 3. **Necropsia/Autópsia**: exame post-mortem para determinar a causa da morte e o processo da doença. 4. **Imunohistoquímica**: uso de anticorpos para detectar proteínas específicas nas células, auxiliando no diagnóstico e classificação de tumores. 5. **Hibridização in situ e Métodos Moleculares**: detecção de material genético (DNA/RNA) para infecções ou alterações genéticas em tumores. O patologista correlaciona achados morfológicos com a clínica para o diagnóstico final." }
+                    ]
+                },
+                'suporte_basico_vida': { // Nova categoria de nível superior: Suporte Básico à Vida (SBV)
+                    display: 'Suporte Básico à Vida',
+                    colorClass: 'suporte_basico_vida-color',
+                    topics: [
+                        { topic: "cadeia_de_sobrevivencia", summary: "A **Cadeia de Sobrevivência** descreve a sequência de ações críticas para melhorar as chances de sobrevivência em casos de Parada Cardiorrespiratória (PCR). Seus elos são: 1) Reconhecimento precoce da PCR e acionamento do serviço de emergência. 2) RCP precoce e de alta qualidade. 3) Desfibrilação rápida. 4) Suporte Avançado de Vida (SAV) e cuidados pós-PCR. 5) Recuperação. A eficácia da cadeia depende da rapidez e qualidade da atuação em cada etapa, minimizando o tempo sem fluxo sanguíneo para o cérebro e coração." },
+                        { topic: "rcp_em_adultos", summary: "A **Ressuscitação Cardiopulmonar (RCP) em adultos** segue a sequência C-A-B: **Compressões** (30 compressões), **Via Aérea** (abertura) e **Respiração** (2 ventilações). Compressões torácicas devem ser de alta qualidade: no centro do tórax, com profundidade de 5-6 cm, frequência de 100-120/min, permitindo o retorno total do tórax após cada compressão, e minimizando interrupções. A ventilação boca-a-boca ou com máscara-bolsa-válvula é feita após a abertura da via aérea (manobra de inclinação da cabeça/elevação do queixo). O objetivo é manter o fluxo sanguíneo mínimo para órgãos vitais até a chegada de ajuda especializada." },
+                        { topic: "rcp_em_criancas", summary: "A **RCP em crianças (1 ano à puberdade)** também segue C-A-B. A proporção é a mesma de adultos (30:2 para um socorrista; 15:2 para dois socorristas, como profissionais de saúde). A profundidade da compressão é de cerca de 5 cm (1/3 do diâmetro anteroposterior do tórax), usando uma ou duas mãos para manter a profundidade adequada. A frequência é de 100-120/min. A abertura da via aérea é suave, e as ventilações devem ser suficientes para elevar o tórax visivelmente. É crucial evitar hiperventilação." },
+                        { topic: "rcp_em_lactentes", summary: "A **RCP em lactentes (até 1 ano)** também segue C-A-B. A proporção é 30:2 para um socorrista e 15:2 para dois socorristas. As compressões são feitas com dois dedos no centro do tórax (logo abaixo da linha mamilar) ou, se dois socorristas, com os polegares circundando o tórax. A profundidade é de aproximadamente 4 cm (1/3 do diâmetro anteroposterior). A frequência é de 100-120/min. A abertura da via aérea deve ser em posição \"olfatando\", e as ventilações com volume pequeno para elevar o tórax, evitando o uso excessivo de força para não lesionar os pulmões do bebê." },
+                        { topic: "engasgo_ovace_em_adultos_criancas", summary: "A **Obstrução de Via Aérea por Corpo Estranho (OVACE)** em adultos e crianças conscientes é tratada com a **Manobra de Heimlich**. Para adultos/criancas > 1 ano: Posicione-se por trás da vítima, abrace-a, coloque o punho cerrado acima do umbigo, e com a outra mão sobre o punho, realize compressões rápidas e firmes para cima e para dentro, até o objeto ser expelido ou a vítima ficar inconsciente. Em caso de inconsciência, inicie RCP." },
+                        { topic: "engasgo_ovace_em_lactentes", summary: "A **OVACE em lactentes (até 1 ano) conscientes** é tratada com 5 tapas nas costas e 5 compressões torácicas alternadas. Segure o lactente de bruços, com a cabeça mais baixa que o tórax, apoiado em seu antebraço. Aplique 5 tapas vigorosos entre as escápulas com a palma da mão. Em seguida, vire o lactente de costas, apoiado no outro antebraço, e realize 5 compressões no meio do tórax (como na RCP, mas com mais força). Repita as sequências até o objeto ser expelido ou o lactente ficar inconsciente. Se inconsciente, inicie RCP." },
+                        { topic: "uso_do_dea_desfibrilador_externo_automatico", summary: "O **Desfibrilador Externo Automático (DEA)** é um dispositivo que analisa o ritmo cardíaco e, se necessário, aplica um choque elétrico para restaurar um ritmo normal. É crucial em casos de PCR por FV/TV sem pulso. Os passos incluem: 1) Ligar o DEA e seguir as instruções de áudio/visuais. 2) Fixar as pás no tórax desnudo do paciente (uma acima do mamilo direito, outra abaixo do mamilo esquerdo). 3) Afastar-se quando o DEA analisar o ritmo e chocar. 4) Reiniciar RCP imediatamente após o choque. É seguro e fácil de usar, mesmo por leigos treinados." },
+                        { topic: "primeiros_socorros_em_queimaduras", summary: "Em **queimaduras**, a prioridade é parar o processo de queima: 1) Remover a fonte de calor/agente químico. 2) Resfriar a área queimada com água corrente fria (não gelada!) por 10-20 minutos (para queimaduras de 1º e 2º grau). 3) Não aplicar gelo, manteiga, pasta de dente ou qualquer produto caseiro. 4) Cobrir a queimadura com pano limpo e úmido ou filme plástico limpo. 5) Não romper bolhas. 6) Procurar atendimento médico, especialmente para queimaduras de 3º grau, grandes extensões ou em áreas críticas (face, mãos, genitais)." },
+                        { topic: "primeiros_socorros_em_hemorragias", summary: "Em **hemorragias (sangramentos)**, o objetivo é controlar a perda de sangue. 1) **Comprimir diretamente** o local do sangramento com um pano limpo ou gaze. 2) Se possível, **elevar** o membro afetado acima do nível do coração. 3) Manter a compressão contínua. 4) Não remover o curativo se ele encharcar, adicione mais camadas por cima. 5) Em casos de hemorragia grave e não controlável, pode-se considerar o uso de **torniquete** (treinado e em último recurso) ou compressão em pontos de pressão. Procurar ajuda médica urgente." },
+                        { topic: "primeiros_socorros_em_fraturas", summary: "Em **fraturas**, o objetivo é imobilizar a área para evitar maior lesão e aliviar a dor. 1) Não tentar realinhar o membro. 2) Imobilizar a articulação acima e abaixo da fratura usando talas improvisadas (revistas, tábuas) e faixas ou panos. 3) Verificar a circulação distal (pulso, cor, temperatura da pele) antes e depois da imobilização. 4) Aplicar gelo (envolto em pano) para reduzir inchaço e dor. 5) Procurar atendimento médico. Se houver ferida (fratura exposta), cobrir com pano limpo e estéril." },
+                        { topic: "choque", summary: "O **choque** é uma condição de risco de vida em que há hipoperfusão sistêmica e oxigenação inadequada dos tecidos, levando à disfunção celular e orgânica. Causas incluem: **Choque hipovolêmico** (perda de volume sanguíneo/fluidos), **Choque cardiogênico** (bomba cardíaca falha), **Choque distributivo** (vasodilatação excessiva, ex: séptico, anafilático), **Choque obstrutivo** (obstrução do fluxo sanguíneo). Sinais: taquicardia, hipotensão, pele fria/úmida, palidez, confusão mental, oligúria. Conduta inicial: chamar ajuda, manter via aérea, respirar, elevar pernas (se não houver contraindicação), aquecer o paciente, monitorar sinais vitais e iniciar hidratação venosa (se permitido e treinado)." },
+                        { topic: "crises_convulsivas", summary: "Durante uma **crise convulsiva** (epiléptica), o objetivo é proteger a pessoa de lesões. 1) Não tentar conter os movimentos ou colocar objetos na boca. 2) Afastar objetos perigosos do redor. 3) Deitar a pessoa de lado para evitar engasgos com a saliva. 4) Afrouxar roupas apertadas ao redor do pescoço. 5) Cronometrar a duração da crise. 6) Chamar ajuda se a crise durar mais de 5 minutos, se houver crises consecutivas, se a pessoa não recuperar a consciência, ou se for a primeira crise. Após a crise, a pessoa pode ficar confusa e sonolenta." },
+                        { topic: "acidente_vascular_encefalico_ave_reconhecimento", summary: "O **Acidente Vascular Encefálico (AVE)** é uma emergência médica. Reconhecer os sinais precocemente é crucial para o tratamento eficaz. Use o acrônimo **SAMU** (ou **FAST** em inglês): **S**orria (verificar desvio de rima labial), **A**braços (pedir para levantar os dois braços - observar se um cai), **M**úsica (pedir para falar uma frase simples - observar fala arrastada/confusa), **U**rgência (se um desses sinais estiver presente, ligue para o serviço de emergência imediatamente). Outros sinais incluem alteração súbita da visão e dor de cabeça intensa e súbita." },
+                        { topic: "infarto_agudo_do_miocardio_iam_reconhecimento", summary: "O **Infarto Agudo do Miocárdio (IAM)**, ou ataque cardíaco, é uma emergência. Sinais de alerta incluem: **Dor no peito** (aperto, queimação, pressão, peso) que pode irradiar para braço esquerdo, costas, mandíbula ou estômago. **Suores frios**, **náuseas/vômitos**, **tontura/desmaio**, **dificuldade para respirar**. Em mulheres, idosos e diabéticos, os sintomas podem ser atípicos (mais fadiga, indigestão). Se houver suspeita, acione o serviço de emergência imediatamente. Oriente a pessoa a mastigar AAS (se não houver contraindicação e for medicamente orientado)." },
+                        { topic: "reconhecimento_de_parada_cardiorrespiratoria_pcr", summary: "A **Parada Cardiorrespiratória (PCR)** é a cessação súbita e inesperada da função cardíaca e respiratória. O reconhecimento rápido é o primeiro elo da Cadeia de Sobrevivência. Os sinais de PCR são: 1) **Inconsciência/Não Responsividade**: a pessoa não responde a estímulos verbais ou táteis. 2) **Ausência de respiração normal**: a pessoa não respira ou apenas \"gasping\" (gaspadas agônicas, respiração ruidosa e irregular). 3) **Ausência de pulso**: não há pulso palpável (verificar em artérias carótidas em adultos/crianças, ou braquial em lactentes). Se presentes, inicie RCP imediatamente e chame ajuda." }
+                    ]
+                },
+                'sus_sistema_unico_saude': { // Nova categoria: SUS - Sistema Único de Saúde
+                    display: 'Sistema Único de Saúde',
+                    colorClass: 'sus_sistema_unico_saude-color',
+                    topics: [
+                        { topic: "principios_e_diretrizes_do_sus", summary: "O **Sistema Único de Saúde (SUS)** é o sistema de saúde pública do Brasil, fundamentado nos princípios da **Universalidade** (saúde como direito de todos), **Integralidade** (atendimento completo, do mais simples ao mais complexo), e **Equidade** (priorizar quem mais precisa). Suas diretrizes incluem **Descentralização** (gestão em diferentes níveis), **Regionalização e Hierarquização** (organização em redes de serviço), e **Participação da Comunidade** (controle social). É regido pela Constituição Federal de 1988 e pela Lei 8.080/90." },
+                        { topic: "organizacao_e_estrutura_do_sus", summary: "O SUS é organizado de forma **descentralizada**, com gestão compartilhada entre União, Estados e Municípios. A **Direção Nacional** é do Ministério da Saúde. A **Direção Estadual** é das Secretarias Estaduais de Saúde. A **Direção Municipal** é das Secretarias Municipais de Saúde, que são a porta de entrada principal para os usuários (Atenção Primária). A estrutura visa a **regionalização**, formando Redes de Atenção à Saúde (RAS) para garantir a integralidade do cuidado em um território definido, com fluxos de referência e contrarreferência entre os diferentes níveis de complexidade." },
+                        { topic: "niveis_de_atencao_a_saude_no_sus", summary: "O SUS organiza o cuidado em **Níveis de Atenção à Saúde** de forma hierarquizada: 1. **Atenção Primária à Saúde (APS)**: porta de entrada, mais próxima da comunidade (UBS, ESF). Foca em promoção, prevenção e resolução de problemas comuns. 2. **Atenção Secundária**: serviços de média complexidade (consultas com especialistas, hospitais de pequeno e médio porte, UPA). 3. **Atenção Terciária**: serviços de alta complexidade (hospitais de grande porte, UTIs, cirurgias complexas, procedimentos de alta tecnologia). A articulação entre esses níveis é essencial para a integralidade do cuidado." },
+                        { topic: "financiamento_e_gestao_do_sus", summary: "O **Financiamento do SUS** é de responsabilidade das três esferas de governo (União, Estados, Municípios), com recursos provenientes de impostos e contribuições sociais. A **Gestão do SUS** envolve os Conselhos de Saúde e as Conferências de Saúde (instâncias de controle social), que fiscalizam e propõem diretrizes. Os Fundos de Saúde (Nacional, Estaduais, Municipais) recebem os recursos. A gestão é feita por meio de planos de saúde, pactuações interfederativas e normas de financiamento (ex: Piso da Atenção Básica Fixo e Variável), buscando a eficiência e a aplicação adequada dos recursos para as necessidades da população." },
+                        { topic: "controle_social_no_sus", summary: "O **Controle Social no SUS** é um pilar fundamental e se dá pela **participação da comunidade** na gestão das políticas de saúde. Isso ocorre principalmente através dos **Conselhos de Saúde** (instâncias deliberativas e fiscalizadoras, com participação de usuários, trabalhadores, gestores e prestadores de serviços) e das **Conferências de Saúde** (realizadas a cada quatro anos, para avaliar a situação de saúde e propor diretrizes). Essa participação popular visa garantir a transparência, a adequação das ações às necessidades da população e a efetividade do sistema." },
+                        { topic: "desafios_e_perspectivas_do_sus", summary: "O SUS enfrenta diversos **desafios**: subfinanciamento, regionalização incompleta, filas para especialistas/exames, gestão fragmentada, e desigualdades regionais. As **perspectivas** incluem o fortalecimento da Atenção Primária, a integração de redes de atenção, o uso de tecnologias para a gestão e o cuidado (e-Saúde), a melhoria da qualidade dos serviços, e a necessidade contínua de ampliação do financiamento e da participação social para garantir sua sustentabilidade e a efetividade na oferta de saúde a todos os brasileiros." },
+                        { topic: "promocao_da_saude_e_prevencao_no_sus", summary: "No SUS, a **Promoção da Saúde** visa melhorar a qualidade de vida e reduzir iniquidades, atuando sobre os determinantes sociais da saúde (educação, moradia, saneamento). Inclui ações educativas, intersetoriais e políticas públicas. A **Prevenção de Doenças** atua em diferentes níveis: **primária** (evitar o surgimento, ex: vacinação, saneamento), **secundária** (diagnóstico e tratamento precoce, ex: rastreamentos como Papanicolaou), e **terciária** (minimizar sequelas e reabilitar, ex: fisioterapia pós-AVE). Ambas são estratégias cruciais da APS para reduzir a carga de doenças e promover bem-estar." },
+                        { topic: "assistencia_farmaceutica_no_sus", summary: "A **Assistência Farmacêutica no SUS** é o conjunto de ações voltadas à garantia do acesso e uso racional de medicamentos, abrangendo desde a seleção, programação, aquisição, armazenamento, distribuição até a dispensação e o acompanhamento do uso. Baseia-se na **Relação Nacional de Medicamentos Essenciais (RENAME)**, garantindo que a população tenha acesso aos fármacos necessários para o tratamento das doenças prevalentes. A atenção farmacêutica e a farmacovigilância são componentes importantes para a segurança e efetividade dos tratamentos." },
+                        { topic: "vigilancia_em_saude_no_sus", summary: "A **Vigilância em Saúde no SUS** é um conjunto de ações que proporcionam o conhecimento, a detecção ou prevenção de qualquer mudança nos fatores determinantes e condicionantes de saúde individual e coletiva, com a finalidade de recomendar e adotar as medidas de prevenção e controle das doenças ou agravos. Engloba: **Vigilância Epidemiológica** (monitoramento de doenças, ex: notificação de casos de dengue), **Vigilância Sanitária** (controle de bens, produtos e serviços), **Vigilância em Saúde Ambiental** (fatores de risco do ambiente), e **Vigilância da Saúde do Trabalhador**. É essencial para a gestão de riscos e resposta a emergências em saúde pública." }
+                    ]
+                }
+            };
+            
+            const universalReferences = `
+                **Referências Bibliográficas Comuns para o Ciclo Básico de Medicina:**
+
+                **Anatomia:**
+                -   MOORE, Keith L.; DALLEY, Arthur F.; AGUR, Anne M. R. *Anatomia Orientada para a Clínica*. Guanabara Koogan.
+                -   SOBOTTA, Johannes; PAULSEN, Friedrich; WASCHKE, Jens. *Sobotta Atlas de Anatomia Humana*. Guanabara Koogan.
+                -   NETTER, Frank H. *Atlas de Anatomia Humana*. Elsevier.
+
+                **Biofísica:**
+                -   FELDMAN, Luiz; FREIRE, Luiz; PEREIRA, Marcelo. *Biofísica*. Editora Guanabara Koogan.
+                -   DAVIDOVITS, Paul. *Physics in Biology and Medicine*. Academic Press.
+                -   CASTRO, Célio de. *Biofísica: um enfoque para a saúde*. Editora Atheneu.
+
+                **Bioquímica:**
+                -   NELSON, David L.; COX, Michael M. *Lehninger Principles of Biochemistry*. W. H. Freeman.
+                -   VOET, Donald; VOET, Judith G. *Bioquímica*. Artmed.
+                
+                **Biologia Geral:**
+                -   CAMPBELL, Neil A.; et al. *Biologia*. Artmed.
+                -   AMABIS, José Mariano; MARTHO, Gilberto Rodrigues. *Biologia*. Moderna.
+                -   RIDLEY, Mark. *Evolution*. Blackwell Publishing.
+                
+                **Sub-disciplinas da Biologia Geral:**
+                -   **Biologia Celular e Molecular (Citologia):**
+                    -   JUNQUEIRA, Luiz C.; CARNEIRO, José. *Histologia Básica: Texto e Atlas*. Guanabara Koogan.
+                    -   ALBERTS, Bruce; et al. *Biologia Molecular da Célula*. Artmed.
+                    -   DE ROBERTIS, E. D. P.; HIB, J. *Biologia Celular e Molecular*. Guanabara Koogan.
+                
+                **Análises Clínicas:**
+                -   LIMA, Adagilson; et al. *Métodos de Laboratório para o Diagnóstico das Doenças*. Sarvier.
+                -   HENRY, John Bernard. *Henry: Diagnósticos Clínicos e Tratamento por Métodos Laboratoriais*. Elsevier.
+                    -   MCPHERSON, Richard A.; PINCUS, Matthew R. *Henry's Clinical Diagnosis and Management by Laboratory Methods*. Elsevier.
+
+                **Atenção Primária da Saúde:**
+                -   STARFIELD, Barbara. *Atenção Primária: Equilíbrio entre Necessidades de Saúde, Serviços e Tecnologia*. UNESCO.
+                -   BRASIL. Ministério da Saúde. *Política Nacional de Atenção Básica (PNAB)*. Brasília, DF: Saúde. (Versões atualizadas periodicamente).
+                -   GIOVANELLA, Ligia; MENDES, Áquilas N. (Org.). *Saúde da Família no Brasil: uma análise crítica do programa*. Hucitec.
+                
+                **Termos Técnicos em Medicina:**
+                -   DORLAND, W. A. Newman. *Dicionário Médico Ilustrado de Dorland*. Elsevier.
+                -   TABER, Clarence Wilbur. *Dicionário de Enfermagem e Saúde*. Atheneu.
+                -   NETINA, Sandra M. *Dicionário de Termos Técnicos de Enfermagem*. Guanabara Koogan.
+
+                **Casos Clínicos:**
+                -   BICKLEY, Lynn S.; SZILAGYI, Peter G. *Bates Propedêutica Médica*. Guanabara Koogan.
+                -   LONGO, Dan L.; et al. *Harrison's Principles of Internal Medicine*. McGraw Hill.
+                -   GOLDMAN, Lee; AUSIELLO, Dennis. *Cecil Medicine*. Saunders Elsevier.
+
+                **Clínica Médica:**
+                -   KASPER, Dennis L.; FAUCI, Anthony S.; HAUSER, Stephen L.; LONGO, Dan L.; JAMESON, J. Larry; LOSCALZO, Joseph. *Harrison's Principles of Internal Medicine*. McGraw Hill Education.
+                -   BRAUNWALD, Eugene; et al. *Braunwald's Heart Disease: A Textbook of Cardiovascular Medicine*. Saunders Elsevier.
+                -   GOLDMAN, Lee; AUSIELLO, Dennis. *Cecil Medicine*. Saunders Elsevier.
+                -   HALL, John E.; GUYTON, Arthur C. *Tratado de Fisiologia Médica*. Elsevier.
+
+                **ECG Eletrocardiograma:**
+                -   GOLDMAN, Merrill J. *Principles of Clinical Electrocardiography*. McGraw-Hill Education.
+                -   DUBIN, Dale. *Rapid Interpretation of EKG's*. Cover Publishing Company.
+                -   HAMPTON, John R. *The ECG Made Easy*. Churchill Livingstone.
+                -   BRAUNWALD, Eugene; et al. *Braunwald's Heart Disease: A Textbook of Cardiovascular Medicine*. Saunders Elsevier.
+
+                **Embriologia:**
+                -   MOORE, Keith L.; PERSAUD, T. V. N.; TORCHIA, Mark G. *Embriologia Clínica*. Elsevier.
+                -   SADLER, T. W. *Langman's Medical Embryology*. Wolters Kluwer.
+
+                **Farmacologia:**
+                -   GOODMAN & GILMAN'S. *As Bases Farmacológicas da Terapêutica*. McGraw Hill Education.
+                -   KATZUNG, Bertram G.; MASTERS, Susan B.; TREVOR, Anthony J. *Farmacologia Básica e Clínica*. McGraw Hill Education.
+                -   RANG, H. P.; DALE, M. M.; RITTER, J. J. *Farmacologia*. Elsevier.
+                -   WHALEN, Karen; FINKEL, Richard; HARVEY, Richard A. *Farmacologia Ilustrada*. Artmed.
+
+                **Fisiologia:**
+                -   GUYTON, Arthur C.; HALL, John E. *Tratado de Fisiologia Médica*. Elsevier.
+                -   GANONG, William F. *Fisiologia Médica*. McGraw Hill.
+                -   BERNE, Robert M.; LEVY, Matthew N. *Physiology*. Mosby.
+
+                **Genética:**
+                -   GRIFFITHS, Anthony J. F.; et al. *Introdução à Genética*. Guanabara Koogan.
+                -   THOMPSON & THOMPSON. *Genética Médica*. Elsevier.
+                -   SNUSTAD, D. Peter; SIMMONS, Michael J. *Fundamentos de Genética*. Guanabara Koogan.
+                -   ALBERTS, Bruce; et al. *Biologia Molecular da Célula*. Artmed.
+
+                **Histologia:**
+                -   ROSS, Michael H.; PAWLINA, Wojciech. *Histologia: Texto e Atlas: Correlações com Biologia Celular e Molecular*. Guanabara Koogan.
+                -   JUNQUEIRA, Luiz C.; CARNEIRO, José. *Histologia Básica: Texto e Atlas*. Guanabara Koogan.
+                
+                **Imunologia:**
+                -   ABBAS, Abul K.; LICHTMAN, Andrew H.; PILLAI, Shiv. *Imunologia Celular e Molecular*. Elsevier.
+                -   MURPHY, Kenneth; WEAVER, Casey. *Janeway's Immunobiology*. Garland Science.
+                -   ROITT, Ivan; BROSTOFF, Jonathan; MALE, David. *Fundamentos de Imunologia*. Artmed.
+                
+                **Infectologia:**
+                -   MANDELL, Gerald L.; BENNETT, John E.; DOLIN, Raphael. *Mandell, Douglas, and Bennett's Principles and Practice of Infectious Diseases*. Elsevier.
+                -   MURRAY, Patrick R.; ROSENTHAL, Ken S.; PFALLER, Michael A. *Microbiologia Médica*. Elsevier.
+                -   VERONESI, Ricardo; FOCACCIA, Roberto. *Tratado de Infectologia*. Atheneu.
+
+                **Parasitologia:**
+                -   REY, Luís. *Parasitologia*. Guanabara Koogan.
+                -   NEVES, David Pereira; et al. *Parasitologia Humana*. Atheneu.
+                -   GILLESPIE, Stephen H.; PEARSON, Richard D. *Principles and Practice of Clinical Parasitology*. John Wiley & Sons.
+
+                **Microbiologia:**
+                -   MURRAY, Patrick R.; ROSENTHAL, Ken S.; PFALLER, Michael A. *Microbiologia Médica*. Elsevier.
+                -   MADIGAN, Michael T.; et al. *Brock Biology of Microorganisms*. Pearson.
+                -   TRABULSI, Luiz R.; ALCACER, Humberto M. L. *Microbiologia*. Atheneu.
+
+                **Patologia:**
+                -   ROBBINS, Stanley L.; COTRAN, Ramzi S. *Robbins & Cotran Patologia: Bases Patológicas das Doenças*. Elsevier.
+                -   MONTENEGRO, Mario R.; FRANCO, Marcelo. *Patologia: Processos Gerais*. Atheneu.
+
+                **Suporte Básico à Vida (SBV):**
+                -   AMERICAN HEART ASSOCIATION (AHA). *Guidelines for Cardiopulmonary Resuscitation and Emergency Cardiovascular Care*. (Publicações periódicas, ex: Destaques das Diretrizes da AHA).
+                -   SOUZA, Gustavo F.; et al. *Manual de Suporte Básico de Vida*. Editora Manole.
+                -   ATLS® Advanced Trauma Life Support. *Manual do Aluno*. American College of Surgeons. (Para abordagem inicial ao trauma, complementar ao SBV).
+
+                **Sistema Único de Saúde (SUS):**
+                -   BRASIL. Lei nº 8.080, de 19 de setembro de 1990. *Dispõe sobre as condições para a promoção, proteção e recuperação da saúde, a organização e o funcionamento dos serviços correspondentes e dá outras providências*.
+                -   BRASIL. Lei nº 8.142, de 28 de dezembro de 1990. *Dispõe sobre a participação da comunidade na gestão do Sistema Único de Saúde (SUS) e sobre as transferências intergovernamentais de recursos financeiros na área da saúde e dá outras providências*.
+                -   CAMPOS, Gastão Wagner de Sousa; et al. *Tratado de Saúde Coletiva*. Hucitec.
+                -   PINHEIRO, Roseni; SILVA JÚNIOR, Aluisio Gomes da (Orgs.). *Avaliação em Saúde: Perspectivas e Desafios*. Editora Fiocruz.
+            `;
+
+            const categoryDisplayMap = {
+                'biologia_geral': 'Biologia Geral',
+                'fisiologia': 'Fisiologia Humana',
+                'bioquimica': 'Bioquímica',
+                'analise_clinica': 'Análises Clínicas',
+                'atencao_primaria_saude': 'Atenção Primária da Saúde',
+                'termos_tecnicos_medicina': 'Termos Técnicos em Medicina',
+                'anatomia': 'Anatomia',
+                'biofisica': 'Biofísica',
+                'casos_clinicos': 'Casos Clínicos',
+                'clinica_medica': 'Clínica Médica',
+                'ecg_eletrocardiograma': 'ECG Eletrocardiograma',
+                'embriologia': 'Embriologia',
+                'farmacologia': 'Farmacologia',
+                'genetica': 'Genética',
+                'histologia': 'Histologia',
+                'imunologia': 'Imunologia',
+                'infectologia': 'Infectologia',
+                'parasitologia': 'Parasitologia',
+                'microbiologia': 'Microbiologia',
+                'patologia': 'Patologia',
+                'suporte_basico_vida': 'Suporte Básico à Vida',
+                'sus_sistema_unico_saude': 'Sistema Único de Saúde' // Adicionado SUS
+            };
+
+            const categoryColorClassMap = {
+                'biologia_geral': 'biologia-color',
+                'citologia': 'citologia-color',
+                'histologia': 'histologia-color',
+                'microbiologia': 'microbiologia-color',
+                'patologia': 'patologia-color',
+                'analise_clinica': 'analise_clinica-color',
+                'atencao_primaria_saude': 'atencao_primaria_saude-color',
+                'termos_tecnicos_medicina': 'termos_tecnicos_medicina-color',
+                'anatomia': 'anatomia-color',
+                'biofisica': 'biofisica-color',
+                'bioquimica': 'bioquimica-color',
+                'casos_clinicos': 'casos_clinicos-color',
+                'clinica_medica': 'clinica_medica-color',
+                'ecg_eletrocardiograma': 'ecg_eletrocardiograma-color',
+                'embriologia': 'embriologia-color',
+                'farmacologia': 'farmacologia-color',
+                'fisiologia': 'fisiologia-color',
+                'genetica': 'genetica-color',
+                'imunologia': 'imunologia-color',
+                'infectologia': 'infectologia-color',
+                'parasitologia': 'parasitologia-color',
+                'suporte_basico_vida': 'suporte_basico_vida-color',
+                'sus_sistema_unico_saude': 'sus_sistema_unico_saude-color' // Adicionada cor para SUS
+            };
+
+            // Função para adicionar uma linha ao terminal de output (lado direito)
+            function addLineToTerminalOutput(text, isUser = false, isError = false) {
+                const line = document.createElement('div');
+                const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                line.innerHTML = isUser ? `<span class="prompt">></span> ${formattedText}` : formattedText;
+                if (isUser) { line.classList.add('user-line'); }
+                if (isError) { line.style.color = '#ff8a8a'; }
+                terminalOutput.appendChild(line);
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
+
+            // Função para adicionar conteúdo ao painel do menu (lado esquerdo)
+            function addLineToMenuPanel(text) {
+                const line = document.createElement('div');
+                const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                line.innerHTML = formattedText;
+                menuPanel.appendChild(line);
+                menuPanel.scrollTop = menuPanel.scrollHeight;
+            }
+
+            // Função para simular o efeito de digitação
+            function typeWriterEffect(elementId, text, speed = 20) {
+                const element = document.getElementById(elementId);
+                let i = 0;
+                element.innerHTML = ''; // Limpa o conteúdo antes de digitar
+
+                function typeChar() {
+                    if (i < text.length) {
+                        // Verifica se o próximo caractere inicia uma tag ** para negrito
+                        if (text.substring(i, i + 2) === '**') {
+                            let strongEnd = text.indexOf('**', i + 2);
+                            if (strongEnd !== -1) {
+                                let strongText = text.substring(i + 2, strongEnd);
+                                element.innerHTML += `<strong>${strongText}</strong>`;
+                                i = strongEnd + 2;
+                            } else {
+                                element.innerHTML += text.charAt(i); // Se não fechar, trata como texto normal
+                                i++;
+                            }
+                        } else {
+                            element.innerHTML += text.charAt(i);
+                            i++;
+                        }
+                        terminalOutput.scrollTop = terminalOutput.scrollHeight; // Rola enquanto digita
+                        typingTimeout = setTimeout(typeChar, speed);
+                    }
+                }
+                typeChar();
+            }
+
+            // Função para definir a cor do terminal de acordo com a categoria
+            function setTerminalColor(categorySlug) {
+                // Remove todas as classes de cor existentes
+                const allColorClasses = Object.values(categoryColorClassMap);
+                terminalOutput.classList.remove(...allColorClasses);
+                menuPanel.classList.remove(...allColorClasses);
+
+                // Adiciona a classe de cor da categoria atual
+                if (categoryColorClassMap[categorySlug]) {
+                    terminalOutput.classList.add(categoryColorClassMap[categorySlug]);
+                    menuPanel.classList.add(categoryColorClassMap[categorySlug]);
+                } else {
+                    // Fallback para cor padrão se não houver classe específica
+                    terminalOutput.style.color = '#E0E0E0';
+                    menuPanel.style.color = '#E0E0E0';
+                }
+            }
+
+            // Mostra o menu principal com as categorias de nível superior no menuPanel
+            function showMainMenu() {
+                if (typingTimeout) clearTimeout(typingTimeout);
+                
+                setTerminalColor('default'); // Volta para a cor padrão
+                currentMainCategory = null;
+                currentSubCategory = null;
+
+                // Limpa e popula o painel do menu
+                menuPanel.innerHTML = '';
+                addLineToMenuPanel("Bem-vindo ao **PenseQuiz Medicina Ciclo Básico Pro**!");
+                addLineToMenuPanel("---");
+                addLineToMenuPanel("**Escolha uma área de estudo (digite o NÚMERO):**");
+                const topLevelCategories = Object.keys(categoryDisplayMap);
+                topLevelCategories.forEach((slug, index) => {
+                    addLineToMenuPanel(`  ${index + 1}. **${categoryDisplayMap[slug]}**`);
+                });
+
+                // Limpa e exibe a mensagem inicial no terminal de output
+                terminalOutput.innerHTML = '';
+                addLineToTerminalOutput("\nUse 'help' para ver outros comandos. Digite um número do menu para começar.");
+            }
+            
+            // Exibe a lista de comandos de ajuda
+            function showHelp() {
+                addLineToTerminalOutput("\n**Comandos disponíveis:**");
+                addLineToTerminalOutput("  - **menu** ou **0**: Retorna ao menu principal de áreas de estudo.");
+                addLineToTerminalOutput("  - **list**: Lista os tópicos da área de estudo atual (sub-disciplinas ou tópicos específicos).");
+                addLineToTerminalOutput("  - **<número>**: Seleciona uma opção (sub-disciplina ou tópico).");
+                addLineToTerminalOutput("  - **clear**: Limpa a tela do terminal.");
+                addLineToTerminalOutput("  - **references**: Exibe as referências bibliográficas.");
+                addLineToTerminalOutput("  - **help**: Mostra esta lista de comandos.");
+            }
+
+            // Lista as sub-categorias (disciplinas dentro de Biologia Geral)
+            function listSubCategories(mainCategorySlug) {
+                if (typingTimeout) clearTimeout(typingTimeout);
+
+                const mainCategoryData = contentDataMap[mainCategorySlug];
+                setTerminalColor(mainCategoryData.colorClass);
+                terminalOutput.innerHTML = '';
+                addLineToTerminalOutput(`**Disciplinas de ${mainCategoryData.display}:**\n`);
+                const subCategories = mainCategoryData.subCategories;
+                let index = 1;
+                for (const slug in subCategories) {
+                    addLineToTerminalOutput(`  ${index}. **${subCategories[slug].display}**`);
+                    index++;
+                }
+                addLineToTerminalOutput("\nDigite o **NÚMERO** da disciplina para ver os tópicos, ou **0** para voltar ao menu principal.");
+            }
+
+            // Lista os tópicos de uma categoria ou sub-categoria
+            function listTopics(categoryOrSubCategorySlug) {
+                if (typingTimeout) clearTimeout(typingTimeout);
+
+                let dataToDisplay;
+                let displayTitle;
+                let colorToApply;
+
+                // Prioriza a busca na categoria principal se ela tiver tópicos diretamente
+                if (contentDataMap[categoryOrSubCategorySlug] && contentDataMap[categoryOrSubCategorySlug].topics) {
+                    dataToDisplay = contentDataMap[categoryOrSubCategorySlug].topics;
+                    displayTitle = contentDataMap[categoryOrSubCategorySlug].display;
+                    colorToApply = contentDataMap[categoryOrSubCategorySlug].colorClass;
+                } 
+                // Se a categoria principal não tiver tópicos diretos, mas tiver sub-categorias (como Biologia Geral)
+                else if (currentMainCategory === 'biologia_geral' && contentDataMap.biologia_geral.subCategories[categoryOrSubCategorySlug]) {
+                    dataToDisplay = contentDataMap.biologia_geral.subCategories[categoryOrSubCategorySlug].topics;
+                    displayTitle = contentDataMap.biologia_geral.subCategories[categoryOrSubCategorySlug].display;
+                    colorToApply = contentDataMap.biologia_geral.subCategories[categoryOrSubCategorySlug].colorClass;
+                } else {
+                    addLineToTerminalOutput(`Erro: Não foi possível encontrar tópicos para '${categoryOrSubCategorySlug}'.`, false, true);
+                    return;
+                }
+                
+                setTerminalColor(colorToApply);
+                terminalOutput.innerHTML = '';
+                addLineToTerminalOutput(`**Tópicos em ${displayTitle}:**\n`);
+                dataToDisplay.forEach((item, index) => {
+                    const displayName = item.topic.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    addLineToTerminalOutput(`  ${index + 1}. ${displayName}`);
+                });
+                
+                let backCommandText = "o menu principal";
+                // Lógica para o comando "0" (voltar)
+                if (currentMainCategory === 'biologia_geral' && currentSubCategory !== null) {
+                    backCommandText = "à lista de disciplinas";
+                }
+                addLineToTerminalOutput(`\nDigite o **NÚMERO** do tópico para ver o resumo, ou **0** para voltar ${backCommandText}.`);
+            }
+
+            // Mostra o resumo de um tópico com efeito de digitação
+            function showTopic(topicNumber) {
+                if (typingTimeout) clearTimeout(typingTimeout);
+                
+                let topicData;
+                let displayCategory;
+
+                const topicIndex = parseInt(topicNumber, 10) - 1;
+
+                if (currentMainCategory && currentSubCategory) { // Se estiver em uma subcategoria da Biologia Geral
+                    topicData = contentDataMap[currentMainCategory].subCategories[currentSubCategory]?.topics?.[topicIndex];
+                    displayCategory = contentDataMap[currentMainCategory].subCategories[currentSubCategory].display;
+                } else if (currentMainCategory && contentDataMap[currentMainCategory].topics) { // Se estiver em uma categoria principal com tópicos diretos
+                    topicData = contentDataMap[currentMainCategory].topics?.[topicIndex];
+                    displayCategory = contentDataMap[currentMainCategory].display;
+                } else {
+                    addLineToTerminalOutput("Erro: Não foi possível determinar a categoria ou tópico.", false, true);
+                    return;
+                }
+
+                if (topicData) {
+                    const displayName = topicData.topic.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    terminalOutput.innerHTML = '';
+                    addLineToTerminalOutput(`\n--- **${displayName}** ---\n`);
+                    
+                    const summaryDiv = document.createElement('div');
+                    summaryDiv.id = 'typingSummary';
+                    terminalOutput.appendChild(summaryDiv);
+
+                    typeWriterEffect('typingSummary', topicData.summary, 20);
+                    
+                    setTimeout(() => {
+                        addLineToTerminalOutput("\n--------------------");
+                    }, topicData.summary.length * 20 + 500);
+                    
+                } else {
+                    addLineToTerminalOutput(`Tópico número '${topicNumber}' não encontrado em ${displayCategory}. Use 'list' para ver as opções.`, false, true);
+                }
+            }
+            
+            // Exibe as referências bibliográficas
+            function showReferences() {
+                if (typingTimeout) clearTimeout(typingTimeout);
+                terminalOutput.innerHTML = '';
+                addLineToTerminalOutput("\n" + universalReferences);
+            }
+
+            // Processa o comando do usuário
+            function processCommand(command) {
+                const cmd = command.toLowerCase().trim();
+                addLineToTerminalOutput(command, true);
+
+                if (cmd === 'help') { showHelp(); return; }
+                if (cmd === 'clear') { terminalOutput.innerHTML = ''; addLineToTerminalOutput("\nTerminal limpo. Digite um número do menu para começar."); return; }
+                if (cmd === 'references') { showReferences(); return; }
+                
+                if (currentMainCategory === null) {
+                    const topLevelCategories = Object.keys(categoryDisplayMap);
+                    const selectedIndex = parseInt(cmd, 10) - 1;
+                    const selectedSlug = topLevelCategories[selectedIndex];
+
+                    if (selectedSlug && contentDataMap[selectedSlug]) {
+                        currentMainCategory = selectedSlug;
+                        if (contentDataMap[selectedSlug].subCategories) {
+                            listSubCategories(selectedSlug);
+                        } else if (contentDataMap[selectedSlug].topics) {
+                            listTopics(selectedSlug);
+                        } else {
+                            addLineToTerminalOutput("Erro: Categoria selecionada não possui conteúdo.", false, true);
+                            currentMainCategory = null; 
+                        }
+                    } else {
+                        addLineToTerminalOutput(`Comando inválido. Digite um número de 1 a ${topLevelCategories.length} ou 'help'.`, false, true);
+                    }
+                } else {
+                    if (cmd === '0' || cmd === 'menu') {
+                        if (currentMainCategory === 'biologia_geral' && currentSubCategory !== null) {
+                            currentSubCategory = null;
+                            listSubCategories(currentMainCategory);
+                        } else {
+                            showMainMenu(); // Redefine tudo e volta para o menu principal
+                        }
+                        return;
+                    }
+                    if (cmd === 'list') {
+                        if (currentMainCategory === 'biologia_geral' && currentSubCategory !== null) {
+                            listTopics(currentSubCategory);
+                        } else {
+                            if (contentDataMap[currentMainCategory].subCategories) {
+                                listSubCategories(currentMainCategory);
+                            } else {
+                                listTopics(currentMainCategory);
+                            }
+                        }
+                        return;
+                    }
+
+                    const selectedIndex = parseInt(cmd, 10) - 1;
+                    
+                    if (currentMainCategory === 'biologia_geral' && currentSubCategory === null) {
+                        const subCategorySlugs = Object.keys(contentDataMap[currentMainCategory].subCategories);
+                        const selectedSubSlug = subCategorySlugs[selectedIndex];
+                        if (selectedSubSlug && contentDataMap[currentMainCategory].subCategories[selectedSubSlug]) {
+                            currentSubCategory = selectedSubSlug;
+                            listTopics(selectedSubSlug);
+                        } else {
+                            addLineToTerminalOutput(`Número de disciplina inválido. Digite um número de 1 a ${subCategorySlugs.length}, 'list', '0' ou 'menu'.`, false, true);
+                        }
+                    } else {
+                        showTopic(cmd);
+                    }
+                }
+            }
+            
+            // Manipula a entrada do usuário
+            function handleUserInput() {
+                const command = terminalInput.value.trim();
+                if (command) {
+                    commandHistory.push(command);
+                    historyIndex = commandHistory.length;
+                    processCommand(command);
+                    terminalInput.value = '';
+                }
+            }
+
+            // Event Listeners
+            sendButton.addEventListener('click', handleUserInput);
+            restartButton.addEventListener('click', showMainMenu);
+            referencesButton.addEventListener('click', showReferences);
+            
+            terminalInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleUserInput();
+                } else if (e.key === 'ArrowUp') {
+                    if (historyIndex > 0) {
+                        historyIndex--;
+                        terminalInput.value = commandHistory[historyIndex];
+                        e.preventDefault();
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    if (historyIndex < commandHistory.length - 1) {
+                        historyIndex++;
+                        terminalInput.value = commandHistory[historyIndex];
+                    } else {
+                        historyIndex = commandHistory.length;
+                        terminalInput.value = '';
+                    }
+                }
+            });
+
+            // Lógica da tela de splash
+            const splashDuration = 4000;
+
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+                mainContent.style.display = 'flex';
+                showMainMenu(); // Exibe o menu principal no painel esquerdo ao iniciar
+            }, splashDuration);
+
+            // REGISTRO DO SERVICE WORKER PARA PWA
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js')
+                        .then(registration => {
+                            console.log('Service Worker registrado com sucesso:', registration);
+                        })
+                        .catch(error => {
+                            console.log('Falha no registro do Service Worker:', error);
+                        });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

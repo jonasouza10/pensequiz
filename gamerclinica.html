@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de PenseQuiz Realidade Clínica</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Fonte global */
+    body { font-family: 'Inter', sans-serif; }
+    /* Estilos para rolagem de caixas de texto */
+    .chat-box, .feedback-box { max-height: 200px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #CBD5E0 #F7FAFC; }
+    .chat-box::-webkit-scrollbar, .feedback-box::-webkit-scrollbar { width: 8px; }
+    .chat-box::-webkit-scrollbar-track, .feedback-box::-webkit-scrollbar-track { background: #F7FAFC; border-radius: 10px; }
+    .chat-box::-webkit-scrollbar-thumb, .feedback-box::-webkit-scrollbar-thumb { background-color: #CBD5E0; border-radius: 10px; border: 2px solid #F7FAFC; }
+    /* Transição para a barra de saúde */
+    .health-bar { transition: width 0.3s ease-in-out; }
+    /* Media queries para responsividade */
+    @media (max-width: 640px) {
+      .container { padding: 8px; }
+      h1 { font-size: 1.75rem; } /* Ajusta tamanho da fonte para mobile */
+      h2 { font-size: 1.25rem; }
+      select, button, input, textarea { font-size: 0.9rem; padding: 10px; }
+    }
+    /* Estilos para o Modal Personalizado */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px); /* Efeito de desfoque de fundo */
+    }
+    .modal-content {
+      background-color: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      animation: fadeInScale 0.3s ease-out forwards; /* Animação de entrada */
+      border: 1px solid #E2E8F0;
+    }
+    .modal-content button {
+      margin-top: 24px;
+      background-color: #3B82F6;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .modal-content button:hover {
+      background-color: #2563EB;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    /* Animação de entrada do modal */
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Indicador de Carregamento */
+    .loading-spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #3B82F6;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 12px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Efeitos de foco em inputs e selects */
+    input:focus, select:focus, textarea:focus {
+      border-color: #60A5FA;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col items-center py-10">
+  <div class="container mx-auto p-6 max-w-5xl bg-white rounded-2xl shadow-2xl border border-gray-100">
+    <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-8 leading-tight">Sistema de PenseQuiz Realidade Clínica</h1>
+
+    <!-- Tela de Game Over -->
+    <div id="game-over" class="hidden bg-red-50 p-8 rounded-2xl shadow-xl mb-8 border border-red-200">
+      <p id="game-over-message" class="text-2xl font-bold text-center text-red-700 mb-5"></p>
+      <div id="game-over-details" class="mt-5 text-base text-gray-700 leading-relaxed space-y-2"></div>
+      <div id="score-breakdown" class="mt-6 p-4 bg-red-100 border border-red-200 rounded-lg">
+        <h3 class="text-lg font-bold text-red-800 mb-3">Detalhamento da Pontuação</h3>
+        <ul class="list-disc list-inside text-gray-700" id="score-breakdown-list"></ul>
+      </div>
+      <button id="new-case" class="mt-8 bg-blue-600 text-white font-semibold px-8 py-4 rounded-xl hover:bg-blue-700 transition duration-300 block mx-auto shadow-lg text-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw inline-block mr-2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.76 2.75L3 12Z"/>
+          <path d="M2.9 7.1v5h5"/>
+        </svg>
+        Iniciar Novo Caso
+      </button>
+    </div>
+
+    <!-- Modal de Início do Jogo -->
+    <div id="start-game-modal" class="modal-overlay">
+      <div class="modal-content">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">Bem-vindo ao Simulador Clínico!</h2>
+        <p class="text-gray-700 mb-6">Teste suas habilidades de diagnóstico e tratamento em um ambiente virtual. Seu objetivo é identificar corretamente a doença e aplicar o tratamento adequado antes que o tempo ou a saúde do paciente se esgotem.</p>
+        <div class="mb-6">
+          <label for="difficulty-select" class="block text-gray-700 text-sm font-semibold mb-2">Selecione a Dificuldade:</label>
+          <select id="difficulty-select" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <option value="easy">Fácil</option>
+            <option value="medium" selected>Médio</option>
+            <option value="hard">Difícil</option>
+          </select>
+        </div>
+        <button id="start-game-button" class="bg-green-600 text-white font-semibold px-8 py-4 rounded-xl hover:bg-green-700 transition duration-300 shadow-lg text-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play inline-block mr-2">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Iniciar Novo Caso
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo Principal do Jogo -->
+    <div id="game-content" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Informações do Paciente -->
+      <div class="bg-gray-50 p-6 rounded-2xl shadow-lg border border-gray-200">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round mr-3 text-purple-600">
+            <circle cx="12" cy="8" r="5"/>
+            <path d="M20 21a8 8 0 0 0-16 0"/>
+          </svg>
+          Informações do Paciente
+        </h2>
+        <p class="text-gray-700 mb-3"><strong>Histórico:</strong> <span id="historico" class="font-medium text-gray-800"></span></p>
+        <p class="text-gray-700 mb-3"><strong>Sintomas:</strong> <span id="sintomas" class="font-medium text-gray-800"></span></p>
+        <div class="mt-5">
+          <h3 class="text-lg font-bold text-gray-800 mb-2">Evolução da Saúde</h3>
+          <div class="w-full bg-gray-200 h-5 rounded-full overflow-hidden">
+            <div id="health-bar" class="h-5 rounded-full bg-green-500 health-bar" style="width: 80%"></div>
+          </div>
+          <p class="text-gray-700 mt-2">Saúde: <span id="health-value" class="font-bold text-lg text-green-700">80</span>%</p>
+        </div>
+        <p class="mt-4 text-gray-700"><strong>Tempo Restante:</strong> <span id="timer" class="font-bold text-xl text-blue-600">5:00</span></p>
+        <p class="text-gray-700"><strong>Pontuação:</strong> <span id="score" class="font-bold text-xl text-yellow-600">0</span></p>
+      </div>
+
+      <!-- Sinais Vitais -->
+      <div class="bg-gray-50 p-6 rounded-2xl shadow-lg border border-gray-200">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity mr-3 text-red-600">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          Sinais Vitais
+        </h2>
+        <p class="text-gray-700 mb-2"><strong>Temperatura:</strong> <span id="vitals-temp" class="font-medium text-gray-800">37.0°C</span></p>
+        <p class="text-gray-700 mb-2"><strong>Frequência Cardíaca:</strong> <span id="vitals-hr" class="font-medium text-gray-800">72 bpm</span></p>
+        <p class="text-gray-700 mb-2"><strong>Pressão Arterial:</strong> <span id="vitals-bp" class="font-medium text-gray-800">120/80 mmHg</span></p>
+        <p class="text-gray-700 mb-2"><strong>Saturação de Oxigênio:</strong> <span id="vitals-spo2" class="font-medium text-gray-800">98%</span></p>
+      </div>
+
+      <!-- Chat com Paciente -->
+      <div class="bg-gray-50 p-6 rounded-2xl shadow-lg border border-gray-200 flex flex-col col-span-1 md:col-span-2 lg:col-span-1">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square mr-3 text-blue-600">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Chat com Paciente
+          <span id="chat-loading" class="loading-spinner hidden"></span>
+        </h2>
+        <div id="chat-box" class="chat-box border border-gray-300 p-4 rounded-lg bg-white flex-grow mb-4 text-gray-800 shadow-inner"></div>
+        <div class="flex">
+          <input type="text" id="chat-input" class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Faça uma pergunta ao paciente...">
+          <button id="chat-send" class="bg-blue-600 text-white px-5 py-3 rounded-r-lg hover:bg-blue-700 transition duration-300 shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send">
+              <path d="m22 2-7 20-4-9-9-4 20-7z"/>
+              <path d="M22 2 11 13"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Solicitação de Exames -->
+      <div class="bg-gray-50 p-6 rounded-2xl shadow-lg border border-gray-200">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flask-conical mr-3 text-yellow-600">
+            <path d="M10 16.5V22a2 2 0 0 0 4 0v-5.5"/>
+            <path d="M14 16.5V22a2 2 0 0 0 4 0v-5.5"/>
+            <path d="M2 12h20"/>
+            <path d="M14 2c3 0 7 1 7 5a6 6 0 0 1-5 4M10 2c-3 0-7 1-7 5a6 6 0 0 0 5 4"/>
+            <circle cx="12" cy="9" r="4"/>
+          </svg>
+          Solicitar Exames
+        </h2>
+        <div id="exames-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4"></div>
+        <p class="text-gray-700"><strong>Exames solicitados:</strong> <span id="exames-solicitados" class="font-medium italic text-gray-800">Nenhum</span></p>
+      </div>
+
+      <!-- Diagnóstico e Tratamento -->
+      <div class="bg-gray-50 p-6 rounded-2xl shadow-lg border border-gray-200 col-span-1 md:col-span-2 lg:col-span-1">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-stethoscope mr-3 text-green-600">
+            <path d="M2 13v-1a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z"/>
+            <path d="M8 10V5a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v5"/>
+            <path d="M10 10h4"/>
+            <path d="M17 10h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2Z"/>
+          </svg>
+          Diagnóstico e Tratamento
+        </h2>
+        <label for="diagnostico-select" class="block text-gray-700 text-sm font-semibold mb-2">Diagnóstico Proposto:</label>
+        <select id="diagnostico-select" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-400">
+          <option value="">Selecione o diagnóstico...</option>
+        </select>
+        <button id="diagnostico-submit" class="w-full bg-purple-600 text-white font-semibold px-4 py-3 rounded-xl hover:bg-purple-700 transition duration-300 mb-5 shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle inline-block mr-2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <path d="m9 11 3 3L22 4"/>
+          </svg>
+          Submeter Diagnóstico
+        </button>
+
+        <label for="tratamento-select" class="block text-gray-700 text-sm font-semibold mb-2">Tratamento Proposto:</label>
+        <select id="tratamento-select" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-400">
+          <option value="">Selecione o tratamento...</option>
+        </select>
+        <button id="tratamento-submit" class="w-full bg-green-600 text-white font-semibold px-4 py-3 rounded-xl hover:bg-green-700 transition duration-300 shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-syringe inline-block mr-2">
+            <path d="m18 12 4-4"/>
+            <path d="m17 11 1-1"/>
+            <path d="M12 19V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2Z"/>
+            <path d="M10 11H6"/>
+          </svg>
+          Submeter Tratamento
+        </button>
+      </div>
+
+      <!-- Registro de Ações e Feedback -->
+      <div class="bg-gray-50 p-6 rounded-2xl shadow-lg border border-gray-200 col-span-full">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list mr-3 text-orange-600">
+            <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+            <path d="M12 11h4"/>
+            <path d="M12 16h4"/>
+            <path d="M8 11h.01"/>
+            <path d="M8 16h.01"/>
+          </svg>
+          Registro de Ações e Feedback
+        </h2>
+        <div id="feedback-box" class="feedback-box border border-gray-300 p-4 rounded-lg bg-white text-gray-800 shadow-inner"></div>
+      </div>
+
+      <!-- Quiz Fisiopatológico -->
+      <div id="quiz-section" class="hidden bg-gray-50 p-6 rounded-2xl shadow-lg border border-gray-200 col-span-full">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle mr-3 text-teal-600">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.81 1c0 2-3 3-3 3"/>
+            <path d="M12 17h.01"/>
+          </svg>
+          Quiz Fisiopatológico
+          <span id="quiz-loading" class="loading-spinner hidden"></span>
+        </h2>
+        <p id="quiz-question" class="mb-5 text-gray-800 text-lg font-medium"></p>
+        <textarea id="quiz-input" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Digite sua resposta..." rows="4"></textarea>
+        <button id="quiz-submit" class="w-full bg-teal-600 text-white font-semibold px-4 py-3 rounded-xl hover:bg-teal-700 transition duration-300 shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send-horizonal inline-block mr-2">
+            <path d="m17 12-5-5-5 5"/>
+            <path d="M17 12H3"/>
+            <path d="M21 12h-2"/>
+            <path d="M7 21v-4"/>
+            <path d="M17 21v-4"/>
+          </svg>
+          Enviar Resposta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configurações e dados base para o simulador clínico
+    const GAME_SETTINGS = {
+      initialHealth: 80, // Saúde inicial do paciente
+      initialTime: 300, // Tempo inicial em segundos (5 minutos)
+      examCost: 10, // Pontos deduzidos por solicitar um exame
+      correctDiagnosisScore: 50, // Pontos ganhos por diagnóstico correto
+      incorrectDiagnosisHealthLoss: 20, // Perda de saúde por diagnóstico incorreto
+      correctTreatmentScore: 50, // Pontos ganhos por tratamento correto
+      incorrectTreatmentHealthLoss: 20, // Perda de saúde por tratamento incorreto
+      quizCorrectScore: 20, // Pontos ganhos por resposta correta do quiz
+      maxExams: 3, // Número máximo de exames que podem ser solicitados
+      // Multiplicadores de dificuldade
+      difficultyMultipliers: {
+        easy: { time: 1.2, healthLoss: 0.8, scoreBonus: 1.2 },
+        medium: { time: 1.0, healthLoss: 1.0, scoreBonus: 1.0 },
+        hard: { time: 0.8, healthLoss: 1.2, scoreBonus: 0.8 },
+      }
+    };
+
+    // Dados clínicos predefinidos para gerar casos
+    const dadosBase = {
+      sintomas: [
+        "Febre alta", "Dor torácica", "Tosse seca", "Fadiga extrema", "Palpitações", "Palidez",
+        "Dor abdominal", "Náusea", "Vômito", "Dispneia", "Cefaleia", "Tontura", "Edema",
+        "Icterícia", "Perda de peso", "Sudorese noturna", "Prurido", "Artralgia", "Mialgia",
+        "Hematúria", "Oligúria", "Febre intermitente", "Confusão mental", "Convulsões"
+      ],
+      historicos: [
+        "Masculino, 20-30 anos, sem comorbidades", "Feminino, 30-40 anos, hipertensa",
+        "Masculino, 40-50 anos, fumante", "Feminino, 50-60 anos, diabética",
+        "Masculino, 60-70 anos, histórico de infarto", "Feminino, 20-30 anos, gestante",
+        "Masculino, 30-40 anos, etilista", "Feminino, 40-50 anos, obesidade"
+      ],
+      exames: [
+        { nome: "Hemograma", resultados: {
+          "Pneumonia bacteriana": "Leucocitose com predomínio de neutrófilos",
+          "Anemia ferropriva": "Hemoglobina baixa, VCM reduzido",
+          "Infarto agudo do miocárdio": "Leucocitose leve, sem alterações específicas",
+          "Sepse": "Leucocitose ou leucopenia, anemia",
+          "Insuficiência renal aguda": "Anemia normocítica, leucocitose leve",
+          "Hepatite viral": "Leucopenia, anemia leve",
+          "Diabetes descompensado": "Glicemia elevada, sem alterações específicas",
+          "Apendicite aguda": "Leucocitose com neutrofilia",
+          "Embolia pulmonar": "Sem alterações específicas",
+          "Meningite bacteriana": "Leucocitose com neutrofilia",
+          "Hipertensão maligna": "Sem alterações específicas",
+          "Asma aguda": "Sem alterações específicas",
+          "Pancreatite aguda": "Leucocitose, amilase elevada",
+          "Arritmia cardíaca": "Sem alterações específicas",
+          "Insuficiência hepática": "Anemia, trombocitopenia"
+        }},
+        { nome: "Raio-X de tórax", resultados: {
+          "Pneumonia bacteriana": "Infiltrados bilaterais ou consolidação lobar",
+          "Anemia ferropriva": "Normal",
+          "Infarto agudo do miocárdio": "Possível cardiomegalia",
+          "Sepse": "Padrão ARDS em casos graves",
+          "Insuficiência renal aguda": "Normal ou edema pulmonar",
+          "Hepatite viral": "Normal",
+          "Diabetes descompensado": "Normal",
+          "Apendicite aguda": "Normal",
+          "Embolia pulmonar": "Sinal de Westermark ou Hampton’s hump",
+          "Meningite bacteriana": "Normal",
+          "Hipertensão maligna": "Edema pulmonar em casos graves",
+          "Asma aguda": "Hiperinsuflação pulmonar",
+          "Pancreatite aguda": "Derrame pleural em casos graves",
+          "Arritmia cardíaca": "Normal ou cardiomegalia",
+          "Insuficiência hepática": "Normal"
+        }},
+        { nome: "Eletrocardiograma", resultados: {
+          "Pneumonia bacteriana": "Normal ou taquicardia sinusal",
+          "Anemia ferropriva": "Normal ou taquicardia",
+          "Infarto agudo do miocárdio": "Supradesnível do segmento ST",
+          "Sepse": "Taquicardia sinusal",
+          "Insuficiência renal aguda": "Hipercalemia (ondas T apiculadas)",
+          "Hepatite viral": "Normal",
+          "Diabetes descompensado": "Normal ou taquicardia",
+          "Apendicite aguda": "Normal",
+          "Embolia pulmonar": "S1Q3T3 ou taquicardia sinusal",
+          "Meningite bacteriana": "Normal",
+          "Hipertensão maligna": "Hipertrofia ventricular esquerda",
+          "Asma aguda": "Taquicardia sinusal",
+          "Pancreatite aguda": "Normal",
+          "Arritmia cardíaca": "Fibrilação atrial ou taquicardia ventricular",
+          "Insuficiência hepática": "Normal"
+        }},
+        { nome: "Gasometria arterial", resultados: {
+          "Pneumonia bacteriana": "Hipoxemia, alcalose respiratória",
+          "Anemia ferropriva": "Normal",
+          "Infarto agudo do miocárdio": "Normal ou hipoxemia leve",
+          "Sepse": "Acidose metabólica, hipoxemia",
+          "Insuficiência renal aguda": "Acidose metabólica",
+          "Hepatite viral": "Normal",
+          "Diabetes descompensado": "Acidose metabólica (cetoacidose)",
+          "Apendicite aguda": "Normal",
+          "Embolia pulmonar": "Hipoxemia, alcalose respiratória",
+          "Meningite bacteriana": "Normal ou hipoxemia",
+          "Hipertensão maligna": "Normal",
+          "Asma aguda": "Hipoxemia, hipercapnia em casos graves",
+          "Pancreatite aguda": "Hipoxemia em casos graves",
+          "Arritmia cardíaca": "Normal",
+          "Insuficiência hepática": "Normal ou alcalose respiratória"
+        }},
+        { nome: "Tomografia computadorizada", resultados: {
+          "Pneumonia bacteriana": "Consolidação pulmonar ou padrão em árvore em broto",
+          "Anemia ferropriva": "Normal",
+          "Infarto agudo do miocárdio": "Normal",
+          "Sepse": "Focos infecciosos em órgãos",
+          "Insuficiência renal aguda": "Rins normais ou aumentados",
+          "Hepatite viral": "Hepatomegalia ou esteatose",
+          "Diabetes descompensado": "Normal",
+          "Apendicite aguda": "Apendice inflamado, espessamento da parede",
+          "Embolia pulmonar": "Defeito de enchimento em artéria pulmonar",
+          "Meningite bacteriana": "Edema cerebral ou hidrocefalia",
+          "Hipertensão maligna": "Edema cerebral em casos graves",
+          "Asma aguda": "Normal",
+          "Pancreatite aguda": "Inflamação pancreática, coleções líquidas",
+          "Arritmia cardíaca": "Normal",
+          "Insuficiência hepática": "Cirrose, ascite"
+        }}
+      ],
+      diagnosticos: [
+        "Pneumonia bacteriana", "Anemia ferropriva", "Infarto agudo do miocárdio",
+        "Sepse", "Insuficiência renal aguda", "Hepatite viral", "Diabetes descompensado",
+        "Apendicite aguda", "Embolia pulmonar", "Meningite bacteriana",
+        "Hipertensão maligna", "Asma aguda", "Pancreatite aguda", "Arritmia cardíaca",
+        "Insuficiência hepática"
+      ],
+      tratamentos: [
+        "Antibiótico (Amoxicilina)", "Suplementação de ferro", "Trombolítico",
+        "Antibiótico de amplo espectro", "Hidratação venosa", "Antiviral",
+        "Insulina", "Cirurgia de urgência", "Anticoagulante", "Ceftriaxona",
+        "Anti-hipertensivo", "Broncodilatador", "Inibidores de bomba de prótons",
+        "Antiarrítmico", "Transplante hepático"
+      ],
+      fisiopatologias: [
+        "Inflamação dos alvéolos pulmonares devido a infecção bacteriana",
+        "Deficiência de ferro levando a redução de hemoglobina",
+        "Obstrução de artéria coronária causando isquemia miocárdica",
+        "Resposta inflamatória sistêmica a infecção grave",
+        "Redução da filtração glomerular por lesão renal",
+        "Inflamação hepática por vírus",
+        "Hiperglicemia por resistência à insulina",
+        "Inflamação do apêndice por obstrução",
+        "Oclusão de artéria pulmonar por trombo",
+        "Infecção das meninges por bactérias",
+        "Elevação severa da pressão arterial causando dano orgânico",
+        "Constrição brônquica por inflamação alérgica",
+        "Inflamação pancreática por cálculos biliares",
+        "Distúrbio elétrico no coração causando batimentos irregulares",
+        "Falência das funções hepáticas por cirrose"
+      ],
+      referencias: [
+        "Harrison’s Principles of Internal Medicine, 21st Ed., Chapter on Infectious Diseases",
+        "Harrison’s Principles of Internal Medicine, 21st Ed., Chapter on Hematology",
+        "Braunwald’s Heart Disease, 12th Ed., Chapter on Acute Coronary Syndromes",
+        "Harrison’s Principles of Internal Medicine, 21st Ed., Chapter on Sepsis",
+        "Brenner and Rector’s The Kidney, 11th Ed., Chapter on Acute Kidney Injury",
+        "Schiff’s Diseases of the Liver, 12th Ed., Chapter on Viral Hepatitis",
+        "Joslin’s Diabetes Mellitus, 14th Ed., Chapter on Diabetic Ketoacidosis",
+        "Sabiston Textbook of Surgery, 21st Ed., Chapter on Appendicitis",
+        "Pulmonary Pathophysiology, 9th Ed., Chapter on Pulmonary Embolism",
+        "Mandell, Douglas, and Bennett’s Principles of Infectious Diseases, 9th Ed., Chapter on Meningitis",
+        "Kaplan’s Clinical Hypertension, 11th Ed., Chapter on Hypertensive Emergencies",
+        "Fishman’s Pulmonary Diseases, 6th Ed., Chapter on Asthma",
+        "Sleisenger and Fordtran’s Gastrointestinal and Liver Disease, 11th Ed., Chapter on Pancreatitis",
+        "Braunwald’s Heart Disease, 12th Ed., Chapter on Arrhythmias",
+        "Schiff’s Diseases of the Liver, 12th Ed., Chapter on Cirrhosis"
+      ],
+      explicacoesDiagnosticoIncorreto: {
+        "Pneumonia bacteriana": "Não explica sintomas como {sintomas}; sugere infecção respiratória.",
+        "Anemia ferropriva": "Não justifica sintomas respiratórios ou infecciosos; indica deficiência de ferro.",
+        "Infarto agudo do miocárdio": "Incompatível com sintomas não cardíacos predominantes; sugere isquemia miocárdica.",
+        "Sepse": "Não corresponde a sintomas localizados sem sinais sistêmicos graves.",
+        "Insuficiência renal aguda": "Não explica sintomas respiratórios ou infecciosos; sugere lesão renal.",
+        "Hepatite viral": "Inconsistente com sintomas não hepáticos; indica inflamação do fígado.",
+        "Diabetes descompensado": "Não justifica sintomas não relacionados a hiperglicemia.",
+        "Apendicite aguda": "Não explica sintomas respiratórios ou sistêmicos; sugere inflamação abdominal localizada.",
+        "Embolia pulmonar": "Incompatível com sintomas não respiratórios ou sem fatores de risco tromboembólicos.",
+        "Meningite bacteriana": "Não justifica sintomas não neurológicos; sugere infecção meníngea.",
+        "Hipertensão maligna": "Inconsistente com sintomas não relacionados a pressão arterial elevada.",
+        "Asma aguda": "Não explica sintomas não respiratórios; sugere broncoespasmo.",
+        "Pancreatite aguda": "Não justifica sintomas não abdominais; sugere inflamação pancreática.",
+        "Arritmia cardíaca": "Incompatível com sintomas não cardíacos; sugere distúrbio elétrico cardíaco.",
+        "Insuficiência hepática": "Não explica sintomas não hepáticos; sugere falência hepática."
+      },
+      explicacoesTratamentoIncorreto: {
+        "Antibiótico (Amoxicilina)": "Não indicado para condições não bacterianas ou infecções específicas.",
+        "Suplementação de ferro": "Inapropriado para condições não relacionadas a anemia ferropriva.",
+        "Trombolítico": "Contraindicado sem evidência de trombose ou infarto.",
+        "Antibiótico de amplo espectro": "Não necessário para condições não infecciosas ou infecções específicas.",
+        "Hidratação venosa": "Insuficiente como tratamento primário para condições específicas.",
+        "Antiviral": "Inapropriado para condições não virais.",
+        "Insulina": "Não indicado para condições não diabéticas.",
+        "Cirurgia de urgência": "Contraindicada sem evidência de condição cirúrgica aguda.",
+        "Anticoagulante": "Inapropriado sem trombose ou embolia.",
+        "Ceftriaxona": "Não indicado para infecções não bacterianas ou sensíveis a outros antibióticos.",
+        "Anti-hipertensivo": "Inapropriado sem hipertensão.",
+        "Broncodilatador": "Não indicado para condições não respiratórias.",
+        "Inibidores de bomba de prótons": "Inapropriado para condições não gástricas.",
+        "Antiarrítmico": "Contraindicado sem arritmia cardíaca.",
+        "Transplante hepático": "Inviável para condições não hepáticas ou sem falência hepática."
+      },
+      racionalTratamentoCorreto: {
+        "Antibiótico (Amoxicilina)": "Eficaz contra Streptococcus pneumoniae, comum em pneumonia bacteriana.",
+        "Suplementação de ferro": "Corrige deficiência de ferro, aumentando hemoglobina.",
+        "Trombolítico": "Dissolve trombos em artérias coronárias, restaurando fluxo sanguíneo.",
+        "Antibiótico de amplo espectro": "Trata infecções graves como sepse até identificação do patógeno.",
+        "Hidratação venosa": "Restaura volume intravascular, essencial em insuficiência renal aguda.",
+        "Antiviral": "Inibe replicação viral em hepatite, reduzindo dano hepático.",
+        "Insulina": "Controla hiperglicemia em diabetes descompensado, prevenindo cetoacidose.",
+        "Cirurgia de urgência": "Remove apêndice inflamado, prevenindo ruptura e peritonite.",
+        "Anticoagulante": "Previne progressão de trombos em embolia pulmonar.",
+        "Ceftriaxona": "Antibiótico de escolha para meningite bacteriana devido à penetração no SNC.",
+        "Anti-hipertensivo": "Reduz pressão arterial, prevenindo dano orgânico em hipertensão maligna.",
+        "Broncodilatador": "Alivia broncoespasmo, melhorando fluxo aéreo em asma.",
+        "Inibidores de bomba de prótons": "Reduz inflamação gástrica em pancreatite aguda.",
+        "Antiarrítmico": "Estabiliza ritmo cardíaco em arritmias.",
+        "Transplante hepático": "Restaura função hepática em insuficiência hepática terminal."
+      }
+    };
+
+    /**
+     * Classe para gerenciar o estado e a lógica do jogo do simulador clínico.
+     */
+    class ClinicalSimulator {
+      constructor() {
+        // Estado do jogo
+        // Geramos um total de 350 casos clínicos para que haja mais variedade
+        // A dificuldade do jogo (fácil, médio, difícil) ajusta os parâmetros de tempo, perda de saúde e bônus de pontuação,
+        // não o tipo ou complexidade dos casos clínicos em si.
+        this.casosClinicos = this.gerarCasosClinicos(350);
+        this.casoAtual = null; // O caso clínico atualmente sendo resolvido
+        this.saudePaciente = GAME_SETTINGS.initialHealth; // Saúde atual do paciente
+        this.tempoRestante = GAME_SETTINGS.initialTime; // Tempo restante para resolver o caso
+        this.pontuacao = 0; // Pontuação do jogador
+        this.examesSolicitados = []; // Lista de exames já solicitados
+        this.jogoFinalizado = false; // Indica se o jogo terminou
+        this.timerInterval = null; // ID do intervalo do temporizador
+        this.quizQuestionGenerated = false; // Flag para controlar a geração da pergunta do quiz
+        this.difficulty = 'medium'; // Dificuldade inicial
+
+        // Armazenar histórico de ações e pontuações para o detalhamento final
+        this.actionLog = [];
+
+        // Mapeamento de elementos do DOM para fácil acesso
+        this.elements = {
+          historico: document.getElementById("historico"),
+          sintomas: document.getElementById("sintomas"),
+          healthBar: document.getElementById("health-bar"),
+          healthValue: document.getElementById("health-value"),
+          timer: document.getElementById("timer"),
+          score: document.getElementById("score"),
+          chatBox: document.getElementById("chat-box"),
+          chatInput: document.getElementById("chat-input"),
+          chatSend: document.getElementById("chat-send"),
+          chatLoading: document.getElementById("chat-loading"),
+          examesList: document.getElementById("exames-list"),
+          examesSolicitados: document.getElementById("exames-solicitados"),
+          diagnosticoSelect: document.getElementById("diagnostico-select"),
+          diagnosticoSubmit: document.getElementById("diagnostico-submit"),
+          tratamentoSelect: document.getElementById("tratamento-select"),
+          tratamentoSubmit: document.getElementById("tratamento-submit"),
+          quizSection: document.getElementById("quiz-section"),
+          quizQuestion: document.getElementById("quiz-question"),
+          quizInput: document.getElementById("quiz-input"),
+          quizSubmit: document.getElementById("quiz-submit"),
+          quizLoading: document.getElementById("quiz-loading"),
+          gameOver: document.getElementById("game-over"),
+          gameOverMessage: document.getElementById("game-over-message"),
+          gameOverDetails: document.getElementById("game-over-details"),
+          newCase: document.getElementById("new-case"),
+          feedbackBox: document.getElementById("feedback-box"),
+          startGameModal: document.getElementById("start-game-modal"),
+          startGameButton: document.getElementById("start-game-button"),
+          gameContent: document.getElementById("game-content"),
+          difficultySelect: document.getElementById("difficulty-select"),
+          scoreBreakdownList: document.getElementById("score-breakdown-list"),
+          vitalsTemp: document.getElementById("vitals-temp"),
+          vitalsHR: document.getElementById("vitals-hr"),
+          vitalsBP: document.getElementById("vitals-bp"),
+          vitalsSpO2: document.getElementById("vitals-spo2"),
+        };
+
+        // Anexa os event listeners aos elementos da UI
+        this.attachEventListeners();
+        // Exibe o modal de início do jogo ao carregar
+        this.showStartModal();
+      }
+
+      /**
+       * Gera uma quantidade especificada de casos clínicos aleatórios com base nos dados base.
+       * Garante que os exames disponíveis para cada caso sejam únicos.
+       * @param {number} quantidade - O número de casos clínicos a gerar.
+       * @returns {Array<Object>} Uma lista de objetos de caso clínico.
+       */
+      gerarCasosClinicos(quantidade) {
+        const casos = [];
+        for (let i = 0; i < quantidade; i++) {
+          const sintomas = [];
+          const numSintomas = Math.floor(Math.random() * 3) + 2; // Gera de 2 a 4 sintomas por caso
+          for (let j = 0; j < numSintomas; j++) {
+            const sintoma = dadosBase.sintomas[Math.floor(Math.random() * dadosBase.sintomas.length)];
+            if (!sintomas.includes(sintoma)) sintomas.push(sintoma); // Garante sintomas únicos
+          }
+
+          // Seleciona 3 exames únicos para o caso
+          const examesDisponiveis = new Set();
+          while (examesDisponiveis.size < 3) {
+            const exame = dadosBase.exames[Math.floor(Math.random() * dadosBase.exames.length)];
+            examesDisponiveis.add(exame);
+          }
+
+          // Seleciona um diagnóstico e tratamento correspondente aleatoriamente
+          const diagnosticoIndex = Math.floor(Math.random() * dadosBase.diagnosticos.length);
+          casos.push({
+            id: i + 1,
+            sintomas,
+            historico: dadosBase.historicos[Math.floor(Math.random() * dadosBase.historicos.length)],
+            examesDisponiveis: Array.from(examesDisponiveis), // Converte o Set de volta para Array
+            diagnosticoCorreto: dadosBase.diagnosticos[diagnosticoIndex],
+            tratamentoCorreto: dadosBase.tratamentos[diagnosticoIndex],
+            fisiopatologia: dadosBase.fisiopatologias[diagnosticoIndex],
+            referencia: dadosBase.referencias[diagnosticoIndex]
+          });
+        }
+        return casos;
+      }
+
+      /**
+       * Exibe um modal personalizado em vez da função alert() nativa do navegador.
+       * @param {string} title - Título do modal.
+       * @param {string} message - A mensagem a ser exibida no modal.
+       * @param {string} [type='info'] - O tipo de modal para estilo ('info', 'success', 'error').
+       * @param {function} [onClose=null] - Função de callback a ser executada ao fechar o modal.
+       */
+      showAlert(title, message, type = 'info', onClose = null) {
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'modal-overlay';
+        let bgColor = '';
+        let textColor = 'text-gray-800';
+
+        if (type === 'success') {
+            bgColor = 'bg-green-50';
+            textColor = 'text-green-700';
+        } else if (type === 'error') {
+            bgColor = 'bg-red-50';
+            textColor = 'text-red-700';
+        } else {
+            bgColor = 'bg-blue-50';
+            textColor = 'text-blue-700';
+        }
+
+        modalOverlay.innerHTML = `
+          <div class="modal-content ${bgColor}">
+            <h3 class="text-xl font-bold mb-3 ${textColor}">${title}</h3>
+            <p class="text-gray-800 text-lg mb-4">${message}</p>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 shadow-md">OK</button>
+          </div>
+        `;
+        document.body.appendChild(modalOverlay);
+
+        const closeButton = modalOverlay.querySelector('button');
+        closeButton.addEventListener('click', () => {
+          document.body.removeChild(modalOverlay);
+          if (onClose) {
+            onClose();
+          }
+        });
+      }
+
+      /**
+       * Anexa todos os event listeners necessários aos elementos da UI.
+       */
+      attachEventListeners() {
+        this.elements.startGameButton.addEventListener("click", () => this.startGame());
+        this.elements.chatSend.addEventListener("click", () => this.enviarMensagem());
+        this.elements.diagnosticoSubmit.addEventListener("click", () => this.submeterDiagnostico());
+        this.elements.tratamentoSubmit.addEventListener("click", () => this.submeterTratamento());
+        this.elements.quizSubmit.addEventListener("click", () => this.responderQuiz());
+        this.elements.newCase.addEventListener("click", () => this.novoCaso());
+        // Adiciona listener para a tecla Enter no input do chat
+        this.elements.chatInput.addEventListener("keypress", (e) => { if (e.key === "Enter") this.enviarMensagem(); });
+        // Adiciona listener para a tecla Enter no input do quiz
+        this.elements.quizInput.addEventListener("keypress", (e) => { if (e.key === "Enter") this.responderQuiz(); });
+        // Event listener para seleção de dificuldade
+        this.elements.difficultySelect.addEventListener("change", (e) => {
+          this.difficulty = e.target.value;
+          this.addFeedbackMessage("Sistema", `Dificuldade alterada para: ${e.target.options[e.target.selectedIndex].text}`, 'info');
+        });
+      }
+
+      /**
+       * Exibe o modal de início do jogo e oculta o conteúdo principal do jogo.
+       */
+      showStartModal() {
+        this.elements.startGameModal.classList.remove("hidden");
+        this.elements.gameContent.classList.add("hidden");
+      }
+
+      /**
+       * Inicia o jogo, ocultando o modal de início e exibindo o conteúdo principal.
+       */
+      startGame() {
+        this.elements.startGameModal.classList.add("hidden");
+        this.elements.gameContent.classList.remove("hidden");
+        this.novoCaso(); // Inicia o primeiro caso
+      }
+
+      /**
+       * Reinicia o jogo com um novo caso clínico, redefinindo o estado e a UI.
+       */
+      novoCaso() {
+        // Aplica modificadores de dificuldade
+        const difficultySettings = GAME_SETTINGS.difficultyMultipliers[this.difficulty];
+        this.saudePaciente = GAME_SETTINGS.initialHealth;
+        this.tempoRestante = Math.floor(GAME_SETTINGS.initialTime * difficultySettings.time);
+        this.pontuacao = 0;
+        this.examesSolicitados = [];
+        this.jogoFinalizado = false;
+        this.quizQuestionGenerated = false;
+        this.actionLog = []; // Limpa o registro de ações para o novo caso
+
+        // Seleciona um novo caso aleatório
+        this.casoAtual = this.casosClinicos[Math.floor(Math.random() * this.casosClinicos.length)];
+
+        // Limpa a interface do usuário
+        this.elements.chatBox.innerHTML = "";
+        this.elements.feedbackBox.innerHTML = "";
+        this.elements.diagnosticoSelect.value = "";
+        this.elements.tratamentoSelect.value = "";
+        this.elements.quizSection.classList.add("hidden");
+        this.elements.quizInput.value = "";
+        this.elements.gameOver.classList.add("hidden");
+        this.elements.chatInput.value = "";
+
+        this.preencherDropdowns(); // Preenche os seletores de diagnóstico e tratamento
+        this.atualizarInterface(); // Atualiza todos os elementos da UI
+        this.iniciarTemporizador(); // Inicia o temporizador para o novo caso
+        this.addFeedbackMessage("Sistema", `Novo caso iniciado! Paciente: ${this.casoAtual.historico}. Seus sintomas são: ${this.casoAtual.sintomas.join(', ')}.`, 'info');
+      }
+
+      /**
+       * Inicia ou reinicia o temporizador do jogo.
+       */
+      iniciarTemporizador() {
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval); // Limpa o temporizador anterior, se houver
+        }
+        this.timerInterval = setInterval(() => {
+          if (this.jogoFinalizado) {
+            clearInterval(this.timerInterval); // Para o temporizador se o jogo terminou
+            return;
+          }
+          this.tempoRestante--; // Decrementa o tempo restante
+          if (this.tempoRestante <= 0) {
+            this.finalizarJogo("Tempo esgotado! O paciente não resistiu.", "O tempo para o diagnóstico e tratamento esgotou.");
+          }
+          this.atualizarInterface(); // Atualiza a contagem do tempo na UI
+        }, 1000); // Atualiza a cada segundo
+      }
+
+      /**
+       * Preenche os dropdowns de diagnóstico e tratamento com opções misturadas, incluindo a correta.
+       */
+      preencherDropdowns() {
+        const { diagnosticoSelect, tratamentoSelect } = this.elements;
+
+        // Preencher Diagnóstico
+        diagnosticoSelect.innerHTML = '<option value="">Selecione o diagnóstico...</option>';
+        const diagnosticosDisponiveis = new Set([this.casoAtual.diagnosticoCorreto]);
+        while (diagnosticosDisponiveis.size < 5) { // Garante 5 opções
+          const diag = dadosBase.diagnosticos[Math.floor(Math.random() * dadosBase.diagnosticos.length)];
+          diagnosticosDisponiveis.add(diag);
+        }
+        // Converte para array, embaralha e adiciona ao dropdown
+        Array.from(diagnosticosDisponiveis).sort(() => Math.random() - 0.5).forEach(diag => {
+          const option = document.createElement("option");
+          option.value = diag;
+          option.textContent = diag;
+          diagnosticoSelect.appendChild(option);
+        });
+
+        // Preencher Tratamento
+        tratamentoSelect.innerHTML = '<option value="">Selecione o tratamento...</option>';
+        const tratamentosDisponiveis = new Set([this.casoAtual.tratamentoCorreto]);
+        while (tratamentosDisponiveis.size < 5) { // Garante 5 opções
+          const trat = dadosBase.tratamentos[Math.floor(Math.random() * dadosBase.tratamentos.length)];
+          tratamentosDisponiveis.add(trat);
+        }
+        // Converte para array, embaralha e adiciona ao dropdown
+        Array.from(tratamentosDisponiveis).sort(() => Math.random() - 0.5).forEach(trat => {
+          const option = document.createElement("option");
+          option.value = trat;
+          option.textContent = trat;
+          tratamentoSelect.appendChild(option);
+        });
+      }
+
+      /**
+       * Adiciona uma mensagem ao feedback box, com formatação baseada no remetente e tipo.
+       * @param {string} sender - O remetente da mensagem ('Você', 'Paciente', 'Sistema', 'Exame', 'Feedback').
+       * @param {string} message - O conteúdo da mensagem.
+       * @param {string} [type='info'] - O tipo da mensagem ('info', 'success', 'error').
+       */
+      addFeedbackMessage(sender, message, type = 'info') {
+        let colorClass = 'text-gray-800';
+        if (type === 'success') colorClass = 'text-green-700';
+        else if (type === 'error') colorClass = 'text-red-700';
+        else if (sender === 'Você') colorClass = 'text-blue-700';
+        else if (sender === 'Paciente') colorClass = 'text-purple-700';
+        else if (sender === 'Exame') colorClass = 'text-yellow-700';
+        else if (sender === 'Sistema') colorClass = 'text-gray-700';
+
+        const timestamp = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        this.elements.feedbackBox.innerHTML += `<p class="mb-1 ${colorClass}"><strong>${timestamp} - ${sender}:</strong> ${message}</p>`;
+        this.elements.feedbackBox.scrollTop = this.elements.feedbackBox.scrollHeight; // Rola para o final
+      }
+
+      /**
+       * Registra uma ação do jogador para o log de pontuação final.
+       * @param {string} type - Tipo da ação (e.g., 'Exam Request', 'Diagnosis', 'Treatment', 'Quiz').
+       * @param {string} description - Descrição da ação.
+       * @param {number} scoreChange - Mudança na pontuação (+/-).
+       */
+      logAction(type, description, scoreChange) {
+          this.actionLog.push({ type, description, scoreChange });
+      }
+
+      /**
+       * Atualiza a interface do usuário com os dados atuais do jogo (saúde, tempo, pontuação, etc.).
+       */
+      atualizarInterface() {
+        const {
+          historico, sintomas, healthBar, healthValue, timer, score,
+          examesSolicitados: examesSolicitadosEl, examesList, chatInput, chatSend,
+          diagnosticoSelect, diagnosticoSubmit, tratamentoSelect,
+          tratamentoSubmit, quizInput, quizSubmit,
+          vitalsTemp, vitalsHR, vitalsBP, vitalsSpO2
+        } = this.elements;
+
+        historico.textContent = this.casoAtual.historico;
+        sintomas.textContent = this.casoAtual.sintomas.join(", ");
+
+        healthBar.style.width = `${this.saudePaciente}%`;
+        // Altera a cor da barra de saúde com base na saúde atual
+        healthBar.className = `h-5 rounded-full ${this.saudePaciente > 70 ? 'bg-green-500' : (this.saudePaciente > 40 ? 'bg-orange-500' : 'bg-red-500')} health-bar`;
+        healthValue.textContent = this.saudePaciente;
+
+        score.textContent = this.pontuacao;
+        timer.textContent = `${Math.floor(this.tempoRestante / 60)}:${(this.tempoRestante % 60).toString().padStart(2, "0")}`;
+
+        // Atualiza os sinais vitais (estáticos por enquanto, mas prontos para expansão)
+        vitalsTemp.textContent = '37.0°C'; // Exemplo
+        vitalsHR.textContent = '72 bpm'; // Exemplo
+        vitalsBP.textContent = '120/80 mmHg'; // Exemplo
+        vitalsSpO2.textContent = '98%'; // Exemplo
+
+        // Atualiza a lista de exames solicitados
+        examesSolicitadosEl.innerHTML = this.examesSolicitados.length > 0
+          ? `<ul class="list-disc list-inside text-gray-700">${this.examesSolicitados.map(ex => `<li>${ex.nome}: <span class="font-normal text-gray-800">${ex.resultado}</span></li>`).join("")}</ul>`
+          : "Nenhum";
+
+        // Renderiza os botões de exames disponíveis
+        examesList.innerHTML = this.casoAtual.examesDisponiveis.map((exame) => {
+          const isRequested = this.examesSolicitados.some(e => e.nome === exame.nome);
+          const isDisabled = isRequested || this.jogoFinalizado;
+          return `
+            <button
+              class="block w-full text-left p-3 rounded-lg border border-gray-300 transition duration-300 text-gray-700 font-medium ${isDisabled ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-white hover:bg-blue-100 hover:border-blue-400'}"
+              ${isDisabled ? 'disabled' : ''}
+              onclick="simulador.solicitarExame('${exame.nome}')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-check inline-block mr-2 text-green-500">
+                <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                <path d="m9 14 2 2 4-4"/>
+              </svg>
+              ${exame.nome}
+            </button>
+          `;
+        }).join("");
+
+        // Desabilita os controles do jogo se o jogo tiver terminado
+        chatInput.disabled = this.jogoFinalizado;
+        chatSend.disabled = this.jogoFinalizado;
+        diagnosticoSelect.disabled = this.jogoFinalizado;
+        diagnosticoSubmit.disabled = this.jogoFinalizado;
+        tratamentoSelect.disabled = this.jogoFinalizado;
+        tratamentoSubmit.disabled = this.jogoFinalizado;
+        quizInput.disabled = this.jogoFinalizado;
+        quizSubmit.disabled = this.jogoFinalizado;
+      }
+
+      /**
+       * Envia uma mensagem no chat e obtém a resposta do paciente via LLM (Large Language Model).
+       */
+      async enviarMensagem() {
+        if (this.jogoFinalizado) return;
+        const mensagem = this.elements.chatInput.value.trim();
+        if (!mensagem) return; // Não envia mensagens vazias
+
+        this.elements.chatBox.innerHTML += `<p class="mb-1 text-blue-700"><strong>Você:</strong> ${mensagem}</p>`;
+        this.addFeedbackMessage("Você", mensagem); // Loga a ação
+        this.elements.chatInput.value = "";
+        this.elements.chatBox.scrollTop = this.elements.chatBox.scrollHeight; // Rola para a última mensagem
+
+        // Desabilita input e botão de envio, e mostra o spinner de carregamento
+        this.elements.chatSend.disabled = true;
+        this.elements.chatInput.disabled = true;
+        this.elements.chatLoading.classList.remove("hidden");
+
+        try {
+          // Cria o prompt para o LLM, instruindo-o a agir como paciente
+          const prompt = `Você é um paciente virtual. Seu histórico é: "${this.casoAtual.historico}". Seus sintomas atuais são: "${this.casoAtual.sintomas.join(', ')}". O médico acabou de perguntar: "${mensagem}". Responda de forma concisa e como um paciente real responderia, focando nos seus sintomas e histórico, sem inventar novos problemas ou detalhes. Não finja ser um médico ou um chatbot. Mantenha a resposta entre 10 e 30 palavras.`;
+          const patientResponse = await this.callLLM(prompt); // Chama o LLM
+          this.elements.chatBox.innerHTML += `<p class="mb-1 text-purple-700"><strong>Paciente:</strong> ${patientResponse}</p>`;
+          this.addFeedbackMessage("Paciente", patientResponse); // Loga a ação
+          this.elements.chatBox.scrollTop = this.elements.chatBox.scrollHeight;
+        } catch (error) {
+          console.error("Erro ao chamar o LLM para chat:", error);
+          this.elements.chatBox.innerHTML += `<p class="text-red-500"><strong>Paciente:</strong> (Desculpe, não consigo responder agora. Houve um erro técnico.)</p>`;
+          this.addFeedbackMessage("Sistema", "Erro ao comunicar com o paciente (LLM).", 'error');
+        } finally {
+          // Reabilita input e botão de envio, e esconde o spinner
+          this.elements.chatSend.disabled = false;
+          this.elements.chatInput.disabled = false;
+          this.elements.chatLoading.classList.add("hidden");
+        }
+      }
+
+      /**
+       * Solicita um exame e atualiza o estado do jogo, deduzindo pontos.
+       * @param {string} nomeExame - O nome do exame a ser solicitado.
+       */
+      solicitarExame(nomeExame) {
+        if (this.jogoFinalizado) return;
+        if (this.examesSolicitados.length >= GAME_SETTINGS.maxExams) {
+          this.showAlert("Limite de Exames Atingido", `Você já solicitou o número máximo de ${GAME_SETTINGS.maxExams} exames permitidos para este caso.`, 'info');
+          this.addFeedbackMessage("Sistema", `Tentativa de solicitar exame "${nomeExame}" falhou: limite atingido.`, 'error');
+          return;
+        }
+        const exame = dadosBase.exames.find(e => e.nome === nomeExame);
+        // Obtém o resultado do exame com base no diagnóstico correto ou um padrão
+        const resultado = exame.resultados[this.casoAtual.diagnosticoCorreto] || "Sem alterações específicas";
+        this.examesSolicitados.push({ nome: exame.nome, resultado });
+        this.pontuacao -= GAME_SETTINGS.examCost; // Deduz pontos
+        this.logAction('Exam Request', `Solicitado: ${exame.nome}. Resultado: ${resultado}`, -GAME_SETTINGS.examCost);
+        this.addFeedbackMessage("Exame", `${exame.nome}: ${resultado}`, 'info');
+        this.showAlert("Resultado do Exame", `Resultado do ${exame.nome}: ${resultado}`, 'info'); // Exibe o resultado em um modal
+        this.atualizarInterface();
+      }
+
+      /**
+       * Submete o diagnóstico escolhido pelo usuário e avalia.
+       */
+      submeterDiagnostico() {
+        if (this.jogoFinalizado) return;
+        const diagnostico = this.elements.diagnosticoSelect.value;
+        if (!diagnostico) {
+          this.showAlert("Atenção", "Por favor, selecione um diagnóstico antes de submeter!", 'info');
+          return;
+        }
+
+        const difficultySettings = GAME_SETTINGS.difficultyMultipliers[this.difficulty];
+        let scoreChange = 0;
+        let healthChange = 0;
+        let feedbackType = 'error';
+        let feedbackMessage = '';
+        let alertMessage = '';
+        let alertTitle = '';
+
+        if (diagnostico.toLowerCase() === this.casoAtual.diagnosticoCorreto.toLowerCase()) {
+          scoreChange = Math.round(GAME_SETTINGS.correctDiagnosisScore * difficultySettings.scoreBonus);
+          this.pontuacao += scoreChange;
+          feedbackType = 'success';
+          feedbackMessage = `Diagnóstico: Correto! "${this.casoAtual.diagnosticoCorreto}" é consistente com os sintomas e exames coletados.`;
+          alertTitle = "Diagnóstico Correto!";
+          alertMessage = "Excelente! Seu diagnóstico está correto. Prepare-se para o quiz fisiopatológico e demonstre seu conhecimento.";
+          this.logAction('Diagnosis', `Diagnóstico CORRETO: ${diagnostico}`, scoreChange);
+          this.showAlert(alertTitle, alertMessage, feedbackType, () => {
+            this.elements.quizSection.classList.remove("hidden"); // Mostra a seção do quiz
+            if (!this.quizQuestionGenerated) {
+              this.generateQuizQuestion(); // Gera a pergunta do quiz se ainda não foi gerada
+            }
+          });
+        } else {
+          healthChange = Math.round(GAME_SETTINGS.incorrectDiagnosisHealthLoss * difficultySettings.healthLoss);
+          this.saudePaciente -= healthChange;
+          const explicacao = dadosBase.explicacoesDiagnosticoIncorreto[diagnostico]?.replace("{sintomas}", this.casoAtual.sintomas.join(", ")) || "Diagnóstico incorreto. Esta opção não se alinha com o quadro clínico apresentado.";
+          feedbackMessage = `Diagnóstico: Incorreto! "${diagnostico}": ${explicacao}`;
+          alertTitle = "Diagnóstico Incorreto!";
+          alertMessage = `Diagnóstico incorreto! ${explicacao} A condição do paciente está piorando em ${healthChange}%.`;
+          this.logAction('Diagnosis', `Diagnóstico INCORRETO: ${diagnostico}. Perda de saúde: ${healthChange}%`, 0); // Pontos não mudam, mas há perda de saúde
+          this.showAlert(alertTitle, alertMessage, feedbackType);
+          if (this.saudePaciente <= 0) {
+            this.finalizarJogo("Paciente faleceu! Jogo encerrado.", "O paciente infelizmente faleceu devido a um diagnóstico incorreto e progressão da doença.");
+          }
+        }
+        this.addFeedbackMessage("Feedback", feedbackMessage, feedbackType);
+        this.atualizarInterface();
+      }
+
+      /**
+       * Submete o tratamento escolhido pelo usuário e avalia.
+       */
+      submeterTratamento() {
+        if (this.jogoFinalizado) return;
+        const tratamento = this.elements.tratamentoSelect.value;
+        if (!tratamento) {
+          this.showAlert("Atenção", "Por favor, selecione um tratamento antes de submeter!", 'info');
+          return;
+        }
+
+        const difficultySettings = GAME_SETTINGS.difficultyMultipliers[this.difficulty];
+        let scoreChange = 0;
+        let healthChange = 0;
+        let feedbackType = 'error';
+        let feedbackMessage = '';
+        let alertMessage = '';
+        let alertTitle = '';
+
+        if (tratamento.toLowerCase() === this.casoAtual.tratamentoCorreto.toLowerCase()) {
+          scoreChange = Math.round(GAME_SETTINGS.correctTreatmentScore * difficultySettings.scoreBonus);
+          this.pontuacao += scoreChange;
+          feedbackType = 'success';
+          feedbackMessage = `Tratamento: Correto! "${tratamento}": ${dadosBase.racionalTratamentoCorreto[tratamento]}`;
+          alertTitle = "Tratamento Correto!";
+          alertMessage = `Tratamento correto! Paciente estabilizado. Pontuação final: ${this.pontuacao}.`;
+          this.logAction('Treatment', `Tratamento CORRETO: ${tratamento}`, scoreChange);
+          this.showAlert(alertTitle, alertMessage, feedbackType, () => {
+            this.finalizarJogo(`Tratamento correto! Paciente estabilizado. Pontuação final: ${this.pontuacao}`, "O tratamento foi bem-sucedido e o paciente se recuperou completamente!");
+          });
+        } else {
+          healthChange = Math.round(GAME_SETTINGS.incorrectTreatmentHealthLoss * difficultySettings.healthLoss);
+          this.saudePaciente -= healthChange;
+          const explicacao = dadosBase.explicacoesTratamentoIncorreto[tratamento] || "Tratamento incorreto. Esta opção não é eficaz ou é inadequada para a condição do paciente.";
+          feedbackMessage = `Tratamento: Incorreto! "${tratamento}": ${explicacao}`;
+          alertTitle = "Tratamento Incorreto!";
+          alertMessage = `Tratamento incorreto! ${explicacao} A condição do paciente está piorando rapidamente em ${healthChange}%.`;
+          this.logAction('Treatment', `Tratamento INCORRETO: ${tratamento}. Perda de saúde: ${healthChange}%`, 0); // Pontos não mudam, mas há perda de saúde
+          this.showAlert(alertTitle, alertMessage, feedbackType);
+          if (this.saudePaciente <= 0) {
+            this.finalizarJogo("Paciente faleceu! Jogo encerrado.", "O paciente infelizmente faleceu devido a um tratamento incorreto e agravamento da doença.");
+          }
+        }
+        this.addFeedbackMessage("Feedback", feedbackMessage, feedbackType);
+        this.atualizarInterface();
+      }
+
+      /**
+       * Gera uma pergunta de quiz sobre a fisiopatologia do diagnóstico correto usando o LLM.
+       */
+      async generateQuizQuestion() {
+        this.elements.quizLoading.classList.remove("hidden");
+        this.elements.quizSubmit.disabled = true;
+        this.elements.quizInput.disabled = true;
+        try {
+          // Prompt para o LLM gerar uma pergunta sobre fisiopatologia
+          const prompt = `Gere uma pergunta de quiz aberta sobre a fisiopatologia de "${this.casoAtual.diagnosticoCorreto}". A resposta correta é: "${this.casoAtual.fisiopatologia}". A pergunta deve ser clara, concisa e testar o conhecimento do mecanismo subjacente à doença. Não forneça a resposta na pergunta.`;
+          const question = await this.callLLM(prompt); // Chama o LLM
+          this.elements.quizQuestion.textContent = question;
+          this.quizQuestionGenerated = true; // Marca que a pergunta foi gerada
+          this.addFeedbackMessage("Sistema", "Pergunta do quiz fisiopatológico gerada.", 'info');
+        } catch (error) {
+          console.error("Erro ao gerar pergunta do quiz com LLM:", error);
+          // Fallback para uma pergunta padrão se o LLM falhar
+          this.elements.quizQuestion.textContent = `Explique o mecanismo fisiopatológico do diagnóstico: ${this.casoAtual.diagnosticoCorreto}`;
+          this.addFeedbackMessage("Sistema", "Erro ao gerar pergunta do quiz. Usando pergunta padrão.", 'error');
+        } finally {
+          this.elements.quizLoading.classList.add("hidden");
+          this.elements.quizSubmit.disabled = false;
+          this.elements.quizInput.disabled = false;
+        }
+      }
+
+      /**
+       * Envia a resposta do usuário ao quiz e usa o LLM para avaliar se está correta.
+       */
+      async responderQuiz() {
+        if (this.jogoFinalizado) return;
+        const resposta = this.elements.quizInput.value.trim();
+        if (!resposta) {
+          this.showAlert("Atenção", "Por favor, digite sua resposta para o quiz!", 'info');
+          return;
+        }
+
+        this.elements.quizLoading.classList.remove("hidden");
+        this.elements.quizSubmit.disabled = true;
+        this.elements.quizInput.disabled = true;
+
+        const difficultySettings = GAME_SETTINGS.difficultyMultipliers[this.difficulty];
+        let scoreChange = 0;
+        let feedbackType = 'error';
+        let feedbackMessage = '';
+        let alertMessage = '';
+        let alertTitle = '';
+
+        try {
+          // Prompt para o LLM avaliar a resposta do usuário
+          const prompt = `A pergunta do quiz foi: "${this.elements.quizQuestion.textContent}". A resposta correta sobre a fisiopatologia de "${this.casoAtual.diagnosticoCorreto}" é: "${this.casoAtual.fisiopatologia}". O usuário respondeu: "${resposta}". Avalie a resposta do usuário. Se estiver substancialmente correta, diga APENAS "Correta!". Se estiver incorreta, ou muito incompleta, diga APENAS "Incorreta!". Seja objetivo e conciso.`;
+          const evaluation = await this.callLLM(prompt); // Chama o LLM para avaliação
+
+          if (evaluation.toLowerCase().includes("correta")) {
+            scoreChange = Math.round(GAME_SETTINGS.quizCorrectScore * difficultySettings.scoreBonus);
+            this.pontuacao += scoreChange;
+            feedbackType = 'success';
+            feedbackMessage = `Quiz: Resposta correta! "${this.casoAtual.fisiopatologia}"`;
+            alertTitle = "Resposta Correta!";
+            alertMessage = `Resposta correta! Sua pontuação aumentou em ${scoreChange} pontos.`;
+            this.logAction('Quiz', `Quiz respondido CORRETAMENTE. Resposta: ${resposta}`, scoreChange);
+            this.showAlert(alertTitle, alertMessage, feedbackType, () => {
+              this.elements.quizSection.classList.add("hidden"); // Oculta o quiz
+              this.elements.quizInput.value = ""; // Limpa o input
+            });
+          } else {
+            feedbackMessage = `Quiz: Resposta incorreta. Tente novamente. (${evaluation})`;
+            alertTitle = "Resposta Incorreta!";
+            alertMessage = `Resposta incorreta. Por favor, revise seus conhecimentos e tente novamente.`;
+            this.logAction('Quiz', `Quiz respondido INCORRETAMENTE. Resposta: ${resposta}`, 0);
+            this.showAlert(alertTitle, alertMessage, feedbackType);
+          }
+        } catch (error) {
+          console.error("Erro ao avaliar quiz com LLM:", error);
+          feedbackMessage = "Erro ao avaliar resposta. Por favor, tente novamente.";
+          alertTitle = "Erro Técnico";
+          alertMessage = "Houve um problema técnico ao avaliar sua resposta. Por favor, tente novamente.";
+          this.showAlert(alertTitle, alertMessage, 'error');
+          this.addFeedbackMessage("Sistema", "Erro ao avaliar resposta do quiz (LLM).", 'error');
+        } finally {
+          this.elements.quizLoading.classList.add("hidden");
+          this.elements.quizSubmit.disabled = false;
+          this.elements.quizInput.disabled = false;
+        }
+        this.addFeedbackMessage("Feedback", feedbackMessage, feedbackType);
+        this.atualizarInterface();
+      }
+
+      /**
+       * Finaliza o jogo, exibe a tela de game over com os resultados e detalhes do caso.
+       * @param {string} message - Mensagem principal de fim de jogo.
+       * @param {string} detailMessage - Mensagem de detalhe para o gameOverDetails.
+       */
+      finalizarJogo(message, detailMessage) {
+        this.jogoFinalizado = true;
+        clearInterval(this.timerInterval); // Para o temporizador
+        this.elements.gameOver.classList.remove("hidden"); // Mostra a tela de game over
+        this.elements.gameOverMessage.textContent = message;
+        // Preenche os detalhes do caso para revisão do jogador
+        this.elements.gameOverDetails.innerHTML = `
+          <p class="mb-1"><strong class="text-gray-900">Resultado:</strong> ${detailMessage}</p>
+          <p class="mb-1"><strong class="text-gray-900">Diagnóstico Correto:</strong> ${this.casoAtual.diagnosticoCorreto}</p>
+          <p class="mb-1"><strong class="text-gray-900">Tratamento Correto:</strong> ${this.casoAtual.tratamentoCorreto} - ${dadosBase.racionalTratamentoCorreto[this.casoAtual.tratamentoCorreto]}</p>
+          <p class="mb-1"><strong class="text-gray-900">Fisiopatologia:</strong> ${this.casoAtual.fisiopatologia}</p>
+          <p class="mb-1"><strong class="text-gray-900">Referência:</strong> <a href="#" onclick="event.preventDefault(); navigator.clipboard.writeText('${this.casoAtual.referencia}'); simulador.showAlert('Referência Copiada', 'A referência bibliográfica foi copiada para a sua área de transferência!');" class="text-blue-600 hover:underline cursor-pointer">${this.casoAtual.referencia}</a></p>
+          <p class="mt-4 text-xl"><strong class="text-gray-900">Pontuação Final:</strong> <span class="text-blue-600 font-bold">${this.pontuacao}</span></p>
+        `;
+        this.renderScoreBreakdown(); // Renderiza o detalhamento da pontuação
+        this.atualizarInterface(); // Atualiza a UI para refletir o estado de game over
+      }
+
+      /**
+       * Renderiza o detalhamento da pontuação no painel de Game Over.
+       */
+      renderScoreBreakdown() {
+          const breakdownList = this.elements.scoreBreakdownList;
+          breakdownList.innerHTML = ''; // Limpa a lista existente
+
+          this.actionLog.forEach(action => {
+              const listItem = document.createElement('li');
+              let scoreText = '';
+              let scoreColor = 'text-gray-800';
+
+              if (action.scoreChange > 0) {
+                  scoreText = `+${action.scoreChange} pontos`;
+                  scoreColor = 'text-green-600';
+              } else if (action.scoreChange < 0) {
+                  scoreText = `${action.scoreChange} pontos`;
+                  scoreColor = 'text-red-600';
+              } else {
+                  scoreText = '0 pontos';
+              }
+
+              listItem.innerHTML = `<span class="font-semibold">${action.type}:</span> ${action.description} <span class="${scoreColor} font-bold">(${scoreText})</span>`;
+              breakdownList.appendChild(listItem);
+          });
+      }
+
+      /**
+       * Função auxiliar para chamar a API do Gemini para gerar texto.
+       * @param {string} prompt - O prompt de texto a ser enviado ao modelo.
+       * @returns {Promise<string>} Uma Promessa que resolve com a resposta gerada pelo LLM.
+       */
+      async callLLM(prompt) {
+        let chatHistory = [];
+        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+        const payload = { contents: chatHistory };
+        // A chave da API é automaticamente fornecida pelo ambiente Canvas em tempo de execução
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        // Verifica a estrutura da resposta e retorna o texto gerado
+        if (result.candidates && result.candidates.length > 0 &&
+            result.candidates[0].content && result.candidates[0].content.parts &&
+            result.candidates[0].content.parts.length > 0) {
+          return result.candidates[0].content.parts[0].text;
+        } else {
+          console.error("Estrutura de resposta LLM inesperada:", result);
+          throw new Error("Não foi possível obter resposta do LLM. Estrutura inesperada.");
+        }
+      }
+    }
+
+    // Inicializa uma nova instância do simulador clínico quando a janela estiver totalmente carregada.
+    // Isso garante que todos os elementos do DOM estejam disponíveis antes que o JavaScript tente acessá-los.
+    let simulador; // Declara a variável simulador no escopo global para acesso por onclick
+    window.onload = () => {
+      simulador = new ClinicalSimulator();
+    };
+  </script>
+</body>
+</html>

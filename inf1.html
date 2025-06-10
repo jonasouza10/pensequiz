@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudo de Casos Clínicos - Terminal Retro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* style.css embutido */
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Press Start 2P', cursive; /* Use uma fonte pixelada */
+            overflow: hidden; /* Evita barras de rolagem indesejadas */
+        }
+
+        .terminal-container {
+            background-color: #1a1a1a;
+            border: 2px solid #0f0;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+            width: 90%;
+            max-width: 800px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .terminal-header {
+            background-color: #0a0a0a;
+            color: #0f0;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            border-bottom: 1px solid #0f0;
+            cursor: grab; /* Para simular arrastar a janela, se for implementar */
+        }
+
+        .terminal-buttons span {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 5px;
+            border: 1px solid #0f0;
+        }
+
+        .terminal-buttons .close-btn { background-color: #ff0000; }
+        .terminal-buttons .minimize-btn { background-color: #ffff00; }
+        .terminal-buttons .maximize-btn { background-color: #00ff00; }
+
+        .terminal-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            overflow-y: auto; /* Para permitir rolagem do conteúdo */
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: #0f0 #1a1a1a; /* Firefox */
+        }
+
+        /* Estilo para Webkit (Chrome, Safari) */
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background-color: #0f0;
+            border-radius: 4px;
+            border: 2px solid #1a1a1a;
+        }
+
+        .output-area {
+            flex-grow: 1;
+            color: #0f0;
+            white-space: pre-wrap; /* Preserva quebras de linha e espaços */
+            word-break: break-word; /* Quebra palavras longas */
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            border-top: 1px dashed #050;
+            padding-top: 10px;
+        }
+
+        .prompt {
+            color: #0f0;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+
+        .user-input {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            color: #0f0;
+            font-family: 'Press Start 2P', cursive;
+            flex-grow: 1;
+            caret-color: #0f0; /* Cor do cursor */
+            font-size: 1.1em;
+        }
+
+        .user-input::placeholder {
+            color: rgba(0, 255, 0, 0.5);
+        }
+
+        /* Animação de digitação (cursor piscando) */
+        .user-input {
+            animation: blink-caret 1s step-end infinite;
+        }
+
+        @keyframes blink-caret {
+            from, to { border-right: 0.1em solid transparent }
+            50% { border-right: 0.1em solid #0f0; }
+        }
+
+        /* Estilos para o texto digitado na saída */
+        .user-response {
+            color: #00ffff; /* Uma cor diferente para a resposta do usuário */
+            font-weight: bold;
+        }
+
+        .system-message {
+            color: #0f0;
+        }
+
+        .diagnosis {
+            color: #ffcc00; /* Cor de destaque para o diagnóstico */
+            font-weight: bold;
+            margin-top: 20px;
+            border-top: 2px dashed #0a0;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <span>Terminal de Casos Clínicos</span>
+            <div class="terminal-buttons">
+                <span class="close-btn"></span>
+                <span class="minimize-btn"></span>
+                <span class="maximize-btn"></span>
+            </div>
+        </div>
+        <div class="terminal-body">
+            <div id="output-area" class="output-area"></div>
+            <div class="input-area">
+                <span class="prompt">C:\></span>
+                <input type="text" id="user-input" class="user-input" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // script.js embutido
+        document.addEventListener('DOMContentLoaded', () => {
+            const outputArea = document.getElementById('output-area');
+            const userInput = document.getElementById('user-input');
+
+            // Definição dos casos clínicos
+            const clinicalCases = [
+                {
+                    id: 1,
+                    name: "Caso 1: Dor Abdominal Aguda",
+                    questions: [
+                        "1. Qual a localização exata da dor?",
+                        "2. A dor é constante ou intermitente?",
+                        "3. Há presença de náuseas ou vômitos?",
+                        "4. A dor irradia para alguma outra parte do corpo?",
+                        "5. Você teve febre ou calafrios?",
+                        "6. Há alteração no hábito intestinal (diarreia/constipação)?"
+                    ],
+                    answers: [], // Armazena as respostas do usuário para este caso
+                    diagnosis: "Apêndicite aguda",
+                    remedy: "Procure um pronto-socorro imediatamente para avaliação e possível cirurgia."
+                },
+                {
+                    id: 2,
+                    name: "Caso 2: Cefaleia Intensa",
+                    questions: [
+                        "1. Qual a intensidade da dor de cabeça (0-10)?",
+                        "2. A dor é pulsátil ou em aperto?",
+                        "3. Há sensibilidade à luz ou ao som?",
+                        "4. Você sente náuseas ou tontura?",
+                        "5. A dor de cabeça piora com esforço físico?",
+                        "6. Você já teve dores de cabeça semelhantes antes?"
+                    ],
+                    answers: [],
+                    diagnosis: "Enxaqueca",
+                    remedy: "Descanso em ambiente escuro e silencioso. Analgésicos como ibuprofeno ou paracetamol podem ajudar. Em casos severos, consultar um neurologista para medicação específica."
+                },
+                {
+                    id: 3,
+                    name: "Caso 3: Tosse Persistente",
+                    questions: [
+                        "1. Há quanto tempo você está com tosse?",
+                        "2. A tosse é seca ou com catarro?",
+                        "3. Há dor no peito ao tossir?",
+                        "4. Você sente falta de ar ou chiado no peito?",
+                        "5. Teve febre recentemente?",
+                        "6. Você fuma ou tem histórico de asma/bronquite?"
+                    ],
+                    answers: [],
+                    diagnosis: "Bronquite Aguda",
+                    remedy: "Repouso, hidratação, e se necessário, expectorantes. Evitar fumaça e irritantes. Se a tosse persistir por mais de uma semana ou piorar, procurar um médico."
+                }
+            ];
+
+            let currentCaseIndex = -1; // -1 significa que nenhum caso foi selecionado ainda
+            let currentQuestionIndex = 0;
+
+            // Função para simular a digitação de texto no terminal
+            function typeWriter(text, element, callback) {
+                let i = 0;
+                element.innerHTML += '<span class="system-message"></span>';
+                const span = element.lastElementChild;
+                const speed = 30; // Velocidade da digitação (ms)
+
+                function type() {
+                    if (i < text.length) {
+                        span.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(type, speed);
+                    } else if (callback) {
+                        callback();
+                    }
+                }
+                type();
+            }
+
+            // Função para adicionar uma linha ao output
+            function addOutputLine(text, className = 'system-message') {
+                const p = document.createElement('p');
+                p.className = className;
+                outputArea.appendChild(p);
+                typeWriter(text, p);
+                outputArea.scrollTop = outputArea.scrollHeight; // Rola para o final
+            }
+
+            // Função para iniciar um novo caso
+            function startCase(caseIndex) {
+                currentCaseIndex = caseIndex;
+                currentQuestionIndex = 0;
+                clinicalCases[currentCaseIndex].answers = []; // Limpa respostas anteriores
+
+                addOutputLine(`\nIniciando ${clinicalCases[currentCaseIndex].name}...\n`);
+                setTimeout(() => askQuestion(), 1000);
+            }
+
+            // Função para fazer a próxima pergunta
+            function askQuestion() {
+                if (currentCaseIndex === -1) return; // Nenhum caso selecionado
+
+                if (currentQuestionIndex < clinicalCases[currentCaseIndex].questions.length) {
+                    const question = clinicalCases[currentCaseIndex].questions[currentQuestionIndex];
+                    addOutputLine(question);
+                    userInput.value = ''; // Limpa o campo de entrada
+                    userInput.focus();
+                } else {
+                    // Todas as perguntas foram respondidas
+                    displayDiagnosis();
+                }
+            }
+
+            // Função para exibir o diagnóstico e o remédio
+            function displayDiagnosis() {
+                if (currentCaseIndex === -1) return;
+
+                addOutputLine("\nAnalisando suas respostas...", 'system-message');
+                setTimeout(() => {
+                    const currentCase = clinicalCases[currentCaseIndex];
+                    addOutputLine(`\nDiagnóstico Provável: ${currentCase.diagnosis}`, 'diagnosis');
+                    addOutputLine(`Recomendação: ${currentCase.remedy}`, 'diagnosis');
+                    addOutputLine("\nPara iniciar um novo caso, digite 'menu'.", 'system-message');
+                    currentCaseIndex = -1; // Reseta para o menu
+                    currentQuestionIndex = 0;
+                    userInput.value = '';
+                }, 2000);
+            }
+
+            // Função para mostrar o menu de casos
+            function showMenu() {
+                addOutputLine("\n--- Menu de Casos Clínicos ---");
+                clinicalCases.forEach((caseItem, index) => {
+                    addOutputLine(`${index + 1}. ${caseItem.name}`);
+                });
+                addOutputLine("\nDigite o número do caso para iniciar, ou 'sair' para fechar.", 'system-message');
+                currentCaseIndex = -1; // Garante que estamos no estado de seleção de caso
+                currentQuestionIndex = 0;
+                userInput.value = '';
+                userInput.focus();
+            }
+
+            // Lida com a entrada do usuário
+            userInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    const command = userInput.value.trim().toLowerCase();
+                    addOutputLine(`C:>${command}`, 'user-response'); // Exibe o que o usuário digitou
+
+                    if (currentCaseIndex === -1) { // Estamos no menu ou esperando seleção de caso
+                        if (command === 'sair') {
+                            addOutputLine("Encerrando o sistema. Até logo!", 'system-message');
+                            userInput.disabled = true; // Desabilita a entrada
+                        } else if (command === 'menu') {
+                            showMenu();
+                        } else {
+                            const caseNumber = parseInt(command);
+                            if (!isNaN(caseNumber) && caseNumber >= 1 && caseNumber <= clinicalCases.length) {
+                                startCase(caseNumber - 1); // -1 porque array é zero-based
+                            } else {
+                                addOutputLine("Comando inválido. Digite o número do caso ou 'menu'/'sair'.", 'system-message');
+                                userInput.value = '';
+                            }
+                        }
+                    } else { // Estamos respondendo a perguntas de um caso
+                        const currentCase = clinicalCases[currentCaseIndex];
+                        currentCase.answers.push(command); // Armazena a resposta
+
+                        currentQuestionIndex++;
+                        askQuestion(); // Vai para a próxima pergunta
+                    }
+                }
+            });
+
+            // Mensagem de boas-vindas ao carregar
+            addOutputLine("Bem-vindo ao Sistema de Estudo de Casos Clínicos Retro.");
+            addOutputLine("Digite 'menu' para ver os casos disponíveis.", 'system-message');
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>

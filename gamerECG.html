@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECG Challenge: Salve o Ritmo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluindo p5.js para a visualização do ECG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+    <style>
+        /* Transição suave para a barra de estabilidade e cores */
+        .stability-bar { transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out; }
+        /* Estilo da caixa de feedback com rolagem automática e comportamento suave */
+        .feedback-box { max-height: 200px; overflow-y: auto; scroll-behavior: smooth; border-radius: 0.5rem; }
+        /* Animação de pulso para o timer quando crítico */
+        .timer-critical { color: red; font-weight: bold; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        /* Estilo do canvas do ECG */
+        canvas { border: 2px solid #4a5568; background: #1a202c; border-radius: 0.5rem; display: block; }
+        /* Media queries para responsividade */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            button, select { font-size: 0.875rem; padding: 0.6rem 0.8rem; }
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.3rem; }
+            button, select { font-size: 0.8rem; padding: 0.5rem 0.7rem; }
+        }
+    </style>
+</head>
+<body class="bg-gray-800 text-white min-h-screen font-sans flex items-center justify-center">
+    <div class="container mx-auto p-4 max-w-4xl bg-gray-900 rounded-lg shadow-xl my-8">
+        <h1 class="text-4xl font-extrabold text-center mb-8 text-red-500 tracking-wide">ECG Challenge: Salve o Ritmo</h1>
+
+        <!-- Seção de Game Over / Novo Caso -->
+        <div id="game-over" class="hidden bg-red-900 bg-opacity-70 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <p id="game-over-message" class="text-2xl font-bold text-center mb-4 text-white"></p>
+            <div id="game-over-details" class="mt-4 text-sm leading-relaxed text-gray-200"></div>
+            <button id="new-case" class="mt-6 bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 block mx-auto shadow-md">Iniciar Novo Caso</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Informações do Paciente e ECG -->
+            <div class="bg-gray-800 p-5 rounded-lg shadow-md border border-gray-700">
+                <h2 class="text-2xl font-bold mb-3 text-red-400">Paciente <span id="paciente-id" class="text-gray-300 font-normal"></span></h2>
+                <div class="space-y-2">
+                    <p class="text-sm"><strong>Idade:</strong> <span id="idade" class="text-gray-300"></span></p>
+                    <p class="text-sm"><strong>Sintomas:</strong> <span id="sintomas" class="text-gray-300"></span></p>
+                </div>
+                
+                <div class="mt-5">
+                    <h3 class="text-xl font-bold text-red-400 mb-2">ECG</h3>
+                    <!-- O canvas do p5.js será anexado aqui -->
+                    <div id="ecg-canvas" class="w-full"></div> 
+                </div>
+
+                <div class="mt-5">
+                    <h3 class="text-xl font-bold text-red-400 mb-2">Estabilidade</h3>
+                    <div class="w-full bg-gray-700 h-5 rounded-full overflow-hidden">
+                        <div id="stability-bar" class="h-full rounded-full bg-green-500 stability-bar" style="width: 70%"></div>
+                    </div>
+                    <p class="text-sm mt-1">Estabilidade: <span id="stability-value" class="font-semibold">70</span>%</p>
+                </div>
+                
+                <div class="mt-5 flex justify-between items-center text-lg font-semibold">
+                    <p><strong>Tempo Restante:</strong> <span id="timer" class="text-yellow-400">3:00</span></p>
+                    <p><strong>Pontuação:</strong> <span id="score" class="text-green-400">0</span></p>
+                </div>
+            </div>
+
+            <!-- Identificação e Tratamentos -->
+            <div class="bg-gray-800 p-5 rounded-lg shadow-md border border-gray-700">
+                <h2 class="text-2xl font-bold mb-3 text-red-400">Ações</h2>
+                <div class="mb-4">
+                    <label for="ritmo" class="block text-sm font-medium text-gray-300 mb-1">Identificar Ritmo:</label>
+                    <select id="ritmo" class="mt-1 block w-full p-2 bg-gray-700 rounded-lg text-white border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Selecione o ritmo</option>
+                        <option value="Ritmo Sinusal">Ritmo Sinusal</option>
+                        <option value="Fibrilação Atrial">Fibrilação Atrial</option>
+                        <option value="Taquicardia Ventricular">Taquicardia Ventricular</option>
+                        <option value="Fibrilação Ventricular">Fibrilação Ventricular</option>
+                        <option value="Assistolia">Assistolia</option>
+                    </select>
+                    <button id="confirmar-ritmo" class="action-button mt-3 w-full p-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md">Confirmar Ritmo (5s)</button>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-2 text-red-400 mt-4">Tratamentos</h3>
+                <div id="tratamentos-list" class="grid grid-cols-1 gap-2">
+                    <!-- Botões de tratamento serão preenchidos aqui -->
+                </div>
+
+                <!-- Novo botão para finalizar o procedimento -->
+                <button id="finalizar-procedimento" class="action-button mt-6 w-full p-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-md opacity-50 cursor-not-allowed" disabled>
+                    Finalizar Procedimento
+                </button>
+            </div>
+
+            <!-- Feedback e Referências -->
+            <div class="bg-gray-800 p-5 rounded-lg shadow-md border border-gray-700 col-span-1 md:col-span-2">
+                <h2 class="text-2xl font-bold mb-3 text-red-400">Feedback e Referências</h2>
+                <div id="feedback-box" class="feedback-box border border-gray-700 p-3 bg-gray-700 text-sm rounded text-gray-200">
+                    <!-- Mensagens de feedback aparecerão aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados base para casos clínicos, incluindo as características de cada ritmo, tratamentos e referências
+        const dadosBase = {
+            ritmos: [
+                {
+                    nome: "Ritmo Sinusal",
+                    caracteristicas: "Regular, onda P antes de cada QRS, intervalo PR 120-200ms, QRS estreito, 60-100 bpm.",
+                    sintomas: ["Assintomático", "Palpitações leves ocasionais", "Pequeno desconforto torácico"],
+                    tratamentosCorretos: ["Observação"],
+                    tratamentosIncorretos: {
+                        "Amiodarona": "Não indicada para ritmo sinusal normal. Pode causar bradicardia ou outras arritmias.",
+                        "Choque Elétrico": "Não é um ritmo chocável. O choque elétrico em ritmo sinusal pode induzir arritmias graves.",
+                        "Adrenalina": "Não necessária em um ritmo sinusal estável. Pode aumentar a frequência cardíaca e o consumo de oxigênio miocárdico."
+                    },
+                    racionalCorretos: {
+                        "Observação": "Em um paciente estável, o ritmo sinusal normal não requer intervenção médica ativa, apenas monitorização."
+                    },
+                    referencia: {
+                        autor: "American Heart Association",
+                        titulo: "Advanced Cardiovascular Life Support (ACLS) Provider Manual",
+                        edicao: "2020",
+                        local: "Dallas, TX",
+                        editora: "American Heart Association",
+                        ano: 2020,
+                        capitulo: "Chapter 7: Rhythm Recognition",
+                        paginas: "105-120"
+                    },
+                    // Função de forma de onda para Ritmo Sinusal (simulação básica)
+                    waveform: (t, p5) => {
+                        let y = 0;
+                        // Onda P
+                        y += p5.sin(t * 2.5) * 5 * p5.map(p5.sin(t * 0.5), -1, 1, 0.2, 1);
+                        // Complexo QRS
+                        y += p5.sin(t * 10 - p5.PI / 2) * 40 * p5.exp(-p5.sq(t * 10 - p5.PI / 2)) * 1.5;
+                        y -= p5.sin(t * 10 - p5.PI / 2) * 20 * p5.exp(-p5.sq(t * 10 - p5.PI / 2)) * 0.8;
+                        // Onda T
+                        y += p5.sin(t * 2.5 + p5.PI) * 15 * p5.map(p5.sin(t * 0.5 + p5.PI), -1, 1, 0.2, 1);
+                        return y;
+                    }
+                },
+                {
+                    nome: "Fibrilação Atrial",
+                    caracteristicas: "Ritmo irregularmente irregular, ausência de ondas P discerníveis, presença de ondas 'f' fibrilatórias, QRS estreito.",
+                    sintomas: ["Palpitações fortes", "Tontura", "Dispneia", "Fadiga"],
+                    tratamentosCorretos: ["Amiodarona", "Choque Elétrico (se instável)"],
+                    tratamentosIncorretos: {
+                        "Observação": "Risco de tromboembolismo e instabilidade hemodinâmica progressiva. Requer controle de frequência ou ritmo.",
+                        "Adrenalina": "Não indicada para Fibrilação Atrial. Pode piorar a resposta ventricular e a estabilidade."
+                    },
+                    racionalCorretos: {
+                        "Amiodarona": "Ajuda a controlar a frequência ventricular ou a converter o ritmo para sinusal em pacientes estáveis.",
+                        "Choque Elétrico (se instável)": "Cardioversão elétrica sincronizada é a terapia de escolha para Fibrilação Atrial com instabilidade hemodinâmica (ex: hipotensão, isquemia, alteração do nível de consciência)."
+                    },
+                    referencia: {
+                        autor: "American Heart Association",
+                        titulo: "Advanced Cardiovascular Life Support (ACLS) Provider Manual",
+                        edicao: "2020",
+                        local: "Dallas, TX",
+                        editora: "American Heart Association",
+                        ano: 2020,
+                        capitulo: "Chapter 8: Tachyarrhythmias",
+                        paginas: "121-130"
+                    },
+                    // Função de forma de onda para Fibrilação Atrial (simulação básica)
+                    waveform: (t, p5) => {
+                        let y = p5.sin(t * 10 - p5.PI / 2) * 40 * p5.exp(-p5.sq(t * 10 - p5.PI / 2)) * (0.8 + p5.sin(t * 0.7) * 0.5); // QRS irregular
+                        y += (p5.noise(t * 5) * 50 - 25); // Baseline caótica
+                        return y * 0.5 + p5.sin(t * 2) * 10; // Adiciona alguma oscilação aleatória
+                    }
+                },
+                {
+                    nome: "Taquicardia Ventricular",
+                    caracteristicas: "Ritmo ventricular rápido (150-250 bpm), complexos QRS largos e bizarros, geralmente regular. Pode ter ou não pulso.",
+                    sintomas: ["Dor torácica aguda", "Síncope súbita", "Hipotensão grave", "Dispneia", "Nível de consciência alterado"],
+                    tratamentosCorretos: ["Amiodarona", "Choque Elétrico (se instável)"],
+                    tratamentosIncorretos: {
+                        "Observação": "TV, especialmente se persistente ou com instabilidade, tem alto risco de degenerar para Fibrilação Ventricular e parada cardíaca. Requer intervenção imediata.",
+                        "Adrenalina": "Embora usada em parada, não é a terapia de primeira linha para TV com pulso. Pode piorar o ritmo ou causar isquemia."
+                    },
+                    racionalCorretos: {
+                        "Amiodarona": "Antiarrítmico que estabiliza a membrana ventricular, indicado para TV com pulso e estável ou para TV que não responde à cardioversão inicial.",
+                        "Choque Elétrico (se instável)": "Cardioversão elétrica sincronizada é a terapia de escolha para Taquicardia Ventricular com pulso e instabilidade hemodinâmica."
+                    },
+                    referencia: {
+                        autor: "American Heart Association",
+                        titulo: "Advanced Cardiovascular Life Support (ACLS) Provider Manual",
+                        edicao: "2020",
+                        local: "Dallas, TX",
+                        editora: "American Heart Association",
+                        ano: 2020,
+                        capitulo: "Chapter 8: Tachyarrhythmias",
+                        paginas: "121-130"
+                    },
+                    // Função de forma de onda para Taquicardia Ventricular (simulação básica)
+                    waveform: (t, p5) => {
+                        let y = p5.sin(t * 8) * 60; // QRS largo, rápido, regular
+                        y += p5.sin(t * 8 + p5.PI / 4) * 20; // Variação para complexos bizarros
+                        return y;
+                    }
+                },
+                {
+                    nome: "Fibrilação Ventricular",
+                    caracteristicas: "Atividade elétrica ventricular caótica e desorganizada, sem QRS discernível, sem pulso. É um ritmo de parada cardíaca.",
+                    sintomas: ["Parada cardíaca súbita", "Inconsciência imediata", "Ausência de pulso"],
+                    tratamentosCorretos: ["Choque Elétrico", "Adrenalina"], // Em ordem de prioridade para simulação (Choque primeiro)
+                    tratamentosIncorretos: {
+                        "Observação": "Fibrilação Ventricular é uma emergência letal que requer desfibrilação imediata. Observação leva a óbito.",
+                        "Amiodarona": "Embora usada após choque inicial, não é a terapia primária. O choque elétrico é a prioridade."
+                    },
+                    racionalCorretos: {
+                        "Choque Elétrico": "Desfibrilação imediata é a intervenção mais eficaz para interromper a FV e restaurar um ritmo organizado. É a prioridade zero.",
+                        "Adrenalina": "Vasoativo que aumenta a perfusão coronariana e cerebral durante a RCP, sendo administrado após o primeiro choque e ciclos de RCP."
+                    },
+                    referencia: {
+                        autor: "American Heart Association",
+                        titulo: "Advanced Cardiovascular Life Support (ACLS) Provider Manual",
+                        edicao: "2020",
+                        local: "Dallas, TX",
+                        editora: "American Heart Association",
+                        ano: 2020,
+                        capitulo: "Chapter 9: Cardiac Arrest",
+                        paginas: "131-150"
+                    },
+                    // Função de forma de onda para Fibrilação Ventricular (simulação básica)
+                    waveform: (t, p5) => {
+                        let y = p5.noise(t * 20) * 100 - 50; // Totalmente caótico
+                        return y;
+                    }
+                },
+                {
+                    nome: "Assistolia",
+                    caracteristicas: "Linha reta no ECG (flatline), ausência total de atividade elétrica ventricular, sem pulso. É um ritmo de parada cardíaca.",
+                    sintomas: ["Parada cardíaca súbita", "Inconsciência imediata", "Ausência de pulso"],
+                    tratamentosCorretos: ["Adrenalina"],
+                    tratamentosIncorretos: {
+                        "Choque Elétrico": "Não indicado para assistolia, pois não há atividade elétrica organizada para chocar. Chocar a assistolia é ineficaz.",
+                        "Amiodarona": "Não eficaz em assistolia. A Amiodarona é um antiarrítmico, e na assistolia não há arritmia, mas ausência total de atividade elétrica.",
+                        "Observação": "A assistolia é uma parada cardíaca e requer RCP e administração de vasopressores imediatamente. Observação leva a óbito."
+                    },
+                    racionalCorretos: {
+                        "Adrenalina": "Vasopressor que aumenta a perfusão coronariana e cerebral durante a RCP, essencial para tentar restaurar a circulação em assistolia."
+                    },
+                    referencia: {
+                        autor: "American Heart Association",
+                        titulo: "Advanced Cardiovascular Life Support (ACLS) Provider Manual",
+                        edicao: "2020",
+                        local: "Dallas, TX",
+                        editora: "American Heart Association",
+                        ano: 2020,
+                        capitulo: "Chapter 9: Cardiac Arrest",
+                        paginas: "131-150"
+                    },
+                    // Função de forma de onda para Assistolia (simulação básica)
+                    waveform: (t, p5) => p5.sin(t) * 0.1 // Quase flatline com mínimo ruído
+                }
+            ],
+            // Tratamentos disponíveis no jogo, com tempo de aplicação
+            tratamentos: [
+                { nome: "Observação", tempo: 5 },
+                { nome: "Amiodarona", tempo: 10 },
+                { nome: "Choque Elétrico", tempo: 10 },
+                { nome: "Adrenalina", tempo: 10 }
+            ],
+            // Idades possíveis para os pacientes
+            idades: ["30 anos", "45 anos", "60 anos", "75 anos", "80 anos"]
+        };
+
+        // Função auxiliar para formatar a referência bibliográfica
+        function formatarReferencia(ref) {
+            return `${ref.autor}. ${ref.titulo}. ${ref.edicao} Edition. ${ref.local}: ${ref.editora}; ${ref.ano}. ${ref.capitulo}. p. ${ref.paginas}.`;
+        }
+
+        // Função para gerar um número específico de casos clínicos aleatórios
+        function gerarCasosClinicos(quantidade) {
+            const casos = [];
+            for (let i = 0; i < quantidade; i++) {
+                const ritmo = dadosBase.ritmos[Math.floor(Math.random() * dadosBase.ritmos.length)];
+                // Seleciona de 1 a 3 sintomas para o paciente
+                const sintomasDisponiveis = [...ritmo.sintomas];
+                const numSintomas = Math.floor(Math.random() * 3) + 1;
+                const sintomasSelecionados = [];
+                for(let s = 0; s < numSintomas; s++) {
+                    if (sintomasDisponiveis.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * sintomasDisponiveis.length);
+                        sintomasSelecionados.push(sintomasDisponiveis.splice(randomIndex, 1)[0]);
+                    }
+                }
+
+                casos.push({
+                    id: String(i + 1).padStart(3, "0"), // ID com 3 dígitos (ex: 001, 002)
+                    ritmo: ritmo.nome,
+                    idade: dadosBase.idades[Math.floor(Math.random() * dadosBase.idades.length)],
+                    sintomas: sintomasSelecionados,
+                    caracteristicas: ritmo.caracteristicas,
+                    tratamentosCorretos: ritmo.tratamentosCorretos,
+                    tratamentosIncorretos: ritmo.tratamentosIncorretos,
+                    racionalCorretos: ritmo.racionalCorretos,
+                    referencia: ritmo.referencia,
+                    waveform: ritmo.waveform
+                });
+            }
+            return casos;
+        }
+
+        // --- Estado do Jogo (Variáveis Globais) ---
+        let casosClinicos = []; // Armazena todos os casos gerados
+        let casoAtual = null;   // O caso clínico atual sendo jogado
+        let estabilidade = 0;   // Estabilidade do paciente (0-100%)
+        let tempoRestante = 0;  // Tempo restante para o caso (em segundos)
+        let pontuacao = 0;      // Pontuação do jogador
+        let ritmoConfirmado = false; // Indica se o ritmo já foi identificado
+        let tratamentosAplicados = []; // Lista de tratamentos já aplicados
+        let jogoFinalizado = false;   // Flag para indicar o fim do jogo
+        let timerIntervalId;      // ID do intervalo do timer para poder limpá-lo
+
+        // --- Elementos do DOM (Cache para acesso mais rápido) ---
+        const pacienteIdEl = document.getElementById("paciente-id");
+        const idadeEl = document.getElementById("idade");
+        const sintomasEl = document.getElementById("sintomas");
+        const stabilityBarEl = document.getElementById("stability-bar");
+        const stabilityValueEl = document.getElementById("stability-value");
+        const timerEl = document.getElementById("timer");
+        const scoreEl = document.getElementById("score");
+        const ritmoSelectEl = document.getElementById("ritmo");
+        const confirmarRitmoEl = document.getElementById("confirmar-ritmo");
+        const tratamentosListEl = document.getElementById("tratamentos-list");
+        const feedbackBoxEl = document.getElementById("feedback-box");
+        const gameOverEl = document.getElementById("game-over");
+        const gameOverMessageEl = document.getElementById("game-over-message");
+        const gameOverDetailsEl = document.getElementById("game-over-details");
+        const newCaseEl = document.getElementById("new-case");
+        const finalizarProcedimentoEl = document.getElementById("finalizar-procedimento"); // Novo elemento
+
+        // --- Funções do Jogo ---
+
+        // Inicia um novo caso clínico, resetando todas as variáveis e a interface
+        function iniciarNovoCaso() {
+            clearInterval(timerIntervalId); // Limpa o timer anterior para evitar múltiplos timers
+            
+            // Gera 200 casos clínicos para maior variedade
+            casosClinicos = gerarCasosClinicos(200); 
+            casoAtual = casosClinicos[Math.floor(Math.random() * casosClinicos.length)]; // Seleciona um caso aleatório
+            
+            estabilidade = 70;      // Estabilidade inicial (pode variar por caso futuro)
+            tempoRestante = 180;    // Tempo limite de 3 minutos (180 segundos)
+            pontuacao = 0;
+            ritmoConfirmado = false;
+            tratamentosAplicados = [];
+            jogoFinalizado = false;
+            feedbackBoxEl.innerHTML = ""; // Limpa a caixa de feedback
+            gameOverEl.classList.add("hidden"); // Esconde a tela de Game Over
+
+            t = 0; // Reseta a variável de tempo para o ECG do p5.js
+
+            atualizarInterface(); // Atualiza todos os elementos visuais
+            iniciarTimer();       // Inicia o novo timer
+        }
+
+        // Atualiza os elementos visuais da interface do usuário com o estado atual do jogo
+        function atualizarInterface() {
+            // Atualiza informações do paciente
+            pacienteIdEl.textContent = casoAtual.id;
+            idadeEl.textContent = casoAtual.idade;
+            sintomasEl.textContent = casoAtual.sintomas.join(", ");
+
+            // Atualiza a barra de estabilidade e seu valor
+            stabilityBarEl.style.width = `${estabilidade}%`;
+            // Altera a cor da barra de estabilidade com base no valor
+            if (estabilidade > 80) {
+                stabilityBarEl.className = "h-full rounded-full bg-blue-500 stability-bar"; // Azul para muito estável
+            } else if (estabilidade > 60) {
+                stabilityBarEl.className = "h-full rounded-full bg-green-500 stability-bar"; // Verde para estável
+            } else if (estabilidade > 30) {
+                stabilityBarEl.className = "h-full rounded-full bg-yellow-500 stability-bar"; // Amarelo para atenção
+            } else {
+                stabilityBarEl.className = "h-full rounded-full bg-red-600 stability-bar"; // Vermelho para crítico
+            }
+            stabilityValueEl.textContent = estabilidade;
+
+            // Atualiza a pontuação
+            scoreEl.textContent = pontuacao;
+
+            // Atualiza o timer formatado
+            const minutos = Math.floor(tempoRestante / 60);
+            const segundos = (tempoRestante % 60).toString().padStart(2, "0");
+            timerEl.textContent = `${minutos}:${segundos}`;
+            timerEl.className = tempoRestante <= 10 ? "timer-critical" : ""; // Aplica estilo crítico se tempo baixo
+
+            // Habilita/desabilita o seletor de ritmo e o botão de confirmação
+            ritmoSelectEl.disabled = ritmoConfirmado || jogoFinalizado;
+            confirmarRitmoEl.disabled = ritmoConfirmado || jogoFinalizado;
+            confirmarRitmoEl.classList.toggle('opacity-50', ritmoConfirmado || jogoFinalizado);
+            confirmarRitmoEl.classList.toggle('cursor-not-allowed', ritmoConfirmado || jogoFinalizado);
+            confirmarRitmoEl.classList.toggle('hover:bg-blue-700', !(ritmoConfirmado || jogoFinalizado));
+
+            // Habilita/desabilita o botão "Finalizar Procedimento"
+            finalizarProcedimentoEl.disabled = !ritmoConfirmado || jogoFinalizado;
+            finalizarProcedimentoEl.classList.toggle('opacity-50', !ritmoConfirmado || jogoFinalizado);
+            finalizarProcedimentoEl.classList.toggle('cursor-not-allowed', !ritmoConfirmado || jogoFinalizado);
+            finalizarProcedimentoEl.classList.toggle('hover:bg-red-700', ritmoConfirmado && !jogoFinalizado);
+
+
+            // Gera os botões de tratamento
+            tratamentosListEl.innerHTML = dadosBase.tratamentos.map(tratamento => {
+                const isApplied = tratamentosAplicados.includes(tratamento.nome);
+                const isDisabled = jogoFinalizado || isApplied || !ritmoConfirmado; // Só pode aplicar tratamento se ritmo confirmado
+                return `
+                    <button
+                        class="action-button block w-full text-left p-3 mb-2 rounded-lg transition-colors duration-200 
+                        ${isApplied ? 'bg-blue-600' : isDisabled ? 'bg-gray-800 cursor-not-allowed opacity-50' : 'bg-gray-700 hover:bg-gray-600'}"
+                        ${isDisabled ? 'disabled' : ''}
+                        onclick="aplicarTratamento('${tratamento.nome}')"
+                    >
+                        <span class="font-semibold">${tratamento.nome}</span> (${tratamento.tempo}s)
+                    </button>
+                `;
+            }).join("");
+        }
+
+        // Função chamada ao confirmar o ritmo selecionado pelo jogador
+        function confirmarRitmo() {
+            if (jogoFinalizado || ritmoConfirmado) return; // Impede múltiplas confirmações
+
+            const ritmoSelecionado = ritmoSelectEl.value;
+            if (!ritmoSelecionado) {
+                adicionarFeedback("Por favor, selecione um ritmo antes de confirmar.", "info");
+                return;
+            }
+
+            ritmoConfirmado = true; // Marca o ritmo como confirmado
+            tempoRestante -= 5;     // Penalidade de tempo por identificar
+            pontuacao += 5; // Pequeno bônus por tentar identificar
+
+            if (ritmoSelecionado === casoAtual.ritmo) {
+                pontuacao += 20; // Bônus por identificação correta
+                adicionarFeedback(`<strong>Identificação do Ritmo: Correta!</strong> Você identificou ${ritmoSelecionado}. Características: ${casoAtual.caracteristicas}.`, "success");
+            } else {
+                estabilidade = Math.max(0, estabilidade - 20); // Grande penalidade por erro grave
+                pontuacao = Math.max(0, pontuacao - 10); // Perde pontos
+                const explicacao = dadosBase.ritmos.find(r => r.nome === ritmoSelecionado)?.tratamentosIncorretos["Identificação Incorreta"] || "Erro na identificação do ritmo. Isso pode levar a tratamentos inadequados.";
+                adicionarFeedback(`<strong>Identificação do Ritmo: Incorreta!</strong> Você selecionou ${ritmoSelecionado}. O ritmo correto era ${casoAtual.ritmo}. Características: ${casoAtual.caracteristicas}.`, "error");
+            }
+            feedbackBoxEl.scrollTop = feedbackBoxEl.scrollHeight; // Rola o feedback para o final
+            verificarCondicoesFimDeJogo();
+            atualizarInterface();
+        }
+
+        // Função chamada ao aplicar um tratamento selecionado pelo jogador
+        function aplicarTratamento(tratamentoNome) {
+            if (jogoFinalizado || !ritmoConfirmado) return; // Impede ações após o fim do jogo ou antes da identificação do ritmo
+            if (tratamentosAplicados.includes(tratamentoNome)) {
+                adicionarFeedback(`O tratamento "${tratamentoNome}" já foi aplicado.`, "info");
+                return;
+            }
+
+            const tratamento = dadosBase.tratamentos.find(t => t.nome === tratamentoNome);
+            if (!tratamento) return; // Tratamento não encontrado
+
+            tratamentosAplicados.push(tratamentoNome); // Registra o tratamento aplicado
+            tempoRestante -= tratamento.tempo;        // Reduz o tempo
+
+            if (casoAtual.tratamentosCorretos.includes(tratamentoNome)) {
+                estabilidade = Math.min(100, estabilidade + 20); // Aumenta estabilidade
+                pontuacao += 30; // Grande bônus
+                adicionarFeedback(`<strong>Tratamento: Correto!</strong> ${tratamentoNome}: ${casoAtual.racionalCorretos[tratamentoNome]}`, "success");
+            } else {
+                estabilidade = Math.max(0, estabilidade - 20); // Reduz estabilidade
+                pontuacao = Math.max(0, pontuacao - 15); // Perde pontos
+                const explicacao = casoAtual.tratamentosIncorretos[tratamentoNome] || "Não indicado para este ritmo, ou pode agravar a situação.";
+                adicionarFeedback(`<strong>Tratamento: Incorreto!</strong> ${tratamentoNome}: ${explicacao}`, "error");
+            }
+            feedbackBoxEl.scrollTop = feedbackBoxEl.scrollHeight;
+            verificarCondicoesFimDeJogo();
+            atualizarInterface();
+        }
+
+        // Adiciona uma mensagem à caixa de feedback, com opção de tipo (cor)
+        function adicionarFeedback(mensagem, tipo = "default") {
+            let className = "text-gray-200"; // Cor padrão
+            if (tipo === "success") className = "text-green-300";
+            else if (tipo === "error") className = "text-red-400";
+            else if (tipo === "warning") className = "text-yellow-300";
+            else if (tipo === "info") className = "text-blue-300";
+
+            feedbackBoxEl.innerHTML += `<p class="${className} mb-1">${mensagem}</p>`;
+            feedbackBoxEl.scrollTop = feedbackBoxEl.scrollHeight; // Rola automaticamente para o final
+        }
+
+        // Inicia o timer do jogo
+        function iniciarTimer() {
+            timerIntervalId = setInterval(() => {
+                if (jogoFinalizado) {
+                    clearInterval(timerIntervalId);
+                    return;
+                }
+                tempoRestante--;
+                if (tempoRestante <= 0) {
+                    finalizarJogo("Tempo esgotado! O paciente não resistiu.", "perdeu");
+                }
+                atualizarInterface();
+            }, 1000); // Atualiza a cada segundo
+        }
+
+        // Verifica as condições de fim de jogo (vitória ou derrota) durante o jogo
+        function verificarCondicoesFimDeJogo() {
+            if (estabilidade <= 0) {
+                finalizarJogo("Paciente faleceu! Infelizmente, a estabilidade chegou a zero.", "perdeu");
+                return;
+            }
+
+            // Condição de vitória automática se tudo for feito e paciente estabilizado
+            const todosTratamentosCorretosAplicados = casoAtual.tratamentosCorretos.every(t => tratamentosAplicados.includes(t));
+            if (ritmoConfirmado && ritmoSelectEl.value === casoAtual.ritmo && todosTratamentosCorretosAplicados && estabilidade >= 80) {
+                let bonusTempo = Math.floor(tempoRestante / 5); // 1 ponto por cada 5 segundos restantes
+                pontuacao += bonusTempo;
+                finalizarJogo(`Paciente estabilizado com sucesso! Pontuação final: ${pontuacao} (Bônus de Tempo: +${bonusTempo})`, "venceu");
+            }
+        }
+
+        // Nova função para finalizar o procedimento manualmente
+        function finalizarProcedimento() {
+            if (jogoFinalizado) return; // Impede finalizar se já estiver finalizado
+
+            jogoFinalizado = true; // Define o jogo como finalizado
+            clearInterval(timerIntervalId); // Para o timer
+            
+            const ritmoCorreto = (ritmoSelectEl.value === casoAtual.ritmo);
+            const todosTratamentosCorretosAplicados = casoAtual.tratamentosCorretos.every(t => tratamentosAplicados.includes(t));
+
+            let mensagemFinal = "";
+            let resultadoFinal = "perdeu";
+
+            if (ritmoCorreto && todosTratamentosCorretosAplicados && estabilidade >= 60) { // Pode vencer mesmo que não tenha 80% de estabilidade ao finalizar manualmente, mas com ações corretas
+                let bonusTempo = Math.floor(tempoRestante / 5);
+                pontuacao += bonusTempo;
+                mensagemFinal = `Procedimento finalizado! ${ritmoCorreto ? 'Ritmo correto identificado.' : 'Ritmo incorreto.'} ${todosTratamentosCorretosAplicados ? 'Todos os tratamentos essenciais aplicados.' : 'Nem todos os tratamentos essenciais aplicados.'} Estabilidade: ${estabilidade}%. Pontuação final: ${pontuacao} (Bônus de Tempo: +${bonusTempo})`;
+                if (estabilidade >= 80) {
+                    mensagemFinal = `Paciente estabilizado com sucesso! Pontuação final: ${pontuacao} (Bônus de Tempo: +${bonusTempo})`;
+                    resultadoFinal = "venceu";
+                } else {
+                    mensagemFinal = `Procedimento finalizado! Paciente estabilizado, mas a estabilidade poderia ser melhor. Pontuação final: ${pontuacao} (Bônus de Tempo: +${bonusTempo})`;
+                    resultadoFinal = "venceu"; // Considera vitória se as ações foram certas, mesmo que não 80% de estabilidade
+                }
+            } else {
+                 if (!ritmoCorreto) {
+                    mensagemFinal = `Procedimento finalizado. Erro na identificação do ritmo. O paciente não foi estabilizado.`;
+                } else if (!todosTratamentosCorretosAplicados) {
+                    mensagemFinal = `Procedimento finalizado. Você identificou o ritmo, mas faltaram tratamentos essenciais. O paciente não foi estabilizado.`;
+                } else {
+                    mensagemFinal = `Procedimento finalizado. O paciente não foi estabilizado. Estabilidade: ${estabilidade}%.`;
+                }
+                pontuacao = Math.max(0, pontuacao - 50); // Grande penalidade por finalizar e não ter sucesso
+                resultadoFinal = "perdeu";
+            }
+            
+            finalizarJogo(mensagemFinal, resultadoFinal);
+        }
+
+
+        // Finaliza o jogo e exibe a tela de "Game Over"
+        function finalizarJogo(mensagem, resultado) {
+            jogoFinalizado = true;
+            clearInterval(timerIntervalId); // Para o timer
+            
+            gameOverEl.classList.remove("hidden"); // Mostra a tela de game over
+            gameOverMessageEl.textContent = mensagem;
+
+            let detalhesMensagem = `<p><strong>Ritmo do Caso:</strong> ${casoAtual.ritmo} (${casoAtual.caracteristicas})</p>`;
+            
+            // Verifica se o ritmo foi identificado corretamente
+            if (ritmoConfirmado && ritmoSelectEl.value === casoAtual.ritmo) {
+                detalhesMensagem += `<p class="text-green-300 font-bold mt-2">Você identificou o ritmo corretamente!</p>`;
+            } else if (ritmoConfirmado && ritmoSelectEl.value !== casoAtual.ritmo) {
+                detalhesMensagem += `<p class="text-red-300 font-bold mt-2">Você identificou o ritmo incorretamente. O ritmo correto era: ${casoAtual.ritmo}</p>`;
+            } else {
+                detalhesMensagem += `<p class="text-yellow-300 font-bold mt-2">Você não identificou o ritmo.</p>`;
+            }
+
+            detalhesMensagem += `<p class="mt-3"><strong>Tratamentos Essenciais para este caso:</strong></p><ul class="list-disc list-inside ml-4">`;
+            casoAtual.tratamentosCorretos.forEach(t => {
+                detalhesMensagem += `<li>${t} - <span class="text-gray-400">${casoAtual.racionalCorretos[t]}</span></li>`;
+            });
+            detalhesMensagem += `</ul>`;
+
+            detalhesMensagem += `<p class="mt-3"><strong>Seus Tratamentos Aplicados:</strong></p><ul class="list-disc list-inside ml-4">`;
+            if (tratamentosAplicados.length > 0) {
+                tratamentosAplicados.forEach(t => {
+                    const isCorrect = casoAtual.tratamentosCorretos.includes(t);
+                    detalhesMensagem += `<li class="${isCorrect ? 'text-green-300' : 'text-red-300'}">${t}</li>`;
+                });
+            } else {
+                detalhesMensagem += `<li class="text-gray-400">Nenhum tratamento aplicado.</li>`;
+            }
+            detalhesMensagem += `</ul>`;
+            
+            detalhesMensagem += `<p class="mt-3"><strong>Referência:</strong> <span class="italic">${formatarReferencia(casoAtual.referencia)}</span></p>`;
+
+            gameOverDetailsEl.innerHTML = detalhesMensagem;
+
+            atualizarInterface(); // Uma última atualização para garantir o estado final visual
+        }
+
+        // --- Configuração do p5.js para o ECG ---
+        let sketch = function(p) {
+            let t = 0; // Variável de tempo para o scroll do ECG
+
+            p.setup = function() {
+                // Cria o canvas e o anexa ao elemento 'ecg-canvas' no HTML
+                let canvas = p.createCanvas(p.select('#ecg-canvas').width, 160);
+                canvas.parent("ecg-canvas");
+                // Garante que o canvas se ajusta ao redimensionar a janela
+                p.windowResized = () => {
+                    p.resizeCanvas(p.select('#ecg-canvas').width, 160);
+                };
+            };
+
+            p.draw = function() {
+                p.background(28, 32, 44); // Fundo escuro do monitor
+                p.stroke(0, 255, 0);      // Cor da linha do ECG (verde neon)
+                p.strokeWeight(2);        // Espessura da linha
+                p.noFill();
+
+                p.beginShape();
+                for (let x = 0; x < p.width; x++) {
+                    // Calcula o tempo relativo para cada ponto x do canvas
+                    // O 0.05 controla a velocidade do scroll e a densidade da onda
+                    let time = t + x * 0.05; 
+                    // Chama a função waveform do caso atual para gerar o valor Y
+                    let y = casoAtual.waveform(time, p); 
+                    // Mapeia o valor Y para a altura do canvas, centralizando a linha base
+                    p.vertex(x, p.height / 2 - y);
+                }
+                p.endShape();
+
+                t += 0.05; // Incrementa o tempo para o próximo frame (efeito de rolagem)
+                // Reseta o tempo para evitar valores muito grandes e garantir um loop contínuo
+                if (t > 1000) t = 0; 
+            };
+        };
+
+        // Cria uma nova instância do p5.js sketch
+        new p5(sketch);
+
+        // --- Event Listeners ---
+        confirmarRitmoEl.addEventListener("click", confirmarRitmo);
+        newCaseEl.addEventListener("click", iniciarNovoCaso);
+        finalizarProcedimentoEl.addEventListener("click", finalizarProcedimento); // Event listener para o novo botão
+
+        // Inicia o primeiro caso assim que a página é carregada
+        document.addEventListener("DOMContentLoaded", iniciarNovoCaso);
+    </script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código Vermelho: Emergência na Sala de Trauma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .stability-bar { transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out; }
+        .feedback-box { max-height: 250px; overflow-y: auto; scroll-behavior: smooth; }
+        .timer-critical { color: red; font-weight: bold; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        /* Adicionando media queries para melhor responsividade */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            button { font-size: 0.875rem; padding: 0.6rem 0.8rem; }
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.3rem; }
+            button { font-size: 0.8rem; padding: 0.5rem 0.7rem; }
+        }
+    </style>
+</head>
+<body class="bg-gray-800 text-white min-h-screen font-sans flex items-center justify-center">
+    <div class="container mx-auto p-4 max-w-4xl bg-gray-900 rounded-lg shadow-xl my-8">
+        <h1 class="text-4xl font-extrabold text-center mb-8 text-red-500 tracking-wide">Código Vermelho: Emergência na Sala de Trauma</h1>
+
+        <!-- Game Over / Novo Caso -->
+        <div id="game-over" class="hidden bg-red-900 bg-opacity-70 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <p id="game-over-message" class="text-2xl font-bold text-center mb-4 text-white"></p>
+            <div id="game-over-details" class="mt-4 text-sm leading-relaxed text-gray-200"></div>
+            <button id="new-case" class="mt-6 bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 block mx-auto shadow-md">Iniciar Novo Caso</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Informações do Paciente -->
+            <div class="bg-gray-800 p-5 rounded-lg shadow-md border border-gray-700">
+                <h2 class="text-2xl font-bold mb-3 text-red-400">Paciente <span id="paciente-id" class="text-gray-300 font-normal"></span></h2>
+                <div class="space-y-2">
+                    <p class="text-sm"><strong>Histórico:</strong> <span id="historico" class="text-gray-300"></span></p>
+                    <p class="text-sm"><strong>Queixas:</strong> <span id="queixas" class="text-gray-300"></span></p>
+                    <p class="text-sm"><strong>Sinais Vitais:</strong></p>
+                    <ul class="list-disc list-inside ml-4 text-gray-300 text-sm" id="sinais-vitais">
+                        <!-- Sinais vitais serão preenchidos aqui -->
+                    </ul>
+                </div>
+                
+                <div class="mt-5">
+                    <h3 class="text-xl font-bold text-red-400 mb-2">Estabilidade Clínica</h3>
+                    <div class="w-full bg-gray-700 h-5 rounded-full overflow-hidden">
+                        <div id="stability-bar" class="h-full rounded-full bg-green-500 stability-bar" style="width: 70%"></div>
+                    </div>
+                    <p class="text-sm mt-1">Estabilidade: <span id="stability-value" class="font-semibold">70</span>%</p>
+                </div>
+                
+                <div class="mt-5 flex justify-between items-center text-lg font-semibold">
+                    <p><strong>Tempo Restante:</strong> <span id="timer" class="text-yellow-400">3:00</span></p>
+                    <p><strong>Pontuação:</strong> <span id="score" class="text-green-400">0</span></p>
+                </div>
+            </div>
+
+            <!-- Ações de Emergência -->
+            <div class="bg-gray-800 p-5 rounded-lg shadow-md border border-gray-700">
+                <h2 class="text-2xl font-bold mb-3 text-red-400">Ações de Emergência</h2>
+                
+                <h3 class="text-xl font-bold mb-2 text-red-400 mt-4">Exames (Máx. 2)</h3>
+                <div id="exames-list" class="grid grid-cols-1 gap-2"></div>
+                
+                <h3 class="text-xl font-bold mb-2 text-red-400 mt-4">Intervenções</h3>
+                <div id="intervencoes-list" class="grid grid-cols-1 gap-2"></div>
+            </div>
+
+            <!-- Feedback e Referências -->
+            <div class="bg-gray-800 p-5 rounded-lg shadow-md border border-gray-700 col-span-1 md:col-span-2">
+                <h2 class="text-2xl font-bold mb-3 text-red-400">Feedback e Referências</h2>
+                <div id="feedback-box" class="feedback-box border border-gray-700 p-3 bg-gray-700 text-sm rounded text-gray-200">
+                    <!-- Mensagens de feedback aparecerão aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados base para casos clínicos
+        const dadosBase = {
+            traumas: [
+                {
+                    nome: "Hemotórax",
+                    sinaisVitais: { fc: "120-140 bpm", pa: "90/60-100/70 mmHg", fr: "24-30 irpm", sat: "80-88%", gcs: "12-14" },
+                    queixas: ["Dor torácica unilateral", "Dispneia", "Palidez", "Sudorese"],
+                    exames: {
+                        "USG FAST": "Líquido livre no hemitórax direito",
+                        "Raio-X de tórax": "Opacidade em hemitórax direito, desvio traqueal",
+                        "TC de tórax": "Hemotórax com fraturas costais"
+                    },
+                    intervencoesCorretas: ["Inserir dreno torácico", "Administrar O2 15L/min"],
+                    intervencoesIncorretas: {
+                        "Intubar imediatamente": "Não indicado sem falência respiratória iminente; priorize drenagem. Pode piorar o quadro.",
+                        "Administrar analgesia forte": "Pode mascarar sintomas cruciais e deprimir a respiração, complicando a avaliação.",
+                        "Aguardar mais exames": "Atraso no tratamento em um hemotórax tenso aumenta drasticamente o risco de colapso respiratório e choque."
+                    },
+                    racionalCorretas: {
+                        "Inserir dreno torácico": "Remove sangue e ar acumulados, restaurando a ventilação e prevenindo o colapso pulmonar. (ATLS, Primary Survey)",
+                        "Administrar O2 15L/min": "Corrige a hipoxemia grave causada pela compressão pulmonar e melhora a oxigenação tecidual."
+                    },
+                    referencia: "ATLS 10th Ed., Chapter 4: Thoracic Trauma"
+                },
+                {
+                    nome: "Ruptura esplênica",
+                    sinaisVitais: { fc: "130-150 bpm", pa: "80/50-90/60 mmHg", fr: "26-32 irpm", sat: "85-90%", gcs: "10-12" },
+                    queixas: ["Dor abdominal intensa", "Palidez", "Sudorese", "Tontura"],
+                    exames: {
+                        "USG FAST": "Líquido livre no abdômen (sugestivo de hemorragia)",
+                        "TC de abdômen": "Laceração esplênica grau IV com grande quantidade de líquido livre",
+                        "Hemograma": "Hemoglobina baixa (7-9 g/dL), indicando perda sanguínea"
+                    },
+                    intervencoesCorretas: ["Administrar Ringer Lactato 1L", "Encaminhar para laparotomia"],
+                    intervencoesIncorretas: {
+                        "Intubar imediatamente": "Não é a prioridade inicial sem comprometimento das vias aéreas. A prioridade é estabilizar a hemodinâmica.",
+                        "Administrar analgesia forte": "Pode mascarar a evolução da instabilidade hemodinâmica, dificultando a monitorização.",
+                        "Aguardar mais exames": "Atraso em um paciente com hemorragia ativa pode levar rapidamente a choque hipovolêmico irreversível."
+                    },
+                    racionalCorretas: {
+                        "Administrar Ringer Lactato 1L": "Repõe volume intravascular perdido devido à hemorragia, combatendo o choque hipovolêmico. (ATLS, Circulation)",
+                        "Encaminhar para laparotomia": "Medida definitiva para controlar a hemorragia interna grave de origem esplênica."
+                    },
+                    referencia: "ATLS 10th Ed., Chapter 5: Abdominal Trauma"
+                },
+                {
+                    nome: "Trauma cranioencefálico grave",
+                    sinaisVitais: { fc: "90-110 bpm", pa: "140/90-160/100 mmHg", fr: "18-24 irpm", sat: "90-95%", gcs: "8-10" },
+                    queixas: ["Rebaixamento do sensório", "Cefaleia intensa", "Vômito em jato", "Confusão progressiva"],
+                    exames: {
+                        "TC de crânio": "Hematoma subdural agudo com desvio de linha média",
+                        "Gasometria arterial": "Pode mostrar acidose metabólica ou leve hipercapnia",
+                        "Raio-X cervical": "Sem fraturas ou desalinhamentos cervicais (importante para exclusão)"
+                    },
+                    intervencoesCorretas: ["Intubar imediatamente", "Administrar manitol"],
+                    intervencoesIncorretas: {
+                        "Administrar Ringer Lactato 1L": "Fluidoterapia excessiva pode aumentar a pressão intracraniana (PIC) em pacientes com TCE.",
+                        "Aguardar mais exames": "Atraso no tratamento do TCE grave com sinais de hipertensão intracraniana agrava o edema cerebral e o prognóstico.",
+                        "Administrar analgesia forte": "Pode deprimir ainda mais o nível de consciência e mascarar alterações no GCS, essenciais para monitorização."
+                    },
+                    racionalCorretas: {
+                        "Intubar imediatamente": "Protege as vias aéreas, garante oxigenação e ventilação adequadas, essenciais para prevenir lesão cerebral secundária em GCS < 9. (ATLS, Airway)",
+                        "Administrar manitol": "Diurético osmótico que reduz o edema cerebral e a pressão intracraniana em casos de TCE grave."
+                    },
+                    referencia: "ATLS 10th Ed., Chapter 6: Head Trauma"
+                },
+                {
+                    nome: "Pneumotórax hipertensivo",
+                    sinaisVitais: { fc: "130-150 bpm", pa: "80/50-90/60 mmHg", fr: "30-40 irpm", sat: "75-85%", gcs: "12-14" },
+                    queixas: ["Dispneia grave súbita", "Dor torácica pleurítica", "Cianose", "Agitação psicomotora", "Desvio de traqueia"],
+                    exames: {
+                        "Raio-X de tórax": "Colapso pulmonar total unilateral com desvio traqueal e mediastinal contralateral",
+                        "USG FAST": "Ausência de deslizamento pleural (lung sliding) no lado afetado, sem líquido livre.",
+                        "TC de tórax": "Confirmação do pneumotórax com desvio mediastinal significativo."
+                    },
+                    intervencoesCorretas: ["Descompressão com agulha", "Inserir dreno torácico"],
+                    intervencoesIncorretas: {
+                        "Administrar Ringer Lactato 1L": "Não aborda a causa do colapso pulmonar e pode piorar a sobrecarga circulatória sem resolver a obstrução mecânica.",
+                        "Intubar imediatamente": "Pode piorar a hipertensão torácica ao aumentar a pressão intratorácica sem descompressão prévia. Prioridade é aliviar a pressão.",
+                        "Aguardar mais exames": "É uma emergência que requer intervenção imediata. Atraso leva rapidamente a colapso cardiovascular e óbito."
+                    },
+                    racionalCorretas: {
+                        "Descompressão com agulha": "Alivia imediatamente a pressão intratorácica, salvando a vida do paciente, ao converter um pneumotórax hipertensivo em simples. (ATLS, Breathing)",
+                        "Inserir dreno torácico": "Medida definitiva para remover o ar acumulado na cavidade pleural e restaurar a ventilação pulmonar, após a descompressão inicial."
+                    },
+                    referencia: "ATLS 10th Ed., Chapter 4: Thoracic Trauma"
+                },
+                {
+                    nome: "Choque cardiogênico",
+                    sinaisVitais: { fc: "110-130 bpm", pa: "70/40-80/50 mmHg", fr: "24-30 irpm", sat: "80-88%", gcs: "10-12" },
+                    queixas: ["Dor torácica anginosa", "Dispneia progressiva", "Sudorese fria", "Pele marmórea", "Palidez extrema"],
+                    exames: {
+                        "Eletrocardiograma": "Supradesnível de ST em múltiplas derivações anteriores (indicando IAM extenso)",
+                        "Ecocardiograma": "Hipocinesia ou acinesia septal e anterior, com disfunção grave de VE",
+                        "Gasometria arterial": "Acidose metabólica severa com lactato elevado"
+                    },
+                    intervencoesCorretas: ["Administrar noradrenalina", "Encaminhar para cateterismo"],
+                    intervencoesIncorretas: {
+                        "Administrar Ringer Lactato 1L": "Pode agravar o edema pulmonar em um coração já sobrecarregado, sem benefício hemodinâmico.",
+                        "Intubar imediatamente": "Não é a intervenção primária; a prioridade é o suporte hemodinâmico e a revascularização. Intubação pode ser necessária secundariamente.",
+                        "Aguardar mais exames": "Atraso na revascularização piora a isquemia miocárdica e aumenta a mortalidade no choque cardiogênico."
+                    },
+                    racionalCorretas: {
+                        "Administrar noradrenalina": "Vasopressor de primeira linha para suporte da pressão arterial e perfusão em choque cardiogênico, melhorando a perfusão de órgãos vitais. (ACLS)",
+                        "Encaminhar para cateterismo": "Procedimento diagnóstico e terapêutico definitivo para restaurar o fluxo sanguíneo coronário em pacientes com IAM com supradesnível de ST, essencial para reverter o choque."
+                    },
+                    referencia: "ACLS 2020 Guidelines, Chapter on Cardiogenic Shock"
+                }
+            ],
+            historicos: [
+                "Acidente de moto, sem capacete", "Colisão frontal de carro, alta velocidade", "Queda de altura (3 metros)",
+                "Trauma torácico contuso, impacto direto", "Ferimento por arma branca, região abdominal", "Atropelamento por veículo leve"
+            ],
+            intervencoes: [
+                { nome: "USG FAST", tempo: 15, tipo: "exame" },
+                { nome: "Raio-X de tórax", tempo: 15, tipo: "exame" },
+                { nome: "TC de crânio", tempo: 15, tipo: "exame" },
+                { nome: "Eletrocardiograma", tempo: 15, tipo: "exame" },
+                { nome: "Gasometria arterial", tempo: 15, tipo: "exame" },
+                { nome: "Hemograma", tempo: 15, tipo: "exame" }, // Adicionado Hemograma
+                { nome: "Ecocardiograma", tempo: 15, tipo: "exame" }, // Adicionado Ecocardiograma
+
+                { nome: "Intubar imediatamente", tempo: 20, tipo: "intervencao" },
+                { nome: "Administrar Ringer Lactato 1L", tempo: 10, tipo: "intervencao" },
+                { nome: "Inserir dreno torácico", tempo: 20, tipo: "intervencao" },
+                { nome: "Administrar O2 15L/min", tempo: 5, tipo: "intervencao" },
+                { nome: "Descompressão com agulha", tempo: 10, tipo: "intervencao" },
+                { nome: "Administrar manitol", tempo: 10, tipo: "intervencao" },
+                { nome: "Administrar noradrenalina", tempo: 10, tipo: "intervencao" },
+                { nome: "Encaminhar para laparotomia", tempo: 20, tipo: "intervencao" },
+                { nome: "Encaminhar para cateterismo", tempo: 20, tipo: "intervencao" },
+                { nome: "Administrar analgesia forte", tempo: 5, tipo: "intervencao" },
+                { nome: "Aguardar mais exames", tempo: 20, tipo: "intervencao" }
+            ]
+        };
+
+        // Estado do jogo
+        let casosClinicos = [];
+        let casoAtual = null;
+        let estabilidade = 0;
+        let tempoRestante = 0;
+        let pontuacao = 0;
+        let examesSolicitados = [];
+        let intervencoesAplicadas = [];
+        let jogoFinalizado = false;
+        let timerIntervalId; // Para poder limpar o intervalo do timer
+
+        // Elementos do DOM
+        const pacienteIdEl = document.getElementById("paciente-id");
+        const historicoEl = document.getElementById("historico");
+        const queixasEl = document.getElementById("queixas");
+        const sinaisVitaisEl = document.getElementById("sinais-vitais");
+        const stabilityBarEl = document.getElementById("stability-bar");
+        const stabilityValueEl = document.getElementById("stability-value");
+        const timerEl = document.getElementById("timer");
+        const scoreEl = document.getElementById("score");
+        const examesListEl = document.getElementById("exames-list");
+        const intervencoesListEl = document.getElementById("intervencoes-list");
+        const feedbackBoxEl = document.getElementById("feedback-box");
+        const gameOverEl = document.getElementById("game-over");
+        const gameOverMessageEl = document.getElementById("game-over-message");
+        const gameOverDetailsEl = document.getElementById("game-over-details");
+        const newCaseEl = document.getElementById("new-case");
+
+        // --- Funções do Jogo ---
+
+        // Gerar casos clínicos
+        function gerarCasosClinicos(quantidade) {
+            const casos = [];
+            for (let i = 0; i < quantidade; i++) {
+                const trauma = dadosBase.traumas[Math.floor(Math.random() * dadosBase.traumas.length)];
+                const queixas = trauma.queixas.slice(0, Math.floor(Math.random() * 2) + 2); // 2-3 queixas aleatórias
+                casos.push({
+                    id: String(i + 1).padStart(3, "0"), // ID com 3 dígitos
+                    trauma: trauma.nome,
+                    historico: dadosBase.historicos[Math.floor(Math.random() * dadosBase.historicos.length)],
+                    sinaisVitais: trauma.sinaisVitais,
+                    queixas,
+                    examesDisponiveis: Object.keys(trauma.exames).map(nome => ({ nome, resultado: trauma.exames[nome] })),
+                    intervencoesCorretas: trauma.intervencoesCorretas,
+                    intervencoesIncorretas: trauma.intervencoesIncorretas,
+                    racionalCorretas: trauma.racionalCorretas,
+                    referencia: trauma.referencia
+                });
+            }
+            return casos;
+        }
+
+        // Iniciar um novo caso
+        function iniciarNovoCaso() {
+            // Limpa o timer anterior se existir
+            clearInterval(timerIntervalId);
+
+            casosClinicos = gerarCasosClinicos(200); // AGORA GERANDO 200 CASOS
+            casoAtual = casosClinicos[Math.floor(Math.random() * casosClinicos.length)];
+            estabilidade = 70; // Estabilidade inicial
+            tempoRestante = 180; // 3 minutos em segundos
+            pontuacao = 0;
+            examesSolicitados = [];
+            intervencoesAplicadas = [];
+            jogoFinalizado = false;
+            feedbackBoxEl.innerHTML = "";
+            gameOverEl.classList.add("hidden");
+
+            atualizarInterface();
+            iniciarTimer();
+            habilitarBotoesAcao();
+        }
+
+        // Atualizar a interface do usuário
+        function atualizarInterface() {
+            pacienteIdEl.textContent = casoAtual.id;
+            historicoEl.textContent = casoAtual.historico;
+            queixasEl.textContent = casoAtual.queixas.join(", ");
+
+            // Sinais vitais em formato de lista
+            sinaisVitaisEl.innerHTML = `
+                <li><strong>FC:</strong> ${casoAtual.sinaisVitais.fc}</li>
+                <li><strong>PA:</strong> ${casoAtual.sinaisVitais.pa}</li>
+                <li><strong>FR:</strong> ${casoAtual.sinaisVitais.fr}</li>
+                <li><strong>Sat O2:</strong> ${casoAtual.sinaisVitais.sat}</li>
+                <li><strong>GCS:</strong> ${casoAtual.sinaisVitais.gcs}</li>
+            `;
+
+            // Barra de estabilidade
+            stabilityBarEl.style.width = `${estabilidade}%`;
+            if (estabilidade > 70) {
+                stabilityBarEl.className = "h-full rounded-full bg-blue-500 stability-bar";
+            } else if (estabilidade > 40) {
+                stabilityBarEl.className = "h-full rounded-full bg-green-500 stability-bar";
+            } else if (estabilidade > 10) {
+                stabilityBarEl.className = "h-full rounded-full bg-yellow-500 stability-bar";
+            } else {
+                stabilityBarEl.className = "h-full rounded-full bg-red-600 stability-bar";
+            }
+            stabilityValueEl.textContent = estabilidade;
+
+            // Timer
+            const minutos = Math.floor(tempoRestante / 60);
+            const segundos = (tempoRestante % 60).toString().padStart(2, "0");
+            timerEl.textContent = `${minutos}:${segundos}`;
+            timerEl.className = tempoRestante <= 30 ? "timer-critical" : "";
+
+            // Pontuação
+            scoreEl.textContent = pontuacao;
+
+            // Listar exames disponíveis
+            examesListEl.innerHTML = casoAtual.examesDisponiveis.map(exame => `
+                <button
+                    class="action-button block w-full text-left p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors duration-200 ${examesSolicitados.includes(exame.nome) || examesSolicitados.length >= 2 || jogoFinalizado ? 'opacity-50 cursor-not-allowed' : ''}"
+                    ${examesSolicitados.includes(exame.nome) || examesSolicitados.length >= 2 || jogoFinalizado ? 'disabled' : ''}
+                    onclick="executarAcao('${exame.nome}')"
+                >
+                    Solicitar <span class="font-semibold">${exame.nome}</span> (15s)
+                </button>
+            `).join("");
+
+            // Listar intervenções disponíveis
+            intervencoesListEl.innerHTML = dadosBase.intervencoes.filter(i => i.tipo === "intervencao").map(intervencao => `
+                <button
+                    class="action-button block w-full text-left p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors duration-200 ${jogoFinalizado ? 'opacity-50 cursor-not-allowed' : ''}"
+                    ${jogoFinalizado ? 'disabled' : ''}
+                    onclick="executarAcao('${intervencao.nome}')"
+                >
+                    <span class="font-semibold">${intervencao.nome}</span> (${intervencao.tempo}s)
+                </button>
+            `).join("");
+        }
+
+        // Executar uma ação (exame ou intervenção)
+        function executarAcao(acaoNome) {
+            if (jogoFinalizado) return;
+
+            const acao = dadosBase.intervencoes.find(i => i.nome === acaoNome);
+            if (!acao) return;
+
+            if (acao.tipo === "exame") {
+                if (examesSolicitados.length >= 2) {
+                    adicionarFeedback("Você já solicitou o número máximo de exames (2). Analise os resultados!", "info");
+                    return;
+                }
+                if (examesSolicitados.includes(acaoNome)) {
+                    adicionarFeedback(`O exame "${acaoNome}" já foi solicitado.`, "info");
+                    return;
+                }
+
+                const exame = casoAtual.examesDisponiveis.find(e => e.nome === acaoNome);
+                if (exame) {
+                    examesSolicitados.push(acaoNome);
+                    pontuacao += 10;
+                    adicionarFeedback(`<strong>Exame - ${acaoNome}:</strong> ${exame.resultado}`, "success");
+                } else {
+                    adicionarFeedback(`Exame "${acaoNome}" não aplicável ou disponível para este caso.`, "warning");
+                    estabilidade = Math.max(0, estabilidade - 5); // Pequena penalidade por exame desnecessário
+                }
+            } else { // Tipo: intervenção
+                if (intervencoesAplicadas.includes(acaoNome)) {
+                    adicionarFeedback(`A intervenção "${acaoNome}" já foi realizada.`, "info");
+                    return;
+                }
+                
+                intervencoesAplicadas.push(acaoNome); // Registra a intervenção aplicada
+
+                if (casoAtual.intervencoesCorretas.includes(acaoNome)) {
+                    estabilidade = Math.min(100, estabilidade + 20);
+                    pontuacao += 30;
+                    adicionarFeedback(`<strong>Ação:</strong> Correta! ${acaoNome}: ${casoAtual.racionalCorretas[acaoNome]}`, "success");
+                } else {
+                    estabilidade = Math.max(0, estabilidade - 20);
+                    const explicacao = casoAtual.intervencoesIncorretas[acaoNome] || "Não indicado para este quadro clínico, ou pode agravar a situação.";
+                    pontuacao = Math.max(0, pontuacao - 15); // Perde pontos por intervenção incorreta
+                    adicionarFeedback(`<strong>Ação:</strong> Incorreta! ${acaoNome}: ${explicacao}`, "error");
+                }
+            }
+            
+            tempoRestante -= acao.tempo; // Reduz o tempo de qualquer forma
+            verificarCondicoesFimDeJogo();
+            atualizarInterface();
+        }
+
+        // Adicionar mensagem ao feedback box
+        function adicionarFeedback(mensagem, tipo = "default") {
+            let className = "text-gray-200";
+            if (tipo === "success") className = "text-green-300";
+            else if (tipo === "error") className = "text-red-400";
+            else if (tipo === "warning") className = "text-yellow-300";
+            else if (tipo === "info") className = "text-blue-300";
+
+            feedbackBoxEl.innerHTML += `<p class="${className} mb-1">${mensagem}</p>`;
+            feedbackBoxEl.scrollTop = feedbackBoxEl.scrollHeight; // Auto-scroll
+        }
+
+        // Iniciar o timer do jogo
+        function iniciarTimer() {
+            timerIntervalId = setInterval(() => {
+                if (jogoFinalizado) {
+                    clearInterval(timerIntervalId);
+                    return;
+                }
+                tempoRestante--;
+                if (tempoRestante <= 0) {
+                    finalizarJogo("Tempo esgotado! O paciente não resistiu.", "perdeu");
+                }
+                atualizarInterface();
+            }, 1000);
+        }
+
+        // Verificar as condições de fim de jogo
+        function verificarCondicoesFimDeJogo() {
+            if (estabilidade <= 0) {
+                finalizarJogo("Paciente faleceu! Infelizmente, o tempo esgotou ou as ações não foram suficientes para estabilizá-lo.", "perdeu");
+            } else if (estabilidade >= 80 && casoAtual.intervencoesCorretas.every(i => intervencoesAplicadas.includes(i))) {
+                // Paciente estabilizado e todas as intervenções CHAVE foram aplicadas
+                let bonusTempo = Math.floor(tempoRestante / 10); // 1 ponto por cada 10 segundos restantes
+                pontuacao += bonusTempo;
+                finalizarJogo(`Paciente estabilizado com sucesso! Pontuação final: ${pontuacao} (Bônus de Tempo: +${bonusTempo})`, "venceu");
+            }
+            // Se o tempo esgotar, a função do timer cuidará disso.
+        }
+
+        // Finalizar o jogo
+        function finalizarJogo(mensagem, resultado) {
+            jogoFinalizado = true;
+            clearInterval(timerIntervalId); // Para o timer
+            desabilitarBotoesAcao(); // Desabilita todos os botões de ação
+
+            gameOverEl.classList.remove("hidden");
+            gameOverMessageEl.textContent = mensagem;
+
+            let detalhesMensagem = `<p><strong>Trauma:</strong> ${casoAtual.trauma}</p>`;
+            
+            if (resultado === "venceu") {
+                detalhesMensagem += `<p class="text-green-300 font-bold">Parabéns! Você estabilizou o paciente.</p>`;
+            } else {
+                detalhesMensagem += `<p class="text-red-300 font-bold">Desfecho: Não foi possível estabilizar o paciente.</p>`;
+            }
+            
+            detalhesMensagem += `<p class="mt-3"><strong>Intervenções Chave para este caso:</strong></p><ul class="list-disc list-inside ml-4">`;
+            casoAtual.intervencoesCorretas.forEach(int => {
+                detalhesMensagem += `<li>${int} - <span class="text-gray-400">${casoAtual.racionalCorretas[int]}</span></li>`;
+            });
+            detalhesMensagem += `</ul>`;
+            
+            detalhesMensagem += `<p class="mt-3"><strong>Referência:</strong> <span class="italic">${casoAtual.referencia}</span></p>`;
+
+            gameOverDetailsEl.innerHTML = detalhesMensagem;
+
+            atualizarInterface(); // Uma última atualização para garantir o estado final
+        }
+
+        // Desabilitar botões de ação
+        function desabilitarBotoesAcao() {
+            document.querySelectorAll('.action-button').forEach(button => {
+                button.disabled = true;
+                button.classList.add('opacity-50', 'cursor-not-allowed');
+                button.classList.remove('hover:bg-gray-600');
+            });
+        }
+
+        // Habilitar botões de ação
+        function habilitarBotoesAcao() {
+            document.querySelectorAll('.action-button').forEach(button => {
+                button.disabled = false;
+                button.classList.remove('opacity-50', 'cursor-not-allowed');
+                button.classList.add('hover:bg-gray-600');
+            });
+        }
+
+        // --- Event Listeners ---
+        newCaseEl.addEventListener("click", iniciarNovoCaso);
+
+        // Iniciar o primeiro caso ao carregar a página
+        document.addEventListener("DOMContentLoaded", iniciarNovoCaso);
+    </script>
+</body>
+</html>

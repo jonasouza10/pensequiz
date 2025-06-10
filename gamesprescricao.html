@@ -1,0 +1,3096 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenseQuiz: Prescrição sob Pressão</title>
+    <!-- Favicon com placeholder URL -->
+    <link rel="icon" type="image/png" href="https://placehold.co/32x32/FF4500/FFFFFF?text=Rx">
+    <!-- Link para o arquivo manifest.json (para PWA básico) -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a fonte Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Fundo escuro */
+            color: #e2e8f0; /* Texto claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .game-container {
+            background-color: #2d3748; /* Cor de fundo do contêiner principal */
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 2px solid #63b3ed; /* Borda azul clara */
+        }
+
+        .header {
+            text-align: center;
+            color: #63b3ed; /* Cor do título */
+            font-weight: 700;
+            font-size: 2.25rem; /* text-4xl */
+            margin-bottom: 20px;
+        }
+
+        .case-card {
+            background-color: #2c3a4a; /* Fundo do cartão do caso clínico */
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #4a5568;
+        }
+
+        .case-description {
+            font-size: 1.125rem; /* text-lg */
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #a0aec0; /* Cor do rótulo */
+            font-weight: 600;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #4a5568;
+            background-color: #1a202c; /* Fundo do input */
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5);
+        }
+
+        .button {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s ease-in-out, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .button-prescribe {
+            background-color: #48bb78; /* Verde */
+            color: #1a202c;
+            border: none;
+        }
+        .button-prescribe:hover {
+            background-color: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+        .button-prescribe:disabled {
+            background-color: #4a5568;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .button-next,
+        .button-restart,
+        .button-references { /* Adicionado estilo para o botão de referências */
+            background-color: #63b3ed; /* Azul */
+            color: #1a202c;
+            border: none;
+        }
+        .button-next:hover,
+        .button-restart:hover,
+        .button-references:hover { /* Adicionado estilo para o botão de referências */
+            background-color: #4299e1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+        .button-next:disabled,
+        .button-restart:disabled,
+        .button-references:disabled { /* Adicionado estilo para o botão de referências */
+            background-color: #4a5568;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .feedback-message {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            line-height: 1.5;
+            white-space: pre-wrap; /* Para preservar quebras de linha no feedback */
+        }
+
+        .feedback-correct {
+            background-color: #2f855a; /* Verde escuro */
+            color: #d1f7e0;
+            border: 1px solid #48bb78;
+        }
+
+        .feedback-incorrect {
+            background-color: #c53030; /* Vermelho escuro */
+            color: #fed7d7;
+            border: 1px solid #e53e3e;
+        }
+
+        .score-display {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700;
+            text-align: center;
+            color: #ecc94b; /* Amarelo */
+        }
+
+        .game-over-screen {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .game-over-screen h2 {
+            font-size: 2.5rem; /* text-5xl */
+            color: #e53e3e; /* Vermelho para game over */
+            margin-bottom: 10px;
+        }
+
+        .game-over-screen p {
+            font-size: 1.5rem; /* text-2xl */
+            margin-bottom: 20px;
+            color: #ecc94b;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header {
+                font-size: 1.75rem; /* text-3xl for smaller screens */
+            }
+            .case-description {
+                font-size: 1rem;
+            }
+            .button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .input-grid {
+                grid-template-columns: 1fr !important; /* Single column on small screens */
+            }
+            .flex-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-5">
+    <div class="game-container hidden" id="gameScreen">
+        <h1 class="header">💊 PenseQuiz: Prescrição sob Pressão</h1>
+
+        <!-- Score Display -->
+        <div class="score-display">
+            Acertos: <span id="correctAnswers">0</span> | Erros: <span id="incorrectAnswers">0</span> | Prescrições: <span id="caseCount">0</span>
+        </div>
+
+        <!-- Clinical Case Card -->
+        <div class="case-card">
+            <h2 class="text-xl font-semibold mb-3 text-blue-300" id="caseTitle">Prescrição #1</h2>
+            <p class="case-description" id="caseDescription">
+                Carregando caso...
+            </p>
+        </div>
+
+        <!-- Prescription Input Form -->
+        <div class="prescription-form bg-gray-700 p-5 rounded-lg border border-gray-600">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 input-grid">
+                <div class="input-group">
+                    <label for="medicine">Medicamento:</label>
+                    <select id="medicine" class="form-select">
+                        <option value="">Selecione o Medicamento</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="dose">Dose:</label>
+                    <select id="dose" class="form-select" disabled>
+                        <option value="">Selecione a Dose</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="route">Via:</label>
+                    <select id="route" class="form-select">
+                        <option value="">Selecione a Via</option>
+                        <option value="Oral">Oral</option>
+                        <option value="IV">Intravenosa (IV)</option>
+                        <option value="IM">Intramuscular (IM)</option>
+                        <option value="SC">Subcutânea (SC)</option>
+                        <option value="Tópica">Tópica</option>
+                        <option value="Inalatória">Inalatória</option>
+                        <option value="Retal">Retal</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="frequency">Frequência:</label>
+                    <select id="frequency" class="form-select">
+                        <option value="">Selecione a Frequência</option>
+                    </select>
+                </div>
+            </div>
+            <button id="prescribeButton" class="button button-prescribe w-full mt-6">Prescrever</button>
+        </div>
+
+        <!-- Feedback Section -->
+        <div id="feedback" class="feedback-message hidden">
+            <!-- Feedback will be displayed here -->
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex flex-col md:flex-row justify-between mt-5 gap-4 flex-buttons">
+            <button id="restartButton" class="button button-restart flex-1">Reiniciar</button>
+            <button id="nextCaseButton" class="button button-next flex-1" disabled>Próximo Caso</button>
+            <button id="referencesButton" class="button button-references flex-1">Referências</button>
+        </div>
+    </div>
+
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="absolute inset-0 bg-gray-900 flex items-center justify-center text-blue-400 text-3xl font-bold transition-opacity duration-1000 opacity-100">
+        Carregando PenseQuiz: Prescrição sob Pressão...
+    </div>
+
+    <!-- Modal for References -->
+    <div id="referencesModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-5 z-50">
+        <div class="bg-gray-800 p-8 rounded-lg shadow-xl max-w-2xl w-full text-gray-100 relative max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold text-blue-300 mb-4">Referências Bibliográficas</h2>
+            <div id="referencesContent" class="prose prose-invert max-w-none">
+                <!-- Content will be injected here -->
+            </div>
+            <button id="closeReferencesModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-100 text-3xl font-bold">&times;</button>
+        </div>
+    </div>
+
+
+    <script>
+        let cases = [ // Changed from const to let to allow shuffling
+            {
+                id: 1,
+                description: "Paciente, 60 anos, com histórico de hipertensão, chega ao pronto-socorro com dor de cabeça intensa, visão turva e PA 180/110 mmHg. Exames mostram ausência de lesão em órgão-alvo. Qual a prescrição adequada para uma crise hipertensiva urgente (não emergência)?",
+                correctPrescription: {
+                    medicine: "Captopril",
+                    dose: "25 mg",
+                    route: "Oral",
+                    frequency: "Dose única"
+                },
+                alternatives: [
+                    {
+                        medicine: "Nifedipino",
+                        dose: "10 mg",
+                        route: "Oral",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Hidralazina" }, message: "Hidralazina IV seria para emergência hipertensiva, não para urgência. Via inadequada para este cenário." },
+                    { trigger: { medicine: "Lisinopril" }, message: "Lisinopril é para tratamento crônico, não para crise urgente. Além disso, a dose inicial é muito baixa para uma crise." },
+                    { trigger: { dose: "50 mg", medicine: "Captopril" }, message: "A dose inicial de captopril para urgência hipertensiva geralmente é 25mg, 50mg pode causar hipotensão excessiva." },
+                    { trigger: { route: "IV", medicine: "Captopril" }, message: "Captopril não é administrado por via IV para urgências. Nifedipino oral ou Captopril oral são opções." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Captopril oral é uma boa escolha para urgência hipertensiva. A redução gradual da PA com medicação oral evita hipoperfusão.",
+                    incorrect: "A prescrição não está ideal. Para urgência hipertensiva, busca-se uma redução gradual da PA com medicações orais para evitar hipoperfusão."
+                }
+            },
+            {
+                id: 2,
+                description: "Criança de 5 anos (20 kg) chega ao pronto-socorro com febre de 39.5°C e dor de garganta. Qual o antipirético e analgésico adequado, considerando o peso da criança?",
+                correctPrescription: {
+                    medicine: "Paracetamol",
+                    dose: "200 mg", /* 10-15 mg/kg => 10 * 20 = 200mg */
+                    route: "Oral",
+                    frequency: "A cada 6 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Ibuprofeno",
+                        dose: "200 mg", /* 5-10 mg/kg => 10 * 20 = 200mg */
+                        route: "Oral",
+                        frequency: "A cada 8 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "AAS" }, message: "Uso de AAS em crianças com febre pode causar Síndrome de Reye. Contraindicado!" },
+                    { trigger: { dose: "muito alta" }, message: "A dose está muito alta para o peso da criança. Risco de toxicidade." },
+                    { trigger: { dose: "muito baixa" }, message: "A dose está muito baixa para o peso da criança. Não será eficaz." },
+                    { trigger: { frequency: "A cada 4 horas", medicine: "Paracetamol" }, message: "Paracetamol a cada 4 horas aumenta o risco de superdosagem em 24h. Prefira a cada 6 horas." }
+                ],
+                generalFeedback: {
+                    correct: "Perfeito! Paracetamol é seguro e eficaz para febre e dor nesta idade, com a dose e frequência corretas.",
+                    incorrect: "A prescrição para crianças exige atenção à dose por peso e à segurança dos medicamentos."
+                }
+            },
+            {
+                id: 3,
+                description: "Paciente de 70 anos, diabético, com histórico de úlcera péptica, apresenta tosse produtiva, febre e dispneia. Radiografia de tórax com infiltrado pulmonar. Suspeita-se de pneumonia adquirida na comunidade. Qual o antibiótico de primeira linha adequado para este paciente, considerando seu histórico?",
+                correctPrescription: {
+                    medicine: "Amoxicilina + Clavulanato",
+                    dose: "875/125 mg",
+                    route: "Oral",
+                    frequency: "A cada 12 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Levofloxacino",
+                        dose: "500 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Azitromicina" }, message: "Azitromicina seria uma opção se houver suspeita de pneumonia atípica, mas para PAC em idoso com comorbidades, um beta-lactâmico com inibidor de beta-lactamase ou quinolona respiratória é preferível." },
+                    { trigger: { medicine: "Doxiciclina" }, message: "Doxiciclina não é de primeira linha para pneumonia em paciente com comorbidades." },
+                    { trigger: { medicine: "Ceftriaxona" }, message: "Ceftriaxona é para casos mais graves ou via IV, o caso sugere tratamento oral." },
+                    { trigger: { route: "IV" }, message: "O caso não descreve gravidade que justifique via IV inicialmente." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Amoxicilina + Clavulanato é uma escolha adequada para pneumonia adquirida na comunidade em pacientes com comorbidades.",
+                    incorrect: "A escolha do antibiótico na pneumonia depende do perfil do paciente e da gravidade. Revise as diretrizes."
+                }
+            },
+            {
+                id: 4,
+                description: "Mulher, 35 anos, com diagnóstico recente de ansiedade generalizada, relata insônia grave e ansiedade que a impede de realizar atividades diárias. Ela nunca usou psicofármacos antes. Qual a prescrição para início de tratamento?",
+                correctPrescription: {
+                    medicine: "Escitalopram",
+                    dose: "10 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Sertralina",
+                        dose: "50 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Diazepam" }, message: "Benzodiazepínicos não são primeira linha para tratamento de ansiedade generalizada crônica devido ao risco de dependência e sedação. Usados para alívio agudo, mas não como monoterapia inicial." },
+                    { trigger: { dose: "20 mg", medicine: "Escitalopram" }, message: "A dose inicial de Escitalopram para TAG geralmente é 10mg, aumentando gradualmente para evitar efeitos colaterais iniciais." },
+                    { trigger: { frequency: "A cada 8 horas", medicine: "Escitalopram" }, message: "Escitalopram é administrado uma vez ao dia." }
+                ],
+                generalFeedback: {
+                    correct: "Ótimo! Um ISRS como Escitalopram é a primeira linha para tratamento de longo prazo da ansiedade generalizada.",
+                    incorrect: "A escolha da medicação para ansiedade deve considerar o perfil do paciente e evitar o uso prolongado de benzodiazepínicos."
+                }
+            },
+            {
+                id: 5,
+                description: "Paciente masculino, 45 anos, com diagnóstico de Diabetes Mellitus Tipo 2, sem controle glicêmico adequado com dieta e exercícios. Glicemia de jejum atual: 180 mg/dL. Qual o tratamento farmacológico de primeira linha?",
+                correctPrescription: {
+                    medicine: "Metformina",
+                    dose: "500 mg",
+                    route: "Oral",
+                    frequency: "Duas vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Metformina",
+                        dose: "850 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Insulina" }, message: "Insulina não é o tratamento de primeira linha para DM2 sem descompensação aguda." },
+                    { trigger: { medicine: "Glibenclamida" }, message: "Sulfonilureias como Glibenclamida aumentam o risco de hipoglicemia e ganho de peso; não são a primeira escolha." },
+                    { trigger: { dose: "1000 mg", medicine: "Metformina" }, message: "A dose inicial de metformina deve ser menor para evitar efeitos gastrointestinais, aumentando gradualmente." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Metformina" }, message: "A dose inicial de metformina é geralmente dividida em duas tomadas." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Metformina é o fármaco de primeira linha para DM2, com dose e frequência adequadas para iniciar o tratamento.",
+                    incorrect: "A escolha da medicação para DM2 depende do controle glicêmico e comorbidades. Revise as diretrizes para o tratamento inicial."
+                }
+            },
+            {
+                id: 6,
+                description: "Paciente feminino, 28 anos, com crise de enxaqueca moderada a grave, sem aura, que não melhora com analgésicos comuns (dipirona, paracetamol). Ela relata náuseas. Qual a prescrição para alívio agudo da dor?",
+                correctPrescription: {
+                    medicine: "Sumatriptano",
+                    dose: "50 mg",
+                    route: "Oral",
+                    frequency: "Dose única"
+                },
+                alternatives: [
+                    {
+                        medicine: "Rizatriptano",
+                        dose: "10 mg",
+                        route: "Oral",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Morfina" }, message: "Opioides não são indicados para enxaqueca rotineiramente devido ao risco de cronificação da dor e efeitos adversos." },
+                    { trigger: { medicine: "Amitriptilina" }, message: "Amitriptilina é para profilaxia da enxaqueca, não para tratamento agudo da crise." },
+                    { trigger: { dose: "100 mg", medicine: "Sumatriptano" }, message: "Dose inicial de Sumatriptano é 50mg, 100mg pode ser usada se a resposta for insuficiente ou para crises mais graves." }
+                ],
+                generalFeedback: {
+                    correct: "Ótima escolha! Triptanos são a primeira linha para enxaqueca moderada a grave que não responde a analgésicos comuns. Considere também um antiemético para as náuseas.",
+                    incorrect: "Para enxaqueca moderada a grave, é preciso um medicamento específico. Analise as opções para alívio agudo."
+                }
+            },
+            {
+                id: 7,
+                description: "Paciente, 55 anos, com histórico de fibrilação atrial crônica, sem válvulas protéticas, necessita de anticoagulação. Qual o anticoagulante oral direto (DOAC) adequado para iniciar?",
+                correctPrescription: {
+                    medicine: "Rivaroxabana",
+                    dose: "20 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Apixabana",
+                        dose: "5 mg",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    },
+                     {
+                        medicine: "Dabigatrana",
+                        dose: "150 mg",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Varfarina" }, message: "Varfarina exige monitoramento rigoroso com RNI; DOACs são preferíveis em pacientes sem válvulas protéticas." },
+                    { trigger: { dose: "10 mg", medicine: "Rivaroxabana" }, message: "A dose de 10mg de Rivaroxabana é para profilaxia de trombose, não para tratamento de FA." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Rivaroxabana" }, message: "Rivaroxabana é geralmente administrada uma vez ao dia." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Um DOAC como Rivaroxabana é uma ótima escolha para anticoagulação na FA não valvar, mais conveniente que a Varfarina.",
+                    incorrect: "A anticoagulação em FA é crucial. Revise as opções de DOACs e suas dosagens."
+                }
+            },
+            {
+                id: 8,
+                description: "Paciente masculino, 65 anos, com queixa de tosse seca persistente e falta de ar que piora ao esforço. É tabagista há 40 anos. Espirometria sugere DPOC. Qual a terapia inalatória inicial para melhorar os sintomas?",
+                correctPrescription: {
+                    medicine: "Tiotrópio",
+                    dose: "18 mcg",
+                    route: "Inalatória",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Salmeterol",
+                        dose: "50 mcg",
+                        route: "Inalatória",
+                        frequency: "Duas vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Salbutamol" }, message: "Salbutamol é um broncodilatador de curta ação, para alívio de resgate, não para tratamento de manutenção da DPOC estável." },
+                    { trigger: { medicine: "Prednisona" }, message: "Corticosteroides orais não são tratamento de manutenção para DPOC. Usados para exacerbações." },
+                    { trigger: { dose: "muito alta" }, message: "Dose inalatória excessiva pode causar efeitos adversos." }
+                ],
+                generalFeedback: {
+                    correct: "Ótima escolha! Um broncodilatador de longa ação (LAMA ou LABA) é a base do tratamento para DPOC sintomática. Tiotrópio é um LAMA eficaz.",
+                    incorrect: "O tratamento da DPOC envolve broncodilatadores de longa ação. Reveja as opções de terapia inalatória."
+                }
+            },
+            {
+                id: 9,
+                description: "Paciente feminino, 40 anos, com infecção urinária não complicada (ITU) sintomática. Sem alergias conhecidas. Qual o antibiótico oral de primeira linha?",
+                correctPrescription: {
+                    medicine: "Nitrofurantoína",
+                    dose: "100 mg",
+                    route: "Oral",
+                    frequency: "A cada 12 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Fosfomicina trometamol",
+                        dose: "3 g",
+                        route: "Oral",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Ciprofloxacino" }, message: "Fluoroquinolonas como Ciprofloxacino devem ser reservadas para ITUs complicadas ou em casos de resistência, devido ao risco de resistência e efeitos adversos." },
+                    { trigger: { medicine: "Amoxicilina" }, message: "Amoxicilina não é mais recomendada como primeira linha devido à alta taxa de resistência para E. coli em ITU." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Nitrofurantoína" }, message: "Nitrofurantoína é geralmente administrada duas vezes ao dia para ITU." }
+                ],
+                generalFeedback: {
+                    correct: "Perfeito! Nitrofurantoína é uma excelente opção de primeira linha para ITU não complicada, com bom perfil de segurança e eficácia.",
+                    incorrect: "A escolha do antibiótico para ITU não complicada deve considerar o perfil de resistência local. Revise as diretrizes."
+                }
+            },
+            {
+                id: 10,
+                description: "Paciente, 60 anos, com dor neuropática crônica devido a diabetes (polineuropatia diabética). A dor é descrita como queimação e choque, impactando significativamente sua qualidade de vida. Qual medicamento é adequado para iniciar o tratamento da dor neuropática?",
+                correctPrescription: {
+                    medicine: "Pregabalina",
+                    dose: "75 mg",
+                    route: "Oral",
+                    frequency: "Duas vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Gabapentina",
+                        dose: "300 mg",
+                        route: "Oral",
+                        frequency: "Três vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Paracetamol" }, message: "Paracetamol é um analgésico fraco e não eficaz para dor neuropática." },
+                    { trigger: { medicine: "Morfina" }, message: "Opioides devem ser evitados para dor neuropática crônica devido aos riscos de dependência e baixa eficácia a longo prazo." },
+                    { trigger: { dose: "150 mg", medicine: "Pregabalina" }, message: "A dose inicial de Pregabalina é geralmente 75mg duas vezes ao dia, aumentando gradualmente para evitar efeitos colaterais como tontura e sonolência." }
+                ],
+                generalFeedback: {
+                    correct: "Ótima escolha! Pregabalina é uma das primeiras linhas para dor neuropática, com boa eficácia na polineuropatia diabética.",
+                    incorrect: "A dor neuropática requer medicamentos específicos, diferentes dos analgésicos comuns. Revise as opções."
+                }
+            },
+            // NOVOS CASOS ADICIONADOS A PARTIR AQUI (TOTAL 20 CASOS)
+            {
+                id: 11,
+                description: "Paciente masculino, 30 anos, com história de asma, apresenta exacerbação aguda com sibilância intensa, dispneia e dessaturação de oxigênio. Qual a terapia de resgate inicial?",
+                correctPrescription: {
+                    medicine: "Salbutamol",
+                    dose: "2.5 mg",
+                    route: "Inalatória",
+                    frequency: "A cada 20 minutos por 1 hora"
+                },
+                alternatives: [
+                    {
+                        medicine: "Salbutamol",
+                        dose: "4-8 puffs",
+                        route: "Inalatória",
+                        frequency: "A cada 20 minutos por 1 hora"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Montelucaste" }, message: "Montelucaste é para controle da asma a longo prazo, não para crise aguda." },
+                    { trigger: { medicine: "Fluticasona" }, message: "Corticosteroide inalatório é para controle, não para resgate rápido da crise." },
+                    { trigger: { route: "Oral", medicine: "Salbutamol" }, message: "Salbutamol oral tem início de ação mais lento e mais efeitos adversos para crise aguda." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Salbutamol inalatório é a medicação de primeira linha para o alívio rápido de exacerbações agudas da asma.",
+                    incorrect: "Para crises de asma, é essencial uma medicação de resgate de ação rápida. Revise as opções."
+                }
+            },
+            {
+                id: 12,
+                description: "Mulher, 50 anos, em tratamento para hipotireoidismo, relata fadiga persistente, ganho de peso e constipação, apesar de estar usando levotiroxina. TSH elevado e T4 livre baixo. Qual o ajuste da medicação?",
+                correctPrescription: {
+                    medicine: "Levotiroxina",
+                    dose: "Aumento da dose (ex: +25 mcg)",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Levotiroxina",
+                        dose: "Ajuste conforme TSH", // More general, but correct
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Propiltiouracil" }, message: "Propiltiouracil é para hipertireoidismo, não hipotireoidismo." },
+                    { trigger: { dose: "Diminuir a dose" }, message: "Diminuir a dose pioraria o hipotireoidismo, os sintomas e exames indicam necessidade de aumento." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Levotiroxina" }, message: "Levotiroxina tem longa meia-vida e é administrada uma vez ao dia." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Os sintomas e exames indicam necessidade de ajuste da dose de Levotiroxina para níveis adequados.",
+                    incorrect: "O tratamento do hipotireoidismo requer monitoramento do TSH para ajuste da dose. Reavalie os exames."
+                }
+            },
+            {
+                id: 13,
+                description: "Paciente masculino, 75 anos, com dor articular crônica devido a osteoartrite de joelhos. Relata dor moderada a intensa. Qual a medicação analgésica e anti-inflamatória de primeira linha, considerando a idade e histórico de comorbidades?",
+                correctPrescription: {
+                    medicine: "Paracetamol",
+                    dose: "500 mg",
+                    route: "Oral",
+                    frequency: "A cada 6 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Dipirona",
+                        dose: "500 mg",
+                        route: "Oral",
+                        frequency: "A cada 6 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Ibuprofeno" }, message: "AINEs como Ibuprofeno devem ser usados com cautela em idosos e pacientes com comorbidades devido ao risco de eventos cardiovasculares e renais. Não é a primeira linha." },
+                    { trigger: { medicine: "Morfina" }, message: "Opioides não são indicados como primeira linha para osteoartrite devido aos riscos e efeitos adversos." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Paracetamol" }, message: "Paracetamol para dor moderada deve ser administrado mais frequentemente." }
+                ],
+                generalFeedback: {
+                    correct: "Ótima escolha! Paracetamol é o analgésico de primeira linha para osteoartrite, especialmente em idosos, devido ao seu bom perfil de segurança.",
+                    incorrect: "A escolha do analgésico em idosos com comorbidades exige cautela para evitar efeitos adversos. Revise as opções."
+                }
+            },
+            {
+                id: 14,
+                description: "Paciente feminina, 22 anos, com infecção de pele e partes moles (celulite) na perna direita, sem sinais de gravidade sistêmica. Qual o antibiótico oral de primeira linha para cobertura de S. aureus e Streptococcus?",
+                correctPrescription: {
+                    medicine: "Cefalexina",
+                    dose: "500 mg",
+                    route: "Oral",
+                    frequency: "A cada 6 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Clindamicina",
+                        dose: "300 mg",
+                        route: "Oral",
+                        frequency: "A cada 8 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Ceftriaxona" }, message: "Ceftriaxona é um antibiótico IV, geralmente reservado para infecções mais graves ou falha de tratamento oral." },
+                    { trigger: { medicine: "Metronidazol" }, message: "Metronidazol é para anaeróbios, não é o foco principal na celulite comum." },
+                    { trigger: { dose: "1000 mg", medicine: "Cefalexina" }, message: "A dose usual de Cefalexina para celulite é 500mg, 1000mg é uma dose alta e pode aumentar efeitos GI." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Cefalexina é uma escolha eficaz e segura para celulite não complicada, cobrindo os principais agentes etiológicos.",
+                    incorrect: "A escolha do antibiótico para infecções de pele deve cobrir os patógenos mais comuns. Revise as opções."
+                }
+            },
+            {
+                id: 15,
+                description: "Paciente masculino, 40 anos, com refluxo gastroesofágico (DRGE) que não melhora com antiácidos e mudanças de estilo de vida. Apresenta pirose frequente. Qual o medicamento para suprimir a produção de ácido?",
+                correctPrescription: {
+                    medicine: "Omeprazol",
+                    dose: "20 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia (antes do café da manhã)"
+                },
+                alternatives: [
+                    {
+                        medicine: "Pantoprazol",
+                        dose: "40 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia (antes do café da manhã)"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Ranitidina" }, message: "Ranitidina (bloqueador H2) é menos potente que inibidores de bomba de prótons e foi retirada do mercado em alguns locais." },
+                    { trigger: { dose: "40 mg", medicine: "Omeprazol" }, message: "A dose inicial de Omeprazol para DRGE é geralmente 20mg. Doses mais altas são para casos mais graves ou específicos." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Omeprazol" }, message: "Omeprazol é administrado uma vez ao dia, idealmente antes da primeira refeição." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Inibidores de bomba de prótons como Omeprazol são a base do tratamento da DRGE, eficazes na supressão da produção de ácido.",
+                    incorrect: "Para DRGE persistente, é necessário um medicamento mais potente para a supressão de ácido. Revise as opções."
+                }
+            },
+            {
+                id: 16,
+                description: "Paciente feminina, 68 anos, com diagnóstico de osteoporose e alto risco de fraturas. Função renal normal. Qual o tratamento farmacológico inicial para aumentar a densidade óssea e reduzir o risco de fraturas?",
+                correctPrescription: {
+                    medicine: "Alendronato",
+                    dose: "70 mg",
+                    route: "Oral",
+                    frequency: "Uma vez por semana"
+                },
+                alternatives: [
+                    {
+                        medicine: "Risedronato",
+                        dose: "35 mg",
+                        route: "Oral",
+                        frequency: "Uma vez por semana"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Cálcio" }, message: "Cálcio e vitamina D são suplementos, não tratamento principal para osteoporose estabelecida." },
+                    { trigger: { medicine: "Estrogênio" }, message: "Terapia de reposição hormonal com estrogênio não é mais a primeira linha para osteoporose devido aos riscos." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Alendronato" }, message: "Alendronato é administrado uma vez por semana para aumentar a adesão e reduzir efeitos GI." }
+                ],
+                generalFeedback: {
+                    correct: "Ótima escolha! Bisfosfonatos como Alendronato são a primeira linha para o tratamento da osteoporose, eficazes na redução do risco de fraturas.",
+                    incorrect: "O tratamento da osteoporose requer medicamentos que atuem na densidade óssea. Revise as opções."
+                }
+            },
+            {
+                id: 17,
+                description: "Paciente masculino, 55 anos, diabético, com colesterol LDL elevado (160 mg/dL) e alto risco cardiovascular. Qual a estatina de alta intensidade para iniciar a redução do LDL?",
+                correctPrescription: {
+                    medicine: "Atorvastatina",
+                    dose: "40 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia (noturno)"
+                },
+                alternatives: [
+                    {
+                        medicine: "Rosuvastatina",
+                        dose: "20 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia (noturno)"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Sinvastatina" }, message: "Sinvastatina geralmente não é considerada estatina de alta intensidade nas doses usuais. Atorvastatina ou Rosuvastatina são preferíveis." },
+                    { trigger: { dose: "10 mg", medicine: "Atorvastatina" }, message: "A dose de 10mg de Atorvastatina é de baixa/moderada intensidade, não suficiente para alto risco." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Atorvastatina" }, message: "Estatinas geralmente são tomadas uma vez ao dia, preferencialmente à noite." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Estatinas de alta intensidade como Atorvastatina ou Rosuvastatina são essenciais para reduzir o LDL em pacientes de alto risco cardiovascular.",
+                    incorrect: "A intensidade da estatina é crucial para o risco cardiovascular. Revise as doses e classes."
+                }
+            },
+            {
+                id: 18,
+                description: "Paciente feminino, 30 anos, com dor de garganta intensa, odinofagia e cultura de orofaringe positiva para Streptococcus pyogenes (Streptococose). Sem alergia a penicilina. Qual o antibiótico de escolha?",
+                correctPrescription: {
+                    medicine: "Amoxicilina",
+                    dose: "500 mg",
+                    route: "Oral",
+                    frequency: "A cada 8 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Penicilina V potássica",
+                        dose: "500 mg",
+                        route: "Oral",
+                        frequency: "A cada 12 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Azitromicina" }, message: "Azitromicina é uma alternativa para alérgicos à penicilina, mas Amoxicilina é a primeira escolha para S. pyogenes." },
+                    { trigger: { medicine: "Ciprofloxacino" }, message: "Fluoroquinolonas não são indicadas para faringite estreptocócica. Risco de resistência e efeitos adversos." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Amoxicilina" }, message: "Amoxicilina para estreptococose é geralmente a cada 8 horas." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Amoxicilina é a primeira escolha para o tratamento da faringite estreptocócica, com boa eficácia e perfil de segurança.",
+                    incorrect: "A escolha do antibiótico para infecções por Streptococcus pyogenes é específica. Revise as diretrizes."
+                }
+            },
+            {
+                id: 19,
+                description: "Paciente masculino, 48 anos, com histórico de etilismo crônico, desenvolve cirrose hepática com ascite e edema de membros inferiores. Qual o diurético de primeira linha para tratar a ascite na cirrose?",
+                correctPrescription: {
+                    medicine: "Espironolactona",
+                    dose: "100 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Espironolactona",
+                        dose: "50 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    },
+                    {
+                        medicine: "Furosemida",
+                        dose: "40 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Hidroclorotiazida" }, message: "Hidroclorotiazida (tiazídico) é menos eficaz que a espironolactona para ascite cirrótica." },
+                    { trigger: { dose: "Muito alta", medicine: "Espironolactona" }, message: "Doses muito altas de Espironolactona aumentam o risco de hipercalemia e ginecomastia." },
+                    { trigger: { route: "IV", medicine: "Espironolactona" }, message: "Espironolactona é um diurético oral, não IV." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Espironolactona (antagonista da aldosterona) é o diurético de escolha para ascite na cirrose, devido ao seu mecanismo de ação.",
+                    incorrect: "O tratamento da ascite em cirrose requer diuréticos específicos. Revise a fisiopatologia e as opções."
+                }
+            },
+            {
+                id: 20,
+                description: "Paciente feminino, 38 anos, com histórico de Trombose Venosa Profunda (TVP) há 6 meses, em uso de Rivaroxabana 20mg, sem novas queixas. O médico decide suspender a medicação. O que fazer?",
+                correctPrescription: {
+                    medicine: "Nenhuma medicação",
+                    dose: "N/A",
+                    route: "N/A",
+                    frequency: "N/A"
+                },
+                alternatives: [], // No alternatives as the correct action is to stop
+                penalties: [
+                    { trigger: { medicine: "AAS" }, message: "AAS não é uma profilaxia adequada para TVP após o período de tratamento, a menos que haja outra indicação." },
+                    { trigger: { medicine: "Clopidogrel" }, message: "Clopidogrel é um antiplaquetário, não um anticoagulante para TVP." },
+                    { trigger: { dose: "10 mg", medicine: "Rivaroxabana" }, message: "Reduzir a dose de Rivaroxabana para 10mg é uma opção para profilaxia estendida, mas o caso pede suspensão. Além disso, se a intenção é suspender, não se prescreve." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Varfarina" }, message: "Mudar para Varfarina não é a ação adequada se a decisão for suspender a anticoagulação." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Se o médico decidiu suspender a medicação após o período de tratamento indicado e não há novas queixas ou fatores de risco adicionais, a ação correta é não prescrever mais nada.",
+                    incorrect: "A suspensão da anticoagulação deve ser cuidadosa. Se a decisão é suspender e não há indicação para profilaxia estendida, nenhuma medicação é a resposta correta."
+                }
+            },
+            // --- NOVOS 5 CASOS ADICIONADOS AQUI (TOTAL 25 CASOS) ---
+            {
+                id: 21,
+                description: "Paciente masculino, 55 anos, com dor súbita e intensa no hálux (dedão do pé), com inchaço, vermelhidão e calor local. Histórico de hiperuricemia. Suspeita de crise de gota aguda. Qual o tratamento inicial?",
+                correctPrescription: {
+                    medicine: "Colchicina",
+                    dose: "0.6 mg",
+                    route: "Oral",
+                    frequency: "A cada 12 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Colchicina",
+                        dose: "Dose de ataque (ex: 1.2 mg, depois 0.6 mg 1h depois)",
+                        route: "Oral",
+                        frequency: "Dose única"
+                    },
+                    {
+                        medicine: "Ibuprofeno",
+                        dose: "400 mg",
+                        route: "Oral",
+                        frequency: "A cada 8 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Alopurinol" }, message: "Alopurinol é para profilaxia da gota crônica, não para crise aguda. Pode piorar a crise inicial." },
+                    { trigger: { medicine: "Prednisona", dose: "Alta dose" }, message: "Corticosteroides orais são usados para gota aguda, mas colchicina ou AINEs são preferíveis como primeira linha se não houver contraindicação." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Colchicina" }, message: "Colchicina para crise aguda requer dose mais frequente inicialmente." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Colchicina é um tratamento eficaz para a crise aguda de gota, especialmente se iniciada precocemente.",
+                    incorrect: "A crise de gota aguda requer um tratamento anti-inflamatório específico para alívio rápido dos sintomas. Revise as opções."
+                }
+            },
+            {
+                id: 22,
+                description: "Paciente feminina, 42 anos, com diagnóstico recente de TVP (trombose venosa profunda) em membro inferior direito. Qual a terapia anticoagulante injetável de início rápido para esta condição?",
+                correctPrescription: {
+                    medicine: "Enoxaparina",
+                    dose: "1 mg/kg",
+                    route: "SC",
+                    frequency: "A cada 12 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Enoxaparina",
+                        dose: "1.5 mg/kg", // for once daily dosing
+                        route: "SC",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Varfarina" }, message: "Varfarina tem início de ação lento e não é usada para início de tratamento agudo da TVP como monoterapia." },
+                    { trigger: { medicine: "AAS" }, message: "AAS não é anticoagulante e não é eficaz para o tratamento agudo da TVP." },
+                    { trigger: { route: "Oral", medicine: "Enoxaparina" }, message: "Enoxaparina é um injetável, não oral." }
+                ],
+                generalFeedback: {
+                    correct: "Perfeito! A Enoxaparina (heparina de baixo peso molecular) é a terapia injetável de escolha para o tratamento agudo da TVP.",
+                    incorrect: "O tratamento agudo da TVP exige anticoagulação imediata e eficaz. Revise as opções injetáveis."
+                }
+            },
+            {
+                id: 23,
+                description: "Paciente masculino, 70 anos, com insuficiência cardíaca com fração de ejeção reduzida (ICFEr), apesar de otimização com IECA/BRA e betabloqueador. Ainda apresenta sintomas. Qual a medicação que combina inibidor da neprilisina e bloqueador do receptor da angiotensina?",
+                correctPrescription: {
+                    medicine: "Sacubitril/Valsartana",
+                    dose: "49/51 mg", // Initial common dose
+                    route: "Oral",
+                    frequency: "Duas vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Sacubitril/Valsartana", // corrected typo from previous version
+                        dose: "24/26 mg", // Lower starting dose
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Digoxina" }, message: "Digoxina é para controle de sintomas e FC, não para remodelação e mortalidade em ICFEr como primeira linha." },
+                    { trigger: { medicine: "Hidroclorotiazida" }, message: "Hidroclorotiazida é um diurético, não um modulador neuro-humoral chave para ICFEr avançada." },
+                    { trigger: { dose: "97/103 mg", medicine: "Sacubitril/Valsartana" }, message: "A dose de 97/103 mg é a dose-alvo. A titulação deve ser gradual para evitar hipotensão." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Sacubitril/Valsartana é uma medicação fundamental para reduzir mortalidade e hospitalizações em pacientes com ICFEr que permanecem sintomáticos.",
+                    incorrect: "A otimização da terapia para insuficiência cardíaca é complexa e visa melhorar desfechos. Revise as diretrizes atuais."
+                }
+            },
+            {
+                id: 24,
+                description: "Paciente feminina, 33 anos, com dermatite atópica grave, apresentando lesões eczematosas extensas e pruriginosas que não respondem a corticosteroides tópicos de baixa potência. Qual o corticosteroide tópico de alta potência para tratamento de curta duração?",
+                correctPrescription: {
+                    medicine: "Clobetasol",
+                    dose: "0.05% creme",
+                    route: "Tópica",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Clobetasol",
+                        dose: "0.05% pomada",
+                        route: "Tópica",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Hidrocortisona" }, message: "Hidrocortisona é um corticosteroide de baixa potência, não adequado para casos graves e refratários." },
+                    { trigger: { medicine: "Miconazol" }, message: "Miconazol é um antifúngico, não indicado para dermatite atópica." },
+                    { trigger: { frequency: "Três vezes ao dia", medicine: "Clobetasol" }, message: "Corticosteroides de alta potência como Clobetasol não devem ser usados com frequência excessiva devido ao risco de atrofia cutânea." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Clobetasol é um corticosteroide tópico de alta potência, eficaz para dermatites graves em uso de curta duração.",
+                    incorrect: "Para dermatites graves, é necessário um corticosteroide tópico mais potente. Revise a potência dos corticoides."
+                }
+            },
+            {
+                id: 25,
+                description: "Paciente masculino, 18 anos, com acne vulgar moderada com comedões, pápulas e pústulas. Não há cistos ou nódulos. Qual o tratamento tópico inicial que combina um retinóide com um antibiótico?",
+                correctPrescription: {
+                    medicine: "Adapaleno + Peróxido de Benzoíla",
+                    dose: "0.1% + 2.5% gel",
+                    route: "Tópica",
+                    frequency: "Uma vez ao dia (noite)"
+                },
+                alternatives: [
+                    {
+                        medicine: "Tretinoína + Clindamicina",
+                        dose: "0.025% creme + 1% gel",
+                        route: "Tópica",
+                        frequency: "Uma vez ao dia (noite)"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Isotretinoína" }, message: "Isotretinoína é um tratamento oral para acne grave e refratária, não para acne moderada como tratamento inicial." },
+                    { trigger: { medicine: "Doxiciclina", route: "Oral" }, message: "Antibióticos orais são usados para acne moderada a grave com inflamação extensa, mas não como primeira linha em monoterapia tópica." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Adapaleno" }, message: "Adapaleno pode causar irritação; aplicar uma vez ao dia (geralmente à noite) é o ideal." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! A combinação de um retinóide e peróxido de benzoíla é uma primeira linha eficaz para acne vulgar moderada.",
+                    incorrect: "O tratamento da acne moderada exige uma abordagem tópica combinada. Revise as opções."
+                }
+            },
+            {
+                id: 26,
+                description: "Paciente feminina, 62 anos, com dor torácica atípica, mas com histórico de FA e hipertensão. ECG sem alterações isquêmicas. É sabido que ela não está em uso de betabloqueadores. Qual betabloqueador pode ser iniciado para controle de frequência cardíaca na FA e manejo da hipertensão?",
+                correctPrescription: {
+                    medicine: "Metoprolol",
+                    dose: "25 mg",
+                    route: "Oral",
+                    frequency: "Duas vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Bisoprolol",
+                        dose: "2.5 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Amiodarona" }, message: "Amiodarona é um antiarrítmico potente, mas com muitos efeitos colaterais, reservada para casos específicos de FA ou quando outras opções falham no controle de ritmo/frequência." },
+                    { trigger: { dose: "100 mg", medicine: "Metoprolol" }, message: "A dose inicial de Metoprolol para controle de frequência na FA e hipertensão é geralmente menor, para titular gradualmente e evitar bradicardia ou hipotensão." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Metoprolol" }, message: "Metoprolol (tartarato, não succinato) é frequentemente administrado duas vezes ao dia para um controle de frequência mais estável." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! O Metoprolol é um betabloqueador amplamente utilizado e eficaz para controle de frequência na FA e hipertensão.",
+                    incorrect: "O controle de frequência na FA com betabloqueadores é crucial. Revise as opções e suas dosagens."
+                }
+            },
+            {
+                id: 27,
+                description: "Paciente masculino, 45 anos, com diverticulite aguda não complicada. Relata dor abdominal em quadrante inferior esquerdo, febre baixa. Qual o esquema antibiótico oral ambulatorial adequado?",
+                correctPrescription: {
+                    medicine: "Amoxicilina + Clavulanato",
+                    dose: "875/125 mg",
+                    route: "Oral",
+                    frequency: "Duas vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Ciprofloxacino + Metronidazol",
+                        dose: "500 mg + 500 mg",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia + Três vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Ceftriaxona" }, message: "Ceftriaxona é um antibiótico IV, geralmente para diverticulite complicada ou com sinais sistêmicos mais graves." },
+                    { trigger: { medicine: "Azitromicina" }, message: "Azitromicina não tem cobertura adequada para anaeróbios e gram-negativos em diverticulite." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Amoxicilina + Clavulanato" }, message: "Amoxicilina + Clavulanato para diverticulite é geralmente administrado duas vezes ao dia." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Amoxicilina + Clavulanato é um esquema antibiótico oral eficaz para diverticulite não complicada, cobrindo os patógenos relevantes.",
+                    incorrect: "O tratamento da diverticulite aguda requer antibióticos com cobertura para aeróbios e anaeróbios. Revise as opções."
+                }
+            },
+            {
+                id: 28,
+                description: "Paciente feminina, 28 anos, gestante (14 semanas), com náuseas e vômitos intensos (hiperemese gravídica) que não melhoram com medidas não farmacológicas. Qual o antiemético seguro e eficaz para gestantes?",
+                correctPrescription: {
+                    medicine: "Ondansetrona",
+                    dose: "4 mg",
+                    route: "Oral",
+                    frequency: "A cada 8 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Dimenidrinato",
+                        dose: "50 mg",
+                        route: "Oral",
+                        frequency: "A cada 4-6 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Metoclopramida" }, message: "Metoclopramida pode ser usada, mas Ondansetrona é frequentemente preferida e eficaz para hiperemese. Dimenidrinato é uma alternativa mais antiga." },
+                    { trigger: { dose: "8 mg", medicine: "Ondansetrona" }, message: "A dose inicial de Ondansetrona é geralmente 4mg. Doses maiores podem ser necessárias, mas é prudente iniciar com a menor dose eficaz." },
+                    { trigger: { frequency: "SOS", medicine: "Ondansetrona" }, message: "Para hiperemese gravídica intensa, a administração regular é preferível ao SOS para controle contínuo dos sintomas." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Ondansetrona é um antiemético eficaz e considerado seguro para o manejo da hiperemese gravídica quando medidas iniciais falham.",
+                    incorrect: "O tratamento da hiperemese gravídica exige cuidado na escolha dos medicamentos. Revise as opções seguras na gravidez."
+                }
+            },
+            {
+                id: 29,
+                description: "Paciente masculino, 60 anos, diabético, apresentando infecção de pé diabético com celulite e secreção purulenta. Não há sinais de sepse. Qual o esquema antibiótico oral com boa cobertura para infecções de pele e partes moles em diabéticos (incluindo MRSA se necessário, mas não é a primeira linha se não houver fator de risco claro para MRSA)?",
+                correctPrescription: {
+                    medicine: "Clindamicina",
+                    dose: "300 mg",
+                    route: "Oral",
+                    frequency: "A cada 8 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Amoxicilina + Clavulanato",
+                        dose: "875/125 mg",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    },
+                    {
+                        medicine: "Doxiciclina",
+                        dose: "100 mg",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Vancomicina" }, message: "Vancomicina é um antibiótico IV, usado para infecções graves ou suspeita de MRSA sistêmico, não para manejo ambulatorial de celulite sem sepse." },
+                    { trigger: { medicine: "Ceftazidima" }, message: "Ceftazidima é um antibiótico parenteral (IV/IM) com foco em Pseudomonas, não é a primeira linha oral para infecção de pé diabético não complicada." },
+                    { trigger: { dose: "600 mg", medicine: "Clindamicina" }, message: "Embora 600mg seja uma dose possível, 300mg a cada 8h é a dose inicial comum para infecções de pele, e doses maiores podem aumentar efeitos GI." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Clindamicina oferece boa cobertura para muitos patógenos de infecções de pé diabético, incluindo estafilococos e estreptococos, e tem atividade contra anaeróbios.",
+                    incorrect: "Infecções de pé diabético exigem antibióticos com cobertura adequada para flora polimicrobiana. Revise as opções para infecções de pele em diabéticos."
+                }
+            },
+            {
+                id: 30,
+                description: "Paciente masculino, 50 anos, com disfunção erétil de longa data. Histórico de hipertensão controlada. Nega doenças cardíacas instáveis. Qual a medicação de primeira linha para tratamento da disfunção erétil?",
+                correctPrescription: {
+                    medicine: "Sildenafila",
+                    dose: "50 mg",
+                    route: "Oral",
+                    frequency: "SOS (antes da atividade sexual)"
+                },
+                alternatives: [
+                    {
+                        medicine: "Tadalafila",
+                        dose: "10 mg",
+                        route: "Oral",
+                        frequency: "SOS (antes da atividade sexual)"
+                    },
+                    {
+                        medicine: "Vardenafila",
+                        dose: "10 mg",
+                        route: "Oral",
+                        frequency: "SOS (antes da atividade sexual)"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Nitratos" }, message: "Nitratos (ex: Isossorbida) são absolutamente contraindicados com inibidores de PDE5 (como Sildenafila) devido ao risco de hipotensão grave e fatal. Verificar histórico de uso de nitratos é crucial!" },
+                    { trigger: { dose: "25 mg", medicine: "Sildenafila" }, message: "A dose de 25mg de Sildenafila pode ser um início, mas 50mg é a dose inicial mais comum para eficácia. A dose menor é geralmente para idosos ou comorbidades." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Sildenafila" }, message: "Sildenafila é usada sob demanda (SOS), não para uso diário contínuo como Sildenafila de baixa dose." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Sildenafila é um inibidor da PDE5, a primeira linha de tratamento para disfunção erétil, com dose e frequência adequadas. Atenção às contraindicações!",
+                    incorrect: "O tratamento da disfunção erétil geralmente envolve inibidores da PDE5. Revise as opções e, crucialmente, as contraindicações."
+                }
+            },
+            // --- NOVOS 5 CASOS ADICIONAIS AQUI (TOTAL 30 CASOS) ---
+            {
+                id: 31,
+                description: "Mulher, 25 anos, com prurido vaginal intenso, corrimento branco e espesso. Sem histórico de ITUs ou DM. Suspeita de candidíase vaginal não complicada. Qual o tratamento antifúngico oral de dose única?",
+                correctPrescription: {
+                    medicine: "Fluconazol",
+                    dose: "150 mg",
+                    route: "Oral",
+                    frequency: "Dose única"
+                },
+                alternatives: [
+                    {
+                        medicine: "Clotrimazol",
+                        dose: "500 mg (óvulo vaginal)",
+                        route: "Tópica",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Nistatina" }, message: "Nistatina tópica é uma opção, mas o caso pede oral de dose única. Nistatina oral não é primeira linha para candidíase vaginal não complicada." },
+                    { trigger: { dose: "50 mg", medicine: "Fluconazol" }, message: "A dose de 50mg de Fluconazol é geralmente para tratamento prolongado ou outras condições, não para dose única na candidíase vaginal." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Fluconazol" }, message: "Fluconazol para candidíase vaginal não complicada é tipicamente uma dose única, não uso diário." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Fluconazol oral em dose única é um tratamento conveniente e eficaz para candidíase vaginal não complicada.",
+                    incorrect: "A candidíase vaginal tem tratamentos específicos. Revise as opções e suas posologias."
+                }
+            },
+            {
+                id: 32,
+                description: "Paciente masculino, 30 anos, com lesões vesiculosas nos lábios (herpes labial) recorrentes. Procura medicação para acelerar a cicatrização e reduzir a duração. Qual o tratamento antiviral oral para surto agudo?",
+                correctPrescription: {
+                    medicine: "Aciclovir",
+                    dose: "400 mg",
+                    route: "Oral",
+                    frequency: "Três vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Valaciclovir",
+                        dose: "500 mg",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Aciclovir", route: "Tópica" }, message: "Aciclovir tópico é menos eficaz e geralmente não é recomendado para surtos recorrentes que necessitam de redução da duração." },
+                    { trigger: { dose: "200 mg", medicine: "Aciclovir" }, message: "A dose de 200mg de Aciclovir é para tratamento de herpes genital ou profilaxia, não a dose para surto agudo labial." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Aciclovir" }, message: "Aciclovir para surtos agudos requer doses mais frequentes para ser eficaz." }
+                ],
+                generalFeedback: {
+                    correct: "Perfeito! Aciclovir oral é eficaz para reduzir a duração e severidade de surtos de herpes labial, especialmente se iniciado precocemente.",
+                    incorrect: "O tratamento do herpes labial recorrente visa encurtar o surto. Revise as opções antivirais orais."
+                }
+            },
+            {
+                id: 33,
+                description: "Criança, 7 anos, com olho vermelho, secreção purulenta e pálpebras coladas ao acordar. Não há dor ou fotofobia intensa. Suspeita de conjuntivite bacteriana. Qual o tratamento oftálmico inicial?",
+                correctPrescription: {
+                    medicine: "Moxifloxacino",
+                    dose: "0.5% colírio",
+                    route: "Tópica",
+                    frequency: "Três vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Sulfacetamida Sódica",
+                        dose: "10% colírio",
+                        route: "Tópica",
+                        frequency: "Três vezes ao dia"
+                    },
+                    {
+                        medicine: "Tobramicina",
+                        dose: "0.3% colírio",
+                        route: "Tópica",
+                        frequency: "A cada 4-6 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Prednisolona" }, message: "Corticosteroides oculares (ex: Prednisolona) são contraindicados em conjuntivites bacterianas não tratadas, pois podem piorar a infecção." },
+                    { trigger: { route: "Oral", medicine: "Moxifloxacino" }, message: "Antibióticos orais não são a primeira linha para conjuntivite bacteriana não complicada; o tratamento é tópico." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Moxifloxacino" }, message: "Moxifloxacino para conjuntivite bacteriana requer aplicação mais frequente para ser eficaz." }
+                ],
+                generalFeedback: {
+                    correct: "Ótima escolha! Moxifloxacino colírio é um antibiótico oftálmico de amplo espectro eficaz para conjuntivite bacteriana.",
+                    incorrect: "O tratamento da conjuntivite bacteriana é tópico e requer um antibiótico adequado. Revise as opções."
+                }
+            },
+            {
+                id: 34,
+                description: "Mulher, 50 anos, com constipação crônica há anos, fezes duras e esforço evacuatório. Dieta rica em fibras e hidratação não são suficientes. Qual o laxante osmótico de primeira linha?",
+                correctPrescription: {
+                    medicine: "Polietilenoglicol (PEG)",
+                    dose: "17 g",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Lactulose",
+                        dose: "30 mL",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Senna" }, message: "Senna e Bisacodil são laxantes estimulantes, para uso de curto prazo ou resgate, não primeira linha para constipação crônica devido ao risco de dependência e dano ao cólon." },
+                    { trigger: { medicine: "Bisacodil" }, message: "Bisacodil é um laxante estimulante, para uso de curto prazo ou resgate, não primeira linha para constipação crônica." },
+                    { trigger: { dose: "Alta dose", medicine: "PEG" }, message: "Altas doses de PEG sem titulação podem causar diarreia e desconforto excessivo." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Polietilenoglicol (PEG) é um laxante osmótico seguro e eficaz para o manejo da constipação crônica, sem o risco de dependência dos laxantes estimulantes.",
+                    incorrect: "O tratamento da constipação crônica deve focar em laxantes osmóticos como primeira linha. Revise as classes de laxantes."
+                }
+            },
+            {
+                id: 35,
+                description: "Paciente feminina, 28 anos, grávida (20 semanas), com fadiga, palidez e exames confirmando anemia microcítica hipocrômica (Hb 9.5 g/dL, Ferritina baixa). Qual a suplementação de ferro oral adequada?",
+                correctPrescription: {
+                    medicine: "Sulfato Ferroso",
+                    dose: "325 mg", // ~65 mg de ferro elementar
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Gluconato Ferroso",
+                        dose: "300 mg", // ~35 mg de ferro elementar
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Vitamina B12" }, message: "Vitamina B12 e Folato são para outros tipos de anemia (megaloblástica), não para deficiência de ferro." },
+                    { trigger: { route: "IV", medicine: "Sulfato Ferroso" }, message: "Ferro intravenoso é reservado para casos graves, má absorção ou intolerância ao ferro oral, não é a primeira linha em gestantes." },
+                    { trigger: { dose: "100 mg", medicine: "Sulfato Ferroso" }, message: "A dose de 100mg de Sulfato Ferroso é muito baixa para tratar anemia por deficiência de ferro estabelecida na gravidez; é mais adequada para profilaxia." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Sulfato Ferroso é a primeira linha para tratamento da anemia por deficiência de ferro na gravidez, com dose e frequência adequadas. O ferro deve ser suplementado mesmo após a normalização da hemoglobina para repor estoques.",
+                    incorrect: "A anemia na gravidez exige tratamento específico com ferro oral. Revise as doses e os tipos de ferro."
+                }
+            },
+            {
+                id: 36,
+                description: "Paciente masculino, 45 anos, com ferida cirúrgica recente no abdômen, apresentando sinais de infecção superficial: vermelhidão, calor local e drenagem purulenta leve. Não há febre ou sinais sistêmicos. Qual a prescrição adequada para infecção de ferida superficial?",
+                correctPrescription: {
+                    medicine: "Mupirocina",
+                    dose: "2% pomada",
+                    route: "Tópica",
+                    frequency: "Três vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Cefalexina",
+                        dose: "500 mg",
+                        route: "Oral",
+                        frequency: "A cada 6 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Vancomicina" }, message: "Vancomicina é um antibiótico IV para infecções graves ou MRSA. Não é indicada para infecção superficial sem sinais sistêmicos." },
+                    { trigger: { dose: "100 mg", medicine: "Mupirocina" }, message: "Mupirocina é uma pomada, não tem dose em mg." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Mupirocina" }, message: "Mupirocina para infecção ativa deve ser aplicada mais frequentemente do que uma vez ao dia." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Mupirocina tópica é a escolha inicial para infecções de ferida cirúrgica superficiais. Se houver sinais de celulite mais extensa, um oral como Cefalexina seria considerado.",
+                    incorrect: "O tratamento de infecções de ferida deve ser guiado pela extensão e gravidade. Revise as opções tópicas e orais."
+                }
+            },
+            {
+                id: 37,
+                description: "Lactente, 6 meses, com regurgitação frequente e irritabilidade pós-mamada, sem ganho de peso adequado. Medidas de posicionamento e dieta da mãe não foram suficientes. Suspeita de DRGE (Doença do Refluxo Gastroesofágico). Qual a medicação de primeira linha para refluxo em lactentes?",
+                correctPrescription: {
+                    medicine: "Ranitidina",
+                    dose: "2 mg/kg", // Dose pediátrica usual
+                    route: "Oral",
+                    frequency: "Duas vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Famotidina",
+                        dose: "0.5 mg/kg",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Omeprazol" }, message: "Omeprazol (IBP) é reservado para casos mais graves ou refratários em lactentes, não é a primeira linha devido a preocupações de segurança a longo prazo." },
+                    { trigger: { medicine: "Antiácido" }, message: "Antiácidos não são recomendados para uso crônico em lactentes e podem interferir na absorção de nutrientes." },
+                    { trigger: { dose: "20 mg", medicine: "Ranitidina" }, message: "A dose de Ranitidina deve ser ajustada por peso em lactentes, 20mg pode ser muito alta ou muito baixa dependendo do peso." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Bloqueadores H2 como Ranitidina ou Famotidina são as primeiras linhas para DRGE em lactentes após falha de medidas não farmacológicas.",
+                    incorrect: "O tratamento do refluxo em lactentes exige atenção à dose por peso e à segurança do medicamento. Revise as diretrizes pediátricas."
+                }
+            },
+            {
+                id: 38,
+                description: "Paciente masculino, 70 anos, com hipertensão arterial sistêmica e Doença Renal Crônica (DRC) estágio 3. PA atual 150/90 mmHg. Qual a classe de anti-hipertensivo preferencial para este paciente, considerando a proteção renal?",
+                correctPrescription: {
+                    medicine: "Anlodipino",
+                    dose: "5 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Clortalidona", // Diurético tiazídico que pode ser usado em DRC estágio 3
+                        dose: "12.5 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Lisinopril" }, message: "IECA/BRA são renoprotetores, mas podem piorar a função renal e aumentar o potássio em DRC avançada, exigindo monitoramento rigoroso. Bloqueadores dos canais de cálcio (BCC) são seguros e eficazes." },
+                    { trigger: { medicine: "Captopril" }, message: "Captopril é um IECA, similar ao Lisinopril, com as mesmas preocupações em DRC avançada." },
+                    { trigger: { dose: "10 mg", medicine: "Anlodipino" }, message: "A dose inicial de Anlodipino é geralmente 5mg para evitar hipotensão e edema, especialmente em idosos e com DRC." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Bloqueadores dos canais de cálcio (BCC) como Anlodipino são eficazes e seguros para controle da PA em pacientes com DRC, pois não afetam a função renal ou o potássio. IECA/BRA são importantes, mas requerem cautela e monitoramento em DRC.",
+                    incorrect: "O manejo da hipertensão em DRC é desafiador e exige escolha cuidadosa da medicação para proteção renal e controle da PA. Revise as diretrizes."
+                }
+            },
+            {
+                id: 39,
+                description: "Criança, 2 anos, apresenta placas brancas na língua e mucosa oral, que não são facilmente removíveis. A criança está irritada e com dificuldade para mamar. Suspeita de candidíase oral (sapinho). Qual o tratamento antifúngico tópico adequado?",
+                correctPrescription: {
+                    medicine: "Nistatina",
+                    dose: "100.000 UI/mL suspensão oral",
+                    route: "Oral", // Administrado oralmente, mas age topicamente na mucosa
+                    frequency: "Quatro vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Miconazol",
+                        dose: "20 mg/g gel oral",
+                        route: "Oral", // Administrado oralmente, age topicamente
+                        frequency: "Quatro vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Fluconazol" }, message: "Fluconazol oral é para candidíase sistêmica ou refratária, não para sapinho não complicado. Nistatina tópica é o tratamento de primeira linha." },
+                    { trigger: { route: "Tópica", medicine: "Nistatina" }, message: "Embora Nistatina possa ser em creme, para sapinho é a suspensão oral para contato com a mucosa." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Nistatina" }, message: "Nistatina para sapinho requer aplicações frequentes para ser eficaz na erradicação do fungo." }
+                ],
+                generalFeedback: {
+                    correct: "Perfeito! Nistatina suspensão oral é o tratamento de primeira linha para candidíase oral em crianças, agindo topicamente para eliminar as placas.",
+                    incorrect: "O tratamento do sapinho é geralmente tópico oral. Revise as opções antifúngicas e suas formas de apresentação para mucosas."
+                }
+            },
+            {
+                id: 40,
+                description: "Paciente feminino, 58 anos, queixa-se de episódios súbitos e breves de tontura rotatória intensa ao mudar a posição da cabeça (virar na cama, olhar para cima). Ouve um zumbido no ouvido e sente náuseas durante os episódios. Qual a medicação para alívio sintomático da vertigem?",
+                correctPrescription: {
+                    medicine: "Dimenidrinato",
+                    dose: "50 mg",
+                    route: "Oral",
+                    frequency: "A cada 6 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Meclizina",
+                        dose: "25 mg",
+                        route: "Oral",
+                        frequency: "A cada 6 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Betahistina" }, message: "Betahistina é para vertigem crônica, como na Doença de Meniere, e não é eficaz para alívio agudo de VPPB. Manobras de reposicionamento (Epley) são o tratamento definitivo para VPPB." },
+                    { trigger: { medicine: "Ondansetrona" }, message: "Ondansetrona é um antiemético para náuseas e vômitos, mas não atua diretamente nos sintomas vestibulares da vertigem como o dimenidrinato." },
+                    { trigger: { frequency: "Dose única", medicine: "Dimenidrinato" }, message: "Para vertigem sintomática, Dimenidrinato é usado mais frequentemente do que uma dose única até a melhora dos sintomas." }
+                ],
+                generalFeedback: {
+                    correct: "Ótima escolha! Dimenidrinato é um anti-histamínico com propriedades antieméticas e antivertiginosas, eficaz para o alívio sintomático da vertigem. Lembre-se que o tratamento definitivo para VPPB são as manobras de reposicionamento (ex: Manobra de Epley).",
+                    incorrect: "O tratamento da vertigem exige medicamentos que atuem no sistema vestibular. Revise as opções e a abordagem para VPPB."
+                }
+            },
+            // NEW CASES FROM PDF "Revista_40CasosClinicosResumidos1.pdf"
+            {
+                id: 41,
+                description: "Paciente feminino, 37 anos, com quadro de artralgia intensa, febre diária e lesões cutâneas sugestivas de doença autoimune em atividade. Exames confirmam alta atividade inflamatória. Qual a prescrição para início de tratamento da inflamação sistêmica?",
+                correctPrescription: {
+                    medicine: "Prednisona",
+                    dose: "20 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Metilprednisolona",
+                        dose: "20 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Dipirona" }, message: "Dipirona é analgésico/antipirético, não trata a inflamação sistêmica subjacente." },
+                    { trigger: { dose: "Alta dose" }, message: "A dose inicial de prednisona para inflamação sistêmica geralmente é 20mg, doses mais altas são para casos mais graves." },
+                    { trigger: { route: "IV" }, message: "O caso não sugere necessidade de via IV inicialmente." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Corticosteroides orais são a primeira linha para controlar a inflamação em doenças autoimunes. A dose e a duração devem ser ajustadas conforme a resposta.",
+                    incorrect: "O controle da inflamação sistêmica requer um potente anti-inflamatório. Revise as opções para doenças autoimunes."
+                }
+            },
+            {
+                id: 42,
+                description: "Paciente feminino, 32 anos, com fadiga, palidez, queilite angular e unhas quebradiças. Histórico de cirurgia bariátrica. Exames laboratoriais confirmam anemia ferropriva grave (Hb 4g/dL, Ferritina baixa). Qual a suplementação de ferro oral adequada para tratamento?",
+                correctPrescription: {
+                    medicine: "Sulfato Ferroso",
+                    dose: "325 mg",
+                    route: "Oral",
+                    frequency: "Duas vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Ferro quelato",
+                        dose: "150 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Vitamina B12" }, message: "Vitamina B12 é para anemia megaloblástica, não ferropriva." },
+                    { trigger: { dose: "50 mg", medicine: "Sulfato Ferroso" }, message: "A dose está muito baixa para tratar anemia ferropriva estabelecida." },
+                    { trigger: { frequency: "Uma vez por semana" }, message: "Para anemia estabelecida, a suplementação deve ser diária, não semanal." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Sulfato Ferroso é a primeira linha para anemia ferropriva. A dose é importante para garantir a reposição adequada.",
+                    incorrect: "A anemia ferropriva exige tratamento com ferro oral em dose e frequência adequadas. Revise as opções."
+                }
+            },
+            {
+                id: 43,
+                description: "Paciente, 78 anos, diabética, apresenta dor intensa em queimação e vesículas agrupadas em trajeto unilateral, com formação de crostas. Diagnóstico de Herpes-Zóster. Qual o tratamento antiviral oral para surto agudo?",
+                correctPrescription: {
+                    medicine: "Valaciclovir",
+                    dose: "1 g",
+                    route: "Oral",
+                    frequency: "Três vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Aciclovir",
+                        dose: "800 mg",
+                        route: "Oral",
+                        frequency: "Cinco vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Aciclovir", route: "Tópica" }, message: "Aciclovir tópico é menos eficaz para Herpes-Zóster em adultos. O tratamento deve ser sistêmico." },
+                    { trigger: { dose: "200 mg", medicine: "Valaciclovir" }, message: "A dose está muito baixa para tratamento de Herpes-Zóster em adultos." },
+                    { trigger: { frequency: "Uma vez ao dia" }, message: "Antivirais para Herpes-Zóster requerem doses mais frequentes para eficácia." }
+                ],
+                generalFeedback: {
+                    correct: "Perfeito! O tratamento antiviral sistêmico é crucial para reduzir a duração e a severidade do Herpes-Zóster e o risco de neuralgia pós-herpética.",
+                    incorrect: "O tratamento do Herpes-Zóster exige antivirais sistêmicos. Revise as opções e as dosagens."
+                }
+            },
+            {
+                id: 44,
+                description: "Paciente masculino, 16 anos, em tratamento para hanseníase dimorfa, apresenta febre, mal-estar, exantema difuso e placas eritematoinfiltradas, com dor à palpação de nervos. Diagnóstico de reação hansênica tipo I. Qual a prescrição para controle da reação?",
+                correctPrescription: {
+                    medicine: "Prednisona",
+                    dose: "40 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Metilprednisolona",
+                        dose: "40 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Dapsona" }, message: "Dapsona foi suspensa devido à reação hansênica. Não deve ser prescrita." },
+                    { trigger: { route: "IV" }, message: "A via IV é para casos graves. O tratamento oral é o padrão inicial." },
+                    { trigger: { dose: "10 mg" }, message: "A dose é muito baixa para controlar uma reação hansênica aguda." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Corticosteroides são a base do tratamento para reações hansênicas tipo I, controlando a inflamação e prevenindo danos neurais.",
+                    incorrect: "O manejo das reações hansênicas é essencial para evitar sequelas. Revise os imunomoduladores."
+                }
+            },
+            {
+                id: 45,
+                description: "Paciente feminina, 32 anos, com cefaleia intensa, diplopia, irregularidade menstrual e galactorreia. RM evidenciou macroprolactinoma. Qual o tratamento farmacológico de primeira linha para reduzir o tumor e controlar os sintomas?",
+                correctPrescription: {
+                    medicine: "Cabergoline",
+                    dose: "0.5 mg",
+                    route: "Oral",
+                    frequency: "Duas vezes por semana"
+                },
+                alternatives: [
+                    {
+                        medicine: "Bromocriptine",
+                        dose: "2.5 mg",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Omeprazol" }, message: "Omeprazol é para problemas gástricos, não para macroprolactinoma." },
+                    { trigger: { route: "IV" }, message: "Agonistas dopaminérgicos para prolactinomas são administrados por via oral." },
+                    { trigger: { frequency: "Uma vez ao dia" }, message: "Cabergolina é geralmente administrada uma ou duas vezes por semana, não diariamente." }
+                ],
+                generalFeedback: {
+                    correct: "Ótimo! Agonistas dopaminérgicos são a primeira linha para prolactinomas, eficazes na redução do tumor e normalização da prolactina.",
+                    incorrect: "O tratamento do prolactinoma visa reduzir o tumor e seus efeitos hormonais. Revise as opções farmacológicas."
+                }
+            },
+            {
+                id: 46,
+                description: "Paciente, 25 anos, com dor e ardor ao urinar, corrimento fétido e lesões ulceradas na vulva. Cultura positiva para Herpes Simplex Virus. Qual o tratamento antiviral oral para surto agudo de herpes genital?",
+                correctPrescription: {
+                    medicine: "Aciclovir",
+                    dose: "400 mg",
+                    route: "Oral",
+                    frequency: "Três vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Valaciclovir",
+                        dose: "1 g",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Ciprofloxacino" }, message: "Ciprofloxacino é um antibiótico, não um antiviral para herpes." },
+                    { trigger: { route: "Tópica" }, message: "O tratamento para surto agudo de herpes genital é sistêmico para maior eficácia." },
+                    { trigger: { frequency: "Uma vez ao dia" }, message: "Antivirais para herpes exigem dosagens mais frequentes para controlar o surto." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Antivirais orais são eficazes para reduzir a duração e a severidade dos surtos de herpes genital. Início precoce é ideal.",
+                    incorrect: "O tratamento do herpes genital exige antivirais. Revise as opções e as dosagens para surtos agudos."
+                }
+            },
+            {
+                id: 47,
+                description: "Paciente, 23 anos, com corrimento vaginal amarelado e disúria, com piora pós-coito. Parceiro com sintomas semelhantes. Gram da secreção endocervical com diplococos intracelulares Gram-negativos. Qual o tratamento antibiótico de dose única para gonorreia não complicada?",
+                correctPrescription: {
+                    medicine: "Ceftriaxone",
+                    dose: "500 mg",
+                    route: "IM",
+                    frequency: "Dose única"
+                },
+                alternatives: [
+                    {
+                        medicine: "Azitromicina",
+                        dose: "1 g",
+                        route: "Oral",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Amoxicilina" }, message: "Amoxicilina não é a primeira linha para gonorreia devido à resistência." },
+                    { trigger: { route: "Oral", medicine: "Ceftriaxone" }, message: "Ceftriaxone para gonorreia é administrado por via intramuscular." },
+                    { trigger: { dose: "125 mg", medicine: "Ceftriaxone" }, message: "A dose recomendada de Ceftriaxone para gonorreia atualmente é 500mg." }
+                ],
+                generalFeedback: {
+                    correct: "Perfeito! Ceftriaxone IM é a primeira linha para o tratamento da gonorreia não complicada, com dose única para conveniência.",
+                    incorrect: "O tratamento da gonorreia exige um antibiótico eficaz e de dose única. Revise as diretrizes atuais para ISTs."
+                }
+            },
+            {
+                id: 48,
+                description: "Paciente feminina, 35 anos, com cefaleia unilateral, pulsátil, de moderada a grave intensidade, piora com luz e ruído, com duração de 12h. Não melhora com analgésicos comuns. Qual a medicação para tratamento agudo da crise de enxaqueca?",
+                correctPrescription: {
+                    medicine: "Sumatriptan",
+                    dose: "50 mg",
+                    route: "Oral",
+                    frequency: "Dose única"
+                },
+                alternatives: [
+                    {
+                        medicine: "Rizatriptan",
+                        dose: "10 mg",
+                        route: "Oral",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Amitriptilina" }, message: "Amitriptilina é para profilaxia da enxaqueca, não para tratamento agudo." },
+                    { trigger: { dose: "10 mg", medicine: "Sumatriptan" }, message: "A dose de Sumatriptan para crise aguda é geralmente 50mg ou 100mg." },
+                    { trigger: { frequency: "A cada 8 horas" }, message: "Triptanos são para uso em dose única na crise, podendo ser repetida uma vez em algumas horas se necessário." }
+                ],
+                generalFeedback: {
+                    correct: "Ótima escolha! Triptanos são eficazes para crises moderadas a graves de enxaqueca que não respondem a analgésicos comuns.",
+                    incorrect: "O tratamento agudo da enxaqueca requer medicamentos específicos para a crise. Revise as opções e quando usar."
+                }
+            },
+            {
+                id: 49,
+                description: "Lactente, 6 meses, com espasmos extensores súbitos e frequentes, atraso no desenvolvimento neuropsicomotor e EEG com hipsarritmia. Diagnóstico de Síndrome de West. Qual a medicação de primeira linha para controle dos espasmos?",
+                correctPrescription: {
+                    medicine: "Vigabatrin",
+                    dose: "50 mg/kg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Prednisolona",
+                        dose: "2 mg/kg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Fenobarbital" }, message: "Fenobarbital não é a primeira linha para Síndrome de West e pode ter efeitos adversos no desenvolvimento." },
+                    { trigger: { route: "IV" }, message: "Vigabatrin é administrado por via oral para controle de longo prazo." },
+                    { trigger: { dose: "20 mg/kg" }, message: "A dose inicial de Vigabatrin para Síndrome de West geralmente é 50mg/kg/dia." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Vigabatrin é uma medicação de primeira linha para Síndrome de West, especialmente em casos associados a esclerose tuberosa. Corticosteroides também são uma opção.",
+                    incorrect: "O tratamento da Síndrome de West é complexo e visa o controle dos espasmos e a melhora do desenvolvimento. Revise as opções de primeira linha."
+                }
+            },
+            {
+                id: 50,
+                description: "Paciente, 65 anos, com epilepsia, apresenta abalos motores tônico-clônicos bilaterais e perda de consciência por mais de 20 minutos. Diagnóstico de status epilepticus convulsivo generalizado. Qual a medicação inicial para cessar a crise?",
+                correctPrescription: {
+                    medicine: "Lorazepam",
+                    dose: "4 mg",
+                    route: "IV",
+                    frequency: "Dose única"
+                },
+                alternatives: [
+                    {
+                        medicine: "Diazepam",
+                        dose: "10 mg",
+                        route: "IV",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Valproato" }, message: "Valproato é um anticonvulsivante de manutenção, não a primeira linha para cessar o status epilepticus agudo." },
+                    { trigger: { route: "Oral" }, message: "Para status epilepticus, a medicação deve ser administrada por via intravenosa para ação rápida." },
+                    { trigger: { dose: "1 mg", medicine: "Lorazepam" }, message: "A dose de Lorazepam para status epilepticus geralmente é 4mg IV, repetível." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Benzodiazepínicos IV são a primeira linha para cessar o status epilepticus. O controle rápido é crucial para evitar danos cerebrais.",
+                    incorrect: "O status epilepticus é uma emergência neurológica. O tratamento exige medicação rápida e eficaz para cessar a crise. Revise as opções."
+                }
+            },
+            {
+                id: 51,
+                description: "Criança de 6 anos, após amigdalite, apresenta dispneia, febre, taquicardia e dores articulares. Exame físico com língua em 'framboesa'. Suspeita de febre reumática após infecção estreptocócica. Qual o antibiótico de escolha para erradicar o Streptococcus pyogenes e prevenir complicações?",
+                correctPrescription: {
+                    medicine: "Penicillin G Benzathine",
+                    dose: "600.000 UI",
+                    route: "IM",
+                    frequency: "Dose única"
+                },
+                alternatives: [
+                    {
+                        medicine: "Amoxicilina",
+                        dose: "500 mg",
+                        route: "Oral",
+                        frequency: "A cada 8 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Azitromicina" }, message: "Azitromicina é para alérgicos à penicilina. Penicilina é a primeira escolha." },
+                    { trigger: { route: "Oral", medicine: "Penicillin G Benzathine" }, message: "Penicilina G Benzathine é administrada por via intramuscular para febre reumática." },
+                    { trigger: { dose: "250 mg", medicine: "Amoxicilina" }, message: "A dose é baixa para tratamento efetivo de faringite estreptocócica em crianças." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Penicilina G Benzathine é a escolha padrão para erradicar o Streptococcus pyogenes e prevenir a febre reumática.",
+                    incorrect: "A prevenção da febre reumática após faringite estreptocócica exige um antibiótico eficaz. Revise as opções."
+                }
+            },
+            {
+                id: 52,
+                description: "Paciente masculino, 72 anos, com dispneia intensa, expectoração rósea e saturação de O2 baixa (82%). Histórico de hipertensão mal controlada. Exame físico com crepitações pulmonares e edema de MMII. Diagnóstico de edema agudo de pulmão. Qual a medicação diurética inicial?",
+                correctPrescription: {
+                    medicine: "Furosemide",
+                    dose: "40 mg",
+                    route: "IV",
+                    frequency: "Dose única"
+                },
+                alternatives: [
+                    {
+                        medicine: "Furosemide",
+                        dose: "20 mg",
+                        route: "IV",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Hidroclorotiazida" }, message: "Hidroclorotiazida é um diurético tiazídico, menos potente para edema agudo de pulmão do que diuréticos de alça." },
+                    { trigger: { route: "Oral", medicine: "Furosemide" }, message: "Para edema agudo de pulmão, a via intravenosa é preferencial para ação rápida." },
+                    { trigger: { dose: "10 mg", medicine: "Furosemide" }, message: "A dose é muito baixa para iniciar tratamento em edema agudo de pulmão." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Furosemide IV é o diurético de escolha para edema agudo de pulmão, promovendo rápida diurese e alívio da congestão.",
+                    incorrect: "O edema agudo de pulmão é uma emergência. O tratamento exige diuréticos potentes e de ação rápida. Revise as opções."
+                }
+            },
+            {
+                id: 53,
+                description: "Paciente feminino, 55 anos, com dor lombar à direita, febre alta, calafrios, disúria e polaciúria. Sinal de Giordano positivo. Exames com leucocitose e sumário de urina sugestivo de infecção (leucocitúria, nitrito positivo). Diagnóstico de pielonefrite aguda não complicada. Qual o antibiótico oral de primeira linha?",
+                correctPrescription: {
+                    medicine: "Ciprofloxacin",
+                    dose: "500 mg",
+                    route: "Oral",
+                    frequency: "Duas vezes ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Sulfametoxazol-Trimetropim (SMX/TMP)",
+                        dose: "800/160 mg",
+                        route: "Oral",
+                        frequency: "Duas vezes ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Amoxicilina" }, message: "Amoxicilina não é a primeira linha para pielonefrite devido à resistência e espectro limitado." },
+                    { trigger: { route: "IM" }, message: "Para pielonefrite não complicada, o tratamento oral é adequado." },
+                    { trigger: { frequency: "Uma vez ao dia", medicine: "Ciprofloxacin" }, message: "Ciprofloxacin para pielonefrite é geralmente administrado duas vezes ao dia." }
+                ],
+                generalFeedback: {
+                    correct: "Ótima escolha! Fluoroquinolonas são eficazes para pielonefrite aguda não complicada. O tratamento oral é uma boa opção se o paciente estiver estável.",
+                    incorrect: "O tratamento da pielonefrite exige um antibiótico com boa penetração renal e cobertura adequada. Revise as opções."
+                }
+            },
+            // NEW CASES FROM PDF "casos.pdf"
+            {
+                id: 54,
+                description: "Paciente, 45 anos, com queixa de congestão nasal, espirros, coriza amarelo-esverdeada e dor no corpo há 2 dias. Nega febre ou pressão nos seios da face. É asmática (controlada) e hipertensa (controlada com losartana). Já usou paracetamol para mal-estar, mas sem alívio para congestão. Qual a prescrição para o alívio dos sintomas de resfriado comum?",
+                correctPrescription: {
+                    medicine: "Clorfeniramina/Fenilefrina/Paracetamol",
+                    dose: "1 cápsula",
+                    route: "Oral",
+                    frequency: "A cada 8 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Clorfeniramina/Fenilefrina/Paracetamol",
+                        dose: "1 cápsula",
+                        route: "Oral",
+                        frequency: "A cada 6 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Amoxicilina" }, message: "Resfriado comum é viral e autolimitado, antibiótico não é indicado." },
+                    { trigger: { dose: "2 cápsulas" }, message: "A dose usual é de 1 cápsula para alívio sintomático." },
+                    { trigger: { route: "Nasal" }, message: "O medicamento é para uso oral. Descongestionantes nasais tópicos seriam outra classe." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Para resfriado comum, um composto com anti-histamínico, descongestionante e analgésico é adequado para alívio sintomático. Lembre-se de medidas não farmacológicas como irrigação nasal.",
+                    incorrect: "Para resfriado comum, o tratamento é sintomático. Reveja as opções de medicamentos compostos e as dosagens."
+                }
+            },
+            {
+                id: 55,
+                description: "Paciente, 35 anos, com tosse produtiva há 4 dias (catarro clarinho), um pouco de congestão nasal. Nega febre, dor, alergias ou tabagismo. A tosse piora à noite ao se deitar. Qual a prescrição para tosse produtiva e congestão nasal?",
+                correctPrescription: {
+                    medicine: "Ambroxol",
+                    dose: "5 mL",
+                    route: "Oral",
+                    frequency: "A cada 8 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Solução Fisiológica 0,9%",
+                        dose: "3 jatos",
+                        route: "Nasal",
+                        frequency: "A cada 8 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Codeína" }, message: "Codeína é um antitussígeno opioide, não indicado para tosse produtiva e pode ter efeitos colaterais. Mucolíticos são preferíveis." },
+                    { trigger: { frequency: "SOS" }, message: "Para tosse produtiva, a frequência regular é melhor para fluidificar a secreção." },
+                    { trigger: { route: "Inalatória", medicine: "Ambroxol" }, message: "Ambroxol xarope é para uso oral. Existem formulações inalatórias, mas o contexto pede xarope." }
+                ],
+                generalFeedback: {
+                    correct: "Perfeito! Ambroxol é um mucolítico eficaz para tosse produtiva. A irrigação nasal também é importante para a congestão e gotejamento pós-nasal.",
+                    incorrect: "Para tosse produtiva, o objetivo é fluidificar a secreção. Revise as opções de mucolíticos e descongestionantes."
+                }
+            },
+            {
+                id: 56,
+                description: "Paciente, 17 anos, com dor de garganta há 3 dias. Sintomas apareceram gradualmente, sem febre, disfagia importante, mas com cefaleia, coriza e congestão nasal associadas. Notou a presença de placas. Qual a prescrição para faringite viral?",
+                correctPrescription: {
+                    medicine: "Naproxeno",
+                    dose: "550 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Ibuprofeno",
+                        dose: "400 mg",
+                        route: "Oral",
+                        frequency: "A cada 8 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Amoxicilina" }, message: "Faringite viral é a causa mais comum, e a presença de placas não indica obrigatoriamente infecção bacteriana. Antibióticos são desnecessários." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Naproxeno" }, message: "Naproxeno 550mg é administrado uma vez ao dia para dor." },
+                    { trigger: { dose: "250 mg" }, message: "A dose de 550mg é mais eficaz para dor e inflamação na faringite." }
+                ],
+                generalFeedback: {
+                    correct: "Ótimo! AINEs como naproxeno são eficazes para alívio da dor e inflamação na faringite viral. Medidas não farmacológicas como gargarejos também ajudam.",
+                    incorrect: "Para faringite viral, o tratamento é sintomático. Antibióticos não são indicados. Revise as opções de AINEs."
+                }
+            },
+            {
+                id: 57,
+                description: "Paciente, 35 anos, com queixa de coriza líquida e transparente e congestão nasal, espirro e coceira no nariz há 2 dias. Começou a trabalhar em uma clínica veterinária recentemente. Histórico de rinite alérgica. Já usou dipirona sem alívio. Qual a prescrição para rinite alérgica?",
+                correctPrescription: {
+                    medicine: "Loratadina",
+                    dose: "10 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Solução Fisiológica 0,9%",
+                        dose: "3 jatos",
+                        route: "Nasal",
+                        frequency: "Quando necessário"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Pseudoefedrina" }, message: "Pseudoefedrina é um descongestionante sistêmico que pode ter efeitos colaterais cardiovasculares. Anti-histamínicos são a primeira linha para rinite alérgica." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Loratadina" }, message: "Loratadina é um anti-histamínico de segunda geração que age por 24 horas, portanto, uma vez ao dia é suficiente." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Loratadina é um anti-histamínico de segunda geração, eficaz para rinite alérgica, com poucos efeitos sedativos. A irrigação nasal também é recomendada.",
+                    incorrect: "Para rinite alérgica, anti-histamínicos são a primeira linha de tratamento. Revise as opções e a frequência."
+                }
+            },
+            {
+                id: 58,
+                description: "Paciente, 21 anos, com congestão nasal, tosse seca e febre de 38,2°C há 2 dias. Saturação de O2 de 97%. Teste rápido de COVID-19 positivo. Apresenta baixo risco de gravidade. Qual a prescrição para alívio sintomático da COVID-19 leve?",
+                correctPrescription: {
+                    medicine: "Ibuprofeno",
+                    dose: "400 mg",
+                    route: "Oral",
+                    frequency: "A cada 8 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Dexclorfeniramina",
+                        dose: "2 mg",
+                        route: "Oral",
+                        frequency: "A cada 8 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Azitromicina" }, message: "Antibióticos não são indicados para COVID-19 viral, a menos que haja suspeita de coinfecção bacteriana, o que não é o caso aqui." },
+                    { trigger: { dose: "600 mg", medicine: "Ibuprofeno" }, message: "Para sintomas leves, 400mg de Ibuprofeno é uma dose inicial adequada. Doses maiores podem ser desnecessárias." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! O tratamento da COVID-19 leve é sintomático com analgésicos/antipiréticos e, se necessário, anti-histamínicos para sintomas respiratórios. Isolamento social é fundamental.",
+                    incorrect: "O tratamento da COVID-19 leve é sintomático. Revise as opções de analgésicos e anti-histamínicos."
+                }
+            },
+            {
+                id: 59,
+                description: "Paciente, 34 anos, fumante, com 'queimação no estômago' (azia) há 3 dias, 2 vezes por semana, geralmente após as refeições e agravada por suco de frutas ácidas. Sem doenças crônicas ou outros sintomas. Qual a prescrição para azia?",
+                correctPrescription: {
+                    medicine: "Hidróxido de Alumínio/Magnésio/Simeticona",
+                    dose: "15 mL",
+                    route: "Oral",
+                    frequency: "A cada 6 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Omeprazol",
+                        dose: "20 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia (antes do café da manhã)"
+                    }
+                ],
+                penalties: [
+                    { trigger: { dose: "5 mL" }, message: "A dose de 5mL de antiácido pode ser insuficiente para azia. A dose usual é de 10 a 20 mL." },
+                    { trigger: { frequency: "Dose única" }, message: "Para alívio contínuo da azia, o antiácido é tomado a cada poucas horas, não em dose única." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Antiácidos combinados proporcionam alívio rápido da azia. Mudanças de hábitos alimentares e de estilo de vida também são importantes.",
+                    incorrect: "Para azia, o tratamento visa neutralizar o ácido. Revise as opções de antiácidos e suas dosagens."
+                }
+            },
+            {
+                id: 60,
+                description: "Paciente, 70 anos, hipertenso, diabético e dislipidêmico, procura ajuda por queimação no peito que irradia para o braço, dor em aperto no peito e falta de ar, que piora aos esforços. Qual a conduta imediata para este caso?",
+                correctPrescription: {
+                    medicine: "Nenhuma medicação",
+                    dose: "N/A",
+                    route: "N/A",
+                    frequency: "N/A"
+                },
+                alternatives: [],
+                penalties: [
+                    { trigger: { medicine: "Antiácido Complexo" }, message: "Sintomas cardíacos associados à dor no peito são um sinal de alerta grave. Antiácidos não são apropriados e atrasam o tratamento vital." },
+                    { trigger: { medicine: "Analgésico" }, message: "Aliviar a dor com analgésicos mascararia um problema cardíaco grave. A conduta é encaminhamento imediato." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! Dor no peito irradiando para o braço, associada à dispneia, é um sinal de alerta para emergência cardíaca. A conduta correta é o encaminhamento imediato para serviço de emergência (chamar o SAMU).",
+                    incorrect: "Este é um caso de emergência! Ignorar os sinais de alerta e tentar prescrever um medicamento é um erro grave. A conduta é o encaminhamento imediato."
+                }
+            },
+            {
+                id: 61,
+                description: "Paciente, 27 anos, constipada há aproximadamente duas semanas, com fezes ressecadas e dificuldade em evacuar. Sente dores abdominais leves. Não realiza atividade física, dieta baseada em carboidratos. Qual a prescrição para constipação?",
+                correctPrescription: {
+                    medicine: "Lactulose",
+                    dose: "15 mL",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Polietilenoglicol (PEG)",
+                        dose: "17 g",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Bisacodil" }, message: "Laxantes estimulantes como Bisacodil não são a primeira linha para constipação crônica devido ao risco de dependência e efeitos adversos a longo prazo." },
+                    { trigger: { dose: "5 mL", medicine: "Lactulose" }, message: "A dose de Lactulose para constipação é geralmente de 15 a 30 mL." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Lactulose" }, message: "Lactulose para constipação é geralmente administrada uma vez ao dia." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Lactulose é um laxante osmótico seguro e eficaz para constipação. Recomendações de aumento de fibras, hidratação e atividade física são cruciais.",
+                    incorrect: "O tratamento da constipação deve priorizar laxantes osmóticos. Revise as opções e a importância de mudanças no estilo de vida."
+                }
+            },
+            {
+                id: 62,
+                description: "Paciente, 38 anos, diabética e hipertensa, constipada há 7 dias. Não viu sangue nas fezes, mas a textura é pastosa. Não quer usar supositório de glicerina. Qual a prescrição para constipação, considerando a preferência da paciente?",
+                correctPrescription: {
+                    medicine: "Psyllium",
+                    dose: "1 colher de sopa",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Lactulose",
+                        dose: "15 mL",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Senna" }, message: "Laxantes estimulantes não são a primeira linha. Psyllium é um formador de massa, mais adequado para uso regular." },
+                    { trigger: { dose: "2 colheres de sopa", medicine: "Psyllium" }, message: "A dose inicial de Psyllium é geralmente 1 colher de sopa, podendo ser aumentada gradualmente." },
+                    { trigger: { frequency: "Três vezes ao dia", medicine: "Psyllium" }, message: "A frequência de Psyllium pode ser ajustada, mas começar com uma vez ao dia é comum." }
+                ],
+                generalFeedback: {
+                    correct: "Ótimo! Psyllium é um laxante formador de massa, excelente para constipação e pode ser usado a longo prazo. Respeitar a preferência da paciente é importante para a adesão.",
+                    incorrect: "O tratamento da constipação deve considerar a preferência do paciente e a segurança a longo prazo. Revise as opções de laxantes formadores de massa."
+                }
+            },
+            {
+                id: 63,
+                description: "Paciente, 25 anos, com diarreia aquosa e cólica intestinal após ter comido feijoada, sem vômitos ou febre. Evacuou 5 vezes no dia. Faz uso de anticoncepcional. Qual a prescrição para diarreia aguda autolimitada?",
+                correctPrescription: {
+                    medicine: "Saccharomyces boulardii",
+                    dose: "200 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Soro para Reidratação Oral (SRO)",
+                        dose: "150-200 mL",
+                        route: "Oral",
+                        frequency: "A cada evacuação diarreica"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Loperamida" }, message: "Loperamida não é recomendada como primeira linha para diarreia aguda, especialmente se não há sinais de desidratação grave, pois pode prolongar a infecção." },
+                    { trigger: { dose: "100 mg", medicine: "Saccharomyces boulardii" }, message: "A dose de Saccharomyces boulardii é tipicamente 200 mg uma vez ao dia." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Saccharomyces boulardii" }, message: "Saccharomyces boulardii geralmente é administrado uma vez ao dia." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! A reidratação oral e os probióticos são as principais medidas para diarreia aguda autolimitada, melhorando a função da barreira intestinal.",
+                    incorrect: "O tratamento da diarreia aguda foca na reidratação e, se indicado, no uso de probióticos. Revise as opções."
+                }
+            },
+            {
+                id: 64,
+                description: "Paciente, 40 anos, em tratamento de câncer de próstata com radioterapia (há 3 semanas). Apresenta diarreia aquosa (4 evacuações/dia) e cólicas abdominais leves, sem febre ou sinais de alerta. Qual a prescrição para diarreia induzida por radioterapia?",
+                correctPrescription: {
+                    medicine: "Bacillus clausii",
+                    dose: "2 x 10^9 esporos/5mL",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Saccharomyces boulardii",
+                        dose: "200 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Loperamida" }, message: "Loperamida pode ser usada para diarreia induzida por radioterapia, mas probióticos são preferidos para modular a microbiota e reforçar a barreira intestinal." },
+                    { trigger: { dose: "1 flaconete" }, message: "A dose usual é de 1 a 3 flaconetes de Enterogermina (Bacillus clausii)." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Bacillus clausii" }, message: "Bacillus clausii é geralmente administrado uma vez ao dia." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! Probióticos como Bacillus clausii ou Saccharomyces boulardii são eficazes na prevenção e tratamento da diarreia induzida por radioterapia, reforçando a barreira intestinal.",
+                    incorrect: "A diarreia induzida por radioterapia pode ser manejada com probióticos. Revise as opções e o papel da microbiota."
+                }
+            },
+            {
+                id: 65,
+                description: "Paciente, 24 anos, estudante, com dor de cabeça há 3 horas, nos dois lados (principalmente testa), dor em aperto e constante. Intensidade 4/10. Não melhora com paracetamol. Sem outros sintomas ou condições clínicas. Qual a prescrição para cefaleia do tipo tensional?",
+                correctPrescription: {
+                    medicine: "Ibuprofeno",
+                    dose: "400 mg",
+                    route: "Oral",
+                    frequency: "Dose única"
+                },
+                alternatives: [
+                    {
+                        medicine: "Naproxeno",
+                        dose: "500 mg",
+                        route: "Oral",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Paracetamol" }, message: "O paciente já tentou paracetamol sem sucesso. Um AINE é mais apropriado para este caso." },
+                    { trigger: { dose: "200 mg", medicine: "Ibuprofeno" }, message: "Para cefaleia tensional que não responde a paracetamol, uma dose de 400mg de Ibuprofeno é mais eficaz." },
+                    { trigger: { frequency: "A cada 6 horas" }, message: "Para uma dor aguda e autolimitada, uma dose única ou SOS é o suficiente, não uma frequência regular." }
+                ],
+                generalFeedback: {
+                    correct: "Correto! AINEs como Ibuprofeno são eficazes para cefaleia tensional. Medidas não farmacológicas como aplicação de calor e técnicas de relaxamento também ajudam.",
+                    incorrect: "Para cefaleia tensional que não responde a analgésicos simples, considere um AINE. Revise as opções e dosagens."
+                }
+            },
+            {
+                id: 66,
+                description: "Paciente, 35 anos, com fortes dores na região lombar há uma semana após levantar objeto pesado. Dor aguda (< 6 semanas), sem lesão prévia ou problema de coluna. Intensidade 5/10. A dor piora em repouso e melhora com movimento. Tentou compressa fria sem sucesso. Qual a prescrição para dor lombar aguda?",
+                correctPrescription: {
+                    medicine: "Naproxeno",
+                    dose: "500 mg",
+                    route: "Oral",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Ibuprofeno",
+                        dose: "400 mg",
+                        route: "Oral",
+                        frequency: "A cada 8 horas"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Morfina" }, message: "Opioides não são indicados para dor lombar aguda não traumática de primeira linha. AINEs são preferíveis." },
+                    { trigger: { dose: "250 mg", medicine: "Naproxeno" }, message: "Para dor lombar aguda, uma dose de 500mg de Naproxeno é mais eficaz. Doses menores são para dores mais leves." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Naproxeno" }, message: "Naproxeno 500mg geralmente é administrado uma vez ao dia para dor lombar." }
+                ],
+                generalFeedback: {
+                    correct: "Excelente! AINEs são a primeira linha para dor lombar aguda. Aconselhe também terapia de calor e manutenção da atividade (evitar repouso prolongado).",
+                    incorrect: "O tratamento da dor lombar aguda foca no alívio da dor e na manutenção da funcionalidade. Revise as opções de AINEs."
+                }
+            },
+            {
+                id: 67,
+                description: "Paciente, 17 anos, com dor abdominal de forte intensidade, cefaleia, náuseas e vômitos, que sempre surgem com o início do ciclo menstrual. Relata melhora significativa com Ibuprofeno em crises anteriores. Qual a prescrição para dismenorreia primária?",
+                correctPrescription: {
+                    medicine: "Ibuprofeno",
+                    dose: "400 mg",
+                    route: "Oral",
+                    frequency: "A cada 6 horas"
+                },
+                alternatives: [
+                    {
+                        medicine: "Naproxeno",
+                        dose: "500 mg",
+                        route: "Oral",
+                        frequency: "Uma vez ao dia"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Paracetamol" }, message: "Embora o paracetamol seja analgésico, os AINEs são mais eficazes para dismenorreia devido à sua ação anti-inflamatória sobre as prostaglandinas." },
+                    { trigger: { dose: "200 mg", medicine: "Ibuprofeno" }, message: "A dose de 400mg de Ibuprofeno é mais eficaz para o alívio da dor moderada a grave na dismenorreia." },
+                    { trigger: { frequency: "SOS", medicine: "Ibuprofeno" }, message: "Para dismenorreia, é melhor tomar o medicamento regularmente nos primeiros dias para controlar as cólicas antes que se tornem intensas." }
+                ],
+                generalFeedback: {
+                    correct: "Perfeito! Ibuprofeno é um AINE eficaz para dismenorreia primária, atuando na inflamação. Oriente a iniciar o tratamento com o início dos sintomas ou da menstruação.",
+                    incorrect: "O tratamento da dismenorreia primária deve focar em AINEs. Revise as opções e a importância do início precoce da medicação."
+                }
+            },
+            {
+                id: 68,
+                description: "Paciente, 24 anos, com queixa de coceira, ardência ao urinar e secreção branca sem odor na calcinha há 3 dias. Os sintomas apareceram gradualmente, sem febre, dores pélvicas ou dor durante a relação sexual. Já sentiu isso uma vez há um ano. Qual a prescrição para candidíase vaginal não complicada?",
+                correctPrescription: {
+                    medicine: "Nitrato de Miconazol",
+                    dose: "2% creme",
+                    route: "Tópica",
+                    frequency: "Uma vez ao dia"
+                },
+                alternatives: [
+                    {
+                        medicine: "Fluconazol",
+                        dose: "150 mg",
+                        route: "Oral",
+                        frequency: "Dose única"
+                    }
+                ],
+                penalties: [
+                    { trigger: { medicine: "Antibiótico" }, message: "Candidíase é uma infecção fúngica, não bacteriana. Antibióticos são ineficazes e podem piorar o quadro." },
+                    { trigger: { frequency: "Duas vezes ao dia", medicine: "Nitrato de Miconazol" }, message: "O tratamento para candidíase vaginal com nitrato de miconazol creme 2% é geralmente uma vez ao dia, ao deitar." }
+                ],
+                generalFeedback: {
+                    correct: "Ótimo! Nitrato de Miconazol tópico é uma excelente escolha para candidíase vaginal não complicada. Medidas não farmacológicas, como evitar roupas apertadas, também ajudam.",
+                    incorrect: "Para candidíase vaginal, o tratamento é antifúngico. Revise as opções tópicas e orais, e suas dosagens."
+                }
+            }
+        ];
+
+        // Global drug database for dropdown options
+        const drugDatabase = {
+            "Captopril": {
+                doses: ["12.5 mg", "25 mg", "50 mg", "100 mg"],
+                frequencies: ["Dose única", "A cada 8 horas", "A cada 12 horas", "Uma vez ao dia"]
+            },
+            "Nifedipino": {
+                doses: ["5 mg", "10 mg", "20 mg"],
+                frequencies: ["Dose única", "A cada 8 horas", "A cada 12 horas"]
+            },
+            "Paracetamol": {
+                doses: ["100 mg", "200 mg", "500 mg", "750 mg", "1 g"],
+                frequencies: ["A cada 4 horas", "A cada 6 horas", "A cada 8 horas", "SOS"]
+            },
+            "Ibuprofeno": {
+                doses: ["100 mg", "200 mg", "400 mg", "600 mg"],
+                frequencies: ["A cada 6 horas", "A cada 8 horas", "A cada 12 horas", "Dose única"]
+            },
+            "Amoxicilina + Clavulanato": {
+                doses: ["500/125 mg", "875/125 mg", "1000 mg"],
+                frequencies: ["A cada 8 horas", "A cada 12 horas", "Duas vezes ao dia"] // Added duas vezes ao dia for specific cases like diverticulitis
+            },
+            "Levofloxacino": {
+                doses: ["250 mg", "500 mg", "750 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Escitalopram": {
+                doses: ["5 mg", "10 mg", "15 mg", "20 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Sertralina": {
+                doses: ["25 mg", "50 mg", "100 mg", "150 mg", "200 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Diazepam": {
+                doses: ["2 mg", "5 mg", "10 mg", "10 mg (IV)"], // Added IV for status epilepticus
+                frequencies: ["A cada 6 horas", "A cada 8 horas", "Duas vezes ao dia", "Três vezes ao dia", "SOS", "Dose única"]
+            },
+            "Metformina": {
+                doses: ["250 mg", "500 mg", "850 mg", "1000 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Três vezes ao dia"]
+            },
+            "Insulina": {
+                doses: ["10 UI", "20 UI", "30 UI", "Dose individualizada"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Três vezes ao dia", "Antes das refeições"]
+            },
+            "Glibenclamida": {
+                doses: ["2.5 mg", "5 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Sumatriptano": {
+                doses: ["25 mg", "50 mg", "100 mg"],
+                frequencies: ["Dose única", "Repetir em 2h (max 2 doses)"]
+            },
+            "Rizatriptano": {
+                doses: ["5 mg", "10 mg"],
+                frequencies: ["Dose única", "Repetir em 2h (max 2 doses)"]
+            },
+            "Amitriptilina": {
+                doses: ["10 mg", "25 mg", "50 mg", "75 mg"],
+                frequencies: ["Uma vez ao dia (noturno)", "Duas vezes ao dia"]
+            },
+            "Rivaroxabana": {
+                doses: ["10 mg", "15 mg", "20 mg", "10 mg (profilaxia TVP)"], // Added more context for dose
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"] // Added two times a day for dose of attack
+            },
+            "Apixabana": {
+                doses: ["2.5 mg", "5 mg"],
+                frequencies: ["Duas vezes ao dia"]
+            },
+            "Dabigatrana": {
+                doses: ["75 mg", "110 mg", "150 mg"],
+                frequencies: ["Duas vezes ao dia"]
+            },
+            "Varfarina": {
+                doses: ["1 mg", "2.5 mg", "5 mg", "Dose individualizada"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Tiotrópio": {
+                doses: ["18 mcg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Salmeterol": {
+                doses: ["25 mcg", "50 mcg"],
+                frequencies: ["Duas vezes ao dia"]
+            },
+            "Salbutamol": {
+                doses: ["100 mcg/puff (2 puffs)", "2.5 mg (nebulização)", "5 mg (nebulização)"], // Example dosage forms
+                frequencies: ["SOS", "A cada 4-6 horas", "A cada 20 minutos por 1 hora"] // Frequencies for acute use
+            },
+            "Prednisona": {
+                doses: ["5 mg", "10 mg", "20 mg", "40 mg", "60 mg"],
+                frequencies: ["Uma vez ao dia", "Dose única"]
+            },
+            "Nitrofurantoína": {
+                doses: ["50 mg", "100 mg"],
+                frequencies: ["A cada 6 horas", "A cada 8 horas", "A cada 12 horas"]
+            },
+            "Fosfomicina trometamol": {
+                doses: ["3 g"],
+                frequencies: ["Dose única"]
+            },
+            "Ciprofloxacino": {
+                doses: ["250 mg", "500 mg", "750 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Amoxicilina": {
+                doses: ["250 mg", "500 mg", "875 mg"],
+                frequencies: ["A cada 8 horas", "A cada 12 horas"]
+            },
+            "Pregabalina": {
+                doses: ["25 mg", "50 mg", "75 mg", "150 mg", "300 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Três vezes ao dia"]
+            },
+            "Gabapentina": {
+                doses: ["100 mg", "300 mg", "400 mg", "600 mg", "800 mg"],
+                frequencies: ["Duas vezes ao dia", "Três vezes ao dia"]
+            },
+            "Hidralazina": {
+                doses: ["10 mg", "25 mg", "50 mg", "20 mg (IV)"], // Added IV for context
+                frequencies: ["A cada 6 horas", "A cada 8 horas", "A cada 4-6 horas (IV)"]
+            },
+            "AAS": {
+                doses: ["81 mg", "100 mg", "325 mg", "500 mg"],
+                frequencies: ["Uma vez ao dia", "A cada 4-6 horas", "Dose única"]
+            },
+            "Dipirona": {
+                doses: ["500 mg", "1 g"],
+                frequencies: ["A cada 6 horas", "A cada 8 horas", "SOS"]
+            },
+            "Levotiroxina": {
+                doses: ["25 mcg", "50 mcg", "75 mcg", "100 mcg", "125 mcg", "150 mcg", "Aumento da dose (ex: +25 mcg)"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Cefalexina": {
+                doses: ["250 mg", "500 mg"],
+                frequencies: ["A cada 6 horas", "A cada 8 horas"]
+            },
+            "Clindamicina": {
+                doses: ["150 mg", "300 mg"],
+                frequencies: ["A cada 6 horas", "A cada 8 horas"]
+            },
+            "Metronidazol": {
+                doses: ["250 mg", "500 mg"],
+                frequencies: ["A cada 8 horas"]
+            },
+            "Omeprazol": {
+                doses: ["10 mg", "20 mg", "40 mg"],
+                frequencies: ["Uma vez ao dia (antes do café da manhã)", "Duas vezes ao dia (antes das refeições)"]
+            },
+            "Pantoprazol": {
+                doses: ["20 mg", "40 mg"],
+                frequencies: ["Uma vez ao dia (antes do café da manhã)"]
+            },
+            "Ranitidina": { // Included for penalty logic, even if not primary choice
+                doses: ["150 mg", "300 mg", "2 mg/kg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Três vezes ao dia"]
+            },
+            "Alendronato": {
+                doses: ["70 mg"],
+                frequencies: ["Uma vez por semana"]
+            },
+            "Risedronato": {
+                doses: ["35 mg"],
+                frequencies: ["Uma vez por semana"]
+            },
+            "Atorvastatina": {
+                doses: ["10 mg", "20 mg", "40 mg", "80 mg"],
+                frequencies: ["Uma vez ao dia (noturno)"]
+            },
+            "Rosuvastatina": {
+                doses: ["5 mg", "10 mg", "20 mg", "40 mg"],
+                frequencies: ["Uma vez ao dia (noturno)"]
+            },
+            "Sinvastatina": { // Included for penalty logic
+                doses: ["10 mg", "20 mg", "40 mg"],
+                frequencies: ["Uma vez ao dia (noturno)"]
+            },
+            "Espironolactona": {
+                doses: ["25 mg", "50 mg", "100 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Furosemide": {
+                doses: ["20 mg", "40 mg", "80 mg", "20 mg (IV)", "40 mg (IV)"], // Added IV doses
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Dose única"]
+            },
+            "Hidroclorotiazida": {
+                doses: ["12.5 mg", "25 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Nenhuma medicação": { // For cases where suspension is the correct action
+                doses: ["N/A"],
+                frequencies: ["N/A"]
+            },
+            "Clopidogrel": {
+                doses: ["75 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            // NOVOS MEDICAMENTOS ADICIONADOS PARA NOVOS CASOS
+            "Colchicina": {
+                doses: ["0.5 mg", "0.6 mg"],
+                frequencies: ["A cada 12 horas", "A cada 8 horas", "Dose de ataque (ex: 1.2 mg, depois 0.6 mg 1h depois)"]
+            },
+            "Enoxaparina": {
+                doses: ["1 mg/kg (SC)", "40 mg (SC)"], // SC = Subcutânea
+                frequencies: ["A cada 12 horas", "Uma vez ao dia"]
+            },
+            "Sacubitril/Valsartana": {
+                doses: ["24/26 mg", "49/51 mg", "97/103 mg"],
+                frequencies: ["Duas vezes ao dia"]
+            },
+            "Clobetasol": {
+                doses: ["0.05% creme/pomada"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Azitromicina": { // Already present, ensure its doses/frequencies match latest common uses.
+                doses: ["250 mg", "500 mg", "1 g"], // Added 1g dose
+                frequencies: ["Uma vez ao dia", "Uma vez ao dia por 3-5 dias", "Dose única"]
+            },
+            "Penicilina V potássica": {
+                doses: ["250 mg", "500 mg"],
+                frequencies: ["A cada 6 horas", "A cada 8 horas", "A cada 12 horas"]
+            },
+            // --- NOVOS MEDICAMENTOS PARA OS 5 CASOS ADICIONAIS ---
+            "Adapaleno + Peróxido de Benzoíla": {
+                doses: ["0.1% + 2.5% gel", "0.3% + 2.5% gel"],
+                frequencies: ["Uma vez ao dia (noite)"]
+            },
+            "Tretinoína + Clindamicina": {
+                doses: ["0.025% creme + 1% gel", "0.05% creme + 1% gel"],
+                frequencies: ["Uma vez ao dia (noite)"]
+            },
+            "Isotretinoína": {
+                doses: ["10 mg", "20 mg", "40 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Doxiciclina": {
+                doses: ["50 mg", "100 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Metoprolol": {
+                doses: ["25 mg", "50 mg", "100 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Amiodarona": {
+                doses: ["200 mg", "400 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Dose de ataque"]
+            },
+            "Ceftazidima": {
+                doses: ["1 g (IV)", "2 g (IV)"],
+                frequencies: ["A cada 8 horas", "A cada 12 horas"]
+            },
+            "Vancomicina": {
+                doses: ["1 g (IV)", "15 mg/kg (IV)"],
+                frequencies: ["A cada 8 horas", "A cada 12 horas"]
+            },
+            "Ondansetrona": {
+                doses: ["4 mg", "8 mg"],
+                frequencies: ["A cada 8 horas", "SOS", "A cada 12 horas"] // Added 12 hours
+            },
+            "Dimenidrinato": {
+                doses: ["50 mg"],
+                frequencies: ["A cada 4-6 horas", "SOS", "A cada 6 horas"] // Added A cada 6 horas for this game
+            },
+            "Sildenafila": {
+                doses: ["25 mg", "50 mg", "100 mg"],
+                frequencies: ["SOS (antes da atividade sexual)"]
+            },
+            "Tadalafila": {
+                doses: ["5 mg", "10 mg", "20 mg"],
+                frequencies: ["Uma vez ao dia", "SOS (antes da atividade sexual)"]
+            },
+            "Vardenafila": {
+                doses: ["5 mg", "10 mg", "20 mg"],
+                frequencies: ["SOS (antes da atividade sexual)"]
+            },
+            "Nitratos": { // For penalty example
+                doses: ["N/A"],
+                frequencies: ["N/A"]
+            },
+            "Bisoprolol": {
+                doses: ["1.25 mg", "2.5 mg", "5 mg", "10 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            // --- NOVOS MEDICAMENTOS PARA OS ÚLTIMOS 5 CASOS ---
+            "Fluconazol": {
+                doses: ["50 mg", "100 mg", "150 mg", "200 mg"],
+                frequencies: ["Dose única", "Uma vez ao dia", "Uma vez por semana"]
+            },
+            "Clotrimazol": {
+                doses: ["1% creme", "500 mg (óvulo vaginal)", "100 mg (óvulo vaginal)"],
+                frequencies: ["Dose única", "Uma vez ao dia", "Por 3-7 dias"]
+            },
+            "Aciclovir": {
+                doses: ["200 mg", "400 mg", "800 mg", "5% creme"],
+                frequencies: ["Três vezes ao dia", "Cinco vezes ao dia", "Duas vezes ao dia", "Dose única"]
+            },
+            "Valaciclovir": {
+                doses: ["500 mg", "1000 mg", "1 g"], // Added 1g
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Três vezes ao dia"] // Added three times a day
+            },
+            "Moxifloxacino": {
+                doses: ["0.5% colírio"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Três vezes ao dia"]
+            },
+            "Sulfacetamida Sódica": {
+                doses: ["10% colírio"],
+                frequencies: ["Três vezes ao dia", "A cada 4 horas"]
+            },
+            "Tobramicina": {
+                doses: ["0.3% colírio", "0.3% pomada"],
+                frequencies: ["A cada 4-6 horas", "Três vezes ao dia"]
+            },
+            "Prednisolona": { // For penalty example (ocular)
+                doses: ["1% colírio", "2 mg/kg"], // Added 2mg/kg for systemic use
+                frequencies: ["Duas vezes ao dia", "Três vezes ao dia", "Uma vez ao dia"] // Added once a day
+            },
+            "Polietilenoglicol (PEG)": {
+                doses: ["17 g", "34 g"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Lactulose": {
+                doses: ["15 mL", "30 mL"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Senna": { // For penalty example
+                doses: ["8.6 mg", "17.2 mg"],
+                frequencies: ["Uma vez ao dia (noturno)"]
+            },
+            "Bisacodil": { // For penalty example
+                doses: ["5 mg"],
+                frequencies: ["Uma vez ao dia (noturno)"]
+            },
+            "Sulfato Ferroso": {
+                doses: ["300 mg", "325 mg"], // Common doses in Brazil/US, check elemental iron
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Gluconato Ferroso": {
+                doses: ["300 mg", "325 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Vitamina B12": { // For penalty example
+                doses: ["1000 mcg"],
+                frequencies: ["Uma vez ao dia", "Uma vez por semana"]
+            },
+            "Ferro quelato": { // Added as a potential, more modern alternative option to database for doses
+                doses: ["150 mg", "300 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            // NOVOS MEDICAMENTOS PARA OS ÚLTIMOS 5 CASOS ADICIONADOS
+            "Mupirocina": {
+                doses: ["2% pomada", "2% creme"],
+                frequencies: ["Duas vezes ao dia", "Três vezes ao dia"]
+            },
+            "Famotidina": {
+                doses: ["10 mg", "20 mg", "0.5 mg/kg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Anlodipino": {
+                doses: ["2.5 mg", "5 mg", "10 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Clortalidona": {
+                doses: ["12.5 mg", "25 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Nistatina": { // For oral thrush (sapinho)
+                doses: ["100.000 UI/mL suspensão oral"],
+                frequencies: ["Quatro vezes ao dia"]
+            },
+            "Miconazol": { // For oral thrush (sapinho)
+                doses: ["20 mg/g gel oral"],
+                frequencies: ["Quatro vezes ao dia"]
+            },
+            "Betahistina": { // For penalty (vertigo)
+                doses: ["8 mg", "16 mg", "24 mg"],
+                frequencies: ["Duas vezes ao dia", "Três vezes ao dia"]
+            },
+            "Meclizina": { // For vertigo
+                doses: ["12.5 mg", "25 mg"],
+                frequencies: ["A cada 6 horas", "A cada 8 horas"]
+            },
+            "Metilprednisolona": { // Added for new cases
+                doses: ["20 mg", "40 mg", "125 mg", "1 g"],
+                frequencies: ["Uma vez ao dia", "Dose única"]
+            },
+            "Cabergoline": { // Added for new cases
+                doses: ["0.25 mg", "0.5 mg", "1 mg"],
+                frequencies: ["Uma vez por semana", "Duas vezes por semana"]
+            },
+            "Bromocriptine": { // Added for new cases
+                doses: ["1.25 mg", "2.5 mg", "5 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Ceftriaxone": { // Added for new cases
+                doses: ["125 mg", "250 mg", "500 mg", "1 g", "2 g"],
+                frequencies: ["Dose única", "Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Vigabatrin": { // Added for new cases
+                doses: ["250 mg", "500 mg", "50 mg/kg", "100 mg/kg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Lorazepam": { // Added for new cases
+                doses: ["1 mg", "2 mg", "4 mg"],
+                frequencies: ["Dose única", "A cada 6 horas"]
+            },
+            "Penicillin G Benzathine": { // Added for new cases
+                doses: ["600.000 UI", "1.200.000 UI", "2.400.000 UI"],
+                frequencies: ["Dose única"]
+            },
+            "Sulfametoxazol-Trimetropim (SMX/TMP)": { // Added for new cases
+                doses: ["400/80 mg", "800/160 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Clorfeniramina/Fenilefrina/Paracetamol": { // New drug from "casos.pdf"
+                doses: ["1 cápsula", "5 mL"],
+                frequencies: ["A cada 6 horas", "A cada 8 horas", "Quando necessário"]
+            },
+            "Ambroxol": { // New drug from "casos.pdf"
+                doses: ["5 mL", "10 mL"],
+                frequencies: ["A cada 8 horas", "Duas vezes ao dia"]
+            },
+            "Naproxeno": { // Already exists but confirming doses/frequencies are robust
+                doses: ["250 mg", "500 mg", "550 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "A cada 12 horas", "Dose única"]
+            },
+            "Loratadina": { // New drug from "casos.pdf"
+                doses: ["10 mg", "5 mg"],
+                frequencies: ["Uma vez ao dia"]
+            },
+            "Dexclorfeniramina": { // New drug from "casos.pdf"
+                doses: ["2 mg"],
+                frequencies: ["A cada 6 horas", "A cada 8 horas"]
+            },
+            "Hidróxido de Alumínio/Magnésio/Simeticona": { // New drug from "casos.pdf"
+                doses: ["10 mL", "15 mL", "20 mL"],
+                frequencies: ["A cada 6 horas", "Quando necessário", "Após refeições"]
+            },
+            "Psyllium": { // New drug from "casos.pdf"
+                doses: ["1 colher de sopa", "2 colheres de sopa", "1 cápsula", "2 cápsulas", "3 cápsulas"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Até 3 vezes ao dia"]
+            },
+            "Saccharomyces boulardii": { // New drug from "casos.pdf"
+                doses: ["100 mg", "200 mg"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia"]
+            },
+            "Bacillus clausii": { // New drug from "casos.pdf"
+                doses: ["2 x 10^9 esporos/5mL"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Três vezes ao dia"] // Common for multi flaconetes/day
+            },
+            "Nitrato de Miconazol": { // New drug from "casos.pdf", topical
+                doses: ["2% creme", "2% pomada", "4% creme"],
+                frequencies: ["Uma vez ao dia", "Duas vezes ao dia", "Por 7 dias"]
+            },
+            "Solução Fisiológica 0,9%": { // Added for nasal irrigation
+                doses: ["3 jatos", "5 mL", "10 mL"],
+                frequencies: ["Quando necessário", "A cada 8 horas"]
+            }
+        };
+
+        const commonFrequencies = [
+            "Uma vez ao dia",
+            "Duas vezes ao dia",
+            "Três vezes ao dia",
+            "Quatro vezes ao dia", // Added for Nistatina
+            "Cinco vezes ao dia", // Added for Aciclovir
+            "A cada 4 horas",
+            "A cada 6 horas",
+            "A cada 8 horas",
+            "A cada 12 horas",
+            "Dose única",
+            "SOS", // Se necessário (pro re nata)
+            "Noite",
+            "A cada 20 minutos por 1 hora", // Specific for asthma, for instance
+            "Uma vez por semana", // Specific for alendronate, for instance
+            "Duas vezes por semana", // Added for Cabergoline
+            "Antes do café da manhã", // For PPIs
+            "Antes das refeições", // For insulin, etc.
+            "Dose de ataque (ex: 1.2 mg, depois 0.6 mg 1h depois)", // For colchicine
+            "Repetir em 2h (max 2 doses)", // For triptans
+            "SOS (antes da atividade sexual)",
+            "Por 3-5 dias", // For Azitromicina
+            "Por 3-7 dias", // For topical antifungals
+            "Quando necessário", // For nasal spray, etc.
+            "Até 3 vezes ao dia" // For psyllium etc.
+        ];
+
+        const commonRoutes = [
+            "Oral", "IV", "IM", "SC", "Tópica", "Nasal", "Inalatória", "Retal", "Sublingual", "N/A" // N/A for 'No medication' cases
+        ];
+
+
+        let currentCaseIndex = 0;
+        let correctAnswers = 0; // Changed from score
+        let incorrectAnswers = 0; // New variable
+        const maxScorePerCase = 4; // This is now more of a conceptual "perfect score" for internal logic
+        let totalMaxScore = 0;
+        let totalCasesCount = 0; // New variable to store total number of cases
+
+        // Declarar as variáveis com 'let' para que possam ser reatribuídas
+        let caseTitleElem;
+        let caseDescriptionElem;
+        let medicineSelect; // Changed to select
+        let doseSelect;     // Changed to select
+        let routeSelect;    // Changed to select
+        let frequencySelect; // Changed to select
+        let prescribeButton;
+        let nextCaseButton;
+        let restartButton;
+        let feedbackElem;
+        let correctAnswersElem; // Renamed
+        let incorrectAnswersElem; // New element
+        let caseCountElem; // New element for case count
+        let referencesButton; // New references button
+        let referencesModal; // New references modal
+        let closeReferencesModal; // Close button for modal
+        let referencesContent; // Content area for references
+
+        const gameScreen = document.getElementById('gameScreen');
+        const splashScreen = document.getElementById('splashScreen');
+
+        // Function to display messages (instead of alert)
+        function showMessage(message, type = 'info') {
+            feedbackElem.textContent = message;
+            feedbackElem.classList.remove('hidden', 'feedback-correct', 'feedback-incorrect', 'bg-blue-800', 'text-blue-100', 'border-blue-400');
+            if (type === 'correct') {
+                feedbackElem.classList.add('feedback-correct');
+            } else if (type === 'incorrect') {
+                feedbackElem.classList.add('feedback-incorrect');
+            } else {
+                feedbackElem.classList.add('bg-blue-800', 'text-blue-100', 'border-blue-400'); // Default info style
+            }
+        }
+
+        // Function to clear input fields (now dropdowns)
+        function clearInputs() {
+            medicineSelect.value = '';
+            doseSelect.innerHTML = '<option value="">Selecione a Dose</option>'; // Clear dose options
+            doseSelect.disabled = true; // Disable until medicine is selected
+            routeSelect.value = '';
+            frequencySelect.value = '';
+        }
+
+        // Helper to populate a select element
+        function populateSelect(selectElement, options, initialValue = '') {
+            selectElement.innerHTML = `<option value="">${selectElement.id === 'dose' ? 'Selecione a Dose' : selectElement.id === 'medicine' ? 'Selecione o Medicamento' : selectElement.id === 'frequency' ? 'Selecione a Frequência' : 'Selecione a Via'}</option>`;
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.textContent = option;
+                selectElement.appendChild(opt);
+            });
+            if (initialValue) {
+                selectElement.value = initialValue;
+            }
+        }
+
+        // Function to populate dose options based on selected medicine
+        function populateDoseOptions(selectedMedicine) {
+            doseSelect.innerHTML = '<option value="">Selecione a Dose</option>'; // Clear current options
+            doseSelect.disabled = true; // Disable by default
+
+            if (selectedMedicine && drugDatabase[selectedMedicine]) {
+                const doses = drugDatabase[selectedMedicine].doses;
+                const currentCase = cases[currentCaseIndex];
+
+                let uniqueDoses = new Set();
+                
+                // Add correct dose for the current case's main prescription
+                if (currentCase.correctPrescription.medicine === selectedMedicine) {
+                    uniqueDoses.add(currentCase.correctPrescription.dose);
+                }
+                // Add correct dose for any alternative matching the selected medicine
+                currentCase.alternatives.forEach(alt => {
+                    if (alt.medicine === selectedMedicine) {
+                        uniqueDoses.add(alt.dose);
+                    }
+                });
+
+                // Add a few other plausible doses from the general drug database for variety
+                // This ensures general valid doses are available even if not strictly "correct" for the current case.
+                if (drugDatabase[selectedMedicine] && drugDatabase[selectedMedicine].doses) {
+                    drugDatabase[selectedMedicine].doses.forEach(d => uniqueDoses.add(d));
+                }
+
+                populateSelect(doseSelect, Array.from(uniqueDoses).sort((a, b) => {
+                    // Custom sort for doses with units (e.g., "25 mg", "100 mcg")
+                    const extractNum = (str) => parseFloat(str.match(/(\d+\.?\d*)/)?.[1] || str);
+                    const extractUnit = (str) => str.match(/[a-zA-Z\/]+$/)?.[0] || '';
+
+                    const numA = extractNum(a);
+                    const numB = extractNum(b);
+                    const unitA = extractUnit(a);
+                    const unitB = extractUnit(b);
+
+                    if (unitA !== unitB) {
+                        // Prioritize "mg" then "mcg" then "g" or others
+                        const unitOrder = {"mg": 1, "mcg": 2, "g": 3, "iu": 4, "puff": 5, "nebulização": 6, "n/a": 7, "doses": 8, "creme": 9, "pomada": 10, "gel": 11, "(óvulo vaginal)": 12, "colírio": 13, "ui/ml suspensão oral": 14, "mg/g gel oral": 15, "mg/kg":16, "ui":17, "cápsula":18, "ml":19, "jatos":20, "colher de sopa":21, "flaconetes":22, "%":23}; // Define a desired order, added "ui", "cápsula", "ml", "jatos", "colher de sopa", "flaconetes", "%"
+                        return (unitOrder[unitA.toLowerCase()] || 99) - (unitOrder[unitB.toLowerCase()] || 99);
+                    }
+                    return numA - numB; // Sort numerically if units are the same
+                }));
+                doseSelect.disabled = false;
+            }
+        }
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+        }
+
+        // Function to load a new case
+        function loadCase(index) {
+            if (index >= cases.length) {
+                endGame();
+                return;
+            }
+
+            const currentCase = cases[index];
+            caseTitleElem.textContent = `Prescrição #${index + 1}`; // Changed to Prescrição
+            caseDescriptionElem.textContent = currentCase.description;
+            
+            clearInputs();
+            // Populate medicine dropdown (all medicines from database)
+            populateSelect(medicineSelect, Object.keys(drugDatabase).sort()); // Sort alphabetically
+            // Populate frequency dropdown (common frequencies)
+            populateSelect(frequencySelect, commonFrequencies.sort()); // Sort alphabetically
+            // Populate route dropdown (common routes, static)
+            populateSelect(routeSelect, commonRoutes.sort()); // Sort alphabetically
+
+            feedbackElem.classList.add('hidden'); // Hide previous feedback
+            prescribeButton.disabled = false;
+            nextCaseButton.disabled = true;
+            updateScoreDisplay();
+        }
+
+        // Function to update score display
+        function updateScoreDisplay() {
+            correctAnswersElem.textContent = correctAnswers;
+            incorrectAnswersElem.textContent = incorrectAnswers;
+            caseCountElem.textContent = `${currentCaseIndex + 1}/${totalCasesCount}`; // Update case count display
+        }
+
+        // Function to evaluate prescription
+        function evaluatePrescription() {
+            const currentCase = cases[currentCaseIndex];
+            const userPrescription = {
+                medicine: medicineSelect.value.trim(),
+                dose: doseSelect.value.trim(),
+                route: routeSelect.value.trim(),
+                frequency: frequencySelect.value.trim()
+            };
+
+            // Basic validation
+            if (!userPrescription.medicine || !userPrescription.dose || !userPrescription.route || !userPrescription.frequency) {
+                showMessage("Por favor, preencha todos os campos da prescrição.", 'incorrect');
+                return;
+            }
+
+            let caseCorrectness = {
+                medicine: false,
+                dose: false,
+                route: false,
+                frequency: false
+            };
+            let feedbackMessages = [];
+            let isPerfectlyCorrect = false; // Tracks if all 4 fields are correct against main or alt
+            let penaltyTriggered = false;
+
+            // Normalize for comparison (lowercase)
+            const correctMed = currentCase.correctPrescription.medicine.toLowerCase();
+            const correctDose = currentCase.correctPrescription.dose.toLowerCase();
+            const correctRoute = currentCase.correctPrescription.route.toLowerCase();
+            const correctFreq = currentCase.correctPrescription.frequency.toLowerCase();
+
+            const userMed = userPrescription.medicine.toLowerCase();
+            const userDose = userPrescription.dose.toLowerCase();
+            const userRoute = userPrescription.route.toLowerCase();
+            const userFreq = userPrescription.frequency.toLowerCase();
+
+            // First, check if the full prescription matches the main correct one
+            if (userMed === correctMed && userDose === correctDose && userRoute === correctRoute && userFreq === correctFreq) {
+                isPerfectlyCorrect = true;
+                feedbackMessages.push("✅ Sua prescrição principal está correta!");
+            } else {
+                // If not main, check if it matches any alternative
+                const matchedAlternative = currentCase.alternatives.some(alt =>
+                    alt.medicine.toLowerCase() === userMed &&
+                    alt.dose.toLowerCase() === userDose &&
+                    alt.route.toLowerCase() === userRoute &&
+                    alt.frequency.toLowerCase() === userFreq
+                );
+                if (matchedAlternative) {
+                    isPerfectlyCorrect = true;
+                    feedbackMessages.push("✅ Sua prescrição corresponde a uma alternativa correta!");
+                }
+            }
+
+            // If not perfectly correct, provide detailed feedback on individual fields
+            if (!isPerfectlyCorrect) {
+                 if (userMed === correctMed || currentCase.alternatives.some(alt => alt.medicine.toLowerCase() === userMed)) {
+                    caseCorrectness.medicine = true;
+                    feedbackMessages.push("✅ Medicamento: Correto.");
+                } else {
+                    feedbackMessages.push(`❌ Medicamento: Incorreto. O medicamento principal seria ${currentCase.correctPrescription.medicine}.`);
+                }
+
+                if (userDose === correctDose || currentCase.alternatives.some(alt => alt.dose.toLowerCase() === userDose)) {
+                    caseCorrectness.dose = true;
+                    feedbackMessages.push("✅ Dose: Correta.");
+                } else {
+                    feedbackMessages.push(`❌ Dose: Incorreta. A dose correta para ${userPrescription.medicine || currentCase.correctPrescription.medicine} seria ${currentCase.correctPrescription.dose}.`);
+                }
+
+                if (userRoute === correctRoute || currentCase.alternatives.some(alt => alt.route.toLowerCase() === userRoute)) {
+                    caseCorrectness.route = true;
+                    feedbackMessages.push("✅ Via: Correta.");
+                } else {
+                    feedbackMessages.push(`❌ Via: Incorreta. A via correta para ${userPrescription.medicine || currentCase.correctPrescription.medicine} seria ${currentCase.correctPrescription.route}.`);
+                }
+
+                if (userFreq === correctFreq || currentCase.alternatives.some(alt => alt.frequency.toLowerCase() === userFreq)) {
+                    caseCorrectness.frequency = true;
+                    feedbackMessages.push("✅ Frequência: Correta.");
+                } else {
+                    feedbackMessages.push(`❌ Frequência: Incorreta. A frequência correta para ${userPrescription.medicine || currentCase.correctPrescription.medicine} seria ${currentCase.correctPrescription.frequency}.`);
+                }
+            }
+
+
+            // Check for specific penalties
+            currentCase.penalties.forEach(penalty => {
+                let triggered = true;
+                for (const key in penalty.trigger) {
+                    const triggerValue = String(penalty.trigger[key]).toLowerCase();
+                    const userValue = String(userPrescription[key]).toLowerCase();
+
+                    if (!userValue.includes(triggerValue)) { // If trigger value is NOT a substring of user input
+                         triggered = false;
+                         break; // Exit inner loop if one trigger condition is not met
+                    }
+                    // Special handling for dose numerical comparison if specific "muito alta/baixa" trigger is present
+                    if (key === "dose" && (triggerValue.includes("muito alta") || triggerValue.includes("muito baixa"))) {
+                        const userNumDose = parseFloat(userPrescription.dose);
+                        const correctNumDose = parseFloat(currentCase.correctPrescription.dose);
+                        if (!isNaN(userNumDose) && !isNaN(correctNumDose)) {
+                            if (triggerValue.includes("muito alta") && userNumDose <= correctNumDose * 1.5) {
+                                triggered = false;
+                            } else if (triggerValue.includes("muito baixa") && userNumDose >= correctNumDose * 0.5) {
+                                triggered = false;
+                            }
+                        } else {
+                            // If doses are not numeric, this specific penalty type shouldn't trigger based on "muito alta/baixa"
+                            triggered = false;
+                        }
+                    }
+                }
+                if (triggered) {
+                    feedbackMessages.push(`⚠️ Atenção: ${penalty.message}`);
+                    penaltyTriggered = true; // Mark that a penalty was triggered
+                }
+            });
+            
+            if (isPerfectlyCorrect && !penaltyTriggered) {
+                correctAnswers++;
+                showMessage(`${currentCase.generalFeedback.correct}\n\n${feedbackMessages.join("\n")}`, 'correct');
+            } else {
+                incorrectAnswers++;
+                showMessage(`${currentCase.generalFeedback.incorrect}\n\n${feedbackMessages.join("\n")}`, 'incorrect');
+                if (!isPerfectlyCorrect) { // Only show detailed field feedback if not perfectly correct initially
+                    feedbackElem.innerHTML += `<br>${feedbackMessages.filter(msg => msg.startsWith("❌")).join("<br>")}`;
+                    feedbackElem.innerHTML += `<br>${feedbackMessages.filter(msg => msg.startsWith("⚠️")).join("<br>")}`;
+                }
+            }
+
+            prescribeButton.disabled = true;
+            nextCaseButton.disabled = false;
+            updateScoreDisplay();
+        }
+
+        // Function to end the game
+        function endGame() {
+            gameScreen.innerHTML = `
+                <div class="game-over-screen">
+                    <h2 class="text-red-500">Fim do Jogo!</h2>
+                    <p>Total de Acertos: <span class="text-yellow-400">${correctAnswers}</span></p>
+                    <p>Total de Erros: <span class="text-yellow-400">${incorrectAnswers}</span></p>
+                    <button id="finalRestartButton" class="button button-restart mt-5">Jogar Novamente</button>
+                </div>
+            `;
+            document.getElementById('finalRestartButton').addEventListener('click', initializeGame);
+        }
+
+        // Function to initialize or restart the game
+        function initializeGame() {
+            currentCaseIndex = 0;
+            correctAnswers = 0; // Reset
+            incorrectAnswers = 0; // Reset
+            totalCasesCount = cases.length; // Set total case count
+            totalMaxScore = totalCasesCount * maxScorePerCase; // This is now more conceptual
+
+            // Shuffle the cases array at the beginning of each game
+            shuffleArray(cases);
+
+            gameScreen.innerHTML = `
+                <h1 class="header">💊 PenseQuiz: Prescrição sob Pressão</h1>
+                <div class="score-display">
+                    Acertos: <span id="correctAnswers">0</span> | Erros: <span id="incorrectAnswers">0</span> | Prescrições: <span id="caseCount">0/${totalCasesCount}</span>
+                </div>
+                <div class="case-card">
+                    <h2 class="text-xl font-semibold mb-3 text-blue-300" id="caseTitle">Prescrição #1</h2>
+                    <p class="case-description" id="caseDescription">Carregando caso...</p>
+                </div>
+                <div class="prescription-form bg-gray-700 p-5 rounded-lg border border-gray-600">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 input-grid">
+                        <div class="input-group">
+                            <label for="medicine">Medicamento:</label>
+                            <select id="medicine" class="form-select">
+                                <option value="">Selecione o Medicamento</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="dose">Dose:</label>
+                            <select id="dose" class="form-select" disabled>
+                                <option value="">Selecione a Dose</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="route">Via:</label>
+                            <select id="route" class="form-select">
+                                <option value="">Selecione a Via</option>
+                                <option value="Oral">Oral</option>
+                                <option value="IV">Intravenosa (IV)</option>
+                                <option value="IM">Intramuscular (IM)</option>
+                                <option value="SC">Subcutânea (SC)</option>
+                                <option value="Tópica">Tópica</option>
+                                <option value="Inalatória">Inalatória</option>
+                                <option value="Retal">Retal</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="frequency">Frequência:</label>
+                            <select id="frequency" class="form-select">
+                                <option value="">Selecione a Frequência</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="prescribeButton" class="button button-prescribe w-full mt-6">Prescrever</button>
+                </div>
+                <div id="feedback" class="feedback-message hidden"></div>
+                <div class="flex flex-col md:flex-row justify-between mt-5 gap-4 flex-buttons">
+                    <button id="restartButton" class="button button-restart flex-1">Reiniciar</button>
+                    <button id="nextCaseButton" class="button button-next flex-1" disabled>Próximo Caso</button>
+                    <button id="referencesButton" class="button button-references flex-1">Referências</button>
+                </div>
+            `;
+            
+            // Re-assign elements after re-rendering gameScreen content
+            caseTitleElem = document.getElementById('caseTitle');
+            caseDescriptionElem = document.getElementById('caseDescription');
+            medicineSelect = document.getElementById('medicine');
+            doseSelect = document.getElementById('dose');
+            routeSelect = document.getElementById('route');
+            frequencySelect = document.getElementById('frequency');
+            prescribeButton = document.getElementById('prescribeButton');
+            nextCaseButton = document.getElementById('nextCaseButton');
+            restartButton = document.getElementById('restartButton');
+            feedbackElem = document.getElementById('feedback');
+            correctAnswersElem = document.getElementById('correctAnswers'); // Get new element
+            incorrectAnswersElem = document.getElementById('incorrectAnswers'); // Get new element
+            caseCountElem = document.getElementById('caseCount'); // Get new element
+            referencesButton = document.getElementById('referencesButton');
+            referencesModal = document.getElementById('referencesModal');
+            closeReferencesModal = document.getElementById('closeReferencesModal');
+            referencesContent = document.getElementById('referencesContent');
+
+            // Re-attach event listeners
+            prescribeButton.addEventListener('click', evaluatePrescription);
+            nextCaseButton.addEventListener('click', () => {
+                currentCaseIndex++;
+                updateScoreDisplay(); // Update display for next case
+                loadCase(currentCaseIndex);
+            });
+            restartButton.addEventListener('click', initializeGame);
+            referencesButton.addEventListener('click', showReferencesModal);
+            closeReferencesModal.addEventListener('click', hideReferencesModal);
+            
+            medicineSelect.addEventListener('change', (event) => {
+                populateDoseOptions(event.target.value);
+            });
+
+            loadCase(currentCaseIndex);
+        }
+
+        const pharmacologyReferences = `
+            <p class="mb-2">Aprofunde seus conhecimentos em Farmacologia e Clínica Médica com estas referências:</p>
+            <ul class="list-disc list-inside space-y-1">
+                <li><strong>GOODMAN & GILMAN'S</strong>: *As Bases Farmacológicas da Terapêutica*. McGraw Hill Education. (Referência clássica em Farmacologia)</li>
+                <li><strong>KATZUNG, Bertram G.; MASTERS, Susan B.; TREVOR, Anthony J.</strong>: *Farmacologia Básica e Clínica*. McGraw Hill Education. (Excelente para Farmacologia clínica)</li>
+                <li><strong>RANG, H. P.; DALE, M. M.; RITTER, J. J.</strong>: *Farmacologia*. Elsevier. (Outra referência abrangente)</li>
+                <li><strong>WHALEN, Karen; FINKEL, Richard; HARVEY, Richard A.</strong>: *Farmacologia Ilustrada*. Artmed. (Abordagem visual para fixação)</li>
+                <li><strong>KASPER, Dennis L.; FAUCI, Anthony S.; HAUSER, Stephen L.; LONGO, Dan L.; JAMESON, J. J. Larry; LOSCALZO, Joseph.</strong>: *Harrison's Principles of Internal Medicine*. McGraw Hill Education. (Referência fundamental em Clínica Médica, com seções extensas sobre tratamento farmacológico)</li>
+                <li><strong>BRAUNWALD, Eugene; et al.</strong>: *Braunwald's Heart Disease: A Textbook of Cardiovascular Medicine*. Saunders Elsevier. (Específico para Cardiologia e tratamentos)</li>
+                <li><strong>GOLDMAN, Lee; AUSIELLO, Dennis.</strong>: *Cecil Medicine*. Saunders Elsevier. (Outra grande obra em Clínica Médica)</li>
+                <li><strong>BRASIL. Ministério da Saúde.</strong>: *Protocolos Clínicos e Diretrizes Terapêuticas (PCDT)*. (Documentos oficiais do SUS, disponíveis online, essenciais para a prática no Brasil)</li>
+            </ul>
+            <p class="mt-4 text-sm text-gray-400">Lembre-se de consultar as edições mais recentes e fontes confiáveis para informações atualizadas.</p>
+        `;
+
+        function showReferencesModal() {
+            referencesContent.innerHTML = pharmacologyReferences;
+            referencesModal.classList.remove('hidden');
+        }
+
+        function hideReferencesModal() {
+            referencesModal.classList.add('hidden');
+        }
+
+
+        // Initial splash screen logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const splashDuration = 2000; // 2 seconds
+
+            setTimeout(() => {
+                splashScreen.style.opacity = '0';
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    gameScreen.classList.remove('hidden');
+                    initializeGame(); // Start the game after splash
+                }, 500); // Allow fadeOut animation to complete
+            }, splashDuration);
+        });
+    </script>
+</body>
+</html>

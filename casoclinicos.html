@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PenseQuiz Casos Clínicos - Um quiz para testar seu raciocínio clínico e diagnóstico.">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="manifest.json">
+  <title>PenseQuiz Casos Clínicos</title>
+  <style>
+    /* Estilo geral do corpo da página - Tema Retro Terminal */
+    body {
+      margin: 0;
+      background-color: #1a1a1a; /* Fundo escuro */
+      color: #00ff00; /* Cor verde neon para o texto padrão */
+      font-family: "Courier New", monospace; /* Fonte monoespaçada clássica */
+      padding: 20px;
+      overflow: hidden; /* Controla a rolagem no corpo da página */
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      box-sizing: border-box;
+      text-shadow: 0 0 3px #00ff00; /* Efeito de brilho no texto */
+    }
+
+    /* Estilo dos cabeçalhos e parágrafos */
+    h1, p {
+      text-align: center;
+      text-shadow: 0 0 8px #00ff00; /* Brilho mais intenso para títulos */
+      margin-bottom: 5px;
+    }
+
+    p {
+      font-size: 0.9em;
+      margin-top: 0;
+    }
+
+    /* Estilo do terminal de exibição das mensagens */
+    #terminal {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      height: 40vh; /* Altura ajustada para acomodar botões extra */
+      overflow-y: auto; /* Adiciona rolagem vertical se o conteúdo exceder */
+      margin-bottom: 10px;
+      border: 2px solid #00ff00; /* Borda sólida verde neon */
+      padding: 15px;
+      background-color: #0d0d0d; /* Fundo do terminal mais escuro */
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.5); /* Sombra externa para o brilho do terminal */
+      scroll-behavior: smooth;
+      position: relative; /* Para o cursor */
+    }
+
+    /* Estilo para cada entrada de log no terminal */
+    .log-entry {
+      margin-bottom: 8px; /* Espaçamento entre as linhas de log */
+      padding: 2px 0;
+      display: block; /* Garante que cada entrada ocupe sua própria linha */
+    }
+
+    /* Cores específicas para mensagens de alerta e diagnóstico */
+    .log-entry.alerta {
+        color: #FF0000; /* Vermelho vibrante para alertas */
+        text-shadow: 0 0 5px #FF0000, 0 0 10px rgba(255, 0, 0, 0.7); /* Brilho vermelho */
+        font-weight: bold;
+    }
+
+    .log-entry.diagnostico {
+        color: #00BFFF; /* Azul profundo para diagnóstico */
+        text-shadow: 0 0 5px #00BFFF, 0 0 10px rgba(0, 191, 255, 0.7); /* Brilho azul */
+        font-weight: bold;
+    }
+
+    .log-entry.input_req { /* Nova cor para INPUT_REQ */
+        color: gold; /* Gold */
+        text-shadow: 0 0 5px gold, 0 0 10px rgba(255, 215, 0, 0.7);
+        font-weight: bold;
+    }
+
+    /* Cursor piscante */
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.1em;
+      background-color: #00ff00;
+      animation: blink-caret 0.75s step-end infinite;
+      vertical-align: text-bottom;
+      margin-left: 2px;
+    }
+
+    @keyframes blink-caret {
+      from, to { background-color: transparent }
+      50% { background-color: #00ff00; }
+    }
+
+    /* Contêiner para os botões de escolha */
+    #choices {
+      display: flex;
+      flex-direction: row; /* Alterado para linha */
+      flex-wrap: wrap; /* Permite que os itens quebrem para a próxima linha */
+      justify-content: center; /* Centraliza os botões na linha */
+      gap: 10px; /* Espaço entre os botões */
+      margin-top: 15px;
+      height: 30vh; /* Altura ajustada para acomodar botões extra */
+      overflow-y: auto; /* Adiciona rolagem vertical se as escolhas excederem */
+      align-items: flex-start; /* Alinha os itens ao topo */
+    }
+
+    /* Estilo dos botões de alternativa */
+    .choice {
+      background: #333; /* Fundo escuro para os botões */
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      font-family: inherit;
+      padding: 12px;
+      cursor: pointer;
+      text-align: center; /* Centraliza o texto dentro do botão */
+      transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+      border-radius: 4px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.5); /* Sombra para efeito 3D */
+      flex: 1 1 calc(50% - 10px); /* Ocupa 50% da largura menos o gap, permite encolher */
+      max-width: calc(50% - 10px); /* Garante que não exceda 50% */
+    }
+
+    /* Ajuste para telas menores para que os botões fiquem em coluna novamente se necessário */
+    @media (max-width: 600px) {
+        .choice {
+            flex: 1 1 100%; /* Ocupa 100% da largura em telas pequenas */
+            max-width: 100%;
+        }
+    }
+
+    /* Efeito ao passar o mouse sobre os botões */
+    .choice:hover {
+      background-color: #444; /* Fundo um pouco mais claro no hover */
+      box-shadow: 0 0 10px #00ff00, 0 0 15px rgba(0, 255, 0, 0.3);
+      transform: translateY(-2px); /* Pequeno levantamento */
+    }
+
+    /* Estilo para botões desabilitados */
+    .choice:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+        background-color: #222;
+    }
+
+    /* Cores de feedback para os botões de escolha */
+    .choice.selected { /* Cor quando o usuário clica */
+        background-color: #FFD700; /* Gold */
+        color: #1a1a1a;
+        box-shadow: 0 0 10px #FFD700;
+    }
+
+    .choice.correct { /* Cor da resposta correta */
+        background-color: #39ff14; /* Verde sucesso */
+        color: #1a1a1a;
+        box-shadow: 0 0 10px #39ff14;
+    }
+
+    .choice.incorrect { /* Cor da resposta incorreta selecionada pelo usuário */
+        background-color: #ff3333; /* Vermelho falha */
+        color: #1a1a1a;
+        box-shadow: 0 0 10px #ff3333;
+    }
+
+
+    /* Estilo do placar de pontuação */
+    #placar {
+      text-align: center;
+      margin: 15px 0;
+      font-size: 1.2em;
+      font-weight: bold;
+      text-shadow: 0 0 6px #00ff00;
+      border: 1px dashed #00ff00;
+      padding: 8px;
+      border-radius: 5px;
+      background-color: #0d0d0d;
+    }
+
+    /* Estilo do rodapé */
+    footer {
+      text-align: center;
+      font-size: 0.8em;
+      margin-top: auto;
+      padding-top: 15px;
+      color: #99ff99; /* Cor mais suave para o rodapé */
+      text-shadow: none;
+    }
+
+    /* Contêiner para os botões de controle (reiniciar, manual, referência) */
+    #control-buttons-container {
+        display: flex; /* Usa flexbox para colocá-los lado a lado */
+        justify-content: center; /* Centraliza os botões no contêiner */
+        gap: 15px; /* Espaço entre os botões */
+        margin-top: 20px; /* Espaçamento acima */
+    }
+
+    /* Estilo dos botões de controle */
+    .control-button {
+      padding: 10px 20px;
+      background-color: #333;
+      border: 2px solid #00ff00;
+      color: #00ff00;
+      font-family: inherit;
+      cursor: pointer;
+      font-size: 1em;
+      box-shadow: 0 0 8px #00ff00, 0 0 15px rgba(0, 255, 0, 0.4);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+      border-radius: 8px;
+      text-transform: uppercase;
+    }
+
+    .control-button:hover {
+      background-color: #555;
+      box-shadow: 0 0 15px #00ff00, 0 0 25px rgba(0, 255, 0, 0.6) inset;
+      transform: scale(1.02);
+    }
+
+    /* Estilo específico para o botão reiniciar (que aparece depois) */
+    #reiniciar {
+      display: none; /* Inicia oculto */
+      margin-top: 20px; /* Separar um pouco dos outros */
+      width: fit-content; /* Ajusta a largura ao conteúdo */
+    }
+
+    /* Estilo do modal (manual e referências) */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+        padding-top: 60px;
+    }
+
+    .modal-content {
+        background-color: #1a1a1a;
+        margin: 5% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 2px solid #00ff00;
+        width: 80%; /* Could be more or less, depending on screen size */
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+        color: #00ff00;
+        text-shadow: 0 0 5px #00ff00;
+        font-family: "Courier New", monospace;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-content h2 {
+        text-align: center;
+        color: #00ff00;
+        text-shadow: 0 0 10px #00ff00;
+        margin-bottom: 20px;
+    }
+
+    .modal-content p, .modal-content ul {
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+
+    .modal-content ul li {
+        margin-left: 20px;
+        list-style-type: '⚡ '; /* Custom bullet point */
+    }
+
+    .close-button {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+        color: #fff;
+        text-decoration: none;
+        cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>PenseQuiz Casos Clínicos</h1>
+  <p>Aplique seu raciocínio médico para desvendar diagnósticos! 🧠</p>
+
+  <div id="terminal">[SISTEMA DE DIAGNÓSTICO CLÍNICO INICIADO] 🔐</div>
+  <div id="placar">✅ Acertos: 0 | ❌ Erros: 0 | 🩺 Casos restantes: 0</div>
+  <div id="choices"></div>
+  
+  <div id="control-buttons-container">
+    <button id="manualBtn" class="control-button" onclick="showManual()">📚 MANUAL DO SISTEMA</button>
+    <button id="referencesBtn" class="control-button" onclick="showReferences()">📑 REFERÊNCIAS BIBLIOGRÁFICAS</button>
+  </div>
+  <button id="reiniciar" class="control-button" onclick="reiniciarQuiz()">🔁 REINICIAR CASOS CLÍNICOS</button>
+
+  <footer>
+    © 2025 PenseQuiz.com — Todos os direitos reservados.<br>
+    Contato: juniosilvasouza@yahoo.com.br | WhatsApp: (92) 98856-2216
+  </footer>
+
+  <div id="manualModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal('manualModal')">&times;</span>
+      <h2>MANUAL DO SISTEMA DE DIAGNÓSTICO CLÍNICO</h2>
+      <p>Bem-vindo, Doutor(a)! Este simulador foi desenvolvido para aprimorar suas habilidades de raciocínio clínico e diagnóstico diferencial.</p>
+      
+      <h3>OBJETIVO DA MISSÃO:</h3>
+      <ul>
+        <li>Analisar cenários de casos clínicos com dados de anamnese, exame físico e, por vezes, exames complementares.</li>
+        <li>Formular o diagnóstico mais provável ou a conduta mais adequada com base nas informações apresentadas.</li>
+        <li>Desenvolver sua capacidade de integração de informações e tomada de decisão clínica.</li>
+      </ul>
+
+      <h3>COMO JOGAR:</h3>
+      <ol>
+        <li><strong>Início:</strong> O sistema iniciará a simulação e apresentará um "Caso Clínico" no terminal.</li>
+        <li><strong>Análise:</strong> Leia o caso e os dados do paciente ("SCAN") cuidadosamente. Identifique sintomas, sinais e dados relevantes.</li>
+        <li><strong>Seleção:</strong> Abaixo do terminal, você encontrará quatro opções. Clique na opção que você considera o diagnóstico mais provável ou a conduta mais indicada.</li>
+        <li><strong>Feedback:</strong> O sistema informará se sua resposta foi "CORRETA" ou "INCORRETA". A alternativa correta será destacada, e uma breve justificativa será fornecida.</li>
+        <li><strong>Progresso:</strong> O placar no topo da tela manterá o controle de seus acertos, erros e o número de casos restantes.</li>
+        <li><strong>Finalização:</strong> A simulação terminará quando todos os casos tiverem sido processados.</li>
+      </ol>
+
+      <h3>PONTUAÇÃO:</h3>
+      <ul>
+        <li>Cada resposta correta aumenta seu contador de "Acertos".</li>
+        <li>Cada resposta incorreta aumenta seu contador de "Erros".</li>
+      </ul>
+
+      <p>Prepare-se para o desafio! A prática leva à excelência no raciocínio clínico. Boa sorte, Operador!</p>
+    </div>
+  </div>
+
+  <div id="referencesModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal('referencesModal')">&times;</span>
+      <h2>REFERÊNCIAS BIBLIOGRÁFICAS</h2>
+      <p>As perguntas e respostas contidas neste PenseQuiz Casos Clínicos foram elaboradas com base em conhecimentos médicos gerais e princípios de raciocínio clínico. As informações apresentadas são para fins educacionais e não devem ser usadas como substituto de aconselhamento médico profissional ou diagnóstico.</p>
+      <p>Para aprofundamento e estudo detalhado, recomenda-se consultar as seguintes fontes fidedignas da literatura médica:</p>
+      <ul>
+        <li>**LIVRO:** Harrison's Principles of Internal Medicine [Ano da Edição], Editora [Nome da Editora].</li>
+        <li>**LIVRO:** Cecil Textbook of Medicine / Goldman's Cecil Medicine [Ano da Edição], Editora [Nome da Editora].</li>
+        <li>**LIVRO:** Robbins Basic Pathology / Robbins and Cotran Pathologic Basis of Disease [Ano da Edição], Editora [Nome da Editora].</li>
+        <li>**GUIAS CLÍNICOS:** Diretrizes e consensos de sociedades médicas (ex: AMB, CFM, sociedades de especialidade).</li>
+        <li>**ARTIGOS CIENTÍFICOS:** Artigos originais e revisões sistemáticas publicados em periódicos médicos revisados por pares.</li>
+        <li>**PLATAFORMAS EDUCAÇÃO MÉDICA:** Recursos online confiáveis para educação médica continuada (ex: UpToDate, Medscape, NEJM).</li>
+      </ul>
+      <p>Lembre-se que este quiz é uma ferramenta de estudo e não substitui o aprofundamento em livros didáticos, o estudo da fisiopatologia e a experiência clínica supervisionada.</p>
+    </div>
+  </div>
+
+  <script>
+    // Referências aos elementos do DOM
+    const terminal = document.getElementById("terminal");
+    const choicesDiv = document.getElementById("choices");
+    const placarDiv = document.getElementById("placar");
+    const botaoReiniciar = document.getElementById("reiniciar");
+    const manualModal = document.getElementById("manualModal");
+    const referencesModal = document.getElementById("referencesModal");
+
+    // Banco de dados de desafios (perguntas) original com casos clínicos
+    // ATENÇÃO: As perguntas foram duplicadas para atingir 200, mas são repetitivas.
+    // Você deve substituir estas perguntas por conteúdo original e diversificado.
+    const desafiosBase = [
+      {
+        "inimigo": "Paciente masculino, 65 anos, tabagista, apresenta dor torácica retroesternal intensa, irradiando para o braço esquerdo, acompanhada de sudorese e náuseas há 30 minutos.",
+        "correta": "Infarto Agudo do Miocárdio",
+        "texto": "A dor torácica retroesternal com irradiação para o braço esquerdo, em paciente idoso e tabagista, é altamente sugestiva de síndrome coronariana aguda, sendo o infarto agudo do miocárdio a principal preocupação.",
+        "ameaca": "CASO CLÍNICO: DOR TORÁCICA INTENSA EM TABAGISTA",
+        "alternativas": ["Crise de ansiedade", "Refluxo gastroesofágico", "Ataque de pânico", "Infarto Agudo do Miocárdio"]
+      },
+      {
+        "inimigo": "Paciente feminina, 30 anos, com febre alta, calafrios, tosse produtiva com expectoração amarelada e dor no peito ao respirar. Exame físico revela estertores crepitantes em base pulmonar direita.",
+        "correta": "Pneumonia",
+        "texto": "A tríade de febre, tosse produtiva e dor pleurítica, juntamente com achados de crepitações à ausculta pulmonar, aponta para um quadro de pneumonia, que requer confirmação por imagem (radiografia de tórax).",
+        "ameaca": "CASO CLÍNICO: FEBRE, TOSSE PRODUTIVA E DOR NO PEITO",
+        "alternativas": ["Resfriado comum", "Bronquite alérgica", "Asma", "Pneumonia"]
+      },
+      {
+        "inimigo": "Criança de 5 anos é trazida à emergência com febre de 39°C, rigidez de nuca, fotofobia e vômitos. Pais relatam irritabilidade e sonolência progressiva.",
+        "correta": "Meningite",
+        "texto": "Febre alta, rigidez de nuca, fotofobia e alteração do nível de consciência são sinais clássicos de meningite, uma emergência médica que exige diagnóstico e tratamento rápidos.",
+        "ameaca": "CASO CLÍNICO PEDIÁTRICO: FEBRE, RIGIDEZ DE NUCA E SONOLÊNCIA",
+        "alternativas": ["Gripe grave", "Encefalite viral", "Caxumba", "Meningite"]
+      },
+      {
+        "inimigo": "Paciente de 45 anos, com histórico de diabetes tipo 2 mal controlado, apresenta sede excessiva, micção frequente, perda de peso inexplicável e visão turva.",
+        "correta": "Hiperglicemia descompensada",
+        "texto": "Poliúria, polidipsia e perda de peso em um diabético mal controlado são sintomas típicos de hiperglicemia acentuada, que pode evoluir para cetoacidose diabética ou estado hiperosmolar hiperglicêmico.",
+        "ameaca": "CASO CLÍNICO: DIABÉTICO COM POLIÚRIA E POLIDIPSIA",
+        "alternativas": ["Infecção urinária", "Hipotireoidismo", "Insuficiência renal crônica", "Hiperglicemia descompensada"]
+      },
+      {
+        "inimigo": "Paciente feminina, 28 anos, relata dor abdominal intensa no quadrante inferior direito, que piorou nas últimas 12 horas. Apresenta náuseas e vômitos. Ao exame, dor à descompressão súbita (sinal de Blumberg positivo).",
+        "correta": "Apendicite aguda",
+        "texto": "A dor no quadrante inferior direito que se intensifica, associada a náuseas, vômitos e Blumberg positivo, é um quadro clássico de apendicite aguda, que geralmente requer intervenção cirúrgica.",
+        "ameaca": "CASO CLÍNICO: DOR ABDOMINAL FID E BLUMBERG POSITIVO",
+        "alternativas": ["Gastroenterite", "Cisto ovariano rompido", "Infecção do trato urinário", "Apendicite aguda"]
+      },
+      {
+        "inimigo": "Paciente masculino, 70 anos, com história de hipertensão e fibrilação atrial, apresenta súbita dificuldade para falar, desvio da comissura labial e fraqueza no braço e perna direitos.",
+        "correta": "Acidente Vascular Encefálico (AVE)",
+        "texto": "O início súbito de déficit neurológico focal (afasia, paresia facial, hemiparesia), especialmente em paciente com fatores de risco como hipertensão e fibrilação atrial, é altamente sugestivo de AVE (derrame).",
+        "ameaca": "CASO CLÍNICO: INÍCIO SÚBITO DE FRAQUEZA E DIFICULDADE PARA FALAR",
+        "alternativas": ["Crise convulsiva", "Enxaqueca com aura", "Hipotensão postural", "Acidente Vascular Encefálico (AVE)"]
+      },
+      {
+        "inimigo": "Paciente de 40 anos apresenta perda de peso não intencional, sudorese noturna, tosse crônica com escarro sanguinolento e febre baixa persistente por mais de 3 semanas. Raio-X de tórax com cavitação apical.",
+        "correta": "Tuberculose pulmonar",
+        "texto": "A combinação de tosse crônica com hemoptise, febre baixa, sudorese noturna, perda de peso e achados radiográficos como cavitação apical são fortes indicativos de tuberculose pulmonar ativa.",
+        "ameaca": "CASO CLÍNICO: TOSSE CRÔNICA, HEMOPTISE E CAVITAÇÃO PULMONAR",
+        "alternativas": ["Bronquite crônica", "Câncer de pulmão", "Asma grave", "Tuberculose pulmonar"]
+      },
+      {
+        "inimigo": "Paciente feminina, 55 anos, com histórico de cálculos biliares, apresenta dor intensa no abdômen superior direito, irradiando para o dorso, após refeição gordurosa. Acompanha náuseas, vômitos e febre.",
+        "correta": "Colecistite aguda",
+        "texto": "A dor em hipocôndrio direito, associada à febre, náuseas e vômitos, desencadeada por refeição gordurosa, em paciente com histórico de colelitíase, sugere colecistite aguda (inflamação da vesícula biliar).",
+        "ameaca": "CASO CLÍNICO: DOR ABDOMINAL SUPERIOR PÓS-REFEIÇÃO GORDUROSA",
+        "alternativas": ["Pancreatite aguda", "Úlcera péptica", "Gastroenterite viral", "Colecistite aguda"]
+      },
+      {
+        "inimigo": "Recém-nascido, 3 dias de vida, apresenta icterícia (pele e olhos amarelados) que progrediu rapidamente após as primeiras 24 horas. Exames revelam bilirrubina indireta muito elevada.",
+        "correta": "Icterícia neonatal patológica (provável hemolítica)",
+        "texto": "A icterícia que surge antes de 24 horas de vida ou que progride rapidamente com níveis muito altos de bilirrubina indireta é considerada patológica e requer investigação, sendo a doença hemolítica do recém-nascido uma causa importante.",
+        "ameaca": "CASO CLÍNICO PEDIÁTRICO: ICTERÍCIA PRECOCE E ELEVADA EM RN",
+        "alternativas": ["Icterícia fisiológica", "Atresia biliar", "Síndrome de Gilbert", "Icterícia neonatal patológica (provável hemolítica)"]
+      },
+      {
+        "inimigo": "Paciente de 25 anos, com histórico de uso de drogas injetáveis, apresenta febre, calafrios, sopro cardíaco novo e lesões eritematosas e dolorosas nas polpas digitais (nódulos de Osler).",
+        "correta": "Endocardite infecciosa",
+        "texto": "Febre em paciente com histórico de uso de drogas injetáveis, associada a sopro cardíaco novo e sinais periféricos como nódulos de Osler, são achados clássicos de endocardite infecciosa, uma condição grave que afeta as válvulas cardíacas.",
+        "ameaca": "CASO CLÍNICO: FEBRE, SOPRO CARDÍACO E NÓDULOS EM USUÁRIO DE DROGAS INJETÁVEIS",
+        "alternativas": ["Gripe comum", "Miocardite viral", "Pericardite", "Endocardite infecciosa"]
+      }
+    ];
+
+    // Duplica as perguntas base até atingir 200 (ou mais, se as perguntas base já forem muitas)
+    const desafiosOriginais = [];
+    while (desafiosOriginais.length < 200) {
+        desafiosOriginais.push(...desafiosBase);
+    }
+    // Corta o array para exatamente 200, se necessário
+    desafiosOriginais.splice(200);
+
+
+    // Variáveis de estado do jogo
+    let desafios = [];
+    let index = 0;
+    let acertos = 0;
+    let erros = 0;
+    let maxAmeacas = 0;
+    let isTyping = false; // Flag para controlar o efeito de digitação
+
+    // Função para atualizar o placar na tela
+    function atualizarPlacar() {
+      const restantes = Math.max(0, maxAmeacas - index);
+      placarDiv.textContent = `✅ ACERTOS: ${acertos} | ❌ ERROS: ${erros} | 🩺 CASOS RESTANTES: ${restantes}`;
+    }
+
+    // Função para simular o efeito de digitação no terminal
+    function typeWriterEffect(element, text, speed = 30) {
+      return new Promise(resolve => {
+        let i = 0;
+        element.textContent = ''; // Limpa o conteúdo antes de digitar
+        const cursorSpan = document.createElement('span');
+        cursorSpan.classList.add('cursor');
+        element.appendChild(cursorSpan); // Adiciona o cursor
+
+        function type() {
+          if (i < text.length) {
+            element.textContent = text.substring(0, i + 1);
+            element.appendChild(cursorSpan); // Garante que o cursor esteja sempre no final
+            i++;
+            setTimeout(type, speed);
+          } else {
+            cursorSpan.remove(); // Remove o cursor ao finalizar a digitação
+            resolve();
+          }
+        }
+        type();
+      });
+    }
+
+    // Função para imprimir texto no terminal com efeito de digitação
+    async function printTerminal(text, type = 'normal') {
+        isTyping = true;
+        const entry = document.createElement('div');
+        entry.classList.add('log-entry');
+
+        let color = '#00ff00'; // Cor padrão verde neon
+        let bold = false;
+        let prefix = '[SISTEMA]: ';
+
+        if (type === 'alerta') {
+            entry.classList.add('alerta');
+            prefix = '[ALERTA CLÍNICO] CASO: ';
+        } else if (type === 'diagnostico') { // Usado para feedback de erro sobre a persistência
+            entry.classList.add('diagnostico');
+            prefix = '[FEEDBACK]: ';
+        } else if (type === 'sucesso') {
+            color = '#39ff14'; // Verde sucesso
+            bold = true;
+            prefix = '✅ [STATUS: CORRETO]: ';
+        } else if (type === 'falha') {
+            color = '#ff3333'; // Vermelho falha
+            bold = true;
+            prefix = '❌ [STATUS: INCORRETO]: ';
+        } else if (type === 'input_req') {
+            entry.classList.add('input_req'); // Adiciona a classe para mudar a cor via CSS
+            prefix = '[INPUT_REQ]: ';
+        } else if (type === 'cmd_input') {
+            color = '#00ffff'; // Ciano
+            prefix = '[PROCESSANDO]: ';
+        } else if (type === 'log_data') {
+            color = '#a0a0a0'; // Cinza
+            prefix = '[INFO]: ';
+        } else if (type === 'final_message') {
+            color = '#00ff00'; // Verde neon para mensagem final
+            bold = true;
+            prefix = ''; // Sem prefixo para a mensagem final
+        } else if (type === 'criterio') {
+            color = '#ffd700'; // Amarelo
+            prefix = '[CENÁRIO]: ';
+        }
+
+
+        entry.style.color = color; // Esta linha pode ser redundante se a classe CSS já definir a cor
+        if (bold) {
+            entry.style.fontWeight = 'bold';
+        }
+        terminal.appendChild(entry);
+        await typeWriterEffect(entry, `${prefix}${text}`);
+        terminal.scrollTop = terminal.scrollHeight;
+        isTyping = false;
+    }
+
+    // Função para exibir um novo desafio
+    async function novoDesafio() {
+      choicesDiv.innerHTML = ""; // Limpa as escolhas anteriores
+      if (index >= desafios.length) {
+        finalizarQuiz();
+        return;
+      }
+      const desafio = desafios[index];
+      await printTerminal(`${desafio.inimigo} 🩺`, 'alerta');
+      await printTerminal(desafio.ameaca, 'criterio');
+      await printTerminal("SELECIONE A RESPOSTA CORRETA.", 'input_req');
+
+      // Embaralha as alternativas para cada pergunta
+      const alternativasEmbaralhadas = shuffle([...desafio.alternativas]);
+
+      // Adiciona os botões de escolha APÓS as mensagens do terminal
+      alternativasEmbaralhadas.forEach((alt) => {
+        const btn = document.createElement("button");
+        btn.classList.add("choice");
+        btn.textContent = alt;
+        btn.onclick = () => verificarResposta(alt, btn); // Passa o botão clicado
+        choicesDiv.appendChild(btn);
+      });
+
+      atualizarPlacar();
+    }
+
+    // Função para verificar a resposta do jogador
+    async function verificarResposta(resposta, clickedButton) {
+      // Desabilita todos os botões e aplica estilo "selected" ao clicado
+      const buttons = choicesDiv.getElementsByTagName('button');
+      for(let btn of buttons) {
+        btn.disabled = true;
+        btn.style.cursor = 'not-allowed';
+      }
+      clickedButton.classList.add('selected'); // Adiciona classe para feedback de seleção
+
+      const desafioAtual = desafios[index];
+      await printTerminal(`PROCESSANDO RESPOSTA: '${resposta}'...`, 'cmd_input');
+
+      if (resposta === desafioAtual.correta) {
+        await printTerminal('RESPOSTA CORRETA! DIAGNÓSTICO ACERTADO.', 'sucesso');
+        await printTerminal(desafioAtual.texto, 'log_data');
+        acertos++;
+        clickedButton.classList.remove('selected'); // Remove selected
+        clickedButton.classList.add('correct'); // Adiciona correct
+      } else {
+        await printTerminal('RESPOSTA INCORRETA. REAVALIAR DIAGNÓSTICO.', 'falha');
+        await printTerminal(`A questão sobre '${desafioAtual.inimigo}' foi respondida incorretamente.`, 'diagnostico');
+        erros++;
+        clickedButton.classList.remove('selected'); // Remove selected
+        clickedButton.classList.add('incorrect'); // Adiciona incorrect
+
+        // Encontra e destaca a resposta correta
+        for(let btn of buttons) {
+            if (btn.textContent === desafioAtual.correta) {
+                btn.classList.add('correct');
+            }
+        }
+      }
+
+      index++;
+      atualizarPlacar(); // Atualiza o placar imediatamente
+      setTimeout(async () => {
+        if (index < desafios.length) {
+          await novoDesafio();
+        } else {
+          await finalizarQuiz();
+        }
+      }, 2000); // Tempo de espera após a resposta antes da próxima ação
+    }
+    
+    // Função para finalizar o quiz e exibir o resultado
+    async function finalizarQuiz() {
+      choicesDiv.innerHTML = "";
+      await printTerminal("RELATÓRIO DE DIAGNÓSTICO CLÍNICO CONCLUÍDO.", 'normal');
+      const finalMessage = `Fim dos testes! Você acertou ${acertos} de ${maxAmeacas} casos.`;
+      await printTerminal(finalMessage, 'final_message');
+      botaoReiniciar.style.display = "block";
+    }
+
+    // Função para reiniciar o quiz
+    async function reiniciarQuiz() {
+      index = 0;
+      acertos = 0;
+      erros = 0;
+      terminal.innerHTML = ""; // Limpa o terminal completamente
+      await printTerminal("SISTEMA DE DIAGNÓSTICO CLÍNICO INICIADO", 'alerta');
+      botaoReiniciar.style.display = "none";
+      desafios = shuffle([...desafiosOriginais]);
+      maxAmeacas = desafios.length; // Atualiza o total de anomalias
+      setTimeout(async () => {
+        await novoDesafio();
+      }, 1000); // Tempo de espera antes do primeiro desafio
+    }
+
+    // Função para embaralhar um array (algoritmo de Fisher-Yates)
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[i], array[j]];
+      }
+      return array;
+    }
+
+    // Funções para abrir e fechar modais
+    function showManual() {
+      manualModal.style.display = "block";
+    }
+
+    function showReferences() {
+      referencesModal.style.display = "block";
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = "none";
+    }
+
+    // Fechar modal clicando fora dele
+    window.onclick = function(event) {
+      if (event.target == manualModal) {
+        manualModal.style.display = "none";
+      }
+      if (event.target == referencesModal) {
+        referencesModal.style.display = "none";
+      }
+    }
+
+    // Inicia o quiz ao carregar a página
+    window.onload = () => {
+      // O código de registro do Service Worker foi removido para evitar o erro de protocolo.
+      // Se você deseja as funcionalidades de PWA, certifique-se de que o ambiente de execução
+      // suporte o registro de Service Workers e reative o código abaixo:
+      /*
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registrado com sucesso:', registration);
+          })
+          .catch(error => {
+            console.error('Falha ao registrar o Service Worker:', error);
+          });
+      }
+      */
+      reiniciarQuiz();
+    };
+  </script>
+</body>
+</html>
