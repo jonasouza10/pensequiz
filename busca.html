@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" type="image/png" href="iconepq.png">
+    <title>PenseQuiz - Buscador</title>
+    <!-- Inclui o CDN do Tailwind CSS para estilização moderna e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Link para o arquivo manifest.json, essencial para a funcionalidade PWA -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Adiciona a fonte Inter do Google Fonts para o corpo do texto -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Adiciona a fonte Montserrat do Google Fonts para o título -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* Define a fonte Inter para todo o corpo da página */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Define a fonte Montserrat especificamente para o título h1 */
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        /* Estilo personalizado para o scrollbar (opcional, para visualização) */
+        #chat::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat::-webkit-scrollbar-track {
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+        #chat::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 10px;
+        }
+        #chat::-webkit-scrollbar-thumb:hover {
+            background: #00e077;
+        }
+        /* Estilo para o bloco de resultado de busca simulado ou link interno */
+        .search-result-block {
+            background-color: #1a1a1a; /* Fundo mais escuro para o bloco */
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px; /* Espaçamento da mensagem principal */
+            border: 1px solid #00ff8840; /* Borda sutil verde */
+            display: block; /* Garante que o link ocupe seu próprio espaço */
+            text-decoration: none; /* Remove sublinhado padrão do link */
+            color: inherit; /* Herda a cor do texto pai */
+        }
+        .search-result-block:hover {
+            background-color: #2a2a2a; /* Mudar cor ao passar o mouse */
+            transform: translateY(-1px); /* Pequeno efeito de elevação */
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .search-result-block h4 {
+            color: #88ff88; /* Cor mais clara para o título do resultado */
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1em;
+        }
+        .search-result-block .url {
+            color: #99aab5; /* Cor para a URL */
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            word-break: break-all; /* Ajuda a quebrar URLs longas */
+        }
+        .search-result-block .description {
+            color: #b0c0c0; /* Cor para a descrição */
+            font-size: 0.9em;
+        }
+        /* Estilo para o botão de limpar chat */
+        #clearChatButton {
+            background-color: #dc3545; /* Cor vermelha para o botão de limpar */
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 10px; /* Espaçamento acima do botão */
+            align-self: center; /* Centraliza o botão dentro do flexbox */
+        }
+        #clearChatButton:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-50 flex justify-center items-center min-h-screen p-4 font-sans antialiased">
+    <div class="chat-container bg-gray-800 rounded-xl shadow-xl w-full max-w-lg p-6 flex flex-col space-y-4">
+        <h1 class="text-3xl font-bold text-center text-green-400 mb-4">PenseQuiz Busca</h1>
+        
+        <!-- Área de exibição das mensagens do chat -->
+        <div id="chat" class="flex-grow h-80 bg-gray-700 p-4 rounded-lg overflow-y-auto custom-scrollbar flex flex-col space-y-3">
+            <!-- As mensagens serão adicionadas aqui pelo JavaScript -->
+        </div>
+
+        <!-- Botão para limpar as buscas -->
+        <button id="clearChatButton" class="self-end">Limpar Buscas</button>
+
+        <!-- Campo de entrada e botão de envio -->
+        <div class="input-area flex gap-2">
+            <input type="text" id="userInput" placeholder="Digite sua pergunta..." 
+                   list="searchSuggestions"  
+                   class="flex-grow p-3 rounded-lg bg-gray-600 text-white placeholder-gray-400 
+                          focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base" />
+            
+            <!-- Datalist para auto-completar as palavras -->
+            <datalist id="searchSuggestions">
+                <!-- As opções serão populadas pelo JavaScript ou podem ser adicionadas diretamente aqui -->
+                <option value="HTML"></option>
+                <option value="CSS"></option>
+                <option value="JavaScript"></option>
+                <option value="programação"></option>
+                <option value="desenvolvimento web"></option>
+                <option value="Amazonino Mendes"></option>
+                <option value="Maria Madalena"></option>
+                <option value="história"></option>
+                <option value="ciência"></option>
+                <option value="matemática"></option>
+                <option value="física"></option>
+                <option value="química"></option>
+                <option value="biologia"></option>
+                <option value="astronomia"></option>
+                <option value="literatura"></option>
+                <option value="arte"></option>
+                <option value="música"></option>
+                <option value="filmes"></option>
+                <option value="jogos"></option>
+                <option value="esportes"></option>
+                <option value="notícias"></option>
+                <option value="eventos"></option>
+                <option value="receitas"></option>
+                <option value="saúde"></option>
+                <option value="bem-estar"></option>
+                <option value="tecnologia"></option>
+                <option value="Google"></option>
+                <option value="Bing"></option>
+                <option value="IA"></option>
+                <option value="chatgpt"></option>
+                <option value="Brasil"></option>
+                <option value="Manaus"></option>
+            </datalist>
+
+            <button id="sendButton" 
+                    class="px-5 py-3 bg-green-500 text-gray-900 font-semibold rounded-lg 
+                           hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-700 
+                           focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors duration-200 ease-in-out text-base">
+                Pesquisar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // PWA: Registro do Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const userInput = document.getElementById('userInput');
+            const sendButton = document.getElementById('sendButton');
+            const chatDisplay = document.getElementById('chat');
+            const clearChatButton = document.getElementById('clearChatButton');
+
+            // --- Função para cálculo de distância Levenshtein (para corretor básico) ---
+            function levenshteinDistance(s1, s2) {
+                s1 = s1.toLowerCase();
+                s2 = s2.toLowerCase();
+
+                const costs = new Array();
+                for (let i = 0; i <= s1.length; i++) {
+                    let lastValue = i;
+                    for (let j = 0; j <= s2.length; j++) {
+                        if (i === 0)
+                            costs[j] = j;
+                        else {
+                            if (j > 0) {
+                                let newValue = costs[j - 1];
+                                if (s1.charAt(i - 1) !== s2.charAt(j - 1))
+                                    newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                                costs[j - 1] = lastValue;
+                                lastValue = newValue;
+                            }
+                        }
+                    }
+                    if (i > 0)
+                        costs[s2.length] = lastValue;
+                }
+                return costs[s2.length];
+            }
+
+            // --- Lista de termos comuns para sugestão de correção ---
+            // Esta lista deve conter termos que você espera que o usuário pesquise,
+            // em sua forma correta. Use para a sugestão "Você quis dizer?".
+            const commonSearchTerms = [
+                "html", "css", "javascript", "programação", "desenvolvimento web",
+                "amazonino mendes", "maria madalena", "história", "ciência",
+                "matemática", "física", "química", "biologia", "astronomia",
+                "literatura", "arte", "música", "filmes", "jogos", "esportes",
+                "notícias", "eventos", "receitas", "saúde", "bem-estar", "tecnologia",
+                "google", "bing", "inteligência artificial", "chatbot", "react", "python",
+                "brasil", "manaus", "amazônia", "politica", "economia"
+            ];
+
+            /**
+             * Adiciona uma mensagem ao display do chat.
+             * @param {string} sender O remetente da mensagem ('Você' ou 'PenseQuiz').
+             * @param {string} text O texto principal da mensagem.
+             * @param {string|null} htmlContent O conteúdo HTML adicional (ex: bloco de busca).
+             */
+            function addMessageToChat(sender, text, htmlContent = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('p-3', 'rounded-lg', 'max-w-[80%]', 'break-words', 'shadow-md', 'text-base');
+
+                if (sender === 'Você') {
+                    messageDiv.classList.add('bg-blue-600', 'self-end', 'text-white');
+                    messageDiv.innerHTML = `<strong>Você:</strong> ${text}`;
+                } else {
+                    messageDiv.classList.add('bg-gray-600', 'self-start', 'text-gray-200');
+                    let messageHtml = `<strong>PenseQuiz:</strong> ${text}`;
+                    if (htmlContent) {
+                        messageHtml += htmlContent; // Adiciona o conteúdo HTML extra
+                    }
+                    messageDiv.innerHTML = messageHtml;
+                }
+                chatDisplay.appendChild(messageDiv);
+                chatDisplay.scrollTop = chatDisplay.scrollHeight;
+            }
+
+            /**
+             * Gera a resposta do PenseQuiz: sempre pesquisa no Google e pode sugerir correção.
+             * @param {string} userQuery A pergunta do usuário.
+             */
+            function generateBotResponse(userQuery) {
+                const lowerCaseQuery = userQuery.toLowerCase();
+                const encodedQuery = encodeURIComponent(userQuery);
+                const googleSearchLink = `https://www.google.com/search?q=${encodedQuery}`;
+                
+                let responseText = "Aqui está sua resposta no Google:"; // Texto da mensagem padrão
+
+                // --- Lógica de Sugestão de Correção (Corretor Automático Básico) ---
+                let bestMatch = null;
+                let minDistance = Infinity;
+                const typoTolerance = 2; // Número máximo de erros para sugerir correção
+
+                // Verifica se a query é uma única palavra para evitar sugestões em frases complexas
+                const queryWords = lowerCaseQuery.split(' ');
+                if (queryWords.length === 1) {
+                    for (const term of commonSearchTerms) {
+                        const distance = levenshteinDistance(lowerCaseQuery, term.toLowerCase());
+                        // Se a distância for pequena (ex: 1 ou 2 erros) e não for uma correspondência exata
+                        if (distance <= typoTolerance && distance > 0 && distance < minDistance) {
+                            minDistance = distance;
+                            bestMatch = term;
+                        }
+                    }
+                }
+
+                if (bestMatch) {
+                    responseText = `Você quis dizer "${bestMatch}"? Aqui está a pesquisa para "${userQuery}" no Google:`;
+                }
+                // --- Fim da Lógica de Sugestão ---
+                
+                // O HTML para o bloco de resultado de busca é sempre gerado
+                const simulatedSearchResultHtml = `
+                    <a href="${googleSearchLink}" target="_blank" rel="noopener noreferrer" class="search-result-block">
+                        <h4>Pesquisa por: "${userQuery}"</h4>
+                        <div class="url">${googleSearchLink}</div>
+                        <p class="description">Clique para ver os resultados completos no Google.</p>
+                    </a>
+                `;
+                
+                const thinkingMessage = document.createElement('div');
+                thinkingMessage.classList.add('self-start', 'text-gray-400', 'text-sm', 'italic');
+                thinkingMessage.innerHTML = 'PenseQuiz: Digitanto...';
+                chatDisplay.appendChild(thinkingMessage);
+                chatDisplay.scrollTop = chatDisplay.scrollHeight;
+
+                setTimeout(() => {
+                    chatDisplay.removeChild(thinkingMessage);
+                    // Adiciona a mensagem do PenseQuiz e o bloco de busca simulado
+                    addMessageToChat('PenseQuiz', responseText, simulatedSearchResultHtml);
+                }, 800);
+            }
+
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (!message) return;
+
+                addMessageToChat('Você', message);
+                userInput.value = '';
+
+                generateBotResponse(message);
+            }
+
+            // Função para limpar as buscas
+            function clearChat() {
+                chatDisplay.innerHTML = '';
+                addMessageToChat('PenseQuiz', 'Histórico de buscas limpo. Como posso ajudar agora?');
+            }
+
+            // Event listeners
+            sendButton.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            clearChatButton.addEventListener('click', clearChat); // Event listener para o botão "Limpar Buscas"
+        });
+    </script>
+</body>
+</html>
