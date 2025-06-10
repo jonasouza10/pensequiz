@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="iconepq.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PensQuiz - Jogo de Perguntas e Respostas</title>
@@ -13,223 +13,373 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PenseQuiz Portal - Escolha seu desafio de conhecimento. Quiz sobre Atenção Primária da Saúde, Termos Técnicos, Termos Técnicos em Medicina e EGC.">
+  <meta name="theme-color" content="#1a202c"> <!-- Cor do tema escura -->
+  <link rel="manifest" href="manifest.json">
+  <title>PenseQuiz - Portal de Conhecimento</title>
+  <style>
+    /* Estilo geral do corpo da página - Tema Escuro Moderno */
+    body {
+      margin: 0;
+      background-color: #1a202c; /* Fundo azul-escuro quase preto */
+      color: #e2e8f0; /* Cor de texto claro (light gray) */
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif; /* Fonte moderna e legível */
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Centraliza horizontalmente */
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
 
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Raleway', sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            color: #333;
-            position: relative; /* Necessário para posicionar o botão de música */
+    /* Esconde o conteúdo principal inicialmente */
+    #main-content {
+      display: none;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      display: flex; /* Para flexbox interno */
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start; /* Alinha o conteúdo ao topo do main-content */
+      flex-grow: 1; /* Permite que ocupe espaço disponível */
+      width: 100%; /* Garante que ocupe a largura disponível */
+    }
+
+    /* Estilo do terminal de boas-vindas para CENTRALIZAR na tela */
+    #welcome-terminal {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      font-size: 1.8em; /* Aumenta um pouco mais para visibilidade */
+      height: 100vh; /* Ocupa a altura total da viewport */
+      width: 100vw; /* Ocupa a largura total da viewport */
+      position: fixed; /* Fixa na tela */
+      top: 0;
+      left: 0;
+      z-index: 1000; /* Garante que fique por cima de tudo */
+      background-color: #1a202c; /* Garante que cubra o fundo */
+      display: flex;
+      align-items: center; /* Centraliza verticalmente */
+      justify-content: center; /* Centraliza horizontalmente */
+      text-align: center;
+      color: #4fd1c5; /* Ciano vibrante para a mensagem */
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(79, 209, 197, 0.8); /* Sombra de brilho ciano mais intensa */
+      transition: opacity 0.5s ease-out; /* Para o fade-out suave */
+    }
+
+    /* Estilo dos cabeçalhos e parágrafos */
+    h1, p {
+      text-align: center;
+      margin-bottom: 5px;
+      color: #e2e8f0; /* Cor de texto claro */
+    }
+
+    h1 {
+      font-size: 3em; /* Título maior e mais impactante */
+      margin-bottom: 25px;
+      font-weight: 700; /* Mais negrito */
+      letter-spacing: -0.5px; /* Ajuste para melhor leitura */
+      text-shadow: 0 0 10px rgba(99, 179, 237, 0.7); /* Brilho sutil azul */
+    }
+
+   p {
+  font-size: 1.2em;
+  margin: 0 auto 40px auto; /* Sets top margin to 0, left/right to auto (for centering), and bottom to 40px */
+  color: #a0aec0; /* Cor mais suave para o parágrafo */
+  max-width: 700px;
+  text-align: center;
+	}
+
+    /* Contêiner principal para o conteúdo do portal */
+    .portal-container {
+      background-color: #2d3748; /* Fundo mais escuro para o container */
+      border-radius: 12px; /* Cantos mais arredondados */
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); /* Sombra mais profunda */
+      border: 1px solid #4a5568; /* Borda sutil */
+      padding: 40px;
+      width: 90%;
+      max-width: 800px; /* Largura máxima para o conteúdo principal */
+      text-align: center;
+      animation: fadeInScale 1s ease-out forwards; /* Animação de entrada diferente */
+      margin-bottom: 20px; /* Adiciona margem inferior para separar do footer se houver rolagem */
+    }
+
+    /* Estilo do contêiner dos botões de quiz */
+    #quiz-selection {
+      display: grid; /* Usando Grid para flexibilidade */
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Colunas responsivas */
+      gap: 20px; /* Espaço entre os botões */
+      margin-top: 30px;
+    }
+
+    /* Estilo dos botões de quiz */
+    .quiz-button {
+      padding: 18px 25px;
+      background: linear-gradient(135deg, #63b3ed 0%, #4299e1 100%); /* Gradiente de azul para botões */
+      color: #ffffff;
+      font-family: inherit;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: 600; /* Mais negrito */
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra para profundidade */
+      transition: all 0.3s ease;
+      text-decoration: none; /* Remover sublinhado de link */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px; /* Espaço entre ícone e texto */
+    }
+
+    .quiz-button:hover {
+      background: linear-gradient(135deg, #4299e1 0%, #63b3ed 100%); /* Inverte o gradiente no hover */
+      transform: translateY(-5px) scale(1.02); /* Leve levantamento e zoom */
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 179, 237, 0.7); /* Sombra mais intensa com brilho */
+    }
+
+    .quiz-button svg {
+        width: 24px;
+        height: 24px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* Estilo do rodapé */
+    footer {
+      text-align: center;
+      font-size: 0.85em;
+      padding-top: 25px;
+      color: #718096; /* Cor mais suave para o rodapé */
+      text-shadow: none;
+      margin-top: auto; /* Empurra o rodapé para o final da página */
+    }
+
+    /* Cursor piscante */
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.1em;
+      background-color: #4fd1c5; /* Cor do cursor alinhada com o tema */
+      animation: blink-caret 0.75s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink-caret {
+      from, to { background-color: transparent }
+      50% { background-color: #4fd1c5; }
+    }
+
+    /* Animação de entrada para o portal-container */
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
         }
-        .container {
-            text-align: center;
-            padding: 20px;
-            background-color: #ffffff;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-            border-radius: 16px;
-            width: 90%;
-            max-width: 500px;
+        to {
+            opacity: 1;
+            transform: scale(1);
         }
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
+    }
+
+    /* Media query para telas menores */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 2.2em;
         }
-        .logo-container img {
-            width: 300px;
-            height: auto;
+        p {
+            font-size: 1em;
+            margin-bottom: 30px;
         }
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .portal-container {
+            padding: 25px;
+            width: 95%;
         }
-        .button {
-            background-color: #0066cc;
-            color: #ffffff;
-            padding: 15px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            text-decoration: none;
+        #quiz-selection {
+            grid-template-columns: 1fr; /* Uma coluna em telas pequenas */
         }
-        .button:hover {
-            background-color: #004da3;
-            transform: scale(1.05);
+        .quiz-button {
+            font-size: 1em;
+            padding: 15px 20px;
         }
-        .footer {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #777;
+        #welcome-terminal {
+            font-size: 1.4em; /* Ajusta o tamanho da fonte para telas menores */
+            height: 100vh; /* Mantém a altura total */
+            width: 100vw; /* Mantém a largura total */
+            padding: 0 10px;
         }
-        /* Estilos para o contêiner do botão de música e texto */
-        .music-control {
-            position: absolute;
-            top: 10px; /* Ajustado para dar espaço ao texto */
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 1000;
-        }
-        /* Estilos para o botão de música */
-        .music-button {
-            background-color: #28a745; /* Cor verde para destaque */
-            color: #ffffff;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 50%; /* Torna o botão redondo */
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: background-color 0.3s, transform 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px; /* Largura e altura para um botão redondo */
-            height: 50px;
-            margin-bottom: 5px; /* Espaço entre o botão e o texto */
-        }
-        .music-button:hover {
-            background-color: #218838;
-            transform: scale(1.1);
-        }
-        /* Estilos para o ícone dentro do botão */
-        .music-button i {
-            margin: 0;
-        }
-        /* Estilos para o texto "Louvor" */
-        .music-label {
-            color: #555;
-            font-size: 0.85rem;
-            font-weight: bold;
-            text-align: center;
-        }
-    </style>
+    
+	
+	
+	}
+	
+  </style>
 </head>
 <body>
-    <div class="music-control">
-        <button id="musicToggleButton" class="music-button">
-            <i class="fas fa-play"></i> </button>
-        <span class="music-label">Web Rádio<br> PenseQuiz</span>
+  <!-- Terminal para a mensagem de boas-vindas inicial -->
+  <div id="welcome-terminal"></div>
+
+  <!-- Conteúdo principal do portal, inicialmente oculto -->
+  <div id="main-content">
+    <div class="portal-container">
+        <h1>PenseQuiz OS</h1>
+        <p>Selecione um dos módulos para iniciar o seu desafio de conhecimento e testar suas habilidades.</p>
+        <div id="quiz-selection">
+          <a href="fe.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+           FÉ
+          </a>
+          <a href="passa.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M12 6.042A8.967 8.967 0 006 3.75c-1.079 0-2.157.068-3.22.198a2.25 2.25 0 00-.94 3.07l1.902 3.259c.591 1.015.591 2.316 0 3.331L1.84 17.03c-.353.64-.061 1.474.636 1.87c1.436.879 3.123 1.402 4.907 1.402 2.279 0 4.502-.6 6.32-1.628A11.952 11.952 0 0012 21.75c1.079 0 2.157-.068 3.22-.198a2.25 2.25 0 00.94-3.07l-1.902-3.259a3.75 3.75 0 010-3.331l1.902-3.259a2.25 2.25 0 00-.94-3.07C15.902 3.35 13.679 2.75 11.4 2.75A8.967 8.967 0 0012 6.042z" />
+            </svg>
+           PASSATEMPO
+          </a>
+          <a href="enem205.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5H16.5m0 0v-2.25m0 2.25L2.25 12c.036 1.076.155 2.129.352 3.14m-.352-3.14A2.25 2.25 0 005.42 16.636L12 21.75l7.02-6.008c.55-.471.85-.776.85-1.564z" />
+            </svg>
+            ENEM
+          </a>
+          <a href="saude1.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0v2.25" />
+              <path d="M12 7.5c-1.657 0-3 1.343-3 3v2.25c0 1.657 1.343 3 3 3h3c1.657 0 3-1.343 3-3V10.5c0-1.657-1.343-3-3-3h-3z" />
+            </svg>
+            CIÊNCIA DA SAÚDE
+          </a>
+          <a href="conc.1.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M12 7.5L3 17.25h18L12 7.5z" />
+              <path d="M12 7.5v-6" />
+            </svg>
+            CONCURSOS 
+          </a>
+          <a href="auto.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M12 11.25c-3.146 0-5.75-2.604-5.75-5.75s2.604-5.75 5.75-5.75 5.75 2.604 5.75 5.75-2.604 5.75-5.75 5.75z" />
+              <path d="M12 11.25V21" />
+              <path d="M15.75 14.25h4.5a.75.75 0 00.75-.75V8.25a.75.75 0 00-.75-.75h-4.5zM3.75 8.25V21" />
+            </svg>
+            AUTOESCOLA
+          </a>
+          <a href="eletri.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M12 7.5V18m0 0l-3-3m3 3l3-3m-9 3H3.75A2.25 2.25 0 011.5 18.75V11.25c0-1.24 1.01-2.25 2.25-2.25h16.5c1.24 0 2.25 1.01 2.25 2.25v7.5c0 1.24-1.01 2.25-2.25 2.25H12" />
+            </svg>
+            ELETRICIDADE
+          </a>
+          <a href="eletron1.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+           ELETRÔNICA
+          </a>
+          <a href="meccarro1.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5H16.5m0 0v-2.25m0 2.25L2.25 12c.036 1.076.155 2.129.352 3.14m-.352-3.14A2.25 2.25 0 005.42 16.636L12 21.75l7.02-6.008c.55-.471.85-.776.85-1.564z" />
+            </svg>
+            MECÂNICA DE CARROS
+          </a>
+          <a href="mecmoto1.html" class="quiz-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            MECÂNICA DE MOTOCICLETAS
+          </a>
+		  
+        
+        </div>
+		
+		<!--  -->
+		<br>
+		<p>Visitante Nº<p>
+		<div align="center"><a title='Contador de Visitas do MegaContador' href='https://megacontador.com.br/' ><img src='https://megacontador.com.br/img-nSGheuAZkpxtQ8LZ-92.gif' border='0' alt='Contador de visitas'></a></div>
+<!-- Fim do codigo Contador -->
+
     </div>
+  </div>
+  
+  <footer>
+    &copy; 2025 PenseQuiz.com — Todos os direitos reservados.<br>
+    Contato: juniosilvasouza@yahoo.com.br | WhatsApp: (92) 98856-2216
+  </footer>
 
-    <audio id="praiseAudio" src="https://stream-179.zeno.fm/yddrdqrimfruv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJ5ZGRyZHFyaW1mcnV2IiwiaG9zdCI6InN0cmVhbS0xNzkuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6Im9hci1kdUhoVGF1WXFGbjYxMzE4NnciLCJpYXQiOjE3NDg3NDI1MTQsImV4cCI6MTc0ODc0MjU3NH0._h54Ng0Devc33mrJoyvnjIctP5HKJmOkKBPo-hMAedE" preload="auto"></audio>
+  <script>
+    // Referências aos elementos do DOM
+    const welcomeTerminal = document.getElementById("welcome-terminal");
+    const mainContent = document.getElementById("main-content");
+    
+    // Mensagem de boas-vindas
+    const welcomeMessageText = "PENSEQUIZ OS 🚀";
+	
+    const typingSpeed = 50; // Velocidade da digitação (ms por caractere)
+    const displayTime = 1500; // Tempo que a mensagem fica visível após digitar (ms)
 
-    <div class="container">
-        <div class="logo-container">
-            <img src="logopq.png" alt="Logo">
-        </div>
-        <div class="buttons">
-			<a href="webvideo.html" class="button">Fé MultCanais</a>
-            <a href="menuInterativo.html" class="button">Bíblia Interativa</a>
-			<a href="bibliatema.html" class="button">Bíblia por Temas</a>
-			<a href="teologia.html" class="button">Curso Teologia</a>
-			
-			<p><<----------------------------->></p>
-			
-            <a href="quizbiblia.html" class="button">Quiz Bíblia</a>
-			<a href="enigmasbiblia" class="button">Enigmas Biblicos</a>
-            <a href="menujornada.html" class="button">Jornada da Fé</a>
-			<a href="versiculohacker.html" class="button">Versículo Hacker</a>
-			<a href="quemedabiblia.html" class="button">Quem É da Bíblia?</a>
-			<a href="desafiodeserto.html" class="button">Desafio do Deserto</a>
-			
-			<p><<----------------------------->></p>
-			
-            <a href="quizenigmas.html" class="button">Enigmas</a>
-            <a href="passatempoquiz.html" class="button">Passatempo</a>
-			
-			<p><<----------------------------->></p>
-			
-            <a href="quizenem.html" class="button">ENEM</a>
-			<a href="quizmedbio.html" class="button">Ciências da Saúde</a>
-            <a href="quizconcurso.html" class="button">Concursos</a>
-			
-			<p><<----------------------------->></p>
-			
-            <a href="quizautoescola.html" class="button">AutoEscola</a>
-            <a href="pensequizeletrica.html" class="button">Eletricidade</a>
-            <a href="quizeletronica.html" class="button">Eletrônica</a>
-            <a href="quizcarro.html" class="button">Mecânica de Carros</a>
-            <a href="quizmoto.html" class="button">Mecânica de Motocicletas</a>
-            
-			
-			<div align=center><p>Visitante Nº</p><a href='https://contador.s12.com.br'><img src='https://contador.s12.com.br/img-bZAbw7cW1AcY92Bb-92.gif' border='0' alt='contador gratuito de visitas'></a>
-			<script type='text/javascript' src='https://contador.s12.com.br/ad.js?id=bZAbw7cW1AcY92Bb'></script><br>
-			<a href='https://meuip.page/qual-e-o-meu-ip/' target='_blank'><img src='https://img.meuip.page/selo-ZBCDaz1z50WcC8zZ.gif' alt='seu ip' border='0'></a></div>
+    // Função para simular o efeito de digitação
+    function typeWriterEffect(element, text, speed) {
+      return new Promise(resolve => {
+        let i = 0;
+        element.innerHTML = ''; // Limpa o conteúdo
+        const cursorSpan = document.createElement('span');
+        cursorSpan.classList.add('cursor');
+        
+        function type() {
+          if (i < text.length) {
+            element.textContent = text.substring(0, i + 1);
+            element.appendChild(cursorSpan); // Garante que o cursor esteja sempre no final
+            i++;
+            setTimeout(type, speed);
+          } else {
+            // Após digitar tudo, mantém o cursor piscando por um tempo
+            setTimeout(() => {
+                cursorSpan.remove(); // Remove o cursor
+                resolve(); // Resolve a Promise para continuar o fluxo
+            }, displayTime);
+          }
+        }
+        type();
+      });
+    }
 
+    // Função principal para iniciar o portal
+    async function startPortal() {
+      // Inicia a digitação da mensagem de boas-vindas
+      await typeWriterEffect(welcomeTerminal, welcomeMessageText, typingSpeed);
+      
+      // Oculta o terminal de boas-vindas e revela o conteúdo principal
+      welcomeTerminal.style.opacity = '0';
+      
+      setTimeout(() => {
+        welcomeTerminal.style.display = 'none'; // Remove o terminal de boas-vindas do fluxo
+        mainContent.style.display = 'flex'; // Mostra o conteúdo principal
+        setTimeout(() => {
+          mainContent.style.opacity = '1'; // Faz o fade-in do conteúdo principal
+          window.scrollTo(0, 0); // Rola a página para o topo
+        }, 50); // Pequeno delay para garantir que o display:flex seja aplicado antes do opacity
+      }, 500); // Espera um pouco para a transição de opacidade do welcomeTerminal
+    }
 
-        </div>
+    // Inicia o portal ao carregar a página
+    window.onload = startPortal;
 
-        <div class="footer">
-            <p>©PenseQuiz.com Todos Direitos Reservados </p>
-            <p>Contato: <a href="mailto:contato@pense.com">juniosilvasouza@yahoo.com.br</a></p>
-            <p>Telefone: <a href="tel:+5592988562216">(92) 98856-2216</a></p>
-        </div>
-
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const audio = document.getElementById('praiseAudio');
-            const musicToggleButton = document.getElementById('musicToggleButton');
-            const musicIcon = musicToggleButton.querySelector('i');
-
-            // Função para alternar play/pause
-            musicToggleButton.addEventListener('click', function() {
-                if (audio.paused) {
-                    audio.play()
-                        .then(() => {
-                            musicIcon.classList.remove('fa-play');
-                            musicIcon.classList.add('fa-pause');
-                        })
-                        .catch(error => {
-                            console.error("Erro ao tentar reproduzir o áudio:", error);
-                            // Exibir uma mensagem amigável ao usuário, se necessário
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Erro de reprodução',
-                                text: 'Não foi possível reproduzir o áudio. O navegador pode ter bloqueado a reprodução automática.',
-                            });
-                        });
-                } else {
-                    audio.pause();
-                    musicIcon.classList.remove('fa-pause');
-                    musicIcon.classList.add('fa-play');
-                }
-            });
-
-            // Atualiza o ícone se o áudio terminar de tocar
-            audio.addEventListener('ended', function() {
-                musicIcon.classList.remove('fa-pause');
-                musicIcon.classList.add('fa-play');
-            });
-
-            // Atualiza o ícone se o áudio for pausado por outros meios (ex: usuário mudou de aba)
-            audio.addEventListener('pause', function() {
-                if (!audio.ended) { // Só muda se não for o fim da música
-                    musicIcon.classList.remove('fa-pause');
-                    musicIcon.classList.add('fa-play');
-                }
-            });
-
-            // Atualiza o ícone se o áudio começar a tocar por outros meios
-            audio.addEventListener('play', function() {
-                musicIcon.classList.remove('fa-play');
-                musicIcon.classList.add('fa-pause');
-            });
-        });
-    </script>
+    // REGISTO DO SERVICE WORKER PARA FUNCIONALIDADES PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js') // Certifique-se que o path está correto se você tiver um sw.js
+          .then(reg => console.log('Service Worker registado com sucesso:', reg))
+          .catch(error => console.error('Falha ao registar o Service Worker:', error));
+      });
+    }
+  </script>
 </body>
 </html>
