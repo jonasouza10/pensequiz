@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminología Médica</title>
+
+    <!-- Estilos CSS embutidos -->
+    <style>
+        /* Definição de variáveis CSS para o tema claro */
+        :root {
+            --background-color-light: #f4f4f4;
+            --text-color-light: #333;
+            --header-bg-light: #4CAF50; /* Um verde amigável para o cabeçalho */
+            --header-text-light: white;
+            --input-bg-light: #fff;
+            --input-border-light: #ddd;
+            --result-bg-light: #fff;
+            --result-border-light: #eee;
+            --button-bg-light: #5cb85c;
+            --button-text-light: white;
+            --select-bg-light: #fff;
+            --select-border-light: #ddd;
+            --splash-bg-light: #4CAF50;
+            --splash-text-light: white;
+            --category-summary-bg-light: #e0ffe0; /* Fundo para as categorias */
+            --category-border-light: #c8e6c9;
+            --category-text-light: #2e7d32; /* Texto verde escuro para categorias */
+        }
+
+        /* Estilos para o modo escuro, sobrescrevendo as variáveis do tema claro */
+        body.dark-mode {
+            --background-color-light: #2c2c2c;
+            --text-color-light: #e0e0e0;
+            --header-bg-light: #1e1e1e;
+            --header-text-light: #f8f8f8;
+            --input-bg-light: #3a3a3a;
+            --input-border-light: #555;
+            --result-bg-light: #3a3a3a;
+            --result-border-light: #4a4a4a;
+            --button-bg-light: #4c4c4c;
+            --button-text-light: #e0e0e0;
+            --select-bg-light: #3a3a3a;
+            --select-border-light: #555;
+            --splash-bg-light: #1e1e1e;
+            --splash-text-light: #f8f8f8;
+            --category-summary-bg-light: #3a3a3a; /* Fundo mais escuro para categorias no dark mode */
+            --category-border-light: #4a4a4a;
+            --category-text-light: #a5d6a7; /* Texto verde claro para categorias no dark mode */
+        }
+
+        /* Estilos globais do corpo da página */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color-light);
+            color: var(--text-color-light);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Estilos da Splash Screen */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--splash-bg-light);
+            color: var(--splash-text-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            z-index: 9999;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 1s ease-out, visibility 1s ease-out;
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #splash-screen h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        #splash-screen .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--splash-text-light);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Estilos do cabeçalho */
+        header {
+            background-color: var(--header-bg-light);
+            color: var(--header-text-light);
+            padding: 1.2em 25px;
+            text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            flex-grow: 1;
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        /* Controles (botões e select) no cabeçalho */
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .controls button,
+        .controls select {
+            padding: 0.9em 1.4em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: var(--button-bg-light);
+            color: var(--button-text-light);
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+            font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls button:hover,
+        .controls select:hover {
+            background-color: var(--header-bg-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls select {
+            background-color: var(--select-bg-light);
+            color: var(--text-color-light);
+            border: 1px solid var(--select-border-light);
+        }
+
+        /* Estilos da área principal do conteúdo */
+        main {
+            padding: 30px;
+            max-width: 950px;
+            margin: 30px auto;
+            background-color: var(--result-bg-light);
+            border-radius: 18px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Estilos para o campo de busca */
+        input[type="text"] {
+            width: calc(100% - 30px);
+            padding: 15px;
+            margin-bottom: 30px;
+            border: 1px solid var(--input-border-light);
+            border-radius: 10px;
+            background-color: var(--input-bg-light);
+            color: var(--text-color-light);
+            font-size: 1.2em;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--header-bg-light);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.4);
+        }
+
+        /* Estilos para cada categoria (details/summary) */
+        .category-container {
+            margin-bottom: 20px;
+            border: 1px solid var(--category-border-light);
+            border-radius: 10px;
+            overflow: hidden; /* Garante que o border-radius funcione */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .category-container summary {
+            padding: 18px 25px; /* Mais padding */
+            background-color: var(--category-summary-bg-light);
+            color: var(--category-text-light);
+            font-weight: bold;
+            font-size: 1.3em; /* Título da categoria maior */
+            cursor: pointer;
+            outline: none; /* Remove outline ao clicar */
+            display: block; /* Para alinhar o triângulo e texto */
+            position: relative;
+            user-select: none; /* Evita seleção de texto no summary */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .category-container summary::-webkit-details-marker {
+            display: none; /* Esconde o marcador padrão */
+        }
+
+        .category-container summary::before {
+            content: '+'; /* Adiciona um ícone de mais */
+            font-size: 1.2em;
+            margin-right: 15px;
+            font-weight: bold;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        .category-container[open] summary::before {
+            content: '-'; /* Muda para menos quando aberto */
+            transform: rotate(0deg); /* Garante que o - não gire */
+        }
+
+        .category-container[open] summary {
+            border-bottom: 1px solid var(--category-border-light);
+        }
+
+        .category-content {
+            padding: 0 25px 15px; /* Padding para o conteúdo da categoria */
+        }
+
+        /* Estilos para cada item de termo nos resultados */
+        .term-item {
+            padding: 15px 0;
+            border-bottom: 1px dashed var(--result-border-light); /* Borda mais suave */
+        }
+
+        .term-item:last-child {
+            border-bottom: none;
+        }
+
+        .term-item h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.4em;
+            color: var(--text-color-light);
+        }
+
+        .term-item p {
+            margin: 0 0 6px 0;
+            font-size: 1em;
+            line-height: 1.5;
+            color: var(--text-color-light);
+        }
+
+        .term-item p strong {
+            color: var(--header-bg-light);
+        }
+
+        /* Estilos da seção de referências bibliográficas */
+        .references-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid var(--result-border-light);
+            text-align: center;
+        }
+
+        .references-section h2 {
+            font-size: 1.8em;
+            color: var(--header-bg-light);
+            margin-bottom: 20px;
+        }
+
+        .references-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .references-section li {
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            color: var(--text-color-light);
+        }
+
+        /* Estilos responsivos */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: center;
+                padding: 1em 15px;
+            }
+
+            header h1 {
+                text-align: center;
+                width: 100%;
+                margin-bottom: 15px;
+                padding-left: 0;
+                font-size: 1.6em;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: center;
+                margin-top: 10px;
+            }
+
+            .controls button,
+            .controls select {
+                padding: 0.7em 1em;
+                font-size: 0.9em;
+            }
+
+            main {
+                padding: 20px;
+                margin: 20px auto;
+            }
+
+            input[type="text"] {
+                width: calc(100% - 20px);
+                padding: 12px;
+                font-size: 1em;
+            }
+
+            .category-container summary {
+                padding: 15px 20px;
+                font-size: 1.1em;
+            }
+
+            .category-content {
+                padding: 0 20px 10px;
+            }
+
+            .term-item h3 {
+                font-size: 1.2em;
+            }
+
+            .term-item p {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 0.8em 10px;
+            }
+
+            header h1 {
+                font-size: 1.4em;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .controls button,
+            .controls select {
+                width: 100%;
+            }
+
+            main {
+                padding: 15px;
+                margin: 15px auto;
+            }
+
+            input[type="text"] {
+                padding: 10px;
+            }
+
+            .category-container summary {
+                font-size: 1em;
+                padding: 12px 15px;
+            }
+
+            .category-content {
+                padding: 0 15px 8px;
+            }
+
+            .term-item {
+                padding: 12px 0;
+            }
+
+            .term-item h3 {
+                font-size: 1.1em;
+            }
+
+            .term-item p {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+
+    <!-- Links essenciais para o PWA (manifest e ícones) -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-status-bar" content="#4CAF50">
+    <meta name="theme-color" content="#4CAF50">
+</head>
+<body>
+    <!-- Splash Screen (Tela de Início) -->
+    <div id="splash-screen">
+        <h2>Terminología Médica Hospitalar</h2>
+        <div class="loading-spinner"></div>
+        <p>Carregando termos...</p>
+    </div>
+
+    <header>
+        <h1 id="appTitle">Terminología Médica</h1>
+        <div class="controls">
+            <button id="themeToggle">Modo Escuro</button>
+            <select id="languageToggle">
+                <option value="pt">Português</option>
+                <option value="es">Español</option>
+            </select>
+        </div>
+    </header>
+    <main>
+        <input type="text" id="searchInput" placeholder="Buscar termo...">
+        <div id="results">
+            <!-- Os termos médicos serão carregados aqui pelo JavaScript, ordenados por categoria e depois de A-Z -->
+        </div>
+
+        <!-- Seção de Referências Bibliográficas -->
+        <section class="references-section">
+            <h2 id="referencesTitle">Referências Bibliográficas</h2>
+            <ul>
+                <li>Manual Merck de Diagnóstico e Terapia.</li>
+                <li>Dicionário Médico Oxford.</li>
+                <li>Terminologia Médica para Profissionais de Saúde - (Nome do Autor se aplicável).</li>
+                <li>Diretrizes Clínicas e Protocolos Hospitalares (do seu ambiente de prática).</li>
+                <li>Artigos científicos e bases de dados médicas (ex: PubMed, Scielo).</li>
+                <li><small><strong>Observação:</strong> Esta é uma lista de exemplos. Por favor, adicione ou substitua com as fontes bibliográficas exatas que você utiliza.</small></li>
+            </ul>
+        </section>
+    </main>
+
+    <!-- Scripts JavaScript embutidos -->
+    <script>
+        // Lógica principal do aplicativo
+        const medicalTerms = {
+            pt: {
+                "Sistema Musculoesquelético": [
+                    { term: "Artralgia", meaning: "Dor em uma ou mais articulações.", synonyms: ["Dor nas juntas", "Dor articular"] },
+                    { term: "Artrite", meaning: "Inflamação de uma ou mais articulações, causando dor, inchaço, vermelhidão e rigidez.", synonyms: ["Inflamação nas juntas", "Inflamação articular"] },
+                    { term: "Artrose", meaning: "Degeneração da cartilagem articular, causando dor, rigidez e perda de movimento nas articulações; também conhecida como osteoartrite.", synonyms: ["Osteoartrite", "Desgaste articular", "Doença degenerativa articular"] },
+                    { term: "Bursite", meaning: "Inflamação da bursa, um saco cheio de líquido que amortece ossos, tendões e músculos perto das articulações.", synonyms: ["Inflamação da bursa", "Bolsa inflamada"] },
+                    { term: "Cifose", meaning: "Curvatura excessiva da coluna vertebral para a frente (corcunda).", synonyms: ["Corcunda", "Hipercifose"] },
+                    { term: "Contratura", meaning: "Encurtamento permanente de um músculo, tendão ou tecido, resultando em deformidade e restrição de movimento.", synonyms: ["Encurtamento muscular", "Rigidez permanente"] },
+                    { term: "Distensão Muscular", meaning: "Estiramento ou ruptura das fibras musculares devido a um esforço excessivo.", synonyms: ["Estiramento", "Puxão muscular", "Lesão muscular"] },
+                    { term: "Escoliose", meaning: "Curvatura lateral anormal da coluna vertebral.", synonyms: ["Coluna torta", "Desvio na coluna"] },
+                    { term: "Fratura", meaning: "Ruptura de um osso devido a trauma ou estresse.", synonyms: ["Osso quebrado", "Quebra de osso", "Osso partido"] },
+                    { term: "Gota", meaning: "Tipo de artrite causada pelo acúmulo de cristais de ácido úrico nas articulações, causando dor intensa e inflamação.", synonyms: ["Artrite gotosa", "Doença do ácido úrico"] },
+                    { term: "Hérnia de Disco", meaning: "Deslocamento do disco intervertebral da coluna, comprimindo nervos e causando dor.", synonyms: ["Disco escorregado", "Hérnia na coluna"] },
+                    { term: "Lesão Ligamentar", meaning: "Dano ou ruptura de um ligamento, tecido que conecta ossos em uma articulação.", synonyms: ["Entorse", "Ruptura de ligamento"] },
+                    { term: "Lordose", meaning: "Curvatura excessiva da coluna vertebral para dentro (região lombar).", synonyms: ["Hiperlordose", "Curvatura lombar"] },
+                    { term: "Luxação", meaning: "Deslocamento de um osso de sua posição normal em uma articulação.", synonyms: ["Desencaixe", "Osso fora do lugar"] },
+                    { term: "Lombalgia", meaning: "Dor na região lombar, causada por esforço ou problemas posturais.", synonyms: ["Dor nas costas"] },
+                    { term: "Mialgia", meaning: "Dor nos músculos, associada a esforço ou infecções.", synonyms: ["Dor muscular", "Dor no músculo"] },
+                    { term: "Osteíte", meaning: "Inflamação do osso.", synonyms: ["Inflamação óssea", "Osso inflamado"] },
+                    { term: "Osteomalácia", meaning: "Amaciamento dos ossos devido à deficiência grave de vitamina D ou problemas no metabolismo do cálcio e fosfato.", synonyms: ["Ossos moles", "Enfraquecimento ósseo (por falta de vit. D)"] },
+                    { term: "Osteomielite", meaning: "Infecção do osso ou da medula óssea, geralmente causada por bactérias.", synonyms: ["Infecção óssea", "Osso infeccionado"] },
+                    { term: "Osteoporose", meaning: "Doença caracterizada por baixa densidade óssea, aumentando o risco de fraturas.", synonyms: ["Fragilidade óssea", "Ossos fracos"] },
+                    { term: "Tendinite", meaning: "Inflamação de um tendão, causando dor e rigidez.", synonyms: ["Inflamação do tendão"] },
+                    { term: "Tendinose", meaning: "Degeneração crônica de um tendão devido ao uso excessivo ou envelhecimento, sem inflamação significativa.", synonyms: ["Degeneração do tendão", "Tendão desgastado"] },
+                    { term: "Tenosinovite", meaning: "Inflamação do tendão e da bainha sinovial que o envolve.", synonyms: ["Inflamação da bainha do tendão"] }
+                ],
+                "Sistema Nervoso": [
+                    { term: "Afasia", meaning: "Perda da capacidade de falar, escrever ou compreender a linguagem, devido a lesão cerebral (ex: AVC, trauma).", synonyms: ["Dificuldade de fala", "Distúrbio de linguagem", "Perda da fala"] },
+                    { term: "Agnosia", meaning: "Incapacidade de reconhecer objetos, pessoas, sons, formas ou cheiros, apesar de a capacidade sensorial estar intacta.", synonyms: ["Incapacidade de reconhecimento", "Não reconhece"] },
+                    { term: "Alucinação", meaning: "Percepção sensorial que parece real, mas não é causada por estímulos externos, ocorrendo na ausência de um objeto real.", synonyms: ["Ver/Ouvir coisas (não reais)", "Percepção falsa"] },
+                    { term: "Alzheimer (Doença de)", meaning: "Doença neurodegenerativa progressiva que causa perda de memória e outras funções cognitivas.", synonyms: ["Demência senil", "Perda de memória avançada"] },
+                    { term: "Amnésia", meaning: "Perda total ou parcial da memória, seja de eventos recentes ou passados.", synonyms: ["Perda de memória", "Esquecimento"] },
+                    { term: "Anosmia", meaning: "Perda total ou parcial do olfato.", synonyms: ["Perda de olfato", "Não sente cheiro"] },
+                    { term: "Apraxia", meaning: "Incapacidade de realizar movimentos voluntários complexos ou coordenados, apesar de não haver paralisia, fraqueza muscular ou problemas de compreensão.", synonyms: ["Dificuldade de movimento coordenado", "Incapacidade de fazer movimentos"] },
+                    { term: "AVC (Acidente Vascular Cerebral)", meaning: "Interrupção do fluxo sanguíneo para uma parte do cérebro, causando danos cerebrais; pode ser isquêmico (bloqueio) ou hemorrágico (sangramento).", synonyms: ["Derrame", "Isquemia cerebral", "Infarto cerebral"] },
+                    { term: "Cefaleia", meaning: "Dor na região craniana, causada por tensão, enxaqueca ou infecções.", synonyms: ["Dor de cabeça", "Enxaqueca", "Mialgia craniana"] },
+                    { term: "Coma", meaning: "Estado prolongado de inconsciência profunda do qual o paciente não pode ser despertado e não responde a estímulos.", synonyms: ["Inconsciência profunda", "Estado vegetativo"] },
+                    { term: "Convulsão", meaning: "Atividade elétrica anormal no cérebro, causando movimentos involuntários.", synonyms: ["Crise epiléptica", "Ataque epiléptico", "Crise convulsiva"] },
+                    { term: "Demência", meaning: "Declínio progressivo das funções cognitivas (memória, raciocínio, linguagem), interferindo nas atividades diárias.", synonyms: ["Senilidade", "Comprometimento cognitivo"] },
+                    { term: "Disartria", meaning: "Dificuldade na fala devido a problemas nos músculos que controlam a boca, língua, laringe ou diafragma, tornando a fala arrastada ou difícil de entender.", synonyms: ["Fala arrastada", "Dificuldade de articulação"] },
+                    { term: "Enxaqueca", meaning: "Dor de cabeça intensa, frequentemente unilateral, com náuseas e fotofobia.", synonyms: ["Cefaleia pulsante"] },
+                    { term: "Epilepsia", meaning: "Distúrbio neurológico crônico caracterizado por convulsões recorrentes e não provocadas, devido à atividade elétrica anormal no cérebro.", synonyms: ["Doença convulsiva", "Transtorno de convulsão"] },
+                    { term: "Esclerose Lateral Amiotrófica (ELA)", meaning: "Doença neurodegenerativa progressiva que afeta as células nervosas do cérebro e da medula espinhal, levando à paralisia.", synonyms: ["Doença de Lou Gehrig", "ELA"] },
+                    { term: "Esclerose Múltipla", meaning: "Doença autoimune crônica que afeta o cérebro e a medula espinhal, causando problemas de movimento, sensação e cognição.", synonyms: ["Esclerose em placas", "EM"] },
+                    { term: "Hemiplegia", meaning: "Paralisia completa de um lado do corpo, geralmente causada por lesão cerebral (ex: AVC).", synonyms: ["Paralisia de um lado", "Metade do corpo paralisada"] },
+                    { term: "Hidrocefalia", meaning: "Acúmulo excessivo de líquido cefalorraquidiano (LCR) no cérebro, causando aumento da pressão intracraniana e dilatação dos ventrículos.", synonyms: ["Água no cérebro", "Acúmulo de líquido no cérebro"] },
+                    { term: "Lipotimia", meaning: "Sensação de desmaio iminente, acompanhada de tontura, fraqueza e palidez, sem perda total da consciência.", synonyms: ["Tontura", "Quase desmaio", "Mal-estar"] },
+                    { term: "Meningite", meaning: "Inflamação das meninges, causada por infecção viral ou bacteriana.", synonyms: ["Inflamação meníngea", "Inflamação cerebral", "Infecção das meninges"] },
+                    { term: "Neuralgia", meaning: "Dor intensa ao longo de um nervo, como na neuralgia do trigêmeo.", synonyms: ["Dor nervosa", "Dor no nervo"] },
+                    { term: "Neuroma", meaning: "Tumor benigno (não canceroso) de um nervo.", synonyms: ["Tumor de nervo", "Nervoma"] },
+                    { term: "Neuropatia", meaning: "Dano ou disfunção de um ou mais nervos, resultando em dor, dormência, formigamento, fraqueza muscular ou outros problemas.", synonyms: ["Doença dos nervos", "Dano nos nervos"] },
+                    { term: "Nistagmo", meaning: "Movimentos involuntários, repetitivos e incontroláveis dos olhos, que podem ser horizontais, verticais ou rotatórios.", synonyms: ["Olhos tremendo", "Movimento ocular involuntário"] },
+                    { term: "Nocicepção", meaning: "Processo neural de codificação e processamento de estímulos nocivos, que pode ou não resultar na percepção da dor.", synonyms: ["Percepção da dor (neural)", "Processamento de estímulos dolorosos"] },
+                    { term: "Nociceptor", meaning: "Receptor sensorial especializado que detecta estímulos prejudiciais ou dolorosos, enviando sinais ao sistema nervoso central.", synonyms: ["Receptor de dor", "Sensor de dor"] },
+                    { term: "Paralisia", meaning: "Perda completa da função muscular em uma parte do corpo, impedindo movimentos voluntários.", synonyms: ["Paresia", "Perda de movimento", "Não mexe"] },
+                    { term: "Parkinson (Doença de)", meaning: "Doença neurodegenerativa progressiva que afeta o movimento, causando tremores, rigidez e lentidão de movimentos.", synonyms: ["Parkinsonismo", "Mal de Parkinson"] },
+                    { term: "Paresia", meaning: "Fraqueza ou paralisia parcial de um músculo ou grupo muscular.", synonyms: ["Fraqueza muscular", "Perda parcial de movimento"] },
+                    { term: "Parestesia", meaning: "Sensação de formigamento ou dormência, frequentemente neurológica.", synonyms: ["Formigamento", "Dormência", "Agulhadas"] },
+                    { term: "Radiculopatia", meaning: "Condição causada pela compressão ou irritação de um nervo na raiz espinhal (coluna), resultando em dor, dormência, formigamento ou fraqueza que irradia para o membro.", synonyms: ["Nervo comprimido (na coluna)", "Dor irradiada"] },
+                    { term: "Síncope", meaning: "Perda temporária de consciência devido à redução do fluxo sanguíneo cerebral.", synonyms: ["Desmaio", "Lipotimia", "Perda de consciência"] },
+                    { term: "Vertigem", meaning: "Sensação de rotação ou movimento, associada a distúrbios do equilíbrio.", synonyms: ["Tontura rotatória", "Sensação de giro", "Labirintite (sensação)"] }
+                ],
+                "Sistema Digestório": [
+                    { term: "Abdome agudo", meaning: "Dor abdominal súbita e grave, frequentemente associada a apendicite ou obstrução intestinal.", synonyms: ["Dor abdominal intensa"] },
+                    { term: "Apendicite", meaning: "Inflamação do apêndice vermiforme, causando dor abdominal aguda.", synonyms: ["Inflamação do apêndice"] },
+                    { term: "Ascite", meaning: "Acúmulo de líquido na cavidade abdominal, geralmente devido a doença hepática ou insuficiência cardíaca.", synonyms: ["Barriga d'água", "Líquido abdominal"] },
+                    { term: "Cirrose", meaning: "Doença crônica do fígado caracterizada pela formação de tecido cicatricial, que impede o funcionamento normal do órgão.", synonyms: ["Fígado endurecido", "Doença hepática avançada"] },
+                    { term: "Colecistite", meaning: "Inflamação da vesícula biliar, geralmente causada por cálculos biliares que bloqueiam o ducto cístico.", synonyms: ["Inflamação da vesícula", "Pedra na vesícula (com inflamação)"] },
+                    { term: "Colite", meaning: "Inflamação do intestino grosso, associada a diarreia e dor abdominal.", synonyms: ["Inflamação do cólon"] },
+                    { term: "Câncer Colorretal", meaning: "Câncer que se origina no cólon ou no reto.", synonyms: ["Câncer de intestino", "Carcinoma colorretal"] },
+                    { term: "Colostomia", meaning: "Procedimento cirúrgico que cria uma abertura no cólon (intestino grosso) para a parede abdominal, formando um estoma para a eliminação de fezes.", synonyms: ["Abertura intestinal", "Bolsa de colostomia"] },
+                    { term: "Doença de Crohn", meaning: "Doença inflamatória intestinal crônica que pode afetar qualquer parte do trato gastrointestinal, da boca ao ânus.", synonyms: ["Enterite regional", "Ileíte granulomatosa"] },
+                    { term: "Disenteria", meaning: "Inflamação do intestino, especialmente do cólon, que resulta em diarreia grave com sangue, muco e dor abdominal.", synonyms: ["Diarreia com sangue", "Infecção intestinal grave"] },
+                    { term: "Disfagia", meaning: "Dificuldade para engolir alimentos sólidos, líquidos ou ambos.", synonyms: ["Dificuldade para engolir", "Engasgo frequente"] },
+                    { term: "Diverticulite", meaning: "Inflamação ou infecção de pequenos sacos (divertículos) que se formam na parede do cólon.", synonyms: ["Infecção de divertículos"] },
+                    { term: "Êmese", meaning: "Ato de vomitar; expulsão forçada do conteúdo do estômago pela boca.", synonyms: ["Vômito", "Vomitar"] },
+                    { term: "Enterite", meaning: "Inflamação do intestino delgado.", synonyms: ["Inflamação do intestino"] },
+                    { term: "Esofagite", meaning: "Inflamação do esôfago, frequentemente associada a refluxo ácido.", synonyms: ["Inflamação esofágica"] },
+                    { term: "Estomatite", meaning: "Inflamação da mucosa da boca, que pode causar úlceras, dor e dificuldade para comer.", synonyms: ["Inflamação na boca", "Aftas (múltiplas)"] },
+                    { term: "Flatulência", meaning: "Excesso de gases no trato gastrointestinal, resultando em inchaço, desconforto abdominal e eliminação de gases.", synonyms: ["Gases intestinais", "Peidos", "Inchaço por gases"] },
+                    { term: "Gastrite", meaning: "Inflamação da mucosa do estômago, com dor abdominal e náuseas.", synonyms: ["Inflamação gástrica", "Queimação no estômago"] },
+                    { term: "Halitose", meaning: "Mau hálito persistente, que pode ser causado por higiene bucal deficiente, problemas dentários ou condições médicas subjacentes.", synonyms: ["Mau hálito", "Hálito forte"] },
+                    { term: "Hematemese", meaning: "Vômito de sangue, geralmente escuro e com aspecto de borra de café, indicando sangramento no trato gastrointestinal superior.", synonyms: ["Vômito com sangue", "Vomitar sangue"] },
+                    { term: "Hematoquezia", meaning: "Presença de sangue fresco e vermelho vivo nas fezes, indicando sangramento no trato gastrointestinal inferior (cólon, reto).", synonyms: ["Sangue vivo nas fezes", "Fezes com sangue vivo"] },
+                    { term: "Hepatite", meaning: "Inflamação do fígado, frequentemente causada por vírus ou toxinas.", synonyms: ["Inflamação do fígado", "Fígado inflamado"] },
+                    { term: "Hérnia", meaning: "Protusão de um órgão ou tecido através de uma abertura anormal na parede de uma cavidade.", synonyms: ["Protrusão", "Inchaço (por saída de órgão)"] },
+                    { term: "Ileostomia", meaning: "Procedimento cirúrgico que cria uma abertura no íleo (parte final do intestino delgado) para a parede abdominal, formando um estoma para a eliminação de efluentes intestinais.", synonyms: ["Abertura do intestino delgado", "Bolsa de ileostomia"] },
+                    { term: "Melena", meaning: "Fezes escuras, pegajosas e com odor fétido, semelhante a alcatrão, indicando sangramento no trato gastrointestinal superior.", synonyms: ["Fezes pretas", "Sangue digerido nas fezes"] },
+                    { term: "Náusea", meaning: "Sensação de desconforto no estômago, com vontade de vomitar.", synonyms: ["Enjoo", "Mal-estar estomacal"] },
+                    { term: "Pancreatite", meaning: "Inflamação do pâncreas, uma glândula que produz enzimas digestivas e hormônios como a insulina.", synonyms: ["Inflamação do pâncreas"] },
+                    { term: "Refluxo", meaning: "Retorno do conteúdo gástrico ao esôfago, causando queimação.", synonyms: ["Azia"] },
+                    { term: "Retocolite Ulcerativa", meaning: "Doença inflamatória intestinal crônica que afeta o cólon e o reto, causando inflamação e úlceras no revestimento do intestino grosso.", synonyms: ["Colite ulcerativa", "RCU"] },
+                    { term: "Úlcera", meaning: "Lesão aberta na pele ou mucosas, como úlceras gástricas ou de pressão.", synonyms: ["Ferida crônica", "Ferida aberta", "Chaga"] },
+                    { term: "Xerostomia", meaning: "Redução da produção de saliva, associada a medicamentos ou doenças autoimunes.", synonyms: ["Boca seca", "Saliva reduzida"] }
+                ],
+                "Sistema Respiratório": [
+                    { term: "Alveolite", meaning: "Inflamação dos alvéolos pulmonares, comum em infecções ou pós-exodontia.", synonyms: ["Inflamação alveolar"] },
+                    { term: "Apneia", meaning: "Pausa temporária na respiração, especialmente durante o sono (apneia do sono).", synonyms: ["Parada respiratória temporária", "Pausa na respiração"] },
+                    { term: "Asfixia", meaning: "Privação grave de oxigênio que pode causar inconsciência, danos cerebrais ou morte.", synonyms: ["Sufocamento", "Falta severa de air", "Estrangulamento"] },
+                    { term: "Asma", meaning: "Doença respiratória crônica com constrição das vias aéreas, causando chiado e dispneia.", synonyms: ["Falta de ar crônica"] },
+                    { term: "Atelectasia", meaning: "Colapso completo ou parcial de um pulmão ou de uma área do pulmão, impedindo a troca gasosa.", synonyms: ["Pulmão colabado", "Colapso pulmonar"] },
+                    { term: "Bronquiolite", meaning: "Inflamação dos bronquíolos, pequenas vias aéreas nos pulmões, comum em crianças pequenas, causada por vírus.", synonyms: ["Inflamação dos brônquios pequenos", "Infecção respiratória infantil"] },
+                    { term: "Bronquite", meaning: "Inflamação dos brônquios, as principais vias aéreas dos pulmões, causando tosse e produção de muco.", synonyms: ["Inflamação brônquica", "Inflamação do brônquio"] },
+                    { term: "Coriza", meaning: "Corrimento nasal aquoso, geralmente associado a resfriados, alergias ou infecções respiratórias.", synonyms: ["Nariz escorrendo", "Secreção nasal"] },
+                    { term: "DPOC (Doença Pulmonar Obstrutiva Crônica)", meaning: "Doença pulmonar progressiva que dificulta a respiração, incluindo bronquite crônica e enfisema.", synonyms: ["Doença pulmonar crônica", "Bronquite crônica", "Enfisema (pulmonar)"] },
+                    { term: "Dispneia", meaning: "Dificuldade respiratória, associada a condições pulmonares ou cardíacas.", synonyms: ["Falta de ar", "Respiração difícil"] },
+                    { term: "Enfisema", meaning: "Condição pulmonar crônica que causa falta de ar devido à destruição dos alvéolos pulmonares, tornando a expiração difícil.", synonyms: ["Pulmão danificado", "Pulmão inchado"] },
+                    { term: "Epiglote", meaning: "Cartilagem em forma de folha localizada na garganta que impede a entrada de alimentos e líquidos nas vias aéreas durante a deglutição.", synonyms: ["Tampa da garganta"] },
+                    { term: "Faringite", meaning: "Inflamação da faringe (garganta), geralmente causada por infecção viral ou bacteriana, causando dor de garganta.", synonyms: ["Dor de garganta", "Inflamação na garganta"] },
+                    { term: "Hemoptise", meaning: "Expectoração de sangue proveniente das vias respiratórias.", synonyms: ["Tosse com sangue", "Sangue ao tossir"] },
+                    { term: "Laringite", meaning: "Inflamação da laringe, causando rouquidão e dor de garganta.", synonyms: ["Inflamação da laringe", "Rouquidão"] },
+                    { term: "Pleurisia", meaning: "Inflamação da pleura, causando dor torácica ao respirar.", synonyms: ["Inflamação pleural"] },
+                    { term: "Pneumonia", meaning: "Infecção dos pulmões, com febre, tosse e dificuldade respiratória.", synonyms: ["Infecção pulmonar", "Inflamação pulmonar"] },
+                    { term: "Pneumotórax", meaning: "Presença de ar ou gás no espaço pleural (entre os pulmões e a parede torácica), causando colapso pulmonar.", synonyms: ["Colapso pulmonar (por ar)", "Pulmão furado"] },
+                    { term: "Rinite", meaning: "Inflamação da mucosa nasal, comum em alergias ou resfriados.", synonyms: ["Nariz entupido", "Coriza", "Alergia nasal"] },
+                    { term: "Rinorreia", meaning: "Secreção nasal fluida, comum em resfriados ou alergias.", synonyms: ["Corrimento nasal"] },
+                    { term: "Sinusite", meaning: "Inflamação dos seios paranasais, causando dor facial e secreção nasal.", synonyms: ["Infecção sinusal"] },
+                    { term: "Tuberculose (TB)", meaning: "Doença infecciosa crônica causada por bactéria que afeta principalmente os pulmões, mas pode atingir outros órgãos.", synonyms: ["TB", "Infecção pulmonar grave"] }
+                ],
+                "Sistema Cardiovascular": [
+                    { term: "Aneurisma", meaning: "Dilatação anormal e localizada de uma artéria ou veia, causada por enfraquecimento da parede do vaso, com risco de ruptura.", synonyms: ["Dilatação arterial", "Saco arterial", "Vaso dilatado"] },
+                    { term: "Angina", meaning: "Dor no peito devido à redução do fluxo sanguíneo ao coração.", synonyms: ["Dor torácica", "Angina de peito"] },
+                    { term: "Angioplastia", meaning: "Procedimento para desobstruir artérias estreitadas ou bloqueadas, geralmente do coração, usando um balão.", synonyms: ["Desobstrução de artéria", "Cateterismo cardíaco"] },
+                    { term: "Arritmia", meaning: "Alteração no ritmo cardíaco, como taquicardia ou bradicardia.", synonyms: ["Batimento irregular", "Palpitação", "Coração descompassado"] },
+                    { term: "Aterosclerose", meaning: "Acúmulo de placas nas artérias, levando a risco de infarto ou AVC.", synonyms: ["Endurecimento das artérias"] },
+                    { term: "Bacteremia", meaning: "Presença de bactérias viáveis no sangue, que pode ou não causar sintomas.", synonyms: ["Bactérias no sangue", "Infecção sanguínea"] },
+                    { term: "Bradicardia", meaning: "Frequência cardíaca anormalmente lenta, geralmente abaixo de 60 batimentos por minuto em adultos.", synonyms: ["Coração lento", "Batimentos lentos"] },
+                    { term: "Cardiopatia", meaning: "Qualquer doença que afete o coração.", synonyms: ["Doença cardíaca", "Coração doente"] },
+                    { term: "Dissecção Aórtica", meaning: "Condição grave em que a camada interna da aorta se rompe, permitindo que o sangue flua entre as camadas da parede do vaso.", synonyms: ["Ruptura da aorta", "Aorta dissecada"] },
+                    { term: "Embolia", meaning: "Bloqueio de um vaso sanguíneo por um coágulo, ar ou outro material.", synonyms: ["Obstrução vascular", "Bloqueio vascular súbito", "Obstrução por coágulo"] },
+                    { term: "Endocardite", meaning: "Infecção das válvulas ou revestimento interno do coração.", synonyms: ["Infecção do endocárdio"] },
+                    { term: "Fibrilação", meaning: "Contração descoordenada e ineficaz das fibras musculares, especialmente no coração (fibrilação atrial ou ventricular), que prejudica o bombeamento de sangue.", synonyms: ["Batimento descoordenado", "Coração tremendo"] },
+                    { term: "Fibrilação Atrial", meaning: "Tipo comum de arritmia em que os átrios (câmaras superiores do coração) batem de forma irregular e rápida.", synonyms: ["Arritmia atrial", "FA"] },
+                    { term: "Flebite", meaning: "Inflamação de uma veia, frequentemente associada a coágulos.", synonyms: ["Inflamação venosa"] },
+                    { term: "Hemofilia", meaning: "Distúrbio genético que afeta a capacidade do sangue de coagular, levando a sangramentos prolongados e hemorragias internas.", synonyms: ["Problema de coagulação", "Sangramento fácil"] },
+                    { term: "Hemorragia", meaning: "Perda excessiva de sangue, interna ou externa, que pode ser grave e ameaçar a vida.", synonyms: ["Sangramento intenso", "Perda de sangue"] },
+                    { term: "Hipercalemia", meaning: "Nível elevado de potássio no sangue, o que pode afetar a função cardíaca.", synonyms: ["Potássio alto"] },
+                    { term: "Hipernatremia", meaning: "Nível elevado de sódio no sangue, geralmente devido à desidratação ou ingestão excessiva de sódio.", synonyms: ["Sódio alto"] },
+                    { term: "Hipertensão", meaning: "Pressão arterial elevada, acima de 140/90 mmHg.", synonyms: ["Pressão alta", "Hipertensão arterial"] },
+                    { term: "Hipocalemia", meaning: "Nível baixo de potássio no sangue, o que pode causar fraqueza muscular e arritmias cardíacas.", synonyms: ["Potássio baixo"] },
+                    { term: "Hiponatremia", meaning: "Nível baixo de sódio no sangue, que pode ocorrer devido à ingestão excessiva de água ou certas condições médicas.", synonyms: ["Sódio baixo"] },
+                    { term: "Hipotensão", meaning: "Pressão sanguínea anormalmente baixa, que pode causar tontura, desmaio e fadiga.", synonyms: ["Pressão baixa"] },
+                    { term: "Infarto do Miocárdio", meaning: "Morte de parte do músculo cardíaco devido à interrupção do fluxo sanguíneo, geralmente por um coágulo em uma artéria coronária.", synonyms: ["Ataque cardíaco", "Infarto"] },
+                    { term: "Insuficiência cardíaca", meaning: "Incapacidade do coração de bombear sangue adequadamente.", synonyms: ["Coração fraco", "Insuficiência do coração"] },
+                    { term: "Isquemia", meaning: "Redução do fluxo sanguíneo a um tecido, causando hipóxia.", synonyms: ["Falta de fluxo sanguíneo", "Falta de sangue", "Fluxo sanguíneo reduzido"] },
+                    { term: "Miocardite", meaning: "Inflamação do músculo cardíaco (miocárdio), que pode enfraquecer o coração e afetar sua capacidade de bombear sangue.", synonyms: ["Inflamação do coração", "Músculo do coração inflamado"] },
+                    { term: "Palpitação", meaning: "Sensação de que o coração está batendo de forma irregular, rápida, forte ou como se estivesse 'pulando'.", synonyms: ["Coração acelerado (sensação)", "Batimento irregular"] },
+                    { term: "Pancitopenia", meaning: "Redução de todas as células sanguíneas (eritrócitos, leucócitos e plaquetas).", synonyms: ["Baixa de células sanguíneas"] },
+                    { term: "Pericardite", meaning: "Inflamação da membrana que envolve o coração.", synonyms: ["Inflamação do pericárdio"] },
+                    { term: "Taquicardia", meaning: "Frequência cardíaca acima de 100 batimentos por minuto.", synonyms: ["Coração acelerado", "Batimentos rápidos"] },
+                    { term: "Trombose", meaning: "Formação de um coágulo em um vaso sanguíneo, causando obstrução.", synonyms: ["Coágulo sanguíneo", "Coágulo", "Obstrução vascular", "Entupimento de veia/artéria"] },
+                    { term: "Varizes", meaning: "Veias dilatadas e tortuosas, frequentemente nas pernas.", synonyms: ["Veias dilatadas"] },
+                    { term: "Vasoconstrição", meaning: "Estreitamento (contração) dos vasos sanguíneos, resultando em diminuição do fluxo sanguíneo para uma área específica.", synonyms: ["Estreitamento dos vasos", "Contração vascular"] },
+                    { term: "Vasodilatação", meaning: "Alargamento (dilatação) dos vasos sanguíneos, resultando em aumento do fluxo sanguíneo para uma área específica.", synonyms: ["Alargamento dos vasos", "Dilatação vascular"] }
+                ],
+                "Sistema Urinário": [
+                    { term: "Cistite", meaning: "Inflamação da bexiga, geralmente causada por infecção bacteriana.", synonyms: ["Infecção urinária", "Inflamação da bexiga"] },
+                    { term: "Cistoscopia", meaning: "Exame que utiliza um tubo fino com câmera (cistoscópio) para examinar o interior da bexiga e uretra.", synonyms: ["Exame de bexiga"] },
+                    { term: "Disúria", meaning: "Dor ou desconforto ao urinar, geralmente uma sensação de queimação ou ardor.", synonyms: ["Dor ao urinar", "Queimação ao urinar"] },
+                    { term: "Enurese", meaning: "Incontinência urinária, especialmente o ato de urinar involuntariamente durante o sono (enurese noturna), comum em crianças.", synonyms: ["Fazer xixi na cama", "Perda de urina (involuntária)"] },
+                    { term: "Glomerulonefrite", meaning: "Inflamação dos glomérulos renais, as pequenas unidades filtradoras dos rins, afetando a capacidade de filtrar o sangue.", synonyms: ["Inflamação do rim", "Doença renal glomerular"] },
+                    { term: "Incontinência Urinária", meaning: "Perda involuntária de urina.", synonyms: ["Perder xixi", "Escape de urina"] },
+                    { term: "Insuficiência renal", meaning: "Perda da função renal, levando ao acúmulo de toxinas no sangue.", synonyms: ["Falência renal", "Rim falhando", "Falha renal", "Doença renal crônica"] },
+                    { term: "Litíase Urinária", meaning: "Formação de cálculos (pedras) no trato urinário (rins, ureteres, bexiga).", synonyms: ["Pedra nos rins", "Cálculo renal", "Nefrolitíase"] },
+                    { term: "Nefrite", meaning: "Inflamação dos rins, frequentemente associada a infecções.", synonyms: ["Inflamação renal", "Inflamação dos rins"] },
+                    { term: "Nefropatia", meaning: "Qualquer doença ou condição que afete os rins.", synonyms: ["Doença renal"] },
+                    { term: "Oligúria", meaning: "Produção de urina em volume anormalmente pequeno (menos de 400 ml em 24 horas em adultos), indicando possível problema renal ou desidratação.", synonyms: ["Pouca urina", "Produção reduzida de urina"] },
+                    { term: "Pielonefrite", meaning: "Infecção do rim e da pelve renal, geralmente causada por bactérias que sobem do trato urinário inferior.", synonyms: ["Infecção renal", "Infecção do rim"] },
+                    { term: "Poliúria", meaning: "Produção de urina em volume excessivo, que excede o normal (mais de 2,5 litros em 24 horas em adultos).", synonyms: ["Urinar muito", "Excesso de urina"] },
+                    { term: "Proteinúria", meaning: "Presença de proteína na urina, indicativa de disfunção renal.", synonyms: ["Proteína na urina"] },
+                    { term: "Uremia", meaning: "Acúmulo de resíduos tóxicos no sangue que normalmente seriam filtrados pelos rins, indicando falha renal avançada.", synonyms: ["Intoxicação por falha renal"] },
+                    { term: "Ureteroscopia", meaning: "Procedimento para examinar ou remover cálculos nos ureteres ou rins usando um ureteroscópio.", synonyms: ["Exame do ureter"] },
+                    { term: "Uretrite", meaning: "Inflamação da uretra, o tubo que transporta a urina da bexiga para fora do corpo.", synonyms: ["Infecção da uretra"] }
+                ],
+                "Sistema Tegumentar (Pele, Cabelos, Unhas)": [
+                    { term: "Acanthosis Nigricans", meaning: "Doença cutânea com manchas escuras, frequentemente associada a resistência à insulina.", synonyms: ["Manchas escuras"] },
+                    { term: "Acne", meaning: "Doença de pele comum que causa espinhas, cravos e, por vezes, cistos, principalmente no rosto, pescoço, tórax e costas.", synonyms: ["Espinha", "Cravos", "Pele oleosa (com lesões)"] },
+                    { term: "Alopecia", meaning: "Perda de cabelo ou pelos em qualquer parte do corpo, podendo ser temporária ou permanente.", synonyms: ["Calvície", "Queda de cabelo"] },
+                    { term: "Dermatite", meaning: "Inflamação da pele, frequentemente associada a alergias ou irritações.", synonyms: ["Inflamação da pele", "Eczema", "Pele irritada"] },
+                    { term: "Edema", meaning: "Acúmulo de líquido nos tecidos, frequentemente nas extremidades.", synonyms: ["Inchaço", "Retenção de líquidos", "Tumefação"] },
+                    { term: "Epidermólise", meaning: "Condição caracterizada pela formação de bolhas na pele devido à fragilidade da epiderme, muitas vezes genética.", synonyms: ["Pele com bolhas", "Doença bolhosa da pele"] },
+                    { term: "Eritema", meaning: "Vermelhidão cutânea devido a inflamação ou vasodilatação.", synonyms: ["Vermelhidão da pele", "Pele vermelha"] },
+                    { term: "Escabiose", meaning: "Infestação da pele por ácaros, causando intensa coceira e lesões cutâneas.", synonyms: ["Sarna", "Coceira de ácaro"] },
+                    { term: "Exantema", meaning: "Erupção cutânea generalizada, geralmente associada a doenças infecciosas (ex: sarampo, rubéola).", synonyms: ["Erupção na pele", "Manchas na pele"] },
+                    { term: "Hematoma", meaning: "Coleção de sangue fora dos vasos, devido a trauma ou ruptura.", synonyms: ["Acúmulo de sangue", "Mancha roxa", "Contusão", "Roxo"] },
+                    { term: "Icterícia", meaning: "Coloração amarelada da pele devido ao acúmulo de bilirrubina.", synonyms: ["Amarelão", "Pele amarela", "Olhos amarelos"] },
+                    { term: "Melanoma", meaning: "Tipo grave de câncer de pele que se desenvolve nas células produtoras de melanina (melanócitos).", synonyms: ["Câncer de pele maligno"] },
+                    { term: "Onicomicose", meaning: "Infecção fúngica das unhas (fungo na unha), causando espessamento, descoloração e fragilidade.", synonyms: ["Micose de unha", "Fungo na unha"] },
+                    { term: "Prurido", meaning: "Coceira.", synonyms: ["Coceira na pele", "Comichão"] },
+                    { term: "Psoríase", meaning: "Doença autoimune crônica com placas escamosas na pele.", synonyms: ["Doença cutânea escamosa", "Pele escamosa", "Doença de pele crônica"] },
+                    { term: "Púrpura", meaning: "Manchas roxas ou avermelhadas na pele ou membranas mucosas, causadas por sangramento sob a pele, sem elevação ou dor.", synonyms: ["Manchas de sangue na pele", "Manchas roxas (não trauma)"] },
+                    { term: "Pus", meaning: "Líquido espesso e amarelado, esverdeado ou amarronzado, formado por glóbulos brancos mortos, bactérias e tecido em decomposição, indicando infecção.", synonyms: ["Secreção purulenta", "Líquido de infecção"] },
+                    { term: "Queloides", meaning: "Cicatriz saliente, grossa, de cor avermelhada ou escura, que se estende além dos limites da lesão original, devido a uma cicatrização excessiva.", synonyms: ["Cicatriz grossa", "Cicatriz elevada"] },
+                    { term: "Queimadura", meaning: "Lesão na pele ou outros tecidos causada por calor, frio, eletricidade, produtos químicos ou radiação.", synonyms: ["Escaldadura", "Dano por calor"] },
+                    { term: "Úlcera de Pressão", meaning: "Lesão na pele e no tecido subjacente causada por pressão prolongada sobre a pele, geralmente em áreas ósseas.", synonyms: ["Escara", "Úlcera de decúbito"] },
+                    { term: "Urticária", meaning: "Erupção cutânea pruriginosa, geralmente associada a alergias.", synonyms: ["Coceira na pele", "Vergões", "Placas vermelhas (com coceira)", "Erupção alérgica"] }
+                ],
+                "Sistema Ocular e Otorrinolaringológico": [
+                    { term: "Ambliopia", meaning: "Redução da acuidade visual em um olho devido a falha na coordenação com o cérebro.", synonyms: ["Olho preguiçoso"] },
+                    { term: "Anosmia", meaning: "Perda total ou parcial do olfato.", synonyms: ["Perda de olfato", "Não sente cheiro"] },
+                    { term: "Astigmatismo", meaning: "Erro refrativo do olho que causa visão borrada ou distorcida a todas as distâncias devido à curvatura irregular da córnea ou lente.", synonyms: ["Visão embaçada", "Visão distorcida"] },
+                    { term: "Blefarite", meaning: "Inflamação das pálpebras, geralmente nas margens, causando irritação, coceira e crostas.", synonyms: ["Inflamação da pálpebra", "Pálpebra inflamada"] },
+                    { term: "Catarata", meaning: "Embaçamento da lente natural do olho (cristalino), que leva à visão turva e, se não tratada, à cegueira.", synonyms: ["Olho embaçado", "Cristalino opaco"] },
+                    { term: "Conjuntivite", meaning: "Inflamação da conjuntiva, a membrana que reveste a parte branca do olho e a parte interna das pálpebras, causando vermelhidão e irritação.", synonyms: ["Olho vermelho", "Inflamação do olho"] },
+                    { term: "Descolamento de Retina", meaning: "Condição grave em que a retina se separa da camada subjacente de vasos sanguíneos, podendo levar à perda de visão.", synonyms: ["Retina descolada"] },
+                    { term: "Epistaxe", meaning: "Sangramento nasal.", synonyms: ["Sangramento do nariz", "Nariz sangrando"] },
+                    { term: "Exoftalmia", meaning: "Protrusão anormal dos globos oculares (olhos saltados), comum em doenças da tireoide.", synonyms: ["Olhos saltados", "Olhos para fora"] },
+                    { term: "Glaucoma", meaning: "Doença ocular com aumento da pressão intraocular, podendo levar à cegueira.", synonyms: ["Pressão ocular elevada"] },
+                    { term: "Laringite", meaning: "Inflamação da laringe, causando rouquidão e dor de garganta.", synonyms: ["Inflamação da laringe", "Rouquidão"] },
+                    { term: "Mácula", meaning: "Pequena área na retina, localizada no centro do campo visual, responsável pela visão central e detalhada.", synonyms: ["Ponto de visão central", "Área central da retina"] },
+                    { term: "Oftalmia", meaning: "Inflamação dos olhos, geralmente da conjuntiva (conjuntivite) ou outras estruturas oculares.", synonyms: ["Inflamação dos olhos", "Olho inflamado"] },
+                    { term: "Otalgia", meaning: "Dor localizada na orelha, geralmente associada a otite.", synonyms: ["Dor de ouvido", "Ouvido doendo"] },
+                    { term: "Otite", meaning: "Inflamação do ouvido, que pode ser externa (nadador), média ou interna, causando dor e, às vezes, perda auditiva.", synonyms: ["Inflamação do ouvido", "Infecção de ouvido"] },
+                    { term: "Otoscopia", meaning: "Exame do ouvido usando um otoscópio para visualizar o tímpano e o canal auditivo.", synonyms: ["Exame de ouvido"] },
+                    { term: "Retinopatia", meaning: "Qualquer doença ou dano à retina do olho, comum em diabetes e hipertensão.", synonyms: ["Doença da retina"] },
+                    { term: "Rinite", meaning: "Inflamação da mucosa nasal, comum em alergias ou resfriados.", synonyms: ["Nariz entupido", "Coriza", "Alergia nasal"] },
+                    { term: "Rinorreia", meaning: "Secreção nasal fluida, comum em resfriados ou alergias.", synonyms: ["Corrimento nasal"] },
+                    { term: "Sinusite", meaning: "Inflamação dos seios paranasais, causando dor facial e secreção nasal.", synonyms: ["Infecção sinusal"] }
+                ],
+                "Sistema Reprodutor e Endócrino": [
+                    { term: "Amenorreia", meaning: "Ausência de menstruação em mulheres em idade reprodutiva.", synonyms: ["Falta de menstruação", "Menstruação ausente"] },
+                    { term: "Criptorquidia", meaning: "Condição em que um ou ambos os testículos não desceram para a bolsa escrotal (escroto) após o nascimento.", synonyms: ["Testículo não descido", "Testículo retido"] },
+                    { term: "Diabetes Gestacional", meaning: "Tipo de diabetes que se desenvolve ou é diagnosticado pela primeira vez durante a gravidez.", synonyms: ["Glicemia alta na gravidez"] },
+                    { term: "Dismenorreia", meaning: "Menstruação dolorosa, com cólicas fortes que podem ser incapacitantes.", synonyms: ["Cólica menstrual forte", "Menstruação com dor"] },
+                    { term: "Endometriose", meaning: "Condição em que tecido semelhante ao revestimento do útero (endométrio) cresce fora do útero.", synonyms: ["Endométrio fora do lugar"] },
+                    { term: "Hipertireoidismo", meaning: "Condição em que a glândula tireoide produz hormônios tireoidianos em excesso, acelerando o metabolismo do corpo.", synonyms: ["Tireoide hiperativa", "Tireoide acelerada"] },
+                    { term: "Hipotireoidismo", meaning: "Condição em que a glândula tireoide não produz hormônios tireoidianos suficientes, levando a metabolismo lento.", synonyms: ["Tireoide hipoativa", "Tireoide preguiçosa"] },
+                    { term: "Histerectomia", meaning: "Remoção cirúrgica do útero.", synonyms: ["Cirurgia de retirada do útero", "Remoção do útero"] },
+                    { term: "Mioma", meaning: "Tumor benigno (não canceroso) que se desenvolve no útero, comum em mulheres em idade reprodutiva.", synonyms: ["Nódulo no útero", "Fibroma uterino"] },
+                    { term: "Nulípara", meaning: "Mulher que nunca deu à luz.", synonyms: ["Nunca pariu", "Mulher sem filhos (nascidos)"] },
+                    { term: "Ovário Policístico (Síndrome do)", meaning: "Distúrbio hormonal comum em mulheres em idade reprodutiva, causando cistos nos ovários, irregularidades menstruais, entre outros.", synonyms: ["SOP", "Cistos no ovário"] },
+                    { term: "Tireoidite", meaning: "Inflamação da glândula tireoide.", synonyms: ["Inflamação da tireoide"] },
+                    { term: "Tireoide", meaning: "Glândula endócrina localizada no pescoço, que produz hormônios que regulam o metabolismo do corpo.", synonyms: ["Glândula da garganta"] }
+                ],
+                "Laboratório Clínico": [
+                    { term: "Albumina", meaning: "Proteína principal do plasma sanguíneo, importante para manter a pressão osmótica, transportar substâncias e nutrição.", synonyms: ["Proteína sérica", "Proteína do sangue"] },
+                    { term: "Amilase", meaning: "Enzima que ajuda a digerir carboidratos, produzida principalmente pelo pâncreas e glândulas salivares; usada para diagnosticar pancreatite.", synonyms: ["Enzima digestiva"] },
+                    { term: "Coagulograma", meaning: "Conjunto de exames de sangue que avaliam a capacidade de coagulação do sangue, útil para detectar distúrbios de sangramento ou coagulação.", synonyms: ["Exame de coagulação", "Tempo de coagulação"] },
+                    { term: "Colesterol", meaning: "Tipo de gordura presente no sangue, essencial para o corpo, mas em excesso pode aumentar o risco de doenças cardiovasculares (LDL, HDL).", synonyms: ["Gordura no sangue"] },
+                    { term: "Creatinina", meaning: "Substância de resíduo no sangue, produzida pelos músculos, cuja medição é usada para avaliar a função renal.", synonyms: ["Marcador renal", "Exame de rim"] },
+                    { term: "Culturas (Exames)", meaning: "Exames laboratoriais para cultivar e identificar microrganismos (bactérias, fungos) em amostras de fluidos corporais ou tecidos, para diagnosticar infecções.", synonyms: ["Cultura de urina", "Cultura de sangue", "Cultura de secreção"] },
+                    { term: "Eletrólitos", meaning: "Minerais com carga elétrica (sódio, potássio, cloreto, etc.) presentes no sangue e outros fluidos corporais, essenciais para muitas funções celulares.", synonyms: ["Sódio", "Potássio", "Cloreto"] },
+                    { term: "Enzimas Cardíacas", meaning: "Proteínas liberadas na corrente sanguínea quando o músculo cardíaco é danificado, usadas para diagnosticar infarto.", synonyms: ["Troponina", "CK-MB"] },
+                    { term: "Gasometria Arterial", meaning: "Exame de sangue que mede os níveis de oxigênio e dióxido de carbono e o pH no sangue arterial, para avaliar a função pulmonar e o equilíbrio ácido-base.", synonyms: ["Exame de gases no sangue", "Balanço ácido-base"] },
+                    { term: "Glicemia", meaning: "Nível de glicose (açúcar) no sangue.", synonyms: ["Açúcar no sangue", "Glicose"] },
+                    { term: "Hemograma", meaning: "Exame de sangue completo que avalia os componentes do sangue (glóbulos vermelhos, brancos, plaquetas) para detectar anemia, infecções, etc.", synonyms: ["Exame de sangue", "Contagem de células sanguíneas"] },
+                    { term: "Marcadores Tumorais", meaning: "Substâncias (proteínas, enzimas, hormônios) produzidas por células cancerosas ou pelo corpo em resposta ao câncer, usadas para monitoramento ou diagnóstico.", synonyms: ["Biomarcadores de câncer"] },
+                    { term: "Testes de Função Hepática (TFG)", meaning: "Exames de sangue que medem os níveis de enzimas e proteínas produzidas pelo fígado para avaliar sua saúde e funcionamento.", synonyms: ["Provas de fígado", "Enzimas hepáticas"] },
+                    { term: "Triglicerídeos", meaning: "Tipo de gordura presente no sangue, uma fonte de energia, mas níveis elevados aumentam o risco de doenças cardíacas.", synonyms: ["Gordura no sangue"] },
+                    { term: "Ureia", meaning: "Produto de resíduo do metabolismo de proteínas, filtrado pelos rins e excretado na urina; sua medição avalia a função renal.", synonyms: ["Marcador renal", "Exame de rim"] }
+                ],
+                "Instrumentos Cirúrgicos": [
+                    { term: "Afastador", meaning: "Instrumento usado em cirurgia para separar e manter os tecidos afastados, expondo a área de trabalho.", synonyms: ["Retrator"] },
+                    { term: "Agulha Cirúrgica", meaning: "Agulha usada para passar o fio de sutura através dos tecidos para fechamento de incisões ou feridas.", synonyms: ["Agulha de sutura"] },
+                    { term: "Bisturi", meaning: "Instrumento cirúrgico com lâmina afiada, usado para fazer incisões.", synonyms: ["Scalpel"] },
+                    { term: "Cateter", meaning: "Tubo fino e flexível inserido no corpo para drenar fluidos, administrar medicamentos ou acessar vasos sanguíneos/órgãos.", synonyms: ["Sonda", "Tubo"] },
+                    { term: "Cureta", meaning: "Instrumento com uma ponta em forma de colher ou laço, usado para raspar ou remover tecido.", synonyms: ["Raspador cirúrgico"] },
+                    { term: "Eletrocautério", meaning: "Aparelho que usa corrente elétrica para cortar tecidos e controlar o sangramento durante a cirurgia.", synonyms: ["Bisturi elétrico", "Cauterizador"] },
+                    { term: "Endoscópio", meaning: "Instrumento longo e fino com uma câmera e luz na ponta, usado para visualizar o interior do corpo através de orifícios naturais ou pequenas incisões.", synonyms: ["Câmera interna", "Tubo com câmera"] },
+                    { term: "Fio de Sutura", meaning: "Material usado para fechar feridas cirúrgicas ou unir tecidos.", synonyms: ["Sutura", "Fio cirúrgico"] },
+                    { term: "Hemostato", meaning: "Pinça usada para pinçar vasos sanguíneos e controlar o sangramento.", synonyms: ["Pinça hemostática"] },
+                    { term: "Laparoscópio", meaning: "Tipo de endoscópio usado em cirurgias minimamente invasivas do abdome (laparoscopia).", synonyms: ["Endoscópio abdominal"] },
+                    { term: "Pinça Cirúrgica", meaning: "Instrumento usado para segurar, manipular ou remover tecidos e materiais durante a cirurgia.", synonyms: ["Fórceps"] },
+                    { term: "Sonda", meaning: "Tubo fino e flexível inserido em uma cavidade ou passagem do corpo para diversos fins (drenagem, alimentação, medição).", synonyms: ["Cateter", "Tubo"] },
+                    { term: "Serra Cirúrgica", meaning: "Instrumento usado para cortar ossos durante procedimentos ortopédicos ou neurocirúrgicos.", synonyms: ["Serra óssea"] },
+                    { term: "Tesoura Cirúrgica", meaning: "Tesoura especializada para cortar tecidos, fios ou outros materiais durante a cirurgia.", synonyms: ["Tesoura médica"] },
+                    { term: "Trocar", meaning: "Instrumento pontiagudo com uma cânula oca, usado para criar um portal de entrada na cavidade abdominal ou torácica para inserção de laparoscópios ou outros instrumentos.", synonyms: ["Punção para laparoscopia"] },
+                    { term: "Trepano", meaning: "Instrumento cirúrgico para fazer um furo circular (trepanação) em um osso, geralmente no crânio.", synonyms: ["Broca óssea", "Trepanação"] }
+                ],
+                "Curativos e Materiais": [
+                    { term: "Álcool 70%", meaning: "Solução alcoólica usada como antisséptico para desinfetar a pele antes de procedimentos ou para limpar superfícies.", synonyms: ["Álcool etílico"] },
+                    { term: "Algodão Hidrófilo", meaning: "Algodão processado para absorver líquidos, usado em curativos e procedimentos de limpeza.", synonyms: ["Algodão absorvente"] },
+                    { term: "Antisséptico", meaning: "Agente químico aplicado em tecidos vivos (pele, mucosas) para destruir ou inibir o crescimento de microrganismos.", synonyms: ["Desinfetante para pele"] },
+                    { term: "Atadura", meaning: "Faixa de tecido usada para envolver partes do corpo, fixar curativos, imobilizar ou aplicar compressão.", synonyms: ["Faixa", "Bandagem"] },
+                    { term: "Campo Cirúrgico", meaning: "Pano estéril usado para cobrir o paciente e as superfícies ao redor da área cirúrgica, criando um ambiente limpo.", synonyms: ["Pano estéril", "Drapeado cirúrgico"] },
+                    { term: "Cânula", meaning: "Tubo fino inserido em uma cavidade do corpo, vaso sanguíneo ou ducto para drenagem, injeção ou acesso.", synonyms: ["Tubulação", "Cateter (curto)"] },
+                    { term: "Clorexidina", meaning: "Antisséptico de amplo espectro usado para desinfecção da pele e mucosas, e como enxaguante bucal.", synonyms: ["Digluconato de clorexidina"] },
+                    { term: "Dreno", meaning: "Tubo ou dispositivo inserido em uma ferida ou cavidade para remover fluidos (sangue, pus) ou ar.", synonyms: ["Tubulação de drenagem"] },
+                    { term: "Esparadrapo", meaning: "Fita adesiva usada para fixar curativos, gazes ou tubos na pele.", synonyms: ["Fita micropore", "Fita cirúrgica"] },
+                    { term: "Gaze", meaning: "Tecido fino e transparente, geralmente de algodão, usado para curativos, absorção de líquidos e limpeza de feridas.", synonyms: ["Compressa de gaze"] },
+                    { term: "Luvas Estéreis", meaning: "Luvas descartáveis sem microrganismos, usadas em procedimentos cirúrgicos ou que exigem alta assepsia.", synonyms: ["Luvas cirúrgicas"] },
+                    { term: "Máscara Cirúrgica", meaning: "Barreira física usada para cobrir a boca e o nariz, protegendo contra a inalação ou exalação de gotículas respiratórias.", synonyms: ["Máscara de procedimento"] },
+                    { term: "Povidone-Iodo", meaning: "Antisséptico e desinfetante tópico de amplo espectro, usado para limpar a pele antes da cirurgia ou em feridas.", synonyms: ["PVPI", "Iodo-povidona"] },
+                    { term: "Soro Fisiológico", meaning: "Solução aquosa de cloreto de sódio 0,9%, usada para limpeza de feridas, hidratação intravenosa e diluição de medicamentos.", synonyms: ["Soro salino", "Solução salina"] },
+                    { term: "Sonda Nasogástrica", meaning: "Tubo inserido pelo nariz até o estômago para alimentação, drenagem ou administração de medicamentos.", synonyms: ["SNG", "Tubo nasal (para estômago)"] },
+                    { term: "Sutura (Material)", meaning: "Material usado para fechar feridas cirúrgicas ou unir tecidos, como fios absorvíveis ou não absorvíveis.", synonyms: ["Fio de sutura", "Ponto cirúrgico"] }
+                ],
+                "Equipamentos e Aparelhos de Exames": [
+                    { term: "Balança Digital", meaning: "Aparelho eletrônico para medição precisa do peso corporal.", synonyms: ["Peso eletrônico"] },
+                    { term: "Bomba de Infusão", meaning: "Dispositivo que administra fluidos, medicamentos ou nutrientes ao paciente em quantidades controladas e em ritmo preciso.", synonyms: ["Bomba de soro", "Infusora"] },
+                    { term: "Colonoscopia (Aparelho)", meaning: "Aparelho (colonoscópio) com câmera flexível usado para examinar o interior do cólon e reto.", synonyms: ["Colonoscópio"] },
+                    { term: "Desfibrilador", meaning: "Aparelho que envia um choque elétrico ao coração para restaurar um ritmo cardíaco normal em casos de arritmias graves.", synonyms: ["Cardioversor", "DEA (desfibrilador externo automático)"] },
+                    { term: "Densitometria Óssea (Aparelho)", meaning: "Aparelho que mede a densidade mineral óssea para diagnosticar osteoporose.", synonyms: ["Densitômetro"] },
+                    { term: "Ecocardiograma (Aparelho)", meaning: "Aparelho de ultrassom que cria imagens em tempo real do coração para avaliar sua estrutura e função.", synonyms: ["Ecocardiográfico"] },
+                    { term: "Eletrocardiograma (Aparelho)", meaning: "Aparelho que registra a atividade elétrica do coração (ECG ou EKG) para diagnosticar problemas cardíacos.", synonyms: ["Eletrocardiógrafo", "Máquina de ECG"] },
+                    { term: "Endoscopia (Aparelho)", meaning: "Aparelho (endoscópio) com câmera flexível usado para examinar o interior do esôfago, estômago e duodeno.", synonyms: ["Endoscópio digestivo"] },
+                    { term: "Esfigmomanômetro", meaning: "Aparelho usado para medir a pressão arterial (aparelho de pressão).", synonyms: ["Aparelho de pressão", "Medidor de pressão"] },
+                    { term: "Estetoscópio", meaning: "Instrumento acústico usado para auscultar sons internos do corpo, como batimentos cardíacos, sons pulmonares e intestinais.", synonyms: ["Fone médico"] },
+                    { term: "Foco Cirúrgico", meaning: "Lâmpada especial usada em salas de cirurgia para iluminar o campo operatório de forma intensa e sem sombras.", synonyms: ["Lâmpada cirúrgica"] },
+                    { term: "Incubadora", meaning: "Equipamento médico que fornece um ambiente controlado para recém-nascidos prematuros ou doentes, mantendo temperatura e umidade ideais.", synonyms: ["Berço aquecido (neonatal)"] },
+                    { term: "Mamografia (Aparelho)", meaning: "Aparelho de raio-X de baixa dose usado para detectar câncer de mama.", synonyms: ["Mamógrafo"] },
+                    { term: "Monitor Cardíaco", meaning: "Aparelho que monitora continuamente a atividade elétrica do coração e outros sinais vitais.", synonyms: ["Cardiomonitor", "Monitor de ECG"] },
+                    { term: "Oxímetro de Pulso", meaning: "Pequeno aparelho colocado no dedo para medir a saturação de oxigênio no sangue (SpO2) e a frequência cardíaca.", synonyms: ["Medidor de oxigênio", "Saturímetro"] },
+                    { term: "Raio-X (Aparelho)", meaning: "Aparelho que utiliza radiação ionizante para criar imagens de estruturas internas do corpo, especialmente ossos.", synonyms: ["Máquina de radiografia", "Aparelho de RX"] },
+                    { term: "Ressonância Magnética (Aparelho)", meaning: "Aparelho que usa campos magnéticos e ondas de rádio para criar imagens detalhadas de órgãos e tecidos moles do corpo.", synonyms: ["Máquina de RM"] },
+                    { term: "Tomografia Computadorizada (Aparelho)", meaning: "Aparelho que usa raios-X e tecnologia de computador para criar imagens transversais detalhadas do corpo.", synonyms: ["Máquina de TC", "Tomógrafo"] },
+                    { term: "Ultrassonografia (Aparelho)", meaning: "Aparelho que usa ondas sonoras de alta frequência para criar imagens em tempo real de órgãos e estruturas internas.", synonyms: ["Ultrassom", "Aparelho de USG"] },
+                    { term: "Ventilador Mecânico", meaning: "Máquina que auxilia ou substitui a respiração do paciente, fornecendo ar para os pulmões.", synonyms: ["Respirador artificial", "Máquina de ventilação"] }
+                ],
+                "Condições Gerais e Outros Sistemas": [
+                    { term: "Ablação", meaning: "Remoção ou destruição de tecido por meios cirúrgicos, térmicos ou químicos.", synonyms: ["Remoção", "Destruição"] },
+                    { term: "Acidose", meaning: "Aumento da acidez no sangue, devido a desequilíbrios metabólicos ou respiratórios.", synonyms: ["Acidez sanguínea", "Excesso de ácido", "pH baixo no sangue"] },
+                    { term: "Alcalose", meaning: "Condição em que há excesso de base no sangue, aumentando o pH sanguíneo, geralmente por perda de ácido ou retenção de bicarbonato.", synonyms: ["Excesso de base", "pH alto no sangue"] },
+                    { term: "Analgésico", meaning: "Medicamento ou método que alivia a dor sem causar perda de consciência.", synonyms: ["Remédio para dor", "Aliviador de dor"] },
+                    { term: "Anemia", meaning: "Redução de glóbulos vermelhos ou hemoglobina, causando fadiga e palidez.", synonyms: ["Falta de sangue", "Sangue fraco", "Baixos glóbulos vermelhos"] },
+                    { term: "Anorexia", meaning: "Perda de apetite ou distúrbio alimentar caracterizado por recusa em manter um peso corporal saudável e medo intenso de engordar.", synonyms: ["Falta de apetite", "Recusa alimentar", "Distúrbio alimentar"] },
+                    { term: "Antissepsia", meaning: "Uso de agentes químicos (antissépticos) para destruir ou inibir o crescimento de microrganismos em tecidos vivos, como a pele.", synonyms: ["Desinfecção de pele", "Limpeza de ferida"] },
+                    { term: "Atrofia", meaning: "Diminuição do tamanho de uma parte do corpo ou de um órgão devido à diminuição do tamanho ou número de suas células, ou desuso.", synonyms: ["Emagrecimento (tecido)", "Diminuição de tamanho", "Encolhimento"] },
+                    { term: "Ausculata", meaning: "Ato de ouvir os sons internos do corpo (coração, pulmões, intestino), geralmente com um estetoscópio, para fins diagnósticos.", synonyms: ["Escutar (com estetoscópio)", "Ouvir sons internos"] },
+                    { term: "Autoimune", meaning: "Refere-se a uma doença em que o sistema imunológico, erroneamente, ataca os próprios tecidos ou órgãos do corpo.", synonyms: ["Doença do sistema imune", "Imunidade que ataca o corpo"] },
+                    { term: "Benigno", meaning: "Tumor ou condição que não é cancerosa e não se espalha para outras partes do corpo.", synonyms: ["Não canceroso", "Não maligno"] },
+                    { term: "Biópsia", meaning: "Remoção de uma pequena amostra de tecido de um órgão ou tumor para exame microscópico e diagnóstico.", synonyms: ["Coleta de tecido para análise", "Remoção de amostra"] },
+                    { term: "Calcificação", meaning: "Acúmulo de cálcio em tecidos moles, frequentemente em artérias coronárias.", synonyms: ["Depósito de cálcio"] },
+                    { term: "Caquexia", meaning: "Perda extrema de peso e massa muscular, atrofia e fadiga intensa, comum em pacientes com doenças crônicas graves (câncer, AIDS).", synonyms: ["Desnutrição severa", "Debilitação extrema", "Emaciação"] },
+                    { term: "Carcinoma", meaning: "Tumor maligno originado de células epiteliais.", synonyms: ["Câncer epitelial"] },
+                    { term: "Claudicação", meaning: "Dor nas pernas, panturrilhas ou nádegas causada por fluxo sanguíneo insuficiente durante o exercício, aliviada com o repouso.", synonyms: ["Dor nas pernas ao caminhar", "Dor ao andar"] },
+                    { term: "Crônico", meaning: "Doença ou condição de longa duração, persistente, que se desenvolve lentamente e pode ter períodos de melhora e piora.", synonyms: ["De longa duração", "Persistente", "Duradouro"] },
+                    { term: "Desidratação", meaning: "Condição causada pela perda excessiva de fluidos corporais (água e eletrólitos), resultando em desequilíbrio e comprometimento das funções orgânicas.", synonyms: ["Falta de água no corpo", "Corpo seco"] },
+                    { term: "Diabetes Mellitus", meaning: "Doença crônica caracterizada por altos níveis de açúcar no sangue (glicemia), devido à produção insuficiente de insulina ou à resistência do corpo a ela.", synonyms: ["Açúcar no sangue", "Glicemia alta", "Doença do açúcar", "Diabetes"] },
+                    { term: "Diagnóstico", meaning: "Identificação de uma doença ou condição com base nos sintomas, sinais, histórico clínico e resultados de exames.", synonyms: ["Identificação da doença", "Determinação da doença"] },
+                    { term: "Diálise", meaning: "Processo artificial de remover produtos de resíduos, toxinas e excesso de água do sangue, quando os rins não podem fazê-lo adequadamente.", synonyms: ["Filtragem do sangue (máquina)", "Rim artificial"] },
+                    { term: "Difteria", meaning: "Infecção bacteriana grave que afeta a garganta, nariz e, às vezes, a pele, podendo causar dificuldade respiratória e problemas cardíacos.", synonyms: ["Crupe diftérico", "Infecção na garganta"] },
+                    { term: "Dislipidemia", meaning: "Alteração nos níveis de lipídios no sangue, aumentando o risco cardiovascular.", synonyms: ["Colesterol alto"] },
+                    { term: "Fagocitose", meaning: "Processo pelo qual as células (especialmente glóbulos brancos) englobam e digerem partículas estranhas, microrganismos ou células mortas.", synonyms: ["Englobar células", "Célula que come"] },
+                    { term: "Fasciite", meaning: "Inflamação da fáscia, tecido conjuntivo que envolve músculos e órgãos, causando dor e sensibilidade.", synonyms: ["Inflamação da fáscia"] },
+                    { term: "Febre", meaning: "Aumento da temperatura corporal acima do normal, sinal de infecção.", synonyms: ["Pirexia", "Hipertermia", "Temperatura alta"] },
+                    { term: "Fístula", meaning: "Conexão anormal entre dois órgãos, vasos ou um órgão e a superfície do corpo, que não deveria existir.", synonyms: ["Conexão anormal", "Passagem anormal"] },
+                    { term: "Flebotomia", meaning: "Incisão ou punção de uma veia, geralmente para coletar sangue (coleta de sangue) ou para administrar líquidos ou medicamentos.", synonyms: ["Coleta de sangue", "Punção venosa", "Tirar sangue"] },
+                    { term: "Fobia", meaning: "Medo irracional, intenso e persistente de um objeto, situação ou atividade específica, levando à evitação.", synonyms: ["Medo extremo", "Pavor"] },
+                    { term: "Gangrena", meaning: "Morte de tecido corporal devido à falta grave de suprimento sanguíneo ou infecção bacteriana grave, exigindo intervenção rápida.", synonyms: ["Morte de tecido", "Tecido morto"] },
+                    { term: "Hipotermia", meaning: "Redução da temperatura corporal abaixo de 35°C.", synonyms: ["Temperatura baixa"] },
+                    { term: "Hipertrofia", meaning: "Aumento do tamanho de um órgão ou tecido devido ao aumento do tamanho de suas células, geralmente em resposta a uma maior demanda de trabalho.", synonyms: ["Crescimento excessivo (tecido)", "Aumento de tamanho"] },
+                    { term: "Imunossupressão", meaning: "Supressão ou diminuição da resposta do sistema imunológico, seja por doença (ex: AIDS) ou por medicamentos (ex: após transplantes).", synonyms: ["Imunidade baixa", "Sistema imune fraco"] },
+                    { term: "Infecção", meaning: "Invasão e multiplicação de microrganismos (bactérias, vírus, fungos, parasitas) nos tecidos do corpo, causando uma resposta inflamatória.", synonyms: ["Contaminação", "Invasão microbiana", "Contaminação por germes"] },
+                    { term: "Inflamação", meaning: "Resposta do corpo a lesões ou infecções, caracterizada por dor, calor, vermelhidão e inchaço (rubor, calor, tumor, dolor).", synonyms: ["Reação inflamatória", "Inchaço", "Vermelhidão (localizada)"] },
+                    { term: "Intubação", meaning: "Procedimento de inserção de um tubo (tubo endotraqueal) na traqueia para manter as vias aéreas abertas e auxiliar a respiração.", synonyms: ["Tubo na garganta", "Ventilação (invasiva)"] },
+                    { term: "Laparotomia", meaning: "Incisão cirúrgica na parede abdominal, geralmente para explorar órgãos internos, diagnosticar ou tratar condições.", synonyms: ["Corte na barriga", "Abertura abdominal"] },
+                    { term: "Leucocitose", meaning: "Aumento do número de glóbulos brancos (leucócitos) no sangue, geralmente indicando uma infecção ou inflamação.", synonyms: ["Glóbulos brancos altos"] },
+                    { term: "Leucopenia", meaning: "Redução do número de leucócitos no sangue.", synonyms: ["Baixa de glóbulos brancos", "Glóbulos brancos baixos"] },
+                    { term: "Linfadenopatia", meaning: "Inchaço dos linfonodos, associado a infecções ou câncer.", synonyms: ["Gânglios inchados"] },
+                    { term: "Linfoma", meaning: "Tipo de câncer que começa nas células do sistema linfático, parte do sistema imunológico do corpo.", synonyms: ["Câncer linfático", "Câncer dos gânglios"] },
+                    { term: "Lipoma", meaning: "Tumor benigno (não canceroso) composto por tecido adiposo (gordura), geralmente macio e móvel sob a pele.", synonyms: ["Nódulo de gordura", "Caroço de gordura"] },
+                    { term: "Maligno", meaning: "Tumor ou condição que é cancerosa e tem a capacidade de invadir tecidos próximos e se espalhar (metastatizar) para outras partes do corpo.", synonyms: ["Canceroso", "Com potencial de espalhar"] },
+                    { term: "Malária", meaning: "Doença infecciosa grave transmitida por mosquitos infectados, que causa febre, calafrios, sudorese e sintomas gripais.", synonyms: ["Paludismo", "Febre palustre"] },
+                    { term: "Metástase", meaning: "Disseminação de células cancerosas de um local primário (tumor original) para outras partes do corpo, formando novos tumores.", synonyms: ["Câncer espalhado", "Disseminação do câncer"] },
+                    { term: "Necrose", meaning: "Morte de células ou tecidos vivos devido a doença, lesão, infecção ou falta de suprimento sanguíneo.", synonyms: ["Morte celular", "Tecido morto"] },
+                    { term: "Neoplasia", meaning: "Crescimento anormal e descontrolado de células, que pode ser benigno (não canceroso) ou maligno (canceroso).", synonyms: ["Tumor", "Câncer", "Massa"] },
+                    { term: "Nódulo", meaning: "Pequena massa ou protuberância em qualquer parte do corpo, que pode ser superficial (pele) ou interna (órgão).", synonyms: ["Caroço", "Protuberância", "Massa"] },
+                    { term: "Obesidade", meaning: "Acúmulo excessivo de gordura corporal, medido pelo IMC.", synonyms: ["Excesso de peso"] },
+                    { term: "Obstrução", meaning: "Bloqueio ou impedimento do fluxo de algo, como no intestino, vias aéreas ou vasos sanguíneos.", synonyms: ["Bloqueio", "Entupimento", "Impasse"] },
+                    { term: "Peritonite", meaning: "Inflamação do peritônio, a membrana que reveste a cavidade abdominal e os órgãos, geralmente causada por infecção.", synonyms: ["Inflamação da barriga", "Infecção abdominal grave"] },
+                    { term: "Polidipsia", meaning: "Sede excessiva e anormalmente aumentada, um sintoma comum de diabetes mellitus.", synonyms: ["Sede em excesso", "Muita sede"] },
+                    { term: "Prognóstico", meaning: "Previsão do provável curso, resultado e evolução de uma doença ou condição médica.", synonyms: ["Previsão da doença", "Expectativa de recuperação"] },
+                    { term: "Quimioterapia", meaning: "Tratamento de doenças, especialmente câncer, com medicamentos que destroem as células doentes, impedindo seu crescimento ou divisão.", synonyms: ["Tratamento com remédios fortes (câncer)", "Quimio"] },
+                    { term: "Reabilitação", meaning: "Processo de restauração de funções e capacidades perdidas após uma doença, lesão ou cirurgia, para melhorar a qualidade de vida e independência.", synonyms: ["Recuperação funcional", "Fisioterapia (amplo sentido)"] },
+                    { term: "Regressão", meaning: "Retorno a um estado anterior ou a uma forma menos desenvolvida de comportamento, ou diminuição dos sintomas ou tamanho de uma doença.", synonyms: ["Voltar ao estado anterior", "Melhora (doença)"] },
+                    { term: "Remissão", meaning: "Diminuição significativa ou desaparecimento dos sintomas e sinais de uma doença, especialmente câncer, podendo ser parcial ou completa.", synonyms: ["Doença controlada", "Sintomas diminuídos", "Período sem doença (aparente)"] },
+                    { term: "Sepse", meaning: "Resposta inflamatória sistêmica grave a uma infecção.", synonyms: ["Infecção generalizada", "Choque séptico", "Sepse"] },
+                    { term: "Sintoma", meaning: "Qualquer evidência subjetiva de doença percebida e relatada pelo paciente (ex: dor, náusea, fadiga).", synonyms: ["Sinal de doença (pelo paciente)", "Queixa do paciente"] },
+                    { term: "Síndrome", meaning: "Conjunto de sintomas e sinais que ocorrem juntos de forma característica e que podem ser associados a uma doença ou condição particular.", synonyms: ["Conjunto de sintomas", "Quadro clínico"] },
+                    { term: "Terapia", meaning: "Tratamento de uma doença ou condição, que pode incluir medicamentos, cirurgias, fisioterapia, etc.", synonyms: ["Tratamento"] },
+                    { term: "Trauma", meaning: "Lesão física ou emocional causada por um evento externo (ex: acidente, queda, violência).", synonyms: ["Lesão", "Ferimento", "Pancada"] },
+                    { term: "Virologia", meaning: "Ramo da ciência que estuda os vírus, incluindo sua estrutura, classificação, replicação e as doenças que causam.", synonyms: ["Estudo de vírus", "Ciência dos vírus"] },
+                    { term: "Vômito", meaning: "Expulsão forçada do conteúdo gástrico pela boca.", synonyms: ["Emese", "Vomitar"] },
+                    { term: "Zoonose", meaning: "Doença transmissível de animais para humanos, como raiva ou leptospirose.", synonyms: ["Doença zoonótica", "Doença animal-humana", "Infecção de animais para humanos"] }
+                ]
+            },
+            es: {
+                "Sistema Musculoesquelético": [
+                    { term: "Artralgia", meaning: "Dolor en una o más articulaciones.", synonyms: ["Dolor en las articulaciones", "Dolor articular"] },
+                    { term: "Artritis", meaning: "Inflamación de una o más articulaciones, causando dolor, hinchazón, enrojecimiento y rigidez.", synonyms: ["Inflamación en las articulaciones", "Inflamación articular"] },
+                    { term: "Artrosis", meaning: "Degeneración del cartílago articular, causando dolor, rigidez y pérdida de movimiento en las articulaciones; también conocida como osteoartritis.", synonyms: ["Osteoartritis", "Desgaste articular", "Enfermedad degenerativa articular"] },
+                    { term: "Bursitis", meaning: "Inflamación de la bursa, un saco lleno de líquido que amortigua huesos, tendones y músculos cerca de las articulaciones.", synonyms: ["Inflamación de la bursa", "Bolsa inflamada"] },
+                    { term: "Cifosis", meaning: "Curvatura excesiva de la columna vertebral hacia adelante (joroba).", synonyms: ["Joroba", "Hipercifosis"] },
+                    { term: "Contractura", meaning: "Acortamiento permanente de un músculo, tendón o tejido, resultando en deformidad y restricción de movimiento.", synonyms: ["Acortamiento muscular", "Rigidez permanente"] },
+                    { term: "Distensión Muscular", meaning: "Estiramiento o ruptura de las fibras musculares debido a un esfuerzo excesivo.", synonyms: ["Estiramiento", "Tirón muscular", "Lesión muscular"] },
+                    { term: "Escoliosis", meaning: "Curvatura lateral anormal de la columna vertebral.", synonyms: ["Columna torcida", "Desviación en la columna"] },
+                    { term: "Fractura", meaning: "Rotura de un hueso debido a trauma o estrés.", synonyms: ["Hueso roto", "Rotura de hueso", "Hueso partido"] },
+                    { term: "Gota", meaning: "Tipo de artritis causada por la acumulación de cristales de ácido úrico en las articulaciones, causando dolor intenso e inflamación.", synonyms: ["Artritis gotosa", "Enfermedad del ácido úrico"] },
+                    { term: "Hernia Discal", meaning: "Desplazamiento del disco intervertebral de la columna, comprimiendo nervios y causando dolor.", synonyms: ["Disco deslizado", "Hernia en la columna"] },
+                    { term: "Lesión Ligamentosa", meaning: "Daño o ruptura de un ligamento, tejido que conecta huesos en una articulación.", synonyms: ["Esguince", "Rotura de ligamento"] },
+                    { term: "Lordosis", meaning: "Curvatura excesiva de la columna vertebral hacia adentro (región lumbar).", synonyms: ["Hiperlordosis", "Curvatura lumbar"] },
+                    { term: "Luxación", meaning: "Desplazamiento de un hueso de su posición normal en una articulación.", synonyms: ["Desencaje", "Hueso fuera de lugar"] },
+                    { term: "Lumbalgia", meaning: "Dolor en la región lumbar, causado por esfuerzo o problemas posturales.", synonyms: ["Dolor de espalda"] },
+                    { term: "Mialgia", meaning: "Dolor en los músculos, asociado con esfuerzo o infecciones.", synonyms: ["Dolor muscular", "Dolor en el músculo"] },
+                    { term: "Osteítis", meaning: "Inflamación del hueso.", synonyms: ["Inflamación ósea", "Hueso inflamado"] },
+                    { term: "Osteomalacia", meaning: "Ablandamiento de los huesos debido a la deficiencia grave de vitamina D o problemas en el metabolismo del calcio y fosfato.", synonyms: ["Huesos blandos", "Debilitamiento óseo (por falta de vit. D)"] },
+                    { term: "Osteomielitis", meaning: "Infección del hueso o de la médula ósea, generalmente causada por bacterias.", synonyms: ["Infección ósea", "Hueso infectado"] },
+                    { term: "Osteoporosis", meaning: "Enfermedad con baja densidad ósea, aumentando el riesgo de fracturas.", synonyms: ["Fragilidad ósea", "Huesos débiles"] },
+                    { term: "Tendinitis", meaning: "Inflamación de un tendón, causando dolor y rigidez.", synonyms: ["Inflamación del tendón"] },
+                    { term: "Tendinosis", meaning: "Degeneración crónica de un tendón debido al uso excesivo o envejecimiento, sin inflamación significativa.", synonyms: ["Degeneración del tendón", "Tendón desgastado"] },
+                    { term: "Tenosinovitis", meaning: "Inflamación del tendón y de la vaina sinovial que lo envuelve.", synonyms: ["Inflamación de la vaina del tendón"] }
+                ],
+                "Sistema Nervioso": [
+                    { term: "Afasia", meaning: "Pérdida de la capacidad de hablar, escribir o comprender el lenguaje, debido a lesión cerebral (ej: ACV, trauma).", synonyms: ["Dificultad del habla", "Trastorno del lenguaje", "Pérdida del habla"] },
+                    { term: "Agnosia", meaning: "Incapacidad de reconocer objetos, personas, sonidos, formas u olores, a pesar de que la capacidad sensorial está intacta.", synonyms: ["Incapacidad de reconocimiento", "No reconoce"] },
+                    { term: "Alucinación", meaning: "Percepción sensorial que parece real, pero no es causada por estímulos externos, ocurriendo en ausencia de un objeto real.", synonyms: ["Ver/Oír cosas (no reales)", "Percepción falsa"] },
+                    { term: "Alzheimer (Enfermedad de)", meaning: "Enfermedad neurodegenerativa progresiva que causa pérdida de memoria y otras funciones cognitivas.", synonyms: ["Demencia senil", "Pérdida de memoria avanzada"] },
+                    { term: "Amnesia", meaning: "Pérdida total o parcial de la memoria, ya sea de eventos recientes o pasados.", synonyms: ["Pérdida de memoria", "Olvido"] },
+                    { term: "Anosmia", meaning: "Pérdida total o parcial del olfato.", synonyms: ["Pérdida de olfato", "No huele"] },
+                    { term: "Apraxia", meaning: "Incapacidad de realizar movimientos voluntarios complejos o coordinados, a pesar de no haber parálisis, debilidad muscular o problemas de comprensión.", synonyms: ["Dificultad de movimiento coordinado", "Incapacidad de hacer movimientos"] },
+                    { term: "ACV (Accidente Cerebrovascular)", meaning: "Interrupción del flujo sanguíneo a una parte del cerebro, causando daño cerebral; puede ser isquémico (bloqueo) o hemorrágico (sangrado).", synonyms: ["Derrame cerebral", "Isquemia cerebral", "Infarto cerebral"] },
+                    { term: "Cefalea", meaning: "Dolor en la región craneal, causado por tensión, migraña o infecciones.", synonyms: ["Dolor de cabeza", "Jaqueca", "Mialgia craneal"] },
+                    { term: "Coma", meaning: "Estado prolongado de inconsciencia profunda del cual el paciente no puede ser despertado y no responde a estímulos.", synonyms: ["Inconsciencia profunda", "Estado vegetativo"] },
+                    { term: "Convulsión", meaning: "Actividad eléctrica anormal en el cerebro, causando movimientos involuntarios.", synonyms: ["Crisis epiléptica", "Ataque epiléptico", "Crisis convulsiva"] },
+                    { term: "Demencia", meaning: "Declive progresivo de las funciones cognitivas (memoria, razonamiento, lenguaje), interfiriendo en las actividades diarias.", synonyms: ["Senilidad", "Deterioro cognitivo"] },
+                    { term: "Disartria", meaning: "Dificultad en el habla debido a problemas en los músculos que controlan la boca, lengua, laringe o diafragma, haciendo el habla arrastrada o difícil de entender.", synonyms: ["Habla arrastrada", "Dificultad de articulación"] },
+                    { term: "Enxaqueca", meaning: "Dolor de cabeza intenso, frecuentemente unilateral, con náuseas y fotofobia.", synonyms: ["Cefalea pulsante"] },
+                    { term: "Epilepsia", meaning: "Trastorno neurológico crónico caracterizado por convulsiones recurrentes y no provocadas, debido a la actividad eléctrica anormal en el cerebro.", synonyms: ["Enfermedad convulsiva", "Trastorno de convulsión"] },
+                    { term: "Esclerosis Lateral Amiotrófica (ELA)", meaning: "Enfermedad neurodegenerativa progresiva que afecta las células nerviosas del cerebro y la médula espinal, llevando a la parálisis.", synonyms: ["Enfermedad de Lou Gehrig", "ELA"] },
+                    { term: "Esclerosis Múltiple", meaning: "Enfermedad autoinmune crónica que afecta el cerebro y la médula espinal, causando problemas de movimiento, sensación y cognición.", synonyms: ["Esclerosis en placas", "EM"] },
+                    { term: "Hemiplejía", meaning: "Parálisis completa de un lado del cuerpo, generalmente causada por lesión cerebral (ej: ACV).", synonyms: ["Parálisis de un lado", "Mitad del cuerpo paralizada"] },
+                    { term: "Hidrocefalia", meaning: "Acumulación excesiva de líquido cefalorraquídeo (LCR) en el cerebro, causando aumento de la presión intracraneal y dilatación de los ventrículos.", synonyms: ["Agua en el cerebro", "Acumulación de líquido en el cerebro"] },
+                    { term: "Lipotimia", meaning: "Sensación de desmayo inminente, acompañada de mareo, debilidad y palidez, sin pérdida total de la conciencia.", synonyms: ["Mareo", "Casi desmayo", "Malestar"] },
+                    { term: "Meningitis", meaning: "Inflamación de las meninges, causada por infección viral o bacteriana.", synonyms: ["Inflamación meníngea", "Inflamación cerebral", "Infección de las meninges"] },
+                    { term: "Neuralgia", meaning: "Dolor intenso a lo largo de un nervio, como en la neuralgia del trigémino.", synonyms: ["Dolor nervioso", "Dolor en el nervio"] },
+                    { term: "Neuroma", meaning: "Tumor benigno (no canceroso) de un nervio.", synonyms: ["Tumor de nervio", "Nervoma"] },
+                    { term: "Neuropatía", meaning: "Daño o disfunción de uno o más nervios, resultando en dolor, entumecimiento, hormigueo, debilidad muscular u otros problemas.", synonyms: ["Enfermedad de los nervios", "Daño en los nervios"] },
+                    { term: "Nistagmo", meaning: "Movimientos involuntarios, repetitivos y incontrolables de los ojos, que pueden ser horizontales, verticales o rotatorios.", synonyms: ["Ojos temblorosos", "Movimiento ocular involuntario"] },
+                    { term: "Nocicepción", meaning: "Proceso neural de codificación y procesamiento de estímulos nocivos, que puede o no resultar en la percepción del dolor.", synonyms: ["Percepción del dolor (neural)", "Procesamiento de estímulos dolorosos"] },
+                    { term: "Nociceptor", meaning: "Receptor sensorial especializado que detecta estímulos dañinos o dolorosos, enviando señales al sistema nervioso central.", synonyms: ["Receptor de dolor", "Sensor de dolor"] },
+                    { term: "Parálisis", meaning: "Pérdida completa de la función muscular en una parte del cuerpo, impidiendo movimientos voluntarios.", synonyms: ["Paresia", "Pérdida de movimiento", "No se mueve"] },
+                    { term: "Parkinson (Enfermedad de)", meaning: "Enfermedad neurodegenerativa progresiva que afecta el movimiento, causando temblores, rigidez y lentitud de movimientos.", synonyms: ["Parkinsonismo", "Mal de Parkinson"] },
+                    { term: "Paresia", meaning: "Debilidad o parálisis parcial de un músculo o grupo muscular.", synonyms: ["Debilidad muscular", "Pérdida parcial de movimiento"] },
+                    { term: "Parestesia", meaning: "Sensación de hormigueo o adormecimiento, a menudo neurológica.", synonyms: ["Hormigueo", "Entumecimiento", "Punzadas"] },
+                    { term: "Radiculopatía", meaning: "Condición causada por la compresión o irritación de un nervio en la raíz espinal (columna), resultando en dolor, entumecimiento, hormigueo o debilidad que irradia al miembro.", synonyms: ["Nervio comprimido (en la columna)", "Dolor irradiado"] },
+                    { term: "Síncope", meaning: "Pérdida temporal de la conciencia debido a la reducción del flujo sanguíneo cerebral.", synonyms: ["Desmayo", "Lipotimia", "Pérdida de conciencia"] },
+                    { term: "Vértigo", meaning: "Sensación de rotación o movimiento, asociada con trastornos del equilibrio.", synonyms: ["Mareo rotatorio", "Sensación de giro", "Laberintitis (sensación)"] }
+                ],
+                "Sistema Digestório": [
+                    { term: "Abdomen agudo", meaning: "Dolor abdominal repentino y grave, a menudo asociado con apendicitis u obstrucción intestinal.", synonyms: ["Dolor abdominal intenso"] },
+                    { term: "Apendicitis", meaning: "Inflamación del apéndice vermiforme, causando dolor abdominal agudo.", synonyms: ["Inflamación del apéndice"] },
+                    { term: "Ascitis", meaning: "Acumulación de líquido en la cavidad abdominal, generalmente debido a enfermedad hepática o insuficiencia cardíaca.", synonyms: ["Barriga de agua", "Líquido abdominal"] },
+                    { term: "Cirrosis", meaning: "Enfermedad crónica del hígado caracterizada por la formación de tejido cicatricial, que impide el funcionamiento normal del órgano.", synonyms: ["Hígado endurecido", "Enfermedad hepática avanzada"] },
+                    { term: "Colecistitis", meaning: "Inflamación de la vesícula biliar, generalmente causada por cálculos biliares que bloquean el conducto cístico.", synonyms: ["Inflamación de la vesícula", "Cálculo en la vesícula (con inflamación)"] },
+                    { term: "Colitis", meaning: "Inflamación del intestino grueso, asociada con diarrea y dolor abdominal.", synonyms: ["Inflamación del colon"] },
+                    { term: "Cáncer Colorrectal", meaning: "Câncer que se origina no cólon ou no reto.", synonyms: ["Câncer de intestino", "Carcinoma colorretal"] },
+                    { term: "Colostomía", meaning: "Procedimiento quirúrgico que crea una abertura en el colon (intestino grueso) hacia la pared abdominal, formando un estoma para la eliminación de heces.", synonyms: ["Abertura intestinal", "Bolsa de colostomía"] },
+                    { term: "Enfermedad de Crohn", meaning: "Enfermedad inflamatoria intestinal crónica que puede afectar cualquier parte del tracto gastrointestinal, desde la boca hasta el ano.", synonyms: ["Enteritis regional", "Ileítis granulomatosa"] },
+                    { term: "Disentería", meaning: "Inflamación del intestino, especialmente del colon, que resulta en diarrea grave con sangre, moco y dolor abdominal.", synonyms: ["Diarrea con sangre", "Infección intestinal grave"] },
+                    { term: "Disfagia", meaning: "Dificultad para tragar alimentos sólidos, líquidos o ambos.", synonyms: ["Dificultad para tragar", "Atoramiento frecuente"] },
+                    { term: "Diverticulitis", meaning: "Inflamación o infección de pequeños sacos (divertículos) que se forman en la pared del colon.", synonyms: ["Infección de divertículos"] },
+                    { term: "Émesis", meaning: "Acto de vomitar; expulsión forzada del contenido del estómago por la boca.", synonyms: ["Vómito", "Vomitar"] },
+                    { term: "Enteritis", meaning: "Inflamación del intestino delgado.", synonyms: ["Inflamación del intestino"] },
+                    { term: "Esofagitis", meaning: "Inflamación del esófago, a menudo asociada con reflujo ácido.", synonyms: ["Inflamación esofágica"] },
+                    { term: "Estomatitis", meaning: "Inflamación de la mucosa de la boca, que puede causar úlceras, dolor y dificultad para comer.", synonyms: ["Inflamación en la boca", "Aftas (múltiples)"] },
+                    { term: "Flatulencia", meaning: "Exceso de gases en el tracto gastrointestinal, resultando en hinchazón, incomodidad abdominal y eliminación de gases.", synonyms: ["Gases intestinales", "Pedos", "Hinchazón por gases"] },
+                    { term: "Gastritis", meaning: "Inflamación de la mucosa del estómago, con dolor abdominal y náuseas.", synonyms: ["Inflamación gástrica", "Ardor de estómago"] },
+                    { term: "Halitosis", meaning: "Mal aliento persistente, que puede ser causado por higiene bucal deficiente, problemas dentales o condiciones médicas subyacentes.", synonyms: ["Mal aliento", "Aliento fuerte"] },
+                    { term: "Hematemesis", meaning: "Vómito de sangre, generalmente oscuro y con aspecto de posos de café, indicando sangrado en el tracto gastrointestinal superior.", synonyms: ["Vómito con sangre", "Vomitar sangre"] },
+                    { term: "Hematoquecia", meaning: "Presencia de sangre fresca y roja viva en las heces, indicando sangrado en el tracto gastrointestinal inferior (colon, recto).", synonyms: ["Sangre viva en las heces", "Heces con sangre viva"] },
+                    { term: "Hepatitis", meaning: "Inflamación del hígado, a menudo causada por virus o toxinas.", synonyms: ["Inflamación del hígado", "Hígado inflamado"] },
+                    { term: "Hernia", meaning: "Protusión de un órgano o tejido a través de una abertura anormal en la pared de una cavidad.", synonyms: ["Protusión", "Hinchazón (por salida de órgano)"] },
+                    { term: "Ileostomía", meaning: "Procedimiento quirúrgico que crea una abertura en el íleon (parte final del intestino delgado) hacia la pared abdominal, formando un estoma para la eliminación de efluentes intestinales.", synonyms: ["Abertura del intestino delgado", "Bolsa de ileostomía"] },
+                    { term: "Melena", meaning: "Heces oscuras, pegajosas y con olor fétido, similar a alquitrán, indicando sangrado en el tracto gastrointestinal superior.", synonyms: ["Heces negras", "Sangre digerida en las heces"] },
+                    { term: "Náusea", meaning: "Sensación de malestar en el estómago, con ganas de vomitar.", synonyms: ["Mareo", "Malestar estomacal"] },
+                    { term: "Pancreatitis", meaning: "Inflamación del páncreas, una glándula que produce enzimas digestivas y hormonas como la insulina.", synonyms: ["Inflamación del páncreas"] },
+                    { term: "Reflujo", meaning: "Retorno del contenido gástrico al esófago, causando ardor.", synonyms: ["Acidez"] },
+                    { term: "Rectocolitis Ulcerosa", meaning: "Enfermedad inflamatoria intestinal crónica que afecta el colon y el recto, causando inflamación y úlceras en el revestimiento del intestino grueso.", synonyms: ["Colitis ulcerosa", "RCU"] },
+                    { term: "Úlcera", meaning: "Lesión abierta en la piel o mucosas, como úlceras gástricas o de presión.", synonyms: ["Herida crónica", "Herida abierta", "Llaga"] },
+                    { term: "Xerostomía", meaning: "Reducción de la producción de saliva, asociada con medicamentos o enfermedades autoinmunes.", synonyms: ["Boca seca", "Saliva reducida"] }
+                ],
+                "Sistema Respiratório": [
+                    { term: "Alveolitis", meaning: "Inflamación de los alvéolos pulmonares, común en infecciones o tras extracción dental.", synonyms: ["Inflamación alveolar"] },
+                    { term: "Apnea", meaning: "Pausa temporal en la respiración, especialmente durante el sueño (apnea del sueño).", synonyms: ["Parada respiratoria temporal", "Pausa en la respiración"] },
+                    { term: "Asfixia", meaning: "Privación grave de oxígeno que puede causar inconsciencia, daño cerebral o muerte.", synonyms: ["Sofocación", "Falta severa de aire", "Estrangulamiento"] },
+                    { term: "Asma", meaning: "Enfermedad respiratoria crónica con constricción de las vías aéreas, causando sibilancias y disnea.", synonyms: ["Falta de aire crónica"] },
+                    { term: "Atelectasia", meaning: "Colapso completo o parcial de un pulmón o de un área del pulmón, impidiendo el intercambio gaseoso.", synonyms: ["Pulmón colapsado", "Colapso pulmonar"] },
+                    { term: "Bronquiolitis", meaning: "Inflamación de los bronquiolos, pequeñas vías aéreas en los pulmones, común en niños pequeños, causada por virus.", synonyms: ["Inflamación de los bronquios pequeños", "Infección respiratoria infantil"] },
+                    { term: "Bronquitis", meaning: "Inflamación de los bronquios, con tos productiva y dificultad respiratoria.", synonyms: ["Inflamación bronquial", "Inflamación del bronquio"] },
+                    { term: "Coriza", meaning: "Secreción nasal acuosa, generalmente asociada a resfriados, alergias o infecciones respiratorias.", synonyms: ["Nariz que gotea", "Secreción nasal"] },
+                    { term: "EPOC (Enfermedad Pulmonar Obstructiva Crónica)", meaning: "Enfermedad pulmonar progresiva que dificulta la respiración, incluyendo bronquitis crónica y enfisema.", synonyms: ["Enfermedad pulmonar crónica", "Bronquitis crónica", "Enfisema (pulmonar)"] },
+                    { term: "Disnea", meaning: "Dificultad respiratoria, associada con condiciones pulmonares o cardíacas.", synonyms: ["Falta de aire", "Respiración difícil"] },
+                    { term: "Enfisema", meaning: "Condición pulmonar crônica que causa falta de ar debido à destruição dos alvéolos pulmonares, tornando a expiração difícil.", synonyms: ["Pulmão danificado", "Pulmão inchado"] },
+                    { term: "Epiglotis", meaning: "Cartílago en forma de hoja ubicada en la garganta que impide la entrada de alimentos y líquidos en las vías respiratorias durante la deglución.", synonyms: ["Tapa de la garganta"] },
+                    { term: "Faringitis", meaning: "Inflamación de la faringe (garganta), generalmente causada por infección viral o bacteriana, causando dolor de garganta.", synonyms: ["Dolor de garganta", "Inflamación en la garganta"] },
+                    { term: "Hemoptisis", meaning: "Expectoración de sangre proveniente de las vías respiratorias.", synonyms: ["Tos con sangre", "Sangre al toser"] },
+                    { term: "Laringitis", meaning: "Inflamación de la laringe, causando ronquera y dolor de garganta.", synonyms: ["Inflamación de la laringe", "Ronquera"] },
+                    { term: "Pleuritis", meaning: "Inflamación de la pleura, causando dolor torácico al respirar.", synonyms: ["Inflamación pleural"] },
+                    { term: "Neumonía", meaning: "Infección de los pulmones, con fiebre, tos y dificultad respiratoria.", synonyms: ["Infección pulmonar", "Inflamación pulmonar"] },
+                    { term: "Neumotórax", meaning: "Presencia de air o gas en el espacio pleural (entre los pulmones y la pared torácica), causando colapso pulmonar.", synonyms: ["Colapso pulmonar (por aire)", "Pulmón perforado"] },
+                    { term: "Rinitis", meaning: "Inflamación de la mucosa nasal, común en alergias o resfriados.", synonyms: ["Nariz tapada", "Goteo nasal", "Alergia nasal"] },
+                    { term: "Rinorrea", meaning: "Secreción nasal fluida, común en resfriados o alergias.", synonyms: ["Secreción nasal"] },
+                    { term: "Sinusitis", meaning: "Inflamación de los senos paranasales, causando dolor facial y secreción nasal.", synonyms: ["Infección sinusal"] },
+                    { term: "Tuberculosis (TB)", meaning: "Enfermedad infecciosa crónica causada por bacteria que afecta principalmente los pulmones, pero puede afectar otros órganos.", synonyms: ["TB", "Infección pulmonar grave"] }
+                ],
+                "Sistema Cardiovascular": [
+                    { term: "Aneurisma", meaning: "Dilatación anormal y localizada de una arteria o vena, causada por el debilitamiento de la pared del vaso, con riesgo de ruptura.", synonyms: ["Dilatación arterial", "Saco arterial", "Vaso dilatado"] },
+                    { term: "Angina", meaning: "Dolor en el pecho debido a la reducción del flujo sanguíneo al corazón.", synonyms: ["Dolor torácico", "Angina de pecho"] },
+                    { term: "Angioplastia", meaning: "Procedimiento para desobstruir arterias estrechadas o bloqueadas, generalmente del corazón, usando un balón.", synonyms: ["Desobstrucción de arteria", "Cateterismo cardíaco"] },
+                    { term: "Arritmia", meaning: "Alteración del ritmo cardíaco, como taquicardia o bradicardia.", synonyms: ["Latido irregular", "Palpitación", "Corazón descompassado"] },
+                    { term: "Aterosclerosis", meaning: "Acumulación de placas en las arterias, aumentando el riesgo de infarto o ACV.", synonyms: ["Endurecimiento de arterias"] },
+                    { term: "Bacteriemia", meaning: "Presencia de bacterias viables en la sangre, que puede o no causar síntomas.", synonyms: ["Bacterias en la sangre", "Infección sanguínea"] },
+                    { term: "Bradicardia", meaning: "Frecuencia cardíaca por debajo de 60 latidos por minuto.", synonyms: ["Corazón lento", "Latidos lentos"] },
+                    { term: "Cardiopatía", meaning: "Cualquier enfermedad que afecte el corazón.", synonyms: ["Enfermedad cardíaca", "Corazón enfermo"] },
+                    { term: "Disección Aórtica", meaning: "Condición grave en la que la capa interna de la aorta se rompe, permitiendo que la sangre fluya entre las capas de la pared del vaso.", synonyms: ["Rotura de la aorta", "Aorta disecada"] },
+                    { term: "Embolia", meaning: "Bloqueo de un vaso sanguíneo por un coágulo, air u otro material.", synonyms: ["Obstrucción vascular", "Bloqueo vascular súbito", "Obstrucción por coágulo"] },
+                    { term: "Endocarditis", meaning: "Infección de las válvulas o revestimiento interno del corazón.", synonyms: ["Infecção do endocárdio"] },
+                    { term: "Fibrilación", meaning: "Contracción descoordinada e ineficaz de las fibras musculares, especialmente en el corazón (fibrilación auricular o ventricular), que perjudica el bombeo de sangre.", synonyms: ["Latido descoordinado", "Corazón tembloroso"] },
+                    { term: "Fibrilación Auricular", meaning: "Tipo común de arritmia en la que las aurículas (cámaras superiores del corazón) laten de forma irregular y rápida.", synonyms: ["Arritmia auricular", "FA"] },
+                    { term: "Flebitis", meaning: "Inflamación de una veina, frecuentemente asociada a coágulos.", synonyms: ["Inflamación venosa"] },
+                    { term: "Hemofilia", meaning: "Trastorno genético que afecta la capacidad de la sangre para coagular, lo que lleva a sangrados prolongados y hemorragias internas.", synonyms: ["Problema de coagulación", "Sangrado fácil"] },
+                    { term: "Hemorragia", meaning: "Pérdida excesiva de sangre, interna o externa, que puede ser grave y amenazar la vida.", synonyms: ["Sangrado intenso", "Pérdida de sangre"] },
+                    { term: "Hiperpotasemia", meaning: "Nivel elevado de potasio en la sangre, lo que puede afectar la función cardíaca.", synonyms: ["Potasio alto"] },
+                    { term: "Hipernatremia", meaning: "Nivel elevado de sodio en la sangre, generalmente debido a la deshidratación o ingesta excesiva de sodio.", synonyms: ["Sodio alto"] },
+                    { term: "Hipertensión", meaning: "Presión arterial elevada, por encima de 140/90 mmHg.", synonyms: ["Presión alta", "Hipertensión arterial"] },
+                    { term: "Hipopotasemia", meaning: "Nivel bajo de potasio en la sangre, lo que puede causar debilidad muscular y arritmias cardíacas.", synonyms: ["Potasio bajo"] },
+                    { term: "Hiponatremia", meaning: "Nivel bajo de sodio en la sangre, que puede ocurrir debido a la ingesta excesiva de agua o ciertas condiciones médicas.", synonyms: ["Sodio bajo"] },
+                    { term: "Hipotensión", meaning: "Presión sanguínea anormalmente baja, que puede causar mareo, desmayo y fatiga.", synonyms: ["Presión baja"] },
+                    { term: "Infarto de Miocardio", meaning: "Muerte de parte del músculo cardíaco debido a la interrupción del flujo sanguíneo, generalmente por un coágulo en una arteria coronaria.", synonyms: ["Ataque cardíaco", "Infarto"] },
+                    { term: "Insuficiencia cardíaca", meaning: "Incapacidad del corazón para bombear sangre adecuadamente.", synonyms: ["Corazón débil", "Insuficiencia del corazón"] },
+                    { term: "Isquemia", meaning: "Reducción del flujo sanguíneo a un tejido, causando hipoxia.", synonyms: ["Falta de flujo sanguíneo", "Falta de sangre", "Fluxo sanguíneo reducido"] },
+                    { term: "Miocarditis", meaning: "Inflamación del músculo cardíaco (miocardio), que puede debilitar el corazón y afectar su capacidad para bombear sangre.", synonyms: ["Inflamación del corazón", "Músculo del corazón inflamado"] },
+                    { term: "Palpitación", meaning: "Sensación de que el corazón está latiendo de forma irregular, rápida, fuerte o como si estuviera 'saltando'.", synonyms: ["Corazón acelerado (sensación)", "Latido irregular"] },
+                    { term: "Pancitopenia", meaning: "Reducción de todas las células sanguíneas (eritrocitos, leucocitos y plaquetas).", synonyms: ["Baja de células sanguíneas"] },
+                    { term: "Pericarditis", meaning: "Inflamación de la membrana que envuelve el corazón.", synonyms: ["Inflamación del pericardio"] },
+                    { term: "Taquicardia", meaning: "Frecuencia cardíaca por encima de 100 latidos por minuto.", synonyms: ["Corazón acelerado", "Latidos rápidos"] },
+                    { term: "Trombosis", meaning: "Formación de un coágulo en un vaso sanguíneo, causando obstrucción.", synonyms: ["Coágulo sanguíneo", "Coágulo", "Obstrucción vascular", "Atasco de vena/arteria"] },
+                    { term: "Varices", meaning: "Venas dilatadas y tortuosas, frecuentemente en las piernas.", synonyms: ["Venas dilatadas"] },
+                    { term: "Vasoconstricción", meaning: "Estrechamiento (contracción) de los vasos sanguíneos, resultando en una disminución del flujo sanguíneo a una área específica.", synonyms: ["Estrechamiento de los vasos", "Contracción vascular"] },
+                    { term: "Vasodilatación", meaning: "Ensanchamiento (dilatación) de los vasos sanguíneos, resultando en un aumento del flujo sanguíneo a una área específica.", synonyms: ["Ensanchamiento de los vasos", "Dilatación vascular"] }
+                ],
+                "Sistema Urinario": [
+                    { term: "Cistitis", meaning: "Inflamación de la vejiga, generalmente causada por infección bacteriana.", synonyms: ["Infección urinaria", "Inflamación de la vejiga"] },
+                    { term: "Cistoscopia", meaning: "Examen que utiliza un tubo fino con cámara (cistoscopio) para examinar el interior de la vejiga y la uretra.", synonyms: ["Examen de vejiga"] },
+                    { term: "Disuria", meaning: "Dolor o incomodidad al orinar, generalmente una sensación de quemazón o ardor.", synonyms: ["Dolor al orinar", "Ardor al orinar"] },
+                    { term: "Enuresis", meaning: "Incontinencia urinaria, especialmente el acto de orinar involuntariamente durante el sueño (enuresis nocturna), común en niños.", synonyms: ["Hacer pis en la cama", "Pérdida de orina (involuntaria)"] },
+                    { term: "Glomerulonefritis", meaning: "Inflamación de los glomérulos renales, las pequeñas unidades filtradoras de los riñones, afectando la capacidad de filtrar la sangre.", synonyms: ["Inflamación del riñón", "Enfermedad renal glomerular"] },
+                    { term: "Incontinencia Urinaria", meaning: "Pérdida involuntaria de orina.", synonyms: ["Perder pis", "Escape de orina"] },
+                    { term: "Insuficiencia renal", meaning: "Pérdida de la función renal, causando acumulación de toxinas.", synonyms: ["Fallo renal", "Riñón fallando", "Fallo renal", "Enfermedad renal crónica"] },
+                    { term: "Litiasis Urinaria", meaning: "Formación de cálculos (piedras) en el tracto urinario (riñones, uréteres, vejiga).", synonyms: ["Piedras en los riñones", "Cálculo renal", "Nefrolitiasis"] },
+                    { term: "Nefritis", meaning: "Inflamación de los riñones, frequentemente associada a infecções.", synonyms: ["Inflamación renal", "Inflamación de los riñones"] },
+                    { term: "Nefropatía", meaning: "Cualquier enfermedad o condición que afecte los riñones.", synonyms: ["Enfermedad renal"] },
+                    { term: "Oliguria", meaning: "Producción de orina en volumen anormalmente pequeño (menos de 400 ml en 24 horas en adultos), indicando posible problema renal o deshidratación.", synonyms: ["Poca orina", "Producción reducida de orina"] },
+                    { term: "Pielonefritis", meaning: "Infección del riñón y de la pelvis renal, generalmente causada por bacterias que ascienden del tracto urinario inferior.", synonyms: ["Infección renal", "Infección del riñón"] },
+                    { term: "Poliuria", meaning: "Producción de orina en volumen excesivo, que excede lo normal (más de 2.5 litros en 24 horas en adultos).", synonyms: ["Orinar mucho", "Exceso de orina"] },
+                    { term: "Proteinuria", meaning: "Presencia de proteína en la orina, indicativa de disfunción renal.", synonyms: ["Proteína en la orina"] },
+                    { term: "Uremia", meaning: "Acumulación de residuos tóxicos en la sangre que normalmente serían filtrados por los riñones, indicando falla renal avanzada.", synonyms: ["Intoxicación por falla renal"] },
+                    { term: "Ureteroscopia", meaning: "Procedimiento para examinar o remover cálculos en los uréteres o riñones usando un ureteroscopio.", synonyms: ["Examen del uréter"] },
+                    { term: "Uretritis", meaning: "Inflamación de la uretra, el tubo que transporta la orina de la vejiga hacia afuera del cuerpo.", synonyms: ["Infección de la uretra"] }
+                ],
+                "Sistema Tegumentario (Piel, Cabello, Uñas)": [
+                    { term: "Acanthosis Nigricans", meaning: "Enfermedad cutánea con manchas oscuras, a menudo asociada con resistencia a la insulina.", synonyms: ["Manchas oscuras"] },
+                    { term: "Acné", meaning: "Enfermedad de la piel común que causa espinillas, puntos negros y, a veces, quistes, principalmente en la cara, cuello, tórax y espalda.", synonyms: ["Espinilla", "Puntos negros", "Piel grasa (con lesiones)"] },
+                    { term: "Alopecia", meaning: "Pérdida de cabello o vello en cualquier parte del cuerpo, pudiendo ser temporal o permanente.", synonyms: ["Calvicie", "Caída del cabello"] },
+                    { term: "Dermatitis", meaning: "Inflamación de la piel, a menudo asociada con alergias o irritaciones.", synonyms: ["Inflamación de la piel", "Eccema", "Piel irritada"] },
+                    { term: "Edema", meaning: "Acumulación de líquido en los tejidos, frecuentemente en las extremidades.", synonyms: ["Inchaço", "Retención de líquidos", "Tumefacción"] },
+                    { term: "Epidermólisis", meaning: "Condición caracterizada por la formación de ampollas en la piel debido a la fragilidad de la epidermis, a menudo genética.", synonyms: ["Piel con ampollas", "Enfermedad ampollosa de la piel"] },
+                    { term: "Eritema", meaning: "Enrojecimiento cutáneo debido a inflamación o vasodilatación.", synonyms: ["Enrojecimiento de la piel", "Piel roja"] },
+                    { term: "Escabiosis", meaning: "Infestación de la piel por ácaros, causando intensa picazón y lesiones cutáneas.", synonyms: ["Sarna", "Picazón por ácaro"] },
+                    { term: "Exantema", meaning: "Erupción cutánea generalizada, generalmente asociada a enfermedades infecciosas (ej: sarampión, rubéola).", synonyms: ["Erupción en la piel", "Manchas en la piel"] },
+                    { term: "Hematoma", meaning: "Colección de sangre fuera de los vasos, debido a trauma o ruptura.", synonyms: ["Acumulación de sangre", "Moretón", "Contusión", "Morado"] },
+                    { term: "Ictericia", meaning: "Coloración amarillenta de la piel debido al acúmulo de bilirrubina.", synonyms: ["Amarilleo", "Piel amarilla", "Ojos amarillos"] },
+                    { term: "Melanoma", meaning: "Tipo grave de cáncer de piel que se desarrolla en las células productoras de melanina (melanocitos).", synonyms: ["Cáncer de piel maligno"] },
+                    { term: "Onicomicosis", meaning: "Infección fúngica de las uñas (hongo en la uña), causando engrosamiento, decoloración y fragilidad.", synonyms: ["Micosis de uña", "Hongo en la uña"] },
+                    { term: "Prurido", meaning: "Picazón.", synonyms: ["Picazón en la piel", "Comezón"] },
+                    { term: "Psoriasis", meaning: "Enfermedad autoinmune crónica con placas escamosas en la piel.", synonyms: ["Enfermedad cutánea escamosa", "Piel escamosa", "Enfermedad de piel crónica"] },
+                    { term: "Púrpura", meaning: "Manchas moradas o rojizas en la piel o membranas mucosas, causadas por sangrado debajo de la piel, sin elevación o dolor.", synonyms: ["Manchas de sangre en la piel", "Manchas moradas (no trauma)"] },
+                    { term: "Pus", meaning: "Líquido espeso y amarillento, verdoso o amarronado, formado por glóbulos blancos muertos, bacterias y tejido en descomposición, indicando infección.", synonyms: ["Secreción purulenta", "Líquido de infección"] },
+                    { term: "Queloides", meaning: "Cicatriz sobresaliente, gruesa, de color rojizo u oscuro, que se extiende más allá de los límites de la lesión original, debido a una cicatrización excesiva.", synonyms: ["Cicatriz gruesa", "Cicatriz elevada"] },
+                    { term: "Quemadura", meaning: "Lesión en la piel u otros tejidos causada por calor, frío, electricidad, productos químicos o radiación.", synonyms: ["Escaldadura", "Daño por calor"] },
+                    { term: "Úlcera por Presión", meaning: "Lesión en la piel y el tejido subyacente causada por presión prolongada sobre la piel, generalmente en áreas óseas.", synonyms: ["Escara", "Úlcera de decúbito"] },
+                    { term: "Urticaria", meaning: "Erupción cutánea pruriginosa, generalmente asociada con alergias.", synonyms: ["Picazón en la piel", "Ronchas", "Placas rojas (con picazón)", "Erupción alérgica"] }
+                ],
+                "Sistema Ocular y Otorrinolaringológico": [
+                    { term: "Ambliopía", meaning: "Reducción de la agudeza visual en un ojo debido a la falta de coordinación con el cerebro.", synonyms: ["Ojo vago"] },
+                    { term: "Anosmia", meaning: "Pérdida total o parcial del olfato.", synonyms: ["Pérdida de olfato", "No huele"] },
+                    { term: "Astigmatismo", meaning: "Error refractivo del ojo que causa visión borrosa o distorsionada a todas las distancias debido a la curvatura irregular de la córnea o lente.", synonyms: ["Visión borrosa", "Visión distorsionada"] },
+                    { term: "Blefaritis", meaning: "Inflamación de los párpados, generalmente en los márgenes, causando irritación, picazón y costras.", synonyms: ["Inflamación del párpado", "Párpado inflamado"] },
+                    { term: "Catarata", meaning: "Opacidad del cristalino (lente natural del ojo), que lleva a visión borrosa y, si no se trata, a ceguera.", synonyms: ["Ojo nublado", "Cristalino opaco"] },
+                    { term: "Conjuntivitis", meaning: "Inflamación de la conjuntiva, la membrana que recubre la parte blanca del ojo y la parte interna de los párpados, causando enrojecimiento e irritación.", synonyms: ["Ojo rojo", "Inflamación del ojo"] },
+                    { term: "Desprendimiento de Retina", meaning: "Condición grave en la que la retina se separa de la capa subyacente de vasos sanguíneos, lo que puede conducir a la pérdida de visión.", synonyms: ["Retina desprendida"] },
+                    { term: "Epistaxis", meaning: "Sangrado nasal.", synonyms: ["Sangrado de la nariz", "Nariz sangrando"] },
+                    { term: "Exoftalmía", meaning: "Protrusión anormal de los globos oculares (ojos saltones), común en enfermedades de la tiroides.", synonyms: ["Ojos saltones", "Ojos hacia afuera"] },
+                    { term: "Glaucoma", meaning: "Enfermedad ocular con aumento de la presión intraocular, pudiendo causar ceguera.", synonyms: ["Presión ocular elevada"] },
+                    { term: "Laringitis", meaning: "Inflamación de la laringe, causando ronquera y dolor de garganta.", synonyms: ["Inflamación de la laringe", "Ronquera"] },
+                    { term: "Mácula", meaning: "Pequeña área en la retina, ubicada en el centro del campo visual, responsable de la visión central y detallada.", synonyms: ["Punto de visión central", "Área central de la retina"] },
+                    { term: "Oftalmía", meaning: "Inflamación de los ojos, generalmente de la conjuntiva (conjuntivitis) u otras estructuras oculares.", synonyms: ["Inflamación de los ojos", "Ojo inflamado"] },
+                    { term: "Otalgia", meaning: "Dolor localizado en el oído, generalmente asociado con otitis.", synonyms: ["Dolor de oído", "Oído doliendo"] },
+                    { term: "Otitis", meaning: "Inflamación del oído, que puede ser externa (nadador), media o interna, causando dolor y, a veces, pérdida auditiva.", synonyms: ["Inflamación del oído", "Infección de oído"] },
+                    { term: "Otoscopia", meaning: "Examen del oído usando un otoscopio para visualizar el tímpano y el canal auditivo.", synonyms: ["Examen de oído"] },
+                    { term: "Retinopatía", meaning: "Cualquier enfermedad o daño a la retina del ojo, común en diabetes e hipertensión.", synonyms: ["Enfermedad de la retina"] },
+                    { term: "Rinitis", meaning: "Inflamación de la mucosa nasal, común en alergias o resfriados.", synonyms: ["Nariz tapada", "Goteo nasal", "Alergia nasal"] },
+                    { term: "Rinorrea", meaning: "Secreción nasal fluida, común en resfriados o alergias.", synonyms: ["Secreción nasal"] },
+                    { term: "Sinusitis", meaning: "Inflamación de los senos paranasales, causando dolor facial y secreción nasal.", synonyms: ["Infección sinusal"] }
+                ],
+                "Sistema Reproductor y Endocrino": [
+                    { term: "Amenorrea", meaning: "Ausencia de menstruación en mujeres en edad reproductiva.", synonyms: ["Falta de menstruación", "Menstruación ausente"] },
+                    { term: "Criptorquidia", meaning: "Condición en la que uno o ambos testículos no han descendido a la bolsa escrotal (escroto) después del nacimiento.", synonyms: ["Testículo no descendido", "Testículo retenido"] },
+                    { term: "Diabetes Gestacional", meaning: "Tipo de diabetes que se desarrolla o es diagnosticado por primera vez durante el embarazo.", synonyms: ["Glucemia alta en el embarazo"] },
+                    { term: "Dismenorrea", meaning: "Menstruación dolorosa, con cólicos fuertes que pueden ser incapacitantes.", synonyms: ["Cólico menstrual fuerte", "Menstruación con dolor"] },
+                    { term: "Endometriosis", meaning: "Condición en la que tejido similar al revestimiento del útero (endometrio) crece fuera del útero.", synonyms: ["Endometrio fuera de lugar"] },
+                    { term: "Hipertiroidismo", meaning: "Condición en la que la glándula tiroides produce hormonas tiroideas en exceso, acelerando el metabolismo del cuerpo.", synonyms: ["Tiroides hiperactiva", "Tiroides acelerada"] },
+                    { term: "Hipotiroidismo", meaning: "Condición en la que la glándula tiroides no produce suficientes hormonas tiroideas, llevando a metabolismo lento.", synonyms: ["Tiroides hipoactiva", "Tiroides perezosa"] },
+                    { term: "Histerectomía", meaning: "Extirpación quirúrgica del útero.", synonyms: ["Cirugía de extirpación del útero", "Extirpación del útero"] },
+                    { term: "Mioma", meaning: "Tumor benigno (no canceroso) que se desarrolla en el útero, común en mujeres en edad reproductiva.", synonyms: ["Nódulo en el útero", "Fibroma uterino"] },
+                    { term: "Nulípara", meaning: "Mujer que nunca ha dado a luz.", synonyms: ["Nunca ha parido", "Mujer sin hijos (nacidos)"] },
+                    { term: "Ovario Poliquístico (Síndrome del)", meaning: "Trastorno hormonal común en mujeres en edad reproductiva, causando quistes en los ovarios, irregularidades menstruales, entre otros.", synonyms: ["SOP", "Quistes en el ovario"] },
+                    { term: "Tiroiditis", meaning: "Inflamación de la glándula tiroides.", synonyms: ["Inflamación de la tiroides"] },
+                    { term: "Tiroides", meaning: "Glândula endocrina ubicada en el cuello, que produce hormonas que regulan el metabolismo do corpo.", synonyms: ["Glândula de la garganta"] }
+                ],
+                "Laboratorio Clínico": [
+                    { term: "Albúmina", meaning: "Proteína principal del plasma sanguíneo, importante para mantener la presión osmótica, transportar sustancias y nutrición.", synonyms: ["Proteína sérica", "Proteína de la sangre"] },
+                    { term: "Amilasa", meaning: "Enzima que ayuda a digerir carbohidratos, producida principalmente por el páncreas y las glándulas salivales; usada para diagnosticar pancreatitis.", synonyms: ["Enzima digestiva"] },
+                    { term: "Coagulograma", meaning: "Conjunto de análisis de sangre que evalúan la capacidad de coagulación de la sangre, útil para detectar trastornos de sangrado o coagulación.", synonyms: ["Análisis de coagulación", "Tiempo de coagulación"] },
+                    { term: "Colesterol", meaning: "Tipo de grasa presente en la sangre, esencial para el cuerpo, pero en exceso puede aumentar el riesgo de enfermedades cardiovasculares (LDL, HDL).", synonyms: ["Grasa en la sangre"] },
+                    { term: "Creatinina", meaning: "Sustancia de desecho en la sangre, producida por los músculos, cuya medición se usa para evaluar la función renal.", synonyms: ["Marcador renal", "Análisis de riñón"] },
+                    { term: "Cultivos (Exámenes)", meaning: "Análisis de laboratorio para cultivar e identificar microorganismos (bacterias, hongos) en muestras de fluidos corporales o tejidos, para diagnosticar infecciones.", synonyms: ["Cultivo de orina", "Cultivo de sangre", "Cultivo de secreción"] },
+                    { term: "Electrolitos", meaning: "Minerales con carga eléctrica (sodio, potasio, cloro, etc.) presentes en la sangre y otros fluidos corporales, esenciales para muchas funciones celulares.", synonyms: ["Sodio", "Potasio", "Cloro"] },
+                    { term: "Enzimas Cardíacas", meaning: "Proteínas liberadas en el torrente sanguíneo cuando el músculo cardíaco se daña, usadas para diagnosticar infarto.", synonyms: ["Troponina", "CK-MB"] },
+                    { term: "Gasometría Arterial", meaning: "Análisis de sangre que mide los niveles de oxígeno y dióxido de carbono y el pH en la sangre arterial, para evaluar la función pulmonar y el equilibrio ácido-base.", synonyms: ["Análisis de gases en la sangre", "Equilibrio ácido-base"] },
+                    { term: "Glucemia", meaning: "Nivel de glucosa (azúcar) en la sangre.", synonyms: ["Azúcar en la sangre", "Glucosa"] },
+                    { term: "Hemograma", meaning: "Análisis de sangre completo que evalúa los componentes de la sangre (glóbulos rojos, blancos, plaquetas) para detectar anemia, infecciones, etc.", synonyms: ["Análisis de sangre", "Recuento de células sanguíneas"] },
+                    { term: "Marcadores Tumorales", meaning: "Sustancias (proteínas, enzimas, hormonas) producidas por células cancerosas o por el cuerpo en respuesta al cáncer, usadas para monitoreo o diagnóstico.", synonyms: ["Biomarcadores de cáncer"] },
+                    { term: "Pruebas de Función Hepática (PFH)", meaning: "Análisis de sangre que miden los niveles de enzimas y proteínas producidas por el hígado para evaluar su salud y funcionamiento.", synonyms: ["Pruebas de hígado", "Enzimas hepáticas"] },
+                    { term: "Triglicéridos", meaning: "Tipo de grasa presente en la sangre, una fuente de energía, pero niveles elevados aumentan el riesgo de enfermedades cardíacas.", synonyms: ["Grasa en la sangre"] },
+                    { term: "Urea", meaning: "Producto de desecho del metabolismo de proteínas, filtrado por los riñones y excretado en la orina; su medición evalúa la función renal.", synonyms: ["Marcador renal", "Análisis de riñón"] }
+                ],
+                "Instrumentos Quirúrgicos": [
+                    { term: "Separador", meaning: "Instrumento usado en cirugía para separar y mantener los tejidos apartados, exponiendo el área de trabajo.", synonyms: ["Retractor"] },
+                    { term: "Aguja Quirúrgica", meaning: "Aguja usada para pasar el hilo de sutura a través de los tejidos para cerrar incisiones o heridas.", synonyms: ["Aguja de sutura"] },
+                    { term: "Bisturí", meaning: "Instrumento quirúrgico con hoja afilada, usado para hacer incisiones.", synonyms: ["Scalpel"] },
+                    { term: "Catéter", meaning: "Tubo fino y flexible insertado en el cuerpo para drenar fluidos, administrar medicamentos o acceder a vasos sanguíneos/órganos.", synonyms: ["Sonda", "Tubo"] },
+                    { term: "Cureta", meaning: "Instrumento con una punta en forma de cuchara o lazo, usado para raspar o remover tejido.", synonyms: ["Raspador quirúrgico"] },
+                    { term: "Electrocauterio", meaning: "Aparato que usa corriente eléctrica para cortar tejidos y controlar el sangrado durante la cirugía.", synonyms: ["Bisturí eléctrico", "Cauterizador"] },
+                    { term: "Endoscopio", meaning: "Instrumento largo y fino con una cámara y luz en la punta, usado para visualizar el interior del cuerpo a través de orificios naturales o pequeñas incisiones.", synonyms: ["Cámara interna", "Tubo con cámara"] },
+                    { term: "Hilo de Sutura", meaning: "Material usado para cerrar heridas quirúrgicas o unir tejidos.", synonyms: ["Sutura", "Hilo quirúrgico"] },
+                    { term: "Hemostato", meaning: "Pinza usada para pinzar vasos sanguíneos y controlar el sangrado.", synonyms: ["Pinza hemostática"] },
+                    { term: "Laparoscopio", meaning: "Tipo de endoscopio usado en cirugías mínimamente invasivas del abdomen (laparoscopia).", synonyms: ["Endoscopio abdominal"] },
+                    { term: "Pinza Quirúrgica", meaning: "Instrumento usado para sujetar, manipular o remover tejidos y materiales durante la cirugía.", synonyms: ["Fórceps"] },
+                    { term: "Sonda", meaning: "Tubo fino y flexible insertado en una cavidad o pasaje del cuerpo para diversos fines (drenaje, alimentación, medición).", synonyms: ["Catéter", "Tubo"] },
+                    { term: "Sierra Quirúrgica", meaning: "Instrumento usado para cortar huesos durante procedimientos ortopédicos o neuroquirúrgicos.", synonyms: ["Sierra ósea"] },
+                    { term: "Tijera Quirúrgica", meaning: "Tijera especializada para cortar tejidos, hilos u otros materiales durante la cirugía.", synonyms: ["Tijera médica"] },
+                    { term: "Trócar", meaning: "Instrumento puntiagudo con una cánula hueca, usado para crear un portal de entrada en la cavidad abdominal o torácica para la inserción de laparoscopios u otros instrumentos.", synonyms: ["Punción para laparoscopia"] },
+                    { term: "Trépano", meaning: "Instrumento quirúrgico para hacer un orificio circular (trepanación) en un hueso, generalmente en el cráneo.", synonyms: ["Broca ósea", "Trepanación"] }
+                ],
+                "Curativos y Materiales": [
+                    { term: "Alcohol 70%", meaning: "Solución alcohólica usada como antiséptico para desinfectar la piel antes de procedimientos o para limpiar superficies.", synonyms: ["Alcohol etílico"] },
+                    { term: "Algodón Hidrófilo", meaning: "Algodón procesado para absorber líquidos, usado en curaciones y procedimientos de limpieza.", synonyms: ["Algodón absorbente"] },
+                    { term: "Antiséptico", meaning: "Agente químico aplicado en tejidos vivos (piel, mucosas) para destruir o inhibir el crecimiento de microorganismos.", synonyms: ["Desinfectante para piel"] },
+                    { term: "Venda", meaning: "Banda de tela usada para envolver partes del cuerpo, fijar apósitos, inmovilizar o aplicar compresión.", synonyms: ["Faja", "Vendaje"] },
+                    { term: "Campo Quirúrgico", meaning: "Paño estéril usado para cubrir al paciente y las superficies alrededor del área quirúrgica, creando un ambiente limpio.", synonyms: ["Paño estéril", "Drapeado quirúrgico"] },
+                    { term: "Cánula", meaning: "Tubo fino insertado en una cavidad del cuerpo, vaso sanguíneo o conducto para drenaje, inyección o acceso.", synonyms: ["Tubulación", "Catéter (corto)"] },
+                    { term: "Clorhexidina", meaning: "Antiséptico de amplio espectro usado para desinfección de la piel y mucosas, y como enjuague bucal.", synonyms: ["Digluconato de clorhexidina"] },
+                    { term: "Drenaje", meaning: "Tubo o dispositivo insertado en una herida o cavidad para remover fluidos (sangre, pus) o aire.", synonyms: ["Tubulación de drenaje"] },
+                    { term: "Esparadrapo", meaning: "Cinta adhesiva usada para fijar apósitos, gasas o tubos en la piel.", synonyms: ["Cinta microporosa", "Cinta quirúrgica"] },
+                    { term: "Gasa", meaning: "Tejido fino y transparente, generalmente de algodón, usado para apósitos, absorción de líquidos y limpieza de heridas.", synonyms: ["Compresa de gasa"] },
+                    { term: "Guantes Estériles", meaning: "Guantes desechables sin microorganismos, usados en procedimientos quirúrgicos o que requieren alta asepsia.", synonyms: ["Guantes quirúrgicos"] },
+                    { term: "Mascarilla Quirúrgica", meaning: "Barrera física usada para cubrir la boca y la nariz, protegiendo contra la inhalación o exhalación de gotas respiratorias.", synonyms: ["Mascarilla de procedimiento"] },
+                    { term: "Povidona Yodada", meaning: "Antiséptico y desinfectante tópico de amplio espectro, usado para limpiar la piel antes de la cirugía o en heridas.", synonyms: ["PVPI", "Yodo-povidona"] },
+                    { term: "Suero Fisiológico", meaning: "Solución acuosa de cloruro de sodio 0.9%, usada para limpieza de heridas, hidratación intravenosa y dilución de medicamentos.", synonyms: ["Suero salino", "Solución salina"] },
+                    { term: "Sonda Nasogástrica", meaning: "Tubo insertado por la nariz hasta el estómago para alimentación, drenaje o administración de medicamentos.", synonyms: ["SNG", "Tubo nasal (para estómago)"] },
+                    { term: "Sutura (Material)", meaning: "Material usado para cerrar heridas quirúrgicas o unir tejidos, como hilos absorbibles o no absorbibles.", synonyms: ["Hilo de sutura", "Punto quirúrgico"] }
+                ],
+                "Equipos y Aparatos de Exámenes": [
+                    { term: "Balanza Digital", meaning: "Aparato electrónico para medición precisa del peso corporal.", synonyms: ["Peso electrónico"] },
+                    { term: "Bomba de Infusión", meaning: "Dispositivo que administra fluidos, medicamentos o nutrientes al paciente en cantidades controladas y a un ritmo preciso.", synonyms: ["Bomba de suero", "Infusora"] },
+                    { term: "Colonoscopia (Aparato)", meaning: "Aparato (colonoscopio) con cámara flexible usado para examinar el interior del colon y recto.", synonyms: ["Colonoscopio"] },
+                    { term: "Desfibrilador", meaning: "Aparato que envía una descarga eléctrica al corazón para restaurar un ritmo cardíaco normal en casos de arritmias graves.", synonyms: ["Cardioversor", "DEA (desfibrilador externo automático)"] },
+                    { term: "Densitometría Ósea (Aparato)", meaning: "Aparato que mide la densidad mineral ósea para diagnosticar osteoporosis.", synonyms: ["Densitómetro"] },
+                    { term: "Ecografía (Aparato)", meaning: "Aparato de ultrasonido que crea imágenes en tiempo real del corazón para evaluar su estructura y función.", synonyms: ["Ecocardiográfico"] },
+                    { term: "Electrocardiograma (Aparato)", meaning: "Aparato que registra la actividad eléctrica del corazón (ECG o EKG) para diagnosticar problemas cardíacos.", synonyms: ["Electrocardiógrafo", "Máquina de ECG"] },
+                    { term: "Endoscopia (Aparato)", meaning: "Aparato (endoscopio) con cámara flexible usado para examinar el interior del esófago, estómago y duodeno.", synonyms: ["Endoscopio digestivo"] },
+                    { term: "Esfigmomanómetro", meaning: "Aparato usado para medir la presión arterial (aparato de presión).", synonyms: ["Aparato de presión", "Medidor de presión"] },
+                    { term: "Estetoscopio", meaning: "Instrumento acústico usado para auscultar sonidos internos del cuerpo, como latidos cardíacos, sonidos pulmonares e intestinales.", synonyms: ["Fonendoscopio"] },
+                    { term: "Foco Quirúrgico", meaning: "Lámpara especial usada en salas de cirugía para iluminar el campo operatorio de forma intensa y sin sombras.", synonyms: ["Lámpara quirúrgica"] },
+                    { term: "Incubadora", meaning: "Equipo médico que proporciona un ambiente controlado para recién nacidos prematuros o enfermos, manteniendo temperatura y humedad ideales.", synonyms: ["Cuna térmica (neonatal)"] },
+                    { term: "Mamografía (Aparato)", meaning: "Aparato de rayos X de baja dosis usado para detectar cáncer de mama.", synonyms: ["Mamógrafo"] },
+                    { term: "Monitor Cardíaco", meaning: "Aparato que monitoriza continuamente la actividad eléctrica del corazón y otros signos vitales.", synonyms: ["Cardiomonitor", "Monitor de ECG"] },
+                    { term: "Oxímetro de Pulso", meaning: "Pequeño aparato colocado en el dedo para medir la saturación de oxígeno en la sangre (SpO2) y la frecuencia cardíaca.", synonyms: ["Medidor de oxígeno", "Saturímetro"] },
+                    { term: "Rayos X (Aparato)", meaning: "Aparato que utiliza radiación ionizante para crear imágenes de estructuras internas del cuerpo, especialmente huesos.", synonyms: ["Máquina de radiografía", "Aparato de RX"] },
+                    { term: "Resonancia Magnética (Aparato)", meaning: "Aparato que usa campos magnéticos y ondas de radio para crear imágenes detalladas de órganos y tejidos blandos del cuerpo.", synonyms: ["Máquina de RM"] },
+                    { term: "Tomografía Computarizada (Aparato)", meaning: "Aparato que usa rayos X y tecnología de computadora para crear imágenes transversales detalladas del cuerpo.", synonyms: ["Máquina de TC", "Tomógrafo"] },
+                    { term: "Ultrasonografía (Aparato)", meaning: "Aparato que usa ondas sonoras de alta frecuencia para crear imágenes en tiempo real de órganos y estructuras internas.", synonyms: ["Ultrasonido", "Aparato de USG"] },
+                    { term: "Ventilador Mecánico", meaning: "Máquina que asiste o reemplaza la respiración del paciente, suministrando aire a los pulmones.", synonyms: ["Respirador artificial", "Máquina de ventilación"] }
+                ],
+                "Condiciones Generales y Otros Sistemas": [
+                    { term: "Ablación", meaning: "Extirpación o destrucción de tejido por medios quirúrgicos, térmicos o químicos.", synonyms: ["Extirpación", "Destrucción"] },
+                    { term: "Acidosis", meaning: "Aumento de la acidez en la sangre, debido a desequilibrios metabólicos o respiratorios.", synonyms: ["Acidez sanguínea", "Exceso de ácido", "pH bajo en la sangre"] },
+                    { term: "Alcalosis", meaning: "Condición en la que hay exceso de base en la sangre, aumentando el pH sanguíneo, generalmente por pérdida de ácido o retención de bicarbonato.", synonyms: ["Exceso de base", "pH alto en la sangre"] },
+                    { term: "Analgésico", meaning: "Medicamento o método que alivia el dolor sin causar pérdida de conciencia.", synonyms: ["Remedio para el dolor", "Aliviador de dolor"] },
+                    { term: "Anemia", meaning: "Reducción de glóbulos rojos o hemoglobina, causando fatiga y palidez.", synonyms: ["Falta de sangre", "Sangre débil", "Bajos glóbulos rojos"] },
+                    { term: "Anorexia", meaning: "Pérdida de apetito o trastorno alimentario caracterizado por la negativa a mantener un peso corporal saludable y miedo intenso a engordar.", synonyms: ["Falta de apetito", "Rechazo alimentario", "Trastorno alimentario"] },
+                    { term: "Antisepsia", meaning: "Uso de agentes químicos (antisépticos) para destruir o inhibir el crecimiento de microorganismos en tejidos vivos, como la piel.", synonyms: ["Desinfección de piel", "Limpieza de herida"] },
+                    { term: "Atrofia", meaning: "Disminución del tamaño de una parte del cuerpo o de un órgano debido a la disminución del tamaño o número de sus células, o desuso.", synonyms: ["Adelgazamiento (tejido)", "Disminución de tamaño", "Encogimiento"] },
+                    { term: "Auscultación", meaning: "Acto de escuchar los sonidos internos del cuerpo (corazón, pulmones, intestino), generalmente con un estetoscopio, para fines diagnósticos.", synonyms: ["Escuchar (con estetoscopio)", "Oír sonidos internos"] },
+                    { term: "Autoinmune", meaning: "Se refiere a una enfermedad en la que el sistema inmunológico, erróneamente, ataca los propios tejidos u órganos del cuerpo.", synonyms: ["Enfermedad del sistema inmune", "Inmunidad que ataca el cuerpo"] },
+                    { term: "Benigno", meaning: "Tumor o condición que no es cancerosa y no se propaga a otras partes del cuerpo.", synonyms: ["No canceroso", "No maligno"] },
+                    { term: "Biopsia", meaning: "Extracción de una pequeña muestra de tejido de un órgano o tumor para examen microscópico y diagnóstico.", synonyms: ["Toma de tejido para análisis", "Extracción de muestra"] },
+                    { term: "Calcificación", meaning: "Acumulación de calcio en tejidos blandos, a menudo en arterias coronarias.", synonyms: ["Depósito de calcio"] },
+                    { term: "Caquexia", meaning: "Pérdida extrema de peso y masa muscular, atrofia y fatiga intensa, común en pacientes con enfermedades crónicas graves (cáncer, SIDA).", synonyms: ["Desnutrición severa", "Debilitación extrema", "Emaciación"] },
+                    { term: "Carcinoma", meaning: "Tumor maligno originado de células epiteliales.", synonyms: ["Cáncer epitelial"] },
+                    { term: "Claudicación", meaning: "Dolor en las piernas, pantorrillas o nalgas causado por flujo sanguíneo insuficiente durante el ejercicio, aliviado con el reposo.", synonyms: ["Dolor en las piernas al caminar", "Dolor al andar"] },
+                    { term: "Crónico", meaning: "Enfermedad o condición de larga duración, persistente, que se desarrolla lentamente y puede tener períodos de mejora y empeoramiento.", synonyms: ["De larga duración", "Persistente", "Duradero"] },
+                    { term: "Deshidratación", meaning: "Condición causada por la pérdida excesiva de fluidos corporales (agua y electrolitos), resultando en desequilibrio y compromiso de las funciones orgánicas.", synonyms: ["Falta de agua en el cuerpo", "Cuerpo seco"] },
+                    { term: "Diabetes Mellitus", meaning: "Enfermedad crónica caracterizada por altos niveles de azúcar en la sangre (glucemia), debido a la producción insuficiente de insulina o a la resistencia del cuerpo a ella.", synonyms: ["Azúcar en la sangre", "Glucemia alta", "Enfermedad del azúcar", "Diabetes"] },
+                    { term: "Diagnóstico", meaning: "Identificación de una enfermedad o condición basándose en los síntomas, signos, historial clínico y resultados de exámenes.", synonyms: ["Identificación de la enfermedad", "Determinación de la enfermedad"] },
+                    { term: "Diálisis", meaning: "Proceso artificial de remover productos de desecho, toxinas y exceso de agua de la sangre, cuando los riñones no pueden hacerlo adecuadamente.", synonyms: ["Filtración de la sangre (máquina)", "Riñón artificial"] },
+                    { term: "Difteria", meaning: "Infección bacteriana grave que afecta la garganta, nariz y, a veces, la piel, pudiendo causar dificultad respiratoria y problemas cardíacos.", synonyms: ["Crup diftérico", "Infección en la garganta"] },
+                    { term: "Dislipidemia", meaning: "Alteración en los niveles de lípidos en la sangre, aumentando el riesgo cardiovascular.", synonyms: ["Colesterol alto"] },
+                    { term: "Fagocitosis", meaning: "Proceso por el cual las células (especialmente glóbulos blancos) engloban y digieren partículas extrañas, microorganismos o células muertas.", synonyms: ["Engullir células", "Célula que come"] },
+                    { term: "Fiebre", meaning: "Aumento de la temperatura corporal por encima de lo normal, signo de infección.", synonyms: ["Pirexia", "Hipertermia", "Temperatura alta"] },
+                    { term: "Fístula", meaning: "Conexión anormal entre dos órganos, vasos o un órgano y la superficie del cuerpo, que no debería existir.", synonyms: ["Conexión anormal", "Pasaje anormal"] },
+                    { term: "Flebotomía", meaning: "Incisura o punción de una veina, generalmente para recolectar sangre (toma de sangre) o para administrar líquidos o medicamentos.", synonyms: ["Toma de sangre", "Punción venosa", "Sacar sangre"] },
+                    { term: "Fobia", meaning: "Miedo irracional, intenso y persistente a un objeto, situación o actividad específica, llevando a la evitación.", synonyms: ["Miedo extremo", "Pavor"] },
+                    { term: "Gangrena", meaning: "Muerte de tejido corporal debido a la falta grave de suministro sanguíneo o infección bacteriana grave, exigiendo intervención rápida.", synonyms: ["Muerte de tejido", "Tecido muerto"] },
+                    { term: "Hipotermia", meaning: "Redução de la temperatura corporal por debajo de 35°C.", synonyms: ["Temperatura baja"] },
+                    { term: "Hipertrofia", meaning: "Aumento del tamaño de un órgano o tejido debido al aumento del tamaño de sus células, generalmente en respuesta a una mayor demanda de trabajo.", synonyms: ["Crecimiento excesivo (tejido)", "Aumento de tamaño"] },
+                    { term: "Imunossupressão", meaning: "Supresión o disminución de la respuesta del sistema inmunológico, ya sea por enfermedad (ej: SIDA) o por medicamentos (ej: después de trasplantes).", synonyms: ["Inmunidad baja", "Sistema inmune débil"] },
+                    { term: "Infección", meaning: "Invasão e multiplicação de microrganismos (bactérias, vírus, fungos, parásitos) nos tecidos do corpo, causando uma resposta inflamatória.", synonyms: ["Contaminação", "Invasão microbiana", "Contaminação por gérmenes"] },
+                    { term: "Inflamación", meaning: "Resposta del corpo a lesiones ou infecções, caracterizada por dolor, calor, vermelhidão e inchaço (rubor, calor, tumor, dolor).", synonyms: ["Reacción inflamatória", "Inchaço", "Vermelhidão (localizada)"] },
+                    { term: "Intubação", meaning: "Procedimento de inserção de um tubo (tubo endotraqueal) na traqueia para manter as vias aéreas abertas e auxiliar a respiração.", synonyms: ["Tubo na garganta", "Ventilação (invasiva)"] },
+                    { term: "Laparotomía", meaning: "Incisura quirúrgica en la pared abdominal, geralmente para explorar órgãos internos, diagnosticar ou tratar condições.", synonyms: ["Corte na barriga", "Abertura abdominal"] },
+                    { term: "Leucocitose", meaning: "Aumento del número de glóbulos blancos (leucócitos) en la sangre, geralmente indicando uma infecção ou inflamação.", synonyms: ["Glóbulos brancos altos"] },
+                    { term: "Leucopenia", meaning: "Redução del número de leucocitos en la sangre.", synonyms: ["Baja de glóbulos blancos", "Glóbulos brancos baixos"] },
+                    { term: "Linfadenopatia", meaning: "Hinchazón de los ganglios linfáticos, asociada con infecciones o cáncer.", synonyms: ["Ganglios inchados"] },
+                    { term: "Linfoma", meaning: "Tipo de câncer que começa nas células do sistema linfático, parte do sistema imunológico do corpo.", synonyms: ["Câncer linfático", "Câncer dos gânglios"] },
+                    { term: "Lipoma", meaning: "Tumor benigno (no canceroso) composto por tejido adiposo (gordura), geralmente macio e móvel sob a pele.", synonyms: ["Nódulo de gordura", "Caroço de gordura"] },
+                    { term: "Maligno", meaning: "Tumor o condición que es cancerosa y tiene la capacidad de invadir tejidos próximos y se espalhar (metastatizar) para otras partes do corpo.", synonyms: ["Canceroso", "Com potencial de espalhar"] },
+                    { term: "Malaria", meaning: "Enfermedad infecciosa grave transmitida por mosquitos infectados, que causa fiebre, escalofríos, sudoración y síntomas gripales.", synonyms: ["Paludismo", "Fiebre palustre"] },
+                    { term: "Metástasis", meaning: "Disseminação de células cancerosas de um local primário (tumor original) para outras partes do corpo, formando novos tumores.", synonyms: ["Câncer espalhado", "Disseminação do câncer"] },
+                    { term: "Necrosis", meaning: "Morte de células ou tecidos vivos devido a doença, lesión, infecção ou falta de suprimento sanguíneo.", synonyms: ["Morte celular", "Tecido morto"] },
+                    { term: "Neoplasia", meaning: "Crescimento anormal e descontrolado de células, que pode ser benigno (no canceroso) ou maligno (canceroso).", synonyms: ["Tumor", "Câncer", "Massa"] },
+                    { term: "Nódulo", meaning: "Pequena massa ou protuberância em qualquer parte do corpo, que pode ser superficial (pele) ou interna (órgão).", synonyms: ["Caroço", "Protuberância", "Massa"] },
+                    { term: "Obesidad", meaning: "Acúmulo excessivo de gordura corporal, medido pelo IMC.", synonyms: ["Excesso de peso"] },
+                    { term: "Obstrucción", meaning: "Bloqueio ou impedimento do fluxo de algo, como no intestino, vias aéreas ou vasos sanguíneos.", synonyms: ["Bloqueio", "Entupimento", "Impasse"] },
+                    { term: "Peritonitis", meaning: "Inflamación del peritoneo, la membrana que recubre la cavidad abdominal y los órganos, generalmente causada por infección.", synonyms: ["Inflamación de la barriga", "Infección abdominal grave"] },
+                    { term: "Polidipsia", meaning: "Sed excessiva e anormalmente aumentada, um sintoma comum de diabetes mellitus.", synonyms: ["Sed em excesso", "Mucha sed"] },
+                    { term: "Pirexia", meaning: "Aumento de la temperatura corporal por encima de lo normal, sinal de infecção.", synonyms: ["Fiebre"] },
+                    { term: "Pronóstico", meaning: "Previsão del provável curso, resultado e evolução de uma doença ou condição médica.", synonyms: ["Previsão da doença", "Expectativa de recuperação"] },
+                    { term: "Quimioterapia", meaning: "Tratamento de doenças, especialmente câncer, com medicamentos que destroem as células doentes, impedindo seu crescimento ou divisão.", synonyms: ["Tratamento con remédios fortes (câncer)", "Quimio"] },
+                    { term: "Reabilitação", meaning: "Proceso de restauração de funções e capacidades perdidas após uma doença, lesão ou cirurgia, para melhorar a qualidade de vida e independência.", synonyms: ["Recuperação funcional", "Fisioterapia (amplo sentido)"] },
+                    { term: "Regresión", meaning: "Retorno a um estado anterior ou a uma forma menos desenvolvida de comportamento, ou diminuição dos sintomas ou tamanho de uma doença.", synonyms: ["Voltar ao estado anterior", "Melhora (doença)"] },
+                    { term: "Remisión", meaning: "Diminuição significativa ou desaparecimento dos sintomas e sinais de uma doença, especialmente câncer, podendo ser parcial ou completa.", synonyms: ["Doença controlada", "Sintomas diminuídos", "Período sem doença (aparente)"] },
+                    { term: "Sepsis", meaning: "Respuesta inflamatória sistêmica grave a uma infecção.", synonyms: ["Infecção generalizada", "Choque séptico", "Sepse"] },
+                    { term: "Síntoma", meaning: "Qualquer evidência subjetiva de doença percebida e relatada pelo paciente (ex: dor, náusea, fadiga).", synonyms: ["Sinal de doença (pelo paciente)", "Queixa do paciente"] },
+                    { term: "Síndrome", meaning: "Conjunto de sintomas e sinais que ocorrem juntos de forma característica e que podem ser associados a uma doença ou condição particular.", synonyms: ["Conjunto de sintomas", "Quadro clínico"] },
+                    { term: "Terapia", meaning: "Tratamento de uma doença ou condição, que pode incluir medicamentos, cirurgias, fisioterapia, etc.", synonyms: ["Tratamento"] },
+                    { term: "Trauma", meaning: "Lesão física ou emocional causada por um evento externo (ex: acidente, queda, violência).", synonyms: ["Lesão", "Ferimento", "Pancada"] },
+                    { term: "Virología", meaning: "Ramo da ciência que estuda os vírus, incluindo sua estrutura, classificação, replicação e as doenças que causam.", synonyms: ["Estudo de vírus", "Ciência dos vírus"] },
+                    { term: "Vómito", meaning: "Expulsão forçada do conteúdo gástrico pela boca.", synonyms: ["Émesis", "Vomitar"] },
+                    { term: "Zoonosis", meaning: "Enfermedad transmisible de animales a humanos, como rabia o leptospirosis.", synonyms: ["Doença zoonótica", "Doença animal-humana", "Infecção de animais para humanos"] }
+                ]
+            }
+        };
+
+        let currentLanguage = 'pt'; // Inicia em português
+
+        // Referências aos elementos do DOM
+        const splashScreen = document.getElementById('splash-screen');
+        const searchInput = document.getElementById('searchInput');
+        const resultsDiv = document.getElementById('results');
+        const themeToggle = document.getElementById('themeToggle');
+        const languageToggle = document.getElementById('languageToggle');
+        const body = document.body;
+        const appTitle = document.getElementById('appTitle');
+        const referencesTitle = document.getElementById('referencesTitle');
+
+
+        // Mapeamento de textos para diferentes idiomas
+        const texts = {
+            pt: {
+                appTitle: "Dicionário Médico",
+                searchInputPlaceholder: "Buscar termo...",
+                themeToggleLight: "Modo Claro",
+                themeToggleDark: "Modo Escuro",
+                synonyms: "Sinônimos:",
+                meaning: "Significado:",
+                noResults: "Nenhum resultado encontrado.",
+                splashLoading: "Carregando termos...",
+                splashTitle: "Dicionário Médico Hospitalar",
+                referencesTitle: "Referências Bibliográficas",
+                referenceNote: "Observação: Esta é uma lista de exemplos. Por favor, adicione ou substitua com as fontes bibliográficas exatas que você utiliza."
+            },
+            es: {
+                appTitle: "Diccionario Médico",
+                searchInputPlaceholder: "Buscar término...",
+                themeToggleLight: "Modo Claro",
+                themeToggleDark: "Modo Oscuro",
+                synonyms: "Sinónimos:",
+                meaning: "Significado:",
+                noResults: "Ningún resultado encontrado.",
+                splashLoading: "Cargando términos...",
+                splashTitle: "Diccionario Médico Hospitalario",
+                referencesTitle: "Referencias Bibliográficas",
+                referenceNote: "Nota: Esta es una lista de ejemplos. Por favor, agregue o reemplace con las fuentes bibliográficas exactas que utiliza."
+            }
+        };
+
+        // Função para atualizar os textos da interface com base no idioma atual
+        function updateUI() {
+            appTitle.textContent = texts[currentLanguage].appTitle;
+            searchInput.placeholder = texts[currentLanguage].searchInputPlaceholder;
+            themeToggle.textContent = body.classList.contains('dark-mode') ?
+                texts[currentLanguage].themeToggleLight :
+                texts[currentLanguage].themeToggleDark;
+            referencesTitle.textContent = texts[currentLanguage].referencesTitle;
+            // Atualiza a nota de rodapé das referências
+            document.querySelector('.references-section small strong').textContent = texts[currentLanguage].referenceNote.split(':')[0] + ":";
+            document.querySelector('.references-section small').childNodes[1].textContent = " " + texts[currentLanguage].referenceNote.split(':')[1];
+
+            // Atualiza texto da splash screen (se visível)
+            if (!splashScreen.classList.contains('hidden')) {
+                splashScreen.querySelector('h2').textContent = texts[currentLanguage].splashTitle;
+                splashScreen.querySelector('p').textContent = texts[currentLanguage].splashLoading;
+            }
+
+            searchTerms(); // Re-renderiza os termos com o novo idioma e ordenação
+        }
+
+        // Função para ordenar os termos alfabeticamente
+        function sortTerms(terms) {
+            // Se terms é um array de objetos, ele sorteará por 'term'
+            if (Array.isArray(terms)) {
+                return terms.sort((a, b) => a.term.localeCompare(b.term));
+            }
+            // Se terms é um objeto com categorias (como medicalTerms[currentLanguage]),
+            // precisamos sortear as chaves (nomes das categorias) e depois os termos dentro.
+            const sortedCategories = Object.keys(terms).sort();
+            const sortedTermsByCategory = {};
+            sortedCategories.forEach(categoryName => {
+                sortedTermsByCategory[categoryName] = terms[categoryName].slice().sort((a, b) => a.term.localeCompare(b.term));
+            });
+            return sortedTermsByCategory;
+        }
+
+
+        // Função para renderizar (exibir) os termos na div de resultados
+        function renderTerms(categorizedTerms) {
+            resultsDiv.innerHTML = '';
+            const query = searchInput.value.toLowerCase();
+            let hasResults = false;
+
+            // Ordena as categorias por nome
+            const sortedCategoryNames = Object.keys(categorizedTerms).sort((a, b) => a.localeCompare(b));
+
+            sortedCategoryNames.forEach(categoryName => {
+                const termsInCategory = categorizedTerms[categoryName];
+                // Filtra os termos dentro da categoria com base na query de busca
+                const filteredTerms = termsInCategory.filter(item =>
+                    item.term.toLowerCase().includes(query) ||
+                    item.meaning.toLowerCase().includes(query) ||
+                    item.synonyms.some(synonym => synonym.toLowerCase().includes(query))
+                );
+
+                if (filteredTerms.length > 0) {
+                    hasResults = true;
+                    const categoryContainer = document.createElement('details');
+                    categoryContainer.classList.add('category-container');
+
+                    const categorySummary = document.createElement('summary');
+                    categorySummary.textContent = categoryName;
+                    categoryContainer.appendChild(categorySummary);
+
+                    const categoryContent = document.createElement('div');
+                    categoryContent.classList.add('category-content');
+
+                    // Ordena os termos filtrados alfabeticamente
+                    const sortedFilteredTerms = sortTerms(filteredTerms);
+
+                    sortedFilteredTerms.forEach(item => {
+                        const termItem = document.createElement('div');
+                        termItem.classList.add('term-item');
+                        termItem.innerHTML = `
+                            <h3>${item.term}</h3>
+                            <p><strong>${texts[currentLanguage].meaning}</strong> ${item.meaning}</p>
+                            <p><strong>${texts[currentLanguage].synonyms}</strong> ${item.synonyms.join(', ')}</p>
+                        `;
+                        categoryContent.appendChild(termItem);
+                    });
+                    categoryContainer.appendChild(categoryContent);
+                    resultsDiv.appendChild(categoryContainer);
+                }
+            });
+
+            if (!hasResults && query !== "") { // Mostra "Nenhum resultado" apenas se houver uma busca ativa
+                resultsDiv.innerHTML = `<p>${texts[currentLanguage].noResults}</p>`;
+            } else if (!hasResults && query === "") { // Se não há busca e não há termos (o que não deve acontecer)
+                // Isto deve ser o caso inicial, onde todos os termos são exibidos
+                // Se a lista inicial está vazia, o erro está na definição de medicalTerms
+                const allTermsInCurrentLang = medicalTerms[currentLanguage];
+                // Chamar renderTerms novamente com a lista completa, que será categorizada
+                const sortedAllTerms = sortTerms(allTermsInCurrentLang);
+                Object.keys(sortedAllTerms).forEach(categoryName => {
+                    const categoryContainer = document.createElement('details');
+                    categoryContainer.classList.add('category-container');
+
+                    const categorySummary = document.createElement('summary');
+                    categorySummary.textContent = categoryName;
+                    categoryContainer.appendChild(categorySummary);
+
+                    const categoryContent = document.createElement('div');
+                    categoryContent.classList.add('category-content');
+
+                    sortedAllTerms[categoryName].forEach(item => {
+                        const termItem = document.createElement('div');
+                        termItem.classList.add('term-item');
+                        termItem.innerHTML = `
+                            <h3>${item.term}</h3>
+                            <p><strong>${texts[currentLanguage].meaning}</strong> ${item.meaning}</p>
+                            <p><strong>${texts[currentLanguage].synonyms}</strong> ${item.synonyms.join(', ')}</p>
+                        `;
+                        categoryContent.appendChild(termItem);
+                    });
+                    categoryContainer.appendChild(categoryContent);
+                    resultsDiv.appendChild(categoryContainer);
+                });
+            }
+        }
+
+        // Função de busca: filtra os termos com base na entrada do usuário e depois ordena
+        function searchTerms() {
+            const query = searchInput.value.toLowerCase();
+            const termsInCurrentLang = medicalTerms[currentLanguage];
+            const filteredCategorizedTerms = {};
+
+            // Iterar por cada categoria para filtrar os termos
+            for (const categoryName in termsInCurrentLang) {
+                const terms = termsInCurrentLang[categoryName];
+                const filtered = terms.filter(item =>
+                    item.term.toLowerCase().includes(query) ||
+                    item.meaning.toLowerCase().includes(query) ||
+                    item.synonyms.some(synonym => synonym.toLowerCase().includes(query))
+                );
+                if (filtered.length > 0) {
+                    filteredCategorizedTerms[categoryName] = filtered;
+                }
+            }
+            renderTerms(filteredCategorizedTerms);
+        }
+
+        // --- Event Listeners ---
+
+        searchInput.addEventListener('keyup', searchTerms);
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+            updateUI(); // Chama updateUI para atualizar o texto do botão
+        });
+
+        languageToggle.addEventListener('change', (event) => {
+            currentLanguage = event.target.value;
+            localStorage.setItem('language', currentLanguage);
+            updateUI();
+        });
+
+        // Funções de Inicialização
+        function loadPreferences() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+            }
+
+            const savedLanguage = localStorage.getItem('language');
+            if (savedLanguage && medicalTerms[savedLanguage]) {
+                currentLanguage = savedLanguage;
+                languageToggle.value = savedLanguage;
+            } else {
+                currentLanguage = 'pt';
+                languageToggle.value = 'pt';
+            }
+        }
+
+        // Função para ocultar a splash screen
+        function hideSplashScreen() {
+            splashScreen.classList.add('hidden');
+            // Após ocultar a splash, atualiza a UI e renderiza os termos
+            updateUI();
+            renderTerms(sortTerms(medicalTerms[currentLanguage]));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPreferences(); // Carrega as preferências primeiro
+            // Atualiza os textos da splash screen com o idioma correto antes de mostrá-la
+            splashScreen.querySelector('h2').textContent = texts[currentLanguage].splashTitle;
+            splashScreen.querySelector('p').textContent = texts[currentLanguage].splashLoading;
+
+            // Define um tempo para a splash screen desaparecer
+            setTimeout(hideSplashScreen, 2000); // 2 segundos
+        });
+    </script>
+
+    <!-- Script para registrar o Service Worker -->
+    <script>
+        // ESTE É O CONTEÚDO DO registerServiceWorker.js
+        // Para que o PWA funcione, o Service Worker PRECISA ser um arquivo .js separado.
+        // As instruções para isso estão no final deste arquivo HTML.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js') // Caminho para o service-worker.js
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+
+    <!-- INSTRUÇÕES IMPORTANTES PARA O PWA: MANIFEST.JSON E SERVICE-WORKER.JS -->
+    <!-- Para que este aplicativo funcione como um PWA (instalável, offline),
+         você DEVE criar dois arquivos separados na mesma pasta deste index.html:
+         1. manifest.json
+         2. service-worker.js
+
+         Copie o conteúdo abaixo para cada arquivo. -->
+
+    <!-- CONTEÚDO PARA manifest.json -->
+    <!-- Crie um arquivo chamado 'manifest.json' na mesma pasta deste HTML
+         e cole o seguinte conteúdo nele: -->
+    <!--
+    {
+        "name": "Dicionário Médico Hospitalar",
+        "short_name": "MedTerm PWA",
+        "description": "Dicionário de terminologia médica e sinônimos para uso didático em hospitais, com suporte multilíngue e temas claro/escuro.",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#ffffff",
+        "theme_color": "#4CAF50",
+        "icons": [
+            {
+                "src": "icons/icon-72x72.png",
+                "sizes": "72x72",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "icons/icon-96x96.png",
+                "sizes": "96x96",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "icons/icon-128x128.png",
+                "sizes": "128x128",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "icons/icon-144x144.png",
+                "sizes": "144x144",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "icons/icon-152x152.png",
+                "sizes": "152x152",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "icons/icon-192x192.png",
+                "sizes": "192x192",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "icons/icon-384x384.png",
+                "sizes": "384x384",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "icons/icon-512x512.png",
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "any maskable"
+            }
+        ],
+        "orientation": "portrait"
+    }
+    -->
+
+    <!-- CONTEÚDO PARA service-worker.js -->
+    <!-- Crie um arquivo chamado 'service-worker.js' na mesma pasta deste HTML
+         e cole o seguinte conteúdo nele: -->
+    <!--
+    // service-worker.js
+
+    const CACHE_NAME = 'medical-dictionary-cache-v3'; // Versão atualizada do cache
+
+    const urlsToCache = [
+        '/',
+        '/index.html',
+        '/manifest.json',
+        '/icons/icon-72x72.png',
+        '/icons/icon-96x96.png',
+        '/icons/icon-128x128.png',
+        '/icons/icon-144x144.png',
+        '/icons/icon-152x152.png',
+        '/icons/icon-192x192.png',
+        '/icons/icon-384x384.png',
+        '/icons/icon-512x512.png'
+    ];
+
+    self.addEventListener('install', (event) => {
+        event.waitUntil(
+            caches.open(CACHE_NAME)
+                .then(cache => {
+                    console.log('Cache aberto');
+                    // Como CSS e JS estão embutidos no index.html, basta cachear o index.html
+                    return cache.addAll(urlsToCache);
+                })
+                .then(() => self.skipWaiting())
+        );
+    });
+
+    self.addEventListener('activate', (event) => {
+        const cacheWhitelist = [CACHE_NAME];
+        event.waitUntil(
+            caches.keys().then(cacheNames => {
+                return Promise.all(
+                    cacheNames.map(cacheName => {
+                        if (cacheWhitelist.indexOf(cacheName) === -1) {
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+            }).then(() => self.clients.claim())
+        );
+    });
+
+    self.addEventListener('fetch', (event) => {
+        event.respondWith(
+            caches.match(event.request)
+                .then(response => {
+                    if (response) {
+                        return response;
+                    }
+                    return fetch(event.request)
+                        .then(fetchResponse => {
+                            return fetchResponse;
+                        })
+                        .catch(error => {
+                            console.error('Falha ao buscar recurso:', event.request.url, error);
+                        });
+                })
+        );
+    });
+    -->
+</body>
+</html>
