@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Desvende a Bíblia: O Escape Room da Fé</title>
+    <!-- Tailwind CSS CDN para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Link para o arquivo manifest.json para funcionalidade PWA -->
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* Verde claro para um tema natural */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            transition-colors duration-500; /* Para o tema */
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* rounded-3xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); /* shadow-xl */
+            max-width: 900px; /* Ajustado para o novo layout */
+            width: 100%;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-height: 600px;
+        }
+        .btn {
+            @apply bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-green-800 transition-all duration-300 ease-in-out transform hover:scale-105;
+        }
+        .btn-secondary {
+            @apply bg-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105;
+        }
+        .btn-disabled {
+            @apply bg-gray-400 cursor-not-allowed;
+        }
+        .scenario-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .interactive-object {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .interactive-object:hover {
+            border-color: #10b981; /* green-500 */
+        }
+        .puzzle-input {
+            @apply p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 w-full max-w-sm mx-auto text-center text-lg;
+        }
+        .message-box {
+            background-color: #f0fdf4;
+            border-left: 5px solid #16a34a;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            color: #1f2937;
+            margin-top: 1rem;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            overflow-y: auto;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            width: 90%;
+            text-align: left;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #4b5563;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #16a34a;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* New styles from user's snippet */
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-green-200 min-h-screen flex items-center justify-center transition-colors duration-500">
+    <div class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl p-8 fade-in">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-4xl font-bold text-green-800">Desvende a Bíblia: O Escape Room da Fé</h1>
+            <button id="toggle-theme" class="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors">🌙</button>
+        </div>
+        
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center space-y-6">
+            <p class="text-lg text-gray-600">Resolva enigmas bíblicos para escapar dos cenários!</p>
+            <h2 class="text-2xl font-semibold text-green-700">Escolha seu Desafio:</h2>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 flex-wrap"> <!-- Added flex-wrap for better responsiveness -->
+                <button id="start-eden" class="bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow hover:bg-green-700 transition-transform transform hover:scale-105">🌳 Jardim do Éden</button>
+                <button id="start-ark" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow hover:bg-blue-700 transition-transform transform hover:scale-105">🛶 Arca de Noé</button>
+                <button id="start-egypt" class="bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl shadow hover:bg-yellow-700 transition-transform transform hover:scale-105">🏜️ Egito: A Libertação</button>
+                <button id="start-desert" class="bg-purple-600 text-white font-bold py-3 px-6 rounded-xl shadow hover:bg-purple-700 transition-transform transform hover:scale-105">🚶‍♂️ Jornada no Deserto</button>
+                <button id="start-david" class="bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow hover:bg-red-700 transition-transform transform hover:scale-105">👑 Reino de Davi</button>
+                <button id="start-jesus-birth" class="bg-pink-600 text-white font-bold py-3 px-6 rounded-xl shadow hover:bg-pink-700 transition-transform transform hover:scale-105">🌟 Nascimento de Jesus</button>
+                <button id="start-prophets" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl shadow hover:bg-indigo-700 transition-transform transform hover:scale-105">🔥 Profetas e Reinos</button>
+                <button id="start-jesus-ministry" class="bg-teal-600 text-white font-bold py-3 px-6 rounded-xl shadow hover:bg-teal-700 transition-transform transform hover:scale-105">🕊️ Ministério de Jesus</button>
+                <button id="start-apostles" class="bg-orange-600 text-white font-bold py-3 px-6 rounded-xl shadow hover:bg-orange-700 transition-transform transform hover:scale-105">⛪ Atos dos Apóstolos</button>
+            </div>
+            <button id="how-to-play" class="mt-4 bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors">📖 Como Jogar?</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 id="scenario-title" class="text-3xl font-bold text-green-800"></h2>
+                <div class="text-gray-700 font-medium">Progresso: <span id="progress-text">0%</span></div>
+            </div>
+            <img id="scenario-img" src="" alt="Cenário" class="rounded-xl shadow-md w-full max-h-60 object-cover">
+            <p id="scenario-description" class="text-gray-700"></p>
+            <p id="puzzle-question-display" class="text-xl font-semibold text-gray-800 text-center"></p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="interactive-elements"></div>
+            <div class="flex flex-col items-center gap-3">
+                <input type="text" id="answer-input" placeholder="Digite sua resposta..." class="border rounded-lg px-4 py-2 w-full max-w-md focus:ring-2 focus:ring-green-500">
+                <button id="submit-answer" class="bg-green-600 text-white py-2 px-5 rounded-lg hover:bg-green-700 transition">✅ Enviar Resposta</button>
+                <button id="hint-btn" class="bg-yellow-500 text-white py-2 px-5 rounded-lg hover:bg-yellow-600 transition">💡 Pedir Dica</button>
+                <button id="ask-explanation-btn" class="bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 transition hidden">❓ Pedir Explicação</button>
+            </div>
+            <p id="feedback" class="text-center text-lg font-semibold text-red-600 hidden"></p>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="hidden text-center space-y-6">
+            <h2 class="text-3xl font-bold text-green-800">🎉 Parabéns! Você escapou!</h2>
+            <p id="end-message" class="text-gray-700"></p>
+            <button id="restart" class="bg-green-600 text-white py-3 px-6 rounded-xl hover:bg-green-700 transition">🔄 Jogar Novamente</button>
+        </div>
+    </div>
+
+    <!-- Modal para mensagens e explicações da API e Manual -->
+    <div id="game-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal()">&times;</button>
+            <h3 id="modal-title" class="text-2xl font-bold text-green-700 mb-4"></h3>
+            <div id="modal-body" class="text-gray-700 text-lg"></div>
+            <div id="loading-spinner" class="loading-spinner hidden"></div>
+        </div>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_194b7d4574.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Variáveis globais para Firebase e App ID (MANDATORY)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const scenarioTitle = document.getElementById('scenario-title');
+        const scenarioImg = document.getElementById('scenario-img');
+        const scenarioDescription = document.getElementById('scenario-description');
+        const puzzleQuestionDisplay = document.getElementById('puzzle-question-display');
+        const interactiveElements = document.getElementById('interactive-elements');
+        const answerInput = document.getElementById('answer-input');
+        const submitAnswer = document.getElementById('submit-answer');
+        const hintBtn = document.getElementById('hint-btn');
+        const askExplanationBtn = document.getElementById('ask-explanation-btn');
+        const feedback = document.getElementById('feedback');
+        const progressText = document.getElementById('progress-text');
+        const endMessage = document.getElementById('end-message');
+        const bgMusic = document.getElementById('bg-music');
+        const toggleTheme = document.getElementById('toggle-theme');
+        const howToPlayBtn = document.getElementById('how-to-play');
+
+        // Modal elements
+        const gameModal = document.getElementById('game-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        let currentPuzzleIndex = 0;
+        let scenario = null;
+        let currentBiblicalContext = ''; // Context for Gemini API
+
+        // Função para exibir o modal
+        function showModal(title, body, isLoading = false) {
+            modalTitle.textContent = title;
+            modalBody.innerHTML = body; // Usar innerHTML para permitir tags HTML
+            if (isLoading) {
+                loadingSpinner.classList.remove('hidden');
+                modalBody.classList.add('hidden');
+            } else {
+                loadingSpinner.classList.add('hidden');
+                modalBody.classList.remove('hidden');
+            }
+            gameModal.classList.add('show');
+        }
+
+        // Função para esconder o modal
+        function hideModal() {
+            gameModal.classList.remove('show');
+            modalTitle.textContent = '';
+            modalBody.innerHTML = '';
+            loadingSpinner.classList.add('hidden');
+        }
+
+        // Função auxiliar para ícones (pode ser aprimorada com Font Awesome ou SVG)
+        function getIconForClue(id) {
+            if (id.includes('chest')) return '📦';
+            if (id.includes('map')) return '🗺️';
+            if (id.includes('scroll')) return '📜';
+            if (id.includes('wall')) return '🧱';
+            if (id.includes('ruler')) return '📏';
+            if (id.includes('diary')) return '📓';
+            if (id.includes('window')) return '🪟';
+            if (id.includes('book')) return '📖';
+            if (id.includes('tree')) return '🌳'; // For Eden
+            if (id.includes('serpent')) return '🐍'; // For Eden
+            if (id.includes('staff')) return '杖'; // Staff for Moses (using Japanese character as a simple icon)
+            if (id.includes('tablet')) return ' Tablet'; // Tablet for commandments
+            if (id.includes('water')) return '💧'; // Water for plagues
+            if (id.includes('basket')) return '🧺'; // Basket for baby Moses
+            if (id.includes('manna')) return '🍞'; // Manna
+            if (id.includes('serpent-bronze')) return '🐍'; // Bronze serpent
+            if (id.includes('sling')) return ' slingshot'; // Sling for David
+            if (id.includes('harp')) return ' Harp'; // Harp for David
+            if (id.includes('star')) return '⭐'; // Star of Bethlehem
+            if (id.includes('manger')) return ' manger'; // Manger
+            if (id.includes('gift')) return '🎁'; // Gifts of the Magi
+            if (id.includes('altar')) return '🔥'; // Altar for prophets
+            if (id.includes('chariot')) return '🐎'; // Chariot for Elijah
+            if (id.includes('fish')) return '🐟'; // Fish for miracles
+            if (id.includes('wine')) return '🍷'; // Wine for miracles
+            if (id.includes('tomb')) return '🪦'; // Tomb for Lazarus
+            if (id.includes('wind')) return '🌬️'; // Wind for Pentecost
+            if (id.includes('tongues')) return '🗣️'; // Tongues of fire
+            if (id.includes('road')) return '🛣️'; // Road to Damascus
+            if (id.includes('chains')) return '⛓️'; // Chains for Paul's prison
+            if (id.includes('cross')) return '✝️'; // Cross
+            if (id.includes('crown-thorns')) return '👑'; // Crown of Thorns
+            if (id.includes('stone')) return '🪨'; // Stone for tomb
+            if (id.includes('angel')) return '😇'; // Angel
+            if (id.includes('shepherd')) return '🐑'; // Shepherd
+            if (id.includes('fish-net')) return '🎣'; // Fish net for disciples
+            if (id.includes('coin')) return '💰'; // Coin for tribute
+            if (id.includes('bread')) return '🥖'; // Bread for Last Supper
+            if (id.includes('cup')) return '🥛'; // Cup for Last Supper
+            return '❓';
+        }
+
+        const scenarios = {
+            eden: {
+                title: "Jardim do Éden",
+                image: "https://placehold.co/800x300/4CAF50/FFFFFF?text=Jardim+do+Éden", // Placeholder para o Jardim do Éden
+                description: "Você está no Jardim do Éden, o paraíso original. Para encontrar o caminho de volta, você deve desvendar os segredos da criação e da primeira tentação.",
+                puzzles: [
+                    {
+                        id: 'eden-puzzle-1',
+                        question: "Complete o versículo: 'No princípio criou Deus o céu e a ___' (Gênesis 1:1)",
+                        answer: "terra",
+                        hint: "Leia Gênesis 1:1 com atenção.",
+                        context: "Gênesis 1:1 - O início da criação de Deus.",
+                        clues: [
+                            { id: 'clue-eden-scroll-1', name: 'Pergaminho Antigo', text: 'Um pergaminho com as palavras: "No princípio criou Deus o céu e a..."', context: 'Gênesis 1:1' },
+                            { id: 'clue-eden-tree-1', name: 'Árvore da Vida', text: 'Ao tocar na árvore, você sente uma vibração e ouve um sussurro: "E a porção seca..."', context: 'Gênesis 1:9-10' }
+                        ]
+                    },
+                    {
+                        id: 'eden-puzzle-2',
+                        question: "Quantos dias Deus levou para criar tudo, antes de descansar?",
+                        answer: "6", // Gênesis 1:31 - Deus viu que tudo era muito bom no sexto dia. O sétimo foi de descanso.
+                        hint: "Pense nos dias da criação em Gênesis capítulo 1.",
+                        context: "Gênesis 1 - Os seis dias da criação e o sétimo dia de descanso.",
+                        clues: [
+                            { id: 'clue-eden-stone-1', name: 'Pedra Marcada', text: 'Uma pedra com seis marcas gravadas, e uma sétima separada.', context: 'Gênesis 1:31, Gênesis 2:2' },
+                            { id: 'clue-eden-serpent-1', name: 'Pele de Serpente', text: 'Uma pele de serpente com um padrão que forma a sequência "1, 2, 3, 4, 5, 6".', context: 'Gênesis 1' }
+                        ]
+                    },
+                    {
+                        id: 'eden-puzzle-3',
+                        question: "Qual o nome da primeira mulher criada por Deus?",
+                        answer: "eva",
+                        hint: "Ela foi formada da costela do homem.",
+                        context: "Gênesis 2:21-22 - A criação de Eva.",
+                        clues: [
+                            { id: 'clue-eden-flower-1', name: 'Flor Exótica', text: 'Uma flor rara que parece ter sido nomeada em homenagem à "mãe de todos os viventes".', context: 'Gênesis 3:20' },
+                            { id: 'clue-eden-rib-bone', name: 'Osso Estranho', text: 'Um pequeno osso, que parece uma costela, com uma inscrição que diz: "Dela veio a vida."', context: 'Gênesis 2:21-22' }
+                        ]
+                    }
+                ]
+            },
+            'noah-ark': {
+                title: 'A Arca de Noé',
+                image: 'https://placehold.co/800x300/8B4513/FFFFFF?text=Arca+de+Noé', // Placeholder para a Arca
+                description: 'Você está dentro da Arca de Noé, e a tempestade lá fora é assustadora. Para que a arca possa navegar com segurança, você precisa garantir que todas as criaturas estejam em ordem, conforme as instruções divinas. Encontre as pistas e resolva os enigmas para abrir a escotilha de saída!',
+                puzzles: [
+                    {
+                        id: 'puzzle-animals',
+                        question: 'Qual o número de pares de animais limpos que Noé levou para a arca?',
+                        answer: '7', // Gênesis 7:2
+                        context: 'Gênesis 7:2 - Instruções de Deus a Noé sobre os animais limpos e impuros.',
+                        clues: [
+                            { id: 'clue-chest', name: 'Baú Antigo', text: 'Dentro do baú, você encontra um pergaminho com a seguinte charada: "Sete de cada um que é puro, e dois de cada um que não é. Qual o número de cada par puro?"', context: 'Gênesis 7:2' },
+                            { id: 'clue-map', name: 'Mapa Rasgado', text: 'Um mapa com anotações sobre a quantidade de cada tipo de animal. Parece que os "limpos" têm um número especial.', context: 'Gênesis 7:2' }
+                        ],
+                        hint: 'Pense nas diferentes categorias de animais que entraram na arca e nas quantidades específicas de cada uma.',
+                        solutionContext: 'O número de pares de animais limpos que Noé levou para a arca é 7. (Gênesis 7:2)'
+                    },
+                    {
+                        id: 'puzzle-dimensions',
+                        question: 'Qual o comprimento da arca em côvados, conforme as instruções de Deus?',
+                        answer: '300', // Gênesis 6:15
+                        context: 'Gênesis 6:15 - As dimensões da arca de Noé.',
+                        clues: [
+                            { id: 'clue-broken-ruler', name: 'Régua Quebrada', text: 'Uma régua antiga, marcada com "côvados", mas quebrada. Você consegue ler "trezentos" em uma parte.', context: 'Gênesis 6:15' },
+                            { id: 'clue-noahs-diary', name: 'Diário de Bordo de Noé', text: 'Uma página do diário de Noé detalha as medidas exatas que Deus lhe deu para a arca: "O comprimento da arca será de trezentos côvados, a sua largura de cinquenta, e a sua altura de trinta."', context: 'Gênesis 6:15' }
+                        ],
+                        hint: 'Deus deu a Noé medidas muito específicas para a construção da arca. Procure por elas em Gênesis.',
+                        solutionContext: 'O comprimento da arca é de 300 côvados. (Gênesis 6:15)'
+                    },
+                    {
+                        id: 'puzzle-covenant-sign',
+                        question: 'Qual o sinal da aliança de Deus com Noé e seus descendentes após o dilúvio?',
+                        answer: 'arco-íris', // Gênesis 9:13
+                        context: 'Gênesis 9:13 - O arco-íris como sinal da aliança de Deus.',
+                        clues: [
+                            { id: 'clue-foggy-window', name: 'Janela Embaçada', text: 'A janela está embaçada, mas você consegue distinguir cores vibrantes quando a limpa. Parece um arco no céu.', context: 'Gênesis 9:13' },
+                            { id: 'clue-prophecy-book', name: 'Livro de Profecias', text: 'Um livro antigo se abre na passagem que diz: "Porei o meu arco nas nuvens, e ele será o sinal da aliança entre mim e a terra."', context: 'Gênesis 9:13' }
+                        ],
+                        hint: 'Após a grande inundação, Deus fez uma promessa e deu um sinal visível no céu.',
+                        solutionContext: 'O sinal da aliança de Deus com Noé é o arco-íris. (Gênesis 9:13)'
+                    },
+                    {
+                        id: 'puzzle-dove-return',
+                        question: 'Qual tipo de folha a pomba trouxe de volta para Noé, indicando que as águas haviam baixado?',
+                        answer: 'oliveira', // Gênesis 8:11
+                        context: 'Gênesis 8:11 - A pomba e o ramo de oliveira.',
+                        clues: [
+                            { id: 'clue-bird-nest', name: 'Ninho de Pássaro', text: 'Um ninho vazio, mas com uma pequena folha seca de uma árvore comum no Mediterrâneo.', context: 'Gênesis 8:11' },
+                            { id: 'clue-water-level', name: 'Marca de Água', text: 'Uma marca na parede da arca indica o nível da água. Há um desenho de uma ave com uma folha no bico.', context: 'Gênesis 8:11' }
+                        ],
+                        hint: 'A pomba é um símbolo de paz. Que tipo de árvore está associada a essa simbologia e ao retorno da pomba?',
+                        solutionContext: 'A pomba trouxe um ramo de oliveira. (Gênesis 8:11)'
+                    }
+                ]
+            },
+            'egypt-liberation': {
+                title: 'Egito: A Libertação',
+                image: 'https://placehold.co/800x300/6A0DAD/FFFFFF?text=Egito+A+Libertação', // Placeholder para o Egito
+                description: 'Você está no Egito, sob o domínio do Faraó. Para libertar o povo de Israel, você deve decifrar os sinais e pragas enviadas por Deus. Encontre as pistas e resolva os enigmas para abrir o caminho para a liberdade!',
+                puzzles: [
+                    {
+                        id: 'egypt-puzzle-1',
+                        question: 'Qual o nome do líder que Deus escolheu para libertar Israel do Egito?',
+                        answer: 'moisés', // Êxodo 3:10
+                        context: 'Êxodo 3:10 - O chamado de Moisés.',
+                        clues: [
+                            { id: 'clue-burning-bush', name: 'Sarça Ardente', text: 'Você encontra uma sarça que parece ter queimado sem se consumir. Há uma voz ecoando: "Tira as sandálias dos pés..."', context: 'Êxodo 3:2-5' },
+                            { id: 'clue-staff', name: 'Cajado Antigo', text: 'Um cajado de pastor, que parece ter sido transformado em serpente e depois de volta.', context: 'Êxodo 4:2-4' }
+                        ],
+                        hint: 'Ele foi criado na casa do Faraó, mas foi chamado por Deus para uma grande missão.',
+                        solutionContext: 'O líder escolhido por Deus foi Moisés. (Êxodo 3:10)'
+                    },
+                    {
+                        id: 'egypt-puzzle-2',
+                        question: 'Qual foi a primeira praga que Deus enviou sobre o Egito?',
+                        answer: 'água em sangue', // Êxodo 7:17-21
+                        context: 'Êxodo 7:17-21 - A primeira praga do Egito.',
+                        clues: [
+                            { id: 'clue-river-nile', name: 'Água Turva do Nilo', text: 'A água do rio Nilo está com uma cor estranha, avermelhada, e um cheiro forte.', context: 'Êxodo 7:17-21' },
+                            { id: 'clue-hieroglyph', name: 'Hieróglifo Misterioso', text: 'Um hieróglifo na parede mostra um rio se transformando em algo vermelho.', context: 'Êxodo 7:17-21' }
+                        ],
+                        hint: 'A primeira praga afetou a principal fonte de vida do Egito.',
+                        solutionContext: 'A primeira praga foi a transformação da água em sangue. (Êxodo 7:17-21)'
+                    },
+                    {
+                        id: 'egypt-puzzle-3',
+                        question: 'Qual foi a última e mais terrível praga que atingiu o Egito?',
+                        answer: 'morte dos primogênitos', // Êxodo 12:29-30
+                        context: 'Êxodo 12:29-30 - A décima praga e a Páscoa.',
+                        clues: [
+                            { id: 'clue-door-post', name: 'Batente da Porta', text: 'Você vê manchas de algo que parece sangue em um batente de porta. Uma voz sussurra: "O anjo da morte passará..."', context: 'Êxodo 12:7, 13' },
+                            { id: 'clue-lamentation', name: 'Lamentação Distante', text: 'Você ouve lamentos vindos de todas as casas do Egito, um choro por algo muito valioso perdido.', context: 'Êxodo 12:30' }
+                        ],
+                        hint: 'Esta praga levou o Faraó a finalmente libertar o povo.',
+                        solutionContext: 'A última praga foi a morte dos primogênitos. (Êxodo 12:29-30)'
+                    }
+                ]
+            },
+            'desert-journey': {
+                title: 'Jornada no Deserto',
+                image: 'https://placehold.co/800x300/D2B48C/FFFFFF?text=Deserto+de+Sinai', // Placeholder para o Deserto
+                description: 'Você está no deserto com o povo de Israel, guiado por Moisés. A fome e a sede são grandes desafios. Encontre as pistas e resolva os enigmas para continuar a jornada rumo à Terra Prometida!',
+                puzzles: [
+                    {
+                        id: 'desert-puzzle-1',
+                        question: 'Qual o alimento que Deus enviou do céu para sustentar o povo no deserto?',
+                        answer: 'maná', // Êxodo 16:14-15
+                        hint: 'Era como uma semente de coentro, branca, e tinha gosto de mel.',
+                        context: 'Êxodo 16:14-15 - O envio do maná no deserto.',
+                        clues: [
+                            { id: 'clue-manna', name: 'Pó Estranho no Chão', text: 'Você vê um tipo de orvalho que, ao secar, deixa um pó fino e branco no chão.', context: 'Êxodo 16:14' },
+                            { id: 'clue-basket', name: 'Cesta Vazia', text: 'Uma cesta vazia, mas com resíduos de algo que cheira a pão e mel.', context: 'Êxodo 16:31' }
+                        ],
+                        solutionContext: 'O alimento enviado por Deus foi o maná. (Êxodo 16:14-15)'
+                    },
+                    {
+                        id: 'desert-puzzle-2',
+                        question: 'Quantos mandamentos Deus deu a Moisés no Monte Sinai?',
+                        answer: '10', // Êxodo 34:28
+                        hint: 'São as leis fundamentais para a vida do povo de Deus.',
+                        context: 'Êxodo 34:28 - Os Dez Mandamentos.',
+                        clues: [
+                            { id: 'clue-tablet', name: 'Fragmento de Pedra', text: 'Um fragmento de uma tábua de pedra com inscrições numéricas.', context: 'Êxodo 34:28' },
+                            { id: 'clue-mountain', name: 'Cume do Monte', text: 'No cume do monte, uma fumaça e relâmpagos indicam a presença divina. Há uma mensagem sobre "palavras" que foram ditas.', context: 'Êxodo 19:18-19' }
+                        ],
+                        solutionContext: 'Deus deu a Moisés os Dez Mandamentos. (Êxodo 34:28)'
+                    },
+                    {
+                        id: 'desert-puzzle-3',
+                        question: 'Qual objeto Moisés levantou no deserto para que as pessoas que olhassem para ele fossem curadas das picadas de serpentes?',
+                        answer: 'serpente de bronze', // Números 21:8-9
+                        hint: 'Era um símbolo de cura e salvação, apontando para algo maior no futuro.',
+                        context: 'Números 21:8-9 - A serpente de bronze no deserto.',
+                        clues: [
+                            { id: 'clue-serpent-bronze', name: 'Pilar com Serpente', text: 'Um pilar com uma serpente de metal enrolada em cima.', context: 'Números 21:8-9' },
+                            { id: 'clue-sick-person', name: 'Pessoa Doente', text: 'Uma pessoa doente aponta para o pilar, indicando que a cura vem de olhar para ele.', context: 'Números 21:9' }
+                        ],
+                        solutionContext: 'Moisés levantou uma serpente de bronze. (Números 21:8-9)'
+                    }
+                ]
+            },
+            'david-kingdom': {
+                title: 'Reino de Davi',
+                image: 'https://placehold.co/800x300/800000/FFFFFF?text=Reino+de+Davi', // Placeholder para o Reino de Davi
+                description: 'Você está no coração do Reino de Israel, na época do Rei Davi. Acompanhe sua jornada de pastor a rei, enfrentando desafios e compondo louvores. Resolva os enigmas para entender a grandeza de seu reinado!',
+                puzzles: [
+                    {
+                        id: 'david-puzzle-1',
+                        question: 'Qual gigante Davi derrotou com uma funda e uma pedra?',
+                        answer: 'golias', // 1 Samuel 17:49-50
+                        hint: 'Ele era um filisteu de Gate, e seu tamanho era impressionante.',
+                        context: '1 Samuel 17:49-50 - Davi e Golias.',
+                        clues: [
+                            { id: 'clue-sling', name: 'Funda de Pastor', text: 'Uma funda de pastor, com uma pedra lisa por perto.', context: '1 Samuel 17:49' },
+                            { id: 'clue-helmet', name: 'Capacete Gigante', text: 'Um capacete enorme, muito maior do que qualquer um que você já viu.', context: '1 Samuel 17:7' }
+                        ],
+                        solutionContext: 'Davi derrotou o gigante Golias. (1 Samuel 17:49-50)'
+                    },
+                    {
+                        id: 'david-puzzle-2',
+                        question: 'Qual instrumento musical Davi tocava para acalmar o rei Saul?',
+                        answer: 'harpa', // 1 Samuel 16:23
+                        hint: 'Ele era um músico talentoso e um salmista.',
+                        context: '1 Samuel 16:23 - Davi tocando harpa para Saul.',
+                        clues: [
+                            { id: 'clue-harp', name: 'Harpa Antiga', text: 'Uma harpa de cordas, com marcas de uso frequente.', context: '1 Samuel 16:23' },
+                            { id: 'clue-crown', name: 'Coroa Real', text: 'Uma coroa de rei, que parece ter sido acalmada pelo som de um instrumento.', context: '1 Samuel 16:14-23' }
+                        ],
+                        solutionContext: 'Davi tocava a harpa para o rei Saul. (1 Samuel 16:23)'
+                    },
+                    {
+                        id: 'david-puzzle-3',
+                        question: 'Qual cidade se tornou a capital do reino de Davi?',
+                        answer: 'jerusalém', // 2 Samuel 5:6-9
+                        hint: 'Era uma fortaleza dos jebuseus antes de Davi conquistá-la.',
+                        context: '2 Samuel 5:6-9 - Davi conquista Jerusalém e a torna capital.',
+                        clues: [
+                            { id: 'clue-city-map', name: 'Mapa Antigo da Cidade', text: 'Um mapa de uma cidade fortificada, com uma estrela marcando um local central.', context: '2 Samuel 5:7' },
+                            { id: 'clue-throne', name: 'Trono Vazio', text: 'Um trono imponente, esperando por seu rei em uma cidade que se tornaria famosa.', context: '2 Samuel 5:9' }
+                        ],
+                        solutionContext: 'Jerusalém se tornou a capital do reino de Davi. (2 Samuel 5:6-9)'
+                    }
+                ]
+            },
+            'jesus-birth': {
+                title: 'Nascimento de Jesus',
+                image: 'https://placehold.co/800x300/ADD8E6/FFFFFF?text=Belém+Nascimento+de+Jesus', // Placeholder para o Nascimento de Jesus
+                description: 'Você está na humilde cidade de Belém, testemunhando o maior evento da história. Encontre as pistas e resolva os enigmas para entender o milagre do Natal!',
+                puzzles: [
+                    {
+                        id: 'jesus-birth-puzzle-1',
+                        question: 'Em qual cidade Jesus nasceu?',
+                        answer: 'belém', // Lucas 2:4-7
+                        hint: 'É conhecida como a cidade de Davi.',
+                        context: 'Lucas 2:4-7 - O nascimento de Jesus em Belém.',
+                        clues: [
+                            { id: 'clue-star', name: 'Estrela Brilhante', text: 'Uma estrela brilhante no céu, que parece apontar para uma pequena cidade.', context: 'Mateus 2:2' },
+                            { id: 'clue-census-scroll', name: 'Censo Romano', text: 'Um pergaminho de censo que menciona uma viagem de José e Maria para se registrar em sua cidade natal.', context: 'Lucas 2:4' }
+                        ],
+                        solutionContext: 'Jesus nasceu em Belém. (Lucas 2:4-7)'
+                    },
+                    {
+                        id: 'jesus-birth-puzzle-2',
+                        question: 'Onde Jesus foi colocado logo após seu nascimento, por não haver lugar na hospedaria?',
+                        answer: 'manjedoura', // Lucas 2:7
+                        hint: 'É um cocho onde se coloca alimento para animais.',
+                        context: 'Lucas 2:7 - Jesus deitado na manjedoura.',
+                        clues: [
+                            { id: 'clue-manger', name: 'Cocho de Madeira', text: 'Um cocho de madeira, com palha, usado para alimentar animais.', context: 'Lucas 2:7' },
+                            { id: 'clue-animals', name: 'Animais no Estábulo', text: 'Você vê um burro e um boi, que parecem estar em um estábulo simples.', context: 'Lucas 2:7' }
+                        ],
+                        solutionContext: 'Jesus foi colocado em uma manjedoura. (Lucas 2:7)'
+                    },
+                    {
+                        id: 'jesus-birth-puzzle-3',
+                        question: 'Qual presente os reis magos trouxeram que simbolizava a realeza de Jesus?',
+                        answer: 'ouro', // Mateus 2:11
+                        hint: 'Um dos três presentes, associado a reis e riquezas.',
+                        context: 'Mateus 2:11 - Os presentes dos magos: ouro, incenso e mirra.',
+                        clues: [
+                            { id: 'clue-gift-box', name: 'Caixa de Presente', text: 'Uma caixa de presente aberta, com vestígios de um metal precioso.', context: 'Mateus 2:11' },
+                            { id: 'clue-crown-drawing', name: 'Desenho de Coroa', text: 'Um desenho simples de uma coroa real, ao lado de um símbolo de riqueza.', context: 'Mateus 2:2' }
+                        ],
+                        solutionContext: 'Os reis magos trouxeram ouro, simbolizando a realeza de Jesus. (Mateus 2:11)'
+                    }
+                ]
+            },
+            'prophets-kingdoms': {
+                title: 'Profetas e Reinos Divididos',
+                image: 'https://placehold.co/800x300/4B0082/FFFFFF?text=Profetas+e+Reinos', // Placeholder para Profetas
+                description: 'Viaje no tempo para os dias dos profetas e reinos divididos de Israel e Judá. Desvende as mensagens divinas e os desafios enfrentados pelos mensageiros de Deus.',
+                puzzles: [
+                    {
+                        id: 'prophet-puzzle-1',
+                        question: 'No Monte Carmelo, qual foi o profeta que desafiou os 450 profetas de Baal?',
+                        answer: 'elias', // 1 Reis 18:20-40
+                        hint: 'Ele orou e fogo desceu do céu.',
+                        context: '1 Reis 18:20-40 - O desafio de Elias no Monte Carmelo.',
+                        clues: [
+                            { id: 'clue-altar', name: 'Altar Molhado', text: 'Um altar encharcado de água, mas com sinais de fogo intenso.', context: '1 Reis 18:33-38' },
+                            { id: 'clue-raven', name: 'Corvo Solitário', text: 'Um corvo pousado, lembrando a forma como Deus alimentou seu servo.', context: '1 Reis 17:6' }
+                        ],
+                        solutionContext: 'O profeta que desafiou os profetas de Baal foi Elias. (1 Reis 18:20-40)'
+                    },
+                    {
+                        id: 'prophet-puzzle-2',
+                        question: 'Qual rio Eliseu e Elias atravessaram a seco antes de Elias ser levado ao céu?',
+                        answer: 'jordão', // 2 Reis 2:8
+                        hint: 'É um rio importante na história de Israel, onde muitos eventos bíblicos ocorreram.',
+                        context: '2 Reis 2:8 - Elias e Eliseu atravessam o Jordão.',
+                        clues: [
+                            { id: 'clue-chariot', name: 'Carro de Fogo', text: 'Um rastro de fogo no céu, apontando para um rio abaixo.', context: '2 Reis 2:11' },
+                            { id: 'clue-mantle', name: 'Manto Caído', text: 'Um manto enrolado, deixado para trás por alguém que subiu.', context: '2 Reis 2:13' }
+                        ],
+                        solutionContext: 'Elias e Eliseu atravessaram o rio Jordão. (2 Reis 2:8)'
+                    },
+                    {
+                        id: 'prophet-puzzle-3',
+                        question: 'Qual profeta do Antigo Testamento é conhecido por suas muitas profecias sobre o Messias, incluindo o "Servo Sofredor"?',
+                        answer: 'isaías', // Isaías 53
+                        hint: 'Seu livro é um dos mais longos entre os profetas maiores.',
+                        context: 'Isaías 53 - A profecia do Servo Sofredor.',
+                        clues: [
+                            { id: 'clue-ancient-book', name: 'Livro Antigo', text: 'Um livro com muitas páginas, algumas delas detalhando o sofrimento de um futuro rei.', context: 'Isaías 53' },
+                            { id: 'clue-lamb', name: 'Cordeiro Sacrificado', text: 'Uma imagem de um cordeiro, lembrando um sacrifício profetizado.', context: 'Isaías 53:7' }
+                        ],
+                        solutionContext: 'O profeta Isaías é conhecido por suas profecias sobre o Messias. (Isaías 53)'
+                    }
+                ]
+            },
+            'jesus-ministry': {
+                title: 'Jesus: Ministério e Milagres',
+                image: 'https://placehold.co/800x300/20B2AA/FFFFFF?text=Galileia+de+Jesus', // Placeholder para o Ministério de Jesus
+                description: 'Siga os passos de Jesus durante seu ministério terreno. Testemunhe seus milagres e ensinamentos, e descubra a verdade por trás de sua missão.',
+                puzzles: [
+                    {
+                        id: 'jesus-ministry-puzzle-1',
+                        question: 'Em qual casamento Jesus realizou seu primeiro milagre, transformando água em quê?',
+                        answer: 'vinho', // João 2:1-11
+                        hint: 'Foi em Caná da Galileia.',
+                        context: 'João 2:1-11 - O primeiro milagre de Jesus em Caná da Galileia.',
+                        clues: [
+                            { id: 'clue-water-jars', name: 'Talhas de Água Vazias', text: 'Seis grandes talhas de pedra, que antes continham água.', context: 'João 2:6' },
+                            { id: 'clue-celebration', name: 'Restos de Festa', text: 'Sinais de uma festa de casamento recente, com copos e jarros.', context: 'João 2:1' }
+                        ],
+                        solutionContext: 'Jesus transformou água em vinho. (João 2:1-11)'
+                    },
+                    {
+                        id: 'jesus-ministry-puzzle-2',
+                        question: 'Com quantos pães e peixes Jesus alimentou uma multidão de cinco mil homens?',
+                        answer: '5 pães e 2 peixes', // Mateus 14:17-21
+                        hint: 'Foi um pequeno lanche que se tornou abundante.',
+                        context: 'Mateus 14:17-21 - A multiplicação dos pães e peixes.',
+                        clues: [
+                            { id: 'clue-baskets-leftover', name: 'Cestas de Sobras', text: 'Doze cestas cheias de pedaços de pão e peixe, mais do que o inicial.', context: 'Mateus 14:20' },
+                            { id: 'clue-fish-bread', name: 'Pequeno Almoço', text: 'Um desenho de cinco pães e dois peixes.', context: 'Mateus 14:17' }
+                        ],
+                        solutionContext: 'Jesus alimentou a multidão com 5 pães e 2 peixes. (Mateus 14:17-21)'
+                    },
+                    {
+                        id: 'jesus-ministry-puzzle-3',
+                        question: 'Qual irmão de Maria e Marta Jesus ressuscitou dos mortos?',
+                        answer: 'lázaro', // João 11:43-44
+                        hint: 'Ele estava morto há quatro dias.',
+                        context: 'João 11:43-44 - A ressurreição de Lázaro.',
+                        clues: [
+                            { id: 'clue-tomb', name: 'Sepulcro Aberto', text: 'Um sepulcro com a pedra removida, e um cheiro de linho velho.', context: 'João 11:41-44' },
+                            { id: 'clue-crying-sisters', name: 'Irmãs Chorando', text: 'Duas mulheres chorando, lamentando a morte do irmão.', context: 'João 11:19-20' }
+                        ],
+                        solutionContext: 'Jesus ressuscitou Lázaro dos mortos. (João 11:43-44)'
+                    }
+                ]
+            },
+            'apostles-acts': {
+                title: 'Atos dos Apóstolos',
+                image: 'https://placehold.co/800x300/FF4500/FFFFFF?text=Atos+dos+Apóstolos', // Placeholder para Atos
+                description: 'Junte-se aos primeiros apóstolos e à Igreja primitiva. Testemunhe o poder do Espírito Santo e a propagação do Evangelho por todo o mundo conhecido.',
+                puzzles: [
+                    {
+                        id: 'apostles-puzzle-1',
+                        question: 'Em qual festa judaica os discípulos receberam o Espírito Santo, falando em outras línguas?',
+                        answer: 'pentecostes', // Atos 2:1-4
+                        hint: 'Aconteceu cinquenta dias após a Páscoa.',
+                        context: 'Atos 2:1-4 - O dia de Pentecostes e a vinda do Espírito Santo.',
+                        clues: [
+                            { id: 'clue-wind', name: 'Vento Impetuoso', text: 'Você sente um vento forte e ouve um som como de um vento impetuoso enchendo a casa.', context: 'Atos 2:2' },
+                            { id: 'clue-tongues', name: 'Línguas de Fogo', text: 'Você vê algo como línguas de fogo pousando sobre cada um dos presentes.', context: 'Atos 2:3' }
+                        ],
+                        solutionContext: 'Os discípulos receberam o Espírito Santo no dia de Pentecostes. (Atos 2:1-4)'
+                    },
+                    {
+                        id: 'apostles-puzzle-2',
+                        question: 'Qual o nome do homem que perseguia os cristãos e teve um encontro com Jesus na estrada para Damasco, tornando-se um grande apóstolo?',
+                        answer: 'saulo', // Atos 9:1-19 (também aceita "paulo")
+                        hint: 'Seu nome foi mudado após sua conversão.',
+                        context: 'Atos 9:1-19 - A conversão de Saulo na estrada para Damasco.',
+                        clues: [
+                            { id: 'clue-road', name: 'Estrada para Damasco', text: 'Uma imagem de uma estrada, com uma luz brilhante vinda do céu.', context: 'Atos 9:3' },
+                            { id: 'clue-blindness', name: 'Olhos Cegos', text: 'Uma figura de um homem com os olhos vendados, incapaz de ver.', context: 'Atos 9:8' }
+                        ],
+                        solutionContext: 'O homem que se tornou apóstolo após o encontro foi Saulo (Paulo). (Atos 9:1-19)'
+                    },
+                    {
+                        id: 'apostles-puzzle-3',
+                        question: 'Em qual cidade Paulo e Silas estavam presos quando um terremoto abriu as portas da prisão?',
+                        answer: 'filipos', // Atos 16:25-26
+                        hint: 'Eles estavam cantando hinos e orando na prisão.',
+                        context: 'Atos 16:25-26 - Paulo e Silas na prisão de Filipos.',
+                        clues: [
+                            { id: 'clue-chains', name: 'Correntes Quebradas', text: 'Correntes no chão, que parecem ter se soltado de repente.', context: 'Atos 16:26' },
+                            { id: 'clue-jailer', name: 'Carcereiro Assustado', text: 'Um homem com uma espada, prestes a se matar, mas impedido por uma voz.', context: 'Atos 16:27-28' }
+                        ],
+                        solutionContext: 'Paulo e Silas estavam presos em Filipos. (Atos 16:25-26)'
+                    }
+                ]
+            }
+        };
+
+        function startGame(scenarioKey) {
+            scenario = scenarios[scenarioKey];
+            currentPuzzleIndex = 0;
+            scenarioTitle.textContent = scenario.title;
+            scenarioImg.src = scenario.image;
+            scenarioDescription.textContent = scenario.description;
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            bgMusic.play();
+            renderPuzzle();
+        }
+
+        function renderPuzzle() {
+            interactiveElements.innerHTML = "";
+            feedback.classList.add('hidden');
+            answerInput.value = ""; // Clear input for new puzzle
+            askExplanationBtn.classList.add('hidden'); // Hide explanation button for new puzzle
+
+            const puzzle = scenario.puzzles[currentPuzzleIndex];
+            puzzleQuestionDisplay.textContent = puzzle.question; // Display puzzle question
+
+            puzzle.clues.forEach(clue => {
+                const clueDiv = document.createElement('div');
+                clueDiv.className = "bg-green-100 p-4 rounded-lg text-center shadow hover:shadow-lg cursor-pointer pulse interactive-object";
+                clueDiv.innerHTML = `<span class="text-4xl mb-2">${getIconForClue(clue.id)}</span><br>${clue.name}`;
+                clueDiv.onclick = () => {
+                    showModal(clue.name, clue.text);
+                    currentBiblicalContext = clue.context; // Set context for API
+                    askExplanationBtn.classList.remove('hidden'); // Show explanation button
+                };
+                interactiveElements.appendChild(clueDiv);
+            });
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const totalPuzzles = scenario.puzzles.length;
+            const solvedPuzzles = currentPuzzleIndex;
+            const progress = (solvedPuzzles / totalPuzzles) * 100;
+            progressText.textContent = `${Math.floor(progress)}%`;
+        }
+
+        submitAnswer.onclick = () => {
+            const userAnswer = answerInput.value.trim().toLowerCase();
+            const currentPuzzle = scenario.puzzles[currentPuzzleIndex];
+
+            if (userAnswer === currentPuzzle.answer.toLowerCase()) {
+                feedback.textContent = "✅ Resposta correta!";
+                feedback.classList.remove('text-red-600', 'hidden');
+                feedback.classList.add('text-green-600');
+
+                currentPuzzleIndex++;
+                if (currentPuzzleIndex < scenario.puzzles.length) {
+                    setTimeout(() => {
+                        showModal('Próximo Enigma!', 'Você resolveu um enigma! Prepare-se para o próximo desafio.', false);
+                        renderPuzzle();
+                    }, 1000);
+                } else {
+                    gameScreen.classList.add('hidden');
+                    endScreen.classList.remove('hidden');
+                    endMessage.textContent = `Você escapou do ${scenario.title}! 👏`;
+                    bgMusic.pause();
+                }
+            } else {
+                feedback.textContent = "❌ Resposta incorreta. Tente novamente.";
+                feedback.classList.remove('text-green-600', 'hidden');
+                feedback.classList.add('text-red-600');
+            }
+            answerInput.value = "";
+        };
+
+        hintBtn.onclick = () => {
+            const currentPuzzle = scenario.puzzles[currentPuzzleIndex];
+            showModal('💡 Dica', currentPuzzle.hint);
+        };
+
+        // Lógica para pedir explicação à API do Gemini
+        askExplanationBtn.addEventListener('click', async () => {
+            if (!currentBiblicalContext) {
+                showModal('Erro', 'Nenhum contexto bíblico disponível para explicação. Clique em uma pista primeiro.', false);
+                return;
+            }
+
+            showModal('Gerando Explicação...', 'Por favor, aguarde enquanto a inteligência artificial prepara uma explicação.', true);
+
+            try {
+                let chatHistory = [];
+                const prompt = `Explique o seguinte trecho ou conceito bíblico de forma concisa e clara para um estudante da Bíblia: "${currentBiblicalContext}"`;
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // A chave API será fornecida pelo ambiente Canvas
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    showModal('Explicação Bíblica', text, false);
+                } else {
+                    showModal('Erro na Explicação', 'Não foi possível obter uma explicação. Tente novamente mais tarde.', false);
+                    console.error('Estrutura de resposta inesperada:', result);
+                }
+            } catch (error) {
+                showModal('Erro de Conexão', 'Houve um problema ao conectar com o serviço de explicação. Verifique sua conexão.', false);
+                console.error('Erro ao chamar a API Gemini:', error);
+            }
+        });
+
+        document.getElementById('restart').onclick = () => {
+            startScreen.classList.remove('hidden');
+            endScreen.classList.add('hidden');
+            bgMusic.pause();
+            bgMusic.currentTime = 0; // Reset music
+        };
+
+        document.getElementById('start-eden').onclick = () => startGame('eden');
+        document.getElementById('start-ark').onclick = () => startGame('noah-ark');
+        document.getElementById('start-egypt').onclick = () => startGame('egypt-liberation');
+        document.getElementById('start-desert').onclick = () => startGame('desert-journey');
+        document.getElementById('start-david').onclick = () => startGame('david-kingdom');
+        document.getElementById('start-jesus-birth').onclick = () => startGame('jesus-birth');
+        document.getElementById('start-prophets').onclick = () => startGame('prophets-kingdoms');
+        document.getElementById('start-jesus-ministry').onclick = () => startGame('jesus-ministry');
+        document.getElementById('start-apostles').onclick = () => startGame('apostles-acts');
+
+
+        toggleTheme.onclick = () => {
+            document.body.classList.toggle('bg-gray-800');
+            document.body.classList.toggle('text-white');
+            document.body.classList.toggle('from-green-50');
+            document.body.classList.toggle('to-green-200');
+            document.body.classList.toggle('from-gray-700');
+            document.body.classList.toggle('to-gray-900');
+
+            const gameContainer = document.querySelector('.w-full.max-w-4xl'); // Select the main container
+            gameContainer.classList.toggle('bg-white');
+            gameContainer.classList.toggle('bg-gray-700');
+
+            // Adjust text colors within the game container for dark mode
+            const textElements = gameContainer.querySelectorAll('h1, h2, p, span, input, button');
+            textElements.forEach(el => {
+                if (el.classList.contains('text-green-800')) {
+                    el.classList.toggle('text-green-800');
+                    el.classList.toggle('text-green-300');
+                } else if (el.classList.contains('text-gray-700')) {
+                    el.classList.toggle('text-gray-700');
+                    el.classList.toggle('text-gray-200');
+                } else if (el.classList.contains('text-gray-600')) {
+                    el.classList.toggle('text-gray-600');
+                    el.classList.toggle('text-gray-300');
+                } else if (el.classList.contains('text-gray-800')) {
+                    el.classList.toggle('text-gray-800');
+                    el.classList.toggle('text-gray-100');
+                }
+            });
+
+            // Adjust button colors for dark mode
+            const btns = gameContainer.querySelectorAll('.btn, .btn-secondary, #how-to-play, #start-eden, #start-ark, #start-egypt, #start-desert, #start-david, #start-jesus-birth, #start-prophets, #start-jesus-ministry, #start-apostles, #submit-answer, #hint-btn, #ask-explanation-btn, #restart');
+            btns.forEach(btn => {
+                if (btn.id === 'toggle-theme') return; // Don't change the theme button itself
+
+                if (btn.classList.contains('bg-green-700')) {
+                    btn.classList.toggle('bg-green-700');
+                    btn.classList.toggle('bg-green-900');
+                    btn.classList.toggle('hover:bg-green-800');
+                    btn.classList.toggle('hover:bg-green-700');
+                } else if (btn.classList.contains('bg-green-600')) {
+                    btn.classList.toggle('bg-green-600');
+                    btn.classList.toggle('bg-green-800');
+                    btn.classList.toggle('hover:bg-green-700');
+                    btn.classList.toggle('hover:bg-green-600');
+                } else if (btn.classList.contains('bg-blue-600')) {
+                    btn.classList.toggle('bg-blue-600');
+                    btn.classList.toggle('bg-blue-800');
+                    btn.classList.toggle('hover:bg-blue-700');
+                    btn.classList.toggle('hover:bg-blue-600');
+                } else if (btn.classList.contains('bg-yellow-500')) {
+                    btn.classList.toggle('bg-yellow-500');
+                    btn.classList.toggle('bg-yellow-700');
+                    btn.classList.toggle('hover:bg-yellow-600');
+                    btn.classList.toggle('hover:bg-yellow-500');
+                } else if (btn.classList.contains('bg-yellow-600')) {
+                    btn.classList.toggle('bg-yellow-600');
+                    btn.classList.toggle('bg-yellow-800');
+                    btn.classList.toggle('hover:bg-yellow-700');
+                    btn.classList.toggle('hover:bg-yellow-600');
+                } else if (btn.classList.contains('bg-purple-600')) { // New desert button
+                    btn.classList.toggle('bg-purple-600');
+                    btn.classList.toggle('bg-purple-800');
+                    btn.classList.toggle('hover:bg-purple-700');
+                    btn.classList.toggle('hover:bg-purple-600');
+                } else if (btn.classList.contains('bg-red-600')) { // New David button
+                    btn.classList.toggle('bg-red-600');
+                    btn.classList.toggle('bg-red-800');
+                    btn.classList.toggle('hover:bg-red-700');
+                    btn.classList.toggle('hover:bg-red-600');
+                } else if (btn.classList.contains('bg-pink-600')) { // New Jesus birth button
+                    btn.classList.toggle('bg-pink-600');
+                    btn.classList.toggle('bg-pink-800');
+                    btn.classList.toggle('hover:bg-pink-700');
+                    btn.classList.toggle('hover:bg-pink-600');
+                } else if (btn.classList.contains('bg-indigo-600')) { // New prophets button
+                    btn.classList.toggle('bg-indigo-600');
+                    btn.classList.toggle('bg-indigo-800');
+                    btn.classList.toggle('hover:bg-indigo-700');
+                    btn.classList.toggle('hover:bg-indigo-600');
+                } else if (btn.classList.contains('bg-teal-600')) { // New Jesus ministry button
+                    btn.classList.toggle('bg-teal-600');
+                    btn.classList.toggle('bg-teal-800');
+                    btn.classList.toggle('hover:bg-teal-700');
+                    btn.classList.toggle('hover:bg-teal-600');
+                } else if (btn.classList.contains('bg-orange-600')) { // New apostles button
+                    btn.classList.toggle('bg-orange-600');
+                    btn.classList.toggle('bg-orange-800');
+                    btn.classList.toggle('hover:bg-orange-700');
+                    btn.classList.toggle('hover:bg-orange-600');
+                }
+            });
+
+            // Adjust interactive object background
+            const interactiveObjs = gameContainer.querySelectorAll('.interactive-object');
+            interactiveObjs.forEach(obj => {
+                obj.classList.toggle('bg-green-100');
+                obj.classList.toggle('bg-gray-600');
+            });
+
+            // Adjust modal content background for dark mode
+            const modalContent = document.querySelector('.modal-content');
+            modalContent.classList.toggle('bg-white');
+            modalContent.classList.toggle('bg-gray-800');
+            modalContent.querySelectorAll('h3, p, ul, li').forEach(el => {
+                if (el.classList.contains('text-green-700')) {
+                    el.classList.toggle('text-green-700');
+                    el.classList.toggle('text-green-300');
+                } else if (el.classList.contains('text-gray-700')) {
+                    el.classList.toggle('text-gray-700');
+                    el.classList.toggle('text-gray-200');
+                }
+            });
+        };
+
+        // Conteúdo do manual "Como Jogar"
+        const howToPlayContent = `
+            <p class="mb-4">Bem-vindo ao Desvende a Bíblia: O Escape Room da Fé! Seu objetivo é resolver enigmas e charadas baseados em histórias da Bíblia para "escapar" de diferentes cenários.</p>
+            <h4 class="text-xl font-semibold text-green-700 mb-2">Como Jogar:</h4>
+            <ul class="list-disc list-inside mb-4 space-y-1">
+                <li><strong>Cenário:</strong> Cada nível é um cenário bíblico (como o Jardim do Éden, a Arca de Noé, o Egito, a Jornada no Deserto, o Reino de Davi, o Nascimento de Jesus, Profetas e Reinos Divididos, Ministério de Jesus ou Atos dos Apóstolos). Leia a descrição para entender seu objetivo geral.</li>
+                <li><strong>Enigmas em Sequência:</strong> Dentro de cada cenário, você encontrará uma série de enigmas. Você deve resolver o enigma atual para desbloquear o próximo. A pergunta do enigma atual estará visível na tela.</li>
+                <li><strong>Elementos Interativos:</strong> Clique nos objetos visíveis no cenário (como baús, mapas, pergaminhos) para encontrar pistas e informações relacionadas ao enigma atual.</li>
+                <li><strong>Campo de Resposta:</strong> Digite sua resposta para o enigma atual no campo de texto e clique em "Enviar Resposta". Se estiver correto, você avança para o próximo enigma ou escapa do cenário!</li>
+                <li><strong>Pedir Dica:</strong> Se estiver com dificuldades, clique em "Pedir Dica" para obter uma ajuda relacionada ao enigma atual.</li>
+                <li><strong>Pedir Explicação:</strong> Após revelar uma pista, se houver um contexto bíblico relevante, o botão "Pedir Explicação" aparecerá. Clique nele para que a inteligência artificial forneça uma explicação aprofundada sobre o trecho bíblico relacionado.</li>
+                <li><strong>Música e Tema:</strong> Você pode controlar a música de fundo e alternar entre o tema claro e escuro usando os botões no cabeçalho.</li>
+            </ul>
+            <p class="mb-4">Boa sorte e que seu conhecimento da Palavra o guie!</p>
+        `;
+
+        howToPlayBtn.onclick = () => {
+            showModal('Como Jogar?', howToPlayContent);
+        };
+
+        // Registra o Service Worker para funcionalidade PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Inicializa o jogo na tela de início
+        window.onload = function() {
+            startScreen.classList.remove('hidden');
+            gameScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+        };
+    </script>
+</body>
+</html>
