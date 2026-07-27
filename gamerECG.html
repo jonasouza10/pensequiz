@@ -48,7 +48,7 @@
 <body class="bg-gray-900 text-white min-h-screen font-sans flex items-center justify-center">
     <div class="container mx-auto p-3 sm:p-4 max-w-5xl bg-gray-950 rounded-xl shadow-2xl my-4 border border-gray-800">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-6 text-red-500 tracking-tight">
-           Pensequiz ECG : Challenge
+            Pensequiz ECG : Challenge
             <span class="block text-sm font-normal text-gray-400 mt-1">Simulador Avançado de Arritmias • ACLS 2020</span>
         </h1>
 
@@ -156,6 +156,79 @@
                         <p class="mt-2 text-[10px] text-gray-500 leading-tight">
                             Traçados esquemáticos das principais arritmias do jogo (referência educacional ACLS).
                         </p>
+                    </div>
+
+                    <!-- Interpretação de ECG Pediátrico -->
+                    <div id="painel-pediatrico" class="mt-2 text-xs rounded-lg border border-gray-700 bg-gray-800/80 p-2.5 hidden">
+                        <div class="font-bold text-gray-300 mb-2 flex items-center justify-between">
+                            <span class="text-red-400">Interpretação de ECG Pediátrico</span>
+                            <button id="btn-toggle-pediatrico" class="text-[10px] px-1.5 py-0.5 bg-gray-700 hover:bg-gray-600 rounded border border-gray-600 text-gray-300">Recolher</button>
+                        </div>
+
+                        <div id="pediatrico-conteudo">
+                            <p class="text-gray-400 mb-2 leading-snug">
+                                O ECG da criança <strong class="text-gray-300">não é um ECG de adulto em miniatura</strong>.
+                                Frequência, intervalos e eixos mudam com a idade — especialmente nos primeiros anos de vida.
+                            </p>
+
+                            <!-- Tabela de valores normais por idade -->
+                            <div class="overflow-x-auto mb-3">
+                                <table class="w-full text-left border-collapse text-[10px]">
+                                    <thead>
+                                        <tr class="text-gray-400 border-b border-gray-700">
+                                            <th class="py-1 pr-2">Faixa etária</th>
+                                            <th class="py-1 pr-2">FC (bpm)</th>
+                                            <th class="py-1 pr-2">PR (ms)</th>
+                                            <th class="py-1 pr-2">QRS (ms)</th>
+                                            <th class="py-1">QTc (ms)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-pediatrico">
+                                        <!-- preenchido via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Diferenças-chave -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                                <div class="bg-gray-900/70 border border-gray-700 rounded p-2">
+                                    <div class="font-semibold text-sky-300 mb-1">Diferenças vs adulto</div>
+                                    <ul class="text-gray-400 space-y-0.5 list-disc list-inside leading-snug">
+                                        <li>FC basal mais alta (recém-nascido 120–160)</li>
+                                        <li>PR e QRS mais curtos</li>
+                                        <li>Predomínio de VD no RN/lactente (eixo direito)</li>
+                                        <li>Ondas T invertidas em precordiais direitas (normal até ~adolescência)</li>
+                                        <li>Voltagens mais altas (parede torácica fina)</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gray-900/70 border border-gray-700 rounded p-2">
+                                    <div class="font-semibold text-amber-300 mb-1">Armadilhas frequentes</div>
+                                    <ul class="text-gray-400 space-y-0.5 list-disc list-inside leading-snug">
+                                        <li>Chamar de “taquicardia” uma FC normal para a idade</li>
+                                        <li>Interpretar eixo direito do RN como patológico</li>
+                                        <li>Usar limites adultos de PR/QRS/QTc</li>
+                                        <li>Confundir T invertida em V1–V3 com isquemia</li>
+                                        <li>Não ajustar QTc à FC elevada da criança</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-900/70 border border-gray-700 rounded p-2 mb-2">
+                                <div class="font-semibold text-emerald-300 mb-1">Abordagem prática (passo a passo)</div>
+                                <ol class="text-gray-400 space-y-0.5 list-decimal list-inside leading-snug">
+                                    <li>Confirmar idade e usar tabela de referência pediátrica</li>
+                                    <li>Calcular FC e comparar com a faixa normal da idade</li>
+                                    <li>Medir PR, QRS e QTc com limites pediátricos</li>
+                                    <li>Avaliar eixo e progressão de R nas precordiais (VD→VE com a idade)</li>
+                                    <li>Integrar clínica: estabilidade, sintomas, cardiopatia congênita conhecida</li>
+                                </ol>
+                            </div>
+
+                            <p class="text-[10px] text-gray-500 leading-tight">
+                                Valores aproximados baseados em tabelas pediátricas de referência (Davignon e correlatos).
+                                Sempre correlacionar com a clínica e, se necessário, laudo especializado.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -1720,6 +1793,7 @@ function atualizarPainelAlargamento(intervalos) {
     // Garante que os exemplos visuais existam e estejam desenhados
     garantirExemplosVisuais();
     garantirExemplosArritmias();
+    garantirPainelPediatrico();
 }
 
 /* ================================================================
@@ -2105,6 +2179,53 @@ function garantirExemplosArritmias() {
         if (btn) {
             btn.addEventListener("click", () => {
                 const hidden = grid.classList.toggle("hidden");
+                btn.textContent = hidden ? "Expandir" : "Recolher";
+            });
+        }
+    }
+}
+
+/* ================================================================
+   INTERPRETAÇÃO DE ECG PEDIÁTRICO
+   Valores aproximados (Davignon e tabelas pediátricas de referência)
+   ================================================================ */
+const VALORES_PEDIATRICOS = [
+    { idade: "RN (0–7 d)",     fc: "120–160", pr: "80–160",  qrs: "40–70",  qtc: "≤ 440" },
+    { idade: "Lactente (1–12 m)", fc: "100–160", pr: "80–160",  qrs: "40–80",  qtc: "≤ 440" },
+    { idade: "1–3 anos",       fc: "90–150",  pr: "80–160",  qrs: "40–80",  qtc: "≤ 440" },
+    { idade: "3–5 anos",       fc: "80–140",  pr: "80–160",  qrs: "50–90",  qtc: "≤ 440" },
+    { idade: "5–8 anos",       fc: "70–120",  pr: "90–170",  qrs: "50–90",  qtc: "≤ 440" },
+    { idade: "8–12 anos",      fc: "60–110",  pr: "90–180",  qrs: "50–100", qtc: "≤ 440" },
+    { idade: "12–16 anos",     fc: "60–100",  pr: "100–200", qrs: "60–110", qtc: "≤ 440–460" },
+    { idade: "Adulto (ref.)",  fc: "60–100",  pr: "120–200", qrs: "< 120",  qtc: "≤ 440–460" }
+];
+
+function garantirPainelPediatrico() {
+    const painel = document.getElementById("painel-pediatrico");
+    const tbody = document.getElementById("tabela-pediatrico");
+    const conteudo = document.getElementById("pediatrico-conteudo");
+    if (!painel || !tbody) return;
+
+    painel.classList.remove("hidden");
+
+    if (tbody.children.length === 0) {
+        tbody.innerHTML = VALORES_PEDIATRICOS.map((r, i) => {
+            const isAdult = i === VALORES_PEDIATRICOS.length - 1;
+            const rowCls = isAdult ? "border-t border-gray-600 text-gray-500" : "border-b border-gray-700/50";
+            return `
+                <tr class="${rowCls}">
+                    <td class="py-1 pr-2 font-medium ${isAdult ? "text-gray-500" : "text-gray-300"}">${r.idade}</td>
+                    <td class="py-1 pr-2 font-mono">${r.fc}</td>
+                    <td class="py-1 pr-2 font-mono">${r.pr}</td>
+                    <td class="py-1 pr-2 font-mono">${r.qrs}</td>
+                    <td class="py-1 font-mono">${r.qtc}</td>
+                </tr>`;
+        }).join("");
+
+        const btn = document.getElementById("btn-toggle-pediatrico");
+        if (btn && conteudo) {
+            btn.addEventListener("click", () => {
+                const hidden = conteudo.classList.toggle("hidden");
                 btn.textContent = hidden ? "Expandir" : "Recolher";
             });
         }
