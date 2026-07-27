@@ -1541,58 +1541,155 @@ function atualizarPainelAlargamento(intervalos) {
 }
 
 /* ================================================================
-   EXEMPLOS VISUAIS DOS CRITÉRIOS (mini-traçados esquemáticos)
+   EXEMPLOS VISUAIS DOS CRITÉRIOS — SVG reais (vetoriais)
+   Cada SVG simula um trecho de ECG clássico de livro-texto
    ================================================================ */
-const EXEMPLOS_CRITERIOS = [
-    {
-        id: "ex-qrs-estreito",
-        titulo: "QRS Estreito",
-        sub: "< 120 ms",
-        cor: "#16a34a",
-        tipo: "estreito"
-    },
-    {
-        id: "ex-qrs-alargado",
-        titulo: "QRS Alargado",
-        sub: "≥ 120 ms",
-        cor: "#dc2626",
-        tipo: "alargado"
-    },
-    {
-        id: "ex-pr-normal",
-        titulo: "PR Normal",
-        sub: "120–200 ms",
-        cor: "#2563eb",
-        tipo: "pr-normal"
-    },
-    {
-        id: "ex-pr-longo",
-        titulo: "PR Longo",
-        sub: "> 200 ms (BAV 1º)",
-        cor: "#2563eb",
-        tipo: "pr-longo"
-    },
-    {
-        id: "ex-qt-normal",
-        titulo: "QT Normal",
-        sub: "QTc ≤ 440 ms",
-        cor: "#7c3aed",
-        tipo: "qt-normal"
-    },
-    {
-        id: "ex-qt-longo",
-        titulo: "QT Prolongado",
-        sub: "QTc > 460–480 ms",
-        cor: "#7c3aed",
-        tipo: "qt-longo"
+
+/** Gera o markup SVG de um exemplo de critério */
+function svgExemplo(tipo, cor) {
+    // ViewBox 0 0 200 70 — linha de base em y=38
+    const grid = `
+      <defs>
+        <pattern id="g-${tipo}" width="8" height="8" patternUnits="userSpaceOnUse">
+          <path d="M8 0H0V8" fill="none" stroke="#3a4a6a" stroke-width="0.4"/>
+        </pattern>
+        <pattern id="g5-${tipo}" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M40 0H0V40" fill="none" stroke="#4a5a7a" stroke-width="0.7"/>
+        </pattern>
+      </defs>
+      <rect width="200" height="70" fill="#1a1a2e"/>
+      <rect width="200" height="70" fill="url(#g-${tipo})"/>
+      <rect width="200" height="70" fill="url(#g5-${tipo})"/>
+      <line x1="0" y1="38" x2="200" y2="38" stroke="#4a6080" stroke-width="0.6" opacity="0.5"/>`;
+
+    // Paths de dois batimentos (aproximação clássica de livro)
+    // Coordenadas pensadas para 25 mm/s visual
+    let wave = "";
+    let marks = "";
+
+    if (tipo === "estreito") {
+        // P-QRS estreito-T  (QRS ~ 10 unidades ≈ <120ms)
+        wave = `
+          <path d="M5,38 
+            C8,38 10,32 14,32 C17,32 19,38 21,38
+            L28,38 L30,42 L33,12 L36,46 L39,38
+            C44,38 48,28 54,28 C58,28 62,38 66,38
+            L70,38
+            C73,38 75,32 79,32 C82,32 84,38 86,38
+            L93,38 L95,42 L98,12 L101,46 L104,38
+            C109,38 113,28 119,28 C123,28 127,38 131,38"
+            fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+        marks = `
+          <line x1="28" y1="52" x2="39" y2="52" stroke="${cor}" stroke-width="1.5"/>
+          <line x1="28" y1="49" x2="28" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <line x1="39" y1="49" x2="39" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <text x="33.5" y="63" fill="${cor}" font-size="7" font-family="monospace" text-anchor="middle">QRS</text>`;
+    } else if (tipo === "alargado") {
+        // QRS largo e bizarro (sem P clara)
+        wave = `
+          <path d="M5,38
+            L12,40 L18,30 L26,8 L36,50 L46,22 L54,38
+            L62,38
+            L69,40 L75,30 L83,8 L93,50 L103,22 L111,38
+            L120,38"
+            fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+        marks = `
+          <!-- limiar 120ms (referência de QRS estreito) -->
+          <line x1="26" y1="10" x2="26" y2="56" stroke="#dc2626" stroke-width="1" stroke-dasharray="2,2" opacity="0.7"/>
+          <line x1="12" y1="52" x2="54" y2="52" stroke="${cor}" stroke-width="1.5"/>
+          <line x1="12" y1="49" x2="12" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <line x1="54" y1="49" x2="54" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <text x="33" y="63" fill="${cor}" font-size="7" font-family="monospace" text-anchor="middle">QRS largo</text>`;
+    } else if (tipo === "pr-normal") {
+        wave = `
+          <path d="M5,38
+            C8,38 10,31 14,31 C17,31 19,38 21,38
+            L36,38
+            L38,42 L41,12 L44,46 L47,38
+            C52,38 56,28 62,28 C66,28 70,38 74,38
+            L80,38
+            C83,38 85,31 89,31 C92,31 94,38 96,38
+            L111,38
+            L113,42 L116,12 L119,46 L122,38
+            C127,38 131,28 137,28 C141,28 145,38 149,38"
+            fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+        marks = `
+          <line x1="21" y1="52" x2="36" y2="52" stroke="${cor}" stroke-width="1.5"/>
+          <line x1="21" y1="49" x2="21" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <line x1="36" y1="49" x2="36" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <text x="28.5" y="63" fill="${cor}" font-size="7" font-family="monospace" text-anchor="middle">PR</text>`;
+    } else if (tipo === "pr-longo") {
+        wave = `
+          <path d="M5,38
+            C8,38 10,31 14,31 C17,31 19,38 21,38
+            L50,38
+            L52,42 L55,12 L58,46 L61,38
+            C66,38 70,28 76,28 C80,28 84,38 88,38
+            L95,38
+            C98,38 100,31 104,31 C107,31 109,38 111,38
+            L140,38
+            L142,42 L145,12 L148,46 L151,38
+            C156,38 160,28 166,28 C170,28 174,38 178,38"
+            fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+        marks = `
+          <line x1="21" y1="52" x2="50" y2="52" stroke="${cor}" stroke-width="1.5"/>
+          <line x1="21" y1="49" x2="21" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <line x1="50" y1="49" x2="50" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <text x="35.5" y="63" fill="${cor}" font-size="7" font-family="monospace" text-anchor="middle">PR longo</text>`;
+    } else if (tipo === "qt-normal") {
+        wave = `
+          <path d="M5,38
+            C8,38 10,32 14,32 C17,32 19,38 21,38
+            L28,38 L30,42 L33,12 L36,46 L39,38
+            C46,38 50,26 58,26 C64,26 68,38 72,38
+            L78,38
+            C81,38 83,32 87,32 C90,32 92,38 94,38
+            L101,38 L103,42 L106,12 L109,46 L112,38
+            C119,38 123,26 131,26 C137,26 141,38 145,38"
+            fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+        marks = `
+          <line x1="28" y1="52" x2="72" y2="52" stroke="${cor}" stroke-width="1.5"/>
+          <line x1="28" y1="49" x2="28" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <line x1="72" y1="49" x2="72" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <text x="50" y="63" fill="${cor}" font-size="7" font-family="monospace" text-anchor="middle">QT</text>`;
+    } else if (tipo === "qt-longo") {
+        wave = `
+          <path d="M5,38
+            C8,38 10,32 14,32 C17,32 19,38 21,38
+            L28,38 L30,42 L33,14 L36,46 L39,38
+            C50,38 58,24 72,24 C82,24 90,38 96,38
+            L102,38
+            C105,38 107,32 111,32 C114,32 116,38 118,38
+            L125,38 L127,42 L130,14 L133,46 L136,38
+            C147,38 155,24 169,24 C179,24 187,38 193,38"
+            fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+        marks = `
+          <line x1="28" y1="52" x2="96" y2="52" stroke="${cor}" stroke-width="1.5"/>
+          <line x1="28" y1="49" x2="28" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <line x1="96" y1="49" x2="96" y2="55" stroke="${cor}" stroke-width="1.3"/>
+          <text x="62" y="63" fill="${cor}" font-size="7" font-family="monospace" text-anchor="middle">QT longo</text>`;
     }
+
+    return `<svg viewBox="0 0 200 70" width="100%" height="70" xmlns="http://www.w3.org/2000/svg" style="display:block;border-radius:4px;">
+      ${grid}
+      ${wave}
+      ${marks}
+    </svg>`;
+}
+
+const EXEMPLOS_CRITERIOS = [
+    { titulo: "QRS Estreito",   sub: "< 120 ms",            cor: "#16a34a", tipo: "estreito" },
+    { titulo: "QRS Alargado",   sub: "≥ 120 ms",            cor: "#dc2626", tipo: "alargado" },
+    { titulo: "PR Normal",      sub: "120–200 ms",          cor: "#2563eb", tipo: "pr-normal" },
+    { titulo: "PR Longo",       sub: "> 200 ms (BAV 1º)",   cor: "#2563eb", tipo: "pr-longo" },
+    { titulo: "QT Normal",      sub: "QTc ≤ 440 ms",        cor: "#7c3aed", tipo: "qt-normal" },
+    { titulo: "QT Prolongado",  sub: "QTc > 460–480 ms",    cor: "#7c3aed", tipo: "qt-longo" }
 ];
 
 function garantirExemplosVisuais() {
     const grid = document.getElementById("exemplos-visuais-grid");
     if (!grid) return;
 
-    // Cria os cards apenas uma vez
     if (grid.children.length === 0) {
         EXEMPLOS_CRITERIOS.forEach(ex => {
             const card = document.createElement("div");
@@ -1600,12 +1697,11 @@ function garantirExemplosVisuais() {
             card.innerHTML = `
                 <div class="text-[10px] font-bold mb-0.5" style="color:${ex.cor}">${ex.titulo}</div>
                 <div class="text-[9px] text-gray-500 mb-1">${ex.sub}</div>
-                <canvas id="${ex.id}" width="140" height="56" class="w-full rounded" style="background:#1a1a2e; height:56px;"></canvas>
+                ${svgExemplo(ex.tipo, ex.cor)}
             `;
             grid.appendChild(card);
         });
 
-        // Toggle recolher/expandir
         const btn = document.getElementById("btn-toggle-exemplos");
         if (btn) {
             btn.addEventListener("click", () => {
@@ -1614,130 +1710,6 @@ function garantirExemplosVisuais() {
             });
         }
     }
-
-    // Desenha todos os exemplos
-    EXEMPLOS_CRITERIOS.forEach(ex => desenharExemploVisual(ex));
-}
-
-function desenharExemploVisual(ex) {
-    const canvas = document.getElementById(ex.id);
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width;
-    const H = canvas.height;
-    const mid = H / 2;
-
-    // Fundo escuro estilo monitor
-    ctx.fillStyle = "#1a1a2e";
-    ctx.fillRect(0, 0, W, H);
-
-    // Grade sutil
-    ctx.strokeStyle = "rgba(80,100,140,0.25)";
-    ctx.lineWidth = 0.5;
-    for (let x = 0; x < W; x += 7) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-    for (let y = 0; y < H; y += 7) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-
-    // Linha de base
-    ctx.strokeStyle = "rgba(100,120,160,0.3)";
-    ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
-
-    ctx.strokeStyle = "#4ade80";
-    ctx.lineWidth = 1.6;
-    ctx.lineJoin = "round";
-    ctx.beginPath();
-
-    // Gera 2 batimentos esquemáticos conforme o tipo
-    const beatW = W / 2.1;
-
-    for (let b = 0; b < 2; b++) {
-        const ox = 6 + b * beatW;
-
-        if (ex.tipo === "estreito") {
-            // P pequena + QRS estreito e alto + T
-            drawPoly(ctx, [
-                [ox, mid], [ox + 8, mid - 4], [ox + 14, mid],           // P
-                [ox + 22, mid], [ox + 24, mid + 3], [ox + 27, mid - 22], // Q-R
-                [ox + 30, mid + 6], [ox + 33, mid],                      // S
-                [ox + 42, mid], [ox + 50, mid - 7], [ox + 58, mid]       // T
-            ]);
-            // Marca largura QRS (~ estreito)
-            markWidth(ctx, ox + 22, ox + 33, mid + 14, "#16a34a");
-        } else if (ex.tipo === "alargado") {
-            // Sem P clara + QRS largo e bizarro
-            drawPoly(ctx, [
-                [ox, mid],
-                [ox + 10, mid + 4], [ox + 18, mid - 8], [ox + 28, mid - 20],
-                [ox + 38, mid + 10], [ox + 48, mid - 4], [ox + 55, mid]
-            ]);
-            markWidth(ctx, ox + 10, ox + 48, mid + 14, "#dc2626");
-            // Linha de limiar 120 ms (referência)
-            ctx.setLineDash([2, 2]);
-            ctx.strokeStyle = "rgba(220,38,38,0.5)";
-            ctx.lineWidth = 1;
-            const limX = ox + 10 + (ox + 33 - (ox + 22)); // ~largura de um QRS estreito como referência
-            ctx.beginPath(); ctx.moveTo(limX, mid - 18); ctx.lineTo(limX, mid + 18); ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.strokeStyle = "#4ade80";
-            ctx.lineWidth = 1.6;
-        } else if (ex.tipo === "pr-normal") {
-            // P → intervalo PR normal → QRS
-            drawPoly(ctx, [
-                [ox, mid], [ox + 7, mid - 5], [ox + 12, mid],             // P
-                [ox + 28, mid], [ox + 30, mid + 2], [ox + 33, mid - 20],  // QRS
-                [ox + 36, mid + 5], [ox + 39, mid],
-                [ox + 48, mid], [ox + 55, mid - 6], [ox + 62, mid]        // T
-            ]);
-            markWidth(ctx, ox + 12, ox + 28, mid + 12, "#2563eb");
-        } else if (ex.tipo === "pr-longo") {
-            // P → PR bem longo → QRS
-            drawPoly(ctx, [
-                [ox, mid], [ox + 7, mid - 5], [ox + 12, mid],             // P
-                [ox + 42, mid], [ox + 44, mid + 2], [ox + 47, mid - 18],  // QRS (PR longo)
-                [ox + 50, mid + 5], [ox + 53, mid],
-                [ox + 60, mid], [ox + 66, mid - 5], [ox + 72, mid]
-            ]);
-            markWidth(ctx, ox + 12, ox + 42, mid + 12, "#2563eb");
-        } else if (ex.tipo === "qt-normal") {
-            drawPoly(ctx, [
-                [ox, mid], [ox + 6, mid - 4], [ox + 11, mid],
-                [ox + 20, mid], [ox + 22, mid + 2], [ox + 25, mid - 20],
-                [ox + 28, mid + 5], [ox + 31, mid],
-                [ox + 40, mid], [ox + 48, mid - 8], [ox + 56, mid]        // T termina cedo
-            ]);
-            markWidth(ctx, ox + 20, ox + 56, mid + 14, "#7c3aed");
-        } else if (ex.tipo === "qt-longo") {
-            drawPoly(ctx, [
-                [ox, mid], [ox + 6, mid - 4], [ox + 11, mid],
-                [ox + 20, mid], [ox + 22, mid + 2], [ox + 25, mid - 18],
-                [ox + 28, mid + 4], [ox + 31, mid],
-                [ox + 45, mid], [ox + 58, mid - 9], [ox + 70, mid]        // T bem alongada
-            ]);
-            markWidth(ctx, ox + 20, ox + 70, mid + 14, "#7c3aed");
-        }
-    }
-}
-
-function drawPoly(ctx, pts) {
-    if (!pts.length) return;
-    ctx.beginPath();
-    ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
-    ctx.stroke();
-}
-
-function markWidth(ctx, x1, x2, y, color) {
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = 1;
-    ctx.setLineDash([]);
-    // Pequenas barras verticais + linha
-    ctx.beginPath();
-    ctx.moveTo(x1, y - 3); ctx.lineTo(x1, y + 3);
-    ctx.moveTo(x2, y - 3); ctx.lineTo(x2, y + 3);
-    ctx.moveTo(x1, y); ctx.lineTo(x2, y);
-    ctx.stroke();
-    ctx.restore();
 }
 
 // Redesenha o papel quando a janela muda de tamanho
