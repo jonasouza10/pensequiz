@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio ECG: Salve o Ritmo — Edição Avançada</title>
+    <title>ECG Challenge: Salve o Ritmo — Edição Avançada</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
@@ -19,6 +19,24 @@
             font-family: monospace; font-size: 1.1rem; font-weight: bold;
             padding: 4px 10px; border-radius: 6px; border: 1px solid #22c55e;
             z-index: 10; pointer-events: none;
+        }
+        /* Estilo do traçado em papel ECG clássico */
+        .ecg-paper-wrapper {
+            background: #fff5f5;
+            border: 2px solid #c53030;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(197, 48, 48, 0.08);
+        }
+        #ecg-paper-canvas {
+            display: block;
+            width: 100%;
+            background: #fff8f8;
+        }
+        .paper-label {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: #9b2c2c;
         }
         @media (max-width: 768px) {
             h1 { font-size: 1.8rem; }
@@ -62,6 +80,47 @@
                     <div class="ecg-container relative">
                         <div id="ecg-canvas" class="w-full"></div>
                         <div class="bpm-badge" id="bpm-display">-- bpm</div>
+                    </div>
+                </div>
+
+                <!-- Traçado estilo Papel ECG (não mexe no monitor ao vivo) -->
+                <div class="mt-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="text-sm font-bold text-red-400">Traçado em Papel ECG</h3>
+                        <button id="btn-gerar-papel" class="text-xs px-2 py-1 bg-red-900/60 hover:bg-red-800 border border-red-700 rounded text-red-200 transition-colors">
+                            📄 Gerar / Atualizar Papel
+                        </button>
+                    </div>
+                    <div class="ecg-paper-wrapper">
+                        <canvas id="ecg-paper-canvas" height="180"></canvas>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between mt-1 paper-label px-1 gap-0.5">
+                        <span>25 mm/s &nbsp;|&nbsp; 10 mm/mV &nbsp;|&nbsp; <span class="text-blue-600">PR</span> <span class="text-amber-600">QRS</span> <span class="text-violet-600">QT/QTc</span></span>
+                        <span id="paper-info" class="text-right">—</span>
+                    </div>
+                    <!-- Painel de critérios de alargamento do QRS + exemplos visuais -->
+                    <div id="painel-alargamento" class="mt-2 text-xs rounded-lg border border-gray-700 bg-gray-800/80 p-2.5 hidden">
+                        <div class="font-bold text-red-400 mb-1">Critérios de Alargamento do QRS</div>
+                        <div id="alargamento-status" class="mb-1"></div>
+                        <div id="alargamento-significado" class="text-gray-400 leading-snug"></div>
+                        <div class="mt-1.5 pt-1.5 border-t border-gray-700 text-gray-500">
+                            <strong>Limiar ACLS/AHA:</strong> QRS ≥ 120 ms = alargado (wide complex). 
+                            Em taquicardia de QRS largo → tratar como TV até prova em contrário.
+                        </div>
+
+                        <!-- Exemplos visuais dos critérios -->
+                        <div class="mt-3 pt-2 border-t border-gray-700">
+                            <div class="font-bold text-gray-300 mb-2 flex items-center justify-between">
+                                <span>Exemplos Visuais dos Critérios</span>
+                                <button id="btn-toggle-exemplos" class="text-[10px] px-1.5 py-0.5 bg-gray-700 hover:bg-gray-600 rounded border border-gray-600 text-gray-300">Recolher</button>
+                            </div>
+                            <div id="exemplos-visuais-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <!-- preenchido via JS -->
+                            </div>
+                            <p class="mt-2 text-[10px] text-gray-500 leading-tight">
+                                Esquemas em 25 mm/s. Linha vermelha tracejada = limiar de 120 ms (≈3 mm pequenos).
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -551,6 +610,8 @@ function iniciarNovoCaso() {
 
     atualizarInterface();
     iniciarTimer();
+    // Atualiza o traçado em papel (sem mexer no monitor ao vivo)
+    setTimeout(desenharPapelECG, 120);
 }
 
 function confirmarRitmo() {
@@ -1034,13 +1095,673 @@ let sketch = function (p) {
 
 new p5(sketch);
 
+/* ================================================================
+   SIMULADOR DE TRAÇADO EM PAPEL ECG (clássico)
+   - NÃO altera o monitor ao vivo (p5.js)
+   - Renderiza em Canvas 2D com grade rosa/vermelha tradicional
+   - Velocidade 25 mm/s | Ganho 10 mm/mV
+   ================================================================ */
+
+// Pseudo-noise simples (não depende do p5)
+function paperNoise(x) {
+    const n = Math.sin(x * 12.9898) * 43758.5453;
+    return n - Math.floor(n);
+}
+
+function gerarComplexoPaper(phase, tipo) {
+    // Versão adaptada do gerarComplexo que não precisa de instância p5
+    let y = 0;
+    const n = (seed) => paperNoise(phase * 17 + seed + (ecgTime || 0));
+
+    if (tipo === "vf") {
+        y = (n(1) - 0.5) * 90;
+        y += (n(2) - 0.5) * 40;
+        return y;
+    }
+    if (tipo === "asistolia") {
+        return (n(3) - 0.5) * 1.8;
+    }
+    if (tipo === "tdp") {
+        const envelope = Math.sin(phase * Math.PI * 2 * 0.15 + (ecgTime || 0) * 0.3) * 0.6 + 0.7;
+        y = Math.sin(phase * Math.PI * 2 * 8) * 55 * envelope;
+        y += Math.sin(phase * Math.PI * 2 * 5.5 + 1.2) * 25 * envelope;
+        y += (n(4) - 0.5) * 15;
+        return y;
+    }
+
+    if (tipo === "sinusal" || tipo === "avb1") {
+        y += gaussian(phase, 0.18, 0.025, 12);
+        y -= gaussian(phase, 0.32, 0.012, 18);
+        y += gaussian(phase, 0.35, 0.015, 75);
+        y -= gaussian(phase, 0.38, 0.013, 28);
+        y += gaussian(phase, 0.62, 0.05, 22);
+    } else if (tipo === "atrial") {
+        y += (n(5) - 0.5) * 18;
+        y -= gaussian(phase, 0.32, 0.012, 12);
+        y += gaussian(phase, 0.35, 0.014, 60);
+        y -= gaussian(phase, 0.38, 0.012, 20);
+        y += gaussian(phase, 0.60, 0.045, 15);
+    } else if (tipo === "flutter") {
+        for (let i = 0; i < 4; i++) {
+            const pos = (i / 4) + 0.05;
+            y += gaussian(phase, pos, 0.03, 14) - gaussian(phase, pos + 0.04, 0.025, 10);
+        }
+        y -= gaussian(phase, 0.33, 0.012, 15);
+        y += gaussian(phase, 0.36, 0.014, 65);
+        y -= gaussian(phase, 0.39, 0.012, 22);
+    } else if (tipo === "ventricular") {
+        y += gaussian(phase, 0.28, 0.04, -25);
+        y += gaussian(phase, 0.38, 0.05, 85);
+        y += gaussian(phase, 0.48, 0.045, -40);
+        y += gaussian(phase, 0.65, 0.06, 20);
+    } else if (tipo === "avb3") {
+        if (phase < 0.25) y += gaussian(phase, 0.12, 0.02, 10);
+        y += gaussian(phase, 0.40, 0.045, -20);
+        y += gaussian(phase, 0.50, 0.055, 70);
+        y += gaussian(phase, 0.62, 0.05, -30);
+        y += gaussian(phase, 0.78, 0.06, 15);
+    }
+    return y;
+}
+
+function sampleECGPaper(t, tipo, rr, irregular) {
+    if (tipo === "vf" || tipo === "asistolia" || tipo === "tdp") {
+        return gerarComplexoPaper((t % 1), tipo);
+    }
+    let localRR = rr;
+    if (irregular) {
+        localRR = rr * (0.7 + paperNoise(Math.floor(t / rr) * 0.5) * 0.6);
+    }
+    const beatIndex = Math.floor(t / localRR);
+    const phase = (t % localRR) / localRR;
+    const morphNoise = 1 + (paperNoise(beatIndex * 0.3) - 0.5) * 0.08;
+    return gerarComplexoPaper(phase, tipo) * morphNoise;
+}
+
+/**
+ * Retorna intervalos realistas (em ms) e posições normalizadas de fase
+ * para o ritmo atual — usado tanto na morfologia quanto nas anotações.
+ */
+function obterIntervalosECG(tipo, bpm) {
+    // Valores de referência clínicos (ms)
+    // PR normal: 120–200 | QRS: <120 | QT: varia com FC (Bazett)
+    const rrMs = bpm > 0 ? (60000 / bpm) : 1000;
+
+    let pr = 160, qrs = 90, qt = 380;
+    let temP = true, temQRS = true, temT = true;
+
+    switch (tipo) {
+        case "sinusal":
+            pr = 140 + Math.round((Math.random() - 0.5) * 30);
+            qrs = 85 + Math.round((Math.random() - 0.5) * 20);
+            qt = Math.min(440, Math.round(0.39 * Math.sqrt(rrMs / 1000) * 1000));
+            break;
+        case "avb1":
+            pr = 240 + Math.round(Math.random() * 80); // PR longo (>200)
+            qrs = 90;
+            qt = Math.min(440, Math.round(0.39 * Math.sqrt(rrMs / 1000) * 1000));
+            break;
+        case "avb3":
+            pr = null; // dissociação — não há PR real
+            qrs = 140; // escape ventricular largo
+            qt = 420;
+            temP = true; // P isoladas existem
+            break;
+        case "atrial": // FA
+            pr = null; // sem P
+            qrs = 85;
+            qt = Math.min(420, Math.round(0.38 * Math.sqrt(rrMs / 1000) * 1000));
+            temP = false;
+            break;
+        case "flutter":
+            pr = null;
+            qrs = 85;
+            qt = Math.min(400, Math.round(0.37 * Math.sqrt(rrMs / 1000) * 1000));
+            temP = false;
+            break;
+        case "ventricular": // TV
+            pr = null;
+            qrs = 160; // QRS largo
+            qt = 360;  // QT "aparente" curto pelo rate alto
+            temP = false;
+            break;
+        case "tdp":
+            pr = null;
+            qrs = 150;
+            qt = 520; // QT prolongado (característica)
+            temP = false;
+            break;
+        case "vf":
+            pr = null; qrs = null; qt = null;
+            temP = false; temQRS = false; temT = false;
+            break;
+        case "asistolia":
+            pr = null; qrs = null; qt = null;
+            temP = false; temQRS = false; temT = false;
+            break;
+        default:
+            break;
+    }
+
+    // QTc (Bazett): QT / √(RR em segundos)
+    let qtc = null;
+    if (qt != null && bpm > 0) {
+        qtc = Math.round(qt / Math.sqrt(rrMs / 1000));
+    }
+
+    // --- Critérios de alargamento do QRS ---
+    // Padrão ACLS / AHA / ESC:
+    //   QRS < 120 ms  → estreito (supraventricular na maioria dos casos)
+    //   QRS ≥ 120 ms  → alargado (ventricular até prova em contrário, ou BCR/BCE, ou aberrância)
+    const LIMIAR_ALARGAMENTO = 120; // ms
+    const wide = qrs != null && qrs >= LIMIAR_ALARGAMENTO;
+    let criterioAlargamento = null;
+    let significadoClinico = null;
+
+    if (qrs == null) {
+        criterioAlargamento = "Não mensurável";
+        significadoClinico = "Sem complexos QRS organizados (FV / Assistolia).";
+    } else if (wide) {
+        criterioAlargamento = `QRS ALARGADO (${qrs} ms ≥ 120 ms)`;
+        if (tipo === "ventricular") {
+            significadoClinico = "Critério de taquicardia de QRS largo → tratar como TV até prova em contrário (ACLS).";
+        } else if (tipo === "tdp") {
+            significadoClinico = "QRS largo + polimórfico + QT longo → Torsades de Pointes.";
+        } else if (tipo === "avb3") {
+            significadoClinico = "Escape ventricular (QRS largo) em bloqueio AV completo.";
+        } else {
+            significadoClinico = "QRS ≥ 120 ms: considerar origem ventricular, bloqueio de ramo ou condução aberrante.";
+        }
+    } else {
+        criterioAlargamento = `QRS ESTREITO (${qrs} ms < 120 ms)`;
+        significadoClinico = "QRS estreito sugere origem supraventricular (nó sinusal, atrial ou juncional).";
+    }
+
+    return {
+        pr, qrs, qt, qtc, rrMs, temP, temQRS, temT,
+        wide, criterioAlargamento, significadoClinico,
+        limiar: LIMIAR_ALARGAMENTO
+    };
+}
+
+function desenharPapelECG() {
+    if (!casoAtual) return;
+
+    const canvas = document.getElementById("ecg-paper-canvas");
+    if (!canvas) return;
+
+    const parentW = canvas.parentElement.clientWidth || 400;
+    const dpr = window.devicePixelRatio || 1;
+    const height = 180; // um pouco mais alto para caber as anotações
+    canvas.width = parentW * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = parentW + "px";
+    canvas.style.height = height + "px";
+
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    const W = parentW;
+    const H = height;
+
+    // Fundo papel ECG
+    ctx.fillStyle = "#fff5f5";
+    ctx.fillRect(0, 0, W, H);
+
+    const mm = 3.8;
+    const small = mm;
+    const big = mm * 5;
+
+    // Grade fina
+    ctx.strokeStyle = "rgba(255, 180, 180, 0.7)";
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x <= W; x += small) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y <= H; y += small) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    // Grade grossa
+    ctx.strokeStyle = "rgba(220, 80, 80, 0.55)";
+    ctx.lineWidth = 1.1;
+    for (let x = 0; x <= W; x += big) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y <= H; y += big) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    const baseline = H * 0.48;
+    ctx.strokeStyle = "rgba(180, 60, 60, 0.25)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, baseline); ctx.lineTo(W, baseline); ctx.stroke();
+
+    // Calibração 1 mV
+    const calX = 8;
+    const calH = 10 * mm;
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(calX, baseline);
+    ctx.lineTo(calX, baseline - calH);
+    ctx.lineTo(calX + mm * 2, baseline - calH);
+    ctx.lineTo(calX + mm * 2, baseline);
+    ctx.stroke();
+
+    // --- Traçado ---
+    const tipo = casoAtual.tipo;
+    const bpm = currentBpm > 0 ? currentBpm : 60;
+    const rr = 60 / Math.max(bpm, 20);
+    const pxPerSec = 25 * mm;
+    const startX = calX + mm * 3;
+    const usableW = W - startX - 4;
+    const durationSec = usableW / pxPerSec;
+    const scale = (10 * mm) / 80;
+
+    const intervalos = obterIntervalosECG(tipo, bpm);
+
+    ctx.strokeStyle = "#111111";
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.beginPath();
+
+    const samples = Math.floor(usableW);
+    let started = false;
+    for (let i = 0; i < samples; i++) {
+        const t = (i / samples) * durationSec;
+        const yVal = sampleECGPaper(t, tipo, rr, casoAtual.irregular);
+        const y = baseline - yVal * scale;
+        const x = startX + i;
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // ========== ANOTAÇÕES DE INTERVALOS PR / QRS / QT ==========
+    // Escolhemos um batimento representativo no meio do traçado para marcar
+    if (intervalos.temQRS && bpm > 0 && tipo !== "vf" && tipo !== "asistolia") {
+        // Posição do batimento alvo (por volta de 40% da duração)
+        const beatTime = durationSec * 0.38;
+        const beatStartX = startX + (beatTime / durationSec) * usableW;
+
+        // Conversão ms → pixels (25 mm/s → 1 ms = 0.025 mm)
+        const msToPx = (ms) => (ms / 1000) * pxPerSec;
+
+        // Posições relativas dentro do ciclo (aproximação da morfologia)
+        // P onset ~ phase 0.12, QRS onset ~ 0.30, QRS end ~ 0.42, T end ~ 0.72
+        const prMs = intervalos.pr;
+        const qrsMs = intervalos.qrs || 90;
+        const qtMs = intervalos.qt || 380;
+
+        // Âncora: início do QRS
+        const qrsOnsetX = beatStartX;
+        const pOnsetX = prMs != null ? qrsOnsetX - msToPx(prMs) : null;
+        const qrsEndX = qrsOnsetX + msToPx(qrsMs);
+        const tEndX = qrsOnsetX + msToPx(qtMs);
+
+        const markerTop = baseline - 52;
+        const markerBot = baseline + 28;
+        const labelY = H - 14;
+
+        // Função auxiliar para desenhar colchete horizontal de intervalo
+        function drawInterval(x1, x2, color, label, yOff) {
+            if (x1 == null || x2 == null || x1 < startX - 5 || x2 > W - 5) return;
+            const midY = markerTop + yOff;
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 1.4;
+
+            // Linhas verticais
+            ctx.beginPath();
+            ctx.moveTo(x1, midY - 6);
+            ctx.lineTo(x1, midY + 6);
+            ctx.moveTo(x2, midY - 6);
+            ctx.lineTo(x2, midY + 6);
+            // Linha horizontal
+            ctx.moveTo(x1, midY);
+            ctx.lineTo(x2, midY);
+            ctx.stroke();
+
+            // Label
+            ctx.font = "bold 9px Courier New, monospace";
+            const txt = label;
+            const tw = ctx.measureText(txt).width;
+            ctx.fillText(txt, (x1 + x2) / 2 - tw / 2, midY - 8);
+        }
+
+        // PR (azul)
+        if (prMs != null && pOnsetX != null) {
+            drawInterval(pOnsetX, qrsOnsetX, "#2563eb", `PR ${prMs} ms`, 0);
+        }
+
+        // QRS — cor de alerta se alargado (≥120 ms)
+        const qrsColor = intervalos.wide ? "#dc2626" : "#d97706";
+        const qrsLabel = intervalos.wide
+            ? `QRS ${qrsMs} ms ★ ALARGADO`
+            : `QRS ${qrsMs} ms`;
+        drawInterval(qrsOnsetX, qrsEndX, qrsColor, qrsLabel, 16);
+
+        // Destacar visualmente a zona do QRS quando alargado
+        if (intervalos.wide) {
+            ctx.fillStyle = "rgba(220, 38, 38, 0.08)";
+            ctx.fillRect(qrsOnsetX, baseline - 45, qrsEndX - qrsOnsetX, 70);
+        }
+
+        // QT (roxo)
+        if (qtMs != null) {
+            drawInterval(qrsOnsetX, tEndX, "#7c3aed", `QT ${qtMs} ms`, 32);
+        }
+
+        // Legenda de cores + critério de alargamento no canto
+        ctx.font = "9px Courier New, monospace";
+        let lx = W - 155;
+        let ly = 11;
+        if (prMs != null) {
+            ctx.fillStyle = "#2563eb";
+            ctx.fillText(`PR  ${prMs} ms`, lx, ly);
+            ly += 12;
+        }
+        ctx.fillStyle = qrsColor;
+        ctx.font = intervalos.wide ? "bold 9px Courier New, monospace" : "9px Courier New, monospace";
+        ctx.fillText(`QRS ${qrsMs} ms${intervalos.wide ? " ≥120" : " <120"}`, lx, ly);
+        ly += 12;
+        ctx.font = "9px Courier New, monospace";
+        if (qtMs != null) {
+            ctx.fillStyle = "#7c3aed";
+            const qtcTxt = intervalos.qtc ? `  QTc ${intervalos.qtc}` : "";
+            ctx.fillText(`QT  ${qtMs} ms${qtcTxt}`, lx, ly);
+            ly += 12;
+        }
+        // Critério
+        ctx.fillStyle = intervalos.wide ? "#dc2626" : "#16a34a";
+        ctx.font = "bold 9px Courier New, monospace";
+        ctx.fillText(intervalos.wide ? "▲ QRS ALARGADO" : "● QRS ESTREITO", lx, ly);
+    } else if (tipo === "vf" || tipo === "asistolia") {
+        ctx.fillStyle = "#9b2c2c";
+        ctx.font = "9px Courier New, monospace";
+        ctx.fillText("PR/QRS/QT: não mensuráveis", W - 145, 12);
+    }
+
+    // Lead
+    ctx.fillStyle = "#9b2c2c";
+    ctx.font = "bold 10px Courier New, monospace";
+    ctx.fillText("DII", 4, 12);
+
+    // Info abaixo do canvas + critério de alargamento
+    const infoEl = document.getElementById("paper-info");
+    if (infoEl) {
+        const ritmoTxt = ritmoConfirmado ? casoAtual.ritmo : "Ritmo não identificado";
+        let intTxt = "";
+        if (intervalos.pr != null) intTxt += `PR ${intervalos.pr} ms  `;
+        if (intervalos.qrs != null) {
+            intTxt += intervalos.wide
+                ? `QRS ${intervalos.qrs} ms ★ALARGADO  `
+                : `QRS ${intervalos.qrs} ms  `;
+        }
+        if (intervalos.qt != null) intTxt += `QT ${intervalos.qt} ms`;
+        if (intervalos.qtc != null) intTxt += ` (QTc ${intervalos.qtc})`;
+        if (!intTxt) intTxt = "Intervalos não mensuráveis";
+        infoEl.innerHTML = `${ritmoTxt}  •  ${bpm > 0 ? bpm + " bpm" : "—"}  •  ${intTxt}`;
+    }
+
+    // Atualiza também um possível painel de critérios (se existir no DOM)
+    atualizarPainelAlargamento(intervalos);
+}
+
+/**
+ * Atualiza o painel educativo de critérios de alargamento do QRS
+ * e desenha os exemplos visuais de cada critério.
+ */
+function atualizarPainelAlargamento(intervalos) {
+    const painel = document.getElementById("painel-alargamento");
+    const statusEl = document.getElementById("alargamento-status");
+    const sigEl = document.getElementById("alargamento-significado");
+    if (!painel || !statusEl || !sigEl || !intervalos) return;
+
+    painel.classList.remove("hidden");
+
+    if (intervalos.qrs == null) {
+        statusEl.innerHTML = `<span class="text-gray-400">QRS não mensurável</span> <span class="text-gray-500">(FV / Assistolia)</span>`;
+        sigEl.textContent = intervalos.significadoClinico || "Sem complexos QRS organizados.";
+    } else if (intervalos.wide) {
+        statusEl.innerHTML = `
+            <span class="inline-block px-1.5 py-0.5 rounded bg-red-900/60 text-red-300 font-bold border border-red-700">
+                ▲ QRS ALARGADO — ${intervalos.qrs} ms ≥ ${intervalos.limiar} ms
+            </span>`;
+        sigEl.innerHTML = `
+            <span class="text-red-300/90">${intervalos.significadoClinico}</span>
+            <br><span class="text-gray-500">Critérios clássicos: duração ≥ 120 ms (3 mm pequenos em 25 mm/s). 
+            Morfologia de BRE/BRD, concordância, ou critério de Brugada podem reforçar origem ventricular.</span>`;
+    } else {
+        statusEl.innerHTML = `
+            <span class="inline-block px-1.5 py-0.5 rounded bg-emerald-900/50 text-emerald-300 font-bold border border-emerald-700">
+                ● QRS ESTREITO — ${intervalos.qrs} ms &lt; ${intervalos.limiar} ms
+            </span>`;
+        sigEl.innerHTML = `
+            <span class="text-emerald-300/90">${intervalos.significadoClinico}</span>
+            <br><span class="text-gray-500">QRS &lt; 120 ms favorece origem supraventricular. 
+            Ainda assim, avaliar estabilidade hemodinâmica e contexto clínico.</span>`;
+    }
+
+    // Garante que os exemplos visuais existam e estejam desenhados
+    garantirExemplosVisuais();
+}
+
+/* ================================================================
+   EXEMPLOS VISUAIS DOS CRITÉRIOS (mini-traçados esquemáticos)
+   ================================================================ */
+const EXEMPLOS_CRITERIOS = [
+    {
+        id: "ex-qrs-estreito",
+        titulo: "QRS Estreito",
+        sub: "< 120 ms",
+        cor: "#16a34a",
+        tipo: "estreito"
+    },
+    {
+        id: "ex-qrs-alargado",
+        titulo: "QRS Alargado",
+        sub: "≥ 120 ms",
+        cor: "#dc2626",
+        tipo: "alargado"
+    },
+    {
+        id: "ex-pr-normal",
+        titulo: "PR Normal",
+        sub: "120–200 ms",
+        cor: "#2563eb",
+        tipo: "pr-normal"
+    },
+    {
+        id: "ex-pr-longo",
+        titulo: "PR Longo",
+        sub: "> 200 ms (BAV 1º)",
+        cor: "#2563eb",
+        tipo: "pr-longo"
+    },
+    {
+        id: "ex-qt-normal",
+        titulo: "QT Normal",
+        sub: "QTc ≤ 440 ms",
+        cor: "#7c3aed",
+        tipo: "qt-normal"
+    },
+    {
+        id: "ex-qt-longo",
+        titulo: "QT Prolongado",
+        sub: "QTc > 460–480 ms",
+        cor: "#7c3aed",
+        tipo: "qt-longo"
+    }
+];
+
+function garantirExemplosVisuais() {
+    const grid = document.getElementById("exemplos-visuais-grid");
+    if (!grid) return;
+
+    // Cria os cards apenas uma vez
+    if (grid.children.length === 0) {
+        EXEMPLOS_CRITERIOS.forEach(ex => {
+            const card = document.createElement("div");
+            card.className = "bg-gray-900/80 border border-gray-700 rounded p-1.5";
+            card.innerHTML = `
+                <div class="text-[10px] font-bold mb-0.5" style="color:${ex.cor}">${ex.titulo}</div>
+                <div class="text-[9px] text-gray-500 mb-1">${ex.sub}</div>
+                <canvas id="${ex.id}" width="140" height="56" class="w-full rounded" style="background:#1a1a2e; height:56px;"></canvas>
+            `;
+            grid.appendChild(card);
+        });
+
+        // Toggle recolher/expandir
+        const btn = document.getElementById("btn-toggle-exemplos");
+        if (btn) {
+            btn.addEventListener("click", () => {
+                const hidden = grid.classList.toggle("hidden");
+                btn.textContent = hidden ? "Expandir" : "Recolher";
+            });
+        }
+    }
+
+    // Desenha todos os exemplos
+    EXEMPLOS_CRITERIOS.forEach(ex => desenharExemploVisual(ex));
+}
+
+function desenharExemploVisual(ex) {
+    const canvas = document.getElementById(ex.id);
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width;
+    const H = canvas.height;
+    const mid = H / 2;
+
+    // Fundo escuro estilo monitor
+    ctx.fillStyle = "#1a1a2e";
+    ctx.fillRect(0, 0, W, H);
+
+    // Grade sutil
+    ctx.strokeStyle = "rgba(80,100,140,0.25)";
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x < W; x += 7) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 7) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    // Linha de base
+    ctx.strokeStyle = "rgba(100,120,160,0.3)";
+    ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
+
+    ctx.strokeStyle = "#4ade80";
+    ctx.lineWidth = 1.6;
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+
+    // Gera 2 batimentos esquemáticos conforme o tipo
+    const beatW = W / 2.1;
+
+    for (let b = 0; b < 2; b++) {
+        const ox = 6 + b * beatW;
+
+        if (ex.tipo === "estreito") {
+            // P pequena + QRS estreito e alto + T
+            drawPoly(ctx, [
+                [ox, mid], [ox + 8, mid - 4], [ox + 14, mid],           // P
+                [ox + 22, mid], [ox + 24, mid + 3], [ox + 27, mid - 22], // Q-R
+                [ox + 30, mid + 6], [ox + 33, mid],                      // S
+                [ox + 42, mid], [ox + 50, mid - 7], [ox + 58, mid]       // T
+            ]);
+            // Marca largura QRS (~ estreito)
+            markWidth(ctx, ox + 22, ox + 33, mid + 14, "#16a34a");
+        } else if (ex.tipo === "alargado") {
+            // Sem P clara + QRS largo e bizarro
+            drawPoly(ctx, [
+                [ox, mid],
+                [ox + 10, mid + 4], [ox + 18, mid - 8], [ox + 28, mid - 20],
+                [ox + 38, mid + 10], [ox + 48, mid - 4], [ox + 55, mid]
+            ]);
+            markWidth(ctx, ox + 10, ox + 48, mid + 14, "#dc2626");
+            // Linha de limiar 120 ms (referência)
+            ctx.setLineDash([2, 2]);
+            ctx.strokeStyle = "rgba(220,38,38,0.5)";
+            ctx.lineWidth = 1;
+            const limX = ox + 10 + (ox + 33 - (ox + 22)); // ~largura de um QRS estreito como referência
+            ctx.beginPath(); ctx.moveTo(limX, mid - 18); ctx.lineTo(limX, mid + 18); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.strokeStyle = "#4ade80";
+            ctx.lineWidth = 1.6;
+        } else if (ex.tipo === "pr-normal") {
+            // P → intervalo PR normal → QRS
+            drawPoly(ctx, [
+                [ox, mid], [ox + 7, mid - 5], [ox + 12, mid],             // P
+                [ox + 28, mid], [ox + 30, mid + 2], [ox + 33, mid - 20],  // QRS
+                [ox + 36, mid + 5], [ox + 39, mid],
+                [ox + 48, mid], [ox + 55, mid - 6], [ox + 62, mid]        // T
+            ]);
+            markWidth(ctx, ox + 12, ox + 28, mid + 12, "#2563eb");
+        } else if (ex.tipo === "pr-longo") {
+            // P → PR bem longo → QRS
+            drawPoly(ctx, [
+                [ox, mid], [ox + 7, mid - 5], [ox + 12, mid],             // P
+                [ox + 42, mid], [ox + 44, mid + 2], [ox + 47, mid - 18],  // QRS (PR longo)
+                [ox + 50, mid + 5], [ox + 53, mid],
+                [ox + 60, mid], [ox + 66, mid - 5], [ox + 72, mid]
+            ]);
+            markWidth(ctx, ox + 12, ox + 42, mid + 12, "#2563eb");
+        } else if (ex.tipo === "qt-normal") {
+            drawPoly(ctx, [
+                [ox, mid], [ox + 6, mid - 4], [ox + 11, mid],
+                [ox + 20, mid], [ox + 22, mid + 2], [ox + 25, mid - 20],
+                [ox + 28, mid + 5], [ox + 31, mid],
+                [ox + 40, mid], [ox + 48, mid - 8], [ox + 56, mid]        // T termina cedo
+            ]);
+            markWidth(ctx, ox + 20, ox + 56, mid + 14, "#7c3aed");
+        } else if (ex.tipo === "qt-longo") {
+            drawPoly(ctx, [
+                [ox, mid], [ox + 6, mid - 4], [ox + 11, mid],
+                [ox + 20, mid], [ox + 22, mid + 2], [ox + 25, mid - 18],
+                [ox + 28, mid + 4], [ox + 31, mid],
+                [ox + 45, mid], [ox + 58, mid - 9], [ox + 70, mid]        // T bem alongada
+            ]);
+            markWidth(ctx, ox + 20, ox + 70, mid + 14, "#7c3aed");
+        }
+    }
+}
+
+function drawPoly(ctx, pts) {
+    if (!pts.length) return;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.stroke();
+}
+
+function markWidth(ctx, x1, x2, y, color) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([]);
+    // Pequenas barras verticais + linha
+    ctx.beginPath();
+    ctx.moveTo(x1, y - 3); ctx.lineTo(x1, y + 3);
+    ctx.moveTo(x2, y - 3); ctx.lineTo(x2, y + 3);
+    ctx.moveTo(x1, y); ctx.lineTo(x2, y);
+    ctx.stroke();
+    ctx.restore();
+}
+
+// Redesenha o papel quando a janela muda de tamanho
+window.addEventListener("resize", () => {
+    if (casoAtual) desenharPapelECG();
+});
+
 els.confirmarRitmo.addEventListener("click", confirmarRitmo);
 els.detectarRitmo.addEventListener("click", detectarRitmoAutomatico);
 els.newCase.addEventListener("click", iniciarNovoCaso);
 els.finalizar.addEventListener("click", finalizarProcedimento);
 
+// Botão de gerar papel
+document.getElementById("btn-gerar-papel").addEventListener("click", () => {
+    desenharPapelECG();
+    adicionarFeedback("Traçado em papel ECG atualizado (25 mm/s • 10 mm/mV).", "info");
+});
+
 preencherSelectRitmos();
-document.addEventListener("DOMContentLoaded", iniciarNovoCaso);
+document.addEventListener("DOMContentLoaded", () => {
+    iniciarNovoCaso();
+    // Gera o papel na primeira carga (após um pequeno delay para o layout estabilizar)
+    setTimeout(desenharPapelECG, 200);
+});
 </script>
 </body>
 </html>
