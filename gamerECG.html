@@ -48,7 +48,7 @@
 <body class="bg-gray-900 text-white min-h-screen font-sans flex items-center justify-center">
     <div class="container mx-auto p-3 sm:p-4 max-w-5xl bg-gray-950 rounded-xl shadow-2xl my-4 border border-gray-800">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-6 text-red-500 tracking-tight">
-            ECG Challenge: Salve o Ritmo
+           Pensequiz ECG : Challenge
             <span class="block text-sm font-normal text-gray-400 mt-1">Simulador Avançado de Arritmias • ACLS 2020</span>
         </h1>
 
@@ -98,6 +98,27 @@
                         <span>25 mm/s &nbsp;|&nbsp; 10 mm/mV &nbsp;|&nbsp; <span class="text-blue-600">PR</span> <span class="text-amber-600">QRS</span> <span class="text-violet-600">QT/QTc</span></span>
                         <span id="paper-info" class="text-right">—</span>
                     </div>
+                    <!-- Análise completa de intervalos ECG -->
+                    <div id="painel-intervalos" class="mt-2 text-xs rounded-lg border border-gray-700 bg-gray-800/80 p-2.5 hidden">
+                        <div class="font-bold text-red-400 mb-2">Análise de Intervalos ECG</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-gray-400 border-b border-gray-700">
+                                        <th class="py-1 pr-2 font-medium">Intervalo</th>
+                                        <th class="py-1 pr-2 font-medium">Valor</th>
+                                        <th class="py-1 pr-2 font-medium">Ref. normal</th>
+                                        <th class="py-1 font-medium">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-intervalos">
+                                    <!-- preenchido via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="interpretacao-intervalos" class="mt-2 pt-2 border-t border-gray-700 text-gray-400 leading-snug"></div>
+                    </div>
+
                     <!-- Painel de critérios de alargamento do QRS + exemplos visuais -->
                     <div id="painel-alargamento" class="mt-2 text-xs rounded-lg border border-gray-700 bg-gray-800/80 p-2.5 hidden">
                         <div class="font-bold text-red-400 mb-1">Critérios de Alargamento do QRS</div>
@@ -121,6 +142,20 @@
                                 Esquemas em 25 mm/s. Linha vermelha tracejada = limiar de 120 ms (≈3 mm pequenos).
                             </p>
                         </div>
+                    </div>
+
+                    <!-- Exemplos de arritmias comuns -->
+                    <div id="painel-arritmias" class="mt-2 text-xs rounded-lg border border-gray-700 bg-gray-800/80 p-2.5 hidden">
+                        <div class="font-bold text-gray-300 mb-2 flex items-center justify-between">
+                            <span class="text-red-400">Exemplos de Arritmias Comuns</span>
+                            <button id="btn-toggle-arritmias" class="text-[10px] px-1.5 py-0.5 bg-gray-700 hover:bg-gray-600 rounded border border-gray-600 text-gray-300">Recolher</button>
+                        </div>
+                        <div id="arritmias-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <!-- preenchido via JS -->
+                        </div>
+                        <p class="mt-2 text-[10px] text-gray-500 leading-tight">
+                            Traçados esquemáticos das principais arritmias do jogo (referência educacional ACLS).
+                        </p>
                     </div>
                 </div>
 
@@ -1277,10 +1312,65 @@ function obterIntervalosECG(tipo, bpm) {
         significadoClinico = "QRS estreito sugere origem supraventricular (nó sinusal, atrial ou juncional).";
     }
 
+    // --- Status de cada intervalo (para tabela de análise) ---
+    // RR / FC
+    let rrStatus = "normal", rrLabel = "Normal";
+    if (bpm <= 0) { rrStatus = "na"; rrLabel = "—"; }
+    else if (bpm < 60) { rrStatus = "brad"; rrLabel = "Bradicardia"; }
+    else if (bpm > 100) { rrStatus = "tach"; rrLabel = "Taquicardia"; }
+    else { rrStatus = "ok"; rrLabel = "Normal"; }
+
+    // PR
+    let prStatus = "na", prLabel = "Não mensurável";
+    if (pr != null) {
+        if (pr < 120) { prStatus = "warn"; prLabel = "Curto"; }
+        else if (pr > 200) { prStatus = "bad"; prLabel = "Prolongado"; }
+        else { prStatus = "ok"; prLabel = "Normal"; }
+    }
+
+    // QRS
+    let qrsStatus = "na", qrsLabel = "Não mensurável";
+    if (qrs != null) {
+        if (wide) { qrsStatus = "bad"; qrsLabel = "Alargado"; }
+        else { qrsStatus = "ok"; qrsLabel = "Estreito"; }
+    }
+
+    // QT / QTc (limites aproximados; QTc > 440–460 preocupante)
+    let qtStatus = "na", qtLabel = "Não mensurável";
+    let qtcStatus = "na", qtcLabel = "—";
+    if (qt != null) {
+        qtStatus = "ok"; qtLabel = "Mensurável";
+    }
+    if (qtc != null) {
+        if (qtc > 480) { qtcStatus = "bad"; qtcLabel = "Muito prolongado"; }
+        else if (qtc > 440) { qtcStatus = "warn"; qtcLabel = "Limítrofe / prolongado"; }
+        else if (qtc < 350) { qtcStatus = "warn"; qtcLabel = "Curto"; }
+        else { qtcStatus = "ok"; qtcLabel = "Normal"; }
+    }
+
+    // Interpretação consolidada
+    const flags = [];
+    if (rrStatus === "brad") flags.push("Bradicardia (FC < 60 bpm)");
+    if (rrStatus === "tach") flags.push("Taquicardia (FC > 100 bpm)");
+    if (prStatus === "bad") flags.push("PR prolongado → sugere BAV de 1º grau");
+    if (prStatus === "warn") flags.push("PR curto (avaliar pré-excitação se contexto)");
+    if (qrsStatus === "bad") flags.push("QRS alargado (≥120 ms) — origem ventricular / BCR / aberrância");
+    if (qtcStatus === "bad") flags.push("QTc muito prolongado — risco de Torsades de Pointes");
+    if (qtcStatus === "warn" && qtc > 440) flags.push("QTc limítrofe/prolongado — monitorar e revisar fármacos/eletrólitos");
+    if (tipo === "vf" || tipo === "asistolia") flags.push("Intervalos não mensuráveis (ritmo de PCR)");
+    if (flags.length === 0) flags.push("Intervalos dentro dos limites da normalidade para o ritmo atual.");
+
     return {
-        pr, qrs, qt, qtc, rrMs, temP, temQRS, temT,
+        pr, qrs, qt, qtc, rrMs, bpm, temP, temQRS, temT,
         wide, criterioAlargamento, significadoClinico,
-        limiar: LIMIAR_ALARGAMENTO
+        limiar: LIMIAR_ALARGAMENTO,
+        // status para tabela
+        rrStatus, rrLabel,
+        prStatus, prLabel,
+        qrsStatus, qrsLabel,
+        qtStatus, qtLabel,
+        qtcStatus, qtcLabel,
+        flags
     };
 }
 
@@ -1502,6 +1592,94 @@ function desenharPapelECG() {
 }
 
 /**
+ * Preenche a tabela de Análise de Intervalos ECG
+ */
+function atualizarPainelIntervalos(intervalos) {
+    const painel = document.getElementById("painel-intervalos");
+    const tbody = document.getElementById("tabela-intervalos");
+    const interp = document.getElementById("interpretacao-intervalos");
+    if (!painel || !tbody || !interp || !intervalos) return;
+
+    painel.classList.remove("hidden");
+
+    const badge = (status, label) => {
+        const cores = {
+            ok:   "bg-emerald-900/50 text-emerald-300 border-emerald-700",
+            warn: "bg-yellow-900/40 text-yellow-300 border-yellow-700",
+            bad:  "bg-red-900/50 text-red-300 border-red-700",
+            brad: "bg-blue-900/40 text-blue-300 border-blue-700",
+            tach: "bg-orange-900/40 text-orange-300 border-orange-700",
+            na:   "bg-gray-800 text-gray-500 border-gray-600"
+        };
+        const cls = cores[status] || cores.na;
+        return `<span class="inline-block px-1.5 py-0.5 rounded border text-[10px] font-semibold ${cls}">${label}</span>`;
+    };
+
+    const fmt = (v, unit = "ms") => (v == null ? "—" : `${v} ${unit}`);
+
+    const rows = [
+        {
+            nome: "RR / FC",
+            valor: intervalos.bpm > 0
+                ? `${Math.round(intervalos.rrMs)} ms (${intervalos.bpm} bpm)`
+                : "—",
+            ref: "60–100 bpm",
+            status: intervalos.rrStatus,
+            label: intervalos.rrLabel
+        },
+        {
+            nome: "PR",
+            valor: fmt(intervalos.pr),
+            ref: "120–200 ms",
+            status: intervalos.prStatus,
+            label: intervalos.prLabel
+        },
+        {
+            nome: "QRS",
+            valor: fmt(intervalos.qrs),
+            ref: "< 120 ms",
+            status: intervalos.qrsStatus,
+            label: intervalos.qrsLabel
+        },
+        {
+            nome: "QT",
+            valor: fmt(intervalos.qt),
+            ref: "varia com FC",
+            status: intervalos.qtStatus,
+            label: intervalos.qtLabel
+        },
+        {
+            nome: "QTc (Bazett)",
+            valor: fmt(intervalos.qtc),
+            ref: "≤ 440 ms (♂) / ≤ 460 ms (♀)",
+            status: intervalos.qtcStatus,
+            label: intervalos.qtcLabel
+        }
+    ];
+
+    tbody.innerHTML = rows.map(r => `
+        <tr class="border-b border-gray-700/60">
+            <td class="py-1.5 pr-2 font-medium text-gray-300">${r.nome}</td>
+            <td class="py-1.5 pr-2 text-gray-200 font-mono">${r.valor}</td>
+            <td class="py-1.5 pr-2 text-gray-500">${r.ref}</td>
+            <td class="py-1.5">${badge(r.status, r.label)}</td>
+        </tr>
+    `).join("");
+
+    // Interpretação
+    const flagsHtml = (intervalos.flags || []).map(f =>
+        `<div class="flex gap-1.5 items-start"><span class="text-red-400 mt-0.5">▸</span><span>${f}</span></div>`
+    ).join("");
+    interp.innerHTML = `
+        <div class="font-semibold text-gray-300 mb-1">Interpretação automática</div>
+        ${flagsHtml}
+        <div class="mt-1.5 text-[10px] text-gray-500">
+            QTc pela fórmula de Bazett: QT / √(RR em segundos). Valores de referência aproximados (AHA/ESC).
+        </div>
+    `;
+}
+
+/**
  * Atualiza o painel educativo de critérios de alargamento do QRS
  * e desenha os exemplos visuais de cada critério.
  */
@@ -1512,6 +1690,9 @@ function atualizarPainelAlargamento(intervalos) {
     if (!painel || !statusEl || !sigEl || !intervalos) return;
 
     painel.classList.remove("hidden");
+
+    // Também atualiza a tabela completa de intervalos
+    atualizarPainelIntervalos(intervalos);
 
     if (intervalos.qrs == null) {
         statusEl.innerHTML = `<span class="text-gray-400">QRS não mensurável</span> <span class="text-gray-500">(FV / Assistolia)</span>`;
@@ -1538,6 +1719,7 @@ function atualizarPainelAlargamento(intervalos) {
 
     // Garante que os exemplos visuais existam e estejam desenhados
     garantirExemplosVisuais();
+    garantirExemplosArritmias();
 }
 
 /* ================================================================
@@ -1678,12 +1860,18 @@ function svgExemplo(tipo, cor) {
 }
 
 const EXEMPLOS_CRITERIOS = [
-    { titulo: "QRS Estreito",   sub: "< 120 ms",            cor: "#16a34a", tipo: "estreito" },
-    { titulo: "QRS Alargado",   sub: "≥ 120 ms",            cor: "#dc2626", tipo: "alargado" },
-    { titulo: "PR Normal",      sub: "120–200 ms",          cor: "#2563eb", tipo: "pr-normal" },
-    { titulo: "PR Longo",       sub: "> 200 ms (BAV 1º)",   cor: "#2563eb", tipo: "pr-longo" },
-    { titulo: "QT Normal",      sub: "QTc ≤ 440 ms",        cor: "#7c3aed", tipo: "qt-normal" },
-    { titulo: "QT Prolongado",  sub: "QTc > 460–480 ms",    cor: "#7c3aed", tipo: "qt-longo" }
+    { titulo: "QRS Estreito",   sub: "< 120 ms",            cor: "#16a34a", tipo: "estreito",
+      clinica: "Favorece origem supraventricular. Conduta conforme estabilidade." },
+    { titulo: "QRS Alargado",   sub: "≥ 120 ms",            cor: "#dc2626", tipo: "alargado",
+      clinica: "Tratar como ventricular até prova em contrário (ACLS)." },
+    { titulo: "PR Normal",      sub: "120–200 ms",          cor: "#2563eb", tipo: "pr-normal",
+      clinica: "Condução AV preservada. Sem intervenção específica." },
+    { titulo: "PR Longo",       sub: "> 200 ms (BAV 1º)",   cor: "#2563eb", tipo: "pr-longo",
+      clinica: "BAV 1º grau — geralmente benigno; revisar medicações." },
+    { titulo: "QT Normal",      sub: "QTc ≤ 440 ms",        cor: "#7c3aed", tipo: "qt-normal",
+      clinica: "Repolarização adequada. Baixo risco arrítmico por QT." },
+    { titulo: "QT Prolongado",  sub: "QTc > 460–480 ms",    cor: "#7c3aed", tipo: "qt-longo",
+      clinica: "Risco de Torsades. Corrigir eletrólitos e fármacos." }
 ];
 
 function garantirExemplosVisuais() {
@@ -1693,11 +1881,14 @@ function garantirExemplosVisuais() {
     if (grid.children.length === 0) {
         EXEMPLOS_CRITERIOS.forEach(ex => {
             const card = document.createElement("div");
-            card.className = "bg-gray-900/80 border border-gray-700 rounded p-1.5";
+            card.className = "bg-gray-900/80 border border-gray-700 rounded p-1.5 flex flex-col";
             card.innerHTML = `
                 <div class="text-[10px] font-bold mb-0.5" style="color:${ex.cor}">${ex.titulo}</div>
                 <div class="text-[9px] text-gray-500 mb-1">${ex.sub}</div>
                 ${svgExemplo(ex.tipo, ex.cor)}
+                <div class="mt-1.5 text-[9px] text-gray-400 leading-snug border-t border-gray-700/60 pt-1.5">
+                    ${ex.clinica}
+                </div>
             `;
             grid.appendChild(card);
         });
@@ -1712,10 +1903,213 @@ function garantirExemplosVisuais() {
     }
 }
 
-// Redesenha o papel quando a janela muda de tamanho
-window.addEventListener("resize", () => {
-    if (casoAtual) desenharPapelECG();
-});
+/* ================================================================
+   EXEMPLOS SVG DE ARRITMIAS COMUNS
+   ================================================================ */
+function svgArritmia(tipo) {
+    const grid = `
+      <defs>
+        <pattern id="ag-${tipo}" width="8" height="8" patternUnits="userSpaceOnUse">
+          <path d="M8 0H0V8" fill="none" stroke="#3a4a6a" stroke-width="0.4"/>
+        </pattern>
+        <pattern id="ag5-${tipo}" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M40 0H0V40" fill="none" stroke="#4a5a7a" stroke-width="0.7"/>
+        </pattern>
+      </defs>
+      <rect width="200" height="70" fill="#1a1a2e"/>
+      <rect width="200" height="70" fill="url(#ag-${tipo})"/>
+      <rect width="200" height="70" fill="url(#ag5-${tipo})"/>
+      <line x1="0" y1="38" x2="200" y2="38" stroke="#4a6080" stroke-width="0.6" opacity="0.5"/>`;
+
+    let wave = "";
+    // Cada path desenha ~2–4 batimentos característicos
+    if (tipo === "sinusal") {
+        wave = `<path d="M4,38 C7,38 9,31 13,31 C16,31 18,38 20,38 L28,38 L30,42 L33,10 L36,48 L39,38 C45,38 49,27 56,27 C61,27 65,38 69,38
+          L75,38 C78,38 80,31 84,31 C87,31 89,38 91,38 L99,38 L101,42 L104,10 L107,48 L110,38 C116,38 120,27 127,27 C132,27 136,38 140,38
+          L146,38 C149,38 151,31 155,31 C158,31 160,38 162,38 L170,38 L172,42 L175,10 L178,48 L181,38 C187,38 191,27 198,27" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linejoin="round"/>`;
+    } else if (tipo === "brady") {
+        // Batimentos mais espaçados
+        wave = `<path d="M8,38 C11,38 13,31 17,31 C20,31 22,38 24,38 L34,38 L36,42 L39,10 L42,48 L45,38 C52,38 56,27 64,27 C70,27 74,38 78,38
+          L100,38 C103,38 105,31 109,31 C112,31 114,38 116,38 L126,38 L128,42 L131,10 L134,48 L137,38 C144,38 148,27 156,27 C162,27 166,38 170,38" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linejoin="round"/>`;
+    } else if (tipo === "tachy") {
+        // Batimentos apertados
+        wave = `<path d="M3,38 C5,38 6,32 9,32 C11,32 12,38 14,38 L18,38 L19,41 L21,12 L23,46 L25,38 C29,38 31,28 36,28 C39,28 41,38 44,38
+          L48,38 C50,38 51,32 54,32 C56,32 57,38 59,38 L63,38 L64,41 L66,12 L68,46 L70,38 C74,38 76,28 81,28 C84,28 86,38 89,38
+          L93,38 C95,38 96,32 99,32 C101,32 102,38 104,38 L108,38 L109,41 L111,12 L113,46 L115,38 C119,38 121,28 126,28 C129,28 131,38 134,38
+          L138,38 C140,38 141,32 144,32 C146,32 147,38 149,38 L153,38 L154,41 L156,12 L158,46 L160,38 C164,38 166,28 171,28 C174,28 176,38 179,38
+          L183,38 C185,38 186,32 189,32 C191,32 192,38 194,38" fill="none" stroke="#4ade80" stroke-width="1.6" stroke-linejoin="round"/>`;
+    } else if (tipo === "fa") {
+        // Baseline irregular + QRS irregulares
+        wave = `<path d="M2,38 Q5,34 8,38 Q11,42 14,37 Q17,33 20,39 Q23,43 26,36 Q29,32 32,40
+          L35,38 L36,42 L38,12 L40,47 L42,38
+          Q46,34 49,40 Q52,44 55,36 Q58,32 61,41 Q64,45 67,35
+          L72,38 L73,42 L75,12 L77,47 L79,38
+          Q83,33 86,40 Q89,44 92,35 Q95,31 98,42 Q101,46 104,36
+          L110,38 L111,42 L113,12 L115,47 L117,38
+          Q121,34 124,39 Q127,43 130,35 Q133,31 136,41 Q139,45 142,37
+          L148,38 L149,42 L151,12 L153,47 L155,38
+          Q159,33 162,40 Q165,44 168,36 Q171,32 174,41 Q177,45 180,35
+          L186,38 L187,42 L189,12 L191,47 L193,38" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linejoin="round"/>`;
+    } else if (tipo === "flutter") {
+        // Dente de serra + QRS a cada 2–3 ondas F
+        wave = `<path d="M2,38 L6,28 L10,38 L14,28 L18,38 L22,28 L26,38
+          L28,42 L31,10 L34,48 L37,38
+          L41,28 L45,38 L49,28 L53,38 L57,28 L61,38
+          L63,42 L66,10 L69,48 L72,38
+          L76,28 L80,38 L84,28 L88,38 L92,28 L96,38
+          L98,42 L101,10 L104,48 L107,38
+          L111,28 L115,38 L119,28 L123,38 L127,28 L131,38
+          L133,42 L136,10 L139,48 L142,38
+          L146,28 L150,38 L154,28 L158,38 L162,28 L166,38
+          L168,42 L171,10 L174,48 L177,38
+          L181,28 L185,38 L189,28 L193,38 L197,28" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linejoin="round"/>`;
+    } else if (tipo === "tv") {
+        // QRS largos e regulares, rápidos
+        wave = `<path d="M3,38 L8,44 L14,8 L22,52 L30,20 L36,38
+          L42,44 L48,8 L56,52 L64,20 L70,38
+          L76,44 L82,8 L90,52 L98,20 L104,38
+          L110,44 L116,8 L124,52 L132,20 L138,38
+          L144,44 L150,8 L158,52 L166,20 L172,38
+          L178,44 L184,8 L192,52 L198,30" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linejoin="round"/>`;
+    } else if (tipo === "fv") {
+        // Caos
+        wave = `<path d="M2,38 L5,20 L9,50 L13,15 L17,55 L21,25 L25,48 L29,18 L33,52 L37,22 L41,50 L45,16 L49,54 L53,28 L57,46 L61,14 L65,56 L69,30 L73,44 L77,12 L81,58 L85,26 L89,48 L93,18 L97,52 L101,24 L105,50 L109,16 L113,54 L117,28 L121,46 L125,14 L129,56 L133,30 L137,44 L141,12 L145,58 L149,26 L153,48 L157,18 L161,52 L165,24 L169,50 L173,16 L177,54 L181,28 L185,46 L189,14 L193,56 L197,32" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linejoin="round"/>`;
+    } else if (tipo === "asistolia") {
+        // Quase linha reta com mínimo ruído
+        wave = `<path d="M2,38 L10,37.5 L20,38.5 L30,37.8 L40,38.2 L50,37.6 L60,38.4 L70,37.9 L80,38.1 L90,37.7 L100,38.3 L110,37.8 L120,38.2 L130,37.6 L140,38.4 L150,37.9 L160,38.1 L170,37.7 L180,38.3 L190,37.8 L198,38" fill="none" stroke="#4ade80" stroke-width="1.4"/>`;
+    } else if (tipo === "bav1") {
+        // PR longo
+        wave = `<path d="M4,38 C7,38 9,31 13,31 C16,31 18,38 20,38 L48,38 L50,42 L53,10 L56,48 L59,38 C65,38 69,27 76,27 C81,27 85,38 89,38
+          L95,38 C98,38 100,31 104,31 C107,31 109,38 111,38 L139,38 L141,42 L144,10 L147,48 L150,38 C156,38 160,27 167,27 C172,27 176,38 180,38" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linejoin="round"/>`;
+    } else if (tipo === "bav3") {
+        // P isoladas + escape ventricular largo e lento
+        wave = `<path d="M6,38 C9,38 11,30 15,30 C18,30 20,38 22,38
+          L40,38 L44,48 L52,8 L62,50 L70,38
+          L90,38 C93,38 95,30 99,30 C102,30 104,38 106,38
+          L130,38 L134,48 L142,8 L152,50 L160,38
+          L175,38 C178,38 180,30 184,30 C187,30 189,38 191,38" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linejoin="round"/>`;
+    } else if (tipo === "tdp") {
+        // Polimórfico com envelope que varia
+        wave = `<path d="M2,38 L6,30 L12,10 L18,50 L24,20 L30,45 L36,15 L42,48 L48,25 L54,40 L60,18 L66,52 L72,12 L78,55 L84,22 L90,48 L96,8 L102,58 L108,28 L114,42 L120,14 L126,50 L132,20 L138,46 L144,16 L150,52 L156,24 L162,44 L168,12 L174,54 L180,26 L186,40 L192,18 L198,48" fill="none" stroke="#4ade80" stroke-width="1.6" stroke-linejoin="round"/>`;
+    }
+
+    return `<svg viewBox="0 0 200 70" width="100%" height="70" xmlns="http://www.w3.org/2000/svg" style="display:block;border-radius:4px;">
+      ${grid}
+      ${wave}
+    </svg>`;
+}
+
+const EXEMPLOS_ARRITMIAS = [
+    {
+        titulo: "Ritmo Sinusal",
+        sub: "60–100 bpm, regular",
+        cor: "#4ade80",
+        tipo: "sinusal",
+        clinica: "Ritmo normal. Paciente geralmente assintomático. Apenas observação se estável."
+    },
+    {
+        titulo: "Bradicardia Sinusal",
+        sub: "FC < 60 bpm",
+        cor: "#60a5fa",
+        tipo: "brady",
+        clinica: "Pode causar tontura, síncope ou hipotensão. Atropina se sintomática; observar se estável."
+    },
+    {
+        titulo: "Taquicardia Sinusal",
+        sub: "FC > 100 bpm",
+        cor: "#fbbf24",
+        tipo: "tachy",
+        clinica: "Resposta a febre, dor, hipovolemia ou sepse. Tratar a causa — não o ritmo."
+    },
+    {
+        titulo: "Fibrilação Atrial",
+        sub: "Irregular, sem P",
+        cor: "#f472b6",
+        tipo: "fa",
+        clinica: "Palpitações, dispneia, risco de tromboembolismo. Controle de FC/ritmo; cardioversão se instável."
+    },
+    {
+        titulo: "Flutter Atrial",
+        sub: "Dente de serra",
+        cor: "#a78bfa",
+        tipo: "flutter",
+        clinica: "Semelhante à FA. Cardioversão elétrica muito eficaz. Avaliar anticoagulação."
+    },
+    {
+        titulo: "Taquicardia Ventricular",
+        sub: "QRS largo, regular",
+        cor: "#f87171",
+        tipo: "tv",
+        clinica: "Pode evoluir para FV. Cardioversão se instável; amiodarona se estável com pulso."
+    },
+    {
+        titulo: "Fibrilação Ventricular",
+        sub: "Caos, sem QRS",
+        cor: "#ef4444",
+        tipo: "fv",
+        clinica: "PCR — sem pulso. Desfibrilação imediata + RCP + adrenalina (ACLS)."
+    },
+    {
+        titulo: "Assistolia",
+        sub: "Linha reta",
+        cor: "#94a3b8",
+        tipo: "asistolia",
+        clinica: "PCR não chocável. RCP de alta qualidade + adrenalina. Identificar causas reversíveis."
+    },
+    {
+        titulo: "BAV 1º Grau",
+        sub: "PR > 200 ms",
+        cor: "#38bdf8",
+        tipo: "bav1",
+        clinica: "Geralmente benigno e assintomático. Revisar fármacos (betabloqueadores, cálcio-bloqueadores)."
+    },
+    {
+        titulo: "BAV 3º Grau",
+        sub: "Dissociação AV",
+        cor: "#fb923c",
+        tipo: "bav3",
+        clinica: "Risco de síncope (Stokes-Adams) e instabilidade. Atropina/adrenalina como ponte; marcapasso."
+    },
+    {
+        titulo: "Torsades de Pointes",
+        sub: "TV polimórfica + QT↑",
+        cor: "#e879f9",
+        tipo: "tdp",
+        clinica: "Associada a QT longo. Magnésio IV; desfibrilar se sem pulso. Corrigir eletrólitos e fármacos."
+    }
+];
+
+function garantirExemplosArritmias() {
+    const grid = document.getElementById("arritmias-grid");
+    const painel = document.getElementById("painel-arritmias");
+    if (!grid || !painel) return;
+
+    painel.classList.remove("hidden");
+
+    if (grid.children.length === 0) {
+        EXEMPLOS_ARRITMIAS.forEach(ex => {
+            const card = document.createElement("div");
+            card.className = "bg-gray-900/80 border border-gray-700 rounded p-1.5 flex flex-col";
+            card.innerHTML = `
+                <div class="text-[10px] font-bold mb-0.5" style="color:${ex.cor}">${ex.titulo}</div>
+                <div class="text-[9px] text-gray-500 mb-1">${ex.sub}</div>
+                ${svgArritmia(ex.tipo)}
+                <div class="mt-1.5 text-[9px] text-gray-400 leading-snug border-t border-gray-700/60 pt-1.5">
+                    ${ex.clinica}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        const btn = document.getElementById("btn-toggle-arritmias");
+        if (btn) {
+            btn.addEventListener("click", () => {
+                const hidden = grid.classList.toggle("hidden");
+                btn.textContent = hidden ? "Expandir" : "Recolher";
+            });
+        }
+    }
+}
 
 els.confirmarRitmo.addEventListener("click", confirmarRitmo);
 els.detectarRitmo.addEventListener("click", detectarRitmoAutomatico);
