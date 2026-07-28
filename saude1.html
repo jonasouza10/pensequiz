@@ -2,208 +2,252 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="iconepq.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PensQuiz - Jogo de Perguntas e Respostas</title>
-    <meta name="description" content="Desafie seus conhecimentos com o PensQuiz.com - Jogo de Perguntas e Respostas sobre a Bíblia, AutoEscola, Concursos, Passaatempo muito mais!">
-    <meta name="keywords" content="quiz, perguntas, respostas">
-    <meta name="author" content="Seu Nome">
+    <title>PenseQuiz — Quizzes Médicos Profissionais</title>
+    <meta name="description" content="MedPense — Plataforma profissional de quizzes e simulados médicos. Terminologia, ECG, Clínica, Prescrição e mais.">
+    <meta name="keywords" content="quiz médico, terminologia médica, ECG, simulador clínico, medicina">
+    <meta name="author" content="MedPense">
     <meta name="robots" content="index, follow">
+    
+    <link rel="icon" type="image/png" href="iconepq.png">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
+        :root {
+            --primary: #0d6efd;
+            --primary-dark: #0a58ca;
+            --primary-light: #e7f1ff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            --radius: 14px;
+        }
+
+        * {
             margin: 0;
-            font-family: 'Raleway', sans-serif;
-            background-color: #f4f4f9;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            color: #333;
-            position: relative; /* Necessário para posicionar o botão de música */
+            padding: 24px 16px;
+            line-height: 1.5;
         }
+
         .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 32px 28px 24px;
             text-align: center;
-            padding: 20px;
-            background-color: #ffffff;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-            border-radius: 16px;
-            width: 90%;
-            max-width: 500px;
+            background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
+            border-bottom: 1px solid var(--border);
         }
+
         .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
+
         .logo-container img {
-            width: 300px;
+            width: 220px;
+            max-width: 80%;
             height: auto;
         }
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+
+        .brand {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.03em;
+            margin-bottom: 4px;
         }
-        .button {
-            background-color: #0066cc;
-            color: #ffffff;
-            padding: 15px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            text-decoration: none;
+
+        .brand span {
+            color: var(--primary);
         }
-        .button:hover {
-            background-color: #004da3;
-            transform: scale(1.05);
-        }
-        .footer {
-            margin-top: 20px;
+
+        .tagline {
             font-size: 0.9rem;
-            color: #777;
+            color: var(--text-muted);
+            font-weight: 500;
         }
-        /* Estilos para o contêiner do botão de música e texto */
-        .music-control {
-            position: absolute;
-            top: 10px; /* Ajustado para dar espaço ao texto */
-            right: 20px;
+
+        .buttons {
+            padding: 24px 20px 28px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            z-index: 1000;
+            gap: 12px;
         }
-        /* Estilos para o botão de música */
-        .music-button {
-            background-color: #28a745; /* Cor verde para destaque */
-            color: #ffffff;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 50%; /* Torna o botão redondo */
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: background-color 0.3s, transform 0.2s;
+
+        .button {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--card);
+            color: var(--text);
+            padding: 16px 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.98rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .button:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -4px rgb(13 110 253 / 0.25);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button i {
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 50px; /* Largura e altura para um botão redondo */
-            height: 50px;
-            margin-bottom: 5px; /* Espaço entre o botão e o texto */
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
         }
-        .music-button:hover {
-            background-color: #218838;
-            transform: scale(1.1);
+
+        .button:hover i {
+            background: var(--primary);
+            color: white;
         }
-        /* Estilos para o ícone dentro do botão */
-        .music-button i {
-            margin: 0;
-        }
-        /* Estilos para o texto "Louvor" */
-        .music-label {
-            color: #555;
-            font-size: 0.85rem;
-            font-weight: bold;
+
+        .footer {
+            padding: 20px 24px 28px;
             text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            background: #fafbfc;
+        }
+
+        .footer p {
+            margin-bottom: 6px;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer .copyright {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        /* Responsivo */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+            .header {
+                padding: 24px 20px 20px;
+            }
+            .brand {
+                font-size: 1.45rem;
+            }
+            .buttons {
+                padding: 20px 16px 24px;
+            }
+            .button {
+                padding: 14px 16px;
+                font-size: 0.95rem;
+            }
         }
     </style>
 </head>
 <body>
-    
 
-   
     <div class="container">
-        <div class="logo-container">
-            <img src="logopq.png" alt="Logo">
+        <div class="header">
+            
+            <div class="brand">Pense<span>Quiz</span></div>
+            <div class="tagline">Quizzes & Simulados Médicos</div>
         </div>
-        <div class="buttons">
-		
 
-			
-			<a href="terminologia_medica.html" class="button">Terminologia Médica</a>
-			<a href="resumomedicina.html" class="button">Resumo Med</a>
-			<a href="gamerECG.html" class="button">Desafio ECG</a>
-			<a href="menudesafiomed.html" class="button">Ciclo Básico Pro</a>
-			<a href="gamerclinica.html" class="button">Simulador Clínico</a>
-			<a href="gamesprescricao.html" class="button">Prescrição Game</a>
-			<a href="gamevermelha.html" class="button">Sala Vermelha Game</a>
-			
-			
-			<a href="quizmedbio.html" class="button">Quiz BioMed</a>
-			
-			
-			
-			
-			
+        <div class="buttons">
+            <a href="terminologia_medica.html" class="button">
+                <i class="fas fa-book-medical"></i>
+                Terminologia Médica
+            </a>
+            <a href="resumomedicina.html" class="button">
+                <i class="fas fa-notes-medical"></i>
+                Resumo Med
+            </a>
+            <a href="gamerECG.html" class="button">
+                <i class="fas fa-heartbeat"></i>
+                Desafio ECG
+            </a>
+            <a href="menudesafiomed.html" class="button">
+                <i class="fas fa-graduation-cap"></i>
+                Ciclo Básico Pro
+            </a>
+            <a href="gamerclinica.html" class="button">
+                <i class="fas fa-stethoscope"></i>
+                Simulador Clínico
+            </a>
+            <a href="gamesprescricao.html" class="button">
+                <i class="fas fa-prescription"></i>
+                Prescrição Game
+            </a>
+            <a href="gamevermelha.html" class="button">
+                <i class="fas fa-ambulance"></i>
+                Sala Vermelha Game
+            </a>
+            <a href="quizmedbio.html" class="button">
+                <i class="fas fa-dna"></i>
+                Quiz BioMed
+            </a>
         </div>
 
         <div class="footer">
-            <p>©PenseQuiz.com Todos Direitos Reservados </p>
-            <p>Contato: <a href="mailto:contato@pense.com">juniosilvasouza@yahoo.com.br</a></p>
+            <p>Contato: <a href="mailto:juniosilvasouza@yahoo.com.br">juniosilvasouza@yahoo.com.br</a></p>
             <p>Telefone: <a href="tel:+5592988562216">(92) 98856-2216</a></p>
+            <p class="copyright">© PenseQuiz — Todos os direitos reservados</p>
         </div>
-
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const audio = document.getElementById('praiseAudio');
-            const musicToggleButton = document.getElementById('musicToggleButton');
-            const musicIcon = musicToggleButton.querySelector('i');
-
-            // Função para alternar play/pause
-            musicToggleButton.addEventListener('click', function() {
-                if (audio.paused) {
-                    audio.play()
-                        .then(() => {
-                            musicIcon.classList.remove('fa-play');
-                            musicIcon.classList.add('fa-pause');
-                        })
-                        .catch(error => {
-                            console.error("Erro ao tentar reproduzir o áudio:", error);
-                            // Exibir uma mensagem amigável ao usuário, se necessário
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Erro de reprodução',
-                                text: 'Não foi possível reproduzir o áudio. O navegador pode ter bloqueado a reprodução automática.',
-                            });
-                        });
-                } else {
-                    audio.pause();
-                    musicIcon.classList.remove('fa-pause');
-                    musicIcon.classList.add('fa-play');
-                }
-            });
-
-            // Atualiza o ícone se o áudio terminar de tocar
-            audio.addEventListener('ended', function() {
-                musicIcon.classList.remove('fa-pause');
-                musicIcon.classList.add('fa-play');
-            });
-
-            // Atualiza o ícone se o áudio for pausado por outros meios (ex: usuário mudou de aba)
-            audio.addEventListener('pause', function() {
-                if (!audio.ended) { // Só muda se não for o fim da música
-                    musicIcon.classList.remove('fa-pause');
-                    musicIcon.classList.add('fa-play');
-                }
-            });
-
-            // Atualiza o ícone se o áudio começar a tocar por outros meios
-            audio.addEventListener('play', function() {
-                musicIcon.classList.remove('fa-play');
-                musicIcon.classList.add('fa-pause');
-            });
-        });
-    </script>
 </body>
 </html>
