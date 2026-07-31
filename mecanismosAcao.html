@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PenseQuiz Mecanismos de Ação</title>
+<meta name="theme-color" content="#7c3aed">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f3ff;--surface:#fff;--surface2:#faf5ff;--text:#1e1b4b;--muted:#6b7280;--primary:#7c3aed;--primary-h:#8b5cf6;--soft:#ede9fe;--accent:#a78bfa;--border:#e9e5ff;--shadow:0 4px 20px rgba(76,29,149,.08);--r:14px}
+body.dark{--bg:#0f0a1a;--surface:#1a1225;--surface2:#251a35;--text:#f5f3ff;--muted:#a1a1aa;--primary:#c4b5fd;--primary-h:#ddd6fe;--soft:#2e1065;--accent:#a78bfa;--border:#2e1065;--shadow:0 4px 20px rgba(0,0,0,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.65;transition:background .3s,color .3s}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.4rem;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.7rem}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem}
+.logo h1{font-size:1.15rem;font-weight:700;letter-spacing:-.02em}
+.logo span{font-size:.7rem;color:var(--muted);display:block;font-weight:500}
+.btn-icon{width:40px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s}
+.btn-icon:hover{background:var(--soft);border-color:var(--primary);color:var(--primary)}
+main{max-width:980px;margin:0 auto;padding:1.4rem 1.2rem 3rem}
+.search-wrap{position:relative;margin-bottom:1.4rem}
+.search-wrap input{width:100%;padding:.95rem 1.2rem .95rem 3.1rem;font-size:1.02rem;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);outline:none;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent)}
+.search-icon{position:absolute;left:1.05rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1.15rem;pointer-events:none}
+.stats{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.chip{background:var(--soft);color:var(--primary);padding:.3rem .75rem;border-radius:999px;font-size:.78rem;font-weight:600}
+.cat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--shadow)}
+.cat summary{padding:1rem 1.25rem;font-weight:600;font-size:1.02rem;cursor:pointer;list-style:none;display:flex;align-items:center;gap:.7rem;user-select:none;background:var(--surface2);transition:background .2s}
+.cat summary::-webkit-details-marker{display:none}
+.cat summary::before{content:'';width:7px;height:7px;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:rotate(-45deg);transition:transform .25s;flex-shrink:0}
+.cat[open] summary::before{transform:rotate(45deg)}
+.cat summary:hover{background:var(--soft)}
+.badge{margin-left:auto;background:var(--primary);color:#fff;font-size:.68rem;font-weight:600;padding:.18rem .5rem;border-radius:999px}
+.cat-body{padding:.4rem 1.25rem 1.15rem;border-top:1px solid var(--border)}
+.term{padding:1.15rem 0;border-bottom:1px dashed var(--border)}
+.term:last-child{border-bottom:none}
+.term h3{font-size:1.12rem;font-weight:700;color:var(--primary);margin-bottom:.35rem}
+.term .classe{font-size:.88rem;color:var(--muted);margin-bottom:.55rem}
+.term .lbl{font-weight:600;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;margin:0.55rem 0 0.15rem}
+.term .box{background:var(--soft);border-left:3px solid var(--primary);padding:.7rem .9rem;border-radius:0 8px 8px 0;margin:.35rem 0;font-size:.9rem}
+.term p{font-size:.92rem;margin-bottom:.35rem}
+.term .steps{margin:.3rem 0;padding-left:1.1rem;font-size:.9rem}
+.term .steps li{margin-bottom:.25rem}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+.refs{margin-top:2.2rem;padding:1.4rem;background:var(--surface);border-radius:var(--r);border:1px solid var(--border)}
+.refs h2{font-size:1.1rem;margin-bottom:.9rem;color:var(--primary)}
+.refs ul{list-style:none;display:grid;gap:.4rem}
+.refs li{font-size:.88rem;color:var(--muted);padding-left:1rem;position:relative}
+.refs li::before{content:'▸';position:absolute;left:0;color:var(--primary)}
+.refs .note{margin-top:.9rem;font-size:.8rem;color:var(--muted);font-style:italic}
+footer{text-align:center;padding:1.3rem;font-size:.78rem;color:var(--muted)}
+@media(max-width:600px){header{padding:.75rem 1rem}.logo h1{font-size:1.05rem}main{padding:1rem .85rem 2.5rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">PQ</div>
+    <div>
+      <h1>PenseQuiz Mecanismos de Ação</h1>
+      <span>Farmacologia molecular e celular · Detalhado · Revalida & Hospital</span>
+    </div>
+  </div>
+  <button class="btn-icon" id="themeBtn" title="Tema">🌙</button>
+</header>
+<main>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Buscar fármaco, alvo molecular ou via..." autocomplete="off">
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="results"></div>
+  <section class="refs">
+    <h2>Referências</h2>
+    <ul>
+      <li><strong>Goodman & Gilman</strong> — The Pharmacological Basis of Therapeutics</li>
+      <li><strong>Katzung</strong> — Basic & Clinical Pharmacology</li>
+      <li><strong>Rang & Dale</strong> — Pharmacology</li>
+      <li><strong>Brunton</strong> — Goodman & Gilman (edição atual)</li>
+      <li>Diretrizes SBC, SBPT, SBD, SBN, SBI · PCDT / Ministério da Saúde</li>
+    </ul>
+    <p class="note">Mecanismos descritos em nível molecular/celular para estudo. Conduta clínica deve seguir protocolos e julgamento individualizado.</p>
+  </section>
+</main>
+<footer>PenseQuiz Mecanismos de Ação · Uso didático</footer>
+<script>
+const DATA = {
+"Eixo Renina-Angiotensina e Diuréticos": [
+{
+term:"IECA (Enalapril, Captopril, Ramipril, Lisinopril)",
+classe:"Inibidores da Enzima Conversora de Angiotensina",
+alvo:"Enzima conversora de angiotensina (ECA / kininase II) — metalopeptidase endotelial",
+mecanismo:`A ECA converte angiotensina I (inativa) em angiotensina II (potente vasoconstritor e estimulante de aldosterona) e degrada bradicinina.
+
+1. Inibição da ECA → ↓ angiotensina II circulante e tecidual
+2. ↓ estimulação do receptor AT1 → vasodilatação arteriolar e venosa, ↓ secreção de aldosterona, ↓ liberação de ADH e ↓ atividade simpática
+3. ↓ aldosterona → menor reabsorção de Na+ no túbulo coletor e menor excreção de K+
+4. ↑ bradicinina (menos degradada) → estimula receptores B2 → ↑ NO e prostaglandinas → vasodilatação adicional
+5. Efeitos a longo prazo: ↓ remodelamento ventricular e vascular, nefroproteção (↓ pressão intraglomerular por dilatação da arteríola eferente)`,
+clinico:"HAS, IC com FE↓, pós-IAM, nefropatia diabética. Tosse por acúmulo de bradicinina. Hipercalemia e elevação de creatinina (monitorar). Contraindicado na gestação.",
+ae:"Tosse seca, hipercalemia, ↑ creatinina, angioedema (raro)."
+},
+{
+term:"BRA (Losartana, Valsartana, Olmesartana, Candesartana)",
+classe:"Antagonistas do receptor AT1 da angiotensina II",
+alvo:"Receptor AT1 da angiotensina II (receptor acoplado à proteína Gq)",
+mecanismo:`A angiotensina II liga-se ao AT1 (Gq) → ativação de PLC → IP3 + DAG → ↑ Ca²+ intracelular e PKC → vasoconstricção, secreção de aldosterona, hipertrofia e fibrose.
+
+1. Bloqueio seletivo do AT1 → impede esses efeitos
+2. A angiotensina II pode desviar-se para o receptor AT2 (em geral oposto: vasodilatação, antiproliferativo)
+3. Não inibem a degradação de bradicinina → menor incidência de tosse e angioedema que os IECA
+4. Efeitos hemodinâmicos e antiproliferativos semelhantes aos IECA`,
+clinico:"Alternativa aos IECA (tosse, angioedema). HAS, IC, nefropatia. Mesmas precauções de K+ e creatinina. Contraindicado na gestação.",
+ae:"Hipercalemia, ↑ creatinina. Sem tosse típica."
+},
+{
+term:"Diuréticos de Alça (Furosemida, Bumetanida, Torasemida)",
+classe:"Inibidores do cotransporte Na-K-2Cl (NKCC2)",
+alvo:"Cotransportador Na-K-2Cl (NKCC2) na membrana apical da alça ascendente espessa de Henle",
+mecanismo:`A alça ascendente espessa é impermeável à água e reabsorve ~25% do Na+ filtrado via NKCC2.
+
+1. Inibição do NKCC2 → bloqueio da entrada de Na+, K+ e 2Cl− na célula
+2. ↓ reabsorção de NaCl → grande carga de soluto chega ao distal → diurese e natriurese potentes
+3. O gradiente elétrico transepitelial (lúmen positivo) diminui → ↓ reabsorção paracelular de Ca²+ e Mg²+
+4. Aumento do fluxo urinário e do K+ no lúmen distal → ↑ secreção de K+ (hipocalemia)
+5. Também têm efeito venodilatador precoce (por prostaglandinas) útil no edema agudo de pulmão`,
+clinico:"IC descompensada, edema pulmonar, sobrecarga volêmica na DRC/LRA, hipercalcemia. Ototoxicidade em doses altas/IV rápidas.",
+ae:"Hipocalemia, hipomagnesemia, hipovolemia, ototoxicidade, hiperuricemia."
+},
+{
+term:"Tiazídicos (Hidroclorotiazida, Clortalidona, Indapamida)",
+classe:"Inibidores do cotransporte Na-Cl (NCC)",
+alvo:"Cotransportador Na-Cl (NCC) no túbulo contorcido distal",
+mecanismo:`O túbulo distal reabsorve ~5–10% do Na+ filtrado via NCC.
+
+1. Inibição do NCC → ↓ reabsorção de NaCl → natriurese moderada
+2. Aumento da entrega de Na+ ao túbulo coletor → ↑ troca Na+/K+ (ENaC/ROMK) → hipocalemia
+3. ↑ reabsorção de Ca²+ (mecanismo ainda parcialmente discutido; útil em hipercalciúria)
+4. Efeito anti-hipertensivo crônico também por redução da resistência vascular periférica (mecanismo não totalmente esclarecido)
+5. Clortalidona tem meia-vida longa e evidência robusta de redução de eventos CV`,
+clinico:"HAS (primeira linha), edema leve, prevenção de cálculos de cálcio. Hiponatremia mais comum que com diuréticos de alça.",
+ae:"Hipocalemia, hiponatremia, hiperuricemia, hiperglicemia, dislipidemia leve."
+},
+{
+term:"Espironolactona / Eplerenona",
+classe:"Antagonistas do receptor mineralocorticoide",
+alvo:"Receptor mineralocorticoide (MR) nuclear no túbulo coletor principal",
+mecanismo:`A aldosterona liga-se ao MR → translocação nuclear → transcrição de ENaC e Na+/K+ ATPase → reabsorção de Na+ e secreção de K+ e H+.
+
+1. Antagonismo competitivo do MR → ↓ expressão de ENaC e Na+/K+ ATPase
+2. ↓ reabsorção de Na+ e ↓ secreção de K+/H+ → efeito poupador de potássio e leve natriurese
+3. Em doses usadas na IC: efeito antifibrótico e anti-remodelamento (bloqueio do MR em cardiomiócitos e fibroblastos)
+4. Eplerenona é mais seletiva para o MR (menos efeitos antiandrogênicos que a espironolactona)`,
+clinico:"IC com FE↓ (reduz mortalidade), HAS resistente, hiperaldosteronismo primário, ascite na cirrose.",
+ae:"Hipercalemia (principal risco). Ginecomastia e impotência (espironolactona)."
+}
+],
+"Sistema Nervoso Autônomo e Cardíaco": [
+{
+term:"Betabloqueadores (Metoprolol, Bisoprolol, Atenolol, Carvedilol, Propranolol)",
+classe:"Antagonistas dos receptores β-adrenérgicos",
+alvo:"Receptores β1 (coração, rim) e, em alguns, β2 (brônquio, vaso) e α1 (carvedilol/labetalol)",
+mecanismo:`Catecolaminas ligam-se a β1 (Gs) → ↑ AMPc → PKA → fosforilação de canais de Ca²+ e de proteínas do acoplamento excitação-contração → ↑ FC, dromotropismo e inotropismo.
+
+1. Bloqueio β1 → ↓ AMPc no nó sinusal e miocárdio → ↓ FC, ↓ condução AV, ↓ contratilidade → ↓ demanda de O₂
+2. ↓ liberação de renina (células justaglomerulares têm β1)
+3. Na IC crônica: bloqueio da hiperativação simpática → permite remodelamento reverso e redução de mortalidade (metoprolol succinato, bisoprolol, carvedilol, nebivolol)
+4. Carvedilol: bloqueio α1 adicional → vasodilatação; propranolol: não seletivo (β1+β2) — útil em tireotoxicose, varizes esofágicas, migrânea`,
+clinico:"HAS, angina, pós-IAM, IC com FE↓ (titular), arritmias, tireotoxicose, profilaxia de varizes. Evitar suspensão abrupta.",
+ae:"Bradardia, bloqueio AV, fadiga, broncoespasmo (não seletivos), mascaramento de hipoglicemia, claudicação."
+},
+{
+term:"Bloqueadores de Canal de Cálcio — Di-hidropiridínicos (Anlodipino, Nifedipino, Felodipino)",
+classe:"Antagonistas de canais de Ca²+ tipo L (vasosseletivos)",
+alvo:"Subunidade α1 dos canais de Ca²+ voltagem-dependentes tipo L no músculo liso vascular",
+mecanismo:`Canais L abrem com despolarização → influxo de Ca²+ → ligação à calmodulina → ativação da quinase da cadeia leve da miosina → contração.
+
+1. Ligação preferencial aos canais L do músculo liso arterial → ↓ influxo de Ca²+ → vasodilatação arteriolar
+2. ↓ resistência vascular periférica → ↓ PA
+3. Reflexo simpático pode ↑ FC (mais com nifedipino de liberação rápida; anlodipino é mais neutro)
+4. Pouco efeito direto em nó sinusal/AV em doses terapêuticas (diferente dos não-DHP)`,
+clinico:"HAS, angina (vasospástica e estável). Edema de tornozelo por vasodilatação pré-capilar.",
+ae:"Edema periférico, cefaleia, flushing, hiperplasia gengival (raro)."
+},
+{
+term:"Bloqueadores de Canal de Cálcio — Não Di-hidropiridínicos (Verapamil, Diltiazem)",
+classe:"Antagonistas de canais de Ca²+ tipo L (cardioativos)",
+alvo:"Canais de Ca²+ tipo L no nó sinusal, nó AV e miocárdio (e vasos)",
+mecanismo:`1. ↓ influxo de Ca²+ no nó sinusal → ↓ automaticidade (↓ FC)
+2. ↓ condução no nó AV → ↑ período refratário → útil no controle de frequência em FA/flutter
+3. ↓ Ca²+ no miocárdio → ↓ contratilidade (efeito inotrópico negativo)
+4. Vasodilatação coronária e sistêmica (menor que DHP)
+5. Verapamil tem maior efeito no AV; diltiazem é intermediário`,
+clinico:"Controle de frequência em FA, angina, HAS. Evitar associação com betabloqueador (risco de bradicardia/BAV grave).",
+ae:"Bradardia, bloqueio AV, constipação (verapamil), piora de IC sistólica."
+},
+{
+term:"Nitratos (Nitroglicerina, Isossorbida dinitrato/mononitrato, Nitroprussiato)",
+classe:"Doadores de óxido nítrico (NO)",
+alvo:"Guanilato ciclase solúvel no músculo liso vascular",
+mecanismo:`1. Nitratos orgânicos são bioativados (ALDH-2 para nitroglicerina) → liberam NO
+2. NO ativa a guanilato ciclase solúvel → ↑ GMPc
+3. GMPc ativa a proteinocinase G → ↓ Ca²+ intracelular e desfosforilação da miosina → relaxamento do músculo liso
+4. Em doses baixas: predominam veias (↓ pré-carga, ↓ congestão pulmonar)
+5. Em doses altas: também artérias e arteríolas (↓ pós-carga). Nitroprussiato: dilatação arterial e venosa equilibrada (crise hipertensiva, pós-carga na IC)`,
+clinico:"Angina, edema agudo de pulmão, crise hipertensiva (nitroprussiato/nitroglicerina IV). Tolerância com uso contínuo (intervalo livre de nitrato).",
+ae:"Cefaleia, hipotensão, taquicardia reflexa. Contraindicados com inibidores de PDE5 (sildenafila etc.)."
+},
+{
+term:"Digoxina",
+classe:"Glicosídeo cardíaco — inibidor da Na+/K+ ATPase",
+alvo:"Na+/K+ ATPase da membrana do cardiomiócito",
+mecanismo:`1. Inibição parcial da Na+/K+ ATPase → ↑ Na+ intracelular
+2. O gradiente de Na+ reduzido diminui a extrusão de Ca²+ pelo trocador Na+/Ca²+ (NCX) → ↑ Ca²+ intracelular
+3. Mais Ca²+ é armazenado no retículo sarcoplasmático → maior liberação na sístole → ↑ contratilidade (inotropismo positivo)
+4. Efeito vagotônico: ↑ tônus parassimpático sobre o nó AV → ↓ condução AV (útil no controle de frequência em FA)
+5. Janela terapêutica estreita; toxicidade aumenta com hipocalemia (competição K+/digoxina no sítio da bomba)`,
+clinico:"IC sintomática (controle de sintomas), controle de FC em FA com IC. Antídoto: fragmento Fab antidigoxina.",
+ae:"Náuseas, arritmias (extrassístoles, bigeminismo, taquicardia atrial com BAV), xantopsia."
+}
+],
+"Antiplaquetários e Anticoagulantes": [
+{
+term:"Ácido Acetilsalicílico (AAS)",
+classe:"Inibidor irreversível da COX-1 plaquetária",
+alvo:"Ciclo-oxigenase-1 (COX-1) plaquetária",
+mecanismo:`1. Acetilação irreversível do resíduo de serina no sítio ativo da COX-1
+2. Plaquetas não têm núcleo → não sintetizam nova enzima → inibição pelo tempo de vida da plaqueta (7–10 dias)
+3. ↓ conversão de ácido araquidônico em PGH2 → ↓ tromboxano A2 (TXA2)
+4. TXA2 é vasoconstritor e potente agregador plaquetário → sua redução inibe a agregação
+5. Em doses baixas (75–100 mg) o efeito é predominantemente antiplaquetário; doses altas também inibem COX-2 e prostaciclina endotelial (menos desejável)`,
+clinico:"SCA, prevenção secundária de IAM/AVC, pós-stent (com P2Y12). Risco de sangramento GI e Reye em crianças.",
+ae:"Úlcera, HDA, broncoespasmo em sensíveis a AINE, Reye."
+},
+{
+term:"Clopidogrel / Prasugrel / Ticagrelor",
+classe:"Inibidores do receptor P2Y12 (ADP)",
+alvo:"Receptor P2Y12 plaquetário (acoplado a Gi)",
+mecanismo:`ADP liga-se a P2Y12 (Gi) → ↓ AMPc → ativação de GPIIb/IIIa → agregação plaquetária.
+
+1. Clopidogrel e prasugrel: pró-fármacos tionfenopiridínicos ativados no fígado (CYP) → metabólito ativo liga-se covalentemente e irreversivelmente ao P2Y12
+2. Ticagrelor: não é pró-fármaco; ligação reversível e direta ao P2Y12; início e término mais rápidos
+3. Bloqueio de P2Y12 → mantém AMPc elevado → inibição da ativação de GPIIb/IIIa → ↓ agregação
+4. Prasugrel: ativação mais previsível e potente que clopidogrel; maior risco de sangramento
+5. Clopidogrel: resposta variável (polimorfismos CYP2C19, interações)`,
+clinico:"SCA e pós-stent em dupla antiagregação com AAS. Ticagrelor/prasugrel preferidos em SCA (conforme perfil de risco).",
+ae:"Sangramento. Ticagrelor: dispneia, bradicardia. Prasugrel: evitar se >75 anos, baixo peso ou AVC prévio."
+},
+{
+term:"Heparina Não Fracionada e HBPM (Enoxaparina)",
+classe:"Glicosaminoglicanos — potencializadores da antitrombina",
+alvo:"Antitrombina III (AT) — e, através dela, trombina (IIa) e fator Xa",
+mecanismo:`1. A heparina liga-se à antitrombina através de uma sequência pentassacarídica específica
+2. A ligação produz mudança conformacional na AT → acelera ~1000× a inativação de proteases de serina da coagulação
+3. Heparina não fracionada (cadeias longas): inativa trombina (IIa) e Xa (precisa de ponte entre AT e trombina)
+4. HBPM (cadeias mais curtas): predominante inativação do Xa (não forma ponte eficiente com a trombina)
+5. Fondaparinux: apenas o pentassacarídeo → somente anti-Xa`,
+clinico:"TVP/TEP, SCA, anticoagulação perioperatória e hospitalar, profilaxia. HIT é complicação imune grave.",
+ae:"Sangramento, HIT, osteoporose (uso prolongado). Antídoto da HNF: protamina (parcial para HBPM)."
+},
+{
+term:"Varfarina",
+classe:"Inibidor da vitamina K epóxido redutase (VKORC1)",
+alvo:"Vitamina K epóxido redutase (VKORC1)",
+mecanismo:`Fatores II, VII, IX, X e proteínas C/S precisam de γ-carboxilação (vitamina K-dependente) para ligar Ca²+ e serem funcionais.
+
+1. O ciclo da vitamina K: forma hidroquinona → epóxido (após carboxilação) → regenerada pela VKORC1
+2. Varfarina inibe a VKORC1 → esgota a vitamina K reduzida → ↓ γ-carboxilação → fatores inativos (PIVKA)
+3. Efeito pleno só após depuração dos fatores já carboxilados (meias-vidas: VII curto, II longo) → INR sobe em dias
+4. Proteína C também cai cedo → risco transitório pró-trombótico (necrose cutânea em deficiência de proteína C)
+5. Variabilidade genética (CYP2C9, VKORC1) e muitas interações alimentares/medicamentosas`,
+clinico:"FA com risco embólico, prótese valvar mecânica, TVP/TEP. Meta de INR conforme indicação. Antídoto: vitamina K, complexo protrombínico.",
+ae:"Sangramento, interações amplas, necrose cutânea (raro)."
+},
+{
+term:"DOACs — Rivaroxabana / Apixabana / Edoxabana / Dabigatrana",
+classe:"Inibidores diretos do fator Xa ou da trombina",
+alvo:"Fator Xa (rivaroxabana, apixabana, edoxabana) ou trombina/IIa (dabigatrana)",
+mecanismo:`1. Inibidores de Xa: ligam-se diretamente ao sítio ativo do Xa (livre e no prothrombinase) → bloqueiam a conversão de protrombina em trombina
+2. Dabigatrana: inibe diretamente a trombina (livre e ligada ao coágulo) → impede a fibrinogênio → fibrina e a amplificação da coagulação
+3. Ação previsível, início rápido, meia-vida relativamente curta, pouca necessidade de monitoramento rotineiro
+4. Eliminação renal importante (especialmente dabigatrana) → ajuste ou contraindicação na IR grave
+5. Antídotos: andexanet alfa (Xa), idarucizumabe (dabigatrana)`,
+clinico:"FA não valvar, tratamento e prevenção de TVP/TEP. Não para prótese mecânica (em geral).",
+ae:"Sangramento. Menos hemorragia intracraniana que varfarina em estudos; mais GI com alguns."
+}
+],
+"Broncodilatadores e Anti-inflamatórios Respiratórios": [
+{
+term:"β2-agonistas (Salbutamol, Fenoterol, Formoterol, Salmeterol)",
+classe:"Agonistas dos receptores β2-adrenérgicos",
+alvo:"Receptor β2 (Gs) no músculo liso brônquico",
+mecanismo:`1. Ligação ao β2 → ativação de Gs → adenilato ciclase → ↑ AMPc
+2. AMPc ativa PKA → fosforilação de alvos que levam a ↓ Ca²+ intracelular e ativação de canais de K+ → hiperpolarização
+3. Resultado: relaxamento do músculo liso brônquico (broncodilatação)
+4. Também: ↓ liberação de mediadores de mastócitos, ↑ clearence mucociliar
+5. SABA (salbutamol): início rápido, duração curta (resgate). LABA (formoterol/salmeterol): duração 12–24 h (manutenção; formoterol com início rápido)`,
+clinico:"Crise de asma/DPOC (SABA). Manutenção da asma sempre com corticoide inalatório (LABA). DPOC: LABA ± LAMA.",
+ae:"Taquicardia, tremor, hipocalemia, hiperglicemia. Monoterapia com LABA na asma aumenta risco de exacerbações graves."
+},
+{
+term:"Anticolinérgicos inalatórios (Ipratrópio, Tiotrópio, Unclidinio, Glicopirrônio)",
+classe:"Antagonistas dos receptores muscarínicos (M3)",
+alvo:"Receptor muscarínico M3 no músculo liso brônquico e glândulas",
+mecanismo:`Acetilcolina (nervo vago) liga-se a M3 (Gq) → PLC → IP3/DAG → ↑ Ca²+ → contração e secreção de muco.
+
+1. Bloqueio de M3 → impede a broncoconstrição e a hipersecreção mediadas pelo vago
+2. Ipratrópio: curta duração (SAMA) — crise, associado a SABA
+3. Tiotrópio e outros LAMA: longa duração — manutenção da DPOC; evidência em asma grave em alguns casos
+4. Quaternários: pouca absorção sistêmica → menos efeitos anticolinérgicos centrais`,
+clinico:"DPOC (base da manutenção). Crise de asma (ipratrópio + SABA). Cuidado em glaucoma de ângulo fechado e retenção urinária.",
+ae:"Boca seca, retenção urinária, piora de glaucoma se contato ocular com nebulização."
+},
+{
+term:"Corticoides inalatórios e sistêmicos (Budesonida, Fluticasona, Prednisona, Metilprednisolona)",
+classe:"Agonistas do receptor de glicocorticoide (GR)",
+alvo:"Receptor de glicocorticoide (nuclear) e efeitos não genômicos",
+mecanismo:`1. O corticoide difunde-se e liga-se ao GR no citoplasma → dissociação de proteínas de choque térmico → translocação nuclear
+2. O complexo GR-ligante liga-se a GRE (elementos de resposta) → ↑ transcrição de genes anti-inflamatórios (anexina-1, IL-10, IκB)
+3. Também inibe fatores de transcrição pró-inflamatórios (NF-κB, AP-1) → ↓ IL-1, IL-6, TNF, IL-4, IL-5, IL-13, quimiocinas
+4. Na asma: ↓ eosinófilos, ↓ mastócitos, ↓ hiper-reatividade e remodelamento
+5. Efeitos não genômicos (rápidos): estabilização de membrana, efeitos sobre canais iônicos — relevantes em doses altas IV`,
+clinico:"Manutenção da asma (inalatório). Exacerbação de asma/DPOC, doenças autoimunes, sepse refratária (dose baixa), edema cerebral (sistêmico).",
+ae:"Inalatório: candidíase oral, rouquidão. Sistêmico: hiperglicemia, infecções, osteoporose, supressão do eixo HHA, miopatia."
+}
+],
+"Diabetes e Hormônios": [
+{
+term:"Insulina",
+classe:"Hormônio peptídico — agonista do receptor de insulina (tirosina quinase)",
+alvo:"Receptor de insulina (IR) — receptor tirosina quinase",
+mecanismo:`1. Insulina liga-se à subunidade α do IR → autofosforilação da subunidade β (tirosina quinase)
+2. Fosforilação de IRS (insulin receptor substrates) → cascata PI3K-Akt e cascata Ras-MAPK
+3. Via PI3K-Akt: translocação de vesículas com GLUT4 para a membrana (músculo e adipócito) → captação de glicose
+4. Ativação da glicogênio sintase, inibição da glicogenólise e da gluconeogênese hepática
+5. Inibição da lipase hormônio-sensível → ↓ lipólise e ↓ ácidos graxos livres → ↓ substrato para cetogênese
+6. Efeito anabólico proteico (↑ captação de aminoácidos, ↓ proteólise)`,
+clinico:"DM1 (essencial), DM2, CAD/EHH (IV), gestação, perioperatório. Tipos: rápida, regular, NPH, análogos longos (glargina, degludeca).",
+ae:"Hipoglicemia, ganho de peso, lipodistrofia local."
+},
+{
+term:"Metformina",
+classe:"Biguanida — ativadora da AMPK",
+alvo:"Principalmente complexos mitocondriais (↓ ATP) → ativação de AMPK; efeitos intestinais e sobre a microbiota",
+mecanismo:`1. Inibição parcial do complexo I mitocondrial → ↑ AMP/ATP → ativação da AMPK
+2. AMPK fosforila e inibe a acetil-CoA carboxilase e fatores de transcrição da gluconeogênese → ↓ produção hepática de glicose
+3. ↑ sensibilidade à insulina no músculo (↑ atividade de GLUT4)
+4. Efeitos intestinais: ↑ GLP-1, alteração da microbiota, ↓ absorção de glicose
+5. Não estimula secreção de insulina → baixo risco de hipoglicemia em monoterapia
+6. Acidose láctica rara: ocorre quando há hipoperfusão/hipóxia ou IR grave (acúmulo de metformina e lactato)`,
+clinico:"Primeira linha no DM2. SOP, pré-diabetes. Suspender em IR aguda, hipóxia, contraste iodado (temporário).",
+ae:"Desconforto GI (náusea, diarreia). Acidose láctica (rara)."
+},
+{
+term:"Inibidores de SGLT2 (Dapagliflozina, Empagliflozina, Canagliflozina)",
+classe:"Inibidores do cotransportador sódio-glicose 2",
+alvo:"SGLT2 no túbulo proximal renal",
+mecanismo:`1. SGLT2 reabsorve ~90% da glicose filtrada (cotransporte com Na+)
+2. Inibição → glicosúria (50–80 g/dia) → ↓ glicemia de forma independente de insulina
+3. Perda calórica → perda de peso; perda de Na+ e água → ↓ volume e ↓ PA
+4. Benefícios cardiorrenais: ↓ pré-carga, melhora da hemodinâmica glomerular (constricção da aferente via feedback túbulo-glomerular), ↓ inflamação e fibrose
+5. Evidência de redução de hospitalização por IC e progressão de DRC (mesmo em não diabéticos em alguns estudos)`,
+clinico:"DM2 com risco CV ou DRC/IC; IC com FE↓ ± diabetes. Risco de ITU genital e cetoacidose euglicêmica.",
+ae:"Infecções geniturinárias, desidratação, cetoacidose euglicêmica (rara)."
+},
+{
+term:"Agonistas de GLP-1 (Semaglutida, Liraglutida, Dulaglutida)",
+classe:"Análogos do peptídeo semelhante ao glucagon tipo 1",
+alvo:"Receptor de GLP-1 (GPCR Gs) em células β, SNC e trato GI",
+mecanismo:`1. GLP-1 natural é incretina (liberada pelo intestino) que potencia a secreção de insulina glicose-dependente
+2. Análogos resistentes à DPP-4 → meia-vida prolongada
+3. No pâncreas: ↑ AMPc na célula β → ↑ secreção de insulina (só quando glicose elevada); ↓ glucagon
+4. No estômago: retardo do esvaziamento gástrico → ↓ pico glicêmico pós-prandial
+5. No SNC (hipotálamo): aumento da saciedade → redução importante de peso
+6. Efeitos CV: redução de eventos em estudos de desfecho (liraglutida, semaglutida, dulaglutida)`,
+clinico:"DM2 (especialmente com obesidade ou risco CV), obesidade. Náuseas no início (titular).",
+ae:"Náuseas, vômitos, risco raro de pancreatite. Contraindicados se história de carcinoma medular de tireoide ou MEN2."
+},
+{
+term:"Levotiroxina (T4)",
+classe:"Hormônio tireoidiano sintético",
+alvo:"Receptores nucleares de hormônio tireoidiano (TRα, TRβ) após conversão a T3",
+mecanismo:`1. T4 é pró-hormônio; convertido perifericamente a T3 pela desiodase (D1, D2)
+2. T3 entra no núcleo e liga-se aos TR (que estão acoplados a elementos TRE no DNA)
+3. O complexo T3-TR recruta coativadores → transcrição de genes que aumentam a taxa metabólica basal, a expressão de ATPases, a termogênese e o desenvolvimento do SNC
+4. Efeitos cardiovasculares: ↑ expressão de canais e proteínas que aumentam FC e contratilidade
+5. Meia-vida longa (~7 dias) → dose única diária; estado de equilíbrio em 4–6 semanas`,
+clinico:"Hipotireoidismo. Tomar em jejum; separar de ferro, cálcio e IBP. Monitorar TSH (e T4 livre).",
+ae:"Superdosagem: taquicardia, tremor, osteoporose, FA."
+}
+],
+"Antimicrobianos — Alvos Principais": [
+{
+term:"Betalactâmicos (Penicilinas, Cefalosporinas, Carbapenêmicos)",
+classe:"Inibidores da síntese da parede celular",
+alvo:"Proteínas ligadoras de penicilina (PBPs) — enzimas de transpeptidação da parede de peptidoglicano",
+mecanismo:`1. A parede bacteriana de peptidoglicano é essencial (especialmente em Gram+)
+2. PBPs catalisam a ligação cruzada (transpeptidação) das cadeias de peptidoglicano
+3. O anel betalactâmico mimetiza o D-Ala-D-Ala → ligação covalente às PBPs → inativação
+4. Parede enfraquecida + autolisinas bacterianas → lise (bactericida)
+5. Resistência: betalactamases (hidrolisam o anel), alteração de PBPs (MRSA — PBP2a), efluxo, porinas (Gram−)`,
+clinico:"Amplo uso: estreptococos, sifilis, meningite, pneumonia, ITU, profilaxia cirúrgica, Pseudomonas (piperacilina, cefepime, meropenem).",
+ae:"Alergia, diarreia, C. difficile, convulsões em doses altas com IR (carbapenêmicos)."
+},
+{
+term:"Vancomicina",
+classe:"Glicopeptídeo — inibidor da síntese da parede celular",
+alvo:"Extremidade D-Ala-D-Ala do precursor do peptidoglicano",
+mecanismo:`1. Liga-se com alta afinidade ao D-Ala-D-Ala dos precursores do peptidoglicano
+2. Impede a polimerização e a transpeptidação por impedimento estérico (não se liga às PBPs)
+3. Bactericida lento em Gram+ (não atravessa a membrana externa de Gram−)
+4. Resistência (Enterococcus VR, alguns S. aureus): substituição D-Ala-D-Lac → perda de uma ligação de hidrogênio e ↓ afinidade`,
+clinico:"MRSA, enterococo sensível, alergia grave a betalactâmicos, C. difficile (oral).",
+ae:"Nefrotoxicidade, ototoxicidade, red man syndrome (histamina por infusão rápida). Monitorar vale."
+},
+{
+term:"Aminoglicosídeos (Gentamicina, Amicacina, Tobramicina)",
+classe:"Inibidores da síntese proteica — subunidade 30S",
+alvo:"Subunidade 30S do ribossomo bacteriano",
+mecanismo:`1. Entrada na bactéria depende de transporte elétron-dependente (menos ativo em anaerobiose)
+2. Ligação à 30S → interferência na iniciação e leitura errônea do mRNA → proteínas defeituosas
+3. Proteínas anômalas na membrana → ↑ permeabilidade → entrada de mais fármaco (efeito bactericida)
+4. Concentração-dependentes; efeito pós-antibiótico longo
+5. Sinergia com betalactâmicos (parede lesada facilita a entrada)`,
+clinico:"Bacilos Gram− graves, sinergia em endocardite enterocócica. Monitorar nível e função renal/auditiva.",
+ae:"Nefrotoxicidade (geralmente reversível), ototoxicidade coclear/vestibular (pode ser irreversível)."
+},
+{
+term:"Macrolídeos (Azitromicina, Claritromicina, Eritromicina)",
+classe:"Inibidores da síntese proteica — subunidade 50S",
+alvo:"Subunidade 50S (centro da peptidiltransferase / túnel de saída da cadeia)",
+mecanismo:`1. Ligação à 50S → bloqueio da elongação da cadeia peptídica (saída do túnel ribossomal)
+2. Bacteriostáticos (bactericidas em algumas concentrações/espécies)
+3. Boa penetração intracelular → úteis em atípicos (Mycoplasma, Chlamydia, Legionella)
+4. Claritromicina e eritromicina: inibidores de CYP3A4 (interações). Azitromicina: menos interação, meia-vida longa (efeito de tecido)`,
+clinico:"Pneumonia atípica, vias aéreas, DST, H. pylori (claritromicina), alergia a penicilina em algumas infecções.",
+ae:"GI, prolongamento de QT, interações medicamentosas (claritromicina/eritromicina)."
+},
+{
+term:"Quinolonas (Ciprofloxacino, Levofloxacino, Moxifloxacino)",
+classe:"Inibidores da DNA girase e topoisomerase IV",
+alvo:"DNA girase (topoisomerase II) e topoisomerase IV bacterianas",
+mecanismo:`1. DNA girase introduz superenrolamentos negativos essenciais à replicação e transcrição
+2. Topoisomerase IV separa as cromátides-filhas
+3. Quinolonas estabilizam o complexo enzima-DNA clivado → quebras de DNA e morte bacteriana (bactericidas)
+4. Cipro: mais potente em Gram− (incluindo Pseudomonas). Levo/moxi: melhor em Gram+ e atípicos (pneumonia)`,
+clinico:"ITU complicada, pneumonia, infecções osteoarticulares, diarréia do viajante. Evitar uso trivial (resistência e efeitos adversos).",
+ae:"Tendinopatia/ruptura de tendão, QT longo, C. difficile, toxicidade em cartilagem de crescimento, alterações do SNC."
+},
+{
+term:"Metronidazol",
+classe:"Nitroimidazol — dano ao DNA em anaeróbios e protozoários",
+alvo:"DNA de microrganismos com metabolismo redutor (anaeróbios, protozoários)",
+mecanismo:`1. O grupo nitro é reduzido por ferredoxinas/flavodoxinas de anaeróbios e protozoários → radicais tóxicos
+2. Radicais danificam o DNA e outras macromoléculas → morte celular
+3. Aeróbios não ativam o fármaco de forma eficiente → seletividade
+4. Excelente atividade em Bacteroides, Clostridium (incluindo C. difficile), ameba, giardia, Trichomonas`,
+clinico:"Anaeróbios, C. difficile, amebíase, giardíase, tricomoníase, H. pylori, vaginose bacteriana.",
+ae:"Sabor metálico, náuseas, efeito tipo dissulfiram com álcool, neuropatia periférica em uso prolongado."
+}
+],
+"SNC — Neurotransmissores": [
+{
+term:"Benzodiazepínicos (Diazepam, Midazolam, Lorazepam, Clonazepam)",
+classe:"Moduladores alostéricos positivos do receptor GABA-A",
+alvo:"Receptor GABA-A (canal de Cl−) — sítio benzodiazepínico na interface α-γ",
+mecanismo:`1. GABA é o principal neurotransmissor inibitório; liga-se ao GABA-A → abertura do canal de Cl− → hiperpolarização
+2. Benzodiazepínicos ligam-se a um sítio alostérico → aumentam a afinidade do GABA e a frequência de abertura do canal
+3. Potenciação da inibição → sedação, ansiólise, anticonvulsivante, amnésia anterógrada, relaxamento muscular
+4. Diferentes subunidades α mediciam efeitos distintos (α1: sedação; α2: ansiólise)
+5. Flumazenil: antagonista competitivo no sítio benzodiazepínico`,
+clinico:"Status epilepticus, ansiedade, sedação procedimental, abstinência alcoólica. Risco de dependência e depressão respiratória com opioides.",
+ae:"Sedação, ataxia, dependência, abstinência, amnésia. Antídoto: flumazenil (cuidado em usuários crônicos)."
+},
+{
+term:"ISRS (Sertralina, Fluoxetina, Escitalopram, Paroxetina)",
+classe:"Inibidores seletivos da recaptação de serotonina",
+alvo:"Transportador de serotonina (SERT) na membrana pré-sináptica",
+mecanismo:`1. Após liberação, a serotonina (5-HT) é recaptada pelo SERT para terminação da sinalização
+2. ISRS bloqueiam o SERT → ↑ 5-HT na fenda sináptica
+3. Efeito agudo: estimulação de autorreceptores 5-HT1A (pode causar latência terapêutica e efeitos iniciais)
+4. Com o uso crônico: dessensibilização de autorreceptores → ↑ disparo neuronal e neurotransmissão serotoninérgica em projeções
+5. Efeitos em humor, ansiedade, TOC; também em vias que regulam sono, apetite e função sexual`,
+clinico:"Depressão, transtornos de ansiedade, TOC, TEPT, bulimia (fluoxetina). Início de ação em 2–6 semanas.",
+ae:"Náuseas, disfunção sexual, insônia ou sonolência, hiponatremia (idosos), síndrome serotoninérgica em associações."
+},
+{
+term:"Opioides (Morfina, Fentanil, Tramadol, Codeína)",
+classe:"Agonistas dos receptores opioides (principalmente μ)",
+alvo:"Receptores opioides μ (Gi/o) — e em graus variados κ e δ",
+mecanismo:`1. Receptores μ no corno dorsal da medula, no tronco e em áreas límbicas
+2. Agonismo μ (Gi) → ↓ AMPc, abertura de canais de K+ e fechamento de canais de Ca²+ → hiperpolarização e ↓ liberação de neurotransmissores da dor (substância P, glutamato)
+3. Analgesia supraespinhal e espinhal; euforia; depressão do centro respiratório; miose; ↓ motilidade GI
+4. Tolerância e dependência com uso crônico (adaptações intracelulares e de circuitos de recompensa)
+5. Naloxona/naltrexona: antagonistas competitivos (reversão de overdose)`,
+clinico:"Dor intensa, edema agudo de pulmão (morfina), anestesia. Risco de depressão respiratória e dependência.",
+ae:"Depressão respiratória, sedação, constipação, náuseas, prurido, dependência. Antídoto: naloxona."
+}
+],
+"Anti-inflamatórios e Imunossupressores": [
+{
+term:"AINE (Ibuprofeno, Diclofenaco, Naproxeno, Cetorolaco, AAS em dose alta)",
+classe:"Inibidores da ciclo-oxigenase (COX-1 e/ou COX-2)",
+alvo:"COX-1 (constitutiva) e COX-2 (induzida na inflamação)",
+mecanismo:`1. COX converte ácido araquidônico em PGH2 → prostaglandinas (PGE2, PGI2) e tromboxanos
+2. PGE2: sensibiliza nociceptores, febre (hipotálamo), proteção da mucosa gástrica, manutenção do fluxo renal
+3. Inibição da COX → ↓ PGE2 → analgesia, antipirese e anti-inflamatório
+4. COX-1: proteção gástrica e função plaquetária; COX-2: inflamação e dor (também prostaciclina endotelial)
+5. Inibidores não seletivos: mais risco GI. COX-2 seletivos: menos GI, mas risco CV (↓ PGI2 sem ↓ TXA2)`,
+clinico:"Dor, inflamação, febre, cólica renal, dismenorreia. Evitar em IR, IC, úlcera ativa, 3º trimestre da gestação.",
+ae:"Úlcera/HDA, IR, retenção hídrica, risco CV, broncoespasmo em sensíveis."
+},
+{
+term:"Metotrexato (doses baixas em reumatologia)",
+classe:"Antagonista do folato — antimetabólito",
+alvo:"Di-hidrofolato redutase (DHFR) e, em doses baixas, vias de adenosina",
+mecanismo:`1. Em doses altas (onco): inibe a DHFR → ↓ tetra-hidrofolato → ↓ síntese de timidilato e purinas → bloqueio da síntese de DNA → morte de células em divisão
+2. Em doses baixas (AR, psoríase): o efeito anti-inflamatório principal parece ser o aumento de adenosina extracelular (anti-inflamatória) e a inibição de outras enzimas dependentes de folato em células imunes
+3. Suplementação de ácido fólico reduz toxicidade sem anular o efeito anti-inflamatório em doses reumatológicas`,
+clinico:"AR (fármaco âncora), psoríase, algumas neoplasias (doses altas). Teratogênico absoluto.",
+ae:"Hepatotoxicidade, mielossupressão, mucosite, pneumonite. Monitorar hemograma e enzimas hepáticas."
+},
+{
+term:"Alopurinol / Febuxostate",
+classe:"Inibidores da xantina oxidase",
+alvo:"Xantina oxidase (converte hipoxantina → xantina → ácido úrico)",
+mecanismo:`1. A xantina oxidase catalisa as duas últimas etapas da degradação de purinas a ácido úrico
+2. Alopurinol (e seu metabólito oxipurinol) e febuxostate inibem a enzima → ↓ produção de ácido úrico
+3. Redução da uricemia → dissolução gradual de cristais e tofos; prevenção de crises (após fase aguda)
+4. Na lise tumoral: reduz a formação de ácido úrico a partir do DNA liberado
+5. Alopurinol: risco de hipersensibilidade grave (associado a HLA-B*5801 em algumas populações)`,
+clinico:"Profilaxia de gota (não iniciar isoladamente na crise aguda), prevenção de nefropatia por ácido úrico na lise tumoral.",
+ae:"Rash, síndrome de hipersensibilidade, hepatotoxicidade. Interação com azatioprina/mercaptopurina (reduzir dose)."
+}
+],
+"Emergências e Antídotos": [
+{
+term:"Adrenalina (Epinefrina)",
+classe:"Agonista de receptores α e β adrenérgicos",
+alvo:"Receptores α1, α2, β1 e β2",
+mecanismo:`1. α1 (Gq): vasoconstricção → ↑ PA e redução de edema de mucosas (laringe)
+2. β1 (Gs): ↑ FC e contratilidade
+3. β2 (Gs): broncodilatação e vasodilatação em leitos musculares; estabilização de mastócitos (↓ liberação de mediadores)
+4. Na anafilaxia: reverte hipotensão, broncoespasmo e edema — fármaco de escolha IM
+5. Na PCR: prioriza α1 (perfusão coronária e cerebral durante massagem)`,
+clinico:"Anafilaxia (IM), PCR (IV), crise asmática grave, choque. Preparar sempre em anafilaxia.",
+ae:"Taquicardia, hipertensão, arritmias, isquemia miocárdica, tremor."
+},
+{
+term:"Noradrenalina",
+classe:"Vasopressor — agonista α1 > β1",
+alvo:"Receptores α1 (principal) e β1",
+mecanismo:`1. α1: potente vasoconstricção arterial e venosa → ↑ resistência vascular periférica e ↑ retorno venoso → ↑ PA
+2. β1: efeito inotrópico e cronotrópico moderado
+3. Pouco efeito β2 → menos vasodilatação muscular que a adrenalina
+4. Primeira linha no choque séptico (após volume) para restaurar PAM e perfusão de órgãos`,
+clinico:"Choque séptico, choque vasodilatado. Infusão central preferencial; cuidado com extravasamento (necrose).",
+ae:"Isquemia digital/periférica, arritmias, extravasamento (tratar com fentolamina)."
+},
+{
+term:"Naloxona",
+classe:"Antagonista opioide puro",
+alvo:"Receptores opioides μ (e κ, δ) — antagonismo competitivo",
+mecanismo:`1. Afinidade alta pelos receptores opioides sem atividade intrínseca → desloca agonistas (morfina, heroína, fentanil)
+2. Reverte depressão respiratória, sedação e miose em minutos
+3. Meia-vida curta (30–90 min) — pode ser menor que a do opioide (especialmente metadone/fentanil) → risco de renarcotização
+4. Em dependentes: precipita abstinência aguda`,
+clinico:"Overdose de opioides, depressão respiratória por opioides. Pode exigir doses repetidas ou infusão contínua.",
+ae:"Abstinência precipitada, agitação, raramente edema pulmonar."
+},
+{
+term:"N-Acetilcisteína (NAC)",
+classe:"Doador de grupos sulfidrila — antídoto do paracetamol",
+alvo:"Reposição de glutationa hepática; detoxificação do NAPQI",
+mecanismo:`1. O paracetamol em overdose satura as vias de conjugação → excesso é oxidado pelo CYP2E1 a NAPQI (tóxico)
+2. NAPQI é normalmente conjugado à glutationa; quando a glutationa se esgota → necrose hepatocelular
+3. NAC fornece cisteína → repõe glutationa e pode ligar-se diretamente ao NAPQI
+4. Eficaz mesmo horas após a ingestão (quanto mais cedo, melhor); também usada como mucolítico`,
+clinico:"Intoxicação por paracetamol (protocolo por tempo/nível ou empírico se horário incerto). Via oral ou IV.",
+ae:"Náuseas; reações anafilactoides na IV (infusão lenta, não é IgE verdadeira)."
+},
+{
+term:"Atropina",
+classe:"Antagonista muscarínico não seletivo",
+alvo:"Receptores muscarínicos (M1–M5)",
+mecanismo:`1. Bloqueio competitivo da acetilcolina nos receptores muscarínicos
+2. Coração (M2): ↑ FC e condução AV (útil em bradicardia e BAV sintomáticos)
+3. Glândulas e músculo liso: ↓ secreções, broncodilatação, ↓ motilidade GI, retenção urinária
+4. No envenenamento por organofosforados: compete com o excesso de ACh nos receptores muscarínicos (não reativa a acetilcolinesterase — para isso usa-se pralidoxima)`,
+clinico:"Bradardia sintomática, intoxicação por organofosforados/carbamatos, pré-anestesia (↓ secreções).",
+ae:"Boca seca, midríase, taquicardia, retenção urinária, delírio/hipertermia em doses tóxicas."
+}
+]
+};
+
+let total = 0;
+Object.values(DATA).forEach(a => total += a.length);
+
+const results = document.getElementById('results');
+const search = document.getElementById('search');
+const stats = document.getElementById('stats');
+const themeBtn = document.getElementById('themeBtn');
+
+function render(filter = '') {
+  const q = filter.toLowerCase().trim();
+  results.innerHTML = '';
+  let shown = 0;
+  Object.keys(DATA).sort((a,b) => a.localeCompare(b)).forEach(cat => {
+    const terms = DATA[cat].filter(t => {
+      if (!q) return true;
+      const blob = (t.term + ' ' + t.classe + ' ' + t.alvo + ' ' + t.mecanismo + ' ' + t.clinico).toLowerCase();
+      return blob.includes(q);
+    }).sort((a,b) => a.term.localeCompare(b.term));
+    if (!terms.length) return;
+    shown += terms.length;
+    const d = document.createElement('details');
+    d.className = 'cat';
+    if (q) d.open = true;
+    d.innerHTML = `<summary>${cat} <span class="badge">${terms.length}</span></summary><div class="cat-body"></div>`;
+    const body = d.querySelector('.cat-body');
+    terms.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'term';
+      const steps = t.mecanismo.split('\n').filter(l => l.trim()).map(l => {
+        const s = l.trim();
+        if (/^\d+\./.test(s)) return `<li>${s.replace(/^\d+\.\s*/, '')}</li>`;
+        return '';
+      }).filter(Boolean).join('');
+      const intro = t.mecanismo.split('\n').filter(l => l.trim() && !/^\d+\./.test(l.trim())).join(' ').trim();
+      div.innerHTML = `
+        <h3>${t.term}</h3>
+        <div class="classe">${t.classe}</div>
+        <div class="lbl">Alvo molecular</div>
+        <div class="box">${t.alvo}</div>
+        <div class="lbl">Mecanismo detalhado</div>
+        ${intro ? `<p>${intro}</p>` : ''}
+        ${steps ? `<ol class="steps">${steps}</ol>` : `<div class="box">${t.mecanismo.replace(/\n/g,'<br>')}</div>`}
+        <div class="lbl">Uso clínico e pontos-chave</div>
+        <p>${t.clinico}</p>
+        <p style="font-size:.88rem;color:var(--muted)"><strong>Efeitos adversos:</strong> ${t.ae}</p>`;
+      body.appendChild(div);
+    });
+    results.appendChild(d);
+  });
+  if (!shown) results.innerHTML = `<div class="empty">Nenhum resultado para “${filter}”</div>`;
+  stats.innerHTML = `<span class="chip">${Object.keys(DATA).length} grupos</span><span class="chip">${total} mecanismos</span>${q ? `<span class="chip">${shown} resultados</span>` : ''}`;
+}
+
+search.addEventListener('input', () => render(search.value));
+if (localStorage.getItem('pq-mech-theme') === 'dark') {
+  document.body.classList.add('dark');
+  themeBtn.textContent = '☀️';
+}
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const dark = document.body.classList.contains('dark');
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('pq-mech-theme', dark ? 'dark' : 'light');
+});
+render();
+</script>
+</body>
+</html>

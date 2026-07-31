@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PenseQuiz Princípios de Farmacologia</title>
+<meta name="theme-color" content="#4338ca">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2ff;--surface:#fff;--surface2:#f5f3ff;--text:#1e1b4b;--muted:#6b7280;--primary:#4338ca;--primary-h:#4f46e5;--soft:#e0e7ff;--accent:#818cf8;--border:#c7d2fe;--shadow:0 4px 20px rgba(67,56,202,.08);--r:14px}
+body.dark{--bg:#0f0e1a;--surface:#1a1730;--surface2:#16122a;--text:#e0e7ff;--muted:#9ca3af;--primary:#a5b4fc;--primary-h:#c7d2fe;--soft:#312e81;--accent:#818cf8;--border:#312e81;--shadow:0 4px 20px rgba(0,0,0,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.65;transition:background .3s,color .3s}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.4rem;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.7rem}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem}
+.logo h1{font-size:1.12rem;font-weight:700;letter-spacing:-.02em}
+.logo span{font-size:.7rem;color:var(--muted);display:block;font-weight:500}
+.btn-icon{width:40px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s}
+.btn-icon:hover{background:var(--soft);border-color:var(--primary);color:var(--primary)}
+main{max-width:980px;margin:0 auto;padding:1.4rem 1.2rem 3rem}
+.search-wrap{position:relative;margin-bottom:1.4rem}
+.search-wrap input{width:100%;padding:.95rem 1.2rem .95rem 3.1rem;font-size:1.02rem;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);outline:none;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent)}
+.search-icon{position:absolute;left:1.05rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1.15rem;pointer-events:none}
+.stats{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.chip{background:var(--soft);color:var(--primary);padding:.3rem .75rem;border-radius:999px;font-size:.78rem;font-weight:600}
+.cat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--shadow)}
+.cat summary{padding:1rem 1.25rem;font-weight:600;font-size:1.02rem;cursor:pointer;list-style:none;display:flex;align-items:center;gap:.7rem;user-select:none;background:var(--surface2);transition:background .2s}
+.cat summary::-webkit-details-marker{display:none}
+.cat summary::before{content:'';width:7px;height:7px;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:rotate(-45deg);transition:transform .25s;flex-shrink:0}
+.cat[open] summary::before{transform:rotate(45deg)}
+.cat summary:hover{background:var(--soft)}
+.badge{margin-left:auto;background:var(--primary);color:#fff;font-size:.68rem;font-weight:600;padding:.18rem .5rem;border-radius:999px}
+.cat-body{padding:.4rem 1.25rem 1.15rem;border-top:1px solid var(--border)}
+.term{padding:1.15rem 0;border-bottom:1px dashed var(--border)}
+.term:last-child{border-bottom:none}
+.term h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:.35rem}
+.term .lbl{font-weight:600;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;margin:.5rem 0 .12rem}
+.term .box{background:var(--soft);border-left:3px solid var(--primary);padding:.7rem .9rem;border-radius:0 8px 8px 0;margin:.35rem 0;font-size:.9rem}
+.term p{font-size:.92rem;margin-bottom:.3rem}
+.term .ex{font-size:.88rem;color:var(--muted);margin-top:.25rem}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+.refs{margin-top:2.2rem;padding:1.4rem;background:var(--surface);border-radius:var(--r);border:1px solid var(--border)}
+.refs h2{font-size:1.1rem;margin-bottom:.9rem;color:var(--primary)}
+.refs ul{list-style:none;display:grid;gap:.4rem}
+.refs li{font-size:.88rem;color:var(--muted);padding-left:1rem;position:relative}
+.refs li::before{content:'▸';position:absolute;left:0;color:var(--primary)}
+.refs .note{margin-top:.9rem;font-size:.8rem;color:var(--muted);font-style:italic}
+footer{text-align:center;padding:1.3rem;font-size:.78rem;color:var(--muted)}
+@media(max-width:600px){header{padding:.75rem 1rem}.logo h1{font-size:1rem}main{padding:1rem .85rem 2.5rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">PQ</div>
+    <div>
+      <h1>PenseQuiz Princípios de Farmacologia</h1>
+      <span>Farmacocinética · Farmacodinâmica · Receptores · Doses · Revalida</span>
+    </div>
+  </div>
+  <button class="btn-icon" id="themeBtn" title="Tema">🌙</button>
+</header>
+<main>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Buscar conceito, via, receptor, parâmetro..." autocomplete="off">
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="results"></div>
+  <section class="refs">
+    <h2>Referências</h2>
+    <ul>
+      <li><strong>Goodman & Gilman</strong> — The Pharmacological Basis of Therapeutics</li>
+      <li><strong>Katzung</strong> — Basic & Clinical Pharmacology</li>
+      <li><strong>Rang & Dale</strong> — Pharmacology</li>
+      <li><strong>Brunton</strong> — Goodman & Gilman (edição atual)</li>
+      <li>Análises Revalida — farmacologia básica e clínica</li>
+    </ul>
+    <p class="note">Conteúdo educacional para compreender o “porquê” dos esquemas terapêuticos. Doses clínicas devem seguir bula e protocolos.</p>
+  </section>
+</main>
+<footer>PenseQuiz Princípios de Farmacologia · Uso didático</footer>
+<script>
+const DATA = {
+"Farmacocinética — Conceitos Gerais (ADME)": [
+{
+term:"Farmacocinética vs Farmacodinâmica",
+def:"Farmacocinética (PK): o que o organismo faz ao fármaco (Absorção, Distribuição, Metabolismo, Excreção — ADME). Farmacodinâmica (PD): o que o fármaco faz ao organismo (receptores, efeito, curva dose-resposta).",
+detail:"PK define concentração no local de ação ao longo do tempo. PD define a magnitude e o tipo de efeito para uma dada concentração. Juntas explicam início, pico, duração e intensidade do efeito.",
+ex:"Ex.: digoxina — PK (meia-vida longa, eliminação renal) + PD (inotropismo e efeito vagal) orientam dose e risco de toxicidade na IR."
+},
+{
+term:"Absorção e biodisponibilidade (F)",
+def:"Absorção: passagem do fármaco do local de administração para a corrente sanguínea. Biodisponibilidade (F): fração da dose que alcança a circulação sistêmica inalterada (0 a 1 ou 0–100%).",
+detail:"Via IV: F = 100%. Via oral: F pode ser reduzida por absorção incompleta e efeito de primeira passagem hepática. AUC (área sob a curva concentração-tempo) compara exposição.",
+ex:"Ex.: morfina oral tem F baixa (primeira passagem); nitroglicerina sublingual evita primeira passagem e age rápido."
+},
+{
+term:"Efeito de primeira passagem",
+def:"Metabolismo do fármaco no intestino e/ou fígado antes de chegar à circulação sistêmica, reduzindo a biodisponibilidade oral.",
+detail:"Fármacos com alto clearance hepático e boa absorção intestinal sofrem grande primeira passagem. Pode ser contornada por vias sublingual, transdérmica, retal (parcial) ou IV.",
+ex:"Ex.: propranolol, lidocaína oral (impraticável), nitroglicerina, estatinas (em parte)."
+},
+{
+term:"Distribuição e volume de distribuição (Vd)",
+def:"Vd é o volume aparente no qual a dose se distribuiria para produzir a concentração plasmática observada. Vd = Dose / Concentração plasmática (assumindo distribuição instantânea).",
+detail:"Vd alto: fármaco sai muito do plasma (tecido, gordura, ligação tecidual) — ex.: digoxina, amiodarona. Vd baixo: permanece no plasma/extracelular — ex.: aminoglicosídeos, varfarina (alta ligação proteica). Não é um volume anatômico real.",
+ex:"Ex.: loading dose ≈ Vd × concentração desejada (útil em fármacos de Vd grande e início lento)."
+},
+{
+term:"Ligação a proteínas plasmáticas",
+def:"Fração do fármaco ligada à albumina (ácidos) ou à α1-glicoproteína ácida (básicos). Só a fração livre atravessa membranas e exerce efeito.",
+detail:"Clinicamente crítica em fármacos de alta ligação (>90%), Vd pequeno e margem estreita (varfarina, fenitoína). Hipoalbuminemia ↑ fração livre. Deslocamento por outro fármaco costuma ser transitório se a depuração aumentar.",
+ex:"Ex.: fenitoína — interpretar nível total com cautela se albumina baixa (preferir nível livre ou correção)."
+},
+{
+term:"Metabolismo (biotransformação) — fases I e II",
+def:"Fase I: oxidação, redução, hidrólise (CYP450, etc.) — pode ativar ou inativar. Fase II: conjugação (glicuronização, sulfatação, acetilação) — em geral aumenta hidrossolubilidade para excreção.",
+detail:"Fígado é o principal órgão. Pró-fármacos precisam de ativação (clopidogrel, enalapril, codeína→morfina via CYP2D6). Indução enzimática ↓ efeito do substrato; inibição ↑ efeito/toxicidade.",
+ex:"Ex.: rifampicina induz CYP3A4 → falha de anticoncepcional; claritromicina inibe CYP3A4 → ↑ sinvastatina (miopatia)."
+},
+{
+term:"Citocromo P450 — isoformas principais",
+def:"Família de enzimas hepáticas (e intestinais) que metabolizam a maioria dos fármacos. Principais: CYP3A4, CYP2D6, CYP2C9, CYP2C19, CYP1A2, CYP2E1.",
+detail:"CYP3A4: maior parte dos fármacos (estatinas, bloqueadores de Ca, midazolam). CYP2C9: varfarina, AINE. CYP2C19: clopidogrel (ativação), IBP. CYP2D6: betabloqueadores, codeína, antidepressivos. Polimorfismos genéticos alteram resposta.",
+ex:"Ex.: metabolizador ultrarrápido de CYP2D6 → mais morfina a partir de codeína (risco em crianças/lactentes)."
+},
+{
+term:"Clearance (CL) e meia-vida (t½)",
+def:"Clearance: volume de plasma depurado do fármaco por unidade de tempo (mL/min ou L/h). Meia-vida: tempo para a concentração plasmática cair pela metade. t½ ≈ 0,693 × Vd / CL.",
+detail:"CL determina a dose de manutenção (Dose taxa = CL × Css). t½ determina o tempo para estado de equilíbrio (~4–5 meias-vidas) e o intervalo de dose. IR reduz CL de fármacos renais → ↑ t½ → ajustar dose/intervalo.",
+ex:"Ex.: gentamicina — CL renal; na IR aumenta t½ e risco de toxicidade. Digoxina — t½ ~36–48 h; equilíbrio em ~1 semana."
+},
+{
+term:"Estado de equilíbrio (steady state) e dose de ataque",
+def:"Steady state (Css): entrada = eliminação; concentração média estável. Atingido em ~4–5 meias-vidas com dose de manutenção. Dose de ataque (loading): preenche o Vd rapidamente para atingir Css mais cedo.",
+detail:"Loading dose = Vd × C desejada / F. Manutenção = CL × C desejada × intervalo / F. Útil quando t½ é longa e o efeito é urgente (digoxina, amiodarona, vancomicina em alguns protocolos).",
+ex:"Ex.: vancomicina — loading em sepse grave; depois manutenção conforme vale e função renal."
+},
+{
+term:"Eliminação de ordem zero vs primeira ordem",
+def:"Primeira ordem: fração constante eliminada por tempo; t½ constante; CL constante (maioria dos fármacos em doses terapêuticas). Ordem zero: quantidade constante eliminada por tempo; t½ aparente aumenta com a dose (etanol, fenitoína em doses altas, salicilato em intoxicação).",
+detail:"Na ordem zero, pequenos aumentos de dose podem causar grande ↑ de concentração (cinética não linear / Michaelis-Menten).",
+ex:"Ex.: fenitoína — acima de certa dose a enzima satura → risco de toxicidade com incremento pequeno."
+},
+{
+term:"Excreção renal e ajuste na insuficiência renal",
+def:"Filtração glomerular + secreção tubular − reabsorção. Fármacos hidrossolúveis e metabólitos conjugados dependem mais do rim.",
+detail:"Na IR: ↓ CL → ↑ níveis. Ajustar dose ou intervalo (aminoglicosídeos, vancomicina, digoxina, DOACs, metformina, enoxaparina). Usar TFG/CrCl estimada e tabelas/bula.",
+ex:"Ex.: enoxaparina — reduzir dose se TFG <30; metformina — evitar se TFG muito baixa (acidose láctica)."
+}
+],
+"Farmacodinâmica — Receptores e Efeito": [
+{
+term:"Receptores — tipos principais",
+def:"Proteínas que reconhecem o fármaco e transduzem o sinal. Tipos: (1) canais iônicos ligados a ligante; (2) receptores acoplados a proteína G (GPCR); (3) receptores ligados a enzima (tirosina quinase); (4) receptores nucleares.",
+detail:"GPCR: maior família de alvos de fármacos (β-adrenérgicos, muscarínicos, opioides, angiotensina). Nucleares: corticoides, hormônios tireoidianos, vitamina D — efeito genômico mais lento.",
+ex:"Ex.: benzodiazepínico → canal GABA-A (Cl−). Insulina → receptor tirosina quinase. Prednisona → receptor nuclear de glicocorticoide."
+},
+{
+term:"Agonista, antagonista e agonista parcial",
+def:"Agonista: ativa o receptor (agonista pleno = resposta máxima). Antagonista: liga-se sem ativar e bloqueia o agonista. Agonista parcial: ativa parcialmente, mesmo com ocupação total (pode antagonizar agonista pleno).",
+detail:"Antagonismo competitivo: deslocável por mais agonista (desloca a curva para a direita). Não competitivo/irreversível: reduz o efeito máximo.",
+ex:"Ex.: morfina = agonista μ. Naloxona = antagonista μ. Buprenorfina = agonista parcial μ (teto analgésico e menor depressão respiratória em alguns contextos)."
+},
+{
+term:"Afinidade, potência e eficácia",
+def:"Afinidade: força de ligação ao receptor (Kd baixo = alta afinidade). Potência: dose/concentração para produzir determinado efeito (EC50 baixo = alta potência). Eficácia: efeito máximo possível (Emax).",
+detail:"Um fármaco pode ser muito potente (baixa dose) mas pouco eficaz (Emax baixo), ou o contrário. Clinicamente, eficácia e segurança importam mais que potência isolada.",
+ex:"Ex.: fentanil é mais potente que morfina (menor dose em mg), mas ambos podem atingir analgesia máxima se a dose for adequada."
+},
+{
+term:"Curva dose-resposta e índice terapêutico",
+def:"Curva dose-resposta: relação entre dose (ou log dose) e efeito. Índice terapêutico (IT) ≈ dose tóxica / dose eficaz (ex.: DT50/DE50). Janela terapêutica: faixa de concentrações entre efeito mínimo útil e toxicidade.",
+detail:"Fármacos de margem estreita (baixo IT): varfarina, digoxina, lítio, fenitoína, aminoglicosídeos, vancomicina — exigem monitoramento.",
+ex:"Ex.: lítio — faixa estreita; AINE + diurético + IECA podem precipitar toxicidade por alterar a eliminação."
+},
+{
+term:"Tolerância, taquifilaxia e dessensibilização",
+def:"Tolerância: redução do efeito com uso crônico (precisa ↑ dose). Taquifilaxia: tolerância rápida (horas). Dessensibilização: receptor deixa de responder (fosforilação, internalização).",
+detail:"Mecanismos: down-regulation de receptores, esgotamento de mediadores, indução enzimática, adaptação neuronal. Tolerância cruzada ocorre entre fármacos do mesmo grupo (ex.: opioides, benzodiazepínicos).",
+ex:"Ex.: nitratos — intervalo livre de nitrato para evitar tolerância. Opioides — tolerância analgésica e respiratória (nem sempre no mesmo ritmo)."
+},
+{
+term:"Regulação para cima e para baixo (up/down-regulation)",
+def:"Uso crônico de antagonista pode ↑ número/sensibilidade de receptores (up-regulation). Uso crônico de agonista pode ↓ receptores (down-regulation).",
+detail:"Explica rebote ao suspender abruptamente alguns fármacos (betabloqueador → taquicardia/HAS; clonidina → crise hipertensiva).",
+ex:"Ex.: nunca suspender betabloqueador de forma abrupta após uso prolongado — retirar gradualmente."
+},
+{
+term:"Sinergismo, adição e antagonismo (efeitos combinados)",
+def:"Adição: efeito conjunto ≈ soma. Sinergismo: efeito maior que a soma. Antagonismo: um reduz o efeito do outro (farmacodinâmico ou farmacocinético).",
+detail:"Sinergismo útil (betalactâmico + aminoglicosídeo em endocardite) ou perigoso (opioide + benzodiazepínico → depressão respiratória). Antagonismo pode ser antídoto (naloxona × opioide).",
+ex:"Ex.: nitratos + sildenafila = sinergismo em ↑ GMPc → hipotensão grave."
+},
+{
+term:"Efeito placebo e nocebo",
+def:"Placebo: benefício clínico atribuível ao contexto terapêutico, expectativa e neurobiologia (opioides endógenos, dopamina), não ao princípio ativo. Nocebo: efeitos adversos pela expectativa negativa.",
+detail:"Não significa que o sintoma seja “falso”. Ensaios clínicos controlam placebo para isolar o efeito farmacológico real.",
+ex:"Ex.: analgesia placebo pode ser parcialmente bloqueada por naloxona — envolve vias opioides endógenas."
+}
+],
+"Vias de Administração e Formas Farmacêuticas": [
+{
+term:"Vias de administração — comparação",
+def:"IV: início imediato, F=100%, risco de toxicidade aguda. IM/SC: depósito, absorção variável. Oral: conveniente, F variável. SL/inalatória/tópica/transdérmica/retal: usos específicos.",
+detail:"Escolha conforme urgência, biodisponibilidade, efeito local vs sistêmico e condições do paciente (vômitos, choque, incompatibilidade).",
+ex:"Ex.: adrenalina IM na anafilaxia (não SC profunda); midazolam IV/IM no status; salbutamol inalatório (efeito local com menos sistêmico)."
+},
+{
+term:"Liberação imediata vs prolongada",
+def:"Formas de liberação prolongada (XR, SR, OROS) mantêm níveis mais estáveis e reduzem frequência de doses, mas não devem ser trituradas (dose dumping).",
+detail:"Em IR ou interações, o perfil de liberação altera o risco. Via sonda: verificar se a forma pode ser aberta/triturada.",
+ex:"Ex.: nifedipino de liberação rápida — risco de hipotensão e reflexo simpático; preferir formulações de liberação prolongada na HAS."
+},
+{
+term:"Barreira hematoencefálica e placenta",
+def:"BHE: endotélio com junções firmes + transportadores (P-gp) — limita entrada de fármacos polares. Placenta: a maioria dos fármacos atravessa em algum grau; lipossolúveis cruzam melhor.",
+detail:"Fármacos centrais precisam atravessar BHE (benzodiazepínicos, opioides). P-gp ejeta muitos xenobióticos. Na gestação: evitar teratogênicos (IECA, varfarina no 1º trimestre, etc.).",
+ex:"Ex.: loperamida normalmente não passa BHE (P-gp); em overdose + inibidores de P-gp pode ter efeito central."
+}
+],
+"Parâmetros Clínicos e Monitoramento": [
+{
+term:"Nível sérico e monitoramento terapêutico (TDM)",
+def:"Dosagem da concentração do fármaco para ajustar dose em margem estreita ou farmacocinética imprevisível.",
+detail:"Exemplos clássicos: vancomicina (vale), aminoglicosídeos (pico/vale), digoxina, lítio, fenitoína, carbamazepina, ciclosporina/tacrolimus. Horário da coleta importa (vale = antes da próxima dose).",
+ex:"Ex.: vancomicina — vale alvo frequentemente 15–20 mg/L em infecções graves (protocolos locais)."
+},
+{
+term:"Janela terapêutica e fármacos de margem estreita",
+def:"Fármacos em que a diferença entre dose eficaz e tóxica é pequena: varfarina, digoxina, lítio, fenitoína, aminoglicosídeos, vancomicina, teofilina, imunossupressores.",
+detail:"Exigem atenção a interações, função renal/hepática, adesão e monitoramento. Polimorfismos (CYP2C9, VKORC1 na varfarina) alteram dose.",
+ex:"Ex.: iniciar amiodarona em paciente com varfarina → reduzir dose de varfarina e monitorar INR de perto."
+},
+{
+term:"Concentração vs tempo-dependência (antimicrobianos)",
+def:"Tempo-dependentes (betalactâmicos): eficácia correlaciona com tempo acima da CIM — importam intervalo e infusão prolongada. Concentração-dependentes (aminoglicosídeos, quinolonas): eficácia correlaciona com pico/CIM ou AUC/CIM — dose alta menos frequente.",
+detail:"Efeito pós-antibiótico: persistência da inibição após cair a concentração (aminoglicosídeos). Orienta esquemas de dose única diária de aminoglicosídeo em muitos contextos.",
+ex:"Ex.: piperacilina em infusão estendida; gentamicina em dose única diária quando apropriado."
+},
+{
+term:"Latência de efeito e ação prolongada",
+def:"Alguns fármacos demoram dias a semanas para o efeito clínico máximo (antidepressivos, estabilizadores de humor, remodelamento com IECA/betabloqueador na IC), apesar de níveis estáveis mais cedo.",
+detail:"Mecanismo: adaptações receptorais, expressão gênica, remodelamento tecidual — não apenas PK.",
+ex:"Ex.: ISRS — melhora clínica em 2–6 semanas; orienta o paciente para não suspender precocemente."
+}
+],
+"Variabilidade Individual e Populações Especiais": [
+{
+term:"Idosos — mudanças PK/PD",
+def:"↓ água corporal e massa magra, ↑ gordura, ↓ TFG, ↓ clearance hepático de alguns fármacos, maior sensibilidade a depressores do SNC e anticolinérgicos.",
+detail:"Começar com doses menores (“start low, go slow”). Critérios de Beers: evitar benzodiazepínicos de meia-vida longa, anticolinérgicos potentes, AINE crônico, etc.",
+ex:"Ex.: zolpidem/diazepam — risco de queda e confusão; preferir não farmacológico ou doses mínimas curtas."
+},
+{
+term:"Gestação e lactação",
+def:"↑ volume plasmático, ↑ TFG, alterações de CYP e da ligação proteica → mudam níveis. Placenta permite passagem de muitos fármacos. Leite: transferências variáveis.",
+detail:"Evitar teratogênicos conhecidos (IECA/BRA, varfarina no 1º trimestre, valproato, metotrexato, isotretinoína). Preferir fármacos com mais experiência (metildopa, labetalol, insulina, HBPM).",
+ex:"Ex.: varfarina no 1º trimestre — embriopatia; perto do parto — risco hemorrágico fetal."
+},
+{
+term:"Insuficiência hepática e renal",
+def:"Hepática: ↓ metabolismo de fármacos com alto/ baixo extrato, ↓ síntese de albumina, encefalopatia (sensibilidade a sedativos). Renal: ↓ eliminação de fármacos e metabólitos ativos.",
+detail:"Ajustar ou evitar: na IR — metformina, metotrexato, DOACs, litio, aminoglicosídeos. Na hepatopatia — dose de benzodiazepínicos, opioides, alguns anticonvulsivantes.",
+ex:"Ex.: midazolam e fentanil — efeito prolongado em cirrose; preferir agentes mais previsíveis e doses reduzidas."
+},
+{
+term:"Polimorfismos genéticos (farmacogenética)",
+def:"Variações em CYP, transportadores e alvos alteram eficácia e toxicidade. Exemplos: CYP2C9/VKORC1 (varfarina), CYP2C19 (clopidogrel), CYP2D6 (codeína, tamoxifeno), HLA-B*5801 (alopurinol), HLA-B*5701 (abacavir).",
+detail:"Testes farmacogenéticos já orientam prescrição em alguns protocolos (HIV, oncologia, reumatologia).",
+ex:"Ex.: HLA-B*5701 positivo → não usar abacavir (hipersensibilidade grave)."
+}
+],
+"Interações — Mecanismos de Base": [
+{
+term:"Interação farmacocinética vs farmacodinâmica",
+def:"PK: um fármaco altera ADME do outro (nível sobe ou desce). PD: efeitos se somam ou se opõem no mesmo sistema sem necessariamente mudar a concentração.",
+detail:"PK clássica: inibição/indução de CYP, competição por secreção tubular, quelação na absorção. PD clássica: opioide + benzo; IECA + espironolactona (K+); nitrato + PDE5.",
+ex:"Ex.: claritromicina + sinvastatina (PK — CYP3A4). Varfarina + AAS (PD — coagulação + plaquetas)."
+},
+{
+term:"Indução e inibição enzimática — tempo de início",
+def:"Inibição: em geral rápida (horas a poucos dias) — compete ou inativa a enzima. Indução: mais lenta (dias a 1–2 semanas) — exige síntese de novas enzimas; reverte em 1–2 semanas após suspender.",
+detail:"Indutores potentes: rifampicina, carbamazepina, fenitoína, erva-de-são-joão. Inibidores potentes: cetoconazol, claritromicina, ritonavir, grapefruit (CYP3A4 intestinal).",
+ex:"Ex.: iniciar rifampicina em paciente com anticoncepcional oral → falha contraceptiva; usar método adicional."
+},
+{
+term:"P-glicoproteína (P-gp) e transportadores",
+def:"P-gp é um efluxo ATP-dependente (intestino, rim, BHE, placenta) que limita absorção e entrada no SNC. Muitos substratos de CYP3A4 também são de P-gp.",
+detail:"Inibidores de P-gp ↑ níveis de digoxina, dabigatrana, colchicina. Indutores ↓ níveis.",
+ex:"Ex.: amiodarona ou verapamil + digoxina → ↑ digoxinemia (reduzir dose de digoxina)."
+},
+{
+term:"Quelação e pH na absorção",
+def:"Cátions (Ca, Fe, Mg, Al) formam complexos insolúveis com quinolonas, tetraciclinas e bifosfonatos → ↓ absorção. pH gástrico alto (IBP) reduz absorção de fármacos que precisam de meio ácido.",
+detail:"Separar horários (2 h antes ou 4–6 h depois). Revisar IBP com atazanavir, cetoconazol, ferro.",
+ex:"Ex.: ciprofloxacino com leite ou antiácido → falha terapêutica possível."
+}
+],
+"Princípios de Prescrição Racional": [
+{
+term:"Escolha do fármaco — eficácia, segurança, conveniência, custo",
+def:"Prescrição racional: indicação clara, fármaco eficaz para o objetivo, menor risco para aquele paciente, posologia viável, custo e disponibilidade (SUS).",
+detail:"Revisar alergias, gestação, IR/IH, interações, idade e adesão. Preferir fármacos com evidência de desfecho clínico (não só desfecho intermediário).",
+ex:"Ex.: na IC com FE↓ preferir betabloqueadores com evidência de ↓ mortalidade (carvedilol, bisoprolol, metoprolol succinato, nebivolol)."
+},
+{
+term:"Desprescrição e reconciliação medicamentosa",
+def:"Desprescrição: retirada planejada de fármacos sem indicação clara ou com risco > benefício. Reconciliação: conferir a lista em transições de cuidado (alta, transferência).",
+detail:"Idosos polimedicados se beneficiam de revisão periódica. Cascata prescritiva: tratar efeito adverso de um fármaco com outro — evitar.",
+ex:"Ex.: AINE causa HAS → novo anti-hipertensivo; melhor suspender o AINE se possível."
+},
+{
+term:"Adesão e educação do paciente",
+def:"Até metade dos pacientes crônicos não adere plenamente. Simplificar esquemas, explicar o “porquê”, alertar efeitos esperados e sinais de alarme.",
+detail:"Formas de dose única diária, monitores (INR, glicemia), calendários e envolvimento da família melhoram adesão.",
+ex:"Ex.: TB — TDO aumenta cura e reduz resistência. Orientar que tosse do IECA não é “alergia a tudo” — pode trocar para BRA."
+}
+]
+};
+
+let total = 0;
+Object.values(DATA).forEach(a => total += a.length);
+
+const results = document.getElementById('results');
+const search = document.getElementById('search');
+const stats = document.getElementById('stats');
+const themeBtn = document.getElementById('themeBtn');
+
+function render(filter = '') {
+  const q = filter.toLowerCase().trim();
+  results.innerHTML = '';
+  let shown = 0;
+  Object.keys(DATA).sort((a,b) => a.localeCompare(b)).forEach(cat => {
+    const terms = DATA[cat].filter(t => {
+      if (!q) return true;
+      const blob = (t.term + ' ' + t.def + ' ' + t.detail + ' ' + t.ex).toLowerCase();
+      return blob.includes(q);
+    });
+    if (!terms.length) return;
+    shown += terms.length;
+    const d = document.createElement('details');
+    d.className = 'cat';
+    if (q) d.open = true;
+    d.innerHTML = `<summary>${cat} <span class="badge">${terms.length}</span></summary><div class="cat-body"></div>`;
+    const body = d.querySelector('.cat-body');
+    terms.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'term';
+      div.innerHTML = `
+        <h3>${t.term}</h3>
+        <div class="lbl">Definição</div>
+        <div class="box">${t.def}</div>
+        <div class="lbl">Detalhamento</div>
+        <p>${t.detail}</p>
+        <p class="ex">${t.ex}</p>`;
+      body.appendChild(div);
+    });
+    results.appendChild(d);
+  });
+  if (!shown) results.innerHTML = `<div class="empty">Nenhum resultado para “${filter}”</div>`;
+  stats.innerHTML = `<span class="chip">${Object.keys(DATA).length} seções</span><span class="chip">${total} conceitos</span>${q ? `<span class="chip">${shown} resultados</span>` : ''}`;
+}
+
+search.addEventListener('input', () => render(search.value));
+if (localStorage.getItem('pq-prin-theme') === 'dark') {
+  document.body.classList.add('dark');
+  themeBtn.textContent = '☀️';
+}
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const dark = document.body.classList.contains('dark');
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('pq-prin-theme', dark ? 'dark' : 'light');
+});
+render();
+</script>
+</body>
+</html>

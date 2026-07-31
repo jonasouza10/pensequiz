@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PenseQuiz Farmacologia</title>
+<meta name="theme-color" content="#1e40af">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1f5f9;--surface:#fff;--surface2:#f8fafc;--text:#0f172a;--muted:#64748b;--primary:#1e40af;--primary-h:#2563eb;--soft:#dbeafe;--accent:#0ea5e9;--border:#e2e8f0;--shadow:0 4px 20px rgba(15,23,42,.07);--r:14px}
+body.dark{--bg:#0b1220;--surface:#111827;--surface2:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--primary:#60a5fa;--primary-h:#93c5fd;--soft:#1e3a5f;--accent:#38bdf8;--border:#1e293b;--shadow:0 4px 20px rgba(0,0,0,.35)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;transition:background .3s,color .3s}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.4rem;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.7rem}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.95rem}
+.logo h1{font-size:1.2rem;font-weight:700;letter-spacing:-.02em}
+.logo span{font-size:.72rem;color:var(--muted);display:block;font-weight:500}
+.btn-icon{width:40px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s}
+.btn-icon:hover{background:var(--soft);border-color:var(--primary);color:var(--primary)}
+main{max-width:980px;margin:0 auto;padding:1.4rem 1.2rem 3rem}
+.search-wrap{position:relative;margin-bottom:1.4rem}
+.search-wrap input{width:100%;padding:.95rem 1.2rem .95rem 3.1rem;font-size:1.02rem;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);outline:none;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent)}
+.search-icon{position:absolute;left:1.05rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1.15rem;pointer-events:none}
+.stats{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.chip{background:var(--soft);color:var(--primary);padding:.3rem .75rem;border-radius:999px;font-size:.78rem;font-weight:600}
+.cat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--shadow)}
+.cat summary{padding:1rem 1.25rem;font-weight:600;font-size:1.02rem;cursor:pointer;list-style:none;display:flex;align-items:center;gap:.7rem;user-select:none;background:var(--surface2);transition:background .2s}
+.cat summary::-webkit-details-marker{display:none}
+.cat summary::before{content:'';width:7px;height:7px;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:rotate(-45deg);transition:transform .25s;flex-shrink:0}
+.cat[open] summary::before{transform:rotate(45deg)}
+.cat summary:hover{background:var(--soft)}
+.badge{margin-left:auto;background:var(--primary);color:#fff;font-size:.68rem;font-weight:600;padding:.18rem .5rem;border-radius:999px}
+.cat-body{padding:.4rem 1.25rem 1.1rem;border-top:1px solid var(--border)}
+.term{padding:1.05rem 0;border-bottom:1px dashed var(--border)}
+.term:last-child{border-bottom:none}
+.term h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:.4rem}
+.term .lbl{font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.12rem}
+.term p{margin-bottom:.5rem;font-size:.93rem}
+.term .mech{background:var(--soft);border-left:3px solid var(--primary);padding:.65rem .85rem;border-radius:0 8px 8px 0;margin:.5rem 0;font-size:.9rem}
+.term .use{font-size:.9rem}
+.term .ae{font-size:.88rem;color:var(--muted)}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+.refs{margin-top:2.2rem;padding:1.4rem;background:var(--surface);border-radius:var(--r);border:1px solid var(--border)}
+.refs h2{font-size:1.1rem;margin-bottom:.9rem;color:var(--primary)}
+.refs ul{list-style:none;display:grid;gap:.4rem}
+.refs li{font-size:.88rem;color:var(--muted);padding-left:1rem;position:relative}
+.refs li::before{content:'▸';position:absolute;left:0;color:var(--primary)}
+.refs .note{margin-top:.9rem;font-size:.8rem;color:var(--muted);font-style:italic}
+footer{text-align:center;padding:1.3rem;font-size:.78rem;color:var(--muted)}
+@media(max-width:600px){header{padding:.75rem 1rem}.logo h1{font-size:1.05rem}main{padding:1rem .85rem 2.5rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">PQ</div>
+    <div>
+      <h1>PenseQuiz Farmacologia</h1>
+      <span>Fármacos · Mecanismos · Usos clínicos · Revalida & Hospital</span>
+    </div>
+  </div>
+  <button class="btn-icon" id="themeBtn" title="Tema">🌙</button>
+</header>
+<main>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Buscar fármaco, classe, mecanismo ou indicação..." autocomplete="off">
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="results"></div>
+  <section class="refs">
+    <h2>Referências Bibliográficas</h2>
+    <ul>
+      <li><strong>Goodman & Gilman</strong> — The Pharmacological Basis of Therapeutics</li>
+      <li><strong>Katzung</strong> — Basic & Clinical Pharmacology</li>
+      <li><strong>Rang & Dale</strong> — Pharmacology</li>
+      <li>Diretrizes Brasileiras: SBC, SBPT, SBD, SBN, SBI, FEBRASGO</li>
+      <li>Protocolos Clínicos e Diretrizes Terapêuticas (PCDT) do Ministério da Saúde / SUS</li>
+      <li>UpToDate / PubMed — revisões de farmacologia clínica</li>
+      <li>Análises Revalida INEP (Estratégia MED, Medcel)</li>
+    </ul>
+    <p class="note">Conteúdo educacional. Doses e indicações devem ser confirmadas em bulas, PCDT e julgamento clínico. Não substitui prescrição médica individualizada.</p>
+  </section>
+</main>
+<footer>PenseQuiz Farmacologia · Uso didático · Revalida & Hospital</footer>
+<script>
+const DATA = {
+"Cardiologia — Anti-hipertensivos e IC": [
+{term:"IECA (Enalapril, Captopril, Ramipril)",classe:"Inibidores da Enzima Conversora de Angiotensina",mechanism:"Inibem a ECA → ↓ angiotensina II e ↑ bradicinina → vasodilatação, ↓ aldosterona e ↓ remodelamento cardiovascular. Nefroproteção em diabéticos.",use:"HAS, IC com FE reduzida, pós-IAM, nefropatia diabética. Primeira linha em muitas diretrizes.",ae:"Tosse seca (bradicinina), hipercalemia, elevação de creatinina, angioedema (raro). Contraindicados na gestação."},
+{term:"BRA (Losartana, Valsartana)",classe:"Bloqueadores do Receptor de Angiotensina II (AT1)",mechanism:"Bloqueiam o receptor AT1 da angiotensina II → efeitos semelhantes aos IECA sem aumento de bradicinina.",use:"HAS, IC, nefropatia. Alternativa quando há tosse com IECA.",ae:"Hipercalemia, elevação de creatinina. Sem tosse típica. Contraindicados na gestação."},
+{term:"Betabloqueadores (Metoprolol, Bisoprolol, Carvedilol)",classe:"Antagonistas dos receptores β-adrenérgicos",mechanism:"Bloqueio β1 (e α1 no carvedilol) → ↓ FC, ↓ contratilidade, ↓ demanda miocárdica e, na IC, bloqueio da hiperativação simpática crônica (remodelamento reverso).",use:"HAS, angina, pós-IAM, IC com FE reduzida (doses tituladas), arritmias, tireotoxicose.",ae:"Bradardia, fadiga, broncoespasmo (não seletivos), mascaramento de hipoglicemia, disfunção sexual."},
+{term:"Bloqueadores de Canal de Cálcio (Anlodipino, Verapamil, Diltiazem)",classe:"Antagonistas de canais de Ca²⁺ tipo L",mechanism:"Di-hidropiridínicos (anlodipino): vasodilatação arterial. Não di-hidropiridínicos (verapamil/diltiazem): ↓ FC e ↓ condução AV + vasodilatação.",use:"HAS, angina. Verapamil/diltiazem: controle de frequência em FA.",ae:"Edema de membros (DHP), constipação (verapamil), bradicardia e bloqueio AV (não-DHP). Evitar associação de não-DHP com betabloqueador."},
+{term:"Diuréticos Tiazídicos (Hidroclorotiazida, Clortalidona)",classe:"Diuréticos tiazídicos",mechanism:"Inibem o cotransporte Na-Cl no túbulo distal → natriurese e redução da volemia. Efeito anti-hipertensivo também por vasodilatação crônica.",use:"HAS (primeira linha em muitos esquemas), edema leve.",ae:"Hipocalemia, hiponatremia, hiperuricemia, hiperglicemia, dislipidemia. Clortalidona tem evidência cardiovascular robusta."},
+{term:"Diuréticos de Alça (Furosemida, Bumetanida)",classe:"Diuréticos de alça",mechanism:"Inibem o cotransporte Na-K-2Cl na alça ascendente espessa → potente natriurese e diurese.",use:"Edema na IC, cirrose, síndrome nefrótica; LRA com sobrecarga; crise hipertensiva com volume.",ae:"Hipocalemia, hipomagnesemia, hipovolemia, ototoxicidade (doses altas/rápidas), hiperuricemia."},
+{term:"Espironolactona / Eplerenona",classe:"Antagonistas mineralocorticoides (diuréticos poupadores de K+)",mechanism:"Bloqueiam o receptor mineralocorticoide → ↓ reabsorção de Na+ e ↓ excreção de K+ no túbulo coletor. Efeito antifibrótico na IC.",use:"IC com FE reduzida (reduz mortalidade), hiperaldosteronismo, HAS resistente, ascite na cirrose.",ae:"Hipercalemia, ginecomastia (espironolactona). Monitorar K+ e função renal."},
+{term:"Nitratos (Isossorbida, Nitroglicerina)",classe:"Doadores de óxido nítrico",mechanism:"Liberam NO → ↑ cGMP → relaxamento de músculo liso vascular (principalmente venoso em doses baixas) → ↓ pré-carga e demanda miocárdica.",use:"Angina, edema agudo de pulmão, crise hipertensiva (nitroprussiato/nitroglicerina IV).",ae:"Cefaleia, hipotensão, tolerância (intervalo livre de nitrato). Contraindicados com inibidores de PDE5."},
+{term:"Digoxina",classe:"Glicosídeo cardíaco",mechanism:"Inibe a Na+/K+ ATPase → ↑ Na+ intracelular → ↑ Ca²+ via trocador Na/Ca → ↑ contratilidade. Também aumenta o tônus vagal (↓ condução AV).",use:"IC sintomática (controle de sintomas), controle de frequência em FA (especialmente com IC).",ae:"Toxicidade: náuseas, arritmias, visão amarelada. Risco ↑ com hipocalemia e IR. Antídoto: fragmento Fab."},
+{term:"Estatinas (Atorvastatina, Rosuvastatina, Sinvastatina)",classe:"Inibidores da HMG-CoA redutase",mechanism:"Inibem a síntese hepática de colesterol → ↑ expressão de receptores de LDL → ↓ LDL plasmático. Efeitos pleiotrópicos (anti-inflamatório, estabilização de placa).",use:"Dislipidemia, prevenção primária e secundária de eventos cardiovasculares, pós-SCA.",ae:"Mialgia, elevação de CK (raro: rabdomiólise), elevação de enzimas hepáticas. Interações (CYP3A4)."}
+],
+"Cardiologia — Antiarrítmicos e Antitrombóticos": [
+{term:"Amiodarona",classe:"Antiarrítmico classe III (multicanal)",mechanism:"Bloqueia canais de K+ (prolonga repolarização), além de efeitos de classe I, II e IV. Prolongamento do potencial de ação e do intervalo QT.",use:"Arritmias ventriculares, FA (conversão e manutenção de ritmo), especialmente com cardiopatia estrutural.",ae:"Toxicidade pulmonar, tireoidiana (hipo/hiper), hepática, depósitos corneanos, fotossensibilidade, bradicardia. Meia-vida muito longa."},
+{term:"Adenosina",classe:"Nucleosídeo endógeno",mechanism:"Ativa receptores A1 no nó AV → hiperpolarização e bloqueio transitório da condução AV.",use:"Diagnóstico e tratamento de TSVP (taquicardia supraventricular paroxística). Meia-vida segundos.",ae:"Flushing, dor torácica transitória, broncoespasmo. Contraindicada em asma grave e WPW com FA."},
+{term:"AAS (Ácido Acetilsalicílico)",classe:"Antiagregante plaquetário (inibidor irreversível da COX-1)",mechanism:"Acetilação irreversível da COX-1 plaquetária → ↓ tromboxano A2 → inibição da agregação plaquetária pelo tempo de vida da plaqueta (~7–10 dias).",use:"SCA, prevenção secundária de AVC/IAM, pós-stent (dupla antiagregação).",ae:"Sangramento GI, úlcera, alergia/broncoespasmo, Reye em crianças com virose."},
+{term:"Clopidogrel / Ticagrelor / Prasugrel",classe:"Inibidores do receptor P2Y12",mechanism:"Bloqueiam o receptor P2Y12 do ADP na plaqueta → inibição da agregação. Clopidogrel é pró-fármaco (CYP2C19); ticagrelor é direto e reversível.",use:"SCA, pós-stent coronariano (dupla antiagregação com AAS).",ae:"Sangramento. Ticagrelor: dispneia, bradicardia. Prasugrel: evitar em idosos/AVC prévio (maior sangramento)."},
+{term:"Heparina Não Fracionada / HBPM (Enoxaparina)",classe:"Anticoagulantes (potenciadores da antitrombina)",mechanism:"Potencializam a antitrombina III → inativação de trombina (IIa) e fator Xa (HBPM age mais sobre Xa).",use:"TEP, TVP, SCA, anticoagulação em hospital, profilaxia de trombose.",ae:"Sangramento, trombocitopenia induzida por heparina (HIT), osteoporose (uso prolongado). Antídoto HNF: protamina."},
+{term:"Varfarina",classe:"Anticoagulante oral (inibidor da vitamina K epóxido redutase)",mechanism:"Inibe a redução da vitamina K → ↓ fatores II, VII, IX, X e proteínas C/S. Monitoramento por INR.",use:"FA com alto risco embólico, próteses valvares mecânicas, TVP/TEP (manutenção).",ae:"Sangramento, interações medicamentosas e alimentares amplas, necrose cutânea (raro). Antídoto: vitamina K, complexo protrombínico."},
+{term:"DOACs (Rivaroxabana, Apixabana, Dabigatrana)",classe:"Anticoagulantes orais diretos",mechanism:"Rivaroxabana/apixabana: inibem fator Xa. Dabigatrana: inibe trombina (IIa). Ação previsível, sem necessidade rotineira de INR.",use:"FA não valvar, TVP/TEP (tratamento e prevenção).",ae:"Sangramento. Ajuste ou evitar na IR grave. Antídotos: andexanet (Xa), idarucizumabe (dabigatrana)."}
+],
+"Pneumologia": [
+{term:"β2-agonistas de curta duração — SABA (Salbutamol, Fenoterol)",classe:"Broncodilatadores β2-agonistas",mechanism:"Estimulam receptores β2 no músculo liso brônquico → ↑ AMPc → broncodilatação rápida.",use:"Alívio de crises de asma e DPOC (resgate). Não usar isoladamente como manutenção na asma.",ae:"Taquicardia, tremor, hipocalemia, hiperglicemia. Uso excessivo indica controle inadequado."},
+{term:"β2-agonistas de longa duração — LABA (Formoterol, Salmeterol)",classe:"Broncodilatadores de longa ação",mechanism:"Mesmo mecanismo dos SABA, com duração prolongada (12–24 h). Formoterol tem início rápido.",use:"Manutenção da asma (sempre com corticoide inalatório) e DPOC.",ae:"Semelhantes aos SABA. Nunca monoterapia na asma (risco de exacerbações graves)."},
+{term:"Corticoides Inalatórios (Budesonida, Beclometasona, Fluticasona)",classe:"Anti-inflamatórios glicocorticoides inalatórios",mechanism:"Ligam-se ao receptor de glicocorticoide → ↓ transcrição de citocinas pró-inflamatórias → ↓ inflamação eosinofílica e hiper-reatividade brônquica.",use:"Base do tratamento de manutenção da asma; também em DPOC com exacerbações frequentes/eosinofilia.",ae:"Candidíase oral, rouquidão (enxaguar a boca). Efeitos sistêmicos raros em doses habituais."},
+{term:"Anticolinérgicos Inalatórios (Brometo de Ipratrópio, Tiotrópio)",classe:"Antagonistas muscarínicos",mechanism:"Bloqueiam receptores M3 no músculo liso brônquico → broncodilatação e ↓ secreção de muco.",use:"DPOC (manutenção com LAMA); crise de asma (ipratrópio associado ao SABA).",ae:"Boca seca, retenção urinária, piora de glaucoma de ângulo fechado (nebulização)."},
+{term:"Corticoides Sistêmicos (Prednisona, Metilprednisolona, Hidrocortisona)",classe:"Glicocorticoides sistêmicos",mechanism:"Potente efeito anti-inflamatório e imunossupressor via receptor genômico e efeitos rápidos não genômicos.",use:"Exacerbação de asma/DPOC, sepse (doses baixas em choque refratário), anafilaxia, doenças autoimunes, edema cerebral.",ae:"Hiperglicemia, infecções, osteoporose, supressão do eixo HHA, miopatia, alterações psiquiátricas. Uso prolongado exige desmame."},
+{term:"Teofilina / Aminofilina",classe:"Metilxantinas",mechanism:"Inibição da fosfodiesterase → ↑ AMPc; antagonismo de adenosina. Broncodilatação e efeito diafragmático.",use:"DPOC/asma refratários (uso limitado por janela terapêutica estreita).",ae:"Taquicardia, convulsões, náuseas. Muitas interações (CYP1A2). Monitorar nível sérico."}
+],
+"Endocrinologia e Diabetes": [
+{term:"Insulina (Rápida, Regular, NPH, Glargina, Degludeca)",classe:"Hormônio hipoglicemiante",mechanism:"Liga-se ao receptor de insulina → translocação de GLUT4 → captação de glicose; inibe lipólise e cetogênese; promove síntese proteica.",use:"DM1 (essencial), DM2 (quando necessário), CAD/EHH (IV), gestação, estresse cirúrgico.",ae:"Hipoglicemia, ganho de peso, lipodistrofia no local da aplicação."},
+{term:"Metformina",classe:"Biguanida",mechanism:"↓ produção hepática de glicose (inibe gluconeogênese); ↑ sensibilidade periférica à insulina; efeito leve na absorção intestinal de glicose.",use:"Primeira linha no DM2 (exceto contraindicações). Também em SOP e pré-diabetes.",ae:"Desconforto GI, acidose láctica (rara; risco em IR, hipóxia, alcoolismo). Suspender em contraste iodado / IR aguda."},
+{term:"Inibidores de SGLT2 (Dapagliflozina, Empagliflozina)",classe:"Inibidores do cotransportador sódio-glicose 2",mechanism:"Bloqueiam a reabsorção de glicose no túbulo proximal → glicosúria → ↓ glicemia, perda calórica e leve diurese. Benefício cardiovascular e renal independente da glicemia.",use:"DM2 com alto risco CV ou DRC/IC; IC com FE reduzida (mesmo sem diabetes).",ae:"Infecções geniturinárias, desidratação, cetoacidose euglicêmica (rara), risco de amputação (canagliflozina — dados antigos)."},
+{term:"Agonistas de GLP-1 (Semaglutida, Liraglutida, Dulaglutida)",classe:"Análogos do peptídeo semelhante ao glucagon-1",mechanism:"Mimetizam GLP-1 → ↑ secreção de insulina glicose-dependente, ↓ glucagon, retardo do esvaziamento gástrico e saciedade → ↓ peso e glicemia.",use:"DM2 (especialmente com obesidade ou risco CV), obesidade.",ae:"Náuseas, vômitos, risco de pancreatite (raro). Contraindicados em história de CMT ou MEN2."},
+{term:"Sulfonilureias (Glibenclamida, Gliclazida, Glimepirida)",classe:"Secretagogos de insulina",mechanism:"Fecham canais de K+ ATP-dependentes na célula β → despolarização → influxo de Ca²+ → liberação de insulina.",use:"DM2 quando metformina insuficiente ou não tolerada (menos usados hoje por hipoglicemia e ganho de peso).",ae:"Hipoglicemia (principalmente glibenclamida), ganho de peso."},
+{term:"Levotiroxina",classe:"Hormônio tireoidiano (T4 sintético)",mechanism:"Repõe T4 → convertido perifericamente em T3 → normaliza o metabolismo basal e as funções dependentes de hormônio tireoidiano.",use:"Hipotireoidismo (Hashimoto, pós-tireoidectomia, central).",ae:"Superdosagem: sintomas de hipertireoidismo. Interações com ferro, cálcio, IBP (tomar em jejum)."},
+{term:"Metimazol / Propiltiouracil (PTU)",classe:"Antitireoidianos (tionamidas)",mechanism:"Inibem a tireoperoxidase → ↓ síntese de T3/T4. PTU também inibe a conversão periférica de T4 em T3.",use:"Hipertireoidismo (Graves, preparo cirúrgico/radioiodo). PTU preferido no 1º trimestre da gestação.",ae:"Agranulocitose (raro mas grave), hepatotoxicidade (mais PTU), rash, artralgia."}
+],
+"Nefrologia e Eletrólitos": [
+{term:"Bicarbonato de Sódio",classe:"Alcalinizante",mechanism:"Fornece HCO₃⁻ → tampona o excesso de H+ → eleva o pH em acidose metabólica grave.",use:"Acidose metabólica grave (pH muito baixo), hipercalemia (desloca K+), intoxicação por tricíclicos (alcalinização).",ae:"Sobrecarga de volume, hipernatremia, alcalose, hipocalcemia ionizada."},
+{term:"Gluconato / Cloreto de Cálcio",classe:"Sais de cálcio",mechanism:"Estabilizam a membrana cardíaca na hipercalemia (antagonizam o efeito do K+ no potencial de repouso).",use:"Hipercalemia com alterações no ECG (proteção miocárdica imediata). Não reduz o K+ sérico.",ae:"Extravasamento (necrose com cloreto). Não misturar com bicarbonato (precipita)."},
+{term:"Insulina + Glicose (na hipercalemia)",classe:"Deslocadores de potássio",mechanism:"Insulina estimula a Na+/K+ ATPase → entrada de K+ para o interior celular. Glicose previne hipoglicemia.",use:"Hipercalemia aguda (efeito temporário enquanto se promove eliminação).",ae:"Hipoglicemia se a glicose for insuficiente."},
+{term:"Resinas de Troca Iônica (Poliestirenossulfonato de Cálcio / Sódio)",classe:"Quelantes de potássio intestinais",mechanism:"Trocam Ca²+ ou Na+ por K+ no lúmen intestinal → eliminação fecal de K+.",use:"Hipercalemia (efeito mais lento; não para emergência isolada).",ae:"Constipação, necrose intestinal (raro; risco com sorbitol)."},
+{term:"Desmopressina (DDAVP)",classe:"Análogo da vasopressina (V2)",mechanism:"Estimula receptores V2 → inserção de aquaporinas no túbulo coletor → reabsorção de água; também libera fator de von Willebrand.",use:"Diabetes insipidus central, enurese, hemofilia A leve / von Willebrand (liberação de FvW).",ae:"Hiponatremia por retenção hídrica."}
+],
+"Gastroenterologia e Hepatologia": [
+{term:"Inibidores da Bomba de Prótons — IBP (Omeprazol, Pantoprazol, Esomeprazol)",classe:"Inibidores da H+/K+ ATPase",mechanism:"Bloqueio irreversível da bomba de prótons da célula parietal → ↓ secreção ácida gástrica.",use:"Úlcera péptica, DRGE, erradicação de H. pylori (associado a antibióticos), profilaxia de úlcera por AINE, HDA.",ae:"Cefaleia, diarreia. Uso prolongado: hipomagnesemia, risco de fraturas, infecções (C. difficile, pneumonia)."},
+{term:"Antagonistas H2 (Ranitidina, Famotidina)",classe:"Bloqueadores do receptor H2 de histamina",mechanism:"Bloqueiam o receptor H2 na célula parietal → ↓ secreção ácida (menos potentes que IBP).",use:"DRGE leve, úlcera, profilaxia de úlcera de estresse (quando IBP não disponível).",ae:"Tolerância com uso contínuo. Ranitidina: alertas de impurezas (NDMA) em alguns países."},
+{term:"Lactulose",classe:"Dissacarídeo osmótico / acidificante colônico",mechanism:"Metabolizada por bactérias colônicas → ácidos orgânicos → acidificação do lúmen → conversão de NH₃ em NH₄+ (não absorvido) + efeito osmótico (laxativo).",use:"Encefalopatia hepática, constipação.",ae:"Flatulência, diarreia, desconforto abdominal."},
+{term:"Octreotida",classe:"Análogo da somatostatina",mechanism:"Inibe a liberação de hormônios gastrointestinais e reduz o fluxo esplâncnico → ↓ pressão portal e secreções.",use:"Hemorragia varicosa (adjuvante), tumores neuroendócrinos, fístulas.",ae:"Náuseas, esteatorreia, cálculos biliares (uso prolongado)."},
+{term:"Noradrenalina / Vasopressores na Cirrose",classe:"Vasopressores",mechanism:"Agonismo α1 → vasoconstricção → ↑ PA e, em contextos específicos, redistribuição de fluxo.",use:"Choque séptico; em cirrose com PBE ou síndrome hepatorrenal (terlipressina/noradrenalina + albumina).",ae:"Isquemia periférica, arritmias."}
+],
+"Infectologia e Antimicrobianos": [
+{term:"Penicilinas (Cristalina, Ampicilina, Amoxicilina, Oxacilina)",classe:"Betalactâmicos — penicilinas",mechanism:"Inibem a síntese da parede celular bacteriana (ligação às PBPs) → lise bacteriana. Bactericidas.",use:"Infecções estreptocócicas, sifilis (penicilina G), otite/sinusite (amoxicilina), estafilococo sensível (oxacilina).",ae:"Alergia (rash a anafilaxia), diarreia, convulsões em doses altas com IR."},
+{term:"Cefalosporinas (Cefazolina, Ceftriaxona, Cefepime)",classe:"Betalactâmicos — cefalosporinas",mechanism:"Mesmo mecanismo das penicilinas (PBPs). Espectro varia por geração.",use:"Profilaxia cirúrgica (1ª gen), meningite/pneumonia/ITU (ceftriaxona), Pseudomonas (cefepime).",ae:"Alergia cruzada com penicilinas (baixa), diarreia, precipitação com cálcio (ceftriaxona em RN)."},
+{term:"Vancomicina",classe:"Glicopeptídeo",mechanism:"Inibe a síntese da parede celular (liga-se ao D-Ala-D-Ala) → bactericida em Gram-positivos.",use:"MRSA, enterococo (quando sensível), colite por C. difficile (oral), alergia a betalactâmicos em infecções graves por Gram+.",ae:"Nefrotoxicidade, ototoxicidade, red man syndrome (infusão rápida). Monitorar nível (vale)."},
+{term:"Aminoglicosídeos (Gentamicina, Amicacina)",classe:"Inibidores da síntese proteica (30S)",mechanism:"Ligam-se à subunidade 30S → leitura errônea do mRNA → proteínas defeituosas. Bactericidas.",use:"Bacilos Gram-negativos graves, sinergia em endocardite enterocócica, profilaxia em urologia.",ae:"Nefrotoxicidade, ototoxicidade (irreversível). Monitorar nível e função renal."},
+{term:"Quinolonas (Ciprofloxacino, Levofloxacino)",classe:"Inibidores da DNA girase / topoisomerase IV",mechanism:"Inibem enzimas essenciais à replicação do DNA bacteriano → bactericidas.",use:"ITU complicada, infecções por Pseudomonas, pneumonia (levofloxacino), diarréia do viajante.",ae:"Tendinopatia/ruptura de tendão, prolongamento de QT, C. difficile, toxicidade em cartilagem (evitar em crianças)."},
+{term:"Macrolídeos (Azitromicina, Claritromicina)",classe:"Inibidores da síntese proteica (50S)",mechanism:"Ligam-se à subunidade 50S → bloqueio da elongação da cadeia peptídica. Bacteriostáticos.",use:"Pneumonia atípica, infecções de vias aéreas, H. pylori (claritromicina), DST (azitromicina).",ae:"GI, prolongamento de QT, interações (CYP3A4 — claritromicina)."},
+{term:"Metronidazol",classe:"Nitroimidazol",mechanism:"Em anaeróbios e protozoários, é reduzido a metabólitos tóxicos que danificam o DNA.",use:"Anaeróbios, C. difficile, amebíase, giardíase, tricomoníase, H. pylori, vaginose.",ae:"Sabor metálico, efeito dissulfiram com álcool, neuropatia (uso prolongado)."},
+{term:"Antivirais — Oseltamivir / Aciclovir / Tenofovir",classe:"Antivirais",mechanism:"Oseltamivir: inibe neuraminidase do influenza. Aciclovir: inibe DNA polimerase viral (HSV/VZV). Tenofovir: análogo nucleotídeo, inibe transcriptase reversa (HIV/HBV).",use:"Influenza, herpes/zoster, HIV e hepatite B.",ae:"Oseltamivir: náuseas. Aciclovir: IR se desidratado. Tenofovir: nefrotoxicidade, redução de densidade óssea."},
+{term:"Antifúngicos (Fluconazol, Anfotericina B)",classe:"Antifúngicos",mechanism:"Fluconazol: inibe síntese de ergosterol (membrana). Anfotericina B: liga-se ao ergosterol → poros na membrana (fungicida).",use:"Candidíase, criptococose, aspergilose (outros azóis), fungos sistêmicos graves (anfotericina).",ae:"Fluconazol: interações CYP, hepatotoxicidade. Anfotericina: nefrotoxicidade, febre/calafrios na infusão."}
+],
+"Neurologia e Psiquiatria": [
+{term:"Benzodiazepínicos (Diazepam, Midazolam, Clonazepam, Lorazepam)",classe:"Moduladores alostéricos do receptor GABA-A",mechanism:"Aumentam a frequência de abertura do canal de Cl⁻ mediado por GABA → hiperpolarização → sedação, ansiólise, anticonvulsivante e relaxamento muscular.",use:"Status epilepticus, ansiedade, sedação, abstinência alcoólica, insônia (curto prazo).",ae:"Sedação, dependência, amnésia, depressão respiratória (especialmente com opioides). Antídoto: flumazenil."},
+{term:"Fenitoína / Fenobarbital / Ácido Valproico / Levetiracetam",classe:"Anticonvulsivantes",mechanism:"Fenitoína: bloqueio de canais de Na+. Fenobarbital: potenciação GABA. Valproato: ↑ GABA + bloqueio de Na+. Levetiracetam: liga-se a SV2A (vesículas sinápticas).",use:"Epilepsia (escolha conforme tipo de crise e perfil do paciente). Status: benzodiazepínico + outro agente.",ae:"Fenitoína: hiperplasia gengival, toxicidade dose-dependente. Valproato: hepatotoxicidade, teratogenicidade. Levetiracetam: alterações comportamentais."},
+{term:"ISRS (Sertralina, Fluoxetina, Escitalopram)",classe:"Inibidores seletivos da recaptação de serotonina",mechanism:"Bloqueiam o transportador de serotonina (SERT) → ↑ serotonina na fenda sináptica.",use:"Depressão, transtornos de ansiedade, TOC, TEPT.",ae:"Náuseas, disfunção sexual, insônia ou sonolência, hiponatremia (idosos). Risco de síndrome serotoninérgica em associações."},
+{term:"Haloperidol / Quetiapina / Olanzapina / Risperidona",classe:"Antipsicóticos (1ª e 2ª geração)",mechanism:"Bloqueio de receptores D2 (e 5-HT2A nos atípicos) → redução de sintomas psicóticos. Atípicos têm menos efeitos extrapiramidais.",use:"Esquizofrenia, mania, agitação psicomotora, delirium (haloperidol em doses baixas).",ae:"Extrapiramidais, discinesia tardia (clássicos); ganho de peso, diabetes, sedação (atípicos). QT prolongado (alguns)."}
+],
+"Analgesia, Anestesia e Anti-inflamatórios": [
+{term:"AINE (Ibuprofeno, Diclofenaco, Cetoprofeno, Cetorolaco)",classe:"Anti-inflamatórios não esteroides (inibidores da COX)",mechanism:"Inibem COX-1 e/ou COX-2 → ↓ prostaglandinas → efeito analgésico, antipirético e anti-inflamatório.",use:"Dor aguda, inflamação, febre, cólica renal, dismenorreia.",ae:"Úlcera/HDA, IR, retenção hídrica, risco CV (alguns). Evitar em IC, DRC, úlcera ativa."},
+{term:"Paracetamol (Acetaminofeno)",classe:"Analgésico e antipirético",mechanism:"Inibição central da COX (mecanismo ainda debatido) e possível modulação de vias serotoninérgicas/canabinoides. Pouco efeito anti-inflamatório periférico.",use:"Dor leve a moderada, febre. Seguro em gestação e crianças nas doses corretas.",ae:"Hepatotoxicidade em overdose (antídoto: N-acetilcisteína). Dose máxima diária limitada."},
+{term:"Opioides (Morfina, Fentanil, Tramadol, Codeína)",classe:"Agonistas de receptores opioides (μ, κ, δ)",mechanism:"Ativação de receptores μ → inibição da transmissão da dor no SNC e medula; euforia e depressão respiratória.",use:"Dor intensa (pós-operatória, câncer, trauma), edema agudo de pulmão (morfina — ↓ pré-carga e dispneia).",ae:"Depressão respiratória, sedação, constipação, náuseas, dependência. Antídoto: naloxona."},
+{term:"Lidocaína / Bupivacaína",classe:"Anestésicos locais (bloqueadores de canais de Na+)",mechanism:"Bloqueio de canais de Na+ voltagem-dependentes → impedem a propagação do potencial de ação nervoso.",use:"Anestesia local/regional, antiarrítmico (lidocaína IV em arritmias ventriculares).",ae:"Toxicidade sistêmica: convulsões, arritmias, colapso cardiovascular (especialmente bupivacaína)."}
+],
+"Reumatologia e Imunossupressão": [
+{term:"Metotrexato",classe:"Imunossupressor / antimetabólito (antagonista do folato)",mechanism:"Inibe a di-hidrofolato redutase → ↓ síntese de DNA; em doses baixas, efeito anti-inflamatório via adenosina.",use:"Artrite reumatoide (âncora do tratamento), psoríase, algumas neoplasias (doses altas).",ae:"Hepatotoxicidade, mielossupressão, mucosite, pneumonite. Suplementar ácido fólico. Teratogênico."},
+{term:"Corticoides (Prednisona, Prednisolona, Metilprednisolona)",classe:"Glicocorticoides",mechanism:"Efeitos genômicos (transcrição) e não genômicos → potente anti-inflamatório e imunossupressor.",use:"LES, vasculites, AR (agudização), asma/DPOC, rejeição de transplante, edema cerebral, choque séptico refratário (dose baixa).",ae:"Ver seção de pneumologia — hiperglicemia, infecções, osteoporose, supressão adrenal."},
+{term:"Colchicina",classe:"Anti-inflamatório (inibe migração de neutrófilos)",mechanism:"Liga-se à tubulina → inibe polimerização de microtúbulos → ↓ quimiotaxia e degranulação de neutrófilos.",use:"Crise de gota, profilaxia de gota, febre familiar do Mediterrâneo, pericardite.",ae:"Diarreia, miopatia, toxicidade medular (IR, interações com inibidores de CYP3A4/P-gp)."},
+{term:"Alopurinol / Febuxostate",classe:"Inibidores da xantina oxidase",mechanism:"Inibem a xantina oxidase → ↓ formação de ácido úrico.",use:"Profilaxia de gota (após resolução da crise), hiperuricemia por lise tumoral.",ae:"Rash, síndrome de hipersensibilidade (HLA-B*5801), hepatotoxicidade. Não iniciar durante crise aguda de gota sem colchicina/AINE."}
+],
+"Obstetrícia e Emergências": [
+{term:"Ocitocina",classe:"Hormônio uterotônico",mechanism:"Estimula receptores de ocitocina no miométrio → contrações uterinas.",use:"Indução/condução do parto, prevenção e tratamento de hemorragia pós-parto (atonia).",ae:"Hiperestimulação uterina, hiponatremia (efeito ADH-like em doses altas), hipotensão se bolus rápido."},
+{term:"Misoprostol",classe:"Análogo de prostaglandina E1",mechanism:"Estimula contrações uterinas e amadurecimento cervical; protege mucosa gástrica (uso GI).",use:"Hemorragia pós-parto, indução do parto, abortamento medicamentoso, profilaxia de úlcera por AINE.",ae:"Náuseas, diarreia, febre, hiperestimulação uterina."},
+{term:"Sulfato de Magnésio",classe:"Anticonvulsivante / tocolítico",mechanism:"Bloqueio de canais de Ca²+ e efeito estabilizador de membrana; vasodilatação cerebral.",use:"Prevenção e tratamento de convulsões na pré-eclâmpsia/eclâmpsia; neuroproteção fetal em prematuridade iminente.",ae:"Depressão respiratória, hiporreflexia, toxicidade (antídoto: gluconato de cálcio). Monitorar reflexos e diurese."},
+{term:"Adrenalina (Epinefrina)",classe:"Catecolamina (agonista α e β)",mechanism:"α1: vasoconstricção; β1: ↑ FC e contratilidade; β2: broncodilatação e vasodilatação muscular.",use:"Anafilaxia (IM), PCR (IV), choque, crise asmática grave (nebulizada/IM).",ae:"Taquicardia, hipertensão, arritmias, isquemia miocárdica."},
+{term:"Noradrenalina",classe:"Vasopressor (agonista α1 > β1)",mechanism:"Potente vasoconstricção (α1) com efeito cardíaco moderado → ↑ PA e perfusão de órgãos em choque vasodilatado.",use:"Choque séptico (primeira linha), outros choques vasodilatados.",ae:"Isquemia periférica, arritmias, necrose se extravasamento (tratar com fentolamina)."}
+],
+"Princípios Gerais e Emergências Tóxicas": [
+{term:"N-Acetilcisteína",classe:"Antídoto / mucolítico",mechanism:"Doador de grupos sulfidrila → repõe glutationa → detoxifica o metabólito tóxico do paracetamol (NAPQI).",use:"Intoxicação por paracetamol (mesmo tardiamente pode beneficiar); mucolítico em algumas situações.",ae:"Náuseas, reações anafilactoides na forma IV (infusão lenta)."},
+{term:"Naloxona",classe:"Antagonista opioide puro",mechanism:"Antagonismo competitivo dos receptores μ → reverte depressão respiratória e sedação por opioides.",use:"Overdose de opioides, depressão respiratória pós-operatória.",ae:"Precipita abstinência em dependentes. Meia-vida curta (pode precisar de reinjeção ou infusão)."},
+{term:"Flumazenil",classe:"Antagonista benzodiazepínico",mechanism:"Antagonismo competitivo no sítio de benzodiazepínicos do receptor GABA-A.",use:"Reversão de sedação por benzodiazepínicos (cuidado em usuários crônicos e misturas com tricíclicos).",ae:"Convulsões (em dependentes ou coingestão de proconvulsivantes)."},
+{term:"Atropina",classe:"Antagonista muscarínico",mechanism:"Bloqueio de receptores muscarínicos → ↑ FC, ↓ secreções, broncodilatação, midríase.",use:"Bradicardia sintomática, intoxicação por organofosforados/carbamatos, pré-medicação anestésica.",ae:"Boca seca, taquicardia, retenção urinária, delírio (doses altas), midríase."},
+{term:"Carvão Ativado",classe:"Adsorvente gastrointestinal",mechanism:"Alta superfície de adsorção → liga toxinas no lúmen GI e reduz absorção sistêmica.",use:"Intoxicações agudas por via oral (dentro de 1–2 h, substâncias adsorvíveis).",ae:"Aspiração (proteger via aérea), constipação, não adsorve metais, álcoois, ácidos/álcalis fortes."}
+]
+};
+
+let total = 0;
+Object.values(DATA).forEach(a => total += a.length);
+
+const results = document.getElementById('results');
+const search = document.getElementById('search');
+const stats = document.getElementById('stats');
+const themeBtn = document.getElementById('themeBtn');
+
+function render(filter = '') {
+  const q = filter.toLowerCase().trim();
+  results.innerHTML = '';
+  let shown = 0;
+  Object.keys(DATA).sort((a,b) => a.localeCompare(b)).forEach(cat => {
+    const terms = DATA[cat].filter(t => {
+      if (!q) return true;
+      const blob = (t.term + ' ' + t.classe + ' ' + t.mechanism + ' ' + t.use + ' ' + t.ae).toLowerCase();
+      return blob.includes(q);
+    }).sort((a,b) => a.term.localeCompare(b.term));
+    if (!terms.length) return;
+    shown += terms.length;
+    const d = document.createElement('details');
+    d.className = 'cat';
+    if (q) d.open = true;
+    d.innerHTML = `<summary>${cat} <span class="badge">${terms.length}</span></summary><div class="cat-body"></div>`;
+    const body = d.querySelector('.cat-body');
+    terms.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'term';
+      div.innerHTML = `<h3>${t.term}</h3>
+        <div class="lbl">Classe</div><p>${t.classe}</p>
+        <div class="mech"><div class="lbl">Mecanismo de ação</div>${t.mechanism}</div>
+        <div class="lbl">Uso clínico</div><p class="use">${t.use}</p>
+        <p class="ae"><strong>Efeitos adversos / cuidados:</strong> ${t.ae}</p>`;
+      body.appendChild(div);
+    });
+    results.appendChild(d);
+  });
+  if (!shown) results.innerHTML = `<div class="empty">Nenhum resultado para “${filter}”</div>`;
+  stats.innerHTML = `<span class="chip">${Object.keys(DATA).length} áreas</span><span class="chip">${total} fármacos/classes</span>${q ? `<span class="chip">${shown} resultados</span>` : ''}`;
+}
+
+search.addEventListener('input', () => render(search.value));
+if (localStorage.getItem('pq-pharm-theme') === 'dark') {
+  document.body.classList.add('dark');
+  themeBtn.textContent = '☀️';
+}
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const dark = document.body.classList.contains('dark');
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('pq-pharm-theme', dark ? 'dark' : 'light');
+});
+render();
+</script>
+</body>
+</html>

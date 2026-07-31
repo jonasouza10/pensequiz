@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PenseQuiz Interações Medicamentosas</title>
+<meta name="theme-color" content="#b45309">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fffbeb;--surface:#fff;--surface2:#fffbeb;--text:#1c1917;--muted:#78716c;--primary:#b45309;--primary-h:#d97706;--soft:#fef3c7;--accent:#f59e0b;--border:#fde68a;--danger:#dc2626;--danger-bg:#fef2f2;--warn:#ca8a04;--ok:#16a34a;--shadow:0 4px 20px rgba(120,53,15,.08);--r:14px}
+body.dark{--bg:#1c1410;--surface:#292016;--surface2:#1f1812;--text:#fef3c7;--muted:#a8a29e;--primary:#fbbf24;--primary-h:#fcd34d;--soft:#422006;--accent:#f59e0b;--border:#422006;--danger:#f87171;--danger-bg:#450a0a;--warn:#fbbf24;--ok:#4ade80;--shadow:0 4px 20px rgba(0,0,0,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.65;transition:background .3s,color .3s}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.4rem;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.7rem}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem}
+.logo h1{font-size:1.12rem;font-weight:700;letter-spacing:-.02em}
+.logo span{font-size:.7rem;color:var(--muted);display:block;font-weight:500}
+.btn-icon{width:40px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s}
+.btn-icon:hover{background:var(--soft);border-color:var(--primary);color:var(--primary)}
+main{max-width:980px;margin:0 auto;padding:1.4rem 1.2rem 3rem}
+.search-wrap{position:relative;margin-bottom:1.4rem}
+.search-wrap input{width:100%;padding:.95rem 1.2rem .95rem 3.1rem;font-size:1.02rem;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);outline:none;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent)}
+.search-icon{position:absolute;left:1.05rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1.15rem;pointer-events:none}
+.stats{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.chip{background:var(--soft);color:var(--primary);padding:.3rem .75rem;border-radius:999px;font-size:.78rem;font-weight:600}
+.cat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--shadow)}
+.cat summary{padding:1rem 1.25rem;font-weight:600;font-size:1.02rem;cursor:pointer;list-style:none;display:flex;align-items:center;gap:.7rem;user-select:none;background:var(--surface2);transition:background .2s}
+.cat summary::-webkit-details-marker{display:none}
+.cat summary::before{content:'';width:7px;height:7px;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:rotate(-45deg);transition:transform .25s;flex-shrink:0}
+.cat[open] summary::before{transform:rotate(45deg)}
+.cat summary:hover{background:var(--soft)}
+.badge{margin-left:auto;background:var(--primary);color:#fff;font-size:.68rem;font-weight:600;padding:.18rem .5rem;border-radius:999px}
+.cat-body{padding:.4rem 1.25rem 1.15rem;border-top:1px solid var(--border)}
+.term{padding:1.15rem 0;border-bottom:1px dashed var(--border)}
+.term:last-child{border-bottom:none}
+.term h3{font-size:1.08rem;font-weight:700;color:var(--primary);margin-bottom:.4rem}
+.term .pair{font-size:.9rem;font-weight:600;margin-bottom:.45rem;color:var(--text)}
+.term .lbl{font-weight:600;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;margin:.5rem 0 .15rem}
+.term .box{background:var(--soft);border-left:3px solid var(--primary);padding:.65rem .85rem;border-radius:0 8px 8px 0;margin:.3rem 0;font-size:.9rem}
+.term .risk{display:inline-block;font-size:.72rem;font-weight:700;padding:.15rem .5rem;border-radius:999px;margin-bottom:.4rem}
+.risk-alta{background:var(--danger-bg);color:var(--danger)}
+.risk-moderada{background:var(--soft);color:var(--warn)}
+.risk-baixa{background:#f0fdf4;color:var(--ok)}
+body.dark .risk-baixa{background:#14532d;color:var(--ok)}
+.term p{font-size:.92rem;margin-bottom:.3rem}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+.refs{margin-top:2.2rem;padding:1.4rem;background:var(--surface);border-radius:var(--r);border:1px solid var(--border)}
+.refs h2{font-size:1.1rem;margin-bottom:.9rem;color:var(--primary)}
+.refs ul{list-style:none;display:grid;gap:.4rem}
+.refs li{font-size:.88rem;color:var(--muted);padding-left:1rem;position:relative}
+.refs li::before{content:'▸';position:absolute;left:0;color:var(--primary)}
+.refs .note{margin-top:.9rem;font-size:.8rem;color:var(--muted);font-style:italic}
+footer{text-align:center;padding:1.3rem;font-size:.78rem;color:var(--muted)}
+@media(max-width:600px){header{padding:.75rem 1rem}.logo h1{font-size:1rem}main{padding:1rem .85rem 2.5rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">PQ</div>
+    <div>
+      <h1>PenseQuiz Interações</h1>
+      <span>Interações medicamentosas · Mecanismos · Conduta · Revalida & Hospital</span>
+    </div>
+  </div>
+  <button class="btn-icon" id="themeBtn" title="Tema">🌙</button>
+</header>
+<main>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Buscar fármaco, interação ou mecanismo..." autocomplete="off">
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="results"></div>
+  <section class="refs">
+    <h2>Referências</h2>
+    <ul>
+      <li><strong>Goodman & Gilman</strong> — The Pharmacological Basis of Therapeutics</li>
+      <li><strong>Stockley’s Drug Interactions</strong></li>
+      <li><strong>Lexicomp / Micromedex</strong> — bases de interações</li>
+      <li>ANVISA / bulas · PCDT Ministério da Saúde</li>
+      <li>Katzung — Basic & Clinical Pharmacology</li>
+    </ul>
+    <p class="note">Conteúdo educacional. Sempre consultar base atualizada e avaliar risco/benefício no paciente individual (idade, função renal/hepática, comorbidades).</p>
+  </section>
+</main>
+<footer>PenseQuiz Interações Medicamentosas · Uso didático</footer>
+<script>
+const DATA = {
+"Conceitos e Tipos de Interação": [
+{
+term:"Tipos de interações medicamentosas",
+pair:"Farmacocinética × Farmacodinâmica × Farmacêutica",
+risk:"conceitual",
+mechanism:`Interação farmacocinética: um fármaco altera absorção, distribuição, metabolismo ou excreção do outro (muda a concentração no alvo).
+
+Interação farmacodinâmica: os efeitos se somam, se opõem ou se potencializam no mesmo receptor/via ou em vias paralelas (sem necessariamente mudar a concentração).
+
+Interação farmacêutica (incompatibilidade): reação físico-química fora do organismo (mesmo equipo, seringa ou solução) — precipitação, inativação.`,
+conduct:"Sempre classificar o tipo para prever se o problema é dose/nível sérico ou efeito no receptor. Em compatibilidade IV, consultar tabela de incompatibilidade e não misturar sem evidência.",
+detail:"Exemplos clássicos: varfarina + antibiótico (cinética + flora); betabloqueador + verapamil (dinâmica no nó AV); ceftriaxona + cálcio IV (farmacêutica)."
+},
+{
+term:"Indução e inibição enzimática (CYP450)",
+pair:"Indutores vs inibidores do citocromo P450",
+risk:"alta",
+mechanism:`Indutores (ex.: rifampicina, carbamazepina, fenitoína, erva-de-são-joão): aumentam a expressão de CYP → ↑ metabolismo do substrato → ↓ efeito (ou ↑ efeito se for pró-fármaco).
+
+Inibidores (ex.: claritromicina, cetoconazol, ritonavir, fluoxetina, suco de grapefruit): diminuem a atividade da CYP → ↑ concentração do substrato → risco de toxicidade.
+
+Principais isoformas: CYP3A4 (maioria dos fármacos), CYP2C9 (varfarina, AINE), CYP2C19 (clopidogrel, IBP), CYP2D6 (betabloqueadores, antidepressivos, codeína).`,
+conduct:"Ao iniciar indutor/inibidor potente, revisar a lista de medicamentos e ajustar doses ou trocar. Em substratos de margem estreita (varfarina, digoxina, imunossupressores, anticonvulsivantes), monitorar nível ou INR.",
+detail:"Rifampicina pode reduzir drasticamente a eficácia de anticoncepcionais orais e de muitos antirretrovirais. Clopidogrel depende de CYP2C19 para ativação — inibidores (omeprazol, esomeprazol) podem reduzir o efeito antiplaquetário."
+},
+{
+term:"Deslocamento de ligação proteica",
+pair:"Fármacos altamente ligados à albumina",
+risk:"moderada",
+mechanism:`Fármacos com alta ligação à albumina (>90%) podem ser deslocados por outro ácido fraco com maior afinidade → ↑ fração livre temporariamente.
+
+Clinicamente relevante sobretudo se o fármaco deslocado tiver: (1) alta ligação, (2) volume de distribuição pequeno e (3) margem terapêutica estreita (ex.: varfarina, fenitoína).
+
+Na prática, o aumento da fração livre costuma ser compensado por maior depuração; o risco maior é em associações agudas ou em hipoalbuminemia.`,
+conduct:"Monitorar INR ao associar AINE, sulfametoxazol ou outros deslocadores à varfarina. Na fenitoína, interpretar nível total com cautela se a albumina estiver baixa (usar nível livre ou correção).",
+detail:"Mais importante que o deslocamento isolado costuma ser a inibição do metabolismo associada (ex.: AINE + varfarina: deslocamento + antiagregação + possível inibição)."
+},
+{
+term:"Interações na absorção",
+pair:"Quelação, pH gástrico, motilidade e microbiota",
+risk:"moderada",
+mechanism:`Quelação: íons (Ca²+, Fe²+, Mg²+, Al³+) formam complexos insolúveis com quinolonas, tetraciclinas e bifosfonatos → ↓ absorção.
+
+pH: IBP e antiácidos elevam o pH gástrico → podem ↓ absorção de fármacos que precisam de meio ácido (cetoconazol, atazanavir, alguns ferro).
+
+Motilidade: pró-cinéticos podem ↓ absorção de fármacos de liberação prolongada; opioides e anticolinérgicos retardam o esvaziamento.
+
+Microbiota: antibióticos reduzem bactérias que reciclam estrogênios (anticoncepcionais) ou que ativam/inativam fármacos (digoxina, em menor grau).`,
+conduct:"Separar quinolonas/tetraciclinas de laticínios, ferro e antiácidos (2 h antes ou 4–6 h depois). Revisar IBP com antirretrovirais e antifúngicos azólicos. Orientar horário fixo.",
+detail:"Suco de grapefruit inibe CYP3A4 intestinal e P-gp → ↑ biodisponibilidade de estatinas (sinvastatina, lovastatina), bloqueadores de cálcio e outros substratos de 3A4."
+}
+],
+"Cardiovascular — Interações Críticas": [
+{
+term:"Varfarina + antibióticos / AINE / amiodarona",
+pair:"Varfarina × múltiplos potencializadores de sangramento",
+risk:"alta",
+mechanism:`Antibióticos (especialmente sulfametoxazol-trimetoprima, metronidazol, quinolonas, macrolídeos): inibem CYP2C9 e/ou reduzem vitamina K da microbiota → ↑ INR.
+
+AINE: antiagregação + lesão de mucosa GI + possível deslocamento da varfarina → risco de HDA sem necessariamente grande ↑ do INR.
+
+Amiodarona: inibe CYP2C9 e CYP3A4 → ↑ efeito da varfarina (pode exigir redução de 25–50% da dose).`,
+conduct:"Ao iniciar esses fármacos: monitorar INR em 3–7 dias. Preferir analgésico sem antiagregação (paracetamol em dose moderada). Com amiodarona, reduzir dose de varfarina proativamente e rechecar INR.",
+detail:"Risco máximo em idosos, IR, história de úlcera e INR já no limite superior. Educar sobre sinais de sangramento."
+},
+{
+term:"IECA ou BRA + espironolactona + AINE (tripla whammy)",
+pair:"IECA/BRA × diurético poupador de K+ × AINE",
+risk:"alta",
+mechanism:`IECA/BRA: dilatam a arteríola eferente → ↓ pressão de filtração glomerular (especialmente se a pré-carga estiver baixa).
+
+Diuréticos: reduzem volume e podem ↑ creatinina e K+.
+
+AINE: inibem prostaglandinas diluidoras da arteríola aferente → ↓ fluxo renal.
+
+Os três juntos: alto risco de LRA e hipercalemia grave, sobretudo em idosos e DRC.`,
+conduct:"Evitar a combinação sempre que possível. Se inevitável: hidratação, menor dose de AINE pelo menor tempo, checar creatinina e K+ em 3–7 dias. Preferir paracetamol para dor.",
+detail:"Mesmo IECA/BRA + espironolactona (sem AINE) exige monitorar K+. Em IC, a combinação IECA + espironolactona é terapêutica — mas com vigilância laboratorial."
+},
+{
+term:"Betabloqueador + verapamil ou diltiazem",
+pair:"β-bloqueador × BCC não di-hidropiridínico",
+risk:"alta",
+mechanism:`Ambos deprimem o nó sinusal e a condução AV e têm efeito inotrópico negativo.
+
+Associação: risco de bradicardia grave, BAV e piora de IC sistólica.
+
+Verapamil tem interação adicional por inibição de CYP3A4 e P-gp (↑ nível de alguns betabloqueadores e de digoxina).`,
+conduct:"Evitar associação, especialmente IV. Se necessário (ex.: angina refratária), usar com monitorização e preferir BCC di-hidropiridínico (anlodipino) com betabloqueador.",
+detail:"Carvedilol e metoprolol são substratos de CYP2D6/3A4 — inibidores potentes podem ↑ efeito."
+},
+{
+term:"Digoxina + amiodarona / verapamil / diuréticos",
+pair:"Digoxina × fármacos que ↑ nível ou toxicidade",
+risk:"alta",
+mechanism:`Amiodarona e verapamil: inibem P-gp → ↓ eliminação renal e intestinal da digoxina → ↑ nível sérico (reduzir dose de digoxina em ~50% com amiodarona).
+
+Diuréticos de alça/tiazídicos: causam hipocalemia e hipomagnesemia → aumentam a ligação da digoxina à Na+/K+ ATPase e a automaticidade → toxicidade com nível “normal”.`,
+conduct:"Reduzir dose de digoxina ao iniciar amiodarona; monitorar nível e eletrólitos. Corrigir K+ e Mg²+ agressivamente se houver sinais de toxicidade.",
+detail:"Sinais de toxicidade: náuseas, arritmias (bigeminismo, taquicardia atrial com BAV), xantopsia. Antídoto: Fab antidigoxina."
+},
+{
+term:"Estatinas + inibidores de CYP3A4 / fibratos",
+pair:"Sinvastatina/Lovastatina × claritromicina, cetoconazol, ritonavir, grapefruit; estatinas × genfibrozila",
+risk:"alta",
+mechanism:`Sinvastatina e lovastatina são muito dependentes de CYP3A4. Inibidores potentes → ↑ concentração → risco de miopatia e rabdomiólise.
+
+Atorvastatina também é substrato de 3A4 (menor magnitude). Rosuvastatina e pravastatina têm menos metabolismo por 3A4.
+
+Genfibrozila: inibe OATP e glicuronidação → ↑ estatinas e risco de rabdomiólise (evitar com sinvastatina).`,
+conduct:"Com inibidor potente de 3A4: suspender sinvastatina/lovastatina ou trocar por pravastatina/rosuvastatina. Evitar genfibrozila; se fibrato necessário, preferir fenofibrato e monitorar CK/sintomas musculares.",
+detail:"Orientar o paciente a relatar mialgia, urina escura e fraqueza. Grapefruit em grande quantidade deve ser evitado com sinvastatina."
+},
+{
+term:"Nitratos + inibidores de PDE5 (sildenafila, tadalafila)",
+pair:"Nitroglicerina / isossorbida × sildenafila / tadalafila / vardenafila",
+risk:"alta",
+mechanism:`Nitratos ↑ NO → ↑ GMPc. Inibidores de PDE5 impedem a degradação do GMPc.
+
+Efeito somado: vasodilatação intensa e hipotensão grave, potencialmente fatal (incluindo IAM e síncope).`,
+conduct:"Contraindicação absoluta. Respeitar intervalo: ≥24 h após sildenafila, ≥48 h após tadalafila (conforme bula e função renal/hepática). Em dor torácica no PS, perguntar sempre sobre uso recente de PDE5 antes de nitrato.",
+detail:"Se hipotensão ocorrer: Trendelenburg, volume, vasopressores se necessário. Não há antídoto específico."
+}
+],
+"Antimicrobianos e Interações": [
+{
+term:"Claritromicina / Eritromicina + substratos de CYP3A4",
+pair:"Macrolídeos inibidores × estatinas, colchicina, carbamazepina, midazolam",
+risk:"alta",
+mechanism:`Claritromicina e eritromicina inibem CYP3A4 e P-gp → ↑ níveis de vários fármacos.
+
+Azitromicina inibe pouco a CYP3A4 → perfil de interação mais seguro nesse aspecto.`,
+conduct:"Preferir azitromicina quando o paciente usa sinvastatina, colchicina ou outros substratos de 3A4. Se usar claritromicina, suspender temporariamente a estatina ou ajustar doses e monitorar toxicidade.",
+detail:"Colchicina + claritromicina em IR pode ser fatal (toxicidade neuromuscular e medular). Carbamazepina pode atingir níveis tóxicos."
+},
+{
+term:"Metronidazol + álcool / varfarina",
+pair:"Metronidazol × etanol; metronidazol × varfarina",
+risk:"moderada",
+mechanism:`Com álcool: efeito tipo dissulfiram (inibe aldeído desidrogenase) → rubor, náuseas, taquicardia, hipotensão.
+
+Com varfarina: inibição do metabolismo → ↑ INR e risco de sangramento.`,
+conduct:"Orientar abstinência de álcool durante o uso e até 48–72 h após. Monitorar INR se o paciente estiver anticoagulado.",
+detail:"Incluir xaropes e soluções que contenham álcool na orientação."
+},
+{
+term:"Rifampicina — indutor potente",
+pair:"Rifampicina × anticoncepcionais, varfarina, antirretrovirais, corticoides, anticonvulsivantes",
+risk:"alta",
+mechanism:`Indução forte de CYP3A4, CYP2C9, CYP2C19 e P-gp → ↓ concentração de dezenas de fármacos → falha terapêutica (gravidez indesejada, trombose, rejeição de enxerto, crise convulsiva).`,
+conduct:"Revisar toda a prescrição ao iniciar rifampicina. Anticoncepção: método de barreira adicional. Aumentar dose de varfarina e monitorar INR de perto. Em HIV, escolher esquemas compatíveis com a diretriz.",
+detail:"A indução demora dias a 1–2 semanas para o máximo e persiste 1–2 semanas após suspender."
+},
+{
+term:"Linezolida + ISRS / IMAO / meperidina",
+pair:"Linezolida × fármacos serotoninérgicos",
+risk:"alta",
+mechanism:`Linezolida tem atividade de inibição fraca da MAO → em associação com ISRS, IRSN, tramadol, meperidina ou IMAO → risco de síndrome serotoninérgica (hipertermia, rigidez, clônus, instabilidade autonômica, alteração mental).`,
+conduct:"Evitar combinação. Se inevitável (infecção grave por Gram+ resistente): suspender o serotoninérgico se possível, observar de perto e educar sobre sintomas. Não usar com IMAO.",
+detail:"Síndrome serotoninérgica é emergência; tratamento de suporte e ciproheptadina em casos selecionados."
+}
+],
+"SNC, Analgesia e Psiquiatria": [
+{
+term:"ISRS + tramadol / meperidina / IMAO / outro serotoninérgico",
+pair:"ISRS × fármacos que ↑ serotonina",
+risk:"alta",
+mechanism:`ISRS bloqueiam a recaptação de 5-HT. Tramadol (fraco ISRS + opioide), meperidina, IMAO, triptanos e outros ISRS/IRSN aumentam serotonina por vias diferentes → risco de síndrome serotoninérgica.`,
+conduct:"Evitar IMAO com ISRS (intervalo de washout). Cuidado com tramadol em quem já usa ISRS. Preferir outro analgésico quando possível.",
+detail:"Sinais: agitação, hiperreflexia, clônus induzível, febre, diarreia, midríase. Início rápido (horas)."
+},
+{
+term:"Opioides + benzodiazepínicos / álcool",
+pair:"Morfina, fentanil, codeína × diazepam, clonazepam, álcool",
+risk:"alta",
+mechanism:`Depressão sinérgica do centro respiratório e do nível de consciência. Principal causa de overdose fatal em muitos contextos (uso concomitante de opioide e sedativo).`,
+conduct:"Evitar associação. Se inevitável (ex.: dor + ansiedade grave): menor dose, menor duração, monitorar saturação e frequência respiratória. Naloxona reverte o opioide, não o benzodiazepínico.",
+detail:"Orientar a não misturar com álcool. Em idosos o risco é ainda maior."
+},
+{
+term:"Lítio + AINE / diuréticos tiazídicos / IECA",
+pair:"Lítio × fármacos que ↑ retenção de lítio",
+risk:"alta",
+mechanism:`Lítio é eliminado por filtração glomerular e reabsorção no túbulo proximal (compete com Na+).
+
+AINE (exceto sulindaco em alguns dados) e IECA reduzem a filtração e/ou alteram a hemodinâmica renal → ↑ lítio.
+
+Tiazídicos causam depleção de Na+ → ↑ reabsorção proximal de Na+ e de lítio → ↑ nível.`,
+conduct:"Evitar AINE; preferir paracetamol. Se associar, monitorar litemia em poucos dias. Com tiazídico ou IECA: reduzir dose de lítio e monitorar.",
+detail:"Toxicidade: tremor grosseiro, diarreia, confusão, convulsão, coma. Faixa terapêutica estreita (em geral 0,6–1,2 mEq/L)."
+},
+{
+term:"Inibidores de MAO + tiramina / simpaticomiméticos",
+pair:"IMAO (fenelzina, tranilcipromina, moclobemida*) × queijos envelhecidos, embutidos, descongestionantes",
+risk:"alta",
+mechanism:`MAO intestinal e hepática degrada tiramina. Com IMAO, tiramina absorvida provoca liberação de noradrenalina → crise hipertensiva.
+
+Simpaticomiméticos (pseudoefedrina, anfetaminas) potencializam o efeito.`,
+conduct:"Dieta restrita em tiramina com IMAO clássicos. Evitar descongestionantes orais. *Moclobemida (IMAO-A reversível) tem menor risco, mas ainda exige cuidado.",
+detail:"Crise hipertensiva: cefaleia intensa, PA muito elevada — emergência hipertensiva."
+}
+],
+"Endócrino, Diabetes e Tireoide": [
+{
+term:"Insulina ou sulfonilureia + betabloqueador",
+pair:"Hipoglicemiantes × β-bloqueadores",
+risk:"moderada",
+mechanism:`Betabloqueadores (especialmente não seletivos) mascaram sintomas adrenérgicos de hipoglicemia (tremor, taquicardia) e podem piorar a recuperação da glicemia (inibição de glicogenólise β2).
+
+A sudorese costuma ser preservada (sinal útil).`,
+conduct:"Preferir β1-seletivos se necessário. Educar o paciente a reconhecer sudorese e sintomas neuroglicopênicos. Monitorar glicemia com mais atenção ao iniciar o betabloqueador.",
+detail:"Não é contraindicação absoluta — muitos cardiopatas diabéticos usam betabloqueador com benefício líquido."
+},
+{
+term:"Metformina + contraste iodado / IR aguda",
+pair:"Metformina × situações de hipoperfusão ou contraste",
+risk:"moderada",
+mechanism:`Metformina é eliminada pelos rins. Em LRA ou hipóxia, pode acumular e, em teoria, contribuir para acidose láctica (evento raro, mas grave).
+
+O contraste iodado pode precipitar LRA em pacientes de risco.`,
+conduct:"Suspender metformina no dia do contraste em pacientes com TFG reduzida ou risco de LRA; reiniciar após 48 h se a função renal estiver estável. Hidratação adequada.",
+detail:"Protocolos variam; seguir diretriz institucional e TFG basal."
+},
+{
+term:"Levotiroxina + ferro / cálcio / IBP / sucralfato",
+pair:"Levotiroxina × redutores de absorção",
+risk:"moderada",
+mechanism:`Ferro, cálcio, alumínio e sucralfato quelam ou adsorvem a levotiroxina no trato GI → ↓ absorção.
+
+IBP e gastrite atrófica elevam o pH e podem reduzir a dissolução/absorção.`,
+conduct:"Tomar levotiroxina em jejum, 30–60 min antes do café. Separar ferro/cálcio por pelo menos 4 horas. Reavaliar TSH após iniciar IBP crônico se o controle piorar.",
+detail:"Adesão ao horário é a causa mais comum de “falha” aparente da reposição."
+},
+{
+term:"Corticoides + AINE / diuréticos / antidiabéticos",
+pair:"Glicocorticoides × múltiplos",
+risk:"moderada",
+mechanism:`Corticoide + AINE: risco sinérgico de úlcera e HDA.
+
+Corticoide: retenção de Na+ e perda de K+ → potencializa hipocalemia de diuréticos de alça/tiazídicos.
+
+Corticoide: ↑ gliconeogênese e resistência à insulina → descompensa diabetes (pode exigir ↑ insulina ou antidiabético).`,
+conduct:"Proteger o estômago (IBP) se associação com AINE for inevitável. Monitorar K+ e glicemia. Em uso prolongado, prevenção de osteoporose.",
+detail:"Nunca suspender corticoide cronicamente de forma abrupta (insuficiência adrenal)."
+}
+],
+"Gastrointestinal e Absorção": [
+{
+term:"IBP + clopidogrel",
+pair:"Omeprazol/esomeprazol × clopidogrel",
+risk:"moderada",
+mechanism:`Clopidogrel é pró-fármaco ativado em parte por CYP2C19. Omeprazol e esomeprazol inibem CYP2C19 → podem ↓ ativação do clopidogrel → possível redução do efeito antiplaquetário.
+
+Pantoprazol e rabeprazol têm menor interação nesse eixo.`,
+conduct:"Se IBP for necessário com clopidogrel, preferir pantoprazol. Avaliar se o IBP ainda é indicado. Em SCA de alto risco, a dupla antiagregação tem prioridade — a evidência clínica da interação ainda é debatida, mas a precaução é razoável.",
+detail:"Não suspender clopidogrel por causa do IBP sem alternativa."
+},
+{
+term:"Quinolonas ou tetraciclinas + cátions",
+pair:"Cipro/levofloxacino/doxiciclina × Ca, Fe, Mg, Al, antiácidos, sucralfato",
+risk:"moderada",
+mechanism:`Formação de complexos insolúveis no lúmen GI → ↓ biodisponibilidade do antibiótico → risco de falha terapêutica.`,
+conduct:"Administrar o antibiótico 2 h antes ou 4–6 h depois de produtos com cátions. Incluir suplementos e leite na orientação.",
+detail:"Muito comum em idosos polimedicados com carbonato de cálcio e ferro."
+},
+{
+term:"Loperamida / opioides + inibidores de P-gp (em overdose)",
+pair:"Loperamida em abuso × inibidores de P-gp",
+risk:"moderada",
+mechanism:`Loperamida em doses terapêuticas não atravessa bem a BHE (efluxo por P-gp). Em doses abusivas + inibidores de P-gp (ou em overdose massiva) pode causar efeitos opioides centrais e arritmias (bloqueio de canais cardíacos).`,
+conduct:"Alertar sobre abuso. Em intoxicação: suporte, naloxona para depressão respiratória, monitorar ECG.",
+detail:"Interação mais relevante em contexto de uso indevido do que em doses antidiarreicas habituais."
+}
+],
+"Anticoagulação, Antiagregação e Sangramento": [
+{
+term:"AAS + anticoagulante + P2Y12 (terapia tripla)",
+pair:"AAS × clopidogrel/ticagrelor × varfarina ou DOAC",
+risk:"alta",
+mechanism:`Inibição de vias complementares da hemostasia (plaqueta + coagulação) → risco hemorrágico muito elevado, especialmente GI e intracraniano.`,
+conduct:"Usar o menor tempo possível de terapia tripla (protocolos de SCA com indicação de anticoagulação). Preferir esquemas com DOAC em doses estudadas + P2Y12, e AAS só no período inicial conforme diretriz. Proteção gástrica com IBP.",
+detail:"Reavaliar diariamente a necessidade de manter os três."
+},
+{
+term:"DOAC + inibidores/indutores de P-gp e CYP3A4",
+pair:"Rivaroxabana/apixabana × cetoconazol, ritonavir, rifampicina, carbamazepina",
+risk:"alta",
+mechanism:`Rivaroxabana e apixabana: substratos de CYP3A4 e P-gp. Inibidores potentes → ↑ nível e sangramento. Indutores potentes → ↓ nível e trombose.
+
+Dabigatrana: principalmente P-gp e eliminação renal (sem CYP relevante).`,
+conduct:"Evitar associações contraindicadas em bula. Com indutores potentes, considerar varfarina (monitorável) ou outro esquema. Ajustar para função renal.",
+detail:"Sempre checar bula do DOAC específico — as contraindicações variam."
+},
+{
+term:"AAS ou AINE + corticoides + álcool",
+pair:"Gastrolesivos combinados",
+risk:"alta",
+mechanism:`AAS/AINE: inibem prostaglandinas protetoras da mucosa. Corticoides: prejudicam cicatrização e muco. Álcool: irritação direta e varizes/coagulopatia em etilistas.
+
+Risco somado de úlcera e HDA.`,
+conduct:"Evitar. Se AINE + corticoide for indispensável: IBP, menor dose, menor duração, testar H. pylori se indicado.",
+detail:"Idosos e história de úlcera = risco máximo."
+}
+],
+"Interações com Alimentos e Estilo de Vida": [
+{
+term:"Varfarina + vitamina K na dieta",
+pair:"Varfarina × folhas verdes escuras (couve, espinafre, brócolis)",
+risk:"moderada",
+mechanism:`Vitamina K da dieta antagoniza o efeito da varfarina (disponibiliza cofator para a γ-carboxilação dos fatores). Mudança brusca no consumo → oscilação do INR.`,
+conduct:"Não proibir verduras — orientar consumo estável e consistente. Ajustar a dose de varfarina ao padrão alimentar do paciente.",
+detail:"Chás e suplementos de erva-de-são-joão (indutor) e cranberry (possível potencialização) também merecem atenção."
+},
+{
+term:"Inibidores de MAO + alimentos com tiramina",
+pair:"IMAO × queijos curados, salames, vinho tinto, molho shoyu",
+risk:"alta",
+mechanism:`Ver mecanismo em “IMAO + tiramina” na seção de SNC. Crise hipertensiva mediada por liberação de catecolaminas.`,
+conduct:"Lista de restrição alimentar clara e por escrito. Educação sobre medicamentos OTC (descongestionantes).",
+detail:"Crise pode ocorrer 30–60 min após a refeição."
+},
+{
+term:"Álcool + depressores do SNC / metronidazol / hipoglicemiantes",
+pair:"Etanol × múltiplas classes",
+risk:"alta",
+mechanism:`Com benzodiazepínicos e opioides: depressão respiratória sinérgica.
+
+Com metronidazol: reação tipo dissulfiram.
+
+Com insulina/sulfonilureias: risco de hipoglicemia (álcool inibe gluconeogênese) e mascaramento de sintomas.`,
+conduct:"Orientação explícita de abstinência conforme o fármaco. Em etilistas, planejar abstinência e risco de privação (benzodiazepínico protocolado se necessário).",
+detail:"Álcool crônico induz CYP2E1 → pode alterar metabolismo de paracetamol e anestésicos."
+}
+],
+"Populações Especiais e Regras Práticas": [
+{
+term:"Idosos — polifarmácia e interações",
+pair:"Critérios de Beers / STOPP-START",
+risk:"alta",
+mechanism:`Idosos: ↓ TFG, ↓ massa corporal, ↑ sensibilidade a depressores do SNC e anticolinérgicos, múltiplas comorbidades e múltiplos prescritores → risco acumulado de interações e eventos adversos.`,
+conduct:"Revisar a lista a cada consulta. Desprescrever o que não tiver indicação clara. Evitar: AINE crônico, benzodiazepínico de meia-vida longa, anticolinérgicos potentes, associação de psicotrópicos.",
+detail:"Quedas, delírio e LRA são desfechos frequentes de interações nessa faixa etária."
+},
+{
+term:"Gestação e lactação — interações e restrições",
+pair:"Teratógenos e fármacos na amamentação",
+risk:"alta",
+mechanism:`IECA/BRA, varfarina (1º trimestre e perto do parto), metotrexato, retinoides, valproato, misoprostol (em contexto inadequado) — riscos específicos.
+
+Indutores enzimáticos (rifampicina, carbamazepina) reduzem anticoncepcionais — crítico no pós-parto se houver gestação não planejada.`,
+conduct:"Checar categoria e evidência atual antes de prescrever. Preferir fármacos com mais experiência em gestação (ex.: metildopa, labetalol, insulina, heparina/HBPM). Anticoncepção efetiva se o fármaco for teratogênico.",
+detail:"Lactação: avaliar transferência no leite e toxicidade no lactente (ex.: cuidado com opioides, especialmente codeína em metabolizadoras ultrarrápidas de CYP2D6)."
+},
+{
+term:"Regra prática — margem estreita e checklist",
+pair:"Fármacos de índice terapêutico estreito",
+risk:"alta",
+mechanism:`Fármacos em que pequena mudança de concentração causa falha ou toxicidade: varfarina, digoxina, lítio, fenitoína, carbamazepina, ciclosporina/tacrolimus, teofilina, aminoglicosídeos, vancomicina.`,
+conduct:"Antes de adicionar qualquer fármaco: (1) listar tudo que o paciente usa (incluindo fitoterápicos); (2) checar CYP/P-gp e sinergia farmacodinâmica; (3) planejar monitorização (INR, nível sérico, K+, creatinina); (4) educar sobre sinais de alarme.",
+detail:"Fitoterápicos e OTC são os mais esquecidos e frequentemente envolvidos em interações (erva-de-são-joão, Ginkgo, alho em dose alta, AAS oculto em anti-gripais)."
+}
+]
+};
+
+let total = 0;
+Object.values(DATA).forEach(a => total += a.length);
+
+const results = document.getElementById('results');
+const search = document.getElementById('search');
+const stats = document.getElementById('stats');
+const themeBtn = document.getElementById('themeBtn');
+
+function riskClass(r) {
+  if (r === 'alta') return 'risk-alta';
+  if (r === 'moderada') return 'risk-moderada';
+  if (r === 'baixa') return 'risk-baixa';
+  return 'risk-moderada';
+}
+function riskLabel(r) {
+  if (r === 'alta') return 'Risco alto';
+  if (r === 'moderada') return 'Risco moderado';
+  if (r === 'baixa') return 'Risco baixo';
+  if (r === 'conceitual') return 'Conceito';
+  return r;
+}
+
+function render(filter = '') {
+  const q = filter.toLowerCase().trim();
+  results.innerHTML = '';
+  let shown = 0;
+  Object.keys(DATA).sort((a,b) => a.localeCompare(b)).forEach(cat => {
+    const terms = DATA[cat].filter(t => {
+      if (!q) return true;
+      const blob = (t.term + ' ' + t.pair + ' ' + t.mechanism + ' ' + t.conduct + ' ' + t.detail).toLowerCase();
+      return blob.includes(q);
+    });
+    if (!terms.length) return;
+    shown += terms.length;
+    const d = document.createElement('details');
+    d.className = 'cat';
+    if (q) d.open = true;
+    d.innerHTML = `<summary>${cat} <span class="badge">${terms.length}</span></summary><div class="cat-body"></div>`;
+    const body = d.querySelector('.cat-body');
+    terms.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'term';
+      div.innerHTML = `
+        <span class="risk ${riskClass(t.risk)}">${riskLabel(t.risk)}</span>
+        <h3>${t.term}</h3>
+        <div class="pair">${t.pair}</div>
+        <div class="lbl">Mecanismo da interação</div>
+        <div class="box">${t.mechanism.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>')}</div>
+        <div class="lbl">Conduta prática</div>
+        <p>${t.conduct}</p>
+        <div class="lbl">Detalhe clínico</div>
+        <p style="font-size:.88rem;color:var(--muted)">${t.detail}</p>`;
+      body.appendChild(div);
+    });
+    results.appendChild(d);
+  });
+  if (!shown) results.innerHTML = `<div class="empty">Nenhum resultado para “${filter}”</div>`;
+  stats.innerHTML = `<span class="chip">${Object.keys(DATA).length} seções</span><span class="chip">${total} interações</span>${q ? `<span class="chip">${shown} resultados</span>` : ''}`;
+}
+
+search.addEventListener('input', () => render(search.value));
+if (localStorage.getItem('pq-int-theme') === 'dark') {
+  document.body.classList.add('dark');
+  themeBtn.textContent = '☀️';
+}
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const dark = document.body.classList.contains('dark');
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('pq-int-theme', dark ? 'dark' : 'light');
+});
+render();
+</script>
+</body>
+</html>
