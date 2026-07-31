@@ -62,13 +62,8 @@
         <h3 class="text-lg font-bold text-red-800 mb-3">Detalhamento da Pontuação</h3>
         <ul class="list-disc list-inside text-gray-700" id="score-breakdown-list"></ul>
       </div>
-      <button id="new-case" class="mt-8 bg-blue-600 text-white font-semibold px-8 py-4 rounded-xl hover:bg-blue-700 transition duration-300 block mx-auto shadow-lg text-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw inline-block mr-2">
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.76 2.75L3 12Z"/>
-          <path d="M2.9 7.1v5h5"/>
-        </svg>
-        Iniciar Novo Caso
-      </button>
+      <button id="new-case"
+        class="mt-8 bg-red-600 text-white font-semibold px-8 py-4 rounded-xl hover:bg-red-700 transition duration-300 block mx-auto shadow-lg text-lg">🔄 Tentar Novamente</button>
     </div>
 
     <!-- Modal de Início do Jogo -->
@@ -277,7 +272,7 @@
     // BANCO DE CASOS CLÍNICOS ESTRUTURADOS (compatível ENAMED/DCNs)
     // Cada caso tem sintomas, vitais, exames e tratamento coerentes.
     // ============================================================
-    const CASOS_CLINICOS = [
+ const CASOS_CLINICOS = [
       // --- INFECTOLOGIA / PNEUMOLOGIA ---
       {
         area: "Infectologia / Pneumologia",
@@ -5936,6 +5931,8 @@ exames:{
         this.actionLog = [];
         this.diagnosticoJaSubmetido = false;
         this.tratamentoJaSubmetido = false;
+        this.erros = 0;
+        this.maxErros = 3;
 
         this.elements = {
           historico: document.getElementById("historico"),
@@ -6008,7 +6005,10 @@ exames:{
         this.elements.diagnosticoSubmit.addEventListener("click", () => this.submeterDiagnostico());
         this.elements.tratamentoSubmit.addEventListener("click", () => this.submeterTratamento());
         this.elements.quizSubmit.addEventListener("click", () => this.responderQuiz());
-        this.elements.newCase.addEventListener("click", () => this.novoCaso());
+        this.elements.newCase.addEventListener("click", () => {
+          this.erros = 0;
+          this.novoCaso();
+        });
         this.elements.chatInput.addEventListener("keypress", (e) => { if (e.key === "Enter") this.enviarMensagem(); });
         this.elements.quizInput.addEventListener("keypress", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); this.responderQuiz(); } });
         this.elements.difficultySelect.addEventListener("change", (e) => {
@@ -6017,12 +6017,24 @@ exames:{
         });
       }
 
-      showStartModal() {
+      
+      registrarErro(tipo) {
+        this.erros++;
+        this.addFeedbackMessage("Erro", `${tipo} incorreto. Erros: ${this.erros}/${this.maxErros}`, "error");
+        if (this.erros >= this.maxErros || this.saudePaciente <= 0) {
+          this.finalizarJogo("Paciente faleceu", "Você errou todos os procedimentos permitidos.");
+        }
+      }
+
+showStartModal() {
         this.elements.startGameModal.classList.remove("hidden");
         this.elements.gameContent.classList.add("hidden");
       }
 
       startGame() {
+        // Garante que a dificuldade escolhida seja aplicada
+        this.difficulty = this.elements.difficultySelect.value;
+
         this.elements.startGameModal.classList.add("hidden");
         this.elements.gameContent.classList.remove("hidden");
         this.novoCaso();
@@ -6070,6 +6082,21 @@ exames:{
       }
 
       novoCaso() {
+	  
+	  this.jogoFinalizado = false;
+clearInterval(this.timerInterval);
+
+this.saudePaciente = GAME_SETTINGS.initialHealth;
+this.tempoRestante = GAME_SETTINGS.initialTime;
+this.examesSolicitados = [];
+this.quizQuestionGenerated = false;
+this.diagnosticoJaSubmetido = false;
+this.tratamentoJaSubmetido = false;
+
+this.elements.gameOver.classList.add("hidden");
+this.elements.quizSection.classList.add("hidden");
+this.elements.feedbackBox.innerHTML = "";
+        this.erros = 0;
         const difficultySettings = GAME_SETTINGS.difficultyMultipliers[this.difficulty];
         this.saudePaciente = GAME_SETTINGS.initialHealth;
         this.tempoRestante = Math.floor(GAME_SETTINGS.initialTime * difficultySettings.time);
@@ -6361,12 +6388,20 @@ exames:{
           this.saudePaciente -= healthChange;
           this.logAction('Diagnóstico', `Diagnóstico INCORRETO: ${diagnostico}. Perda de saúde: ${healthChange}%`, 0);
           this.addFeedbackMessage("Feedback", `Diagnóstico: Incorreto! "${diagnostico}" não explica adequadamente o quadro. Saúde −${healthChange}%.`, 'error');
-          this.showAlert("Diagnóstico Incorreto!", `Diagnóstico incorreto. A condição do paciente piorou em ${healthChange}%. Você ainda pode tentar o tratamento correto.`, 'error');
-          if (this.saudePaciente <= 0) {
-            this.finalizarJogo("Paciente faleceu! Jogo encerrado.", "O paciente faleceu devido a diagnóstico incorreto e progressão da doença.");
+          this.showAlert("Diagnóstico Incorreto!", `Diagnóstico incorreto. A condição do paciente piorou em ${healthChange}%.`, 'error');
+          this.atualizarInterface();
+
+          // Se diagnóstico e tratamento já foram submetidos e ambos estão errados,
+          // encerra o jogo imediatamente.
+          if (this.tratamentoJaSubmetido) {
+            this.finalizarJogo(
+              "Paciente faleceu",
+              "Você errou o diagnóstico e o tratamento. Tente novamente."
+            );
+            return;
           }
         }
-        this.atualizarInterface();
+
       }
 
       submeterTratamento() {
@@ -6394,11 +6429,19 @@ exames:{
           this.logAction('Tratamento', `Tratamento INCORRETO: ${tratamento}. Perda de saúde: ${healthChange}%`, 0);
           this.addFeedbackMessage("Feedback", `Tratamento: Incorreto! "${tratamento}" não é adequado. Saúde −${healthChange}%.`, 'error');
           this.showAlert("Tratamento Incorreto!", `Tratamento incorreto. A condição do paciente piorou em ${healthChange}%.`, 'error');
-          if (this.saudePaciente <= 0) {
-            this.finalizarJogo("Paciente faleceu! Jogo encerrado.", "O paciente faleceu devido a tratamento incorreto.");
+          this.atualizarInterface();
+
+          // Se diagnóstico e tratamento já foram submetidos e ambos estão errados,
+          // encerra o jogo imediatamente.
+          if (this.diagnosticoJaSubmetido) {
+            this.finalizarJogo(
+              "Paciente faleceu",
+              "Você errou o diagnóstico e o tratamento. Tente novamente."
+            );
+            return;
           }
         }
-        this.atualizarInterface();
+
       }
 
       async generateQuizQuestion() {
@@ -6474,23 +6517,28 @@ exames:{
         this.atualizarInterface();
       }
 
-      finalizarJogo(message, detailMessage) {
-        this.jogoFinalizado = true;
-        clearInterval(this.timerInterval);
-        this.elements.gameOver.classList.remove("hidden");
-        this.elements.gameOverMessage.textContent = message;
-        this.elements.gameOverDetails.innerHTML = `
-          <p class="mb-1"><strong class="text-gray-900">Resultado:</strong> ${detailMessage}</p>
-          <p class="mb-1"><strong class="text-gray-900">Área:</strong> ${this.casoAtual.area}</p>
-          <p class="mb-1"><strong class="text-gray-900">Diagnóstico Correto:</strong> ${this.casoAtual.diagnosticoCorreto}</p>
-          <p class="mb-1"><strong class="text-gray-900">Tratamento Correto:</strong> ${this.casoAtual.tratamentoCorreto}</p>
-          <p class="mb-1"><strong class="text-gray-900">Fisiopatologia:</strong> ${this.casoAtual.fisiopatologia}</p>
-          <p class="mb-1"><strong class="text-gray-900">Referência:</strong> <span class="text-blue-600">${this.casoAtual.referencia}</span></p>
-          <p class="mt-4 text-xl"><strong class="text-gray-900">Pontuação Final:</strong> <span class="text-blue-600 font-bold">${this.pontuacao}</span></p>
-        `;
-        this.renderScoreBreakdown();
-        this.atualizarInterface();
-      }
+     finalizarJogo(message, detailMessage) {
+    this.jogoFinalizado = true;
+    clearInterval(this.timerInterval);
+
+    this.elements.gameOver.classList.remove("hidden");
+
+    this.elements.gameOverMessage.textContent = message;
+
+    this.elements.gameOverDetails.innerHTML = `
+      <p><strong>Resultado:</strong> ${detailMessage}</p>
+      <p><strong>Área:</strong> ${this.casoAtual.area}</p>
+      <p><strong>Diagnóstico Correto:</strong> ${this.casoAtual.diagnosticoCorreto}</p>
+      <p><strong>Tratamento Correto:</strong> ${this.casoAtual.tratamentoCorreto}</p>
+      <p><strong>Pontuação Final:</strong> ${this.pontuacao}</p>
+    `;
+
+    this.renderScoreBreakdown();
+    this.atualizarInterface();
+
+    // Botão reinicia completamente o jogo
+    this.elements.newCase.onclick = () => { this.erros = 0; this.novoCaso(); };
+}
 
       renderScoreBreakdown() {
         const breakdownList = this.elements.scoreBreakdownList;
