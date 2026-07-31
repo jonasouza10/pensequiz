@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PenseQuiz Infectologia</title>
+<meta name="theme-color" content="#047857">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0fdf4;--surface:#fff;--surface2:#ecfdf5;--text:#14532d;--muted:#6b7280;--primary:#047857;--primary-h:#059669;--soft:#d1fae5;--accent:#10b981;--border:#a7f3d0;--danger:#dc2626;--danger-bg:#fef2f2;--shadow:0 4px 20px rgba(6,78,59,.08);--r:14px}
+body.dark{--bg:#0a1f14;--surface:#14291c;--surface2:#0f1f16;--text:#d1fae5;--muted:#9ca3af;--primary:#34d399;--primary-h:#6ee7b7;--soft:#064e3b;--accent:#10b981;--border:#064e3b;--danger:#f87171;--danger-bg:#450a0a;--shadow:0 4px 20px rgba(0,0,0,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.65;transition:background .3s,color .3s}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.4rem;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.7rem}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem}
+.logo h1{font-size:1.15rem;font-weight:700;letter-spacing:-.02em}
+.logo span{font-size:.7rem;color:var(--muted);display:block;font-weight:500}
+.btn-icon{width:40px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s}
+.btn-icon:hover{background:var(--soft);border-color:var(--primary);color:var(--primary)}
+main{max-width:980px;margin:0 auto;padding:1.4rem 1.2rem 3rem}
+.search-wrap{position:relative;margin-bottom:1.4rem}
+.search-wrap input{width:100%;padding:.95rem 1.2rem .95rem 3.1rem;font-size:1.02rem;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);outline:none;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent)}
+.search-icon{position:absolute;left:1.05rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1.15rem;pointer-events:none}
+.stats{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.chip{background:var(--soft);color:var(--primary);padding:.3rem .75rem;border-radius:999px;font-size:.78rem;font-weight:600}
+.cat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--shadow)}
+.cat summary{padding:1rem 1.25rem;font-weight:600;font-size:1.02rem;cursor:pointer;list-style:none;display:flex;align-items:center;gap:.7rem;user-select:none;background:var(--surface2);transition:background .2s}
+.cat summary::-webkit-details-marker{display:none}
+.cat summary::before{content:'';width:7px;height:7px;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:rotate(-45deg);transition:transform .25s;flex-shrink:0}
+.cat[open] summary::before{transform:rotate(45deg)}
+.cat summary:hover{background:var(--soft)}
+.badge{margin-left:auto;background:var(--primary);color:#fff;font-size:.68rem;font-weight:600;padding:.18rem .5rem;border-radius:999px}
+.cat-body{padding:.4rem 1.25rem 1.15rem;border-top:1px solid var(--border)}
+.term{padding:1.15rem 0;border-bottom:1px dashed var(--border)}
+.term:last-child{border-bottom:none}
+.term h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:.35rem}
+.term .lbl{font-weight:600;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;margin:.5rem 0 .12rem}
+.term .box{background:var(--soft);border-left:3px solid var(--primary);padding:.65rem .85rem;border-radius:0 8px 8px 0;margin:.3rem 0;font-size:.9rem}
+.term .tx{background:var(--danger-bg);border-left:3px solid var(--danger);padding:.65rem .85rem;border-radius:0 8px 8px 0;margin:.3rem 0;font-size:.9rem}
+.term p{font-size:.92rem;margin-bottom:.3rem}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+.refs{margin-top:2.2rem;padding:1.4rem;background:var(--surface);border-radius:var(--r);border:1px solid var(--border)}
+.refs h2{font-size:1.1rem;margin-bottom:.9rem;color:var(--primary)}
+.refs ul{list-style:none;display:grid;gap:.4rem}
+.refs li{font-size:.88rem;color:var(--muted);padding-left:1rem;position:relative}
+.refs li::before{content:'▸';position:absolute;left:0;color:var(--primary)}
+.refs .note{margin-top:.9rem;font-size:.8rem;color:var(--muted);font-style:italic}
+footer{text-align:center;padding:1.3rem;font-size:.78rem;color:var(--muted)}
+@media(max-width:600px){header{padding:.75rem 1rem}.logo h1{font-size:1.05rem}main{padding:1rem .85rem 2.5rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">PQ</div>
+    <div>
+      <h1>PenseQuiz Infectologia</h1>
+      <span>Princípios · Agentes · Sintomas · Crises · Tratamento · Revalida & Hospital</span>
+    </div>
+  </div>
+  <button class="btn-icon" id="themeBtn" title="Tema">🌙</button>
+</header>
+<main>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Buscar infecção, agente, sintoma ou tratamento..." autocomplete="off">
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="results"></div>
+  <section class="refs">
+    <h2>Referências</h2>
+    <ul>
+      <li><strong>Mandell, Douglas e Bennett</strong> — Principles and Practice of Infectious Diseases</li>
+      <li>Diretrizes SBI / IDSA · Protocolos do Ministério da Saúde (TB, HIV, dengue, sepse)</li>
+      <li>Surviving Sepsis Campaign · PCDT / SUS</li>
+      <li>Harrison’s Principles of Internal Medicine</li>
+      <li>Análises Revalida INEP (infectologia, sepse, arboviroses, TB)</li>
+    </ul>
+    <p class="note">Conteúdo educacional. Esquemas antimicrobianos devem seguir protocolos locais, cultura e antibiograma. Doses e duração variam com idade, função renal e gravidade.</p>
+  </section>
+</main>
+<footer>PenseQuiz Infectologia · Uso didático · Revalida & Hospital</footer>
+<script>
+const DATA = {
+"Princípios Gerais de Infectologia": [
+{
+term:"Cadeia de transmissão e princípios de controle",
+agent:"Conceito",
+symptoms:"—",
+patho:"Infecção exige: agente infeccioso → reservatório → porta de saída → via de transmissão → porta de entrada → hospedeiro suscetível. Quebrar qualquer elo interrompe a cadeia.",
+treatment:"Precauções padrão (todos os pacientes): higiene das mãos, EPI conforme exposição, descarte de perfurocortantes. Precauções por gotículas, aerossóis ou contato conforme o agente. Isolamento e notificação quando indicado."
+},
+{
+term:"Empirismo racional vs terapia dirigida",
+agent:"Conceito terapêutico",
+symptoms:"—",
+patho:"Terapia empírica: iniciada antes da identificação do agente, baseada no sítio, gravidade, flora provável e fatores de risco (IRAS, imunossupressão, viagens). Terapia dirigida: após cultura/antibiograma — estreitar espectro (desescalonamento).",
+treatment:"Coletar culturas antes do antibiótico sempre que possível (sem atrasar em sepse). Reavaliar em 48–72 h. Evitar espectro desnecessariamente amplo (resistência e C. difficile)."
+},
+{
+term:"Bactericida vs bacteriostático e concentração vs tempo-dependente",
+agent:"Conceito farmacológico",
+symptoms:"—",
+patho:"Bactericidas matam (betalactâmicos, aminoglicosídeos, quinolonas). Bacteriostáticos inibem o crescimento (macrolídeos, tetraciclinas, linezolida em geral). Concentração-dependentes: pico importa (aminoglicosídeos). Tempo-dependentes: tempo acima da CIM importa (betalactâmicos).",
+treatment:"Em endocardite, meningite e neutropenia febril preferir bactericidas. Infusão prolongada de betalactâmicos pode otimizar tempo>CIM em infecções graves."
+},
+{
+term:"Colonização × infecção × contaminação",
+agent:"Conceito diagnóstico",
+symptoms:"Colonização: agente presente sem doença. Infecção: invasão + resposta do hospedeiro. Contaminação: presença acidental em amostra.",
+patho:"Cultura positiva não significa infecção (ex.: Staphylococcus coagulase-negativa em uma de duas hemoculturas pode ser contaminação; bacteriúria assintomática em idoso é colonização).",
+treatment:"Tratar o paciente, não apenas o resultado. Exceção: tratar bacteriúria assintomática em gestação e antes de urologia de mucosa."
+}
+],
+"Sepse e Choque Séptico": [
+{
+term:"Sepse e choque séptico",
+agent:"Qualquer (bacteriano mais comum; também fungos)",
+symptoms:"Suspeita de infecção + disfunção orgânica. Choque: hipotensão persistente necessitando vasopressor para PAM ≥65 e lactato >2 após volume. Sinais: taquicardia, taquipneia, confusão, oligúria, pele moteada.",
+patho:"Resposta desregulada do hospedeiro → vasodilatação, aumento da permeabilidade, coagulopatia e disfunção mitocondrial. qSOFA (≥2): FR ≥22, PAM ≤100, alteração mental — triagem, não diagnóstico.",
+treatment:"Hora de ouro: culturas + antibiótico IV amplo em ≤1 h se choque/sepse de alto risco. Volume (cristaloides 30 mL/kg se hipoperfusão). Noradrenalina se PAM <65 após volume. Controle do foco (dreno, retirada de cateter). Lactato seriado. Corticoides se choque refratário."
+},
+{
+term:"Sepse neonatal (precoce e tardia)",
+agent:"Precoce: Streptococcus agalactiae (GBS), E. coli, Listeria. Tardia: estafilococos, Gram− hospitalares",
+symptoms:"Letargia, recusa alimentar, apneia, instabilidade térmica, icterícia, convulsões, choque.",
+patho:"Imaturidade imunológica + colonização vertical (precoce, <72 h) ou nosocomial (tardia).",
+treatment:"Precoce: ampicilina + gentamicina (ou conforme protocolo). Tardia: cobrir estafilococo e Gram− (vancomicina + cefalosporina de 3ª/aminoglicosídeo conforme local). Culturas e suporte intensivo."
+}
+],
+"Infecções Respiratórias": [
+{
+term:"Pneumonia adquirida na comunidade (PAC)",
+agent:"S. pneumoniae (principal), H. influenzae, atípicos (Mycoplasma, Chlamydia, Legionella), vírus (influenza, SARS-CoV-2)",
+symptoms:"Febre, tosse, expectoração, dor pleurítica, dispneia. Em idosos: confusão e descompensação de comorbidade. CURB-65 e saturação orientam gravidade.",
+patho:"Inalação/aspiração → inflamação alveolar → consolidação e prejuízo da troca gasosa.",
+treatment:"Ambulatorial (sem comorbidade): amoxicilina ± macrolídeo. Com comorbidade: amoxicilina-clavulanato ou quinolona respiratória. Hospitalar: betalactâmico + macrolídeo ou quinolona. Grave/UTI: betalactâmico antipneumocócico + macrolídeo; considerar Pseudomonas/MRSA se fatores de risco. Vacinas: influenza, pneumococo, COVID."
+},
+{
+term:"Pneumonia hospitalar / associada à ventilação (PAV)",
+agent:"Pseudomonas, S. aureus (incl. MRSA), enterobactérias, Acinetobacter",
+symptoms:"Nova ou piora de infiltrado + febre, leucocitose, secreção purulenta, piora gasométrica em paciente hospitalizado/intubado.",
+patho:"Colonização do tubo e vias aéreas + microaspiração + imunossupressão hospitalar.",
+treatment:"Empírico conforme flora local e fatores de risco de resistência. Cobertura de Pseudomonas (piperacilina-tazobactam, cefepime, meropenem) ± MRSA (vancomicina/linezolida). Desescalonar com cultura. Prevenção: elevação da cabeceira, higiene oral, evitar intubação prolongada."
+},
+{
+term:"Tuberculose pulmonar",
+agent:"Mycobacterium tuberculosis",
+symptoms:"Tosse >2–3 semanas, expectoração, hemoptise, febre vespertina, sudorese noturna, emagrecimento. Forma extrapulmonar: linfonodos, meninges, ossos, geniturinário.",
+patho:"Inalação de bacilos → granuloma (primoinfecção). Reativação em imunossupressão → necrose caseosa e cavidades. Transmissão por aerossóis.",
+treatment:"Esquema RIPE (rifampicina, isoniazida, pirazinamida, etambutol) na fase intensiva (2 meses), depois RH na manutenção (4 meses) — conforme Manual do MS. Isolamento respiratório até negativação. Notificação compulsória. Testar HIV. Ajustar interações (rifampicina)."
+},
+{
+term:"Influenza e COVID-19 (síndromes gripais graves)",
+agent:"Vírus influenza A/B; SARS-CoV-2",
+symptoms:"Febre, tosse, mialgia, cefaleia, odinofagia. Gravidade: dispneia, hipoxemia, SDRA, trombose (COVID).",
+patho:"Infecção do epitélio respiratório → inflamação, em casos graves tempestade citocínica e lesão alveolar difusa.",
+treatment:"Influenza: oseltamivir o mais precoce possível em grupos de risco/graves. COVID: suporte de O₂, anticoagulação profilática conforme protocolo, corticoides se O₂ necessário, antivirais/mAbs conforme disponibilidade e fase. Vacinação anual influenza e esquemas COVID atualizados."
+},
+{
+term:"Bronquiolite viral (lactentes)",
+agent:"Vírus sincicial respiratório (VSR) — principal; também rinovírus, metapneumovírus",
+symptoms:"Coriza seguida de taquipneia, sibilos, tiragem, dificuldade alimentar em <2 anos (pico <6 meses).",
+patho:"Inflamação e obstrução de bronquíolos → hiperinsuflação e atelectasia.",
+treatment:"Suporte: hidratação, O₂ se hipoxemia, aspiração de vias aéreas. Não usar rotineiramente broncodilatador, corticoide ou antibiótico. Internar se apneia, hipoxemia ou dificuldade de alimentação. Profilaxia com palivizumabe em grupos de alto risco (conforme indicação)."
+}
+],
+"Infecções do Trato Urinário": [
+{
+term:"Cistite aguda não complicada",
+agent:"E. coli (75–95%); S. saprophyticus, Klebsiella, Proteus",
+symptoms:"Disúria, polaciúria, urgência, dor suprapúbica. Sem febre alta nem dor lombar.",
+patho:"Ascensão de bactérias pela uretra → inflamação da bexiga. Mulheres mais acometidas (uretra curta).",
+treatment:"Fosfomicina dose única, nitrofurantoína 5 dias ou pivmecilinamo (conforme disponibilidade/diretriz). Alternativa: sulfametoxazol-trimetoprima se sensibilidade local. Evitar quinolona como primeira linha. Hidratação e analgesia."
+},
+{
+term:"Pielonefrite aguda",
+agent:"E. coli (principal); outros Gram− entéricos",
+symptoms:"Febre, calafrios, dor lombar, punho-percussão positiva ± sintomas de cistite. Pode evoluir para sepse.",
+patho:"Ascensão ao rim → inflamação do interstício e pelve renal ± bacteremia.",
+treatment:"Ambulatorial (estável): cefuroxima, amoxicilina-clavulanato ou quinolona (se sensível) por 7–14 dias. Hospitalar/grave: ceftriaxona ou piperacilina-tazobactam; escalar se risco de ESBL (ertapenem/meropenem). Hemocultura e urocultura antes do ATB. Internar se vômitos, instabilidade, gravidez ou dúvida diagnóstica."
+},
+{
+term:"ITU associada a cateter",
+agent:"E. coli, enterococos, Pseudomonas, Candida",
+symptoms:"Febre sem outro foco em paciente cateterizado; odores ou turvação isolados não definem infecção.",
+patho:"Biofilme no cateter → colonização quase universal após poucos dias. Infecção quando há invasão tecidual/bacteremia.",
+treatment:"Retirar ou trocar o cateter. Antibiótico só se houver sinais sistêmicos ou critérios de ITU. Evitar tratar bacteriúria assintomática (exceto gestação e procedimentos urológicos)."
+}
+],
+"Infecções do SNC": [
+{
+term:"Meningite bacteriana aguda",
+agent:"Adultos: S. pneumoniae, N. meningitidis. Neonatos: GBS, E. coli, Listeria. Idosos/imunossuprimidos: + Listeria",
+symptoms:"Febre, cefaleia intensa, rigidez de nuca, fotofobia, alteração mental, petéquias/púrpura (meningococo). Evolução rápida.",
+patho:"Bacteremia ou contigüidade → espaço subaracnóideo → inflamação intensa, edema e ↑ PIC.",
+treatment:"Não atrasar antibiótico por TC/punção se atraso previsto. Empírico adulto: ceftriaxona + vancomicina (± ampicilina se Listeria). Dexametasona antes ou com a 1ª dose se suspeita de pneumococo. Isolamento por gotículas (meningococo). Profilaxia de contatos se meningococo/H. influenzae."
+},
+{
+term:"Meningite viral / encefalite",
+agent:"Enterovírus, HSV-1 (encefalite), VZV, arbovírus",
+symptoms:"Meningite viral: quadro meníngeo mais brando, LCR linfocitário. Encefalite: alteração de comportamento, convulsões, déficit focal (HSV: temporal).",
+patho:"Infecção viral das meninges ou do parênquima cerebral.",
+treatment:"Meningite viral: suporte. Encefalite por HSV: aciclovir IV imediato (não esperar PCR). Investigar arbovírus conforme epidemiologia."
+},
+{
+term:"Abscesso cerebral",
+agent:"Flora mista (estreptococos, anaeróbios, Gram−); S. aureus pós-trauma/cirurgia",
+symptoms:"Cefaleia, febre, déficit focal, convulsão, sinais de hipertensão intracraniana.",
+patho:"Foco contíguo (sinusite, otite) ou hematogênico → necrose e cápsula.",
+treatment:"Antibiótico prolongado (ceftriaxona/cefotaxima + metronidazol ± vancomicina) + drenagem neurocirúrgica na maioria dos casos. TC/RM e hemoculturas."
+}
+],
+"Infecções de Pele, Partes Moles e Ossos": [
+{
+term:"Celulite e erisipela",
+agent:"Estreptococos β-hemolíticos (erisipela); S. aureus e estreptococos (celulite)",
+symptoms:"Eritema, calor, edema, dor. Erisipela: limites nítidos, platô. Celulite: limites menos definidos. Febre variável.",
+patho:"Invasão por solução de continuidade → inflamação dérmica/subcutânea.",
+treatment:"Cefalexina, amoxicilina-clavulanato ou penicilina (erisipela). Se risco de MRSA comunitário: sulfametoxazol-trimetoprima, clindamicina ou doxiciclina. Grave: oxacilina/cefazolina IV ou vancomicina. Elevar o membro e tratar porta de entrada (tinea, úlcera)."
+},
+{
+term:"Abscesso cutâneo e furúnculo",
+agent:"S. aureus (incl. MRSA comunitário)",
+symptoms:"Nódulo doloroso flutuante com eritema; pode drenar pus.",
+patho:"Necrose local e coleção purulenta.",
+treatment:"Drenagem cirúrgica é o tratamento principal. Antibiótico se celulite extensa, febre, imunossupressão ou localização especial (face). Cobrir MRSA se prevalência local alta."
+},
+{
+term:"Fasciíte necrosante",
+agent:"Estreptococo do grupo A (tipo II); polimicrobiana (tipo I — aeróbios + anaeróbios)",
+symptoms:"Dor desproporcional ao exame, edema tenso, equimose, crepitação, toxicidade sistêmica, progressão rápida. Emergência.",
+patho:"Infecção do fáscia com necrose e toxinas → choque e falência de órgãos.",
+treatment:"Cirurgia imediata (desbridamento) + antibiótico (carbapenêmico ou piperacilina-tazobactam + vancomicina/linezolida + clindamicina para toxinas). Suporte de UTI. Não atrasar a cirurgia por imagem se a suspeita for alta."
+},
+{
+term:"Osteomielite e artrite séptica",
+agent:"S. aureus (principal); gonococo em jovens sexualmente ativos; Gram− em idosos/DRC",
+symptoms:"Osteomielite: dor óssea, febre, fístula. Artrite séptica: articulação quente, muito dolorosa, limitação extrema — monoartrite aguda até prova em contrário.",
+patho:"Hematogênica ou contígua → destruição óssea/cartilagem.",
+treatment:"Artrite séptica: punção + drenagem/lavagem + antibiótico (oxacilina/vancomicina ± ceftriaxona). Osteomielite: antibiótico prolongado (4–6 semanas) ± cirurgia. Ajustar com cultura."
+}
+],
+"Infecções Gastrointestinais e Intra-abdominais": [
+{
+term:"Diarreia infecciosa aguda",
+agent:"Vírus (rotavírus, norovírus); bactérias (E. coli, Salmonella, Shigella, Campylobacter, C. difficile); parasitas (Giardia, Entamoeba)",
+symptoms:"Diarreia ± sangue/muco, dor abdominal, febre, vômitos. Desidratação é a principal complicação.",
+patho:"Invasão mucosa, toxinas ou prejuízo da absorção.",
+treatment:"Base: reidratação oral ou IV. Antibiótico só em disenteria grave, sepse, imunossupressão ou viajante selecionado (ciprofloxacino/azitromicina conforme agente). C. difficile: suspender ATB indutor + vancomicina oral ou fidaxomicina. Evitar antimotilidade se disenteria/toxina."
+},
+{
+term:"Peritonite bacteriana espontânea (PBE)",
+agent:"E. coli, Klebsiella, estreptococos (em cirróticos com ascite)",
+symptoms:"Descompensação de cirrose, dor abdominal, febre, encefalopatia — pode ser sutil.",
+patho:"Translocação bacteriana intestinal para ascite.",
+treatment:"Diagnóstico: paracentese (PMN ≥250/mm³). Cefotaxima ou ceftriaxona. Albumina IV em critérios de risco (↑ creatinina, bilirrubina). Profilaxia secundária com norfloxacino/sulfametoxazol."
+},
+{
+term:"Infecção intra-abdominal complicada (apendicite, diverticulite perfurada, abscesso)",
+agent:"Flora mista: enterobactérias + anaeróbios (Bacteroides) ± enterococos",
+symptoms:"Dor abdominal localizada ou difusa, defesa, febre, sinais de sepse se generalizada.",
+patho:"Perfuração ou necrose → contaminação peritonial ± abscesso.",
+treatment:"Controle de foco (cirurgia/drenagem) + antibiótico (piperacilina-tazobactam, ou ceftriaxona + metronidazol, ou ertapenem). Duração curta após controle adequado do foco (em geral 4–7 dias)."
+}
+],
+"Infecções Sexualmente Transmissíveis": [
+{
+term:"Sífilis",
+agent:"Treponema pallidum",
+symptoms:"Cancro duro (primária); rash palmoplantar e geral (secundária); latente; terciária (goma, cardiovascular, neurossífilis). Congênita: graves sequelas.",
+patho:"Espiroqueta → disseminação hematogênica e latência longa.",
+treatment:"Penicilina G benzatina conforme estágio (protocolo MS). Neurossífilis: penicilina G cristalina IV. Alergia: dessensibilização preferível. Notificação e tratamento de parceiros. Testar HIV."
+},
+{
+term:"Gonorreia e clamídia",
+agent:"Neisseria gonorrhoeae; Chlamydia trachomatis",
+symptoms:"Uretrite, cervicite, corrimento; muitas mulheres assintomáticas. Complicações: DIP, infertilidade, gravidez ectópica, artrite.",
+patho:"Infecção de mucosa genital ± ascensão.",
+treatment:"Gonorreia: ceftriaxona IM (dose conforme diretriz atual). Clamídia: doxiciclina 7 dias (ou azitromicina). Tratar frequentemente os dois. Parceiros e reteste. Notificação."
+},
+{
+term:"HIV — infecção aguda e seguimento",
+agent:"HIV-1 (predominante)",
+symptoms:"Aguda: síndrome mono-like (febre, rash, linfadenopatia). Crônica: imunodeficiência progressiva → infecções oportunistas e neoplasias se sem TARV.",
+patho:"Infecção de células CD4 → depleção e disfunção imune.",
+treatment:"TARV para todos (iniciar o mais cedo possível). Profilaxias conforme CD4 (PCP, etc.). PEP e PrEP conforme indicação. Testar e tratar coinfecções (TB, hepatites, sífilis)."
+}
+],
+"Arboviroses e Zoonoses": [
+{
+term:"Dengue",
+agent:"Vírus dengue (flavivírus) — Aedes aegypti",
+symptoms:"Febre alta, cefaleia retro-orbital, mialgia, artralgia, rash. Alarme: dor abdominal intensa, vômitos persistentes, sangramento, letargia, hipotensão postural, hemoconcentração, plaquetopenia. Grave: choque, extravasamento, sangramento importante.",
+patho:"Aumento da permeabilidade vascular mediado por resposta imune → extravasamento plasmático.",
+treatment:"Hidratação generosa (oral ou IV conforme grupo A/B/C do MS). Não usar AINE (risco hemorrágico). Internar grupos B/C. Monitorar HCT e sinais de choque. Controle de vetor."
+},
+{
+term:"Leptospirose",
+agent:"Leptospira interrogans — contato com água/urina de roedores",
+symptoms:"Febre, mialgia (panturrilha), cefaleia, conjuntivite sem secreção. Forma grave (Weil): icterícia, IR, hemorragia pulmonar.",
+patho:"Penetração cutaneomucosa → bacteremia → lesão endotelial e de órgãos.",
+treatment:"Penicilina G ou ceftriaxona (grave); doxiciclina (leve). Iniciar cedo. Suporte renal e respiratório. Notificação."
+},
+{
+term:"Malária",
+agent:"Plasmodium falciparum (mais grave), P. vivax (mais comum em algumas regiões)",
+symptoms:"Febre cíclica, calafrios, sudorese, cefaleia, mialgia. Grave: disfunção neurológica, anemia intensa, IR, SDRA, hipoglicemia.",
+patho:"Ciclo eritrocítico → hemólise e sequestro microvascular (falciparum).",
+treatment:"Conforme espécie e gravidade (cloramina, artemisinina combinada, primaquina para vivax — ver protocolo MS). Emergência: tratamento parenteral se grave. Notificação e investigação epidemiológica."
+},
+{
+term:"Raiva",
+agent:"Vírus da raiva — saliva de mamíferos (cão, morcego)",
+symptoms:"Parestesia no local, hidrofobia, aerofobia, espasmos, progressão para coma e morte quase invariável após sintomas.",
+patho:"Vírus neurotrópico → encefalite.",
+treatment:"Pós-exposição: lavagem vigorosa da ferida + vacina + soro/imunoglobulina conforme tipo de contato e animal (esquema MS). Após sintomas: apenas suporte (sobrevida excepcional). Prevenção: vacinação de animais e profilaxia adequada."
+}
+],
+"Infecções em Imunossuprimidos e IRAS": [
+{
+term:"Neutropenia febril",
+agent:"Bacilos Gram− (incl. Pseudomonas), Gram+, estreptococos; fungos se prolongada",
+symptoms:"Febre em paciente com neutrófilos <500 (ou <1000 em queda) — emergência, mesmo sem foco evidente.",
+patho:"Ausência de neutrófilos → infecção rapidamente invasiva com poucos sinais locais.",
+treatment:"Antibiótico IV de amplo espectro imediato (piperacilina-tazobactam, cefepime ou meropenem ± vancomicina se indicado). Investigar foco. Antifúngico se febre persistente >4–7 dias. Isolamento protetor e G-CSF conforme protocolo."
+},
+{
+term:"Infecção relacionada a cateter vascular",
+agent:"S. aureus, coagulase-negativa, enterococos, Gram−, Candida",
+symptoms:"Febre sem foco; sinais locais no sítio; hemoculturas positivas de sangue central e periférico.",
+patho:"Biofilme no cateter → bacteremia.",
+treatment:"Retirar o cateter na maioria dos casos (obrigatório em S. aureus, Pseudomonas, Candida). Antibiótico dirigido. Duração conforme agente e complicações (endocardite, tromboflebite séptica)."
+},
+{
+term:"Infecções oportunistas no HIV (CD4 baixo)",
+agent:"Pneumocystis jirovecii, Toxoplasma, Mycobacterium avium, Cryptococcus, CMV, Candida",
+symptoms:"Conforme órgão: pneumonia hipoxêmica (PCP), abscesso cerebral (toxo), meningite subaguda (cripto), retinite (CMV).",
+patho:"Imunodeficiência celular → reativação ou aquisição de patógenos oportunistas.",
+treatment:"TARV (base). Profilaxia: sulfametoxazol-trimetoprima (PCP/toxo) conforme CD4. Tratamento específico de cada infecção + iniciar TARV no tempo adequado (cuidado com IRIS)."
+}
+],
+"Situações Críticas — Resumo de Conduta": [
+{
+term:"Checklist da primeira hora na sepse",
+agent:"—",
+symptoms:"Suspeita de infecção + disfunção / hipotensão / hiperlactatemia",
+patho:"—",
+treatment:"1) Medir lactato. 2) Hemoculturas antes do ATB. 3) Antibiótico IV amplo ≤1 h. 4) Cristaloides se hipotensão/lactato↑. 5) Vasopressor se PAM <65 após volume. 6) Identificar e controlar o foco."
+},
+{
+term:"Quando isolar e notificar",
+agent:"—",
+symptoms:"—",
+patho:"—",
+treatment:"Aerossóis: TB pulmonar, sarampo, varicela, COVID (conforme protocolo). Gotículas: meningococo, influenza, coqueluche. Contato: C. difficile, MRSA multidroga, escabiose. Notificação compulsória: meningite, TB, dengue, HIV, sífilis, febre amarela, raiva, etc. (lista MS)."
+},
+{
+term:"Princípios para não errar o antibiótico",
+agent:"—",
+symptoms:"—",
+patho:"—",
+treatment:"(1) Há infecção bacteriana ou é viral/inflamatório? (2) Qual o foco mais provável? (3) Quais agentes e resistências locais? (4) Alergias, IR, gravidez, interações? (5) Coletou cultura? (6) Reavaliar em 48–72 h e desescalonar. (7) Duração mínima eficaz."
+}
+]
+};
+
+let total = 0;
+Object.values(DATA).forEach(a => total += a.length);
+
+const results = document.getElementById('results');
+const search = document.getElementById('search');
+const stats = document.getElementById('stats');
+const themeBtn = document.getElementById('themeBtn');
+
+function render(filter = '') {
+  const q = filter.toLowerCase().trim();
+  results.innerHTML = '';
+  let shown = 0;
+  Object.keys(DATA).sort((a,b) => a.localeCompare(b)).forEach(cat => {
+    const terms = DATA[cat].filter(t => {
+      if (!q) return true;
+      const blob = (t.term + ' ' + t.agent + ' ' + t.symptoms + ' ' + t.patho + ' ' + t.treatment).toLowerCase();
+      return blob.includes(q);
+    });
+    if (!terms.length) return;
+    shown += terms.length;
+    const d = document.createElement('details');
+    d.className = 'cat';
+    if (q) d.open = true;
+    d.innerHTML = `<summary>${cat} <span class="badge">${terms.length}</span></summary><div class="cat-body"></div>`;
+    const body = d.querySelector('.cat-body');
+    terms.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'term';
+      div.innerHTML = `
+        <h3>${t.term}</h3>
+        <div class="lbl">Agente / conceito</div>
+        <p>${t.agent}</p>
+        <div class="lbl">Sintomas e apresentação</div>
+        <p>${t.symptoms}</p>
+        <div class="lbl">Fisiopatologia / mecanismo</div>
+        <div class="box">${t.patho}</div>
+        <div class="lbl">Tratamento e conduta</div>
+        <div class="tx">${t.treatment}</div>`;
+      body.appendChild(div);
+    });
+    results.appendChild(d);
+  });
+  if (!shown) results.innerHTML = `<div class="empty">Nenhum resultado para “${filter}”</div>`;
+  stats.innerHTML = `<span class="chip">${Object.keys(DATA).length} seções</span><span class="chip">${total} tópicos</span>${q ? `<span class="chip">${shown} resultados</span>` : ''}`;
+}
+
+search.addEventListener('input', () => render(search.value));
+if (localStorage.getItem('pq-inf-theme') === 'dark') {
+  document.body.classList.add('dark');
+  themeBtn.textContent = '☀️';
+}
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const dark = document.body.classList.contains('dark');
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('pq-inf-theme', dark ? 'dark' : 'light');
+});
+render();
+</script>
+</body>
+</html>
