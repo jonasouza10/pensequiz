@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PenseQuiz Fisiopatologia</title>
+<meta name="theme-color" content="#0f766e">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f1f5f9;
+  --surface: #ffffff;
+  --surface2: #f8fafc;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #0f766e;
+  --primary-h: #0d9488;
+  --soft: #ccfbf1;
+  --accent: #0891b2;
+  --border: #e2e8f0;
+  --shadow: 0 4px 20px rgba(15,23,42,.07);
+  --r: 14px;
+}
+body.dark {
+  --bg: #0b1220;
+  --surface: #111827;
+  --surface2: #1e293b;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --primary: #2dd4bf;
+  --primary-h: #5eead4;
+  --soft: #134e4a;
+  --accent: #22d3ee;
+  --border: #1e293b;
+  --shadow: 0 4px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;transition:background .3s,color .3s}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.4rem;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.7rem}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem}
+.logo h1{font-size:1.2rem;font-weight:700;letter-spacing:-.02em}
+.logo span{font-size:.72rem;color:var(--muted);display:block;font-weight:500}
+.btn-icon{width:40px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s}
+.btn-icon:hover{background:var(--soft);border-color:var(--primary);color:var(--primary)}
+main{max-width:980px;margin:0 auto;padding:1.4rem 1.2rem 3rem}
+.search-wrap{position:relative;margin-bottom:1.4rem}
+.search-wrap input{width:100%;padding:.95rem 1.2rem .95rem 3.1rem;font-size:1.02rem;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);outline:none;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent)}
+.search-icon{position:absolute;left:1.05rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1.15rem;pointer-events:none}
+.stats{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.chip{background:var(--soft);color:var(--primary);padding:.3rem .75rem;border-radius:999px;font-size:.78rem;font-weight:600}
+.cat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--shadow)}
+.cat summary{padding:1rem 1.25rem;font-weight:600;font-size:1.02rem;cursor:pointer;list-style:none;display:flex;align-items:center;gap:.7rem;user-select:none;background:var(--surface2);transition:background .2s}
+.cat summary::-webkit-details-marker{display:none}
+.cat summary::before{content:'';width:7px;height:7px;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:rotate(-45deg);transition:transform .25s;flex-shrink:0}
+.cat[open] summary::before{transform:rotate(45deg)}
+.cat summary:hover{background:var(--soft)}
+.badge{margin-left:auto;background:var(--primary);color:#fff;font-size:.68rem;font-weight:600;padding:.18rem .5rem;border-radius:999px}
+.cat-body{padding:.4rem 1.25rem 1.1rem;border-top:1px solid var(--border)}
+.term{padding:1.05rem 0;border-bottom:1px dashed var(--border)}
+.term:last-child{border-bottom:none}
+.term h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:.4rem;letter-spacing:-.01em}
+.term .lbl{font-weight:600;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.12rem}
+.term p{margin-bottom:.5rem;font-size:.93rem}
+.term .patho{background:var(--soft);border-left:3px solid var(--primary);padding:.65rem .85rem;border-radius:0 8px 8px 0;margin:.5rem 0;font-size:.9rem}
+.term .syns{font-size:.85rem;color:var(--muted)}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+.refs{margin-top:2.2rem;padding:1.4rem;background:var(--surface);border-radius:var(--r);border:1px solid var(--border)}
+.refs h2{font-size:1.1rem;margin-bottom:.9rem;color:var(--primary)}
+.refs ul{list-style:none;display:grid;gap:.4rem}
+.refs li{font-size:.88rem;color:var(--muted);padding-left:1rem;position:relative}
+.refs li::before{content:'▸';position:absolute;left:0;color:var(--primary)}
+.refs .note{margin-top:.9rem;font-size:.8rem;color:var(--muted);font-style:italic}
+footer{text-align:center;padding:1.3rem;font-size:.78rem;color:var(--muted)}
+@media(max-width:600px){header{padding:.75rem 1rem}.logo h1{font-size:1.05rem}main{padding:1rem .85rem 2.5rem}.cat summary{padding:.9rem 1rem;font-size:.95rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">PQ</div>
+    <div>
+      <h1>PenseQuiz Fisiopatologia</h1>
+      <span>Patologia & Fisiopatologia · Todos os Sistemas · Revalida & Hospital</span>
+    </div>
+  </div>
+  <button class="btn-icon" id="themeBtn" title="Tema">🌙</button>
+</header>
+<main>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Buscar termo, sinônimo ou fisiopatologia..." autocomplete="off">
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="results"></div>
+  <section class="refs">
+    <h2>Referências Bibliográficas</h2>
+    <ul>
+      <li><strong>Robbins & Cotran</strong> — Pathologic Basis of Disease (Kumar, Abbas, Aster) — base de patologia e fisiopatologia</li>
+      <li><strong>Harrison’s Principles of Internal Medicine</strong> — clínica e mecanismos</li>
+      <li><strong>Guyton e Hall</strong> — Tratado de Fisiologia Médica</li>
+      <li><strong>Goldman-Cecil Medicine</strong> — medicina interna</li>
+      <li>Diretrizes Brasileiras: SBC, SBPT, SBD, SBN, FEBRASGO, SBI, SBR, SBH</li>
+      <li>Protocolos do Ministério da Saúde / SUS e Cadernos de Atenção Básica</li>
+      <li>UpToDate / PubMed — revisões atualizadas de fisiopatologia</li>
+      <li>Análises estatísticas Revalida INEP (Estratégia MED, Medcel, Recurso Oficial)</li>
+      <li>Kasper et al. — Harrison; Kumar et al. — Robbins; Hall — Guyton</li>
+    </ul>
+    <p class="note">Conteúdo educacional focado em patologia e fisiopatologia de alta incidência no Revalida INEP e no cotidiano hospitalar brasileiro (SUS). Não substitui consulta a textos completos nem conduta clínica individualizada.</p>
+  </section>
+</main>
+<footer>PenseQuiz Fisiopatologia · Uso didático · Revalida & Hospital</footer>
+<script>
+const DATA = {
+"Sistema Cardiovascular": [
+{term:"Hipertensão Arterial Sistêmica (HAS)",meaning:"Elevação persistente da pressão arterial ≥ 140/90 mmHg. Tema mais cobrado em Cardiologia no Revalida.",pathophysiology:"Desequilíbrio entre débito cardíaco e resistência vascular periférica. Hiperatividade simpática, ativação do sistema renina-angiotensina-aldosterona (SRAA), disfunção endotelial e remodelamento vascular. Cerca de 95% é essencial (primária). Lesão de órgãos-alvo: coração (hipertrofia, IC), rins (nefroesclerose), cérebro (AVC) e vasos (aterosclerose).",synonyms:["Pressão alta","HAS","Hipertensão"]},
+{term:"Insuficiência Cardíaca",meaning:"Incapacidade do coração de bombear sangue de forma adequada às necessidades metabólicas. Principal causa de internação cardiovascular no SUS.",pathophysiology:"Redução do débito cardíaco → ativação neuro-hormonal (sistema nervoso simpático + SRAA) → retenção de sódio e água, vasoconstricção e remodelamento ventricular. Classificada em HFrEF (fração de ejeção reduzida) e HFpEF (preservada). Descompensação aguda por infecção, isquemia, arritmia ou má adesão terapêutica.",synonyms:["IC","Coração fraco","Insuficiência do coração"]},
+{term:"Síndromes Coronarianas Agudas",meaning:"Espectro que inclui angina instável, IAM com e sem supradesnível de ST.",pathophysiology:"Ruptura ou erosão de placa aterosclerótica → trombose coronariana → isquemia miocárdica. Oclusão total produz IAM com SST; oclusão parcial ou microembolização, IAM sem SST ou angina instável. Necrose miocárdica libera troponinas e CK-MB.",synonyms:["IAM","Infarto","SCA","Angina instável"]},
+{term:"Fibrilação Atrial",meaning:"Arritmia sustentada mais comum. Altamente cobrada no Revalida.",pathophysiology:"Focos ectópicos (principalmente veias pulmonares) associados a remodelamento atrial → atividade elétrica desorganizada nos átrios → perda de contração atrial efetiva e estase sanguínea → risco elevado de tromboembolismo (AVC). Frequência ventricular irregular e frequentemente elevada.",synonyms:["FA","Arritmia atrial"]},
+{term:"Aterosclerose",meaning:"Doença inflamatória crônica da parede arterial com formação de placas.",pathophysiology:"Lesão endotelial → infiltração e oxidação de LDL → recrutamento de monócitos/macrófagos → células espumosas → placa ateromatosa com núcleo lipídico e capa fibrosa. Ruptura da capa fibrosa dispara trombose aguda (síndromes coronarianas, AVC isquêmico).",synonyms:["Placa aterosclerótica","Endurecimento arterial"]},
+{term:"Choque Cardiogênico",meaning:"Hipoperfusão tecidual por falha primária da bomba cardíaca.",pathophysiology:"Queda crítica do débito cardíaco (geralmente pós-IAM extenso) → hipotensão e hipoperfusão. Compensação inicial por vasoconstricção e taquicardia. Evolui para disfunção multiorgânica se não revertido rapidamente.",synonyms:["Choque cardíaco"]},
+{term:"Tromboembolismo Pulmonar (TEP)",meaning:"Obstrução da artéria pulmonar por êmbolo, geralmente proveniente de trombose venosa profunda.",pathophysiology:"Tríade de Virchow (estase, lesão endotelial, hipercoagulabilidade) → TVP → embolização para a circulação pulmonar → aumento da pós-carga do ventrículo direito, hipoxemia e, em casos maciços, choque obstrutivo.",synonyms:["TEP","Embolia pulmonar"]},
+{term:"Angina Pectoris",meaning:"Dor ou desconforto torácico por isquemia miocárdica transitória.",pathophysiology:"Desequilíbrio entre oferta e demanda de oxigênio miocárdico (estenose coronariana fixa, espasmo, aumento de demanda por taquicardia ou hipertensão). Não há necrose miocárdica significativa.",synonyms:["Angina de peito","Dor torácica isquêmica"]},
+{term:"Endocardite Infecciosa",meaning:"Infecção do endocárdio, principalmente válvulas cardíacas.",pathophysiology:"Lesão endotelial valvular + bacteremia → adesão e colonização bacteriana → vegetações (fibrina, plaquetas e microrganismos) → destruição valvular, embolização séptica e resposta inflamatória sistêmica.",synonyms:["Endocardite","Infecção valvular"]},
+{term:"Dissecção Aórtica",meaning:"Separação das camadas da parede aórtica com formação de falsa luz.",pathophysiology:"Degeneração da média (HAS, síndrome de Marfan) → ruptura da íntima → sangue penetra e disseca a parede → possível oclusão de ramos, tamponamento ou ruptura livre. Classificação de Stanford A (ascendente) e B (descendente).",synonyms:["Aorta dissecada","Ruptura aórtica"]}
+],
+"Sistema Respiratório": [
+{term:"Asma Brônquica",meaning:"Doença inflamatória crônica das vias aéreas com hiper-reatividade brônquica. Líder em Pneumologia no Revalida.",pathophysiology:"Inflamação predominantemente eosinofílica (via Th2) → hipersecreção de muco, edema de mucosa e broncoconstrição. Exacerbação: liberação de mediadores (histamina, leucotrienos, prostaglandinas) → obstrução reversível. Remodelamento crônico pode levar a limitação fixa do fluxo aéreo.",synonyms:["Asma","Crise asmática","Broncoespasmo"]},
+{term:"DPOC",meaning:"Limitação progressiva e pouco reversível do fluxo aéreo (enfisema e/ou bronquite crônica).",pathophysiology:"Exposição crônica (tabaco, poluição) → inflamação neutrofílica + destruição de paredes alveolares (enfisema) e/ou hipersecreção e fibrose de pequenas vias (bronquite crônica). Hiperinsuflação, trapézio aéreo, hipoxemia e hipercapnia. Exacerbações por infecção viral ou bacteriana.",synonyms:["Enfisema","Bronquite crônica","DPOC"]},
+{term:"Pneumonia Adquirida na Comunidade",meaning:"Infecção do parênquima pulmonar adquirida fora do ambiente hospitalar.",pathophysiology:"Aspiração ou inalação de patógenos → inflamação alveolar com exsudato fibrinopurulento → comprometimento da troca gasosa. Agentes principais: Streptococcus pneumoniae, Haemophilus influenzae, vírus respiratórios e atípicos (Mycoplasma, Chlamydia).",synonyms:["PAC","Pneumonia","Infecção pulmonar"]},
+{term:"Síndrome do Desconforto Respiratório Agudo (SDRA)",meaning:"Insuficiência respiratória aguda hipoxêmica com infiltrados bilaterais não explicados por IC.",pathophysiology:"Lesão alveolar difusa (sepse, pneumonia, trauma, aspiração) → aumento da permeabilidade da barreira alvéolo-capilar → edema pulmonar não cardiogênico → shunt intrapulmonar e hipoxemia refratária. Dano a células tipo II reduz surfactante.",synonyms:["SDRA","ARDS"]},
+{term:"Pneumotórax",meaning:"Presença de ar no espaço pleural causando colapso pulmonar parcial ou total.",pathophysiology:"Ruptura alveolar (espontâneo) ou lesão da pleura visceral/parietal (traumático, iatrogênico) → entrada de ar no espaço pleural → perda da pressão negativa → colapso do parênquima. Forma hipertensiva: mecanismo valvular com compressão mediastinal.",synonyms:["Pulmão colabado","Pulmão furado"]},
+{term:"Derrame Pleural",meaning:"Acúmulo anormal de líquido no espaço pleural.",pathophysiology:"Desequilíbrio das forças de Starling ou inflamação da pleura. Transudato (IC, cirrose, hipoalbuminemia) vs exsudato (pneumonia, neoplasia, tuberculose, embolia). Critérios de Light diferenciam os tipos.",synonyms:["Líquido pleural","Efusão pleural"]},
+{term:"Tuberculose Pulmonar",meaning:"Infecção crônica por Mycobacterium tuberculosis, predominantemente pulmonar.",pathophysiology:"Inalação de bacilos → infecção primária com granuloma (células de Langhans e necrose caseosa). Em imunossupressão, reativação → necrose, cavitações e disseminação broncogênica ou hematogênica (forma miliar).",synonyms:["TB","Tísica"]},
+{term:"Tromboembolismo Pulmonar (aspecto respiratório)",meaning:"Obstrução vascular pulmonar com repercussão ventilatória e gasométrica.",pathophysiology:"Êmbolo oclui leito arterial pulmonar → espaço morto fisiológico (ventilação sem perfusão) → hipoxemia por desequilíbrio V/Q e shunt. Hipertensão pulmonar aguda e sobrecarga de VD em embolias significativas.",synonyms:["TEP"]}
+],
+"Sistema Endócrino e Metabólico": [
+{term:"Cetoacidose Diabética (CAD)",meaning:"Complicação aguda grave do diabetes mellitus (especialmente tipo 1). Altamente cobrada no Revalida.",pathophysiology:"Deficiência absoluta de insulina → lipólise maciça → liberação de ácidos graxos livres → produção hepática excessiva de corpos cetônicos → acidose metabólica de ânion gap elevado + hiperglicemia + desidratação osmótica. Tríade clássica: hiperglicemia, cetonemia/cetonúria e acidose.",synonyms:["CAD","Cetoacidose"]},
+{term:"Estado Hiperosmolar Hiperglicêmico (EHH)",meaning:"Descompensação grave do DM2 com hiperosmolaridade sem cetoacidose significativa.",pathophysiology:"Insulina residual suficiente para inibir a cetogênese, mas insuficiente para controlar a glicemia → hiperglicemia extrema → diurese osmótica intensa → desidratação profunda e hiperosmolaridade plasmática → alteração do nível de consciência e risco de trombose.",synonyms:["EHH","HHS","Coma hiperosmolar"]},
+{term:"Diabetes Mellitus Tipo 2",meaning:"Doença crônica caracterizada por hiperglicemia por resistência à insulina e/ou deficiência relativa de insulina.",pathophysiology:"Resistência periférica à insulina (músculo esquelético, fígado, tecido adiposo) associada a disfunção progressiva das células β pancreáticas → hiperglicemia. Glucotoxicidade e lipotoxicidade aceleram a falência das células β. Complicações micro e macrovasculares.",synonyms:["DM2","Diabetes tipo 2"]},
+{term:"Diabetes Mellitus Tipo 1",meaning:"Deficiência absoluta de insulina por destruição autoimune das células β.",pathophysiology:"Processo autoimune (células T e autoanticorpos) destrói ilhotas pancreáticas → ausência de insulina → hiperglicemia, lipólise e risco de cetoacidose. Início geralmente em crianças e adolescentes.",synonyms:["DM1","Diabetes tipo 1"]},
+{term:"Hipotireoidismo",meaning:"Produção insuficiente de hormônios tireoidianos (T4/T3).",pathophysiology:"Baixos níveis de T3/T4 → redução do metabolismo basal, acúmulo de mucopolissacarídeos (mixedema), bradicardia, constipação, pele seca e lentificação cognitiva. Causa mais comum: tireoidite de Hashimoto (autoimune). Pode ser central (hipofisário/hipotalâmico).",synonyms:["Tireoide hipoativa","Hashimoto"]},
+{term:"Hipertireoidismo / Tireotoxicose",meaning:"Excesso de hormônios tireoidianos circulantes.",pathophysiology:"Aumento de T3/T4 → hiperatividade simpática e metabólica: taquicardia, perda de peso, tremor, intolerância ao calor, diarreia. Doença de Graves: anticorpos estimuladores do receptor de TSH. Outras causas: bócio multinodular tóxico, adenoma tóxico, tireoidites.",synonyms:["Tireoide hiperativa","Graves"]},
+{term:"Síndrome de Cushing",meaning:"Excesso crônico de glicocorticoides.",pathophysiology:"Hipercortisolismo (ACTH-dependente ou independente) → redistribuição de gordura, catabolismo proteico, hipertensão, intolerância à glicose, imunossupressão e fragilidade cutânea. Causas: adenoma hipofisário (Doença de Cushing), adrenal, ectópico ou iatrogênico.",synonyms:["Hipercortisolismo"]},
+{term:"Insuficiência Adrenal (Addison / Crise Adrenal)",meaning:"Deficiência de glicocorticoides e/ou mineralocorticoides.",pathophysiology:"Destruição adrenal (autoimune, infecção, hemorragia) ou falha hipofisária → baixo cortisol (± aldosterona) → hipoglicemia, hipotensão, hiponatremia, hipercalemia e choque na crise adrenal. Necessita reposição imediata de corticoides.",synonyms:["Doença de Addison","Crise adrenal"]}
+],
+"Sistema Renal e Urinário": [
+{term:"Doença Renal Crônica (DRC)",meaning:"Perda progressiva e irreversível da função renal. Frequente no Revalida e no hospital.",pathophysiology:"Lesão inicial (diabetes, HAS, glomerulopatias) → hiperfiltração compensatória nos néfrons remanescentes → esclerose progressiva de glomérulos e interstício → redução progressiva da TFG. Estágios 1 a 5 (KDIGO). Complicações: anemia (EPO↓), acidose, hipercalemia, hiperfosfatemia, osteodistrofia e uremia.",synonyms:["DRC","Insuficiência renal crônica","IRC"]},
+{term:"Lesão Renal Aguda (LRA)",meaning:"Queda abrupta da função renal. Comum em pacientes hospitalizados.",pathophysiology:"Classificada em pré-renal (hipoperfusão), intrínseca (necrose tubular aguda, glomerulonefrite, nefrite intersticial) e pós-renal (obstrução). Isquemia ou toxicidade → morte de células tubulares → redução da TFG, oligúria e retenção de escórias. Critérios KDIGO (creatinina e débito urinário).",synonyms:["LRA","IRA","Insuficiência renal aguda"]},
+{term:"Infecção do Trato Urinário / Pielonefrite",meaning:"Infecção bacteriana do trato urinário. Entre os temas mais cobrados em Nefrologia no Revalida.",pathophysiology:"Ascensão de bactérias (E. coli na maioria) pela uretra → colonização da bexiga (cistite) ou dos rins (pielonefrite). Adesinas bacterianas e fatores de virulência facilitam a adesão. Em pielonefrite: inflamação do interstício renal e possível bacteremia.",synonyms:["ITU","Cistite","Pielonefrite","Infecção urinária"]},
+{term:"Glomerulonefrite",meaning:"Inflamação dos glomérulos. Tema de alta incidência em Nefrologia no Revalida.",pathophysiology:"Depósito de imunocomplexos ou anticorpos anti-membrana basal glomerular → ativação do complemento e recrutamento de células inflamatórias → dano à barreira de filtração → proteinúria, hematúria, oligúria e hipertensão (síndrome nefrítica). Pode evoluir para síndrome nefrótica ou DRC.",synonyms:["Glomerulopatia","GN"]},
+{term:"Síndrome Nefrótica",meaning:"Proteinúria maciça (>3,5 g/dia), hipoalbuminemia, edema e hiperlipidemia.",pathophysiology:"Lesão dos podócitos (doença de lesões mínimas, FSGS, membranosa) → perda da seletividade da barreira de filtração → proteinúria intensa → redução da pressão oncótica plasmática → edema. Hiperlipidemia por aumento da síntese hepática de lipoproteínas.",synonyms:["Nefrose"]},
+{term:"Nefrolitíase (Litíase Renal)",meaning:"Formação de cálculos no trato urinário.",pathophysiology:"Supersaturação urinária de solutos (cálcio, oxalato, ácido úrico, cistina) + déficit de inibidores da cristalização → nucleação, crescimento e agregação de cristais. Obstrução, infecção e dor em cólica são consequências comuns.",synonyms:["Pedra no rim","Cálculo renal"]},
+{term:"Acidose Tubular Renal",meaning:"Incapacidade renal de acidificar a urina ou reabsorver bicarbonato adequadamente.",pathophysiology:"Tipo 1 (distal): falha na secreção de H+. Tipo 2 (proximal): falha na reabsorção de HCO₃⁻. Tipo 4: hipoaldosteronismo ou resistência → hipercalemia e acidose hiperclorêmica. Causa acidose metabólica de ânion gap normal.",synonyms:["ATR"]}
+],
+"Sistema Digestório e Hepático": [
+{term:"Abdome Agudo",meaning:"Dor abdominal intensa de início súbito que exige avaliação diagnóstica e, frequentemente, cirúrgica. Tema líder em Cirurgia no Revalida.",pathophysiology:"Processos inflamatórios (apendicite, colecistite, diverticulite), obstrutivos, perfurativos, hemorrágicos ou isquêmicos. Estimulação de nociceptores viscerais e, posteriormente, parietais. Peritonite generalizada evolui para sepse abdominal se não tratada.",synonyms:["Abdome agudo inflamatório","Dor abdominal cirúrgica"]},
+{term:"Cirrose Hepática",meaning:"Fibrose difusa e nódulos de regeneração que destroem a arquitetura hepática normal.",pathophysiology:"Lesão crônica (álcool, vírus B/C, NASH, autoimune) → ativação de células estreladas hepáticas → deposição excessiva de matriz extracelular → hipertensão portal, insuficiência hepatocelular e risco elevado de carcinoma hepatocelular. Complicações: ascite, varizes, encefalopatia, peritonite bacteriana espontânea.",synonyms:["Fígado cirrótico","Cirrose"]},
+{term:"Pancreatite Aguda",meaning:"Inflamação aguda do pâncreas, frequentemente associada a litíase biliar ou álcool.",pathophysiology:"Ativação prematura intraparenquimatosa de enzimas proteolíticas (tripsina) → autodigestão do tecido pancreático → inflamação local e resposta inflamatória sistêmica. Pode evoluir para necrose, infecção e falência de órgãos.",synonyms:["Inflamação do pâncreas"]},
+{term:"Doença Inflamatória Intestinal (Crohn e RCU)",meaning:"Inflamação crônica idiopática do trato gastrointestinal.",pathophysiology:"Desregulação da resposta imune da mucosa em indivíduos geneticamente suscetíveis (interação com microbiota) → inflamação crônica transmural e descontínua (Doença de Crohn) ou limitada à mucosa e submucosa do cólon de forma contínua (Retocolite Ulcerativa).",synonyms:["DII","Crohn","Retocolite ulcerativa"]},
+{term:"Hemorragia Digestiva Alta",meaning:"Sangramento originado proximalmente ao ângulo de Treitz.",pathophysiology:"Úlcera péptica (H. pylori e AINE), ruptura de varizes esofágicas (hipertensão portal), síndrome de Mallory-Weiss ou lesões vasculares. Pode causar instabilidade hemodinâmica e choque hipovolêmico.",synonyms:["HDA","Vômito com sangue","Hematemese"]},
+{term:"Úlcera Péptica",meaning:"Lesão da mucosa gástrica ou duodenal que ultrapassa a muscular da mucosa.",pathophysiology:"Desequilíbrio entre fatores agressores (ácido, pepsina, H. pylori, AINE) e defensores (muco, bicarbonato, fluxo sanguíneo, prostaglandinas) → erosão e ulceração. H. pylori induz inflamação crônica; AINE inibem COX e prostaglandinas protetoras.",synonyms:["Úlcera gástrica","Úlcera duodenal"]},
+{term:"Hepatite Viral Aguda",meaning:"Inflamação hepática aguda causada por vírus hepatotrópicos (A, B, C, D, E).",pathophysiology:"Infecção dos hepatócitos → resposta imune citotóxica (células T) → necrose hepatocelular e inflamação. Pode ser autolimitada ou evoluir para crônica (B e C). Em formas fulminantes: necrose maciça e insuficiência hepática aguda.",synonyms:["Hepatite"]},
+{term:"Obstrução Intestinal",meaning:"Impedimento mecânico ou funcional ao trânsito intestinal.",pathophysiology:"Adesões, hérnias, tumores ou volvo → dilatação proximal, estase, proliferação bacteriana e risco de isquemia, perfuração e peritonite. Íleo paralítico é a forma funcional (sem barreira mecânica).",synonyms:["Íleo","Obstrução"]}
+],
+"Sistema Nervoso": [
+{term:"AVC Isquêmico",meaning:"Interrupção do fluxo sanguíneo cerebral por oclusão arterial, com necrose do tecido.",pathophysiology:"Tromboembolismo ou trombose in situ → isquemia focal → cascata isquêmica (excitotoxicidade por glutamato, estresse oxidativo, inflamação) → necrose na zona de core e risco de progressão da penumbra se não houver reperfusão oportuna.",synonyms:["Derrame isquêmico","Infarto cerebral"]},
+{term:"AVC Hemorrágico",meaning:"Sangramento intraparenquimatoso ou no espaço subaracnóideo.",pathophysiology:"Ruptura de vaso (HAS crônica com lipohialinose, aneurisma, malformação arteriovenosa) → hematoma → efeito de massa, aumento da pressão intracraniana e lesão secundária por inflamação e isquemia perilesional.",synonyms:["Derrame hemorrágico","Hemorragia cerebral"]},
+{term:"Meningite Bacteriana",meaning:"Inflamação das meninges causada por bactérias. Emergência neurológica.",pathophysiology:"Bacteremia ou contigüidade → invasão do espaço subaracnóideo → inflamação intensa com aumento da permeabilidade da barreira hematoencefálica → edema cerebral, hipertensão intracraniana e risco de herniação. Principais agentes: S. pneumoniae, N. meningitidis, H. influenzae.",synonyms:["Meningite","Infecção meníngea"]},
+{term:"Epilepsia e Crise Convulsiva",meaning:"Atividade elétrica cerebral anormal, excessiva e sincronizada.",pathophysiology:"Desequilíbrio entre excitação (glutamato) e inibição (GABA) → descargas hipersíncronas de neurônios → manifestações motoras, sensitivas, autonômicas ou cognitivas. Status epilepticus: crise prolongada ou repetida sem recuperação, com risco de lesão neuronal.",synonyms:["Convulsão","Crise epiléptica"]},
+{term:"Hipertensão Intracraniana",meaning:"Aumento da pressão dentro do compartimento craniano.",pathophysiology:"Aumento de volume (edema, hematoma, tumor, hidrocefalia) em espaço de complacência limitada (doutrina de Monroe-Kellie) → redução da perfusão cerebral e risco de herniações (uncal, tonsilar, subfalcina).",synonyms:["HIC","PIC elevada"]},
+{term:"Doença de Alzheimer",meaning:"Doença neurodegenerativa progressiva, causa mais comum de demência.",pathophysiology:"Acúmulo de placas de beta-amiloide e emaranhados neurofibrilares de proteína tau hiperfosforilada → disfunção sináptica, morte neuronal e atrofia cortical (especialmente hipocampo e córtex de associação) → declínio de memória e cognição.",synonyms:["Alzheimer","Demência de Alzheimer"]},
+{term:"Doença de Parkinson",meaning:"Doença neurodegenerativa caracterizada por parkinsonismo.",pathophysiology:"Degeneração de neurônios dopaminérgicos da substância negra pars compacta → depleção de dopamina no estriado → bradicinesia, tremor de repouso, rigidez e instabilidade postural. Corpos de Lewy (alfa-sinucleína) são o marcador histopatológico.",synonyms:["Parkinson","Mal de Parkinson"]},
+{term:"Esclerose Múltipla",meaning:"Doença autoimune desmielinizante do sistema nervoso central.",pathophysiology:"Resposta autoimune contra a mielina do SNC → inflamação, desmielinização e dano axonal → condução nervosa prejudicada. Lesões em placas disseminadas no tempo e no espaço. Forma remitente-recorrente é a mais comum.",synonyms:["EM","Esclerose em placas"]}
+],
+"Infectologia e Sepse": [
+{term:"Sepse e Choque Séptico",meaning:"Disfunção orgânica ameaçadora à vida causada por resposta desregulada do hospedeiro à infecção.",pathophysiology:"Infecção → liberação massiva de citocinas pró-inflamatórias (tempestade citocínica) → vasodilatação, aumento da permeabilidade capilar, coagulopatia e disfunção mitocondrial. Hipotensão refratária à reposição volêmica caracteriza o choque séptico. Critérios: qSOFA e SOFA.",synonyms:["Sepse","Choque séptico","Infecção generalizada"]},
+{term:"Tuberculose",meaning:"Infecção crônica por Mycobacterium tuberculosis. Muito cobrada no Revalida.",pathophysiology:"Inalação de bacilos → infecção primária com formação de granuloma (células epitelioides e de Langhans, necrose caseosa). Em estados de imunossupressão, reativação → necrose, cavitações e possível disseminação hematogênica (TB miliar).",synonyms:["TB","Tísica"]},
+{term:"Dengue e Arboviroses Graves",meaning:"Doenças virais transmitidas por vetores (Aedes). Altamente prevalentes no Brasil.",pathophysiology:"Replicação viral e resposta imune → aumento da permeabilidade vascular (especialmente em dengue grave) → extravasamento plasmático, hemoconcentração e choque. Trombocitopenia e coagulopatia contribuem para hemorragias. Em formas graves: falência de órgãos.",synonyms:["Dengue","Arbovirose"]},
+{term:"HIV / AIDS",meaning:"Infecção pelo vírus da imunodeficiência humana com progressão para imunodeficiência.",pathophysiology:"Infecção e depleção progressiva de linfócitos T CD4+ → imunodeficiência celular → infecções oportunistas e neoplasias definidoras de AIDS. Fases: aguda, latência clínica e AIDS. Replicação viral contínua e ativação imune crônica.",synonyms:["HIV","AIDS"]},
+{term:"Malária",meaning:"Doença parasitária transmitida por Anopheles, causada por Plasmodium spp.",pathophysiology:"Ciclo eritrocítico do parasita → hemólise, liberação de citocinas e sequestro de hemácias parasitadas na microcirculação → febre cíclica, anemia e, em P. falciparum, disfunção de órgãos (cerebral, renal, pulmonar).",synonyms:["Paludismo"]},
+{term:"Leptospirose",meaning:"Zoonose causada por Leptospira interrogans.",pathophysiology:"Penetração cutânea/mucosa → bacteremia → lesão endotelial e de órgãos (fígado, rim, pulmão) → icterícia, insuficiência renal e hemorragia pulmonar na forma grave (síndrome de Weil).",synonyms:["Doença de Weil"]}
+],
+"Sistema Musculoesquelético e Reumatologia": [
+{term:"Artrite Reumatoide",meaning:"Doença autoimune sistêmica com sinovite crônica e destruição articular.",pathophysiology:"Ativação de células T e B → produção de fator reumatoide e anticorpos anti-CCP → inflamação sinovial persistente → formação de pannus → erosão óssea e destruição da cartilagem. Manifestações extra-articulares possíveis (nódulos, vasculitis, comprometimento pulmonar).",synonyms:["AR"]},
+{term:"Lúpus Eritematoso Sistêmico (LES)",meaning:"Doença autoimune multissistêmica. Mais cobrada em Reumatologia no Revalida.",pathophysiology:"Perda de tolerância imunológica → produção de autoanticorpos (ANA, anti-dsDNA, anti-Sm) → formação e depósito de imunocomplexos em rins, pele, articulações, SNC e serosas → inflamação e dano tecidual. Fotossensibilidade e fenômeno de Raynaud são comuns.",synonyms:["LES","Lúpus"]},
+{term:"Gota",meaning:"Artropatia por depósito de cristais de monourato de sódio.",pathophysiology:"Hiperuricemia (produção excessiva ou subexcreção) → supersaturação → precipitação de cristais nas articulações e tecidos → inflamação intensa mediada por neutrófilos e inflamassoma NLRP3. Crises agudas e tofos crônicos.",synonyms:["Artrite gotosa"]},
+{term:"Osteoporose",meaning:"Redução da massa e da qualidade óssea com aumento do risco de fratura.",pathophysiology:"Desequilíbrio entre reabsorção óssea (osteoclastos) e formação (osteoblastos). Pós-menopausa: queda de estrógeno aumenta a reabsorção. Forma senil e secundária (corticoides, hipertireoidismo, etc.) também importantes. Fraturas de vértebras, fêmur e punho são típicas.",synonyms:["Ossos fracos","Fragilidade óssea"]},
+{term:"Osteoartrite (Artrose)",meaning:"Doença degenerativa da cartilagem articular e do osso subcondral.",pathophysiology:"Desgaste da cartilagem articular + remodelamento ósseo (osteófitos) + inflamação de baixo grau da sinóvia → dor, rigidez e limitação funcional. Fatores: idade, sobrecarga mecânica, obesidade e predisposição genética.",synonyms:["Artrose","OA"]},
+{term:"Espondilite Anquilosante",meaning:"Espondiloartrite axial com inflamação da coluna e articulações sacroilíacas.",pathophysiology:"Inflamação crônica associada ao HLA-B27 → entesite, erosões e, posteriormente, ossificação e anquilose da coluna. Pode haver uveíte e comprometimento de articulações periféricas.",synonyms:["EA","Espondiloartrite"]}
+],
+"Hematologia": [
+{term:"Anemia Falciforme",meaning:"Hemoglobinopatia hereditária (HbS). Muito cobrada em Pediatria e Hematologia no Revalida.",pathophysiology:"Mutação pontual (Glu→Val) na cadeia β da hemoglobina → polimerização da HbS na forma desoxigenada → deformação em foice dos eritrócitos → hemólise crônica e oclusão microvascular → crises vaso-oclusivas, sequestro esplênico, síndrome torácica aguda e infecções.",synonyms:["Drepanocitose","HbS"]},
+{term:"Anemia por Deficiência de Ferro",meaning:"Anemia microcítica hipocrômica mais prevalente no mundo.",pathophysiology:"Esgotamento dos estoques de ferro (ferritina) → redução da síntese de hemoglobina → eritrócitos pequenos e hipocrômicos. Causas: perdas sanguíneas (gastrointestinal, menstrual), má absorção e aumento de demanda (gestação, crescimento).",synonyms:["Anemia ferropriva"]},
+{term:"Anemia Megaloblástica",meaning:"Anemia macrocítica por deficiência de vitamina B12 ou ácido fólico.",pathophysiology:"Defeito na síntese de DNA → eritropoiese ineficaz e macrocitose. Deficiência de B12 (anemia perniciosa, má absorção) pode causar neuropatia; deficiência de folato está ligada a dieta e aumento de demanda.",synonyms:["Anemia por B12","Anemia por folato"]},
+{term:"Coagulação Intravascular Disseminada (CIVD)",meaning:"Ativação sistêmica da coagulação com consumo de fatores e tendência a sangramento.",pathophysiology:"Estímulo maciço (sepse, trauma, obstétrico, neoplasias) → geração generalizada de trombina → microtrombose + consumo de plaquetas e fatores de coagulação → sangramento e disfunção de órgãos.",synonyms:["CIVD","DIC"]},
+{term:"Leucemia Aguda",meaning:"Proliferação clonal de blastos na medula óssea com insuficiência medular.",pathophysiology:"Bloqueio da diferenciação e proliferação de precursores hematopoéticos → acúmulo de blastos → anemia, trombocitopenia e neutropenia. Pode ser linfoblástica (LLA) ou mieloide (LMA). Infiltração extramedular possível.",synonyms:["Leucemia"]},
+{term:"Linfoma",meaning:"Neoplasia originada em células linfoides (Hodgkin e não-Hodgkin).",pathophysiology:"Transformação clonal de linfócitos B ou T → proliferação em linfonodos e tecidos linfoides → linfadenopatia, sintomas B (febre, sudorese, emagrecimento) e, em alguns tipos, disseminação extranodal. Classificação histológica e molecular orienta o tratamento.",synonyms:["Linfoma Hodgkin","Linfoma não-Hodgkin"]}
+],
+"Sistema Tegumentar (Pele)": [
+{term:"Celulite e Erisipela",meaning:"Infecções bacterianas da pele e tecido subcutâneo.",pathophysiology:"Invasão bacteriana (estreptococos, estafilococos) através de solução de continuidade → inflamação local com eritema, calor, edema e dor. Erisipela acomete derme superficial com limites nítidos; celulite é mais profunda e difusa. Risco de sepse em imunocomprometidos.",synonyms:["Infecção de pele"]},
+{term:"Queimaduras",meaning:"Lesão tecidual por agentes térmicos, químicos, elétricos ou radioativos.",pathophysiology:"Destruição de epiderme e/ou derme → resposta inflamatória local e, em grandes extensões, resposta sistêmica (perda de fluidos, resposta hiperdinâmica, imunossupressão). Classificação por profundidade (1º, 2º, 3º grau) e extensão (regra dos 9).",synonyms:["Queimadura"]},
+{term:"Úlcera por Pressão (Escara)",meaning:"Lesão de pele e tecido subjacente por pressão prolongada.",pathophysiology:"Compressão sustentada sobre proeminências ósseas → isquemia tecidual → necrose. Fatores: imobilidade, umidade, desnutrição e fricção. Estágios de I a IV conforme profundidade.",synonyms:["Escara","Úlcera de decúbito"]},
+{term:"Psoríase",meaning:"Doença inflamatória crônica da pele com placas eritemato-descamativas.",pathophysiology:"Hiperproliferação de queratinócitos mediada por células T (Th1/Th17) e citocinas (TNF, IL-17, IL-23) → placas espessas com escamas prateadas. Pode haver acometimento articular (artrite psoriásica).",synonyms:["Psoríase"]},
+{term:"Dermatite de Contato",meaning:"Reação inflamatória da pele a agentes externos.",pathophysiology:"Forma irritativa (dano direto) ou alérgica (hipersensibilidade tipo IV mediada por células T) → eritema, edema, vesículas e prurido no local de contato.",synonyms:["Eczema de contato"]}
+],
+"Sistema Reprodutor e Obstetrícia": [
+{term:"Pré-eclâmpsia / Eclâmpsia",meaning:"Distúrbio hipertensivo da gestação com proteinúria ou disfunção de órgãos. Altamente cobrado em Obstetrícia.",pathophysiology:"Placentação inadequada → isquemia placentária → liberação de fatores antiangiogênicos → disfunção endotelial sistêmica → hipertensão, proteinúria, edema e risco de convulsões (eclâmpsia), HELLP e restrição de crescimento fetal.",synonyms:["Pré-eclâmpsia","Eclâmpsia","DHEG"]},
+{term:"Hemorragia Pós-Parto",meaning:"Perda sanguínea excessiva após o parto. Emergência obstétrica.",pathophysiology:"Os “4 Ts”: Tônus (atonia uterina — causa mais comum), Trauma (laceração), Tecido (retenção placentária) e Trombina (coagulopatia). Pode evoluir rapidamente para choque hipovolêmico e CIVD.",synonyms:["HPP","Hemorragia puerperal"]},
+{term:"Endometriose",meaning:"Presença de tecido endometrial fora da cavidade uterina.",pathophysiology:"Implantes ectópicos de endométrio (teoria da menstruação retrógrada e outras) → inflamação cíclica, aderências e dor pélvica. Pode causar infertilidade por distorção anatômica e ambiente peritoneal inflamatório.",synonyms:["Endometriose"]},
+{term:"Doença Inflamatória Pélvica",meaning:"Infecção ascendente do trato genital feminino superior.",pathophysiology:"Ascensão de patógenos (gonococo, clamídia, flora polimicrobiana) do colo para endométrio, trompas e peritônio pélvico → inflamação, abscesso tubo-ovariano e risco de infertilidade e gestação ectópica.",synonyms:["DIP"]},
+{term:"Diabetes Gestacional",meaning:"Intolerância à glicose de início ou diagnóstico na gestação.",pathophysiology:"Hormônios placentários (lactogênio placentário, cortisol, progesterona) induzem resistência à insulina → hiperglicemia materna quando a compensação das células β é insuficiente. Risco de macrossomia, pré-eclâmpsia e diabetes futuro.",synonyms:["DMG"]}
+],
+"Pediatria e Neonatologia": [
+{term:"Desidratação na Infância",meaning:"Déficit de água e eletrólitos, frequentemente por diarreia ou vômitos.",pathophysiology:"Perdas gastrointestinais excessivas → redução do volume extracelular → taquicardia, diminuição da perfusão periférica e, em casos graves, choque hipovolêmico e lesão renal aguda. Classificada em isotônica, hipotônica ou hipertônica.",synonyms:["Desidratação pediátrica"]},
+{term:"Bronquiolite Viral Aguda",meaning:"Infecção viral das vias aéreas inferiores em lactentes (principalmente VSR).",pathophysiology:"Infecção do epitélio bronquiolar → inflamação, edema e acúmulo de debris → obstrução de pequenas vias → hiperinsuflação, atelectasia e insuficiência respiratória em casos graves.",synonyms:["Bronquiolite"]},
+{term:"Icterícia Neonatal",meaning:"Hiperbilirrubinemia no período neonatal.",pathophysiology:"Aumento da produção de bilirrubina (hemólise fisiológica ou patológica) + imaturidade da conjugação hepática → acúmulo de bilirrubina indireta. Risco de kernicterus (depósito em núcleos da base) em níveis elevados.",synonyms:["Icterícia do RN"]},
+{term:"Sepse Neonatal",meaning:"Infecção sistêmica no recém-nascido (precoce ou tardia).",pathophysiology:"Imaturidade imunológica + colonização/infecção (estreptococo do grupo B, E. coli, Listeria, estafilococos) → resposta inflamatória sistêmica, choque e disfunção de órgãos. Diagnóstico e antibioticoterapia precoces são essenciais.",synonyms:["Sepse do RN"]},
+{term:"Convulsão Febril",meaning:"Crise convulsiva associada a febre em criança de 6 meses a 5 anos, sem infecção do SNC.",pathophysiology:"Imaturidade cerebral + elevação da temperatura → redução do limiar convulsivo. Na maioria das vezes benigna e autolimitada; formas complexas exigem investigação de causas subjacentes.",synonyms:["Crise febril"]}
+],
+"Equilíbrio Ácido-Base e Eletrólitos": [
+{term:"Acidose Metabólica",meaning:"Redução do pH sanguíneo por acúmulo de ácidos ou perda de bicarbonato.",pathophysiology:"Ânion gap elevado (cetoácidos, lactato, toxinas, uremia) ou ânion gap normal/hiperclorêmico (perda de HCO₃⁻ gastrointestinal ou renal, ATR). Compensação respiratória por hiperventilação (redução de PaCO₂).",synonyms:["Acidose"]},
+{term:"Alcalose Metabólica",meaning:"Aumento do pH por ganho de bicarbonato ou perda de ácidos.",pathophysiology:"Vômitos, diuréticos ou hipovolemia → contração de volume e hipocalemia mantêm a alcalose. Compensação respiratória limitada (hipoventilação).",synonyms:["Alcalose"]},
+{term:"Acidose Respiratória",meaning:"Redução do pH por retenção de CO₂.",pathophysiology:"Hipoventilação (DPOC, depressão do SNC, fraqueza muscular, obstrução de vias aéreas) → elevação de PaCO₂ → queda do pH. Compensação renal por retenção de HCO₃⁻ em formas crônicas.",synonyms:["Hipercapnia"]},
+{term:"Alcalose Respiratória",meaning:"Aumento do pH por eliminação excessiva de CO₂.",pathophysiology:"Hiperventilação (ansiedade, hipoxemia, sepse, gravidez, excesso de ventilação mecânica) → redução de PaCO₂ → elevação do pH. Pode causar hipocalcemia ionizada e parestesias.",synonyms:["Hipocapnia"]},
+{term:"Hipercalemia",meaning:"Elevação do potássio sérico. Emergência eletrolítica frequente.",pathophysiology:"Redução da excreção renal (DRC, medicamentos), liberação celular (hemólise, rabdomiólise, acidose, queimaduras) ou excesso de aporte. Risco de arritmias graves: ondas T apiculadas, alargamento do QRS e assistolia.",synonyms:["Potássio alto"]},
+{term:"Hipocalemia",meaning:"Redução do potássio sérico.",pathophysiology:"Perdas gastrointestinais ou renais, redistribuição para o interior celular (alcalose, insulina) ou baixa ingestão. Causa fraqueza muscular, constipação e arritmias (ondas U, extra-sístoles).",synonyms:["Potássio baixo"]},
+{term:"Hiponatremia",meaning:"Redução da concentração de sódio plasmático.",pathophysiology:"Excesso de água em relação ao sódio (SIADH, polidipsia, IC, cirrose) ou perda de sódio. Classificada por tonicidade e volume. Hiponatremia aguda grave pode causar edema cerebral e convulsões.",synonyms:["Sódio baixo"]},
+{term:"Hipernatremia",meaning:"Elevação da concentração de sódio plasmático.",pathophysiology:"Déficit de água livre (perdas insensíveis, diabetes insipidus, baixa ingestão) ou ganho de sódio. Causa desidratação celular e, se grave ou de correção inadequada, risco de lesão cerebral.",synonyms:["Sódio alto"]}
+],
+"Oncologia e Neoplasias": [
+{term:"Carcinogênese",meaning:"Processo de transformação de uma célula normal em célula neoplásica maligna.",pathophysiology:"Acúmulo de mutações em proto-oncogenes, genes supressores de tumor e genes de reparo do DNA → autossuficiência em sinais de crescimento, insensibilidade a sinais inibidores, evasão da apoptose, replicação ilimitada, angiogênese e capacidade de invasão/metástase (hallmarks do câncer).",synonyms:["Oncogênese"]},
+{term:"Metástase",meaning:"Disseminação de células neoplásicas para sítios distantes do tumor primário.",pathophysiology:"Invasão local → intravasão em vasos sanguíneos ou linfáticos → sobrevivência na circulação → extravasão e colonização de órgãos distantes. Microambiente do órgão-alvo (seed and soil) influencia o sucesso metastático.",synonyms:["Disseminação neoplásica"]},
+{term:"Síndrome de Lise Tumoral",meaning:"Emergência oncológica por liberação maciça de conteúdo celular.",pathophysiology:"Destruição rápida de células tumorais (espontânea ou pós-quimioterapia) → hiperuricemia, hipercalemia, hiperfosfatemia e hipocalcemia → risco de arritmias, convulsões e lesão renal aguda por precipitação de ácido úrico e fosfato de cálcio.",synonyms:["SLT"]},
+{term:"Síndrome da Veia Cava Superior",meaning:"Obstrução do fluxo da veia cava superior, geralmente por massa mediastinal.",pathophysiology:"Compressão ou trombose da VCS (câncer de pulmão, linfoma) → edema de face, pescoço e membros superiores, circulação colateral e, em casos graves, comprometimento respiratório e neurológico.",synonyms:["SVCS"]}
+],
+"Imunologia e Hipersensibilidade": [
+{term:"Hipersensibilidade Tipo I (Anafilaxia)",meaning:"Reação alérgica imediata mediada por IgE.",pathophysiology:"Exposição ao alérgeno em indivíduo sensibilizado → ligação a IgE em mastócitos e basófilos → degranulação → liberação de histamina, leucotrienos e outras mediadores → vasodilatação, aumento da permeabilidade, broncoespasmo e, na anafilaxia, choque.",synonyms:["Anafilaxia","Alergia"]},
+{term:"Hipersensibilidade Tipo II",meaning:"Reação citotóxica mediada por anticorpos IgG/IgM contra antígenos de superfície celular.",pathophysiology:"Anticorpos ligam-se a antígenos na membrana celular → ativação do complemento e/ou opsonização → lise ou fagocitose. Exemplos: anemia hemolítica autoimune, reação transfusional, doença hemolítica do RN, Goodpasture.",synonyms:["Citotóxica"]},
+{term:"Hipersensibilidade Tipo III",meaning:"Doença por imunocomplexos.",pathophysiology:"Formação de complexos antígeno-anticorpo → depósito em tecidos (rins, articulações, vasos, pele) → ativação do complemento e inflamação. Exemplos: lúpus, doença do soro, glomerulonefrites por imunocomplexos.",synonyms:["Imunocomplexos"]},
+{term:"Hipersensibilidade Tipo IV",meaning:"Reação tardia mediada por células T.",pathophysiology:"Células T sensibilizadas reconhecem antígeno → liberação de citocinas e recrutamento de macrófagos → inflamação em 48–72 h. Exemplos: dermatite de contato, teste tuberculínico, rejeição de enxerto, algumas lesões da tuberculose.",synonyms:["Hipersensibilidade tardia"]},
+{term:"Imunodeficiência",meaning:"Defeito quantitativo ou funcional de componentes do sistema imune.",pathophysiology:"Congênita (defeitos genéticos de células T, B, fagócitos ou complemento) ou adquirida (HIV, desnutrição, imunossupressores, neoplasias) → aumento da suscetibilidade a infecções, autoimunidade e neoplasias.",synonyms:["Imunossupressão"]}
+]
+};
+
+let total = 0;
+Object.values(DATA).forEach(a => total += a.length);
+
+const results = document.getElementById('results');
+const search = document.getElementById('search');
+const stats = document.getElementById('stats');
+const themeBtn = document.getElementById('themeBtn');
+
+function render(filter = '') {
+  const q = filter.toLowerCase().trim();
+  results.innerHTML = '';
+  let shown = 0;
+  Object.keys(DATA).sort((a,b) => a.localeCompare(b)).forEach(cat => {
+    const terms = DATA[cat].filter(t => {
+      if (!q) return true;
+      return t.term.toLowerCase().includes(q) || t.meaning.toLowerCase().includes(q) ||
+        (t.pathophysiology && t.pathophysiology.toLowerCase().includes(q)) ||
+        t.synonyms.some(s => s.toLowerCase().includes(q));
+    }).sort((a,b) => a.term.localeCompare(b.term));
+    if (!terms.length) return;
+    shown += terms.length;
+    const d = document.createElement('details');
+    d.className = 'cat';
+    if (q) d.open = true;
+    d.innerHTML = `<summary>${cat} <span class="badge">${terms.length}</span></summary><div class="cat-body"></div>`;
+    const body = d.querySelector('.cat-body');
+    terms.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'term';
+      div.innerHTML = `<h3>${t.term}</h3><div class="lbl">Significado</div><p>${t.meaning}</p><div class="patho"><div class="lbl">Fisiopatologia</div>${t.pathophysiology}</div><p class="syns"><strong>Sinônimos:</strong> ${t.synonyms.join(', ')}</p>`;
+      body.appendChild(div);
+    });
+    results.appendChild(d);
+  });
+  if (!shown) results.innerHTML = `<div class="empty">Nenhum resultado para “${filter}”</div>`;
+  stats.innerHTML = `<span class="chip">${Object.keys(DATA).length} sistemas</span><span class="chip">${total} tópicos</span>${q ? `<span class="chip">${shown} resultados</span>` : ''}`;
+}
+
+search.addEventListener('input', () => render(search.value));
+if (localStorage.getItem('pq-theme') === 'dark') {
+  document.body.classList.add('dark');
+  themeBtn.textContent = '☀️';
+}
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const dark = document.body.classList.contains('dark');
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('pq-theme', dark ? 'dark' : 'light');
+});
+render();
+</script>
+</body>
+</html>
