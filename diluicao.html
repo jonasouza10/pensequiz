@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guia de Diluição | PenseQuiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0d6efd;
+      --primary-dark: #0a58ca;
+      --primary-light: #e7f1ff;
+      --accent: #20c997;
+      --danger: #e35d6a;
+      --bg: #f0f4f8;
+      --bg-card: #ffffff;
+      --bg-sidebar: #ffffff;
+      --text: #1a1d21;
+      --text-muted: #6c757d;
+      --border: #e2e8f0;
+      --shadow: 0 4px 24px rgba(0,0,0,0.07);
+      --radius: 14px;
+      --header-bg: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+      --tag-bg: #e7f1ff;
+      --tag-color: #0d6efd;
+      --section-bg: #f8fafc;
+      --transition: all 0.22s ease;
+    }
+
+    [data-theme="dark"] {
+      --primary: #4d9fff;
+      --primary-dark: #3a8aef;
+      --primary-light: #1a2a3a;
+      --accent: #2dd4a8;
+      --danger: #f07178;
+      --bg: #0f1419;
+      --bg-card: #1a2332;
+      --bg-sidebar: #1a2332;
+      --text: #e8edf2;
+      --text-muted: #8b9cb3;
+      --border: #2a3544;
+      --shadow: 0 4px 24px rgba(0,0,0,0.35);
+      --header-bg: linear-gradient(135deg, #1a3a6b 0%, #0d2144 100%);
+      --tag-bg: #1e3a5f;
+      --tag-color: #6bb3ff;
+      --section-bg: #141c28;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    header {
+      background: var(--header-bg);
+      color: white;
+      padding: 0.9rem 1.25rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    }
+
+    .header-content {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .logo h1 { font-size: 1.15rem; font-weight: 700; line-height: 1.2; }
+    .logo span { font-size: 0.7rem; opacity: 0.8; font-weight: 400; }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex: 1;
+      max-width: 520px;
+      justify-content: flex-end;
+    }
+
+    .search-box {
+      flex: 1;
+      position: relative;
+      max-width: 380px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.6rem 1rem 0.6rem 2.6rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      background: rgba(255,255,255,0.95);
+      color: #1a1d21;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .search-box input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
+    }
+
+    .search-box::before {
+      content: "🔍";
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .theme-btn, .menu-toggle {
+      background: rgba(255,255,255,0.18);
+      border: none;
+      color: white;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+
+    .theme-btn:hover, .menu-toggle:hover { background: rgba(255,255,255,0.3); }
+    .menu-toggle { display: none; }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.25rem;
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 920px) {
+      .container { grid-template-columns: 1fr; }
+      .menu-toggle { display: flex; }
+    }
+
+    .sidebar {
+      background: var(--bg-sidebar);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.1rem;
+      height: fit-content;
+      position: sticky;
+      top: 80px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+      border: 1px solid var(--border);
+    }
+
+    .sidebar h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+      font-weight: 600;
+    }
+
+    .category-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+
+    .category-btn {
+      width: 100%;
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    .category-btn:hover { background: var(--primary-light); color: var(--primary); }
+    .category-btn.active { background: var(--primary); color: white; font-weight: 500; }
+
+    .category-btn .count {
+      font-size: 0.7rem;
+      background: rgba(0,0,0,0.07);
+      padding: 0.12rem 0.4rem;
+      border-radius: 20px;
+      min-width: 22px;
+      text-align: center;
+    }
+
+    .category-btn.active .count { background: rgba(255,255,255,0.22); }
+
+    .results-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .results-header h2 { font-size: 1.25rem; font-weight: 700; }
+
+    .results-count {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .med-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: var(--transition);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .med-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+      border-color: var(--primary);
+    }
+
+    .med-card-header {
+      padding: 1rem 1.15rem 0.65rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .category-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.18rem 0.5rem;
+      border-radius: 5px;
+      background: var(--tag-bg);
+      color: var(--tag-color);
+      margin-bottom: 0.4rem;
+    }
+
+    .med-card-header h3 { font-size: 1.05rem; font-weight: 650; line-height: 1.3; }
+    .med-card-header .subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+    .med-card-body {
+      padding: 0.85rem 1.15rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .info-row { display: flex; gap: 0.4rem; font-size: 0.82rem; }
+    .info-row .label { font-weight: 550; color: var(--text-muted); min-width: 58px; flex-shrink: 0; }
+    .info-row .value { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .med-card-footer {
+      padding: 0.65rem 1.15rem;
+      background: var(--section-bg);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-detail {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.4rem 0.95rem;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 550;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-detail:hover { background: var(--primary-dark); }
+
+    .empty-state {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+
+    .empty-state .icon { font-size: 3rem; margin-bottom: 0.75rem; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(5px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active { display: flex; opacity: 1; }
+
+    .modal {
+      background: var(--bg-card);
+      border-radius: 16px;
+      max-width: 760px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+      transform: translateY(18px);
+      transition: transform 0.3s ease;
+      border: 1px solid var(--border);
+    }
+
+    .modal-overlay.active .modal { transform: translateY(0); }
+
+    .modal-header {
+      padding: 1.35rem 1.4rem 1rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg-card);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .modal-header h2 { font-size: 1.3rem; font-weight: 750; }
+    .modal-header .category { font-size: 0.75rem; color: var(--primary); font-weight: 650; margin-bottom: 0.25rem; }
+
+    .modal-close {
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      flex-shrink: 0;
+      color: var(--text);
+    }
+
+    .modal-close:hover { background: var(--border); }
+
+    .modal-body {
+      padding: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .detail-section {
+      background: var(--section-bg);
+      border-radius: 10px;
+      padding: 0.95rem 1.1rem;
+      border: 1px solid var(--border);
+    }
+
+    .detail-section h4 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      margin-bottom: 0.45rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .detail-section p, .detail-section ul { font-size: 0.92rem; color: var(--text); }
+    .detail-section ul { padding-left: 1.15rem; margin-top: 0.25rem; }
+    .detail-section li { margin-bottom: 0.22rem; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 920px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -290px;
+        width: 280px;
+        height: 100vh;
+        z-index: 150;
+        transition: left 0.3s ease;
+        border-radius: 0;
+        max-height: 100vh;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 140;
+        display: none;
+      }
+      .sidebar-overlay.active { display: block; }
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.75rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer strong { color: var(--text); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+        <div class="logo-icon">💊</div>
+        <div>
+          <h1>Guia de Diluição | PenseQuiz</h1>
+          <span>Educacional e simulador</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="search-box">
+          <input type="search" id="searchInput" placeholder="Buscar medicamento..." autocomplete="off">
+        </div>
+        <button class="theme-btn" id="themeBtn" title="Alternar tema" aria-label="Modo escuro">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="container">
+    <aside class="sidebar" id="sidebar">
+      <h2>Categorias</h2>
+      <ul class="category-list" id="categoryList"></ul>
+    </aside>
+
+    <main>
+      <div class="results-header">
+        <h2 id="resultsTitle">Todos os Medicamentos</h2>
+        <span class="results-count" id="resultsCount">0 medicamentos</span>
+      </div>
+      <div class="cards-grid" id="cardsGrid"></div>
+    </main>
+  </div>
+
+  <footer>
+    <p>Baseado no e-book <strong>Guia de Medicamentos</strong> — 1ª Edição • SINOP 2023</p>
+    <p>Corpo discente Turma 2022/2 • Enfermagem UFMT • Sistema para consulta rápida e fins educacionais</p>
+  </footer>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <div>
+          <div class="category" id="modalCategory"></div>
+          <h2 id="modalTitle"></h2>
+        </div>
+        <button class="modal-close" id="modalClose" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const medicamentos = [
+      {id:"epinefrina",nome:"Epinefrina",categoria:"Amina vasoativa",subtitulo:"Agonista adrenérgico",apresentacao:"Solução injetável 1 mg/mL (ampola de 1 mL)",vias:["Intramuscular","Endovenoso","Subcutâneo"],estabilidade:"24h refrigerado (5°C)",diluicao:"SG 5%; SF 0,9% — volume de 250 mL a 500 mL (se infusão contínua)",posologia:"Conforme protocolo de emergência e prescrição médica. Em broncoespasmo severo: preferir via subcutânea.",cuidados:["Manter proteção da luz (medicação fotossensível)","Em broncoespasmo severo, administrar subcutâneo","Prever e prover materiais para possíveis emergências","Estimular hidratação"],reacoes:"Aumentar a rigidez e tremores em parkinsonianos; a repetição pode causar danos aos tecidos injetados; náuseas, vômitos, visão turva e aumento da PA."},
+      {id:"norepinefrina",nome:"Norepinefrina",categoria:"Amina vasoativa",subtitulo:"Vasopressor",apresentacao:"Solução injetável 2 mg/mL (ampola de 4 mL)",vias:["Endovenoso"],estabilidade:"24h em temperatura ambiente (TA)",diluicao:"Preferencialmente em SG 5%; SF 0,9% — 250 mL",posologia:"Infusão contínua em bomba de infusão. Dose conforme resposta hemodinâmica e prescrição.",cuidados:["Controlar PA e FC durante o tratamento","Utilizar acesso venoso central devido ao risco de necrose tecidual","Manter controle da bomba de infusão","Monitorar possíveis efeitos colaterais e reações adversas"],reacoes:"Ansiedade, desconforto respiratório, dor de cabeça, tremores, dor no peito, dor faríngea, sensibilidade excessiva à luz, palidez, suor, vômitos, bradicardia ou taquicardia."},
+      {id:"dopamina",nome:"Dopamina",categoria:"Amina vasoativa",subtitulo:"Vasopressor",apresentacao:"Solução injetável 5 mg/mL (ampola de 10 mL)",vias:["Endovenoso"],estabilidade:"24h em temperatura ambiente (TA)",diluicao:"SG 5%; SF 0,9% — volume de 100 a 250 mL (100 mg) e 500 mL (250 mg)",posologia:"Infusão em AVC controlada por bomba. Descontinuar lentamente (desmame).",cuidados:["Informar ao paciente a ação do medicamento e as reações","Infundir a droga em AVC, controlada por bomba de infusão e descontinuar lentamente (desmame)","Manter o paciente monitorado com ECG","Manter as extremidades do paciente aquecidas"],reacoes:"Náuseas, vômitos, batimentos ectópicos, taquicardia, dispneia, hipotensão, vasoconstrição, angina, bradicardia, hipertensão, palpitações e arritmias ventriculares."},
+      {id:"morfina",nome:"Morfina",categoria:"Analgésico narcótico",subtitulo:"Analgésico narcótico",apresentacao:"Comprimido, cápsula, solução injetável, solução oral",vias:["Endovenoso","Epidural"],estabilidade:"48h em temperatura ambiente (TA)",diluicao:"Direta: 2,5-15 mg em 5 mL de AD; Intermitente: 10 mg/mL + 90 mL em SF 0,9% ou SG 5%",posologia:"Dose usual: 2,5 a 15 mg EV. Ajustar conforme dor e tolerância. Monitorar respiração.",cuidados:["Monitorar controle da dor, estado respiratório e mental","Monitorar pressão arterial, sinais de uso indevido, abuso e dependência","Sinais ou sintomas de hipogonadismo e hipoadrenalismo"],reacoes:"Respiração difícil, irregular, rápida, lenta ou superficial; lábios/unha/pele pálidos ou azuis; tontura, vertigem, sedação, náusea, vômito, transpiração, euforia, fraqueza, dor de cabeça."},
+      {id:"tramadol",nome:"Cloridrato de Tramadol",categoria:"Analgésico narcótico",subtitulo:"Analgésico narcótico",apresentacao:"Comprimido, solução injetável, solução oral",vias:["Endovenoso","Intramuscular","Subcutâneo","Oral"],estabilidade:"12h em temperatura ambiente (TA)",diluicao:"SF 0,9%; SG 5% a critério médico",posologia:"Conforme prescrição. Avaliar função renal e hepática antes da administração.",cuidados:["Avaliar estado respiratório e mental, PA, FC e função intestinal","Avaliar sinais de hipogonadismo ou hipoadrenalismo","Observar sinais de tolerância, dependência, abuso ou mau uso"],reacoes:"Cefaleia, sonolência, náuseas e vômitos, constipação, boca seca, hiperidrose e fadiga."},
+      {id:"fentanil",nome:"Fentanil",categoria:"Analgésico narcótico",subtitulo:"Analgésico narcótico",apresentacao:"Solução injetável (frasco-ampola 2 mL / 5 mL / 10 mL)",vias:["Endovenoso"],estabilidade:"24h após preparo",diluicao:"SG 0,9% ou SG 5%",posologia:"Dose conforme procedimento e peso. Monitorar rigorosamente respiração e sedação.",cuidados:["Monitorar controle da dor, estado respiratório e mental","Monitorar pressão arterial, sinais de uso indevido, abuso e dependência","Sinais ou sintomas de hipogonadismo e hipoadrenalismo"],reacoes:"Broncoespasmos, apneia, hipotensão, hipertensão, distúrbios visuais, sedação, tontura, bradicardia, taquicardia, arritmias, vômitos e náuseas."},
+      {id:"dipirona",nome:"Dipirona",categoria:"Analgésico, Antipirético, AINE",subtitulo:"Analgésico / Antipirético / AINE",apresentacao:"Xarope, gotas, comprimidos, solução injetável",vias:["Endovenoso","Intramuscular","Oral"],estabilidade:"Estável até 1h após reconstituição; depois diluir em 100 mL de SF",diluicao:"Pronto para uso, ou diluir em SF 0,9%; SG 5% ou AD em 10 ou 20 mL",posologia:"Não utilizar em crianças < 3 meses e < 5 kg. Não usar na gestação ou lactação.",cuidados:["Não utilizar em crianças < 3 meses e < 5 kg, nem na gestação ou lactação","Informar efeitos adversos e contraindicação do uso concomitante com depressores do SNC"],reacoes:"Dor no estômago ou intestino; má digestão; diarreia; coloração avermelhada da urina; pressão baixa; arritmias cardíacas; ardência ou coceira na pele."},
+      {id:"paracetamol",nome:"Paracetamol",categoria:"Analgésico, Antipirético, AINE",subtitulo:"Analgésico / Antipirético / AINE",apresentacao:"Xarope, gotas, comprimido, injetável",vias:["Endovenoso","Oral"],estabilidade:"Guardado a TA (15 a 30°C), embalagem original, protegido da luz e umidade",diluicao:"Solução EV pronto para uso",posologia:"Atenção à dose máxima diária para evitar hepatotoxicidade. Monitorar função hepática.",cuidados:["Monitorar função renal e hepática","Monitorar SSVV principalmente temperatura e PA","Atentar-se a sinais de alergia medicamentosa e efeitos adversos"],reacoes:"Aumento das transaminases e hepatotoxicidade, dor de cabeça, arritmia, palpitações, taquicardia, dor abdominal, diarreia, vômitos, prurido, erupção cutânea, disúria, retenção urinária."},
+      {id:"ibuprofeno",nome:"Ibuprofeno",categoria:"Analgésico, Antipirético, AINE",subtitulo:"Analgésico / Antipirético / AINE",apresentacao:"Xarope, gotas, comprimido",vias:["Oral"],estabilidade:"Guardado a TA (15 a 30°C), embalagem original, protegido da luz e umidade",diluicao:"Não se aplica",posologia:"Administrar preferencialmente após refeições. Atenção a risco gastrointestinal.",cuidados:["Atentar-se a risco de sangramento no trato gastrointestinal","Atentar-se a reações adversas","Orientar paciente quanto aos efeitos adversos e forma correta de administração"],reacoes:"Tontura, fadiga, cefaleia, rash, náuseas, vertigem, epigastralgia, dor abdominal, vômitos."},
+      {id:"butilbrometo-escopolamina",nome:"Butilbrometo de Escopolamina (Buscopan)",categoria:"Analgésico, Antipirético, AINE",subtitulo:"Analgésico / Antiespasmódico / Anticolinérgico",apresentacao:"Buscopan simples 10 mg – drágea; Gotas 10 mg/mL (1 mL = 20 gotas); Injetável 20 mg/mL (ampola 1 mL)",vias:["EV lenta","IM","SC","VO"],estabilidade:"Injetável – uso imediato",diluicao:"Via EV direta. Se necessário diluição, fazer em 20 mL de SF 0,9%",posologia:"Aplicar lentamente na via endovenosa. Não misturar com outras substâncias na mesma seringa.",cuidados:["Na aplicação endovenosa: aplique lentamente; não adicione outras substâncias na mesma seringa","Informar e explicar ao paciente quanto à ação do medicamento e efeitos colaterais","Se atentar às interações medicamentosas"],reacoes:"Inquietação, sonolência, fadiga e lassidão."},
+      {id:"buscopan-composto",nome:"Butilbrometo de Escopolamina + Dipirona (Buscopan Composto)",categoria:"Analgésico, Antipirético, AINE",subtitulo:"Analgésico / Antiespasmódico / Antitérmico",apresentacao:"Comprimido revestido: 10 mg + 250 mg; Solução injetável 4 mg/mL + 500 mg/mL (ampola 5 mL); Gotas 10 mg/mL",vias:["VO","IM","EV"],estabilidade:"Injetável – uso imediato",diluicao:"Pode ser misturado ou diluído em SG 5%, SF 0,9% ou Ringer Lactato",posologia:"Não usar em crianças < 3 meses ou < 5 kg, nem na gestação/lactação.",cuidados:["Não deve ser usada em crianças com menos de 3 meses ou menos de 5 kg, nem durante gestação ou lactação","Se atentar a reações de hipersensibilidade","Na aplicação endovenosa: aplique lentamente; não adicione outras substâncias na mesma seringa"],reacoes:"Hipotensão, tontura, boca seca."},
+      {id:"diclofenaco",nome:"Diclofenaco",categoria:"Analgésico, Antipirético, AINE",subtitulo:"Anti-inflamatório não esteroidal (AINE)",apresentacao:"Injetável (3–100 mg/mL) ampolas 3 mL; Comprimidos 25/50/75/100 mg",vias:["VO","IM"],estabilidade:"Uso imediato",diluicao:"Não diluir",posologia:"Não usar em menores de 14 anos. Monitorar função hepática e renal.",cuidados:["Monitorar sintomas: dor no peito, falta de ar, fraqueza e fala arrastada","Verificar hipersensibilidade à medicação","Monitorar função hepática, renal e úlcera gástrica","Atentar para o não uso para menores de 14 anos"],reacoes:"Cefaleia, tontura, vertigem, náusea, vômito, diarreia, dispepsia, cólicas abdominais, flatulência, diminuição do apetite, aumento de transaminases."},
+      {id:"lidocaina",nome:"Cloridrato de Lidocaína",categoria:"Anestésico local",subtitulo:"Anestésico local",apresentacao:"Xylestesin 2% 20 mg/mL; Geleia estéril 30 g – bisnaga (20 mg/g)",vias:["Uso local (tópico)","Uretral"],estabilidade:"Utilizar após rompido lacre. Usar apenas uma vez (gel/bisnaga)",diluicao:"Não diluir",posologia:"Aplicar camada fina na área desejada. Evitar contato com vasos sanguíneos.",cuidados:["Monitorar local da aplicação devido risco de eritema e erupção cutânea","Observar sinais de alergia e sangramento","Monitorar SSVV, principalmente FC, devido risco de contato com vasos sanguíneos"],reacoes:"Sistêmicas raras: elevação de níveis plasmáticos. SNC: nervosismo, tontura, convulsões, inconsciência e, possivelmente, parada respiratória."},
+      {id:"tetracaina-fenilefrina",nome:"Cloridrato de Tetracaína + Fenilefrina",categoria:"Anestésico local",subtitulo:"Anestésico local oftalmológico",apresentacao:"Colírio – 10 mg/mL (A) + 1 mg/mL (B) (frasco 10 mL)",vias:["Oftalmológica"],estabilidade:"TA (15–30°C). Após aberto, válido por 120 dias",diluicao:"Não diluir",posologia:"Administrar diretamente no olho conforme prescrição.",cuidados:["Observar sinais de reações alérgicas locais","Administrar diretamente no olho do paciente","Orientar quanto aos efeitos adversos da medicação"],reacoes:"Reações alérgicas locais, dano na córnea e retardo da cicatrização ocular em uso prolongado."},
+      {id:"diazepam",nome:"Diazepam",categoria:"Anestésico venoso não opióide",subtitulo:"Ansiolítico, benzodiazepínico, hipnótico",apresentacao:"Comprimidos 5/10/20 mg; Solução injetável 5 mg/mL (ampola 2 mL)",vias:["VO","EV","IM"],estabilidade:"3h",diluicao:"SG 5% 250 mL",posologia:"EV: monitorar toxicidade do propilenoglicol. Dose conforme indicação clínica.",cuidados:["Monitorar FC, FR, PA, estado mental, enzimas hepáticas, hemograma em terapia prolongada","EV: monitorar sinais de toxicidade do propilenoglicol (creatina sérica, lactato sérico)"],reacoes:"Cansaço, sonolência e fraqueza muscular."},
+      {id:"etomidato",nome:"Etomidato",categoria:"Anestésico venoso não opióide",subtitulo:"Hipnótico",apresentacao:"Solução injetável (ampola com 10 mL)",vias:["EV"],estabilidade:"Uso imediato",diluicao:"Não diluir",posologia:"Administração EV sob monitorização cardíaca e respiratória contínua.",cuidados:["Monitoramento cardíaco, pressão sanguínea e função renal"],reacoes:"Hiperventilação, apneia, dor na veia, hipotensão, estridor, discinesia, náuseas e vômitos, erupção cutânea."},
+      {id:"flumazenil",nome:"Flumazenil",categoria:"Anestésico venoso não opióide",subtitulo:"Antagonista benzodiazepínico",apresentacao:"Solução injetável 0,5 mg/mL (ampola 5 mL)",vias:["EV"],estabilidade:"Até 24h em TA",diluicao:"SG, SF, Ringer",posologia:"Monitorar retorno da sedação por pelo menos 2 horas após administração.",cuidados:["Monitore o retorno da sedação, depressão respiratória e outros efeitos residuais do benzodiazepínico por pelo menos 2 horas"],reacoes:"Reação de hipersensibilidade, incluindo anafilaxia."},
+      {id:"midazolam",nome:"Midazolam",categoria:"Anestésico venoso não opióide",subtitulo:"Benzodiazepínico",apresentacao:"Solução injetável (frasco-ampola 3/5/10 mL); Comprimido revestido 7,5/15 mg; Solução oral 2 mg",vias:["EV","VO"],estabilidade:"Até 24h em TA",diluicao:"SG, SF, Ringer",posologia:"Titular dose conforme nível de sedação desejado. Monitorar SpO2.",cuidados:["Monitorar nível de sedação, frequência respiratória, frequência cardíaca, pressão arterial e saturação de oxigênio"],reacoes:"Apneia ou depressão respiratória, broncoespasmo, laringoespasmo, hipotensão, sedação prolongada, reações de hipersensibilidade, sonolência, confusão mental, fadiga, cefaleia, tontura, fraqueza muscular."},
+      {id:"dextrocetamina",nome:"Dextrocetamina",categoria:"Anestésico venoso não opióide",subtitulo:"Anestésico geral",apresentacao:"Solução injetável 50 mg/mL (ampola 10 mL)",vias:["EV"],estabilidade:"10 a 15 minutos",diluicao:"10 mL em 250 mL ou 500 mL de SG 5% ou SF 0,9%",posologia:"Monitorar função cardíaca continuamente durante o procedimento.",cuidados:["Monitorar FR, SpO2, reação de despertar, função hepática","Função cardíaca deve ser continuamente monitorada durante o procedimento"],reacoes:"Hipertensão e aumento da frequência cardíaca, delírios, sonhos e confusão."},
+      {id:"aas",nome:"Ácido Acetilsalicílico",categoria:"Antiagregante plaquetário",subtitulo:"Analgésico, AINE, antiagregante plaquetário",apresentacao:"Comprimidos 85, 100, 325 e 500 mg",vias:["VO"],estabilidade:"Termicamente estável em TA (15–30°C); proteger da umidade",diluicao:"Não diluir",posologia:"Dose antiagregante usual: 100 mg/dia. Atenção a sangramento e problemas renais.",cuidados:["Informar o paciente e família sobre a ação e efeitos colaterais","Solicitar o paciente a seguir corretamente o tratamento","Atenção ao paciente em relação a problemas renais"],reacoes:"Dor abdominal, azia, náusea, vômito, irritação da mucosa gástrica (inclusive úlcera e perfuração gastroduodenal) e sangramento digestivo, sobretudo em dose alta e tratamento prolongado."},
+      {id:"clopidogrel",nome:"Clopidogrel",categoria:"Antiagregante plaquetário",subtitulo:"Antiagregante plaquetário",apresentacao:"Comprimido revestido 75 mg",vias:["VO"],estabilidade:"30 dias",diluicao:"Não se aplica",posologia:"Dose usual: 75 mg/dia. Monitorar sinais de sangramento.",cuidados:["Devido ao risco de sangramento, a contagem de células sanguíneas e outros testes apropriados devem ser considerados sempre que surgirem sintomas clínicos"],reacoes:"Hemorragias e reações na pele, dor abdominal, diarreia, náuseas, edema, hipertensão arterial, arritmias e lipotimia, fadiga, ansiedade, hipotensão, boca seca e dor de cabeça."},
+      {id:"prometazina",nome:"Prometazina (Fenergan)",categoria:"Antialérgico",subtitulo:"Antialérgico, anti-histamínico, antiemético",apresentacao:"Comprimido 25 mg; Injetável 25 mg/mL (ampola 2 mL)",vias:["IM (preferencialmente)","EV (urgência)","VO"],estabilidade:"Uso imediato",diluicao:"IM: não diluir; AD, Ringer, Ringer Lactato, SG 5%, SG 10% e SF (em 10 a 20 mL preferencialmente)",posologia:"Preferir via IM. Evitar na gravidez e lactação. Não associar com álcool.",cuidados:["Cautela em hipertensão, apneia do sono","Evitar uso na gravidez e lactantes","Informar reações adversas","Informar a restrição do uso concomitante com álcool"],reacoes:"Bradicardia; hipertensão; hipotensão; taquicardia; fotossensibilidade; rash; constipação; boca seca; hepatite medicamentosa."},
+      {id:"dramin-b6",nome:"Dramin B6",categoria:"Antialérgico",subtitulo:"Anti-histamínico, antiemético",apresentacao:"Comprimido revestido 50 mg; Gotas 25 mg/mL; Injetável 50 mg/mL (IM); B6 DL 30 mg/mL (EV)",vias:["VO","EV","IM"],estabilidade:"Uso imediato",diluicao:"Dramin B6 DL diluir em 50 mL de SF 0,9%",posologia:"Evitar álcool e outros depressores do SNC. Monitorar balanço hídrico.",cuidados:["Informe ao paciente as reações adversas mais frequentes","Recomende evitar consumo de álcool e uso concomitante de outros depressores do SNC","Durante a terapia, monitore o balanço hídrico, incluindo êmese e sinais de desidratação"],reacoes:"Sedação, sonolência, cefaleia."},
+      {id:"anlodipino",nome:"Anlodipino",categoria:"Antianginoso",subtitulo:"Antianginoso, anti-hipertensivo",apresentacao:"Comprimido simples 2,5 / 5 / 10 mg",vias:["VO"],estabilidade:"30 dias",diluicao:"Não se aplica",posologia:"Dose usual 5–10 mg/dia. Monitorar PA e FC.",cuidados:["Monitorar frequência cardíaca e pressão arterial"],reacoes:"Astenia, cansaço, constipação, boca seca, aumento do apetite, edema periférico, artralgia, tontura, elevação de TGO e/ou TGP."},
+      {id:"nifedipino",nome:"Nifedipino",categoria:"Antianginoso",subtitulo:"Antianginoso, hipotensor",apresentacao:"Cápsulas 10/20/40 mg; Comprimidos 20/30/60 mg",vias:["VO"],estabilidade:"Termicamente estável em TA e local seco",diluicao:"Não diluir",posologia:"Hidratação adequada. Monitorar PA, ritmo e débito cardíaco.",cuidados:["Hidrate adequadamente o paciente","Monitore PA, ritmo cardíaco e débito cardíaco","Avalie: edema pulmonar, alterações do ECG e palpitações"],reacoes:"Cefaleia, rubor e sensação de calor facial, tonturas, depressão, mialgia, tremor, taquicardia, palpitações, náusea, constipação ou diarreia, aumento da frequência urinária, distúrbio visual, impotência sexual, hiperglicemia inicial."},
+      {id:"isossorbida",nome:"Dinitrato de Isossorbida (Isordil)",categoria:"Antianginoso",subtitulo:"Antianginoso / vasodilatador",apresentacao:"Comprimido sublingual 2,5 e 5 mg; Comprimido 5 e 10 mg; Cápsula 20 e 40 mg; Cápsula AP 40 mg",vias:["VO","Sublingual"],estabilidade:"Termicamente estável em TA e local seco",diluicao:"Não se aplica",posologia:"Sublingual: manter sob a língua até dissolução. Não usar na gestação.",cuidados:["Salientar que os comprimidos têm ação prolongada","Orientar que o sublingual deve ser mantido abaixo da língua até dissolução","Não utilizar durante a gestação","Informar que a medicação pode causar tontura e comprometer atividades"],reacoes:"Vermelhidão na pele, dores de cabeça, enjoos, nervosismo, hipotensão ortostática, taquiarritmia, vômito e síncopes."},
+      {id:"adenosina",nome:"Adenosina",categoria:"Antiarrítmico",subtitulo:"Antiarrítmico",apresentacao:"Injetável 3 mg/mL (ampola 2 mL)",vias:["EV"],estabilidade:"Uso imediato",diluicao:"Não diluir",posologia:"EV rápido em bolus. Após cada dose, flush de 20 mL de SF. Não refrigerar.",cuidados:["EV rápido, em bolus. A cada dose, administrar flush de 20 mL de soro fisiológico","Não refrigerar devido cristalização","Informar reações adversas"],reacoes:"Rubor facial (flushing) e respiração ofegante/dispneia; cefaleia; desconfortos gastrintestinais; atordoamento, tontura, dor de cabeça e na região do pescoço; pressão no peito; náusea; hipotensão, nervosismo."},
+      {id:"amiodarona",nome:"Amiodarona",categoria:"Antiarrítmico",subtitulo:"Antiarrítmico",apresentacao:"Comprimidos 200 mg; Injetável 50 mg/mL (ampola 3 mL)",vias:["EV","VO"],estabilidade:"Uso imediato",diluicao:"Diluir em 250 mL SG (ou SF 0,9% / SG 5%)",posologia:"Atenção à dose e apresentação. Orientar risco de tontura.",cuidados:["Caso de EV, diluir em SF 0,9% ou SG 5%","Orientar risco de tontura","Atentar para dose, apresentação e via de administração"],reacoes:"Enjoo, vômito, prisão de ventre, alteração do paladar, ataxia, tremor, parestesia, cefaleia, insônia, tontura, bradicardia, hipotensão."},
+      {id:"carvedilol",nome:"Carvedilol",categoria:"Antiarrítmico",subtitulo:"Antiarrítmico / beta-bloqueador",apresentacao:"Comprimidos 3 / 6 / 12,5 / 25 mg",vias:["VO"],estabilidade:"30 dias",diluicao:"Não diluir",posologia:"Não usar em gravidez, amamentação, asma ou broncoespasmo. Monitorar PA, FC, glicemia.",cuidados:["Não orientar uso na gravidez, amamentação, asma brônquica ou broncoespasmo","Aferir PA, FC, glicemia, eletrocardiograma, função renal e hepática frequentemente","Reforçar atenção ao dirigir ou tarefas que exijam atenção"],reacoes:"Tontura, cefaleia e fadiga, alterações visuais, náusea, diarreia, vômito, dor abdominal, dispepsia, edema, dor, aumento de peso, depressão e dor nas extremidades."},
+      {id:"propranolol",nome:"Propranolol",categoria:"Antiarrítmico",subtitulo:"Antiarrítmico, beta-bloqueador, anti-hipertensivo",apresentacao:"Comprimidos 10, 40 e 80 mg",vias:["VO"],estabilidade:"Termicamente estável em TA e local seco",diluicao:"Não diluir",posologia:"Não administrar se FC < 60 bpm. Não usar na gestação. Cuidado com dose em idosos.",cuidados:["Manter o controle da PA e FC","Não administrar se PA/FC menor que 60 bpm (risco de depressão miocárdica)","Não utilizar durante a gestação","Nos pacientes idosos: cuidados com a dosagem"],reacoes:"Fadiga, bradicardia, extremidades frias, alterações do sono, náuseas, vômitos e diarreia, piora da insuficiência cardíaca, hipotensão postural, alterações de humor, confusão e reações cutâneas."},
+      {id:"atenolol",nome:"Atenolol",categoria:"Antiarrítmico",subtitulo:"Antiarrítmico, beta-bloqueador, anti-hipertensivo",apresentacao:"Comprimido 25 / 50 / 100 mg",vias:["VO"],estabilidade:"30 dias",diluicao:"Não diluir",posologia:"Monitorar sinais de bradicardia, hipotensão e choque cardiogênico.",cuidados:["Atentar-se para sinais de bradicardia, hipotensão, choque cardiogênico, distúrbio de circulação arterial periférica"],reacoes:"Bradicardia, extremidades frias, fadiga, depressão, embolia pulmonar, distúrbios gastrointestinais."},
+      {id:"metoprolol",nome:"Metoprolol",categoria:"Antiarrítmico",subtitulo:"Antiarrítmico, beta-bloqueador, anti-hipertensivo",apresentacao:"Comprimidos 25, 50 e 100 mg",vias:["VO"],estabilidade:"Termicamente estável em TA e local seco",diluicao:"Não diluir",posologia:"Não suspender por conta própria. Evitar álcool. Não dirigir se houver sonolência.",cuidados:["Tomar a medicação corretamente conforme a prescrição e não fazer a suspensão por conta própria","Monitorar regularmente a PA","Não exercer atividades que necessitem de estado de alerta","Orientar a evitar o consumo de álcool e outras drogas"],reacoes:"Fadiga e astenia, bradicardia, alterações posturais na pressão, mãos e pés frios, palpitações, vertigem, dor de cabeça, enjoo, dor abdominal, diarreia, prisão de ventre e dispneia de esforço."},
+      {id:"varfarina",nome:"Varfarina",categoria:"Anticoagulante",subtitulo:"Anticoagulante",apresentacao:"Comprimidos 2,5 / 5 / 7,5 mg",vias:["VO"],estabilidade:"Termicamente estável em TA e local seco",diluicao:"Não diluir",posologia:"Usar sempre no mesmo horário. Realizar TP e TTPA periódicos. Não usar na gestação.",cuidados:["Observar a presença de sangramento","Utilizar sempre no mesmo horário","Deve realizar exames periódicos de TP e TTPA","Não utilizar a medicação durante a gestação"],reacoes:"Sangramentos, queda de cabelo, febre, náuseas, vômito, gases, diarreia, dor abdominal, reações de hipersensibilidade, vermelhidão na pele, cansaço, dor de cabeça, dor no tórax."},
+      {id:"fenitoina",nome:"Fenitoína",categoria:"Anticonvulsivante",subtitulo:"Anticonvulsionante",apresentacao:"Comprimidos 100 mg; Injetável 50 mg/mL (ampola 5 mL)",vias:["VO","EV"],estabilidade:"24 h",diluicao:"SF 0,9% – 100 mL",posologia:"EV: monitorar cardíaco contínuo. PA e pulso a cada 15 min por 1h após administração.",cuidados:["Monitorar hemograma, perfil metabólico e função hepática","EV: monitoramento cardíaco contínuo (frequência, ritmo e PA)","PA e pulso a cada 15 minutos por 1 hora após a administração","Observar reações no local da infusão"],reacoes:"Sangramentos, queda de cabelo, febre, náuseas, vômito, gases, diarreia, dor abdominal, reações de hipersensibilidade, vermelhidão na pele, cansaço, dor de cabeça, dor no tórax."},
+      {id:"fenobarbital",nome:"Fenobarbital",categoria:"Anticonvulsivante",subtitulo:"Anticonvulsivante",apresentacao:"Comprimidos 50/100 mg; Solução oral 40 mg/mL; Injetável 100 mg/mL (frasco-ampola 2 mL)",vias:["VO","EV"],estabilidade:"48h protegido da luz",diluicao:"30–130 mg/mL em SF e SG",posologia:"EV: monitorar FR, FC, PA e local da injeção. Atenção a sinais de suicídio.",cuidados:["Monitorar enzimas hepáticas, hemograma, função renal, atividade de apreensão, sinais e sintomas de suicídio","Em uso EV: frequência respiratória, frequência cardíaca, pressão arterial e local da injeção"],reacoes:"Comportamento anormal com agitação e agressividade, insolência no início do dia, náusea, vômito e rash."},
+      {id:"atropina",nome:"Atropina",categoria:"Antídotos",subtitulo:"Antídoto de organofosforados / Antiarrítmico",apresentacao:"Solução injetável 0,25 / 0,5 / 1 mg/mL (ampolas 1 mL)",vias:["EV"],estabilidade:"72h em TA",diluicao:"SF 0,9%",posologia:"Acesso venoso seguro. Monitorar durante a infusão. Não usar na gestação/lactação.",cuidados:["Puncionar acesso venoso seguro ou verificar a permeabilidade","Durante a infusão o paciente deve estar monitorado","Investigar interações com outros medicamentos","Não utilizar durante a gestação e lactação"],reacoes:"Taquicardia e arritmia atriais, hipertermia, miopatia, retenção urinária, turvação visual, xerostomia, reações alérgicas severas, cefaleia, sonolência, fadiga, desorientação, nervosismo, insônia, perda temporária da memória, confusão mental e excitação."},
+      {id:"naloxona",nome:"Naloxona",categoria:"Antídotos",subtitulo:"Antagonista dos opioides",apresentacao:"Solução injetável 0,4 mg/mL (ampola 1 mL)",vias:["EV","IM","SC"],estabilidade:"24h em TA",diluicao:"SF 0,9%; SG 5% – 100 mL",posologia:"Não usar na gestação/lactação e em crianças sem orientação. Ter materiais de RCP prontos.",cuidados:["Manter a permeabilidade do acesso venoso e testar refluxo antes da administração","Não pode utilizar durante gestação ou lactação e em crianças","Nos pacientes com doença hepática, pancreática ou idosos: atenção à dose","Disponibilizar materiais e medicamentos para manobras de RCP"],reacoes:"Taquicardia e arritmia atriais, hipertermia, miopatia, retenção urinária, turvação visual, xerostomia, reações alérgicas severas, cefaleia, sonolência, fadiga, desorientação, nervosismo, insônia, perda temporária da memória, confusão mental e excitação."},
+      {id:"fitomenadiona",nome:"Fitomenadiona (Kavit)",categoria:"Antídotos",subtitulo:"Vitamina K / antagonista de anticoagulantes",apresentacao:"Ampolas 2 mg/0,2 mL; 10 mg/mL",vias:["IM","VO","SC"],estabilidade:"Uso imediato",diluicao:"Cloreto de sódio 0,9%; Dextrose 5%",posologia:"Preferir SC ou IM. EV é de alto risco. Em RN: 0,5–1 mg IM em até 1h após nascimento. Proteger da luz.",cuidados:["Deve ser administrado por via SC ou IM; a administração endovenosa é de alto risco","Proteger da luz o tempo todo","Em RN, dose única IM de 0,5 a 1 mg em até 1h após nascimento"],reacoes:"Rubor de face, hiperidrose, sensação de constipação do peito, cianose, vermelhidão e dor no local da aplicação."},
+      {id:"bromoprida",nome:"Bromoprida",categoria:"Antiemético/procinéticos",subtitulo:"Propulsivo",apresentacao:"Solução injetável 5 mg/mL (ampola 2 mL); Cápsula ou comprimido 10 mg",vias:["VO","IM","EV"],estabilidade:"Uso imediato",diluicao:"Cloreto de sódio 0,9%; Glicose 5%. Tempo de injeção: 1 a 3 minutos",posologia:"Aplicar lentamente (EV/IM). IM na região glútea.",cuidados:["Na adm EV ou IM, deve sempre ser aplicada lentamente; administrar IM na região glútea","Informar e explicar ao paciente quanto à ação do medicamento e efeitos colaterais","Se atentar às interações medicamentosas"],reacoes:"Comuns (SNC): inquietação, sonolência, fadiga e lassidão."},
+      {id:"metoclopramida",nome:"Metoclopramida",categoria:"Antiemético/procinéticos",subtitulo:"Antiemético, procinético",apresentacao:"Solução oral 1 mg/mL; Gotas 4 mg/mL; Injetável 5 mg/2 mL e 10 mg/2 mL",vias:["VO","EV"],estabilidade:"24h TA",diluicao:"Até 10 mg sem diluição; doses > 10 mg diluir em 50 mL de SF 0,9%",posologia:"Infusão lenta. Intervalo mínimo de 6 horas. Contraindicado em menores de 1 ano.",cuidados:["Atentar-se para infusão lenta","Administrar com intervalo de pelo menos 6 horas","Contraindicar para menores de 1 ano","Atentar-se para episódios de hipoglicemia em diabéticos"],reacoes:"Reação extrapiramidal; síndrome parkinsoniana, acatisia; distonia e discinesia; convulsões."},
+      {id:"simeticona",nome:"Simeticona",categoria:"Antifisético",subtitulo:"Antifisético, antiflatulento",apresentacao:"Comprimido 40 mg; Gotas 75 mg/mL (25 gotas); Gel max 125 mg/cápsula",vias:["VO"],estabilidade:"24h após preparo com água ou puro, em TA",diluicao:"Comprimido/cápsula: ingerir com água; Gotas: diretamente na boca ou diluído em água",posologia:"Atenção à dose correta. Orientar forma de administração.",cuidados:["Atentar-se à dose correta para administração","Orientar paciente a forma correta de tomar a medicação","Atentar-se a sinais de reações adversas"],reacoes:"Risco de eczema de contato; em casos raros: reações imediatas como urticária."},
+      {id:"oleo-mineral",nome:"Óleo Mineral",categoria:"Antifisético",subtitulo:"Laxante",apresentacao:"Frascos com 100 e 200 mL",vias:["VO"],estabilidade:"Termicamente estável em TA",diluicao:"Não se aplica",posologia:"Evitar em náuseas, vômitos ou dor abdominal a esclarecer. Cuidado em crianças (aspiração).",cuidados:["Evitar uso em pacientes com náuseas, vômitos, dor abdominal a esclarecer","Administrar com cuidado principalmente em crianças devido risco de toxicidade por aspiração","Observar sangramento retal","Suspender no caso de diarreia"],reacoes:"Efeitos metabólicos, redução do nível sérico de betacaroteno, efeitos gastrintestinais; dosagem oral excessiva pode resultar em incontinência e prurido anal."},
+      {id:"captopril",nome:"Captopril",categoria:"Anti-hipertensivo",subtitulo:"Anti-hipertensivo (IECA)",apresentacao:"Comprimido 12,5 / 25 / 50 mg",vias:["VO"],estabilidade:"30 dias",diluicao:"Não diluir",posologia:"Monitorar ureia, eletrólitos, creatinina e PA. Observar angioedema.",cuidados:["Monitorar ureia, eletrólitos, creatina sérica e pressão arterial","Observar angioedema em pacientes tratados com inibidores de ECA"],reacoes:"Erupção cutânea com prurido, febre, artralgia e eosinofilia. Hipotensão, taquicardia, dores no peito e palpitações, alteração do paladar, tosse."},
+      {id:"hidralazina",nome:"Hidralazina",categoria:"Anti-hipertensivo",subtitulo:"Anti-hipertensivo",apresentacao:"Comprimido 25 e 50 mg; Injetável 20 mg/1 mL",vias:["VO","EV","IM"],estabilidade:"Injetável: uso imediato; Comprimido: termicamente estável em TA",diluicao:"SF 0,9% – 19 mL",posologia:"Pode causar tontura. Orientar o paciente a buscar atendimento se houver efeito adverso.",cuidados:["Informar a família e paciente que a medicação pode causar tontura e comprometer atividades","Orientar o paciente a buscar a unidade caso haja quaisquer efeito adverso"],reacoes:"Taquicardia, palpitação, hipotensão, sintomas de angina, edema, cefaleia, vertigens, neurites, artralgia, mialgia, edema articular, câimbras, rash."},
+      {id:"losartana",nome:"Losartana",categoria:"Anti-hipertensivo",subtitulo:"Anti-hipertensivo (BRA)",apresentacao:"Comprimidos 50 e 100 mg",vias:["VO"],estabilidade:"Termicamente estável em TA",diluicao:"Não diluir",posologia:"Manter controle de PA e FC. Tomar durante ou após refeições. Cuidado em idosos e doença hepática/pancreática.",cuidados:["Manter o controle da PA e FC durante o tratamento","Orientar o paciente a tomar o medicamento durante ou após as refeições","Pacientes com doenças hepáticas, pancreáticas ou em idosos: cuidado com a dose"],reacoes:"Tontura, PA baixa (pacientes com IC grave ou tratados com diuréticos), fadiga, hipoglicemia, hipercalemia, alteração no funcionamento dos rins, anemia, aumento de ureia, creatinina e potássio sérico em pacientes com insuficiência cardíaca."},
+      {id:"metildopa",nome:"Metildopa",categoria:"Anti-hipertensivo",subtitulo:"Anti-hipertensivo",apresentacao:"Comprimidos 250 e 500 mg",vias:["VO"],estabilidade:"Termicamente estável em TA",diluicao:"Não diluir",posologia:"Monitorar função hepática (primeiras 6–12 semanas) e hematológica. Evitar levantar-se abruptamente.",cuidados:["Monitorar função hepática, principalmente nas primeiras 6 a 12 semanas","Monitorar função hematológica, especialmente para detectar anemia hemolítica","Orientar o paciente a não levantar-se rapidamente e abruptamente para evitar hipotensão postural"],reacoes:"Sedação e sonolência (geralmente transitórias), vertigens, náuseas, fraqueza, cefaleia, bradicardia, congestão nasal e diarreia, boca seca, diminuição da libido, depressão física, pesadelo, lactação, depressão da função hepática (febre, mal-estar e icterícia)."},
+      {id:"enalapril",nome:"Enalapril",categoria:"Anti-hipertensivo",subtitulo:"Anti-hipertensivo (IECA)",apresentacao:"Comprimidos 5, 10 e 20 mg",vias:["VO"],estabilidade:"Termicamente estável em TA",diluicao:"Não diluir",posologia:"Não deixar o paciente deitado sem auxílio devido ao risco de tontura/desmaio.",cuidados:["Atentar-se para a forma de apresentação, a dosagem e a via de administração prescrita pelo médico","Orientar o paciente a não deixar o leito sem auxílio da enfermagem, devido ao risco de tontura","Orientar familiares sobre a possibilidade de desmaio"],reacoes:"Tonturas e dor de cabeça. Também podem ocorrer cansaço, hipotensão ortostática, síncope, náuseas, diarreia, câimbras musculares, erupção cutânea, tosse, disfunção renal, insuficiência renal e oligúria."},
+      {id:"anlodipino-htn",nome:"Anlodipino (Anti-hipertensivo)",categoria:"Anti-hipertensivo",subtitulo:"Anti-hipertensivo",apresentacao:"Comprimidos 2,5 / 5 / 10 mg",vias:["VO"],estabilidade:"Termicamente estável em TA",diluicao:"Não diluir",posologia:"Monitorar frequência cardíaca e pressão arterial.",cuidados:["Atentar-se aos cuidados com: frequência cardíaca, pressão arterial"],reacoes:"Cefaleia, tonturas, sonolência, palpitação, rubor, dor abdominal, náusea, edema e fadiga."},
+      {id:"carvedilol-htn",nome:"Carvedilol (Anti-hipertensivo)",categoria:"Anti-hipertensivo",subtitulo:"Anti-hipertensivo",apresentacao:"Comprimidos 3 / 6 / 12,5 / 25 mg",vias:["VO"],estabilidade:"Termicamente estável em TA",diluicao:"Não diluir",posologia:"Atenção a sinais de insuficiência cardíaca/hepática, bradicardia grave, hipotensão grave, asma severa e choque cardiogênico.",cuidados:["Hipersensibilidade aos componentes","Atentar-se a sinais de insuficiência cardíaca e insuficiência hepática, bradicardia grave, hipotensão grave, asma brônquica severa e choque cardiogênico"],reacoes:"Tontura, cefaleia, fadiga, síncope, alterações visuais, irritação ocular, infecção do trato respiratório superior, dispneia, edema pulmonar, asma em pacientes predispostos, infecção do trato urinário, náusea, diarreia, vômito, dor abdominal, dispepsia, astenia, edema, dor, hipotensão, aumento de peso, depressão e dor nas extremidades."},
+      {id:"benzilpenicilina",nome:"Benzilpenicilina Benzatina",categoria:"Antimicrobiano",subtitulo:"Antibiótico beta-lactâmico",apresentacao:"Suspensão injetável 600.000 UI/4 mL e/ou 1.200.000 UI/4 mL",vias:["IM profunda exclusivamente"],estabilidade:"Uso imediato",diluicao:"Reconstituição em 4 mL de água estéril (não diluir adicionalmente)",posologia:"Apenas IM profunda. Observar reações cutâneas. Estimular hidratação.",cuidados:["Controle de SSVV","Observar rigorosamente a dose prescrita, aparecimento de reações cutâneas","Histórico alérgico ao medicamento","Estimular hidratação para facilitar excreção"],reacoes:"Cefaleia, monilíase oral, náusea, vômito, diarreia, monilíase vaginal e/ou vulvar."},
+      {id:"ceftriaxona",nome:"Ceftriaxona",categoria:"Antimicrobiano",subtitulo:"Antibiótico beta-lactâmico",apresentacao:"Pó para reconstituição: 500 mg ou 1 g",vias:["IM","EV"],estabilidade:"6 horas em TA ou 24 horas sob refrigeração",diluicao:"EV: reconstituir em 10 mL de AD; diluir para 50 ou 100 mL de SF 0,9% ou SG 5%. IM: reconstituir em 3,5 mL de AD ou lidocaína 1%; não diluir.",posologia:"Não reconstituir ou co-administrar com soluções contendo cálcio. Não aplicar mais de 1 g em cada glúteo.",cuidados:["Não reconstituir ou co-administrar com soluções contendo cálcio","Não aplicar mais de 1 g em cada glúteo","Atentar-se para sinais e sintomas dos efeitos colaterais"],reacoes:"Eosinofilia, leucopenia, trombocitopenia, diarreia, fezes amolecidas, aumento das enzimas hepáticas e erupção cutânea."},
+      {id:"neomicina",nome:"Neomicina",categoria:"Antimicrobiano",subtitulo:"Antibiótico aminoglicosídeo",apresentacao:"Bisnaga 3,5 mg/g (embalagem com 10 g, 15 g, 20 g ou 50 g)",vias:["Tópico"],estabilidade:"Termicamente estável em TA (15–30°C). Proteger da luz e umidade",diluicao:"Não se aplica",posologia:"Aplicar camada fina na região afetada. Atenção a dias e quantidade de aplicações prescritas.",cuidados:["Aplicar uma camada fina na região afetada","Atentar-se a reações alérgicas locais","Evitar aplicação com outros produtos contendo antibióticos aminoglicosídeos (sensibilidade cruzada)","Atentar-se à quantidade de dias prescritos e quantidade de aplicações diárias"],reacoes:"Vermelhidão, rash cutâneo, coceira no local e inchaço no local de aplicação, irritação local e diminuição da audição."},
+      {id:"regenecel",nome:"Regenecel",categoria:"Antimicrobiano",subtitulo:"Antibiótico / cicatrizante oftalmológico",apresentacao:"Pomada oftálmica: acetato de retinol 10.000 UI/g + aminoácidos 25 mg/g + metionina 5 mg/g + cloranfenicol 5 mg/g (tubo 3,5 g)",vias:["Oftalmológico"],estabilidade:"Termicamente estável em TA (15–30°C). Proteger da luz e umidade",diluicao:"Não se aplica",posologia:"Administrar camada fina oftálmica conforme prescrição.",cuidados:["Administrar camada fina oftálmica","Atentar-se a infecção por microrganismos não sensíveis","Observar se discrasias sanguíneas"],reacoes:"Infecções secundárias por microrganismos não sensíveis e discrasias sanguíneas."},
+      {id:"nistatina",nome:"Nistatina",categoria:"Antimicrobiano",subtitulo:"Antifúngico",apresentacao:"Suspensão oral 100.000 UI/mL; Creme vaginal 100.000 UI/4 g e 25.000 UI/g; Pomada 100.000 UI/g + 200 mg/g de óxido de zinco",vias:["VO","Vaginal","Tópico"],estabilidade:"Termicamente estável em TA",diluicao:"Não diluir",posologia:"Orientar sobre efeitos adversos. Observar erupções cutâneas locais após administração.",cuidados:["Observar e orientar quanto aos efeitos adversos da medicação","Observar erupções cutâneas locais após administração da medicação"],reacoes:"Diarreia, distúrbios gastrointestinais, náuseas e vômitos, erupções cutâneas."},
+      {id:"ivermectina",nome:"Ivermectina",categoria:"Antimicrobiano",subtitulo:"Antiparasitário",apresentacao:"Comprimidos 6 mg",vias:["VO"],estabilidade:"Termicamente estável em TA",diluicao:"Não diluir",posologia:"Realizar contagem de microfilárias da pele e olhos. Exames oftalmológicos e de fezes periódicos.",cuidados:["Realizar contagem de microfilárias da pele e olhos","Exames oftalmológicos periódicos, exames de acompanhamento de fezes","Atentar-se para sinais e sintomas de neurotoxicidade"],reacoes:"Cefaleia, dor muscular, dores pelo corpo, dispneia, febre, reações cutâneas, náusea, anorexia, vômitos, edema de face e membros."},
+      {id:"dexametasona",nome:"Dexametasona",categoria:"Anti-inflamatório hormonal",subtitulo:"Glicocorticoide / antiemético",apresentacao:"Comprimido 0,5 / 0,75 / 4 mg; Injetável 2 mg/mL e 4 mg/mL; Pomada 1 mg/g",vias:["VO","EV","IM","Tópico"],estabilidade:"Pós-diluição: 24h a TA ou 48h a 4°C; proteger da luz",diluicao:"SF ou SG 5% – 50 ou 100 mL",posologia:"Não administrar por via SC. Não associar a álcool ou AINEs. Monitorar peso, PA, eletrólitos e glicose.",cuidados:["Monitorar peso, PA, eletrólitos, glicose","Não administrar por via SC","Informar sobre não associar a álcool ou AINEs","Informar efeitos adversos"],reacoes:"Distúrbios gástricos, edema, fraqueza muscular, dor de cabeça, vertigem e distúrbios menstruais."},
+      {id:"hidrocortisona",nome:"Hidrocortisona",categoria:"Anti-inflamatório hormonal",subtitulo:"Corticoide",apresentacao:"Injetável 100 mg/frasco e 500 mg/frasco; Pomada 10 mg/g (bisnaga 30 g)",vias:["EV","IM","Tópico"],estabilidade:"Pós-reconstituição: 24h a TA. Pós-diluição: 4h a TA. Proteger da luz",diluicao:"Reconstituir 100 mg em 2 mL e 500 mg em 4 mL de AD; diluir em 500–1000 mL SG 5%, SF 0,9% ou SGF. Bolus: 100 mg em 20 mL SF (2 min); 500 mg em 50 mL SF (15–30 min)",posologia:"Atenção a histórico de alergia a corticoides e sinais de efeitos colaterais.",cuidados:["Atentar-se para sinais e sintomas de efeitos colaterais","Atentar-se para histórico de alergia a corticoides"],reacoes:"Sensação de ardência, prurido, irritação, secura, foliculite, hipertricose, erupção acneiforme e hipopigmentação."},
+      {id:"prednisolona",nome:"Prednisolona",categoria:"Anti-inflamatório hormonal",subtitulo:"Corticoide",apresentacao:"Comprimidos 5 e 20 mg; Solução oral 3 mg/mL (frasco 60 ou 120 mL)",vias:["VO"],estabilidade:"Solução oral estável por 60 dias após aberto, em TA",diluicao:"Não diluir",posologia:"Monitorar PA, HGT (glicose), função renal e hepática.",cuidados:["Monitorar pressão sanguínea","Monitorar HGT para verificar níveis de glicose no sangue","Monitorar função renal e hepática"],reacoes:"Úlcera gástrica ou duodenal (com possível perfuração e sangramento), pancreatite e esofagite ulcerativa, nervosismo, cansaço e insônia, reação alérgica localizada, catarata e aumento da pressão intraocular."},
+      {id:"sinvastatina",nome:"Sinvastatina",categoria:"Antilipêmico",subtitulo:"Redutor de colesterol",apresentacao:"Comprimidos 5 / 10 / 20 / 40 / 80 mg; Comprimidos revestidos 5 / 10 / 20 mg",vias:["VO"],estabilidade:"Termicamente estável em TA, protegido da luz e em lugar seco",diluicao:"Não se aplica",posologia:"Não usar na gestação e lactação. Atenção ao uso concomitante com outras drogas (ex.: varfarina).",cuidados:["Não usar este medicamento durante gestação e lactação","Monitorar o paciente durante a terapia","Atentar-se ao uso concomitante com outras drogas (ex.: varfarina)","Orientar quanto à realização de atividades físicas e as restrições na dieta"],reacoes:"Dor abdominal, constipação, flatulência, astenia e cefaleia, náusea, diarreia, erupção cutânea, dispepsia, prurido, alopecia, tontura, câimbras musculares, mialgia, pancreatite, parestesia, neuropatia periférica, vômitos e anemia."},
+      {id:"metformina",nome:"Metformina",categoria:"Hipoglicemiante",subtitulo:"Hipoglicemiante",apresentacao:"Comprimidos 500 e 850 mg e 1 g",vias:["VO"],estabilidade:"Termicamente estável em TA, protegido da luz e em lugar seco",diluicao:"Não se aplica",posologia:"Não usar durante trabalho de parto e lactação. Administrar junto com alimentos. Monitorar glicemia.",cuidados:["Não usar durante trabalho de parto e lactação","Orientar a usar calçados confortáveis para evitar lesões em MMII","Monitorar glicemia durante terapia","Administrar o medicamento junto com alimentos para evitar desconforto gastrointestinal"],reacoes:"Náusea, vômito, diarreia, dor na barriga, perda de apetite, vermelhidão, coceira e urticária, queda dos níveis de vitamina B12, inflamação do fígado (hepatite), cansaço, perda de apetite, perda de peso, com ou sem amarelamento da pele ou do branco dos olhos."},
+      {id:"flunarizina",nome:"Flunarizina",categoria:"Antagonistas de canais de cálcio",subtitulo:"Bloqueador de canais de cálcio / antivertiginoso",apresentacao:"Comprimidos 10 mg",vias:["VO"],estabilidade:"Termicamente estável em TA, protegido da luz e em lugar seco",diluicao:"Não se aplica",posologia:"Não usar na gestação. Cautela em asma brônquica e úlcera péptica. Oferecer hidratação adequada.",cuidados:["Medicamento não deve ser usado durante a gestação","Orientar cautela nos casos de asma brônquica e úlcera péptica","Orientar quanto às reações adversas e pedir para que comuniquem caso sinta alguma delas","Oferecer hidratação adequada"],reacoes:"Cefaleia, insônia, astenia, depressão, irritabilidade, baixa concentração e sensação de cabeça leve."},
+      {id:"colagenase",nome:"Colagenase",categoria:"Agente desbridante",subtitulo:"Desbridante enzimático",apresentacao:"Pomada 0,6 U/g (bisnaga 10, 30 e 50 g)",vias:["Tópico"],estabilidade:"Termicamente estável em TA, protegido da luz e em lugar seco",diluicao:"Não se aplica",posologia:"Aplicar cuidadosamente em áreas de necrose. Se não houver melhora em 14 dias, descontinuar.",cuidados:["Atentar-se a ardência, prurido, eritema e dor local","Se não houver melhora da ferida após 14 dias, o tratamento deve ser descontinuado","A pomada deve ser aplicada cuidadosamente em áreas de necrose da lesão"],reacoes:"Irritação, eczema, hiperemia local e reações de hipersensibilidade."},
+      {id:"ipratropio",nome:"Brometo de Ipratrópio (Atrovent)",categoria:"Broncodilatador/Mucolítico/Expectorante",subtitulo:"Broncodilatador / anticolinérgico",apresentacao:"Gotas 0,25 mg/mL (1 mL = 20 gotas) (frasco 20 mL)",vias:["Inalatório"],estabilidade:"Uso imediato",diluicao:"Diluição até um volume final de 3 a 5 mL de SF 0,9%",posologia:"Monitorar SpO2. Atenção a broncoespasmo paradoxal e reações de hipersensibilidade.",cuidados:["Atentar-se a reações de hipersensibilidade imediata após administração, como urticária e anafilaxia","Observar se broncoespasmo paradoxal, que pode ser fatal","Monitorar saturação de oxigênio"],reacoes:"Cefaleia, tontura, irritação na garganta, tosse, boca seca, náusea e distúrbios da motilidade gastrointestinal."},
+      {id:"fenoterol",nome:"Bromidrato de Fenoterol (Berotec)",categoria:"Broncodilatador/Mucolítico/Expectorante",subtitulo:"Broncodilatador",apresentacao:"Solução aerossol (HFA) 100 mcg/dose (frasco 10 mL – 200 doses); Solução (gotas) 5 mg/mL (frasco 20 mL)",vias:["Inalatório"],estabilidade:"Uso imediato",diluicao:"Gotas: diluição até um volume final de 3 a 5 mL de SF 0,9%",posologia:"Monitorar função pulmonar, gasometria, FC e PA rigorosamente. Observar SpO2.",cuidados:["Monitorar função pulmonar e gasometria arterial","Monitorar FC e PA rigorosamente devido toxicidade da medicação","Observar saturação de oxigênio devido risco de broncoespasmo paradoxal"],reacoes:"Tremor, tosse e aumento da FC."},
+      {id:"acetilcisteina",nome:"Acetilcisteína",categoria:"Broncodilatador/Mucolítico/Expectorante",subtitulo:"Mucolítico, antídoto",apresentacao:"Xarope 20 mg/mL ou 40 mg/mL; Sachê 200 mg e 600 mg; Injetável 100 mg/mL (ampola 3 mL)",vias:["Inalatório","EV","VO"],estabilidade:"Uso imediato",diluicao:"EV: 250 mL de SF 0,9% ou SG 5%; Envelope: dissolver em ½ copo de água; Ampola inalatória: diluir cada ampola em igual volume de SF 0,9%. Em intoxicação por paracetamol: 1ª dose 150 mg/kg em 200 mL (1h); 2ª dose 50 mg/kg em 500 mL (4h); 3ª dose 100 mg/kg em 1000 mL (16h)",posologia:"Atenção a risco de choque anafilático e broncoespasmo. Monitorar SpO2.",cuidados:["Atentar-se a risco de choque anafilático","Atentar-se a risco de broncoespasmo","Monitorar saturação de oxigênio devido medicação fluidificar a secreção brônquica"],reacoes:"Hipersensibilidade, náusea, choque anafilático, taquicardia, rash e prurido."},
+      {id:"ambroxol",nome:"Ambroxol",categoria:"Broncodilatador/Mucolítico/Expectorante",subtitulo:"Expectorante",apresentacao:"Xarope pediátrico 15 mg/5 mL (frasco 120 mL); Xarope adulto 30 mg/5 mL (frasco 120 mL)",vias:["VO"],estabilidade:"Termicamente estável em TA e dentro do prazo de validade",diluicao:"Não diluir",posologia:"Não administrar em pacientes com intolerância à frutose. Cautela em insuficiência renal.",cuidados:["Não administrar em pacientes com intolerância à frutose","Atentar-se a risco de hipoestesia oral e da faringe","Utilizar com cautela em pacientes com insuficiência renal"],reacoes:"Disgeusia, hipoestesia da faringe, náusea, hipoestesia oral."},
+      {id:"furosemida",nome:"Furosemida",categoria:"Diuréticos",subtitulo:"Diurético de alça e anti-hipertensivo",apresentacao:"Comprimidos 20 mg ou 40 mg; Injetável 10 mg/mL (ampola 2 mL)",vias:["VO","EV","IM"],estabilidade:"Após diluição em TA: 24h",diluicao:"Pode ser administrado sem diluição, ou diluir em SF, SG 5%, Ringer ou Ringer Lactato",posologia:"Realizar balanço hídrico. Monitorar eletrólitos (especialmente potássio). Orientar alimentação rica em potássio.",cuidados:["Realizar balanço hídrico e pesar paciente internado","Atentar-se para SSVV e EF","Orientar a alimentação rica em potássio"],reacoes:"Hipotensão, desidratação, hipovolemia, aumento de creatinina, hiponatremia, hipocloremia, hipopotassemia e aumento no volume urinário."},
+      {id:"hidroclorotiazida",nome:"Hidroclorotiazida",categoria:"Diuréticos",subtitulo:"Diurético e anti-hipertensivo",apresentacao:"Comprimidos 25 e 50 mg",vias:["VO"],estabilidade:"Termicamente estável em TA (15–30°C) e protegido da luz",diluicao:"Pode ser administrado sem diluição, ou diluir em SF, SG 5%, Ringer ou Ringer Lactato",posologia:"Não usar na gestação ou lactação. Controlar peso diariamente. Monitorar glicemia em diabéticos.",cuidados:["Controlar peso diariamente","Não utilizar a medicação durante a gestação ou lactação","Nos casos de doença hepática ou renal, pacientes idosos, com DM ou RN, cuidado com a dose","Nos pacientes com DM, monitorar frequentemente a glicemia","Orientar o paciente a buscar a unidade sobre qualquer efeito adverso"],reacoes:"Hipotensão arterial, desidratação, câimbras, fraqueza, hipocalemia, hiponatremia, hipomagnesemia."},
+      {id:"espironolactona",nome:"Espironolactona",categoria:"Diuréticos",subtitulo:"Diurético poupador de potássio e anti-hipertensivo",apresentacao:"Comprimidos 25, 50 e 100 mg",vias:["VO"],estabilidade:"Termicamente estável em TA (15–30°C) e protegido da luz",diluicao:"Pode ser administrado sem diluição, ou diluir em SF, SG 5%, Ringer ou Ringer Lactato",posologia:"Não usar na gestação. Administrar todos os dias no mesmo horário. Evitar tabagismo, álcool e alimentos ricos em potássio/sódio.",cuidados:["A medicação não deve ser usada durante a gestação","A medicação deve ser administrada todos os dias no mesmo horário","Recomende ao paciente que evite o tabagismo, consumo de álcool, os substitutos do sal e de alimentos que contenham altas concentrações de potássio ou sódio","Reforce a necessidade do emprego de medidas adicionais para o controle da hipertensão"],reacoes:"Hiperpotassemia, estado de confusão mental, tontura, náusea, prurido, rash, ginecomastia, câimbras nas pernas, insuficiência renal aguda, dor nas mamas (em homens), mal-estar."},
+      {id:"clorpromazina",nome:"Clorpromazina",categoria:"Neuroléptico",subtitulo:"Antipsicótico",apresentacao:"Comprimido revestido 25 e 100 mg; Solução oral 40 mg/mL; Solução injetável 5 mg/mL (ampola 5 mL)",vias:["VO","IM"],estabilidade:"Uso imediato",diluicao:"Não diluir",posologia:"Monitorar estado mental, sinais vitais, movimentos involuntários e risco de queda. Monitorar hemograma, eletrólitos, função hepática e glicose.",cuidados:["Atentar-se ao estado mental e sinais vitais, mudança na menstruação, libido, movimentos involuntários, mudanças visuais e risco de queda","Monitorar hemograma, eletrólitos e função hepática, nível de glicose plasmática em jejum e painel lipídico"],reacoes:"Sonolência, sedação, síndrome extrapiramidal, constipação, xerostomia, hipotensão ortostática, ganho de peso, discinesia tardia, acatisia, convulsões, parkinsonismo e amenorreia."},
+      {id:"haloperidol",nome:"Haloperidol",categoria:"Neuroléptico",subtitulo:"Antipsicótico",apresentacao:"Comprimido 1 e 5 mg; Injetável 5 mg/1 mL, 50 mg/1 mL; Gotas 2 mg/1 mL",vias:["VO","IM"],estabilidade:"6h em TA",diluicao:"Haloperidol (G Teuto): SF 0,9%, SG 5%. Halo® (Cristália): SF 0,9%, SG 5%, AD – 30 a 50 mL",posologia:"Não usar na gestação. Cuidado com dose em idosos e pacientes debilitados. Monitorar hemograma periodicamente.",cuidados:["Recomendar a importância de hábitos saudáveis","Salientar quanto aos riscos em consumir bebidas","Pacientes com doenças respiratórias, cardíacas, renal, hepática, idosos ou debilitados: cuidados com a dosagem","Monitorar hemograma periodicamente. Não utilizar a medicação durante a gestação"],reacoes:"Tontura, hipocinesia, distúrbios vasculares, hipotensão ortostática, disfunção erétil, aumento de peso, distúrbios extrapiramidais, tremor, sonolência, bradicardia, distúrbios visuais, constipação, boca seca e hipersecreção salivar."},
+      {id:"omeprazol",nome:"Omeprazol",categoria:"Redutor de acidez gástrica",subtitulo:"Antiulceroso",apresentacao:"Cápsula 10, 20 e 40 mg; Injetável 40 mg/10 mL",vias:["VO","EV"],estabilidade:"Injetável: 4h em TA depois de reconstituído",diluicao:"Reconstituição: 10 mL de diluente próprio",posologia:"Não usar na gestação ou lactação. Investigar interações medicamentosas.",cuidados:["Não utilizar a medicação durante a gestação ou lactação","Ressaltar a importância de hábitos saudáveis","Investigar o uso de outros medicamentos e possíveis interações medicamentosas"],reacoes:"Dor abdominal, constipação, diarreia, flatulência, náusea/vômito, boca seca, estomatite, candidíase gastrointestinal e colite microscópica, disfunção hepática, disfunção renal."},
+      {id:"sulfato-magnesio",nome:"Sulfato de Magnésio",categoria:"Repositores de Eletrólitos",subtitulo:"Eletrólito",apresentacao:"Ampolas plásticas de 10 mL com 10% e 50%",vias:["VO","IO","IM"],estabilidade:"48 horas em TA",diluicao:"IM: pronto para uso; EV: pronto para uso ou diluído em SF ou SG",posologia:"IM 10% pode ser aplicada em adultos e pediatria. EV: adm 150 mg/min (~7 min para cada ampola). Monitorar SSVV, ECG, reflexos e função renal.",cuidados:["IM: 10% pode ser aplicada em adultos e pediatria. Adm IM apenas se o acesso EV não estiver disponível","EV: adm 150 mg/minuto (~7 minutos para cada ampola)","Monitorar SSVV, ECG, reflexos tendinosos profundos e função renal"],reacoes:"Sonolência, hipocalcemia, hipotensão, bradicardia."},
+      {id:"gluconato-calcio",nome:"Gluconato de Cálcio",categoria:"Repositores de Eletrólitos",subtitulo:"Eletrólito",apresentacao:"10% (100 mg/mL) em ampola 10 mL (1 g/ampola)",vias:["EV"],estabilidade:"48 horas em TA",diluicao:"EV: diluir em SF ou SG: 10 mL (1 g) em 100 mL (10 mg/mL)",posologia:"Não administrar em neonatos sob tratamento com ceftriaxona. Cautela em pacientes que usam digitálicos.",cuidados:["Não deve ser administrado em neonatos sob tratamento com ceftriaxona, devido ao risco de precipitação do sal ceftriaxona-cálcio","Usar com cautela em pacientes que utilizam digitálicos, pacientes com hiperfosfatemia severa, insuficiência respiratória ou acidose"],reacoes:"Arritmia, bradicardia, parada cardíaca, hipotensão, vasodilatação, síncope (pode ocorrer após injeção intravenosa rápida)."},
+      {id:"cloreto-sodio",nome:"Cloreto de Sódio",categoria:"Repositores de Eletrólitos",subtitulo:"Eletrólito",apresentacao:"20% (200 mg/mL) em ampola com 10 mL (2 g/ampola)",vias:["EV"],estabilidade:"24h após diluição",diluicao:"SF 0,9%, SG 5%, RG",posologia:"Monitorar nível de consciência, eletrólitos, bicarbonato, osmolaridade, peso e local da infusão. Em hipertensos: monitorar FC e PA.",cuidados:["Atentar-se ao nível de consciência","Monitorar concentrações de sódio, potássio, cloreto, bicarbonato e osmolaridade","Monitorar peso corporal e local da infusão","Em pacientes hipertensos: monitorar FC e PA"],reacoes:"Insuficiência cardíaca congestiva, hipertensão transitória, hipernatremia, hipocalemia, hipervolemia, hiperhidratação, flebite, trombose."},
+      {id:"cloreto-potassio",nome:"Cloreto de Potássio",categoria:"Repositores de Eletrólitos",subtitulo:"Eletrólito",apresentacao:"19,1% – 191 mg/mL = 2,56 mEq/mL (ampola 10 mL)",vias:["EV"],estabilidade:"24h após diluição",diluicao:"SF 0,9%, SG 5%, RG",posologia:"Infusão não deve ser rápida. Não diluir em SG 5% nos casos de hipocalemia grave. Monitorar função renal e local da infusão.",cuidados:["Monitorar função renal","Monitorar demais eletrólitos","Monitorar local da infusão devido risco de flebite","A infusão não deve ser rápida","Não diluir em SG 5% nos casos de hipocalemia grave"],reacoes:"Arritmia, parada cardíaca, hipotensão, hipercalemia."},
+      {id:"glicose",nome:"Glicose",categoria:"Repositores de Eletrólitos",subtitulo:"Eletrólito / substrato energético",apresentacao:"Glicose 25% – 250 mg/mL (ampola 10 mL); Glicose 50% – 500 mg/mL (ampola 10 mL)",vias:["EV","VO"],estabilidade:"24h após diluição",diluicao:"Soluções concentradas: diluir para concentração 12,5%. Glic. 50% 10 mL: adm periférico puro",posologia:"Acompanhar glicemia capilar. Monitorar função renal e nível de consciência. Administrar lentamente em crianças e idosos.",cuidados:["Acompanhar glicemia capilar devido risco de hiperglicemia","Monitorar função renal","Monitorar nível de consciência","Administrar lentamente em crianças e idosos"],reacoes:"Edema, desidratação, flebite, trombose no local da administração, acidose, desidratação, síndrome hiperosmolar, hiperglicemia, hipocalemia, hipofosfatemia, hipomagnesemia."},
+      {id:"complexo-b",nome:"Complexo B",categoria:"Vitaminas",subtitulo:"Vitaminas hidrossolúveis",apresentacao:"Injetável – ampola 2 mL e drágeas",vias:["EV","IM"],estabilidade:"24h em TA",diluicao:"Pode ser associado a solutos glicosados ou fisiológicos",posologia:"Verificar prazo de validade. Cautela em úlceras pépticas. Não administrar com levodopa. Avaliar uso em pacientes renais crônicos.",cuidados:["Verificar o prazo de validade","Administrar com cautela em pacientes com úlceras pépticas","Não administrar com levodopa","Avaliar uso em pacientes renais crônicos"],reacoes:"Prurido, náuseas, vômitos e reação anafilática; dor e irritação no local da aplicação da injeção."}
+    ];
+
+    const categoryList = document.getElementById('categoryList');
+    const cardsGrid = document.getElementById('cardsGrid');
+    const searchInput = document.getElementById('searchInput');
+    const resultsTitle = document.getElementById('resultsTitle');
+    const resultsCount = document.getElementById('resultsCount');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalClose = document.getElementById('modalClose');
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const themeBtn = document.getElementById('themeBtn');
+
+    let currentCategory = 'Todos';
+    let currentSearch = '';
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeBtn.textContent = '☀️';
+    }
+
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        themeBtn.textContent = '🌙';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        themeBtn.textContent = '☀️';
+      }
+    });
+
+    const categories = ['Todos', ...new Set(medicamentos.map(m => m.categoria))];
+
+    function renderCategories() {
+      categoryList.innerHTML = categories.map(cat => {
+        const count = cat === 'Todos' ? medicamentos.length : medicamentos.filter(m => m.categoria === cat).length;
+        return `<li>
+          <button class="category-btn ${cat === currentCategory ? 'active' : ''}" data-cat="${cat}">
+            <span>${cat}</span>
+            <span class="count">${count}</span>
+          </button>
+        </li>`;
+      }).join('');
+
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCategory = btn.dataset.cat;
+          renderCategories();
+          renderCards();
+          sidebar.classList.remove('open');
+          sidebarOverlay.classList.remove('active');
+        });
+      });
+    }
+
+    function getFilteredMeds() {
+      return medicamentos.filter(m => {
+        const matchCat = currentCategory === 'Todos' || m.categoria === currentCategory;
+        const matchSearch = !currentSearch ||
+          m.nome.toLowerCase().includes(currentSearch) ||
+          m.subtitulo.toLowerCase().includes(currentSearch) ||
+          m.categoria.toLowerCase().includes(currentSearch);
+        return matchCat && matchSearch;
+      });
+    }
+
+    function renderCards() {
+      const filtered = getFilteredMeds();
+      resultsTitle.textContent = currentCategory === 'Todos' ? 'Todos os Medicamentos' : currentCategory;
+      resultsCount.textContent = `${filtered.length} medicamento${filtered.length !== 1 ? 's' : ''}`;
+
+      if (filtered.length === 0) {
+        cardsGrid.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><h3>Nenhum medicamento encontrado</h3><p>Tente ajustar a busca ou selecionar outra categoria.</p></div>`;
+        return;
+      }
+
+      cardsGrid.innerHTML = filtered.map(m => `
+        <article class="med-card" data-id="${m.id}">
+          <div class="med-card-header">
+            <span class="category-tag">${m.categoria}</span>
+            <h3>${m.nome}</h3>
+            <div class="subtitle">${m.subtitulo}</div>
+          </div>
+          <div class="med-card-body">
+            <div class="info-row"><span class="label">Vias:</span><span class="value">${m.vias.join(', ')}</span></div>
+            <div class="info-row"><span class="label">Estab.:</span><span class="value">${m.estabilidade}</span></div>
+          </div>
+          <div class="med-card-footer">
+            <button class="btn-detail">Ver detalhes</button>
+          </div>
+        </article>
+      `).join('');
+
+      document.querySelectorAll('.med-card').forEach(card => {
+        card.addEventListener('click', () => openModal(card.dataset.id));
+      });
+    }
+
+    function openModal(id) {
+      const m = medicamentos.find(med => med.id === id);
+      if (!m) return;
+
+      document.getElementById('modalCategory').textContent = m.categoria;
+      document.getElementById('modalTitle').textContent = m.nome;
+
+      document.getElementById('modalBody').innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-section">
+            <h4>📦 Apresentação</h4>
+            <p>${m.apresentacao}</p>
+          </div>
+          <div class="detail-section">
+            <h4>💉 Vias de Administração</h4>
+            <p>${m.vias.join(' • ')}</p>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-section">
+            <h4>⏱️ Estabilidade</h4>
+            <p>${m.estabilidade}</p>
+          </div>
+          <div class="detail-section">
+            <h4>🧪 Diluição</h4>
+            <p>${m.diluicao}</p>
+          </div>
+        </div>
+        <div class="detail-section">
+          <h4>📋 Posologia / Observações</h4>
+          <p>${m.posologia}</p>
+        </div>
+        <div class="detail-section">
+          <h4>👩‍⚕️ Cuidados de Enfermagem</h4>
+          <ul>${m.cuidados.map(c => `<li>${c}</li>`).join('')}</ul>
+        </div>
+        <div class="detail-section">
+          <h4>⚠️ Reações Adversas</h4>
+          <p>${m.reacoes}</p>
+        </div>
+      `;
+
+      modalOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value.trim().toLowerCase();
+      renderCards();
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+
+    renderCategories();
+    renderCards();
+  </script>
+</body>
+</html>
